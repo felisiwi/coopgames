@@ -122,3 +122,5 @@ needed for v1; revisit for a live lobby or any game needing shared server state.
 Collaboration: Kenny is a collaborator on the private repo. Both push to `main`. One agent per repo
 at a time, across both humans; `LAST_SESSION.md` is the handoff. Any commit, push, or work in
 another person's folder: follow `docs/COLLABORATION.md`.
+
+- Mission control (claude.ai chat orchestrating terminal agents): read `docs/MISSION-CONTROL.md` first.
