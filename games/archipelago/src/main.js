@@ -1,6 +1,5 @@
-import { CONFIG } from './config.js';
 import { generateIsland } from './island.js';
-import { renderIsland } from './render.js';
+import { renderIsland, loadTileImages } from './render.js';
 
 const params = new URLSearchParams(window.location.search);
 const seed = params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
@@ -13,9 +12,10 @@ const ctx = canvas.getContext('2d');
 
 const island = generateIsland(seed);
 
-function draw() {
-  renderIsland(ctx, canvas, island, { config: CONFIG, debug });
-}
-
-draw();
-window.addEventListener('resize', draw);
+loadTileImages().then((images) => {
+  function draw() {
+    renderIsland(ctx, canvas, island, images, { debug });
+  }
+  draw();
+  window.addEventListener('resize', draw);
+});

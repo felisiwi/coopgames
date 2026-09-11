@@ -1,8 +1,7 @@
-// Curated CC0 tile palette (Batch 2) — 10 PNGs in assets/tiles/, each the
-// full 128x72 "Thick" cell (diamond top + 8px thickness skirt; see
-// CONFIG.TILE_STEP_X/Y for the measured footprint). Batch 3 wires these
-// into the real isometric draw; for now renderIsland() below still draws
-// flat-colour placeholder diamonds so the pipeline is exercised end-to-end.
+// Full isometric island render. No camera, no players (Stage 1 scope) —
+// the whole map is always centred on the canvas and scaled to fit the
+// viewport. ?debug=1 uses tighter fit padding, which is what the Step 0
+// audit #2 sign-off process (eyeballing 5 seeds) uses.
 import { CONFIG } from './config.js';
 
 export const TILES = {
@@ -33,40 +32,59 @@ export async function loadTileImages() {
   return Object.fromEntries(entries);
 }
 
-const PLACEHOLDER_COLORS = {
-  water: '#1b4f72',
-  land: '#6b8e4e',
-};
+// Grid (x, y) -> screen centre of the tile's true diamond (not the image's
+// top-left — see CONFIG comment for why TILE_STEP_Y != TILE_HEIGHT / 2).
+function toScreen(x, y, originX, originY) {
+  return {
+    x: originX + (x - y) * CONFIG.TILE_STEP_X,
+    y: originY + (x + y) * CONFIG.TILE_STEP_Y,
+  };
+}
 
-export function renderIsland(ctx, canvas, island) {
+function mapBounds(size) {
+  const width = 2 * size * CONFIG.TILE_STEP_X;
+  const height = 2 * (size - 1) * CONFIG.TILE_STEP_Y + CONFIG.TILE_HEIGHT;
+  return { width, height };
+}
+
+export function renderIsland(ctx, canvas, island, images, { debug = false } = {}) {
   const { size, grid } = island;
-  const tw = CONFIG.TILE_WIDTH;
-  const th = CONFIG.TILE_HEIGHT;
-  const halfW = tw / 2;
-  const halfH = th / 2;
 
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  ctx.imageSmoothingEnabled = false;
 
-  const originX = canvas.width / 2;
-  const originY = canvas.height / 2 - (size * halfH) / 2;
+  // No camera/player yet (Stage 1 scope), so the only way to see the whole
+  // island on a normal viewport is to fit it — that's the default, not just
+  // ?debug=1. Once camera-follow lands, default becomes 1:1 around the
+  // player and debug=1 stays the "see the whole map" escape hatch.
+  const { width: bboxW, height: bboxH } = mapBounds(size);
+  const fitPadding = debug ? 0.98 : 0.92;
+  const scale = Math.min(1, (canvas.width * fitPadding) / bboxW, (canvas.height * fitPadding) / bboxH);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.scale(scale, scale);
 
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
+  const originX = 0;
+  const originY = -((size - 1) * CONFIG.TILE_STEP_Y);
+
+  // Painter's algorithm: draw strictly back-to-front (increasing x + y) so
+  // each tile's skirt (the Thick style's extra height below the true
+  // diamond) is covered by the tile drawn in front of it.
+  for (let d = 0; d <= 2 * (size - 1); d++) {
+    const yStart = Math.max(0, d - (size - 1));
+    const yEnd = Math.min(d, size - 1);
+    for (let y = yStart; y <= yEnd; y++) {
+      const x = d - y;
       const tile = grid[y][x];
-      const screenX = originX + (x - y) * halfW;
-      const screenY = originY + (x + y) * halfH;
-
-      ctx.fillStyle = PLACEHOLDER_COLORS[tile.type] || '#333';
-      ctx.beginPath();
-      ctx.moveTo(screenX, screenY - halfH);
-      ctx.lineTo(screenX + halfW, screenY);
-      ctx.lineTo(screenX, screenY + halfH);
-      ctx.lineTo(screenX - halfW, screenY);
-      ctx.closePath();
-      ctx.fill();
+      const img = images[tile.type];
+      if (!img) continue;
+      const { x: sx, y: sy } = toScreen(x, y, originX, originY);
+      ctx.drawImage(img, sx - CONFIG.TILE_WIDTH / 2, sy - CONFIG.TILE_STEP_Y, CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT);
     }
   }
+
+  ctx.restore();
 }
