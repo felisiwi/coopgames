@@ -39,8 +39,18 @@ export const CONFIG = {
   BOAT_SPAWN_OFFSET: 10, // meters apart on X before any 'pos' has synced
 
   // Water + wind readability (W0.5 Batch 3, games/windward/DESIGN.md).
+  // Wave amplitude itself lives in src/water.js's WAVE_CONFIG (shared with
+  // the JS boat-bob calculation) so it can't drift out of sync with the
+  // shader — see that file for the W0.6 boat-scale fix.
   WATER_SIZE: 600, // meters, matches SCATTER_AREA so the sea fills the reference area
   WATER_SEGMENTS: 128,
+
+  // Boat bob/tilt from the wave surface (W0.6). Gradient is a finite
+  // difference of src/water.js's waveHeight, sampled this many meters ahead
+  // and to the side of the boat.
+  BOAT_TILT_GRADIENT_EPS: 1, // meters
+  BOAT_TILT_GAIN: 1.5, // radians of pitch/roll per (m/m) wave slope
+  BOAT_TILT_MAX: 0.12, // radians (~7deg), clamp so a steep local slope can't flip the boat
 
   WIND_ARROW_HEIGHT: 7, // meters above the boat
   WIND_ARROW_MIN_LENGTH: 3,

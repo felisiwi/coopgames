@@ -9,14 +9,38 @@ import * as THREE from './vendor/three/three.module.js';
 import { CONFIG } from './src/config.js';
 import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './src/sail.js';
 import { initialWind, nextWind, nextChangeDelaySeconds } from './src/wind.js';
-import { createBoatMesh } from './src/boat.js';
+import { createBoatMesh, loadBoatModel } from './src/boat.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud } from './src/hud.js';
-import { createWater } from './src/water.js';
+import { createWater, waveHeight, windLocalDir } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
 import { createWake } from './src/wake.js';
 import { createInputState } from '../../shared/input.js';
+
+// Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
+// `waveHeight` (src/water.js) is the JS mirror of the water shader's vertex
+// displacement, so the boat sits exactly on the sea it's drawn against.
+// Pitch/roll come from a finite-difference gradient of that same function
+// sampled a short distance ahead/right of the boat, clamped so a steep local
+// slope can't flip it.
+function bobBoat(group, x, z, headingRad, nowS, wind, localDir) {
+  const eps = CONFIG.BOAT_TILT_GRADIENT_EPS;
+  const fwd = { x: Math.sin(headingRad), z: Math.cos(headingRad) };
+  const right = { x: Math.cos(headingRad), z: -Math.sin(headingRad) };
+
+  const y = waveHeight(x, z, nowS, wind.strength, localDir);
+  const yFwd = waveHeight(x + fwd.x * eps, z + fwd.z * eps, nowS, wind.strength, localDir);
+  const yRight = waveHeight(x + right.x * eps, z + right.z * eps, nowS, wind.strength, localDir);
+
+  const slopeForward = (yFwd - y) / eps;
+  const slopeRight = (yRight - y) / eps;
+  const max = CONFIG.BOAT_TILT_MAX;
+
+  group.position.y = y;
+  group.rotation.x = Math.min(max, Math.max(-max, -slopeForward * CONFIG.BOAT_TILT_GAIN));
+  group.rotation.z = Math.min(max, Math.max(-max, slopeRight * CONFIG.BOAT_TILT_GAIN));
+}
 
 export default function start({ canvas, net, seed, role }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -41,6 +65,8 @@ export default function start({ canvas, net, seed, role }) {
 
   const windArrow = createWindArrow();
   scene.add(windArrow.object);
+
+  loadBoatModel(); // once, before any createBoatMesh() call (self or lazy other)
 
   const selfColor = role === 'host' ? 0xffcc66 : 0x66ccff;
   const otherColor = role === 'host' ? 0x66ccff : 0xffcc66;
@@ -171,14 +197,18 @@ export default function start({ canvas, net, seed, role }) {
     self.x += Math.sin(self.heading) * self.speed * dt;
     self.z += Math.cos(self.heading) * self.speed * dt;
 
+    const windDirLocal = windLocalDir(wind.dir);
+
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
+    bobBoat(selfBoat.group, self.x, self.z, self.heading, nowS, wind, windDirLocal);
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
 
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
       otherBoat.group.rotation.y = other.heading;
+      bobBoat(otherBoat.group, other.x, other.z, other.heading, nowS, wind, windDirLocal);
       // Trim isn't synced (DESIGN.md) — approximate the other boat's sail
       // with the ideal trim for its current point of sail.
       const otherIdeal = idealTrimRad(angleOffWind(other.heading, wind.dir));

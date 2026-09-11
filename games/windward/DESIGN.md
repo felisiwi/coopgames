@@ -106,6 +106,35 @@ so its PRNG stream doesn't collide with `wind.js`'s use of `seed`) so
 movement reads against something until W1's islands land. `src/wake.js` pools
 24 fading/growing foam disks spawned behind each boat while it's moving.
 
+**Wave amplitude corrected to boat scale (W0.6, 2026-09-12):** Batch 3's
+amplitude (1.4–4.4m) was tuned only against a screenshot and, at the fixed
+camera's distance, read as a flat plane at realistic scale — but it was also
+enough to fully submerge the ~6m boat, which sits at a fixed `y=0`. `src/water.js`'s
+`WAVE_CONFIG` now caps total displacement at 0.5m, and both the GLSL vertex
+shader and a JS `waveHeight(x, z, t, strength, localDir)` (used to bob/tilt
+the boat in `game.js`, `src/water.test.js` checks the two stay in lockstep)
+are generated from the same numbers. Visibility at that smaller scale comes
+from a crest/trough colour band driven by the wave's raw phase (independent
+of amplitude, so it doesn't wash out as amplitude shrinks) plus shorter
+wavelengths than Batch 3 used (still comfortably above the 128-segment/600m
+plane's ~4.7m vertex spacing, to avoid aliasing). GLSL float literals must
+carry a decimal point (`0.0`, not `0`) — a bare-integer `phase: 0` broke
+shader compilation the first time through; `glslFloat()` guards this now.
+Boat loading is now explicit (`boat.js`'s `loadBoatModel()`, called once from
+`game.js` before any `createBoatMesh()`), not triggered by `createBoatMesh()`
+itself — otherwise `boat.test.js` (plain node, no DOM) threw an unhandled
+`fetch` rejection for the model's `file://` URL just from exercising the
+module. The wrap screenshot for this batch also surfaced a hub-level bug
+(not Windward-specific, fixed alongside since it silently broke the boat
+render through the hub): `hub.css`'s `#game-canvas` set only
+`position:fixed; inset:0`, no explicit `width`/`height`. Three.js's
+`renderer.setSize()` writes the canvas's `width`/`height` attributes every
+resize; without an explicit CSS size those attributes can win the layout box
+over `inset` alone, so each resize event fed back into a larger canvas
+layout size, compounding — observed ballooning a 1200×751 viewport past
+76000px on one run. Fixed by pinning `width:100%; height:100%` (the solo
+dev entries already do this).
+
 ## Wind
 
 - **Cadence**: changes every 25–40s, uniformly random in that range. No

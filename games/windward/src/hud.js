@@ -2,6 +2,13 @@
 // a compass rose canvas added in W0.5 Batch 3 (games/windward/DESIGN.md) —
 // the fixed camera (Batch 1) makes bearings meaningful to show at a glance,
 // independent of which way the boat happens to be pointed on screen.
+//
+// Pushed down clear of y=80 (W0.6): the hub's own "waiting for a friend"
+// pill (index.html's #waiting-overlay, hub.css) is top:12px right:12px, and
+// W0.5 put this HUD at top:8px in the same top-right corner — through the
+// hub (not the solo dev entry, which has no such pill) the two overlapped.
+// Kept right-anchored rather than moved to top-left, since the solo dev
+// entry's own static "back to hub" link already lives top-left.
 const DEG = Math.PI / 180;
 const ROSE_SIZE = 96;
 
@@ -10,7 +17,7 @@ export function createHud(canvas) {
 
   const text = document.createElement('div');
   text.style.cssText = [
-    'position:fixed', 'top:8px', 'right:8px', 'font:13px monospace',
+    'position:fixed', 'top:80px', 'right:8px', 'font:13px monospace',
     'color:#eaf6ff', 'background:rgba(10,26,42,0.55)', 'padding:6px 10px',
     'border-radius:4px', 'pointer-events:none', 'white-space:pre',
   ].join(';');
@@ -24,7 +31,7 @@ export function createHud(canvas) {
     // page rule (index.html had exactly this before it was scoped to #game)
     // stretches any canvas to fill the viewport unless overridden here.
     `width:${ROSE_SIZE}px`, `height:${ROSE_SIZE}px`,
-    'position:fixed', 'top:8px', `right:${8 + 130}px`,
+    'position:fixed', 'top:80px', `right:${8 + 130}px`,
     'background:rgba(10,26,42,0.55)', 'border-radius:50%', 'pointer-events:none',
   ].join(';');
   parent.appendChild(rose);

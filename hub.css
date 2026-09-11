@@ -136,6 +136,16 @@ header p {
   display: block;
   position: fixed;
   inset: 0;
+  /* Explicit size, not just inset:0 (W0.6): a <canvas> is a replaced element
+     whose own width/height attributes can win the layout box over inset
+     alone. Three.js's renderer.setSize() writes those attributes every
+     resize; without this, that feeds back into the canvas's own layout
+     size and compounds on every resize event (observed ballooning a
+     1200x751 viewport to 76800x48064 over a handful of resizes, which
+     silently broke rendering of small scene objects). The solo game entries
+     (e.g. games/windward/index.html's #game) already pin size this way. */
+  width: 100%;
+  height: 100%;
 }
 
 #game-canvas[hidden] {
