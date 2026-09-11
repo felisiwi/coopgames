@@ -32,6 +32,9 @@
 // knows whether to send 'launch' immediately or let onConnect send it
 // later — see index.html's runHost(). send() before a connection is open
 // queues messages rather than dropping them, up to SEND_QUEUE_MAX below.
+// Symmetrically, data arriving before any onMessage(fn) is registered is
+// buffered rather than dropped, up to INBOUND_QUEUE_MAX below, and flushed
+// to the first-registered listener in order — see index.html's runGuest().
 //
 // Payloads are plain JSON-serializable values (objects/arrays/strings/
 // numbers) — PeerJS's default serialization handles them as-is, no manual
@@ -108,12 +111,23 @@ async function logIceDiagnostics(conn, reason) {
 // losing it.
 const SEND_QUEUE_MAX = 50;
 
+// Mirror of SEND_QUEUE_MAX for the inbound side: a guest's onMessage()
+// registration can lose a race against the host's very first send (open
+// fires on both ends before either side has necessarily wired up its
+// listeners — see index.html's runGuest(), which used to await
+// loadManifest() before calling onMessage(), dropping a 'launch' sent
+// from onConnect in the gap). Buffer inbound data until at least one
+// listener exists, then flush in order on the first onMessage() call.
+// Same drop-oldest cap and reasoning as SEND_QUEUE_MAX above.
+const INBOUND_QUEUE_MAX = 50;
+
 function buildNet({ peer, isHost }) {
   let conn = null;
   const messageListeners = [];
   const closeListeners = [];
   const connectListeners = [];
   const sendQueue = [];
+  const inboundQueue = [];
 
   function fireClose() {
     for (const fn of closeListeners) fn();
@@ -122,6 +136,11 @@ function buildNet({ peer, isHost }) {
   function wireConnection(c) {
     conn = c;
     conn.on('data', (data) => {
+      if (messageListeners.length === 0) {
+        inboundQueue.push(data);
+        if (inboundQueue.length > INBOUND_QUEUE_MAX) inboundQueue.shift();
+        return;
+      }
       for (const fn of messageListeners) fn(data);
     });
     conn.on('open', () => {
@@ -154,7 +173,11 @@ function buildNet({ peer, isHost }) {
       if (sendQueue.length > SEND_QUEUE_MAX) sendQueue.shift();
     },
     onMessage(fn) {
+      const flushFirst = messageListeners.length === 0 && inboundQueue.length > 0;
       messageListeners.push(fn);
+      if (flushFirst) {
+        while (inboundQueue.length) fn(inboundQueue.shift());
+      }
     },
     onClose(fn) {
       closeListeners.push(fn);

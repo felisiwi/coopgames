@@ -36,6 +36,11 @@ export default function start({ canvas, net, seed, role, players }) {
   // net: { send(msg), onMessage(fn), peerId, isHost } — the ONLY way to
   //   talk to the other peer(s). The hub owns the PeerJS connection; games
   //   never import PeerJS or shared/net.js directly, only this object.
+  //   Messages sent before a game registers onMessage() are delivered on
+  //   registration, in order, up to a small cap (50, drop-oldest) — you
+  //   don't need to register onMessage() before the other side might send,
+  //   but you also can't rely on more than the last 50 buffered messages
+  //   surviving if you register late.
   // seed: number, identical on every peer — seed your generator with it,
   //   don't invent separate randomness for anything that must match.
   // role: 'host' | 'guest'.

@@ -260,20 +260,20 @@
       }
       net.onClose(showLost);
 
+      // Register onMessage() before the (async) manifest fetch, not after —
+      // the host can send 'launch' the instant its onConnect fires, which
+      // races this fetch. shared/net.js buffers inbound messages until a
+      // listener exists, but that only helps if we register one before the
+      // manifest work; if 'launch' arrives while games is still empty, hold
+      // it in pendingLaunch and resolve it once the manifest is in.
       let games = [];
-      try {
-        games = await loadManifest();
-      } catch (err) {
-        console.error(err);
-      }
-
-      els.pickerStatus.textContent = 'Waiting for the host to pick a game…';
-      els.gameList.innerHTML = '';
-      for (const game of games) els.gameList.appendChild(renderCard(game)); // read-only: no onPick
-      showOnly(els.picker);
-
+      let pendingLaunch = null;
       net.onMessage((msg) => {
         if (msg?.type !== 'launch') return;
+        if (games.length === 0) {
+          pendingLaunch = msg;
+          return;
+        }
         const game = games.find((g) => g.id === msg.gameId);
         if (!game) {
           console.error('[hub] launch message named an unknown game', msg);
@@ -281,6 +281,29 @@
         }
         launchGame(game, { net, seed: msg.seed, role: 'guest' });
       });
+
+      try {
+        games = await loadManifest();
+      } catch (err) {
+        console.error(err);
+      }
+
+      if (pendingLaunch) {
+        const msg = pendingLaunch;
+        pendingLaunch = null;
+        const game = games.find((g) => g.id === msg.gameId);
+        if (!game) {
+          console.error('[hub] launch message named an unknown game', msg);
+        } else {
+          launchGame(game, { net, seed: msg.seed, role: 'guest' });
+          return;
+        }
+      }
+
+      els.pickerStatus.textContent = 'Waiting for the host to pick a game…';
+      els.gameList.innerHTML = '';
+      for (const game of games) els.gameList.appendChild(renderCard(game)); // read-only: no onPick
+      showOnly(els.picker);
     }
 
     els.launchErrorBack.addEventListener('click', () => {
