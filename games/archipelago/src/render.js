@@ -1,7 +1,37 @@
-// Scaffold stub. Real isometric tile rendering (TILES map, measured
-// diamond footprint, back-to-front depth sort) lands in Batch 2/3. For now
-// this draws flat-colour diamonds so the pipeline is exercised end-to-end.
+// Curated CC0 tile palette (Batch 2) — 10 PNGs in assets/tiles/, each the
+// full 128x72 "Thick" cell (diamond top + 8px thickness skirt; see
+// CONFIG.TILE_STEP_X/Y for the measured footprint). Batch 3 wires these
+// into the real isometric draw; for now renderIsland() below still draws
+// flat-colour placeholder diamonds so the pipeline is exercised end-to-end.
 import { CONFIG } from './config.js';
+
+export const TILES = {
+  deep_water: 'assets/tiles/deep_water.png',
+  shallow_water: 'assets/tiles/shallow_water.png',
+  sand: 'assets/tiles/sand.png',
+  grass_1: 'assets/tiles/grass_1.png',
+  grass_2: 'assets/tiles/grass_2.png',
+  forest_1: 'assets/tiles/forest_1.png',
+  forest_2: 'assets/tiles/forest_2.png',
+  forest_3: 'assets/tiles/forest_3.png',
+  rock: 'assets/tiles/rock.png',
+  landmark: 'assets/tiles/landmark.png',
+};
+
+export async function loadTileImages() {
+  const entries = await Promise.all(
+    Object.entries(TILES).map(
+      ([key, src]) =>
+        new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve([key, img]);
+          img.onerror = reject;
+          img.src = src;
+        })
+    )
+  );
+  return Object.fromEntries(entries);
+}
 
 const PLACEHOLDER_COLORS = {
   water: '#1b4f72',
