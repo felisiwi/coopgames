@@ -1,7 +1,8 @@
-// Full isometric island render. No camera, no players (Stage 1 scope) —
-// the whole map is always centred on the canvas and scaled to fit the
-// viewport. ?debug=1 uses tighter fit padding, which is what the Step 0
-// audit #2 sign-off process (eyeballing 5 seeds) uses.
+// Isometric island render. Camera-follow (Stage 2) recentres the view on a
+// given grid point (continuous coords OK, for smooth movement); ?debug=1
+// keeps the Stage 1 whole-map fit-to-screen view, which is what the Step 0
+// audit #2 sign-off process (eyeballing 5 seeds) uses, so eyeballing a
+// generator change never depends on player position.
 import { CONFIG } from './config.js';
 
 export const TILES = {
@@ -47,28 +48,35 @@ function mapBounds(size) {
   return { width, height };
 }
 
-export function renderIsland(ctx, canvas, island, images, { debug = false } = {}) {
+export function renderIsland(ctx, canvas, island, images, opts = {}) {
   const { size, grid } = island;
+  const { debug = false, camera = null } = opts;
 
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   ctx.imageSmoothingEnabled = false;
 
-  // No camera/player yet (Stage 1 scope), so the only way to see the whole
-  // island on a normal viewport is to fit it — that's the default, not just
-  // ?debug=1. Once camera-follow lands, default becomes 1:1 around the
-  // player and debug=1 stays the "see the whole map" escape hatch.
-  const { width: bboxW, height: bboxH } = mapBounds(size);
-  const fitPadding = debug ? 0.98 : 0.92;
-  const scale = Math.min(1, (canvas.width * fitPadding) / bboxW, (canvas.height * fitPadding) / bboxH);
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.save();
   ctx.translate(canvas.width / 2, canvas.height / 2);
-  ctx.scale(scale, scale);
 
-  const originX = 0;
-  const originY = -((size - 1) * CONFIG.TILE_STEP_Y);
+  let originX;
+  let originY;
+
+  if (camera && !debug) {
+    // Camera-follow: place camera's grid point at screen (0,0) — the
+    // translate above puts that at canvas centre — at native 1:1 scale.
+    originX = -(camera.x - camera.y) * CONFIG.TILE_STEP_X;
+    originY = -(camera.x + camera.y) * CONFIG.TILE_STEP_Y;
+  } else {
+    // Stage 1 whole-map fit, kept as the ?debug=1 escape hatch.
+    const { width: bboxW, height: bboxH } = mapBounds(size);
+    const fitPadding = debug ? 0.98 : 0.92;
+    const scale = Math.min(1, (canvas.width * fitPadding) / bboxW, (canvas.height * fitPadding) / bboxH);
+    ctx.scale(scale, scale);
+    originX = 0;
+    originY = -((size - 1) * CONFIG.TILE_STEP_Y);
+  }
 
   // Painter's algorithm: draw strictly back-to-front (increasing x + y) so
   // each tile's skirt (the Thick style's extra height below the true
