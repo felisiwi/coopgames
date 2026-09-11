@@ -42,6 +42,22 @@ Working in someone else's `games/<name>/`? Or in `shared/`, the root hub files (
 `LAST_SESSION.md` at the repo root is the pointer (workspace cap: 40 lines). If the latest entry
 is someone else's session, read it before starting yours.
 
+It lives at the root but is **not** a shared surface — commit it straight to `main` like your own
+game folder. Waiting on a PR to record that you finished would make the handoff slower than the
+sessions it logs.
+
+The catch is that it is the one file both of you write every single session, so it is where you
+will actually collide. It is therefore **append-only**:
+
+- Add your entry **at the top**. Never rewrite, re-word, or re-wrap someone else's lines — even to
+  make them fit, and even when yours reads better.
+- Trimming for the 40-line cap removes **your own oldest** entries, never theirs.
+- Rebase conflicts here get reported to the humans, not resolved by an agent (see Session start).
+  Both entries are real work; picking one is a call neither of you delegated.
+
+If a session genuinely needs to rewrite someone else's entry, that is a branch + PR like any other
+shared surface — say why in the description.
+
 ## Compatibility
 
 A game must keep working against the `shared/net.js` contract documented in `games/README.md`.
