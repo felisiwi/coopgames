@@ -1,10 +1,10 @@
 # Last session
 
-**2026-09-11 — hub asset-path fix (this commit)** — archipelago's tile
-images 404'd when launched through the hub (page-relative paths resolve
-against whoever loaded the module, not the module itself). Fixed via
-`import.meta.url`; documented the rule in games/README.md; hub now shows
-`start()` errors on screen instead of a dead grey canvas.
+**2026-09-11 — Stage H housekeeping (this commit)** — live URL into
+README.md/AGENTS.md; vendored `grill-me`/`grilling` skills into
+`.claude/skills/` with attribution; added `docs/SKILLS.md` index and an
+AGENTS.md Skills section; retired the two-network test from Next (it
+passed — see docs/MISSION-CONTROL.md).
 
 ## Today's sessions
 
@@ -23,14 +23,18 @@ against whoever loaded the module, not the module itself). Fixed via
 - TURN fix (6ddd21b): `shared/net.js` now passes explicit `ICE_SERVERS`
   (Google STUN + Open Relay Project free TURN) to every `new Peer()`;
   added ICE state + candidate-type console diagnostics on close/error.
-- Hub asset-path fix (this commit): `games/archipelago/src/render.js`
-  tile paths resolve via `import.meta.url`, not page-relative; added
-  games/README.md rules (import.meta.url for assets; test through the
-  hub before sign-off); hub `launchGame()` now shows `start()` errors
-  on screen instead of leaving a dead grey canvas.
+- Hub asset-path fix (c25d340): `games/archipelago/src/render.js` tile
+  paths resolve via `import.meta.url`, not page-relative; added
+  games/README.md rules; hub `launchGame()` shows `start()` errors on
+  screen instead of a dead grey canvas.
+- Two-network test (per docs/MISSION-CONTROL.md): Felix + Kenny connected
+  across two networks, both spawned on the same island. **Passed.**
+- Stage H housekeeping (this commit): docs/skills cleanup, see above.
 
 ## Next
 
-1. Live two-peer test on two different networks (Felix, manually) now
-   that ICE_SERVERS points at a real relay.
-2. Otherwise proceed per AGENTS.md build plan / risk list.
+1. Archipelago tuning from real play: `VISION_RADIUS` (5) and spawn
+   distance (18) in `games/archipelago/src/config.js`; player sprite
+   instead of marker; landmarks as things to find.
+2. Otherwise proceed per docs/MISSION-CONTROL.md backlog (hub lobby
+   polish, Kenny's first game).

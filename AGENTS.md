@@ -116,7 +116,8 @@ hub hands them.
 
 Deploy: `vercel.json` sets `buildCommand: "node scripts/manifest.js"` and `outputDirectory: "."`,
 so Vercel regenerates the manifest on every deploy and serves the repo root as static — every game
-is live at `/games/<name>/` with zero further config. Firebase (Kenny's account) is deferred: not
+is live at `/games/<name>/` with zero further config. Live URL:
+https://coopgames-felisiwis-projects.vercel.app. Firebase (Kenny's account) is deferred: not
 needed for v1; revisit for a live lobby or any game needing shared server state.
 
 Collaboration: Kenny is a collaborator on the private repo. Both push to `main`. One agent per repo
@@ -124,3 +125,8 @@ at a time, across both humans; `LAST_SESSION.md` is the handoff. Any commit, pus
 another person's folder: follow `docs/COLLABORATION.md`.
 
 - Mission control (claude.ai chat orchestrating terminal agents): read `docs/MISSION-CONTROL.md` first.
+
+## Skills
+
+Vendored skills live in `.claude/skills/`; see `docs/SKILLS.md` for the index and when mission
+control expects each one used (e.g. `/grill-me` before new features or shared-surface changes).

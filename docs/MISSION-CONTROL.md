@@ -65,11 +65,11 @@ agent's report back to you. Kenny runs the same loop on his machine.
 - `coopgames.vercel.app` is taken by someone else; the team-scoped URL is production.
   Vercel Authentication had to be switched off manually for the link to be public.
 
-## Backlog (nothing started)
+## Backlog
 
-1. **Housekeeping commit:** live URL into `AGENTS.md`/`README.md`; copy `grill-me` +
+1. ~~**Housekeeping commit:** live URL into `AGENTS.md`/`README.md`; copy `grill-me` +
    `grilling` from `~/.claude/skills/` into `.claude/skills/` with attribution and a
-   `docs/SKILLS.md` index; Skills section in `AGENTS.md`. Then update this file.
+   `docs/SKILLS.md` index; Skills section in `AGENTS.md`.~~ **Done** (Stage H, 2026-09-11).
 2. **Archipelago tuning** from real play: `VISION_RADIUS` (5) and spawn distance (18)
    in `games/archipelago/src/config.js`; player sprite instead of marker; landmarks
    as things to find; boats / multi-island (the original archipelago idea, deferred).
