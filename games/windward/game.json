@@ -1,0 +1,7 @@
+{
+  "id": "windward",
+  "name": "Windward",
+  "description": "Sail a boat through shifting wind, tacking to explore a seeded sea.",
+  "players": { "min": 2, "max": 2 },
+  "owner": "felix"
+}

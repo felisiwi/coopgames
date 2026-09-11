@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windward (solo dev) — coopgames</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0a1a2a; }
+    canvas { display: block; width: 100%; height: 100%; }
+    #hud { position: fixed; top: 8px; left: 8px; font: 13px monospace; color: #eaf6ff; }
+  </style>
+</head>
+<body>
+  <div id="hud"><a href="../../" style="color:#eaf6ff">&larr; hub</a> — solo dev entry, no hub, no PeerJS</div>
+  <canvas id="game"></canvas>
+  <script type="module">
+    import start from './game.js';
+
+    // Fakes the hub's net object for solo testing. There's no second peer:
+    // send() just logs, and onMessage() only fires if you drive it
+    // yourself from devtools (fakeNet._emit({...})).
+    const listeners = [];
+    const fakeNet = {
+      send(msg) { console.log('[dev net] send', msg); },
+      onMessage(fn) { listeners.push(fn); },
+      _emit(msg) { listeners.forEach((fn) => fn(msg)); },
+      peerId: 'solo-dev',
+      isHost: true,
+    };
+    window.fakeNet = fakeNet; // so fakeNet._emit(...) works from devtools
+
+    const canvas = document.getElementById('game');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const params = new URLSearchParams(window.location.search);
+    const seed = params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
+
+    start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+three.module.js + three.core.js
+================================
+
+Source:  https://unpkg.com/three@0.186.0/build/three.module.js
+         https://unpkg.com/three@0.186.0/build/three.core.js
+Version: 0.186.0
+License: MIT (https://github.com/mrdoob/three.js/blob/dev/LICENSE)
+
+Two files because this three.js release splits its ES module build:
+three.module.js imports from ./three.core.js — both must be vendored
+together, same directory, same version.
+
+Vendored as plain ES modules (not a CDN import) so Windward has no runtime
+dependency on unpkg/jsdelivr — Stage W0, Batch 1. Owner: felix (games/windward/
+only; this is not shared/vendor/ — see AGENTS.md's Windward concept note on
+why it isn't promoted to a shared vendor path yet). Import it with a relative
+path from src/, e.g. `import * as THREE from '../vendor/three/three.module.js'`.
+
+To update: bump the version above, re-fetch both files from
+`https://unpkg.com/three@<version>/build/<file>`, and smoke-test Windward's
+solo dev entry (games/windward/index.html) still renders before committing
+the bump.
+
+Full MIT text below, copied from the npm package's LICENSE file.
+The MIT License
+
+Copyright © 2010-2026 three.js authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
