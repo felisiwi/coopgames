@@ -1,44 +1,29 @@
 # Last session
 
-**2026-09-11 — 34a862c** — Stage 1 complete: hub scaffold + archipelago
-island generation (Batches 1-3). No movement, camera, fog, or networking.
+**2026-09-11 — Stage 1.5 (this commit)** — game contract, manifest-driven
+hub picker, docs. Stage 1 (hub scaffold + archipelago island gen) also
+shipped today. No movement, camera, fog, or networking yet.
 
 ## Today's sessions
 
-- Batch 1 (3035e0a, 63f6262): scaffold, then restructured into the games
-  hub (root index.html/hub.css, `games/archipelago/`, `shared/{noise,input,net}.js`,
-  `games/_template/`, `games/README.md`) after AGENTS.md's Hub structure
-  section landed mid-session.
-- Batch 2 (7a5ee28): curated 10 tiles from the CC0 Screaming Brain Studios
-  pack into `games/archipelago/assets/tiles/`; measured the Thick-style
-  diamond footprint from pixel data (TILE_STEP_X=64, TILE_STEP_Y=32 — not
-  TILE_HEIGHT/2).
-- Batch 3 (34a862c): real `generateIsland(seed)` (radial falloff + simplex,
-  hard water-margin/landmass/spawn invariants) and full isometric render
-  with painter's-algorithm draw order.
-
-## DONE-WHEN evidence
-
-`python3 -m http.server` from repo root: `/` shows the hub, `/games/archipelago/`
-shows a recognizable island (verified visually via Chrome — water, sandy
-coastline, grass, forest, rocky interior, one landmark).
-
-Invariant checks, seeds 1-5 (`margin ok` / `landmass count` / `spawn distance`,
-need >= 18): all pass.
-
-```
-seed 1: margin ok: true | landmass count: 1 | spawn distance: 28
-seed 2: margin ok: true | landmass count: 1 | spawn distance: 24
-seed 3: margin ok: true | landmass count: 1 | spawn distance: 25
-seed 4: margin ok: true | landmass count: 1 | spawn distance: 21
-seed 5: margin ok: true | landmass count: 1 | spawn distance: 32
-```
-
-Full ASCII grid dumps for these 5 seeds were pasted in-session (not
-archived here — regenerate with `generateIsland(seed)` if needed).
+- Batch 1 (3035e0a, 63f6262): scaffold, then restructured into the games hub.
+- Batch 2 (7a5ee28): curated CC0 tileset; measured Thick-style footprint
+  (TILE_STEP_X=64, TILE_STEP_Y=32, not TILE_HEIGHT/2).
+- Batch 3 (34a862c): real generateIsland(seed) + full isometric render;
+  seeds 1-5 all pass margin/landmass/spawn-distance invariants.
+- Pushed to origin (e702ac9) — Kenny joining as collaborator.
+- Stage 1.5: game.json/game.js contract (`start({canvas, net, seed, role,
+  players})`), hub now owns the PeerJS connection per AGENTS.md;
+  scripts/manifest.js + vercel.json wire discovery into the hub picker
+  (verified: `node scripts/manifest.js` lists archipelago, hub renders it
+  — one screenshot, per the new Tool economy rule); games/_template/
+  updated to the contract with a solo dev entry that fakes `net`;
+  games/README.md rewritten for an agent building a new game; AGENTS.md
+  gained a Tool economy section.
 
 ## Next
 
-Stage 2: single-player movement (WASD, camera-follow, fog-of-war). Per
+Stage 2: single-player movement (WASD, camera-follow, fog-of-war) — wrap
+archipelago's existing src/ into game.js per the new contract. Per
 AGENTS.md risk #3, cut order if it overruns: drop the dimmed fog
 middle-state first, then widen vision radius, then static camera.

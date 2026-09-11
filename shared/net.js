@@ -1,7 +1,12 @@
-// PeerJS host/join-link networking — STUB. No PeerJS code yet (that lands
-// in the multiplayer-sync stage, AGENTS.md build plan step 3). This file
-// documents the intended API so games can be written against it now and
-// wired up later without changing call sites.
+// PeerJS host/join-link networking — STUB, and hub-internal. Per AGENTS.md's
+// game contract, the hub owns the PeerJS connection; games never import this
+// file. The hub calls host()/joinFromUrl() itself, then builds the small
+// `net` object the contract promises ({ send, onMessage, peerId, isHost })
+// from whatever these resolve to and passes it into the game's start().
+//
+// No PeerJS code yet (that lands in the multiplayer-sync stage, AGENTS.md
+// build plan step 3). This file documents the intended API so the hub can
+// be written against it now and wired up later without changing call sites.
 //
 // Intended shape, once implemented:
 //

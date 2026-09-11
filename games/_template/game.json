@@ -1,0 +1,6 @@
+{
+  "id": "template",
+  "name": "Template",
+  "description": "Starter game — copy this folder to add a new game.",
+  "players": { "min": 1, "max": 4 }
+}

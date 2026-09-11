@@ -1,0 +1,12 @@
+[
+  {
+    "id": "archipelago",
+    "name": "Archipelago",
+    "description": "Cozy isometric exploration co-op. Spawn onto the same procedurally generated island and wander it together as fog-of-war lifts.",
+    "players": {
+      "min": 2,
+      "max": 2
+    },
+    "path": "games/archipelago/"
+  }
+]

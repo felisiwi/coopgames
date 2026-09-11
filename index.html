@@ -13,18 +13,56 @@
   </header>
 
   <main id="game-list">
-    <article class="game-card">
-      <h2>Archipelago</h2>
-      <p>Cozy isometric exploration co-op. Spawn onto the same procedurally
-        generated island and wander it together as fog-of-war lifts.</p>
-      <a class="host-button" href="games/archipelago/">Host</a>
-    </article>
-
-    <article class="game-card game-card--soon">
-      <h2>Coming soon</h2>
-      <p>Next game lands here.</p>
-      <span class="host-button host-button--disabled">Host</span>
-    </article>
+    <p id="game-list-status">Loading games&hellip;</p>
   </main>
+
+  <script type="module">
+    const listEl = document.getElementById('game-list');
+    const statusEl = document.getElementById('game-list-status');
+
+    function renderCard(game) {
+      const article = document.createElement('article');
+      article.className = 'game-card';
+
+      const players = game.players ? `${game.players.min}–${game.players.max} players` : '';
+
+      const h2 = document.createElement('h2');
+      h2.textContent = game.name;
+      const p = document.createElement('p');
+      p.textContent = game.description ?? '';
+      const button = document.createElement('a');
+      button.className = 'host-button';
+      button.href = game.path;
+      button.textContent = 'Host';
+
+      article.append(h2, p);
+      if (players) {
+        const playersEl = document.createElement('p');
+        playersEl.className = 'players';
+        playersEl.textContent = players;
+        article.append(playersEl);
+      }
+      article.append(button);
+      return article;
+    }
+
+    fetch('games/manifest.json')
+      .then((res) => {
+        if (!res.ok) throw new Error(`manifest fetch failed: ${res.status}`);
+        return res.json();
+      })
+      .then((games) => {
+        statusEl.remove();
+        if (!games.length) {
+          listEl.innerHTML = '<p>No games yet.</p>';
+          return;
+        }
+        for (const game of games) listEl.appendChild(renderCard(game));
+      })
+      .catch((err) => {
+        statusEl.textContent = 'Could not load games/manifest.json — run node scripts/manifest.js.';
+        console.error(err);
+      });
+  </script>
 </body>
 </html>

@@ -82,23 +82,42 @@ Risks the doc missed, added:
 
 Working conventions: this repo now lives under `~/GitHub`, so the workspace `CLAUDE.md` applies — gated batches, stage specific files, DONE-WHEN with pasted evidence, `LAST_SESSION.md` updated at every wrap. Add a repo `CLAUDE.md` containing `@AGENTS.md` in stage 1 so terminal sessions load this file.
 
-## Hub structure (Felix, 2026-09-11 — supersedes single-game layout above)
+## Tool economy
 
-This repo is a **hub of co-op games** shared by Felix and Kenny, not one game. Every game is a
-self-contained static folder; the hub is the root page that lists them.
+Prefer the cheapest check that proves the point: node scripts, curl, grep, and ASCII dumps before
+browser tools. Reach for Claude in Chrome / screenshots only when the criterion is literally visual
+and nothing cheaper can prove it — and then one screenshot, not a session. Run each game's
+invariants headlessly (`node --input-type=module -e '...'` importing the game's own module) rather
+than opening a browser to eyeball a grid. Pixel-perfect and "does it look cozy" calls go to the
+human — that's their call anyway, not something a screenshot round-trip settles for them.
 
-- `index.html` — hub: list of games, each with a Host button. Plain page, no framework.
-- `games/<name>/` — one folder per game, self-contained (`index.html` + its own `src/`, `assets/`).
-  The archipelago game from this doc is `games/archipelago/` and remains the v1 tracer bullet.
-- `shared/` — code every game can import: `shared/net.js` (PeerJS host/join-link flow: create peer,
-  embed id + game params in URL, auto-join on load, one `DataConnection` API), `shared/noise.js`,
-  `shared/input.js` (WASD). Games import from `../../shared/`. Keep it small; only lift into
-  `shared/` what two games actually need — the net flow is the one thing lifted up front.
-- `games/README.md` — how to add a game (copy `games/_template/`, register it in the hub list).
+## Hub structure (Felix, 2026-09-11 — supersedes single-game layout above; contract added 2026-09-11)
 
-Deploy: Vercel serves the repo root as static, so every game is live at `/games/<name>/` with zero
-config. Firebase (Kenny's account) is deferred: not needed for v1; revisit for a live lobby or any
-game needing shared server state.
+This repo is a **hub of co-op games** shared by Felix and Kenny, not one game. The hub owns the
+PeerJS connection; games are plugins — they never touch PeerJS directly, only the `net` object the
+hub hands them.
+
+- `index.html` — hub: fetches `games/manifest.json` at runtime and renders a picker (name,
+  description, Host button) for every listed game. Plain page, no framework.
+- `games/<name>/` — one folder per game: `game.json` (`id`, `name`, `description`,
+  `players: {min, max}`) for discovery, `game.js` default-exporting
+  `start({ canvas, net, seed, role, players })`, plus its own `src/`/`assets/` as needed. The hub
+  creates the PeerJS connection, then calls `start()` with `net: { send(msg), onMessage(fn),
+  peerId, isHost }` and `role: 'host' | 'guest'`. Games never import PeerJS. (`games/archipelago/`
+  currently ships only `game.json` — its `game.js` wrapper is Stage 2's job.)
+- `shared/` — code every game can import: `shared/net.js` (hub-only — PeerJS host/join-link flow;
+  games get the resulting `net` object via `start()`, they never call this directly),
+  `shared/noise.js`, `shared/input.js` (WASD). Keep it small; only lift into `shared/` what two
+  games actually need.
+- `scripts/manifest.js` — scans `games/*/game.json` (skipping `_template`), writes
+  `games/manifest.json`. Runs as Vercel's `buildCommand` (see `vercel.json`); run it locally the
+  same way after adding or editing a game.
+- `games/README.md` — the contract in full, written for an agent building a new game.
+
+Deploy: `vercel.json` sets `buildCommand: "node scripts/manifest.js"` and `outputDirectory: "."`,
+so Vercel regenerates the manifest on every deploy and serves the repo root as static — every game
+is live at `/games/<name>/` with zero further config. Firebase (Kenny's account) is deferred: not
+needed for v1; revisit for a live lobby or any game needing shared server state.
 
 Collaboration: Kenny is a collaborator on the private repo. Both push to `main`. One agent per repo
 at a time, across both humans; `LAST_SESSION.md` is the handoff.
