@@ -72,3 +72,60 @@ header p {
 .host-button:hover {
   background: #4a9d8a;
 }
+
+#lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  gap: 12px;
+  text-align: center;
+}
+
+#host-start button,
+#copy-link-button {
+  background: #3a7d6e;
+  color: #eaf6ff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#host-start button:hover,
+#copy-link-button:hover {
+  background: #4a9d8a;
+}
+
+#host-start button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+#host-link-input {
+  width: min(420px, 90vw);
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eaf6ff;
+  font: 13px monospace;
+}
+
+#lobby .note {
+  font-size: 12px;
+  opacity: 0.7;
+  max-width: 420px;
+}
+
+#game-canvas {
+  display: block;
+  position: fixed;
+  inset: 0;
+}
+
+#game-canvas[hidden] {
+  display: none;
+}

@@ -7,67 +7,224 @@
   <link rel="stylesheet" href="hub.css" />
 </head>
 <body>
-  <header>
+  <header id="hub-header">
     <h1>coopgames</h1>
     <p>Co-op games for Felix &amp; Kenny. Pick one, host it, send the link.</p>
   </header>
 
-  <main id="game-list">
-    <p id="game-list-status">Loading games&hellip;</p>
+  <main id="lobby">
+    <div id="host-start">
+      <button id="host-button">Host a session</button>
+    </div>
+
+    <div id="host-link" hidden>
+      <p>Send this link to your friend:</p>
+      <input id="host-link-input" type="text" readonly />
+      <button id="copy-link-button">Copy link</button>
+      <p class="note">Keep this tab open — refreshing it gets a new link (a new page load is a new peer id).</p>
+    </div>
+
+    <div id="connecting" hidden>
+      <p id="connecting-status">Connecting to host&hellip;</p>
+    </div>
+
+    <div id="picker" hidden>
+      <p id="picker-status"></p>
+      <div id="game-list"></div>
+    </div>
+
+    <div id="lost" hidden>
+      <p>Connection lost — host must resend a link.</p>
+    </div>
   </main>
 
-  <script type="module">
-    const listEl = document.getElementById('game-list');
-    const statusEl = document.getElementById('game-list-status');
+  <canvas id="game-canvas" hidden></canvas>
 
-    function renderCard(game) {
+  <script src="shared/vendor/peerjs.min.js"></script>
+  <script type="module">
+    import { host, joinFromUrl } from './shared/net.js';
+
+    const els = {
+      header: document.getElementById('hub-header'),
+      lobby: document.getElementById('lobby'),
+      hostStart: document.getElementById('host-start'),
+      hostButton: document.getElementById('host-button'),
+      hostLink: document.getElementById('host-link'),
+      hostLinkInput: document.getElementById('host-link-input'),
+      copyButton: document.getElementById('copy-link-button'),
+      connecting: document.getElementById('connecting'),
+      connectingStatus: document.getElementById('connecting-status'),
+      picker: document.getElementById('picker'),
+      pickerStatus: document.getElementById('picker-status'),
+      gameList: document.getElementById('game-list'),
+      lost: document.getElementById('lost'),
+      canvas: document.getElementById('game-canvas'),
+    };
+
+    const lobbyPanels = [els.hostStart, els.hostLink, els.connecting, els.picker, els.lost];
+    function showOnly(panel) {
+      for (const candidate of lobbyPanels) candidate.hidden = candidate !== panel;
+    }
+
+    function renderCard(game, { onPick } = {}) {
       const article = document.createElement('article');
       article.className = 'game-card';
 
       const meta = [
         game.players ? `${game.players.min}–${game.players.max} players` : '',
         game.owner ? `by ${game.owner}` : '',
-      ]
-        .filter(Boolean)
-        .join(' · ');
+      ].filter(Boolean).join(' · ');
 
       const h2 = document.createElement('h2');
       h2.textContent = game.name;
       const p = document.createElement('p');
       p.textContent = game.description ?? '';
-      const button = document.createElement('a');
-      button.className = 'host-button';
-      button.href = game.path;
-      button.textContent = 'Host';
-
       article.append(h2, p);
+
       if (meta) {
         const metaEl = document.createElement('p');
         metaEl.className = 'meta';
         metaEl.textContent = meta;
         article.append(metaEl);
       }
-      article.append(button);
+
+      if (onPick) {
+        const button = document.createElement('button');
+        button.className = 'host-button';
+        button.textContent = 'Play';
+        button.addEventListener('click', () => onPick(game));
+        article.append(button);
+      }
+
       return article;
     }
 
-    fetch('games/manifest.json')
-      .then((res) => {
-        if (!res.ok) throw new Error(`manifest fetch failed: ${res.status}`);
-        return res.json();
-      })
-      .then((games) => {
-        statusEl.remove();
-        if (!games.length) {
-          listEl.innerHTML = '<p>No games yet.</p>';
+    async function loadManifest() {
+      const res = await fetch('games/manifest.json');
+      if (!res.ok) throw new Error(`manifest fetch failed: ${res.status}`);
+      return res.json();
+    }
+
+    function showLost() {
+      showOnly(els.lost);
+    }
+
+    async function launchGame(game, { net, seed, role }) {
+      els.header.hidden = true;
+      els.lobby.hidden = true;
+      els.canvas.hidden = false;
+      els.canvas.width = window.innerWidth;
+      els.canvas.height = window.innerHeight;
+
+      const mod = await import(`./${game.path}game.js`);
+      const start = mod.default;
+      start({
+        canvas: els.canvas,
+        // Reduced to the documented games/README.md contract — onClose/
+        // onConnect are hub-only, games never see them.
+        net: { send: net.send, onMessage: net.onMessage, peerId: net.peerId, isHost: net.isHost },
+        seed,
+        role,
+        players: game.players ?? { min: 1, max: 1 },
+      });
+    }
+
+    async function runHost() {
+      showOnly(els.hostStart);
+
+      els.hostButton.addEventListener('click', async () => {
+        els.hostButton.disabled = true;
+        els.hostButton.textContent = 'Starting…';
+
+        let net;
+        try {
+          net = await host();
+        } catch (err) {
+          console.error(err);
+          els.hostButton.disabled = false;
+          els.hostButton.textContent = 'Host a session';
+          alert('Could not start hosting — see console.');
           return;
         }
-        for (const game of games) listEl.appendChild(renderCard(game));
-      })
-      .catch((err) => {
-        statusEl.textContent = 'Could not load games/manifest.json — run node scripts/manifest.js.';
-        console.error(err);
+
+        const link = `${location.origin}${location.pathname}?host=${net.peerId}`;
+        els.hostLinkInput.value = link;
+        showOnly(els.hostLink);
+        net.onClose(showLost);
+
+        net.onConnect(async () => {
+          let games = [];
+          try {
+            games = await loadManifest();
+          } catch (err) {
+            console.error(err);
+            els.pickerStatus.textContent = 'Could not load games/manifest.json — run node scripts/manifest.js.';
+            showOnly(els.picker);
+            return;
+          }
+
+          els.pickerStatus.textContent = games.length ? 'Pick a game:' : 'No games yet.';
+          els.gameList.innerHTML = '';
+          for (const game of games) {
+            els.gameList.appendChild(renderCard(game, {
+              onPick: (picked) => {
+                const seed = Math.floor(Math.random() * 1_000_000);
+                net.send({ type: 'launch', gameId: picked.id, seed });
+                launchGame(picked, { net, seed, role: 'host' });
+              },
+            }));
+          }
+          showOnly(els.picker);
+        });
       });
+
+      els.copyButton.addEventListener('click', () => {
+        els.hostLinkInput.select();
+        navigator.clipboard?.writeText(els.hostLinkInput.value).catch(() => {});
+      });
+    }
+
+    async function runGuest() {
+      showOnly(els.connecting);
+
+      let net;
+      try {
+        net = await joinFromUrl();
+      } catch (err) {
+        console.error(err);
+        els.connectingStatus.textContent = 'Could not connect — check the link, or ask for a new one.';
+        return;
+      }
+      net.onClose(showLost);
+
+      let games = [];
+      try {
+        games = await loadManifest();
+      } catch (err) {
+        console.error(err);
+      }
+
+      els.pickerStatus.textContent = 'Waiting for the host to pick a game…';
+      els.gameList.innerHTML = '';
+      for (const game of games) els.gameList.appendChild(renderCard(game)); // read-only: no onPick
+      showOnly(els.picker);
+
+      net.onMessage((msg) => {
+        if (msg?.type !== 'launch') return;
+        const game = games.find((g) => g.id === msg.gameId);
+        if (!game) {
+          console.error('[hub] launch message named an unknown game', msg);
+          return;
+        }
+        launchGame(game, { net, seed: msg.seed, role: 'guest' });
+      });
+    }
+
+    if (new URLSearchParams(location.search).get('host')) {
+      runGuest();
+    } else {
+      runHost();
+    }
   </script>
 </body>
 </html>
