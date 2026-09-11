@@ -1,40 +1,35 @@
 # Last session
 
-**2026-09-11 — Stage H housekeeping + Dino Rumble** — live URL into
-README/AGENTS; `grill-me`/`grilling` skills vendored into `.claude/skills/`
-with attribution; `docs/SKILLS.md` index + AGENTS.md Skills section;
-two-network test retired from Next (passed). Kenny added
-`games/dino-rumble/`, a 2-player play-fighting game — verified headless
-(61/61), **not yet opened in a browser or run through the hub**.
+**2026-09-11 — Stage D wrap: docs + picker bleed-through fix (this commit,
+branch `felix/stage-d-dropin`, not merged)** — fixed `#lobby[hidden]` losing
+to its own `display: flex`; documented Open Relay carrier-NAT TURN gotcha;
+marked Stage D drop-in play merged in docs/MISSION-CONTROL.md. Pushed
+(updates PR #1), awaiting Felix's preview-URL test.
 
 ## Today's sessions
 
-- Batches 0-1.5 (3035e0a..93367f9): hub scaffold, CC0 tileset, real
-  `generateIsland(seed)` + isometric render; game.json/game.js contract,
-  hub owns PeerJS; manifest.js + vercel.json; docs/COLLABORATION.md.
-- Stage 3 Batches 1-2: real `shared/net.js` on vendored PeerJS + hub
-  lobby. **Found live**: data channel never opened — `dig` confirmed
-  PeerJS's shipped `eu-0`/`us-0.turn.peerjs.com` pair has no DNS record.
-- Stage 2 + hub fixes (a071de1, 41a68e1): movement/camera/fog merged;
-  shareable address bar, guest timeout. TURN fix (6ddd21b): explicit
-  `ICE_SERVERS` (Google STUN + Open Relay free TURN) + ICE diagnostics.
-- Hub asset-path fix (c25d340): archipelago tile paths via
-  `import.meta.url`, not page-relative; games/README.md rules added; hub
-  `launchGame()` shows `start()` errors on screen, not a grey canvas.
-- Two-network test (docs/MISSION-CONTROL.md): Felix + Kenny connected
-  across two networks, same island. **Passed.** Stage H (47b7c0a):
-  docs/skills cleanup, see above.
-- Dino Rumble (Kenny): `games/dino-rumble/` — 2-player fighter, pep not
-  health, first to 3 flops. Procedural canvas dinos (no vendored art);
-  latency-tolerant netcode, hits attacker-authoritative and cheatable by
-  design. `node games/dino-rumble/test/invariants.mjs` = 61 checks, which
-  caught a missing push-box. Rationale in that folder's README.
+- Batches 0-1.5: hub scaffold, CC0 tileset, `generateIsland(seed)` +
+  isometric render, game.json/game.js contract, manifest.js, vercel.json.
+- Stage 3: `shared/net.js` on vendored PeerJS + hub lobby. Found live:
+  PeerJS's shipped TURN hosts have no DNS record.
+- Stage 2 + fixes, TURN fix, asset-path fix, two-network test (passed),
+  Stage H housekeeping, Dino Rumble (Kenny, headless 61/61) — see git log.
+- Stage D (branch): picker renders right after `host()`, no longer gated
+  on a guest connecting; `currentLaunch` + `net.onConnect` is the single
+  `'launch'` send site (avoids double-launch for a late-connecting guest).
+- Stage D fix: guest-side race dropped `'launch'` arriving during the
+  manifest fetch; `shared/net.js` now buffers inbound messages until a
+  listener is registered.
+- Stage D wrap (this commit): `#lobby[hidden] { display: none }` was
+  missing in hub.css, so the ID-selector `display: flex` beat the
+  browser's default `[hidden]` rule and the picker bled through behind
+  the waiting overlay — fixed with the same pattern already used for
+  `#game-canvas`/`#waiting-overlay`/`#launch-error`. Added the Open
+  Relay carrier-NAT TURN gotcha and merged-status note to
+  docs/MISSION-CONTROL.md.
 
 ## Next
 
-1. Archipelago tuning from real play: `VISION_RADIUS` (5) and spawn
-   distance (18) in `games/archipelago/src/config.js`; player sprite
-   instead of marker; landmarks worth finding.
-2. Dino Rumble needs a human eye — browser + hub launch, plus the
-   feel/cuteness calls, which are Kenny's rather than an agent's.
+1. Merge `felix/stage-d-dropin` after Felix tests the preview URL.
+2. Archipelago tuning from real play; Dino Rumble needs a human eye.
 3. Otherwise per docs/MISSION-CONTROL.md backlog (hub lobby polish).

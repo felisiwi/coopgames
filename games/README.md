@@ -36,6 +36,11 @@ export default function start({ canvas, net, seed, role, players }) {
   // net: { send(msg), onMessage(fn), peerId, isHost } — the ONLY way to
   //   talk to the other peer(s). The hub owns the PeerJS connection; games
   //   never import PeerJS or shared/net.js directly, only this object.
+  //   Messages sent before a game registers onMessage() are delivered on
+  //   registration, in order, up to a small cap (50, drop-oldest) — you
+  //   don't need to register onMessage() before the other side might send,
+  //   but you also can't rely on more than the last 50 buffered messages
+  //   surviving if you register late.
   // seed: number, identical on every peer — seed your generator with it,
   //   don't invent separate randomness for anything that must match.
   // role: 'host' | 'guest'.
@@ -97,6 +102,19 @@ Never commit `games/manifest.json` — see `docs/COLLABORATION.md`.
   a single `ASSET_BASE = new URL('../assets/', import.meta.url)` joined per
   file (see `games/archipelago/src/render.js`'s `TILES` for the pattern).
   Same rule for any `fetch()` of a same-folder data file.
+
+## Drop-in play
+
+The hub lets the host start playing before any guest connects (Stage D) — a
+guest can open the link and connect at any arbitrary later moment, mid-game.
+Practically: your `start()` must run correctly with zero remote players from
+`t=0` (don't block on a partner existing), and must handle a partner
+appearing at any time thereafter, not just at startup — treat "a message
+just arrived from a peer I've never heard from before" as the normal case,
+not an edge case. `games/archipelago/game.js` is the reference: it starts
+with the other player's position unknown, renders nothing for them until
+their first `pos` message arrives, and has no other host-side state a late
+guest would need to be caught up on.
 
 ## Solo dev entry
 

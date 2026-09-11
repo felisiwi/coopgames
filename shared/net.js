@@ -15,15 +15,26 @@
 //
 // host() and joinFromUrl() both resolve with the same shape:
 //
-//   { send(msg), onMessage(fn), onClose(fn), onConnect(fn), peerId, isHost }
+//   { send(msg), onMessage(fn), onClose(fn), onConnect(fn), hasConnection(),
+//     peerId, isHost }
 //
-// send/onMessage/onClose are the documented contract (games/README.md).
-// onConnect is an addition this stage needed: host()'s promise resolves as
-// soon as the peer has an id (so the hub can render the copy-link UI
-// immediately), before any guest has joined — onConnect(fn) fires once,
-// when the guest's connection actually opens, which is what the hub uses
-// to leave the "waiting for guest" step. send() before that point queues
-// messages rather than dropping them.
+// send/onMessage/onClose are the documented contract (games/README.md) —
+// games only ever see those four (plus peerId/isHost), never onConnect or
+// hasConnection, which are hub-only (index.html reduces the object before
+// handing it to a game's start()). onConnect is an addition this stage
+// needed: host()'s promise resolves as soon as the peer has an id (so the
+// hub can render the copy-link UI immediately), before any guest has
+// joined — onConnect(fn) fires once, when the guest's connection actually
+// opens, which is what the hub uses to leave the "waiting for guest" step
+// and to send a 'launch' message to a guest who connects after the host
+// already picked a game (Stage D: drop-in play). hasConnection() lets the
+// hub tell whether a pick is happening before or after that point, so it
+// knows whether to send 'launch' immediately or let onConnect send it
+// later — see index.html's runHost(). send() before a connection is open
+// queues messages rather than dropping them, up to SEND_QUEUE_MAX below.
+// Symmetrically, data arriving before any onMessage(fn) is registered is
+// buffered rather than dropped, up to INBOUND_QUEUE_MAX below, and flushed
+// to the first-registered listener in order — see index.html's runGuest().
 //
 // Payloads are plain JSON-serializable values (objects/arrays/strings/
 // numbers) — PeerJS's default serialization handles them as-is, no manual
@@ -86,12 +97,37 @@ async function logIceDiagnostics(conn, reason) {
   }
 }
 
+// Stage D (drop-in play): the hub now shows the picker — and lets the host
+// start playing — before any guest has connected, so send() can be called
+// for a long stretch (whole solo-play sessions) with conn still null.
+// Position-style messages sent every tick (e.g. archipelago's 20 Hz `pos`)
+// would otherwise queue unboundedly. Cap at a small FIFO window instead:
+// net.js is a generic transport and doesn't know which message types are
+// stale-tolerant, but ANY message type is fine to lose the oldest copies of
+// when a fresher one is coming right behind it — only the most recent state
+// of anything actually matters once a connection opens. 'launch' itself
+// never touches this queue (see index.html: it's only ever sent live, from
+// onConnect, when conn.open is already true), so this cap doesn't risk
+// losing it.
+const SEND_QUEUE_MAX = 50;
+
+// Mirror of SEND_QUEUE_MAX for the inbound side: a guest's onMessage()
+// registration can lose a race against the host's very first send (open
+// fires on both ends before either side has necessarily wired up its
+// listeners — see index.html's runGuest(), which used to await
+// loadManifest() before calling onMessage(), dropping a 'launch' sent
+// from onConnect in the gap). Buffer inbound data until at least one
+// listener exists, then flush in order on the first onMessage() call.
+// Same drop-oldest cap and reasoning as SEND_QUEUE_MAX above.
+const INBOUND_QUEUE_MAX = 50;
+
 function buildNet({ peer, isHost }) {
   let conn = null;
   const messageListeners = [];
   const closeListeners = [];
   const connectListeners = [];
   const sendQueue = [];
+  const inboundQueue = [];
 
   function fireClose() {
     for (const fn of closeListeners) fn();
@@ -100,6 +136,11 @@ function buildNet({ peer, isHost }) {
   function wireConnection(c) {
     conn = c;
     conn.on('data', (data) => {
+      if (messageListeners.length === 0) {
+        inboundQueue.push(data);
+        if (inboundQueue.length > INBOUND_QUEUE_MAX) inboundQueue.shift();
+        return;
+      }
       for (const fn of messageListeners) fn(data);
     });
     conn.on('open', () => {
@@ -120,12 +161,23 @@ function buildNet({ peer, isHost }) {
   const net = {
     peerId: peer.id,
     isHost,
+    hasConnection() {
+      return !!(conn && conn.open);
+    },
     send(msg) {
-      if (conn && conn.open) conn.send(msg);
-      else sendQueue.push(msg);
+      if (conn && conn.open) {
+        conn.send(msg);
+        return;
+      }
+      sendQueue.push(msg);
+      if (sendQueue.length > SEND_QUEUE_MAX) sendQueue.shift();
     },
     onMessage(fn) {
+      const flushFirst = messageListeners.length === 0 && inboundQueue.length > 0;
       messageListeners.push(fn);
+      if (flushFirst) {
+        while (inboundQueue.length) fn(inboundQueue.shift());
+      }
     },
     onClose(fn) {
       closeListeners.push(fn);
