@@ -10,7 +10,7 @@ import { CONFIG } from './src/config.js';
 import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './src/sail.js';
 import { initialWind, nextWind, nextChangeDelaySeconds } from './src/wind.js';
 import { createBoatMesh } from './src/boat.js';
-import { updateChaseCamera, snapChaseCamera } from './src/camera.js';
+import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud } from './src/hud.js';
 import { createInputState } from '../../shared/input.js';
 
@@ -21,7 +21,9 @@ export default function start({ canvas, net, seed, role }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x89c4f4);
 
-  const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 2000);
+  const isFixedCamera = CONFIG.CAMERA_MODE === 'fixed';
+  const cameraFov = isFixedCamera ? CONFIG.FIXED_CAMERA_FOV_DEG : CONFIG.CHASE_CAMERA_FOV_DEG;
+  const camera = new THREE.PerspectiveCamera(cameraFov, 1, 0.1, 2000);
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.6));
   const sun = new THREE.DirectionalLight(0xffffff, 0.9);
@@ -118,7 +120,11 @@ export default function start({ canvas, net, seed, role }) {
 
   selfBoat.group.position.set(self.x, 0, self.z);
   selfBoat.group.rotation.y = self.heading;
-  snapChaseCamera(camera, selfBoat.group.position, self.heading);
+  if (isFixedCamera) {
+    snapFixedCamera(camera, selfBoat.group.position);
+  } else {
+    snapChaseCamera(camera, selfBoat.group.position, self.heading);
+  }
 
   let last = performance.now();
   function frame(now) {
@@ -161,7 +167,11 @@ export default function start({ canvas, net, seed, role }) {
       otherBoat.setSailAngle(leewardSign(other.heading, wind.dir) * otherIdeal);
     }
 
-    updateChaseCamera(camera, selfBoat.group.position, self.heading, dt);
+    if (isFixedCamera) {
+      updateFixedCamera(camera, selfBoat.group.position, dt);
+    } else {
+      updateChaseCamera(camera, selfBoat.group.position, self.heading, dt);
+    }
     updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)));
 
     renderer.render(scene, camera);

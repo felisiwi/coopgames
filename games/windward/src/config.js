@@ -12,10 +12,25 @@ export const CONFIG = {
   WIND_CHANGE_MAX_S: 40,
   WIND_HEARTBEAT_S: 5, // resend current wind at least this often (late-join)
 
+  // W0.5 default: fixed-orientation three-quarter camera (never rotates with
+  // the boat, so wind/compass stay readable regardless of heading). Set to
+  // 'chase' to A/B against the old behind-the-boat cam kept below.
+  CAMERA_MODE: 'fixed',
+
+  FIXED_CAMERA_ELEVATION_DEG: 52,
+  FIXED_CAMERA_AZIMUTH_DEG: 45, // constant compass bearing from boat to camera
+  FIXED_CAMERA_FOV_DEG: 30, // narrow => reads almost isometric
+  // Straight-line camera-to-boat distance. At 30deg vertical FOV / 16:9 this
+  // puts ~120m across the screen at the boat's position (120 / (2*tan(hFOV/2))).
+  FIXED_CAMERA_DISTANCE: 125,
+  FIXED_CAMERA_DAMPING_RATE: 3, // 1/s, dt-based exponential smoothing
+
+  // Legacy chase cam (pre-W0.5), kept for comparison behind CAMERA_MODE.
   CAMERA_DISTANCE: 12,
   CAMERA_HEIGHT: 6,
   CAMERA_LOOKAHEAD: 6,
   CAMERA_DAMPING_RATE: 3, // 1/s, dt-based exponential smoothing (not a fixed per-frame lerp)
+  CHASE_CAMERA_FOV_DEG: 60,
 
   BOAT_SPAWN_OFFSET: 10, // meters apart on X before any 'pos' has synced
 };

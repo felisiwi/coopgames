@@ -48,11 +48,29 @@ HUD shows a trim bar/hint (ease vs. sheet-in) comparing actual to ideal.
 
 ## Camera
 
-Chase cam: 12 units behind the boat, 6 units up, looking at a point slightly
-ahead of the boat (reads the direction of travel, not just the hull). Damped
-follow using dt-based exponential smoothing (not a fixed per-frame lerp
-constant, which would be framerate-dependent) — turns and wake feel weighty
-rather than glued to the boat.
+**Superseded 2026-09-11 (Stage W0.5, Batch 1).** W0's chase cam rotated with
+the boat's heading, which meant wind direction and the compass rotated with
+it too — Felix played it and had nothing fixed to judge his heading against.
+Also, the chase cam initially snapped-to-boat-facing bug (Batch 0) was a
+symptom of a design that made the camera's own orientation load-bearing for
+readability in the first place.
+
+Default is now a **fixed-orientation three-quarter camera**: a constant
+compass bearing (`FIXED_CAMERA_AZIMUTH_DEG`, `src/config.js`) and elevation
+(`FIXED_CAMERA_ELEVATION_DEG` = 52°) from the boat, narrow FOV
+(`FIXED_CAMERA_FOV_DEG` = 30°, so it reads almost isometric), far enough
+(`FIXED_CAMERA_DISTANCE` = 125) to put roughly 120m across the screen at the
+boat's position. Only *position* is damped (dt-based exponential smoothing,
+same as before) to follow the boat — orientation never rotates with heading,
+so wind arrow / compass rose (Batch 3) stay legible at a glance regardless of
+which way the boat is pointed. `src/camera.js`'s `snapFixedCamera` sets the
+camera directly (no lerp) at setup, for the same t=0 reason as Batch 0's
+`snapChaseCamera`.
+
+The old chase cam (12 units behind, 6 up, looking slightly ahead, wider FOV)
+is kept in `src/camera.js` behind `CONFIG.CAMERA_MODE = 'chase'` for
+comparison — turns and wake still feel weighty under it, it's just no longer
+the default because it fights the wind/compass readability goal.
 
 ## World units & scale
 
