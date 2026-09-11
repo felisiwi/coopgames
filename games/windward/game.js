@@ -12,6 +12,10 @@ import { initialWind, nextWind, nextChangeDelaySeconds } from './src/wind.js';
 import { createBoatMesh } from './src/boat.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud } from './src/hud.js';
+import { createWater } from './src/water.js';
+import { createWindArrow } from './src/windArrow.js';
+import { createScatter } from './src/scatter.js';
+import { createWake } from './src/wake.js';
 import { createInputState } from '../../shared/input.js';
 
 export default function start({ canvas, net, seed, role }) {
@@ -30,19 +34,23 @@ export default function start({ canvas, net, seed, role }) {
   sun.position.set(5, 10, 5);
   scene.add(sun);
 
-  const water = new THREE.Mesh(
-    new THREE.PlaneGeometry(2000, 2000),
-    new THREE.MeshStandardMaterial({ color: 0x2d6ea6 }),
-  );
-  water.rotation.x = -Math.PI / 2;
-  scene.add(water);
+  const water = createWater();
+  scene.add(water.mesh);
+
+  scene.add(createScatter(seed));
+
+  const windArrow = createWindArrow();
+  scene.add(windArrow.object);
 
   const selfColor = role === 'host' ? 0xffcc66 : 0x66ccff;
   const otherColor = role === 'host' ? 0x66ccff : 0xffcc66;
 
   const selfBoat = createBoatMesh(selfColor);
   scene.add(selfBoat.group);
+  const selfWake = createWake();
+  scene.add(selfWake.group);
   let otherBoat = null; // created lazily on the peer's first 'pos' (drop-in play)
+  let otherWake = null; // created alongside otherBoat
 
   const self = {
     x: role === 'host' ? -CONFIG.BOAT_SPAWN_OFFSET : CONFIG.BOAT_SPAWN_OFFSET,
@@ -84,6 +92,8 @@ export default function start({ canvas, net, seed, role }) {
       if (!otherBoat) {
         otherBoat = createBoatMesh(otherColor);
         scene.add(otherBoat.group);
+        otherWake = createWake();
+        scene.add(otherWake.group);
       }
     } else if (msg.type === 'wind' && role === 'guest') {
       if (msg.seq > windSeq) {
@@ -157,6 +167,7 @@ export default function start({ canvas, net, seed, role }) {
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
+    selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
 
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
@@ -165,14 +176,18 @@ export default function start({ canvas, net, seed, role }) {
       // with the ideal trim for its current point of sail.
       const otherIdeal = idealTrimRad(angleOffWind(other.heading, wind.dir));
       otherBoat.setSailAngle(leewardSign(other.heading, wind.dir) * otherIdeal);
+      otherWake.update(dt, otherBoat.group.position, other.heading, other.speed);
     }
+
+    water.update(nowS, wind);
+    windArrow.update(selfBoat.group.position, wind);
 
     if (isFixedCamera) {
       updateFixedCamera(camera, selfBoat.group.position, dt);
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt);
     }
-    updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)));
+    updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading);
 
     renderer.render(scene, camera);
     requestAnimationFrame(frame);

@@ -85,6 +85,20 @@ point so `setSailAngle` can still swing it for trim, same mechanism as the
 box placeholder. Self/other are distinguished by tinting only the sail's
 (cloned) material — hull and flags keep the model's natural colors.
 
+**Water + wind readability (added 2026-09-11, Batch 3):** the flat blue plane
+is replaced by `src/water.js` — a 96×96-segment plane displaced in a vertex
+shader by 3 summed sine waves aligned with wind direction and scaled by
+strength, flat-shaded via a fragment-shader normal from `dFdx`/`dFdy` on
+world position (cheap: no analytic wave normals, no CPU-side geometry
+updates). `src/windArrow.js` adds a world-space arrow above the boat pointing
+where the wind blows to, length scaled by strength; `src/hud.js`'s new
+compass-rose canvas shows the same wind bearing plus the boat's heading,
+alongside the unchanged text HUD. `src/scatter.js` seeds ~30 throwaway
+buoys/rocks over a 600m square (same `seed` as the rest of the world, offset
+so its PRNG stream doesn't collide with `wind.js`'s use of `seed`) so
+movement reads against something until W1's islands land. `src/wake.js` pools
+24 fading/growing foam disks spawned behind each boat while it's moving.
+
 ## Wind
 
 - **Cadence**: changes every 25–40s, uniformly random in that range. No

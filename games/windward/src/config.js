@@ -33,4 +33,20 @@ export const CONFIG = {
   CHASE_CAMERA_FOV_DEG: 60,
 
   BOAT_SPAWN_OFFSET: 10, // meters apart on X before any 'pos' has synced
+
+  // Water + wind readability (W0.5 Batch 3, games/windward/DESIGN.md).
+  WATER_SIZE: 600, // meters, matches SCATTER_AREA so the sea fills the reference area
+  WATER_SEGMENTS: 96,
+
+  WIND_ARROW_HEIGHT: 7, // meters above the boat
+  WIND_ARROW_MIN_LENGTH: 3,
+  WIND_ARROW_LENGTH_SCALE: 8, // added length at full strength
+
+  SCATTER_COUNT: 30,
+  SCATTER_AREA: 600, // meters square, centred on world origin — throwaway, W1 replaces with islands
+
+  WAKE_POOL_SIZE: 24,
+  WAKE_SPAWN_INTERVAL_S: 0.12,
+  WAKE_LIFETIME_S: 1.4,
+  WAKE_STERN_OFFSET: 3, // meters behind the boat's position
 };
