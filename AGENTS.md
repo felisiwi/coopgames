@@ -81,3 +81,24 @@ Risks the doc missed, added:
 9. **Isometric depth sorting.** Trees and players must draw back-to-front. v1 rule: draw all ground tiles, then a single list of (trees + players) sorted by map y then x. Anything fancier is out of scope.
 
 Working conventions: this repo now lives under `~/GitHub`, so the workspace `CLAUDE.md` applies — gated batches, stage specific files, DONE-WHEN with pasted evidence, `LAST_SESSION.md` updated at every wrap. Add a repo `CLAUDE.md` containing `@AGENTS.md` in stage 1 so terminal sessions load this file.
+
+## Hub structure (Felix, 2026-09-11 — supersedes single-game layout above)
+
+This repo is a **hub of co-op games** shared by Felix and Kenny, not one game. Every game is a
+self-contained static folder; the hub is the root page that lists them.
+
+- `index.html` — hub: list of games, each with a Host button. Plain page, no framework.
+- `games/<name>/` — one folder per game, self-contained (`index.html` + its own `src/`, `assets/`).
+  The archipelago game from this doc is `games/archipelago/` and remains the v1 tracer bullet.
+- `shared/` — code every game can import: `shared/net.js` (PeerJS host/join-link flow: create peer,
+  embed id + game params in URL, auto-join on load, one `DataConnection` API), `shared/noise.js`,
+  `shared/input.js` (WASD). Games import from `../../shared/`. Keep it small; only lift into
+  `shared/` what two games actually need — the net flow is the one thing lifted up front.
+- `games/README.md` — how to add a game (copy `games/_template/`, register it in the hub list).
+
+Deploy: Vercel serves the repo root as static, so every game is live at `/games/<name>/` with zero
+config. Firebase (Kenny's account) is deferred: not needed for v1; revisit for a live lobby or any
+game needing shared server state.
+
+Collaboration: Kenny is a collaborator on the private repo. Both push to `main`. One agent per repo
+at a time, across both humans; `LAST_SESSION.md` is the handoff.

@@ -22,4 +22,18 @@ html, body {
   background: rgba(0, 0, 0, 0.35);
   padding: 4px 8px;
   border-radius: 4px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#hub-link {
+  color: #eaf6ff;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+#hub-link:hover {
+  opacity: 1;
+  text-decoration: underline;
 }
