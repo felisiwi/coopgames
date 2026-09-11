@@ -17,8 +17,8 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-// net/players are unused this batch — position sync lands in Stage 2
-// Batch 3.
+// players is unused this batch — the message shape only carries a position,
+// nothing about who's who beyond the two peers net already distinguishes.
 export default function start({ canvas, net, seed, role, players }) {
   const ctx = canvas.getContext('2d');
   const island = generateIsland(seed);
@@ -38,10 +38,38 @@ export default function start({ canvas, net, seed, role, players }) {
     t: 1,
   };
 
+  // The other peer's last-known position, straight off the wire — never
+  // smoothed further, per the "one hour" cut list (AGENTS.md #5).
+  const other = { x: null, y: null };
+
+  // Per-player fog: 0 unseen / 1 seen / 2 visible, indexed y * size + x.
+  // Local only — never synced (Stage 2 audit resolution #3).
+  const fog = new Uint8Array(island.size * island.size);
+
   const input = createInputState();
 
   function renderPos() {
     return { x: lerp(player.fromX, player.toX, player.t), y: lerp(player.fromY, player.toY, player.t) };
+  }
+
+  function updateFog(cx, cy) {
+    const size = island.size;
+    const r = CONFIG.VISION_RADIUS;
+    const r2 = r * r;
+    for (let i = 0; i < fog.length; i++) {
+      if (fog[i] === 2) fog[i] = 1; // demote last frame's visible tiles to seen
+    }
+    const minY = Math.max(0, Math.floor(cy - r));
+    const maxY = Math.min(size - 1, Math.ceil(cy + r));
+    const minX = Math.max(0, Math.floor(cx - r));
+    const maxX = Math.min(size - 1, Math.ceil(cx + r));
+    for (let y = minY; y <= maxY; y++) {
+      for (let x = minX; x <= maxX; x++) {
+        const dx = x - cx;
+        const dy = y - cy;
+        if (dx * dx + dy * dy <= r2) fog[y * size + x] = 2;
+      }
+    }
   }
 
   function tryStartMove(dx, dy) {
@@ -55,6 +83,18 @@ export default function start({ canvas, net, seed, role, players }) {
     player.toY = ny;
     player.t = 0;
   }
+
+  net.onMessage((msg) => {
+    if (msg && msg.t === 'pos') {
+      other.x = msg.x;
+      other.y = msg.y;
+    }
+  });
+
+  setInterval(() => {
+    const pos = renderPos();
+    net.send({ t: 'pos', x: pos.x, y: pos.y });
+  }, 1000 / CONFIG.NET_SEND_HZ);
 
   loadTileImages().then((images) => {
     let lastTime = performance.now();
@@ -80,11 +120,18 @@ export default function start({ canvas, net, seed, role, players }) {
       }
 
       const pos = renderPos();
-      renderIsland(ctx, canvas, island, images, {
-        debug,
-        camera: pos,
-        entities: [{ x: pos.x, y: pos.y, color: '#ffcc66' }],
-      });
+      updateFog(pos.x, pos.y);
+
+      const entities = [{ x: pos.x, y: pos.y, color: '#ffcc66' }];
+      if (other.x !== null) {
+        const tileX = Math.min(island.size - 1, Math.max(0, Math.round(other.x)));
+        const tileY = Math.min(island.size - 1, Math.max(0, Math.round(other.y)));
+        if (fog[tileY * island.size + tileX] === 2) {
+          entities.push({ x: other.x, y: other.y, color: '#66ccff' });
+        }
+      }
+
+      renderIsland(ctx, canvas, island, images, { debug, camera: pos, entities, fog });
 
       requestAnimationFrame(frame);
     }

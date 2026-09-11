@@ -50,7 +50,12 @@ function mapBounds(size) {
 
 export function renderIsland(ctx, canvas, island, images, opts = {}) {
   const { size, grid } = island;
-  const { debug = false, camera = null, entities = [] } = opts;
+  const { debug = false, camera = null, entities = [], fog = null } = opts;
+  // Fog is a per-player Uint8Array (0 unseen / 1 seen / 2 visible), indexed
+  // y * size + x — see Stage 2 audit resolution #3. ?debug=1 ignores it so
+  // eyeballing generator output never depends on how much a player has
+  // explored.
+  const fogActive = fog && !debug;
 
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -86,11 +91,15 @@ export function renderIsland(ctx, canvas, island, images, opts = {}) {
     const yEnd = Math.min(d, size - 1);
     for (let y = yStart; y <= yEnd; y++) {
       const x = d - y;
+      const fogState = fogActive ? fog[y * size + x] : 2;
+      if (fogState === 0) continue; // unseen — skipped entirely
       const tile = grid[y][x];
       const img = images[tile.type];
       if (!img) continue;
       const { x: sx, y: sy } = toScreen(x, y, originX, originY);
+      ctx.globalAlpha = fogState === 1 ? 0.35 : 1; // seen-but-not-visible dims
       ctx.drawImage(img, sx - CONFIG.TILE_WIDTH / 2, sy - CONFIG.TILE_STEP_Y, CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT);
+      ctx.globalAlpha = 1;
     }
   }
 
