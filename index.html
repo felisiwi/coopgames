@@ -24,7 +24,12 @@
       const article = document.createElement('article');
       article.className = 'game-card';
 
-      const players = game.players ? `${game.players.min}–${game.players.max} players` : '';
+      const meta = [
+        game.players ? `${game.players.min}–${game.players.max} players` : '',
+        game.owner ? `by ${game.owner}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
 
       const h2 = document.createElement('h2');
       h2.textContent = game.name;
@@ -36,11 +41,11 @@
       button.textContent = 'Host';
 
       article.append(h2, p);
-      if (players) {
-        const playersEl = document.createElement('p');
-        playersEl.className = 'players';
-        playersEl.textContent = players;
-        article.append(playersEl);
+      if (meta) {
+        const metaEl = document.createElement('p');
+        metaEl.className = 'meta';
+        metaEl.textContent = meta;
+        article.append(metaEl);
       }
       article.append(button);
       return article;

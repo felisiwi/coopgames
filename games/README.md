@@ -17,13 +17,16 @@ render its picker:
   "id": "archipelago",
   "name": "Archipelago",
   "description": "One sentence, shown on the hub picker card.",
-  "players": { "min": 2, "max": 2 }
+  "players": { "min": 2, "max": 2 },
+  "owner": "felix"
 }
 ```
 
-`id` should match the folder name. A folder with no `game.json` isn't
-discoverable. `_template/` is skipped outright, by name, regardless of what
-its own `game.json` says.
+`id` should match the folder name. `owner` is whoever created the folder (see
+`docs/COLLABORATION.md` for what that means for who can commit where) — the
+manifest passes it through as-is so the hub can show who made each game. A
+folder with no `game.json` isn't discoverable. `_template/` is skipped
+outright, by name, regardless of what its own `game.json` says.
 
 **`game.js`** — default-exports the game's entry point:
 
@@ -60,16 +63,21 @@ imports.
 ## Discovery
 
 `scripts/manifest.js` scans `games/*/game.json` (skipping `_template`) and
-writes `games/manifest.json`. Run it yourself after adding or editing a game,
-and commit the result:
+writes `games/manifest.json`, which is **generated, not committed**
+(`.gitignore`'d). It's written twice, both from the same script:
 
-```
-node scripts/manifest.js
-```
+- Locally, run it yourself after adding or editing a game, before testing
+  the hub against `python3 -m http.server` (which serves static files and
+  won't regenerate it for you):
 
-It also runs automatically as Vercel's `buildCommand` (`vercel.json`) on
-every deploy — but the committed copy is what local testing sees, since
-`python3 -m http.server` serves static files with no build step of its own.
+  ```
+  node scripts/manifest.js
+  ```
+
+- On Vercel, it runs automatically as the `buildCommand` (`vercel.json`) on
+  every deploy.
+
+Never commit `games/manifest.json` — see `docs/COLLABORATION.md`.
 
 ## Asset conventions
 
@@ -93,12 +101,10 @@ just collects listeners nobody drives yet, `peerId` is a fixed string,
 
 ## The two-human rule
 
-Felix and Kenny both push to `main` on this repo. One agent works one repo
-at a time, across both humans — check `git status` for someone else's
-in-progress work before starting anything, and don't start a mission on a
-dirty tree without asking first. `LAST_SESSION.md` at the repo root is the
-handoff: read it before you start, update it as your last step before you
-stop.
+Felix and Kenny both work in this repo. Your folder is yours to commit to
+directly; anyone else's folder, or a shared surface (`shared/`, the root hub
+files, `scripts/`, `AGENTS.md`, `docs/`), is a branch + PR. Full protocol,
+including session start/end and the handoff: `docs/COLLABORATION.md`.
 
 ## Tool economy
 

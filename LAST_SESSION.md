@@ -1,8 +1,8 @@
 # Last session
 
-**2026-09-11 — Stage 1.5 (this commit)** — game contract, manifest-driven
-hub picker, docs. Stage 1 (hub scaffold + archipelago island gen) also
-shipped today. No movement, camera, fog, or networking yet.
+**2026-09-11 — Batch 0 (this commit)** — collaboration protocol. Stage 1
+(hub scaffold + archipelago island gen) and Stage 1.5 (game contract +
+docs) also shipped today. No movement, camera, fog, or networking yet.
 
 ## Today's sessions
 
@@ -12,14 +12,17 @@ shipped today. No movement, camera, fog, or networking yet.
 - Batch 3 (34a862c): real generateIsland(seed) + full isometric render;
   seeds 1-5 all pass margin/landmass/spawn-distance invariants.
 - Pushed to origin (e702ac9) — Kenny joining as collaborator.
-- Stage 1.5: game.json/game.js contract (`start({canvas, net, seed, role,
-  players})`), hub now owns the PeerJS connection per AGENTS.md;
-  scripts/manifest.js + vercel.json wire discovery into the hub picker
-  (verified: `node scripts/manifest.js` lists archipelago, hub renders it
-  — one screenshot, per the new Tool economy rule); games/_template/
-  updated to the contract with a solo dev entry that fakes `net`;
-  games/README.md rewritten for an agent building a new game; AGENTS.md
-  gained a Tool economy section.
+- Stage 1.5 (21a6782): game.json/game.js contract, hub now owns the PeerJS
+  connection per AGENTS.md, scripts/manifest.js + vercel.json wire
+  discovery into the hub picker, games/README.md rewritten, AGENTS.md
+  gained a Tool economy section. Pushed.
+- Batch 0: docs/COLLABORATION.md (session start/end via `git pull
+  --rebase`, folder ownership + branch/PR rule for shared surfaces,
+  never-list, LAST_SESSION.md handoff, contract-compat rule) —
+  AGENTS.md points to it. `games/manifest.json` untracked + gitignored
+  (generated locally by `scripts/manifest.js`, and by Vercel at build —
+  never commit it). Added `"owner"` to archipelago (`felix`) and
+  template (`<name>`) game.json; the manifest passes it through as-is.
 
 ## Next
 

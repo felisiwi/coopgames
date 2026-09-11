@@ -52,7 +52,7 @@ header p {
   min-height: 3.5em;
 }
 
-.game-card .players {
+.game-card .meta {
   margin: -12px 0 16px;
   font-size: 12px;
   opacity: 0.6;

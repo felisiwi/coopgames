@@ -120,4 +120,5 @@ is live at `/games/<name>/` with zero further config. Firebase (Kenny's account)
 needed for v1; revisit for a live lobby or any game needing shared server state.
 
 Collaboration: Kenny is a collaborator on the private repo. Both push to `main`. One agent per repo
-at a time, across both humans; `LAST_SESSION.md` is the handoff.
+at a time, across both humans; `LAST_SESSION.md` is the handoff. Any commit, push, or work in
+another person's folder: follow `docs/COLLABORATION.md`.
