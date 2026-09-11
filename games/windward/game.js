@@ -105,6 +105,13 @@ export default function start({ canvas, net, seed, role }) {
 
   const input = createInputState();
 
+  let zoom = 1;
+  function onWheel(e) {
+    e.preventDefault();
+    zoom = Math.min(CONFIG.ZOOM_MAX, Math.max(CONFIG.ZOOM_MIN, zoom + e.deltaY * CONFIG.ZOOM_WHEEL_SENSITIVITY));
+  }
+  canvas.addEventListener('wheel', onWheel, { passive: false });
+
   const posInterval = setInterval(() => {
     net.send({
       type: 'pos',
@@ -131,9 +138,9 @@ export default function start({ canvas, net, seed, role }) {
   selfBoat.group.position.set(self.x, 0, self.z);
   selfBoat.group.rotation.y = self.heading;
   if (isFixedCamera) {
-    snapFixedCamera(camera, selfBoat.group.position);
+    snapFixedCamera(camera, selfBoat.group.position, zoom);
   } else {
-    snapChaseCamera(camera, selfBoat.group.position, self.heading);
+    snapChaseCamera(camera, selfBoat.group.position, self.heading, zoom);
   }
 
   let last = performance.now();
@@ -183,9 +190,9 @@ export default function start({ canvas, net, seed, role }) {
     windArrow.update(selfBoat.group.position, wind);
 
     if (isFixedCamera) {
-      updateFixedCamera(camera, selfBoat.group.position, dt);
+      updateFixedCamera(camera, selfBoat.group.position, dt, zoom);
     } else {
-      updateChaseCamera(camera, selfBoat.group.position, self.heading, dt);
+      updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }
     updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading);
 
@@ -197,6 +204,7 @@ export default function start({ canvas, net, seed, role }) {
   window.addEventListener('beforeunload', () => {
     clearInterval(posInterval);
     window.removeEventListener('resize', resize);
+    canvas.removeEventListener('wheel', onWheel);
     input.destroy();
   });
 }

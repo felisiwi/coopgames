@@ -25,6 +25,10 @@ export const CONFIG = {
   FIXED_CAMERA_DISTANCE: 125,
   FIXED_CAMERA_DAMPING_RATE: 3, // 1/s, dt-based exponential smoothing
 
+  ZOOM_MIN: 0.5, // closer than default
+  ZOOM_MAX: 2.5, // further than default
+  ZOOM_WHEEL_SENSITIVITY: 0.0015, // multiplier change per wheel deltaY unit
+
   // Legacy chase cam (pre-W0.5), kept for comparison behind CAMERA_MODE.
   CAMERA_DISTANCE: 12,
   CAMERA_HEIGHT: 6,
