@@ -85,12 +85,19 @@ point so `setSailAngle` can still swing it for trim, same mechanism as the
 box placeholder. Self/other are distinguished by tinting only the sail's
 (cloned) material — hull and flags keep the model's natural colors.
 
-**Water + wind readability (added 2026-09-11, Batch 3):** the flat blue plane
-is replaced by `src/water.js` — a 96×96-segment plane displaced in a vertex
-shader by 3 summed sine waves aligned with wind direction and scaled by
-strength, flat-shaded via a fragment-shader normal from `dFdx`/`dFdy` on
-world position (cheap: no analytic wave normals, no CPU-side geometry
-updates). `src/windArrow.js` adds a world-space arrow above the boat pointing
+**Water + wind readability (added 2026-09-11, Batch 3; wave/light tuning
+2026-09-12 after the wrap screenshot showed a flat-looking sea):** the flat
+blue plane is replaced by `src/water.js` — a 128×128-segment plane displaced
+in a vertex shader by 3 summed sine waves aligned with wind direction and
+scaled by strength, flat-shaded via a fragment-shader normal from
+`dFdx`/`dFdy` on world position (cheap: no analytic wave normals, no
+CPU-side geometry updates). Amplitude (1.4-4.4m) and the fragment shader's
+own light direction are deliberately exaggerated/stylized past realistic
+scale — at the W0.5 fixed camera's steep, near-overhead vantage, a
+physically-scaled swell under the scene's own near-overhead sun was
+imperceptible; a lower, more grazing `uLightDir` plus a sharp glint term
+(`pow(diffuse, 12.0)`) make the facets read clearly instead.
+`src/windArrow.js` adds a world-space arrow above the boat pointing
 where the wind blows to, length scaled by strength; `src/hud.js`'s new
 compass-rose canvas shows the same wind bearing plus the boat's heading,
 alongside the unchanged text HUD. `src/scatter.js` seeds ~30 throwaway

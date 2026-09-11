@@ -15,11 +15,15 @@ const VERTEX_SHADER = `
 
   void main() {
     vec3 pos = position;
-    float amp = 0.15 + uWindStrength * 0.55;
+    // Amplitude is exaggerated well past realistic swell — at the W0.5 fixed
+    // camera's distance/elevation (src/camera.js), a physically-scaled wave
+    // reads as a flat plane; this is a stylized "the sea shows the wind"
+    // effect, not a realism target (tuned against the actual screenshot).
+    float amp = 1.4 + uWindStrength * 3.0;
     float d = dot(pos.xy, uWindDir);
     pos.z += amp * 0.55 * sin(d * 0.12 + uTime * 1.3);
     pos.z += amp * 0.30 * sin(d * 0.28 - uTime * 2.1 + 1.7);
-    pos.z += amp * 0.15 * sin(d * 0.55 + uTime * 3.4 + 4.2);
+    pos.z += amp * 0.15 * sin(d * 0.4 + uTime * 3.4 + 4.2);
 
     vec4 worldPos = modelMatrix * vec4(pos, 1.0);
     vWorldPos = worldPos.xyz;
@@ -37,7 +41,11 @@ const FRAGMENT_SHADER = `
     vec3 fdy = dFdy(vWorldPos);
     vec3 normal = normalize(cross(fdx, fdy));
     float diffuse = max(dot(normal, normalize(uLightDir)), 0.0);
-    vec3 color = uBaseColor * (0.55 + 0.45 * diffuse);
+    // Wide contrast range + a sharp glint term so wave facets read clearly
+    // from the fixed camera's steep, near-overhead vantage (a subtle
+    // diffuse-only gradient washes out at that angle).
+    float glint = pow(diffuse, 12.0);
+    vec3 color = uBaseColor * (0.35 + 0.65 * diffuse) + vec3(0.9, 0.95, 1.0) * glint * 0.45;
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -55,7 +63,11 @@ export function createWater() {
       uWindDir: { value: new THREE.Vector2(1, 0) },
       uWindStrength: { value: 0.5 },
       uBaseColor: { value: new THREE.Color(0x2d6ea6) },
-      uLightDir: { value: new THREE.Vector3(0.4, 1, 0.3) },
+      // Deliberately more grazing than the scene's own DirectionalLight —
+      // a near-overhead light barely shades small facet tilts when both the
+      // fixed camera and the light are steep, this is a stylized choice for
+      // wave visibility, not a match to the real light.
+      uLightDir: { value: new THREE.Vector3(0.7, 0.4, 0.5) },
     },
     vertexShader: VERTEX_SHADER,
     fragmentShader: FRAGMENT_SHADER,

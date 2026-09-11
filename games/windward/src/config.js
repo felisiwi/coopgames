@@ -36,7 +36,7 @@ export const CONFIG = {
 
   // Water + wind readability (W0.5 Batch 3, games/windward/DESIGN.md).
   WATER_SIZE: 600, // meters, matches SCATTER_AREA so the sea fills the reference area
-  WATER_SEGMENTS: 96,
+  WATER_SEGMENTS: 128,
 
   WIND_ARROW_HEIGHT: 7, // meters above the boat
   WIND_ARROW_MIN_LENGTH: 3,
