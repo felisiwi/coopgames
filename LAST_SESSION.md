@@ -1,10 +1,10 @@
 # Last session
 
-**2026-09-11 — Stage D wrap: docs + picker bleed-through fix (this commit,
-branch `felix/stage-d-dropin`, not merged)** — fixed `#lobby[hidden]` losing
-to its own `display: flex`; documented Open Relay carrier-NAT TURN gotcha;
-marked Stage D drop-in play merged in docs/MISSION-CONTROL.md. Pushed
-(updates PR #1), awaiting Felix's preview-URL test.
+**2026-09-11 — Windward W0 Batches 0-2: grill-me → DESIGN.md, three.js
+scaffold, boat/wind/tacking sail model + 20 Hz pos sync** (commits 12d49e0,
+df723a6, dc9d202, pushed to main). Boat feel only — no islands yet, per
+AGENTS.md's Windward concept. PR #1 (Stage D drop-in play) is merged at
+c8fff34; the previous header's "not merged" note was stale, corrected here.
 
 ## Today's sessions
 
@@ -14,22 +14,22 @@ marked Stage D drop-in play merged in docs/MISSION-CONTROL.md. Pushed
   PeerJS's shipped TURN hosts have no DNS record.
 - Stage 2 + fixes, TURN fix, asset-path fix, two-network test (passed),
   Stage H housekeeping, Dino Rumble (Kenny, headless 61/61) — see git log.
-- Stage D (branch): picker renders right after `host()`, no longer gated
-  on a guest connecting; `currentLaunch` + `net.onConnect` is the single
-  `'launch'` send site (avoids double-launch for a late-connecting guest).
-- Stage D fix: guest-side race dropped `'launch'` arriving during the
-  manifest fetch; `shared/net.js` now buffers inbound messages until a
-  listener is registered.
-- Stage D wrap (this commit): `#lobby[hidden] { display: none }` was
-  missing in hub.css, so the ID-selector `display: flex` beat the
-  browser's default `[hidden]` rule and the picker bled through behind
-  the waiting overlay — fixed with the same pattern already used for
-  `#game-canvas`/`#waiting-overlay`/`#launch-error`. Added the Open
-  Relay carrier-NAT TURN gotcha and merged-status note to
-  docs/MISSION-CONTROL.md.
+- Stage D (branch, merged PR #1): drop-in play — host plays solo, picker
+  renders right after `host()`; guest connecting later gets `'launch'`;
+  fixed a guest-side inbound-message race and a lobby CSS bleed-through.
+- Windward W0 (felix): DESIGN.md from `/grill-me` — sail speed curve
+  (no-go zone, polar, smoothstep joins), manual trim (not auto), chase
+  cam, and a wind-delivery fix (mission prompt assumed `net.onConnect`,
+  which games don't have — replaced with periodic resend + first-message
+  detection). Scaffolded game.json/game.js/index.html, vendored three.js
+  0.186.0. `src/sail.js` pure speed/trim model (10/10 headless tests);
+  boat/camera/wind/hud modules wired into game.js; 20 Hz `pos` sync.
 
 ## Next
 
-1. Merge `felix/stage-d-dropin` after Felix tests the preview URL.
-2. Archipelago tuning from real play; Dino Rumble needs a human eye.
-3. Otherwise per docs/MISSION-CONTROL.md backlog (hub lobby polish).
+1. Play-test Windward (solo dev entry, then through the hub); tune
+   `src/config.js` (turn rate, trim window, wind cadence) from feel.
+2. Windward: gust telegraphing (deferred to W3); islands/claiming/scoring
+   not in scope yet.
+3. Otherwise per docs/MISSION-CONTROL.md backlog (Archipelago tuning from
+   real play, hub lobby polish).
