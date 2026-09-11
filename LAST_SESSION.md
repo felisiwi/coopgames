@@ -1,12 +1,12 @@
 # Last session
 
-**2026-09-11/12 — Windward W0.5 Batches 0-3 + wrap-screenshot fixes:
-camera-start-snap fix, fixed three-quarter camera, real CC0 boat model,
-water/wind/scatter/wake** (commits 38c65d3, b016e3f, e797444, 3591a6d,
-0040e06, 036184d, 045b71a, pushed to main). Felix played W0 and had nothing
-fixed to judge his heading against; W0.5 replaces the rotating chase cam and
-placeholder box boat — no islands yet (W1, per AGENTS.md's Windward concept).
-PR #1 (Stage D drop-in play) is merged at c8fff34.
+**2026-09-11/12 — Windward W0.6: wave amplitude fixed to boat scale, boat
+bob/tilt, explicit boat-model load, HUD clear of hub pill** (commit
+f92c58c, pushed to main). W0.5's water amplitude (up to 4.4m) was
+submerging the ~6m boat; W0.6 caps displacement at 0.5m and gets visibility
+from crest/trough shading instead. Also fixed a hub-level canvas-sizing bug
+(`hub.css`) that was silently breaking rendering of any game launched
+through the hub picker.
 
 ## Today's sessions
 
@@ -16,24 +16,23 @@ PR #1 (Stage D drop-in play) is merged at c8fff34.
 - Stage D (PR #1): drop-in play — host plays solo, guest gets `'launch'`.
 - Windward W0 (felix): DESIGN.md from `/grill-me`, sail speed/trim model
   (10/10 headless tests), boat/camera/wind/hud modules, 20 Hz `pos` sync.
-- Windward W0.5 (felix): root-caused the facing bug to the chase cam lerping
-  from Three.js's default (0,0,0) instead of snapping at t=0 (new
-  `snapChaseCamera`/`snapFixedCamera`, verified by a headless lerp sim);
-  replaced the rotating chase cam with a fixed-orientation three-quarter
-  camera (default) so wind/compass stay readable; swapped the placeholder
-  box boat for Kenney's CC0 `ship-small.glb` (GLTFLoader vendored, bare
-  `'three'` imports rewritten, no import map needed); added wind-aligned
-  water shader, a world-space wind arrow, a HUD compass rose, seeded
-  buoy/rock scatter, and pooled wake. The mandatory wrap screenshot caught
-  two live bugs: the compass-rose canvas was stretched fullscreen by a bare
-  `canvas{width:100%}` page rule, and the water was invisible (wave
-  amplitude/lighting too subtle for the fixed camera's steep angle) — both
-  fixed and reverified with follow-up screenshots.
+- Windward W0.5 (felix): fixed-orientation camera, real CC0 boat model,
+  wind-aligned water shader, HUD compass rose, buoy/rock scatter, wake;
+  wrap screenshot caught and fixed a stretched compass canvas + invisible
+  water.
+- Windward W0.6 (felix): wave amplitude capped at 0.5m (boat scale — W0.5's
+  4.4m was submerging the boat), crest/trough shading for visibility at that
+  scale, JS/GLSL wave-height parity (`water.test.js`), boat model load made
+  explicit (fixed `boat.test.js`'s stray fetch stack trace), boat bob/tilt
+  from the wave surface, HUD pushed clear of the hub's waiting-for-friend
+  pill, and a `hub.css` canvas-sizing feedback-loop bug (missing explicit
+  width/height let Three.js's own `renderer.setSize()` balloon the canvas
+  on every resize) that was breaking rendering for any game through the hub.
 
 ## Next
 
-1. Play-test Windward W0.5 (solo dev entry, then hub); tune `src/config.js`
-   (turn rate, trim window, wind cadence, camera elevation/distance/FOV).
+1. Play-test Windward W0.6 (hub, two real networks per AGENTS.md risk #1);
+   tune `src/config.js` (turn rate, trim window, wind cadence, tilt gain).
 2. Windward: gust telegraphing (W3); islands/claiming/scoring (W1) not in
    scope — scatter.js's buoys/rocks are throwaway.
 3. Otherwise per docs/MISSION-CONTROL.md backlog (Archipelago tuning from
