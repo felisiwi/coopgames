@@ -77,6 +77,14 @@ the default because it fights the wind/compass readability goal.
 1 unit = 1 meter. Boat ~6m long. `maxSpeed` = 8 m/s (~15.5 kn) at full strength
 and the 100° peak — tuned to feel brisk in a chase cam, not a realism target.
 
+**Boat asset (added 2026-09-11, Batch 2):** the placeholder box hull is
+replaced by Kenney's "Pirate Kit" `ship-small.glb` (CC0, `assets/LICENSE.txt`
+records provenance), scaled from its native ~8.8m hull length down to the 6m
+target. Its `sail-a` node is reparented under a runtime pivot at its mount
+point so `setSailAngle` can still swing it for trim, same mechanism as the
+box placeholder. Self/other are distinguished by tinting only the sail's
+(cloned) material — hull and flags keep the model's natural colors.
+
 ## Wind
 
 - **Cadence**: changes every 25–40s, uniformly random in that range. No

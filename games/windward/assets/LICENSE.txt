@@ -1,0 +1,23 @@
+Source: Kenney "Pirate Kit" (v2.1) — https://kenney.nl/assets/pirate-kit
+Files used from that pack: Models/GLB format/ship-small.glb,
+Models/GLB format/Textures/colormap.png (only these two files are vendored
+here; the rest of the pack is not included).
+
+License: Creative Commons Zero (CC0 1.0 Universal)
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Verbatim from the pack's own License.txt:
+
+	Pirate Kit (2.1)
+
+	Created/distributed by Kenney (www.kenney.nl)
+
+	License: (Creative Commons Zero, CC0)
+	http://creativecommons.org/publicdomain/zero/1.0/
+
+	You can use this content for personal, educational, and commercial purposes.
+
+	Support by crediting 'Kenney' or 'www.kenney.nl' (this is not a requirement)
+
+No attribution is required, but this file records provenance per
+DesignSystem/docs/COMPONENT-RULES.md-style asset hygiene.
