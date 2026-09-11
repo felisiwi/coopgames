@@ -99,7 +99,8 @@ header p {
   background: #4a9d8a;
 }
 
-#host-start button:disabled {
+#host-start button:disabled,
+#copy-link-button:disabled {
   opacity: 0.6;
   cursor: default;
 }
@@ -112,6 +113,13 @@ header p {
   background: rgba(255, 255, 255, 0.06);
   color: #eaf6ff;
   font: 13px monospace;
+}
+
+.link-text {
+  font: 12px monospace;
+  word-break: break-all;
+  max-width: 420px;
+  opacity: 0.85;
 }
 
 #lobby .note {

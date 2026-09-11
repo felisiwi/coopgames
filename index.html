@@ -20,7 +20,8 @@
     <div id="host-link" hidden>
       <p>Send this link to your friend:</p>
       <input id="host-link-input" type="text" readonly />
-      <button id="copy-link-button">Copy link</button>
+      <button id="copy-link-button" disabled>Copy link</button>
+      <p id="host-link-text" class="link-text"></p>
       <p class="note">Keep this tab open — refreshing it gets a new link (a new page load is a new peer id).</p>
     </div>
 
@@ -51,6 +52,7 @@
       hostButton: document.getElementById('host-button'),
       hostLink: document.getElementById('host-link'),
       hostLinkInput: document.getElementById('host-link-input'),
+      hostLinkText: document.getElementById('host-link-text'),
       copyButton: document.getElementById('copy-link-button'),
       connecting: document.getElementById('connecting'),
       connectingStatus: document.getElementById('connecting-status'),
@@ -109,6 +111,17 @@
       showOnly(els.lost);
     }
 
+    const CONNECT_TIMEOUT_MS = 8000;
+    function withTimeout(promise, ms) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('timeout')), ms);
+        promise.then(
+          (value) => { clearTimeout(timer); resolve(value); },
+          (err) => { clearTimeout(timer); reject(err); },
+        );
+      });
+    }
+
     async function launchGame(game, { net, seed, role }) {
       els.header.hidden = true;
       els.lobby.hidden = true;
@@ -148,7 +161,10 @@
         }
 
         const link = `${location.origin}${location.pathname}?host=${net.peerId}`;
+        history.replaceState(null, '', link);
         els.hostLinkInput.value = link;
+        els.hostLinkText.textContent = link;
+        els.copyButton.disabled = false;
         showOnly(els.hostLink);
         net.onClose(showLost);
 
@@ -189,10 +205,12 @@
 
       let net;
       try {
-        net = await joinFromUrl();
+        net = await withTimeout(joinFromUrl(), CONNECT_TIMEOUT_MS);
       } catch (err) {
         console.error(err);
-        els.connectingStatus.textContent = 'Could not connect — check the link, or ask for a new one.';
+        els.connectingStatus.textContent = err?.message === 'timeout'
+          ? 'Couldn’t reach host — ask them to resend the link.'
+          : 'Could not connect — check the link, or ask for a new one.';
         return;
       }
       net.onClose(showLost);
