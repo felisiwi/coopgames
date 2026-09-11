@@ -1,11 +1,12 @@
 # Last session
 
-**2026-09-11 — Windward W0.5 Batches 0-3: camera-start-snap fix, fixed
-three-quarter camera, real CC0 boat model, water/wind/scatter/wake** (commits
-38c65d3, b016e3f, e797444, 3591a6d, pushed to main). Felix played W0 and had
-nothing fixed to judge his heading against; W0.5 replaces the rotating chase
-cam and placeholder box boat — no islands yet (W1, per AGENTS.md's Windward
-concept). PR #1 (Stage D drop-in play) is merged at c8fff34.
+**2026-09-11/12 — Windward W0.5 Batches 0-3 + wrap-screenshot fixes:
+camera-start-snap fix, fixed three-quarter camera, real CC0 boat model,
+water/wind/scatter/wake** (commits 38c65d3, b016e3f, e797444, 3591a6d,
+0040e06, 036184d, 045b71a, pushed to main). Felix played W0 and had nothing
+fixed to judge his heading against; W0.5 replaces the rotating chase cam and
+placeholder box boat — no islands yet (W1, per AGENTS.md's Windward concept).
+PR #1 (Stage D drop-in play) is merged at c8fff34.
 
 ## Today's sessions
 
@@ -23,7 +24,11 @@ concept). PR #1 (Stage D drop-in play) is merged at c8fff34.
   box boat for Kenney's CC0 `ship-small.glb` (GLTFLoader vendored, bare
   `'three'` imports rewritten, no import map needed); added wind-aligned
   water shader, a world-space wind arrow, a HUD compass rose, seeded
-  buoy/rock scatter, and pooled wake.
+  buoy/rock scatter, and pooled wake. The mandatory wrap screenshot caught
+  two live bugs: the compass-rose canvas was stretched fullscreen by a bare
+  `canvas{width:100%}` page rule, and the water was invisible (wave
+  amplitude/lighting too subtle for the fixed camera's steep angle) — both
+  fixed and reverified with follow-up screenshots.
 
 ## Next
 
