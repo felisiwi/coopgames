@@ -88,6 +88,15 @@ Never commit `games/manifest.json` — see `docs/COLLABORATION.md`.
   a license file if the source needs one, and curate only what you actually
   use — don't vendor a whole pack "just in case" (see AGENTS.md risk #6 on
   the archipelago tileset for the pattern).
+- **All asset paths resolve via `import.meta.url`, never page-relative.**
+  A game's solo `index.html` serves it at `/games/<name>/`, but the hub
+  imports `game.js` from the hub's own URL (`/`) — a path like
+  `'assets/tiles/x.png'` resolves against whichever page loaded it, so it
+  works standalone and 404s under the hub. Resolve every asset against the
+  module instead: `new URL('../assets/foo.png', import.meta.url).href`, or
+  a single `ASSET_BASE = new URL('../assets/', import.meta.url)` joined per
+  file (see `games/archipelago/src/render.js`'s `TILES` for the pattern).
+  Same rule for any `fetch()` of a same-folder data file.
 
 ## Solo dev entry
 
@@ -105,6 +114,13 @@ Felix and Kenny both work in this repo. Your folder is yours to commit to
 directly; anyone else's folder, or a shared surface (`shared/`, the root hub
 files, `scripts/`, `AGENTS.md`, `docs/`), is a branch + PR. Full protocol,
 including session start/end and the handoff: `docs/COLLABORATION.md`.
+
+## Before you call a game done
+
+- **Test through the hub, not just the solo entry.** The solo `index.html`
+  and the hub load `game.js` from different URLs (see the asset-path rule
+  above) — a game that works standalone can still 404 or throw under the
+  hub. Launch it from the hub picker at least once before sign-off.
 
 ## Tool economy
 

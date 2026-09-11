@@ -137,3 +137,42 @@ header p {
 #game-canvas[hidden] {
   display: none;
 }
+
+#launch-error {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: #0a1a2a;
+}
+
+#launch-error[hidden] {
+  display: none;
+}
+
+#launch-error-text {
+  max-width: 480px;
+  color: #ffb4b4;
+  font: 14px monospace;
+  white-space: pre-wrap;
+}
+
+#launch-error-back {
+  background: #3a7d6e;
+  color: #eaf6ff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#launch-error-back:hover {
+  background: #4a9d8a;
+}

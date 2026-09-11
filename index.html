@@ -41,6 +41,11 @@
 
   <canvas id="game-canvas" hidden></canvas>
 
+  <div id="launch-error" hidden>
+    <p id="launch-error-text"></p>
+    <button id="launch-error-back">Back to game list</button>
+  </div>
+
   <script src="shared/vendor/peerjs.min.js"></script>
   <script type="module">
     import { host, joinFromUrl } from './shared/net.js';
@@ -61,6 +66,9 @@
       gameList: document.getElementById('game-list'),
       lost: document.getElementById('lost'),
       canvas: document.getElementById('game-canvas'),
+      launchError: document.getElementById('launch-error'),
+      launchErrorText: document.getElementById('launch-error-text'),
+      launchErrorBack: document.getElementById('launch-error-back'),
     };
 
     const lobbyPanels = [els.hostStart, els.hostLink, els.connecting, els.picker, els.lost];
@@ -125,21 +133,31 @@
     async function launchGame(game, { net, seed, role }) {
       els.header.hidden = true;
       els.lobby.hidden = true;
+      els.launchError.hidden = true;
       els.canvas.hidden = false;
       els.canvas.width = window.innerWidth;
       els.canvas.height = window.innerHeight;
 
-      const mod = await import(`./${game.path}game.js`);
-      const start = mod.default;
-      start({
-        canvas: els.canvas,
-        // Reduced to the documented games/README.md contract — onClose/
-        // onConnect are hub-only, games never see them.
-        net: { send: net.send, onMessage: net.onMessage, peerId: net.peerId, isHost: net.isHost },
-        seed,
-        role,
-        players: game.players ?? { min: 1, max: 1 },
-      });
+      try {
+        const mod = await import(`./${game.path}game.js`);
+        const start = mod.default;
+        // await covers both a synchronous throw and a rejected promise —
+        // start() isn't documented as async, but treat it as if it might be.
+        await start({
+          canvas: els.canvas,
+          // Reduced to the documented games/README.md contract — onClose/
+          // onConnect are hub-only, games never see them.
+          net: { send: net.send, onMessage: net.onMessage, peerId: net.peerId, isHost: net.isHost },
+          seed,
+          role,
+          players: game.players ?? { min: 1, max: 1 },
+        });
+      } catch (err) {
+        console.error('[hub] game failed to start', err);
+        els.canvas.hidden = true;
+        els.launchErrorText.textContent = `${game.name ?? game.id ?? 'This game'} failed to start: ${err?.message ?? err}`;
+        els.launchError.hidden = false;
+      }
     }
 
     async function runHost() {
@@ -237,6 +255,13 @@
         launchGame(game, { net, seed: msg.seed, role: 'guest' });
       });
     }
+
+    els.launchErrorBack.addEventListener('click', () => {
+      els.launchError.hidden = true;
+      els.header.hidden = false;
+      els.lobby.hidden = false;
+      showOnly(els.picker);
+    });
 
     if (new URLSearchParams(location.search).get('host')) {
       runGuest();

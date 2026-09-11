@@ -5,17 +5,23 @@
 // generator change never depends on player position.
 import { CONFIG } from './config.js';
 
+// Asset paths resolve against this module, not the page — the hub imports
+// game.js from a different URL (/) than the game's solo entry point
+// (/games/archipelago/), so a page-relative path like 'assets/tiles/x.png'
+// 404s under the hub. See games/README.md's asset-path rule.
+const ASSET_BASE = new URL('../assets/', import.meta.url);
+
 export const TILES = {
-  deep_water: 'assets/tiles/deep_water.png',
-  shallow_water: 'assets/tiles/shallow_water.png',
-  sand: 'assets/tiles/sand.png',
-  grass_1: 'assets/tiles/grass_1.png',
-  grass_2: 'assets/tiles/grass_2.png',
-  forest_1: 'assets/tiles/forest_1.png',
-  forest_2: 'assets/tiles/forest_2.png',
-  forest_3: 'assets/tiles/forest_3.png',
-  rock: 'assets/tiles/rock.png',
-  landmark: 'assets/tiles/landmark.png',
+  deep_water: new URL('tiles/deep_water.png', ASSET_BASE).href,
+  shallow_water: new URL('tiles/shallow_water.png', ASSET_BASE).href,
+  sand: new URL('tiles/sand.png', ASSET_BASE).href,
+  grass_1: new URL('tiles/grass_1.png', ASSET_BASE).href,
+  grass_2: new URL('tiles/grass_2.png', ASSET_BASE).href,
+  forest_1: new URL('tiles/forest_1.png', ASSET_BASE).href,
+  forest_2: new URL('tiles/forest_2.png', ASSET_BASE).href,
+  forest_3: new URL('tiles/forest_3.png', ASSET_BASE).href,
+  rock: new URL('tiles/rock.png', ASSET_BASE).href,
+  landmark: new URL('tiles/landmark.png', ASSET_BASE).href,
 };
 
 export async function loadTileImages() {
