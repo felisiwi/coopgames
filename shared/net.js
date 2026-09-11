@@ -7,10 +7,11 @@
 // <script> tag before this module runs (see shared/vendor/LICENSE.txt for
 // version/provenance). No CDN at runtime.
 //
-// No custom ICE config: PeerJS's shipped DEFAULT_CONFIG already pairs
-// Google STUN with a TURN relay (eu-0/us-0.turn.peerjs.com) — AGENTS.md
-// Step 0 audit, risk 1. Grep shared/vendor/peerjs.min.js for
-// "turn.peerjs.com" before changing that assumption.
+// Custom ICE config required: PeerJS's shipped DEFAULT_CONFIG pairs Google
+// STUN with a TURN relay at eu-0/us-0.turn.peerjs.com, but those hosts no
+// longer resolve (dead DNS, confirmed 2026-09-11) — the AGENTS.md Step 0
+// audit's "TURN comes free" resolution no longer holds. Both host() and
+// joinFromUrl() now pass ICE_SERVERS explicitly to `new Peer()`.
 //
 // host() and joinFromUrl() both resolve with the same shape:
 //
@@ -36,6 +37,55 @@
 // errors), onClose fires and nothing more is sent or received. The hub is
 // responsible for telling the user to get a fresh link from the host.
 
+// Google STUN plus the Open Relay Project's free public TURN service
+// (https://www.metered.ca/tools/openrelay/). This is a shared, rate-limited
+// relay meant for prototypes — fine for v1, but swap in a proper TURN
+// provider (or a paid Open Relay plan) before this hub sees real traffic.
+export const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+  {
+    urls: 'turns:openrelay.metered.ca:443',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  },
+];
+
+// Logs ICE connection state and gathered candidate types on failure/close,
+// so a dead relay (like the peerjs.com one above) shows up in the console
+// instead of a silent hang. `reason` is a short label ('closed' | 'errored').
+async function logIceDiagnostics(conn, reason) {
+  const pc = conn.peerConnection;
+  if (!pc) {
+    console.warn(`shared/net.js: connection ${reason}, no underlying RTCPeerConnection to inspect`);
+    return;
+  }
+  console.warn(`shared/net.js: connection ${reason}, iceConnectionState=${pc.iceConnectionState}`);
+  try {
+    const stats = await pc.getStats();
+    const candidateTypes = new Set();
+    stats.forEach((report) => {
+      if (report.type === 'local-candidate' || report.type === 'remote-candidate') {
+        candidateTypes.add(`${report.type}:${report.candidateType}`);
+      }
+    });
+    console.warn(
+      `shared/net.js: gathered candidate types — ${candidateTypes.size ? [...candidateTypes].join(', ') : '(none)'}`,
+    );
+  } catch (err) {
+    console.warn('shared/net.js: getStats() failed', err);
+  }
+}
+
 function buildNet({ peer, isHost }) {
   let conn = null;
   const messageListeners = [];
@@ -56,8 +106,15 @@ function buildNet({ peer, isHost }) {
       while (sendQueue.length) conn.send(sendQueue.shift());
       for (const fn of connectListeners) fn();
     });
-    conn.on('close', fireClose);
-    conn.on('error', fireClose);
+    conn.on('close', () => {
+      logIceDiagnostics(conn, 'closed');
+      fireClose();
+    });
+    conn.on('error', (err) => {
+      console.warn('shared/net.js: connection error', err);
+      logIceDiagnostics(conn, 'errored');
+      fireClose();
+    });
   }
 
   const net = {
@@ -90,7 +147,7 @@ function requirePeer() {
 export function host() {
   return new Promise((resolve, reject) => {
     requirePeer();
-    const peer = new window.Peer();
+    const peer = new window.Peer({ config: { iceServers: ICE_SERVERS } });
     peer.on('error', reject);
     peer.on('open', () => {
       const { net, wireConnection } = buildNet({ peer, isHost: true });
@@ -116,7 +173,7 @@ export function joinFromUrl() {
       reject(new Error('shared/net.js: joinFromUrl() found no ?host=<id> in the URL'));
       return;
     }
-    const peer = new window.Peer();
+    const peer = new window.Peer({ config: { iceServers: ICE_SERVERS } });
     peer.on('error', reject);
     peer.on('open', () => {
       const { net, wireConnection } = buildNet({ peer, isHost: false });
