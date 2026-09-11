@@ -50,7 +50,7 @@ function mapBounds(size) {
 
 export function renderIsland(ctx, canvas, island, images, opts = {}) {
   const { size, grid } = island;
-  const { debug = false, camera = null } = opts;
+  const { debug = false, camera = null, entities = [] } = opts;
 
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -92,6 +92,21 @@ export function renderIsland(ctx, canvas, island, images, opts = {}) {
       const { x: sx, y: sy } = toScreen(x, y, originX, originY);
       ctx.drawImage(img, sx - CONFIG.TILE_WIDTH / 2, sy - CONFIG.TILE_STEP_Y, CONFIG.TILE_WIDTH, CONFIG.TILE_HEIGHT);
     }
+  }
+
+  // AGENTS.md depth-sorting rule: ground tiles first, then a single list of
+  // movable entities sorted by map y then x (drawn on top, no baked trees
+  // to interleave with in this tileset).
+  const sortedEntities = entities.slice().sort((a, b) => a.y - b.y || a.x - b.x);
+  for (const entity of sortedEntities) {
+    const { x: sx, y: sy } = toScreen(entity.x, entity.y, originX, originY);
+    ctx.beginPath();
+    ctx.arc(sx, sy - CONFIG.TILE_STEP_Y / 2, 10, 0, Math.PI * 2);
+    ctx.fillStyle = entity.color || '#ffcc66';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
   }
 
   ctx.restore();
