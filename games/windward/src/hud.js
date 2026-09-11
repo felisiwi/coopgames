@@ -20,6 +20,10 @@ export function createHud(canvas) {
   rose.width = ROSE_SIZE;
   rose.height = ROSE_SIZE;
   rose.style.cssText = [
+    // Explicit px width/height: a bare `canvas { width:100%; height:100% }`
+    // page rule (index.html had exactly this before it was scoped to #game)
+    // stretches any canvas to fill the viewport unless overridden here.
+    `width:${ROSE_SIZE}px`, `height:${ROSE_SIZE}px`,
     'position:fixed', 'top:8px', `right:${8 + 130}px`,
     'background:rgba(10,26,42,0.55)', 'border-radius:50%', 'pointer-events:none',
   ].join(';');
