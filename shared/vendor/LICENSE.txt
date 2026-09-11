@@ -1,0 +1,15 @@
+peerjs.min.js
+==============
+
+Source:  https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js
+Version: 1.5.5
+License: MIT (https://github.com/peers/peerjs/blob/master/LICENSE)
+
+Vendored as a single minified file so the hub has no runtime dependency on a
+CDN (see AGENTS.md Stage 3, Batch 1). Classic script — attaches `window.Peer`
+(and `window.peerjs = { Peer, util }`); load it with a plain <script> tag
+before shared/net.js runs.
+
+To update: bump the version above and re-fetch from unpkg, then re-grep for
+`turn.peerjs.com` to confirm the shipped TURN pair is still present (see
+AGENTS.md Step 0 audit, risk 1).

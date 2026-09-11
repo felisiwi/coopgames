@@ -1,49 +1,128 @@
-// PeerJS host/join-link networking — STUB, and hub-internal. Per AGENTS.md's
-// game contract, the hub owns the PeerJS connection; games never import this
-// file. The hub calls host()/joinFromUrl() itself, then builds the small
-// `net` object the contract promises ({ send, onMessage, peerId, isHost })
-// from whatever these resolve to and passes it into the game's start().
+// PeerJS host/join-link networking — hub-internal. Per AGENTS.md's game
+// contract, the hub owns the PeerJS connection; games never import this
+// file, only the `net` object the hub builds from it and passes into
+// start().
 //
-// No PeerJS code yet (that lands in the multiplayer-sync stage, AGENTS.md
-// build plan step 3). This file documents the intended API so the hub can
-// be written against it now and wired up later without changing call sites.
+// Requires window.Peer from shared/vendor/peerjs.min.js, loaded via a plain
+// <script> tag before this module runs (see shared/vendor/LICENSE.txt for
+// version/provenance). No CDN at runtime.
 //
-// Intended shape, once implemented:
+// No custom ICE config: PeerJS's shipped DEFAULT_CONFIG already pairs
+// Google STUN with a TURN relay (eu-0/us-0.turn.peerjs.com) — AGENTS.md
+// Step 0 audit, risk 1. Grep shared/vendor/peerjs.min.js for
+// "turn.peerjs.com" before changing that assumption.
 //
-//   import { host, joinFromUrl, send, onMessage } from '../../shared/net.js';
+// host() and joinFromUrl() both resolve with the same shape:
 //
-//   host(gameParams)
-//     Creates a PeerJS Peer with default ICE config (Step 0 audit #1 — the
-//     shipped PeerJS DEFAULT_CONFIG already includes a TURN pair, no custom
-//     config needed). Once the peer ID is assigned, embeds it in the URL
-//     alongside gameParams (e.g. ?host=<peerId>&seed=<n>, AGENTS.md risk #7
-//     — world-defining data travels in the URL, only positions cross the
-//     wire) and exposes a "copy link" affordance. Returns a promise that
-//     resolves once a peer connects.
+//   { send(msg), onMessage(fn), onClose(fn), onConnect(fn), peerId, isHost }
 //
-//   joinFromUrl()
-//     Reads the host's peer ID + gameParams off the current URL on load,
-//     connects automatically — nothing typed or misread by the joining
-//     player. Returns a promise that resolves once the connection opens.
+// send/onMessage/onClose are the documented contract (games/README.md).
+// onConnect is an addition this stage needed: host()'s promise resolves as
+// soon as the peer has an id (so the hub can render the copy-link UI
+// immediately), before any guest has joined — onConnect(fn) fires once,
+// when the guest's connection actually opens, which is what the hub uses
+// to leave the "waiting for guest" step. send() before that point queues
+// messages rather than dropping them.
 //
-//   send(data)
-//     Sends a JSON-serializable payload over the open DataConnection.
-//     No-op (or throws) if no connection is open yet.
+// Payloads are plain JSON-serializable values (objects/arrays/strings/
+// numbers) — PeerJS's default serialization handles them as-is, no manual
+// stringify. Don't send functions, class instances, or binary data.
 //
-//   onMessage(callback)
-//     Registers callback(data) for every message received on the open
-//     DataConnection. Multiple listeners may be registered.
+// Only one guest connection is supported (this hub is a 2-player affair
+// today); a host peer that receives a second incoming connection while one
+// is already open closes it immediately.
 //
-// Until implemented, every export throws so a caller finds out immediately
-// rather than silently doing nothing.
+// Reconnect is explicitly out of scope: once the connection closes (or
+// errors), onClose fires and nothing more is sent or received. The hub is
+// responsible for telling the user to get a fresh link from the host.
 
-function notImplemented(name) {
-  return () => {
-    throw new Error(`shared/net.js: ${name}() is a stub — networking lands in the multiplayer-sync stage`);
+function buildNet({ peer, isHost }) {
+  let conn = null;
+  const messageListeners = [];
+  const closeListeners = [];
+  const connectListeners = [];
+  const sendQueue = [];
+
+  function fireClose() {
+    for (const fn of closeListeners) fn();
+  }
+
+  function wireConnection(c) {
+    conn = c;
+    conn.on('data', (data) => {
+      for (const fn of messageListeners) fn(data);
+    });
+    conn.on('open', () => {
+      while (sendQueue.length) conn.send(sendQueue.shift());
+      for (const fn of connectListeners) fn();
+    });
+    conn.on('close', fireClose);
+    conn.on('error', fireClose);
+  }
+
+  const net = {
+    peerId: peer.id,
+    isHost,
+    send(msg) {
+      if (conn && conn.open) conn.send(msg);
+      else sendQueue.push(msg);
+    },
+    onMessage(fn) {
+      messageListeners.push(fn);
+    },
+    onClose(fn) {
+      closeListeners.push(fn);
+    },
+    onConnect(fn) {
+      connectListeners.push(fn);
+    },
   };
+
+  return { net, wireConnection };
 }
 
-export const host = notImplemented('host');
-export const joinFromUrl = notImplemented('joinFromUrl');
-export const send = notImplemented('send');
-export const onMessage = notImplemented('onMessage');
+function requirePeer() {
+  if (typeof window.Peer !== 'function') {
+    throw new Error('shared/net.js: window.Peer missing — load shared/vendor/peerjs.min.js first');
+  }
+}
+
+export function host() {
+  return new Promise((resolve, reject) => {
+    requirePeer();
+    const peer = new window.Peer();
+    peer.on('error', reject);
+    peer.on('open', () => {
+      const { net, wireConnection } = buildNet({ peer, isHost: true });
+      let guestConn = null;
+      peer.on('connection', (conn) => {
+        if (guestConn) {
+          conn.close();
+          return;
+        }
+        guestConn = conn;
+        wireConnection(conn);
+      });
+      resolve(net);
+    });
+  });
+}
+
+export function joinFromUrl() {
+  return new Promise((resolve, reject) => {
+    requirePeer();
+    const hostId = new URLSearchParams(window.location.search).get('host');
+    if (!hostId) {
+      reject(new Error('shared/net.js: joinFromUrl() found no ?host=<id> in the URL'));
+      return;
+    }
+    const peer = new window.Peer();
+    peer.on('error', reject);
+    peer.on('open', () => {
+      const { net, wireConnection } = buildNet({ peer, isHost: false });
+      const conn = peer.connect(hostId);
+      conn.on('open', () => resolve(net));
+      wireConnection(conn);
+    });
+  });
+}
