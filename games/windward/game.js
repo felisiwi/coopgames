@@ -10,7 +10,7 @@ import { CONFIG } from './src/config.js';
 import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './src/sail.js';
 import { initialWind, nextWind, nextChangeDelaySeconds } from './src/wind.js';
 import { createBoatMesh } from './src/boat.js';
-import { updateChaseCamera } from './src/camera.js';
+import { updateChaseCamera, snapChaseCamera } from './src/camera.js';
 import { createHud, updateHud } from './src/hud.js';
 import { createInputState } from '../../shared/input.js';
 
@@ -115,6 +115,10 @@ export default function start({ canvas, net, seed, role }) {
   resize();
 
   const hud = createHud(canvas);
+
+  selfBoat.group.position.set(self.x, 0, self.z);
+  selfBoat.group.rotation.y = self.heading;
+  snapChaseCamera(camera, selfBoat.group.position, self.heading);
 
   let last = performance.now();
   function frame(now) {

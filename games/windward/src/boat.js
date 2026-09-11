@@ -6,6 +6,12 @@ import * as THREE from '../vendor/three/three.module.js';
 
 const HULL_LENGTH = 6;
 
+// The mesh's bow faces local +Z. game.js drives `group.rotation.y = heading`
+// and moves the boat along (sin(heading), 0, cos(heading)) — rotating local
+// +Z by rotation.y=heading lands on exactly that vector, so this constant
+// must stay local +Z for the mesh to visually face its direction of travel.
+export const BOW_LOCAL_DIRECTION = new THREE.Vector3(0, 0, 1);
+
 export function createBoatMesh(color) {
   const group = new THREE.Group();
 
