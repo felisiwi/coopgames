@@ -98,6 +98,19 @@ Never commit `games/manifest.json` — see `docs/COLLABORATION.md`.
   file (see `games/archipelago/src/render.js`'s `TILES` for the pattern).
   Same rule for any `fetch()` of a same-folder data file.
 
+## Drop-in play
+
+The hub lets the host start playing before any guest connects (Stage D) — a
+guest can open the link and connect at any arbitrary later moment, mid-game.
+Practically: your `start()` must run correctly with zero remote players from
+`t=0` (don't block on a partner existing), and must handle a partner
+appearing at any time thereafter, not just at startup — treat "a message
+just arrived from a peer I've never heard from before" as the normal case,
+not an edge case. `games/archipelago/game.js` is the reference: it starts
+with the other player's position unknown, renders nothing for them until
+their first `pos` message arrives, and has no other host-side state a late
+guest would need to be caught up on.
+
 ## Solo dev entry
 
 Because `game.js` never touches PeerJS, a game can be developed and tested

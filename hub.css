@@ -138,6 +138,43 @@ header p {
   display: none;
 }
 
+#waiting-overlay {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(10, 26, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+#waiting-overlay p {
+  margin: 0;
+}
+
+#waiting-overlay button {
+  background: #3a7d6e;
+  color: #eaf6ff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#waiting-overlay button:hover {
+  background: #4a9d8a;
+}
+
+#waiting-overlay[hidden] {
+  display: none;
+}
+
 #launch-error {
   position: fixed;
   inset: 0;

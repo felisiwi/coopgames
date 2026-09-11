@@ -1,11 +1,9 @@
 # Last session
 
-**2026-09-11 — Stage H housekeeping + Dino Rumble** — live URL into
-README/AGENTS; `grill-me`/`grilling` skills vendored into `.claude/skills/`
-with attribution; `docs/SKILLS.md` index + AGENTS.md Skills section;
-two-network test retired from Next (passed). Kenny added
-`games/dino-rumble/`, a 2-player play-fighting game — verified headless
-(61/61), **not yet opened in a browser or run through the hub**.
+**2026-09-11 — Stage D: drop-in play (this commit, branch
+`felix/stage-d-dropin`, not merged)** — host can pick a game and play solo;
+guest joins whenever, lands in the same game/seed. PR open, awaiting
+Felix's preview-URL test before merge.
 
 ## Today's sessions
 
@@ -15,26 +13,27 @@ two-network test retired from Next (passed). Kenny added
 - Stage 3 Batches 1-2: real `shared/net.js` on vendored PeerJS + hub
   lobby. **Found live**: data channel never opened — `dig` confirmed
   PeerJS's shipped `eu-0`/`us-0.turn.peerjs.com` pair has no DNS record.
-- Stage 2 + hub fixes (a071de1, 41a68e1): movement/camera/fog merged;
-  shareable address bar, guest timeout. TURN fix (6ddd21b): explicit
-  `ICE_SERVERS` (Google STUN + Open Relay free TURN) + ICE diagnostics.
-- Hub asset-path fix (c25d340): archipelago tile paths via
-  `import.meta.url`, not page-relative; games/README.md rules added; hub
-  `launchGame()` shows `start()` errors on screen, not a grey canvas.
-- Two-network test (docs/MISSION-CONTROL.md): Felix + Kenny connected
-  across two networks, same island. **Passed.** Stage H (47b7c0a):
-  docs/skills cleanup, see above.
-- Dino Rumble (Kenny): `games/dino-rumble/` — 2-player fighter, pep not
-  health, first to 3 flops. Procedural canvas dinos (no vendored art);
-  latency-tolerant netcode, hits attacker-authoritative and cheatable by
-  design. `node games/dino-rumble/test/invariants.mjs` = 61 checks, which
-  caught a missing push-box. Rationale in that folder's README.
+- Stage 2 + hub fixes, TURN fix, asset-path fix, two-network test
+  (**passed**), Stage H housekeeping, Dino Rumble (Kenny, headless 61/61,
+  not yet hub-tested) — see git log for this range, summarized previously.
+- Stage D (branch, this session): picker renders right after `host()`
+  resolves, no longer gated on a guest connecting. `currentLaunch` +
+  `net.onConnect` is the single send site for `'launch'` (the naive
+  "send at pick time AND resend on connect" plan double-launched
+  `start()` for a guest who connects after the host already picked —
+  caught in `/grill-me` before coding). `shared/net.js` `sendQueue`
+  capped at 50 (FIFO drop-oldest) — was unbounded, would grow by
+  archipelago's 20 pos-msgs/sec for as long as the host plays solo.
+  Non-blocking "waiting for a friend" corner overlay while solo.
+  Confirmed both archipelago and dino-rumble already tolerate zero
+  remote players and a peer connecting at any later time — no game
+  code changes needed. `games/README.md` documents that contract.
+  `docs/MISSION-CONTROL.md`'s stale "branch+PR if Kenny active" line
+  corrected to match `docs/COLLABORATION.md` (always branch+PR for
+  shared surfaces, no exception).
 
 ## Next
 
-1. Archipelago tuning from real play: `VISION_RADIUS` (5) and spawn
-   distance (18) in `games/archipelago/src/config.js`; player sprite
-   instead of marker; landmarks worth finding.
-2. Dino Rumble needs a human eye — browser + hub launch, plus the
-   feel/cuteness calls, which are Kenny's rather than an agent's.
+1. Merge `felix/stage-d-dropin` after Felix tests the preview URL.
+2. Archipelago tuning from real play; Dino Rumble needs a human eye.
 3. Otherwise per docs/MISSION-CONTROL.md backlog (hub lobby polish).

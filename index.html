@@ -41,6 +41,11 @@
 
   <canvas id="game-canvas" hidden></canvas>
 
+  <div id="waiting-overlay" hidden>
+    <p>Waiting for a friend — link copied?</p>
+    <button id="waiting-overlay-copy">Copy link</button>
+  </div>
+
   <div id="launch-error" hidden>
     <p id="launch-error-text"></p>
     <button id="launch-error-back">Back to game list</button>
@@ -66,6 +71,8 @@
       gameList: document.getElementById('game-list'),
       lost: document.getElementById('lost'),
       canvas: document.getElementById('game-canvas'),
+      waitingOverlay: document.getElementById('waiting-overlay'),
+      overlayCopyButton: document.getElementById('waiting-overlay-copy'),
       launchError: document.getElementById('launch-error'),
       launchErrorText: document.getElementById('launch-error-text'),
       launchErrorBack: document.getElementById('launch-error-back'),
@@ -186,33 +193,53 @@
         showOnly(els.hostLink);
         net.onClose(showLost);
 
-        net.onConnect(async () => {
-          let games = [];
-          try {
-            games = await loadManifest();
-          } catch (err) {
-            console.error(err);
-            els.pickerStatus.textContent = 'Could not load games/manifest.json — run node scripts/manifest.js.';
-            showOnly(els.picker);
-            return;
-          }
+        // Drop-in play (Stage D): the picker no longer waits for a guest.
+        // currentLaunch is the single piece of state that lets a guest
+        // connecting at any later time — mid-pick or mid-game — land in the
+        // same game/seed the host is already playing. onConnect is the ONLY
+        // place a 'launch' message is ever sent (see net.onConnect below):
+        // the pick handler just records currentLaunch and starts the game
+        // locally, so a guest who was already connected when the pick
+        // happened and a guest who connects later both get exactly one
+        // 'launch' message, from the same code path — no double-send.
+        let currentLaunch = null;
 
-          els.pickerStatus.textContent = games.length ? 'Pick a game:' : 'No games yet.';
-          els.gameList.innerHTML = '';
-          for (const game of games) {
-            els.gameList.appendChild(renderCard(game, {
-              onPick: (picked) => {
-                const seed = Math.floor(Math.random() * 1_000_000);
-                net.send({ type: 'launch', gameId: picked.id, seed });
-                launchGame(picked, { net, seed, role: 'host' });
-              },
-            }));
-          }
+        let games = [];
+        try {
+          games = await loadManifest();
+        } catch (err) {
+          console.error(err);
+          els.pickerStatus.textContent = 'Could not load games/manifest.json — run node scripts/manifest.js.';
           showOnly(els.picker);
+          return;
+        }
+
+        els.pickerStatus.textContent = games.length ? 'Pick a game:' : 'No games yet.';
+        els.gameList.innerHTML = '';
+        for (const game of games) {
+          els.gameList.appendChild(renderCard(game, {
+            onPick: (picked) => {
+              currentLaunch = { gameId: picked.id, seed: Math.floor(Math.random() * 1_000_000) };
+              if (net.hasConnection()) net.send({ type: 'launch', ...currentLaunch });
+              else els.waitingOverlay.hidden = false;
+              launchGame(picked, { net, seed: currentLaunch.seed, role: 'host' });
+            },
+          }));
+        }
+        showOnly(els.picker);
+
+        net.onConnect(() => {
+          els.waitingOverlay.hidden = true;
+          if (currentLaunch) net.send({ type: 'launch', ...currentLaunch });
         });
       });
 
       els.copyButton.addEventListener('click', () => {
+        els.hostLinkInput.select();
+        navigator.clipboard?.writeText(els.hostLinkInput.value).catch(() => {});
+      });
+
+      els.overlayCopyButton.addEventListener('click', () => {
         els.hostLinkInput.select();
         navigator.clipboard?.writeText(els.hostLinkInput.value).catch(() => {});
       });
@@ -258,6 +285,7 @@
 
     els.launchErrorBack.addEventListener('click', () => {
       els.launchError.hidden = true;
+      els.waitingOverlay.hidden = true;
       els.header.hidden = false;
       els.lobby.hidden = false;
       showOnly(els.picker);

@@ -47,7 +47,8 @@ agent's report back to you. Kenny runs the same loop on his machine.
 - **Parallel work = git worktree,** never two agents in the same checkout:
   `git worktree add ../coopgames-<thing> -b felix/<thing>`; merge on `main` after.
   Archipelago is Felix's folder — commit to `main` directly. `shared/`, hub, `docs/`,
-  `AGENTS.md`, `scripts/` are shared surfaces — branch + PR if Kenny is active.
+  `AGENTS.md`, `scripts/` are shared surfaces — branch + PR always, per
+  `docs/COLLABORATION.md` (not just when Kenny happens to be active).
 
 ## Hard-won gotchas (each cost a round trip)
 

@@ -15,15 +15,23 @@
 //
 // host() and joinFromUrl() both resolve with the same shape:
 //
-//   { send(msg), onMessage(fn), onClose(fn), onConnect(fn), peerId, isHost }
+//   { send(msg), onMessage(fn), onClose(fn), onConnect(fn), hasConnection(),
+//     peerId, isHost }
 //
-// send/onMessage/onClose are the documented contract (games/README.md).
-// onConnect is an addition this stage needed: host()'s promise resolves as
-// soon as the peer has an id (so the hub can render the copy-link UI
-// immediately), before any guest has joined — onConnect(fn) fires once,
-// when the guest's connection actually opens, which is what the hub uses
-// to leave the "waiting for guest" step. send() before that point queues
-// messages rather than dropping them.
+// send/onMessage/onClose are the documented contract (games/README.md) —
+// games only ever see those four (plus peerId/isHost), never onConnect or
+// hasConnection, which are hub-only (index.html reduces the object before
+// handing it to a game's start()). onConnect is an addition this stage
+// needed: host()'s promise resolves as soon as the peer has an id (so the
+// hub can render the copy-link UI immediately), before any guest has
+// joined — onConnect(fn) fires once, when the guest's connection actually
+// opens, which is what the hub uses to leave the "waiting for guest" step
+// and to send a 'launch' message to a guest who connects after the host
+// already picked a game (Stage D: drop-in play). hasConnection() lets the
+// hub tell whether a pick is happening before or after that point, so it
+// knows whether to send 'launch' immediately or let onConnect send it
+// later — see index.html's runHost(). send() before a connection is open
+// queues messages rather than dropping them, up to SEND_QUEUE_MAX below.
 //
 // Payloads are plain JSON-serializable values (objects/arrays/strings/
 // numbers) — PeerJS's default serialization handles them as-is, no manual
@@ -86,6 +94,20 @@ async function logIceDiagnostics(conn, reason) {
   }
 }
 
+// Stage D (drop-in play): the hub now shows the picker — and lets the host
+// start playing — before any guest has connected, so send() can be called
+// for a long stretch (whole solo-play sessions) with conn still null.
+// Position-style messages sent every tick (e.g. archipelago's 20 Hz `pos`)
+// would otherwise queue unboundedly. Cap at a small FIFO window instead:
+// net.js is a generic transport and doesn't know which message types are
+// stale-tolerant, but ANY message type is fine to lose the oldest copies of
+// when a fresher one is coming right behind it — only the most recent state
+// of anything actually matters once a connection opens. 'launch' itself
+// never touches this queue (see index.html: it's only ever sent live, from
+// onConnect, when conn.open is already true), so this cap doesn't risk
+// losing it.
+const SEND_QUEUE_MAX = 50;
+
 function buildNet({ peer, isHost }) {
   let conn = null;
   const messageListeners = [];
@@ -120,9 +142,16 @@ function buildNet({ peer, isHost }) {
   const net = {
     peerId: peer.id,
     isHost,
+    hasConnection() {
+      return !!(conn && conn.open);
+    },
     send(msg) {
-      if (conn && conn.open) conn.send(msg);
-      else sendQueue.push(msg);
+      if (conn && conn.open) {
+        conn.send(msg);
+        return;
+      }
+      sendQueue.push(msg);
+      if (sendQueue.length > SEND_QUEUE_MAX) sendQueue.shift();
     },
     onMessage(fn) {
       messageListeners.push(fn);
