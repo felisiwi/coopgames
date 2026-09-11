@@ -1,0 +1,7 @@
+{
+  "id": "dino-rumble",
+  "name": "Dino Rumble",
+  "description": "Two dinosaurs play-fighting. Chomp, tail-swipe and block until someone flops over, tuckered out. Nobody gets hurt.",
+  "players": { "min": 2, "max": 2 },
+  "owner": "kenny"
+}

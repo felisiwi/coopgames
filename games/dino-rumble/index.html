@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dino Rumble (solo dev) — coopgames</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #12101c;
+      overflow: hidden;
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+      color: #eaf6ff;
+    }
+    canvas { display: block; }
+    #hud {
+      position: fixed;
+      left: 10px;
+      bottom: 10px;
+      font-size: 12px;
+      line-height: 1.6;
+      background: rgba(18, 16, 28, 0.72);
+      padding: 8px 12px;
+      border-radius: 8px;
+      pointer-events: auto;
+    }
+    #hud a { color: #ffd166; }
+    #hud kbd {
+      background: #2b2536;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: ui-monospace, monospace;
+    }
+    #hud .row { opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <div><a href="../../">&larr; hub</a> &middot; solo dev entry — no hub, no PeerJS</div>
+    <div class="row"><b>Rex</b> <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move &middot;
+      <kbd>J</kbd> chomp &middot; <kbd>K</kbd> tail &middot; <kbd>L</kbd> block</div>
+    <div class="row"><b>Tri</b> <kbd>&larr;&uarr;&darr;&rarr;</kbd> move &middot;
+      <kbd>,</kbd> chomp &middot; <kbd>.</kbd> tail &middot; <kbd>/</kbd> block</div>
+    <div class="row">?seed=N for a different clearing &middot; ?mode=net to fake a lone peer</div>
+  </div>
+
+  <script type="module">
+    import start from './game.js';
+
+    // Fakes the hub's net object. There is no second peer here: send()
+    // logs, and onMessage() only fires if you drive it from devtools with
+    // fakeNet._emit({...}).
+    const listeners = [];
+    const fakeNet = {
+      send(msg) { if (window.LOG_NET) console.log('[dev net] send', msg); },
+      onMessage(fn) { listeners.push(fn); },
+      _emit(msg) { listeners.forEach((fn) => fn(msg)); },
+      peerId: 'solo-dev',
+      isHost: true,
+    };
+    window.fakeNet = fakeNet;
+    window.LOG_NET = false; // set true in devtools to watch the wire
+
+    const canvas = document.getElementById('game');
+    function fit() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    fit();
+    window.addEventListener('resize', fit);
+
+    const params = new URLSearchParams(window.location.search);
+    const seed = params.has('seed')
+      ? Number(params.get('seed'))
+      : Math.floor(Math.random() * 1_000_000);
+
+    // Default to couch versus: a fighting game needs two fighters to be
+    // worth looking at, and this makes the whole thing playable and
+    // reviewable with the networking stack completely out of the picture.
+    // ?mode=net exercises the online path instead (one lonely dino).
+    const local = params.get('mode') === 'net' ? null : 'versus';
+
+    start({
+      canvas,
+      net: fakeNet,
+      seed,
+      role: params.get('role') === 'guest' ? 'guest' : 'host',
+      players: { min: 2, max: 2 },
+      local,
+    });
+  </script>
+</body>
+</html>
