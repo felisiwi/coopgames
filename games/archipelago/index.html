@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Archipelago — coopgames</title>
+  <title>Archipelago (solo dev) — coopgames</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,6 +12,30 @@
     <span id="seed-label"></span>
   </div>
   <canvas id="world"></canvas>
-  <script type="module" src="src/main.js"></script>
+  <script type="module">
+    import start from './game.js';
+
+    // Fakes the hub's net object for solo testing (games/README.md "Solo
+    // dev entry"). No second peer: send() logs, onMessage() only fires if
+    // driven manually from devtools via window.fakeNet._emit({...}).
+    const listeners = [];
+    const fakeNet = {
+      send(msg) { console.log('[dev net] send', msg); },
+      onMessage(fn) { listeners.push(fn); },
+      _emit(msg) { listeners.forEach((fn) => fn(msg)); },
+      peerId: 'solo-dev',
+      isHost: true,
+    };
+    window.fakeNet = fakeNet; // so fakeNet._emit(...) works from devtools
+
+    const canvas = document.getElementById('world');
+
+    const params = new URLSearchParams(window.location.search);
+    const seed = params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
+    const debug = params.get('debug') === '1';
+    document.getElementById('seed-label').textContent = `seed: ${seed}${debug ? ' (debug)' : ''}`;
+
+    start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
+  </script>
 </body>
 </html>

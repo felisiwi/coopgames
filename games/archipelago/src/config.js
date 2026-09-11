@@ -8,6 +8,12 @@ export const CONFIG = {
   VISION_RADIUS: 5, // tiles a player can see around themselves
   SPAWN_DISTANCE: 18, // min Manhattan distance between spawnA and spawnB
 
+  // Movement
+  MOVE_SECONDS_PER_TILE: 0.18, // time to animate one grid step
+
+  // Networking
+  NET_SEND_HZ: 20, // own-position broadcast rate over net.send
+
   // Tile art — curated "Thick" 128x72 PNGs in assets/tiles/ (Batch 2,
   // Screaming Brain Studios CC0 pack). Each PNG is the full 128x72 cell:
   // a flat isometric diamond top face PLUS an 8px "thickness" skirt below
