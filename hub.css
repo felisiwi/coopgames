@@ -82,6 +82,10 @@ header p {
   text-align: center;
 }
 
+#lobby[hidden] {
+  display: none;
+}
+
 #host-start button,
 #copy-link-button {
   background: #3a7d6e;
