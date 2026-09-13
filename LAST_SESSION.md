@@ -1,9 +1,9 @@
 # Last session
 
-**2026-09-13 — Will It Fit? stage 1 (Kenny, this commit)** — new game
-`games/will-it-fit/`: DESIGN.md from a grilling session, then build stage 1
-(ballistic arc, falling-sand CA, flight→settle handoff, seeded vessel gen,
-pool economy). 35/35 headless. Not yet browser-checked or hub-launched.
+**2026-09-13 — Will It Fit? stage 1, signed off (Kenny)** — new game
+`games/will-it-fit/`, designed by grilling then built and revised over four
+rounds of play. 43/43 headless. **Not hub-launched yet.** Details in that
+folder's README; stage 2 (vessel tilt) is next.
 
 **2026-09-11/12 — Windward W0.6: wave amplitude fixed to boat scale, boat
 bob/tilt, explicit boat-model load, HUD clear of hub pill** (commit
