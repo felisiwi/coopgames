@@ -67,6 +67,22 @@ export const PHYS = {
 
 export const TABLE_Y = 520; // where the vessel stands, in logical pixels
 
+// STAGE 2 — the catcher's seat.
+//
+// Tilt is NOT a free control. If it were, it would only ever cause spills,
+// so the rational play would be to never tilt and the whole mechanic would
+// be inert. Tilt is induced by MOVEMENT: you lean because you moved fast to
+// catch something. It is still instant (no spring, no momentum, per Q2) —
+// stop moving and you are upright again on the same frame — so it stays
+// completely predictable. Move fast to reach the stream, lean, risk it.
+export const VESSEL = {
+  MIN_COL: 30,              // travel limits, in world cells
+  MAX_COL: 290,
+  MAX_TILT: 34,             // degrees either way
+  TILT_PER_SPEED: 5,        // degrees of lean per cell/tick of travel
+  SPEED_FOR_MAX_TILT: 7,    // cells/tick that pins the lean at MAX_TILT
+};
+
 // The vessel's grid, in the finer cells.
 export const GRID = { W: 70, H: 112 };
 

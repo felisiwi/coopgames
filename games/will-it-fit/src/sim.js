@@ -13,7 +13,7 @@
 // Stage 1 scope: the vessel is upright and static. The grid is already
 // bottle-LOCAL, so stage 2 adds tilt by rotating gravity rather than by
 // rewriting any of this.
-import { FP, STAGE, SPOUT, PHYS, GRID, SOURCE, MATERIALS, TABLE_Y } from './config.js';
+import { FP, STAGE, SPOUT, PHYS, GRID, SOURCE, MATERIALS, TABLE_Y, VESSEL } from './config.js';
 import { generateVessel, inside } from './vessel.js';
 
 const INSIDE_MAX_FALL = PHYS.INSIDE_MAX_FALL;
@@ -99,6 +99,9 @@ export class Sim {
     this.grid = new Uint8Array(GRID.W * GRID.H);
     this.drops = [];
 
+    this.tilt = 0;    // degrees, integer; rotates the world around the grid
+    this.offset = 0;  // vessel travel along the plinth, in world cells
+
     this.angle = SPOUT.ANGLE_DEFAULT;
     this.pressure = SPOUT.PRESSURE_DEFAULT;
     this.corked = true;
@@ -109,6 +112,52 @@ export class Sim {
     this.spilled = 0;          // lost to the abyss or over the rim
     this.ticks = 0;
     this.emitPhase = 0;
+  }
+
+  // ── the rotating frame (stage 2) ────────────────────────────────────
+  // The grid stays bottle-LOCAL and axis-aligned forever; tilting rotates
+  // the world around it. The vessel pivots about the centre of its base,
+  // which is where it actually rests on the plinth.
+  //
+  // Ballistic grains keep obeying WORLD gravity — that is real physics and
+  // must not rotate. Only the settled material, which lives in the local
+  // grid, sees the rotated gravity vector.
+  get pivotCol() {
+    return this.col0 + ((this.vessel.minL + this.vessel.maxR) >> 1) + this.offset;
+  }
+
+  get pivotRow() {
+    return this.mouthRow + this.vessel.height;
+  }
+
+  worldToLocal(wxFP, wyFP) {
+    const dx = wxFP - this.pivotCol * FP;
+    const dy = wyFP - this.pivotRow * FP;
+    const c = cosDeg(this.tilt);
+    const s = sinDeg(this.tilt);
+    // Rotate by -tilt.
+    const lx = (dx * c + dy * s) / FP | 0;
+    const ly = (-dx * s + dy * c) / FP | 0;
+    return {
+      x: lx + ((this.vessel.minL + this.vessel.maxR) >> 1) * FP,
+      y: ly + this.vessel.height * FP,
+    };
+  }
+
+  localToWorld(lxFP, lyFP) {
+    const dx = lxFP - ((this.vessel.minL + this.vessel.maxR) >> 1) * FP;
+    const dy = lyFP - this.vessel.height * FP;
+    const c = cosDeg(this.tilt);
+    const s = sinDeg(this.tilt);
+    return {
+      x: ((dx * c - dy * s) / FP | 0) + this.pivotCol * FP,
+      y: ((dx * s + dy * c) / FP | 0) + this.pivotRow * FP,
+    };
+  }
+
+  setVessel(offsetCols, tiltDeg) {
+    this.offset = Math.round(offsetCols) | 0;
+    this.tilt = Math.max(-VESSEL.MAX_TILT, Math.min(VESSEL.MAX_TILT, Math.round(tiltDeg))) | 0;
   }
 
   // ── controls ────────────────────────────────────────────────────────
@@ -224,8 +273,12 @@ export class Sim {
       // Admission no longer means landing — it flips `inside` and the
       // grain flies on. That is the whole difference between a stream
       // pouring into a vessel and a stream hitting a wall.
-      if (prevRow < this.mouthRow && row >= this.mouthRow) {
-        const gx = col - this.col0;
+      // Crossing the rim plane, measured in the vessel's OWN frame so a
+      // tilted mouth is a tilted opening rather than a horizontal line.
+      const Lnow = this.worldToLocal(d.x, d.y);
+      const Lprev = this.worldToLocal(prevCol * FP + (FP >> 1), prevRow * FP + (FP >> 1));
+      if (Lprev.y < 0 && Lnow.y >= 0) {
+        const gx = Lnow.x / FP | 0;
         if (gx >= this.vessel.mouth.l && gx < this.vessel.mouth.r) {
           d.inside = 1;
           kept.push(d);
@@ -258,15 +311,19 @@ export class Sim {
   // away down the flank.
   deflectOffVessel(d) {
     const v = this.vessel;
-    const gx = (d.x / FP | 0) - this.col0;
-    const gy = (d.y / FP | 0) - this.mouthRow;
+    const L = this.worldToLocal(d.x, d.y);
+    const gx = L.x / FP | 0;
+    const gy = L.y / FP | 0;
     if (gy < 0 || gy >= v.height) return;
     if (!inside(v, gx, gy)) return;
 
     const row = v.rows[gy];
     const outward = gx < ((row.l + row.r) >> 1) ? -1 : 1;
     const edge = outward < 0 ? row.l - 1 : row.r;
-    d.x = (edge + this.col0) * FP + (FP >> 1);
+    // Push back out along the vessel's own axis, then return to world.
+    const w = this.localToWorld(edge * FP + (FP >> 1), L.y);
+    d.x = w.x;
+    d.y = w.y;
     // Glance off rather than stop dead: keep half the sideways speed in the
     // outward direction, plus a nudge so it always clears the wall, and
     // shed a quarter of the fall to the scrape.
@@ -279,10 +336,12 @@ export class Sim {
   // grain stopped being a grain this tick (settled or spilled).
   resolveInside(d, prevCol, prevRow) {
     const v = this.vessel;
-    let gx = (d.x / FP | 0) - this.col0;
-    let gy = (d.y / FP | 0) - this.mouthRow;
-    const pgx = prevCol - this.col0;
-    const pgy = prevRow - this.mouthRow;
+    const L = this.worldToLocal(d.x, d.y);
+    const P = this.worldToLocal(prevCol * FP + (FP >> 1), prevRow * FP + (FP >> 1));
+    let gx = L.x / FP | 0;
+    let gy = L.y / FP | 0;
+    const pgx = P.x / FP | 0;
+    const pgy = P.y / FP | 0;
 
     // Below the base: settle on the floor.
     if (gy >= v.height) {
@@ -296,7 +355,9 @@ export class Sim {
     if (!inside(v, gx, gy)) {
       const row = v.rows[gy];
       const clamped = Math.max(row.l, Math.min(row.r - 1, gx));
-      d.x = (clamped + this.col0) * FP + (FP >> 1);
+      const w = this.localToWorld(clamped * FP + (FP >> 1), L.y);
+      d.x = w.x;
+      d.y = w.y;
       d.vx = -(d.vx >> 2);
       gx = clamped;
       if (!inside(v, gx, gy)) { this.settleAt(pgx, pgy, pgx); return true; }
@@ -337,6 +398,15 @@ export class Sim {
     const g = this.grid;
     const v = this.vessel;
 
+    // Rotated gravity. World down is (0,1); rotated into the bottle's own
+    // frame it becomes (sin tilt, cos tilt). Rather than quantising that to
+    // one of eight compass directions — which makes material visibly snap
+    // between angles — each cell samples it stochastically from the seeded
+    // PRNG, so a 20° tilt really does drift sideways one step in five.
+    // Integer throughout, so both peers sample identically.
+    const gvx = sinDeg(this.tilt);
+    const gvy = cosDeg(this.tilt);
+
     for (let y = v.height - 1; y >= 0; y--) {
       const row = v.rows[y];
       for (let x = row.l; x < row.r; x++) {
@@ -347,12 +417,24 @@ export class Sim {
           continue;
         }
 
-        // Straight down.
-        if (inside(v, x, y + 1) && g[(y + 1) * GRID.W + x] === 0) {
-          g[(y + 1) * GRID.W + x] = g[i];
-          g[i] = 0;
-          continue;
+        const sx = (this.rand() % FP) < Math.abs(gvx) ? (gvx < 0 ? -1 : 1) : 0;
+        const sy = (this.rand() % FP) < Math.abs(gvy) ? (gvy < 0 ? -1 : 1) : 0;
+
+        // Along gravity, then its two components separately.
+        let moved = false;
+        for (const [dx, dy] of [[sx, sy], [0, sy], [sx, 0]]) {
+          if (dx === 0 && dy === 0) continue;
+          const tx = x + dx;
+          const ty = y + dy;
+          if (this.escapes(x, y, tx, ty)) { moved = true; break; }
+          if (inside(v, tx, ty) && g[ty * GRID.W + tx] === 0) {
+            g[ty * GRID.W + tx] = g[i];
+            g[i] = 0;
+            moved = true;
+            break;
+          }
         }
+        if (moved) continue;
 
         if (spread === 0 || this.rand() % 100 >= spread) continue;
 
@@ -366,31 +448,65 @@ export class Sim {
         // a liquid at all. Flow rate is a property of the material, not of
         // how finely we happen to have diced the world.
         const dir = this.rand() & 1 ? 1 : -1;
-        let moved = false;
+        let slid = false;
         for (const d of [dir, -dir]) {
           let bestX = x;
           for (let k = 1; k <= flow; k++) {
             const nx = x + d * k;
+            if (this.escapes(x, y, nx, y)) { slid = true; break; }
             if (!inside(v, nx, y) || g[y * GRID.W + nx] !== 0) break;
             bestX = nx;
-            // A gap below: fall into it immediately rather than sliding on.
-            if (inside(v, nx, y + 1) && g[(y + 1) * GRID.W + nx] === 0) {
-              g[(y + 1) * GRID.W + nx] = g[i];
+            // A gap along gravity: fall into it rather than sliding on.
+            if (inside(v, nx, y + sy) && g[(y + sy) * GRID.W + nx] === 0 && sy !== 0) {
+              g[(y + sy) * GRID.W + nx] = g[i];
               g[i] = 0;
-              moved = true;
+              slid = true;
               break;
             }
           }
-          if (moved) break;
+          if (slid) break;
           if (bestX !== x) {
             g[y * GRID.W + bestX] = g[i];
             g[i] = 0;
-            moved = true;
+            slid = true;
             break;
           }
         }
       }
     }
+  }
+
+  // Pouring out. A cell sitting AT the rim (local row 0) that gravity drags
+  // past the lip leaves the vessel — that is what tipping a full bottle
+  // does, and it is why fullness is the thing that makes tilt dangerous:
+  // only material that has reached the rim can escape, so an empty vessel
+  // can be waved about freely and a brimming one cannot.
+  //
+  // It becomes a falling grain in WORLD space rather than being deleted.
+  // Deleting it would be the same decide-and-delete mistake that made the
+  // mouth feel like a wall and made misses vanish in mid-air.
+  escapes(x, y, tx, ty) {
+    if (y !== 0) return false;
+    const rim = this.vessel.rows[0];
+    if (tx >= rim.l && tx < rim.r && ty >= 0) return false;
+
+    const i = y * GRID.W + x;
+    const id = this.grid[i];
+    if (!id) return false;
+    this.grid[i] = 0;
+    this.caught--;
+
+    const w = this.localToWorld(tx * FP + (FP >> 1), ty * FP + (FP >> 1));
+    const outward = tx < rim.l ? -1 : 1;
+    this.drops.push({
+      x: w.x,
+      y: w.y,
+      vx: outward * (FP >> 2),
+      vy: FP >> 3,
+      inside: 0,
+      lost: 1,
+    });
+    return true;
   }
 
   neighbours(x, y) {
