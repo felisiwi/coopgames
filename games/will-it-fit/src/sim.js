@@ -189,6 +189,7 @@ export class Sim {
       // also makes the reserve tick down in time with what you can see.
       if (d.lost) {
         stepBallistic(d);
+        this.deflectOffVessel(d);
         const lc = d.x / FP | 0;
         const lr = d.y / FP | 0;
         if (lc < -8 || lc > WORLD_COLS + 8 || lr > WORLD_ROWS + 8) {
@@ -230,17 +231,15 @@ export class Sim {
           kept.push(d);
           continue;
         }
-        // Missed the mouth. It is lost, but it does not disappear here —
-        // it keeps falling. If it came down over the vessel's shoulder it
-        // deflects off it and runs clear; if it was never near the vessel
-        // it simply carries on into the abyss.
+        // Missed the mouth. It is lost, but nothing happens to it here: at
+        // the mouth row the vessel is only as wide as its mouth, so a grain
+        // just outside the rim is still in open air. The body flares out
+        // BELOW this line, so the grain keeps its velocity and falls on
+        // until it actually meets the shoulder — deflectOffVessel handles
+        // that collision where it really happens. Nudging it aside here
+        // instead was pushing grains clear of the very wall they should
+        // have bounced off.
         d.lost = 1;
-        const overShoulder = gx >= this.vessel.minL - 2 && gx < this.vessel.maxR + 2;
-        if (overShoulder) {
-          const outward = gx < this.vessel.mouth.l ? -1 : 1;
-          d.vx = outward * (Math.abs(d.vx >> 1) + (FP >> 3));
-          d.vy = d.vy >> 2; // the shoulder takes most of the fall out of it
-        }
         kept.push(d);
         continue;
       }
@@ -248,6 +247,31 @@ export class Sim {
       kept.push(d);
     }
     this.drops = kept;
+  }
+
+  // Bounce a missed grain off the OUTSIDE of the vessel. Without this a
+  // grain that misses the mouth sails straight through the drawn bottle,
+  // which looks like the vessel is not there at all. Every grain below the
+  // mouth row has already been classified as inside or lost, so anything
+  // lost that finds itself within the vessel silhouette has just clipped a
+  // wall from outside — push it back out the nearer side and let it glance
+  // away down the flank.
+  deflectOffVessel(d) {
+    const v = this.vessel;
+    const gx = (d.x / FP | 0) - this.col0;
+    const gy = (d.y / FP | 0) - this.mouthRow;
+    if (gy < 0 || gy >= v.height) return;
+    if (!inside(v, gx, gy)) return;
+
+    const row = v.rows[gy];
+    const outward = gx < ((row.l + row.r) >> 1) ? -1 : 1;
+    const edge = outward < 0 ? row.l - 1 : row.r;
+    d.x = (edge + this.col0) * FP + (FP >> 1);
+    // Glance off rather than stop dead: keep half the sideways speed in the
+    // outward direction, plus a nudge so it always clears the wall, and
+    // shed a quarter of the fall to the scrape.
+    d.vx = outward * ((Math.abs(d.vx) >> 1) + (FP >> 3));
+    d.vy = (d.vy * 3) >> 2;
   }
 
   // Move a grain that is inside the vessel, bouncing it off walls and

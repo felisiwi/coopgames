@@ -202,6 +202,35 @@ console.log('\n3. the handoff');
   }
   check('missed grains keep falling instead of vanishing', peakLost > 5,
     `peak falling-lost = ${peakLost}`);
+{
+  // Material must GLANCE OFF the bottle, not sail through it. This aim
+  // clips the shoulder, so the scenario is real rather than vacuous — an
+  // earlier version of this test used an aim that overshot the vessel
+  // entirely and passed without the collision code ever running once.
+  const t = new Sim({ seed: 3, stage: 1, volume: 300 });
+  const orig = t.deflectOffVessel.bind(t);
+  let deflections = 0;
+  t.deflectOffVessel = (d) => {
+    const before = d.vx;
+    orig(d);
+    if (d.vx !== before) deflections++;
+  };
+  t.setAim(-11, 3); // onto the shoulder
+  t.setCork(true);
+
+  let penetrated = false;
+  for (let i = 0; i < 30000 && !t.done; i++) {
+    t.tick();
+    for (const d of t.drops) {
+      if (!d.lost) continue;
+      const gx = (d.x / FP | 0) - t.col0;
+      const gy = (d.y / FP | 0) - t.mouthRow;
+      if (gy >= 0 && gy < t.vessel.height && inside(t.vessel, gx, gy)) penetrated = true;
+    }
+  }
+  check('material glances off the vessel', deflections > 20, `${deflections} deflections`);
+  check('and never passes through it', !penetrated);
+}
   check('they fall past the plinth into the abyss', deepest > TABLE_ROW,
     `deepest row ${deepest} vs plinth ${TABLE_ROW}`);
   check('and are all accounted for once gone', s.done && s.caught + s.spilled === 200,
