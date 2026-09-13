@@ -1,9 +1,7 @@
 # Last session
 
-**2026-09-13 — Will It Fit? stage 1, signed off (Kenny)** — new game
-`games/will-it-fit/`, designed by grilling then built and revised over four
-rounds of play. 43/43 headless. **Not hub-launched yet.** Details in that
-folder's README; stage 2 (vessel tilt) is next.
+**2026-09-13 — Will It Fit? stage 1, signed off (Kenny)** — 43/43 headless,
+not hub-launched yet; see `games/will-it-fit/README.md`.
 
 **2026-09-11/12 — Windward W0.6: wave amplitude fixed to boat scale, boat
 bob/tilt, explicit boat-model load, HUD clear of hub pill** (commit
@@ -40,5 +38,4 @@ through the hub picker.
    tune `src/config.js` (turn rate, trim window, wind cadence, tilt gain).
 2. Windward: gust telegraphing (W3); islands/claiming/scoring (W1) not in
    scope — scatter.js's buoys/rocks are throwaway.
-3. Otherwise per docs/MISSION-CONTROL.md backlog (Archipelago tuning from
-   real play, hub lobby polish).
+3. Will It Fit? stage 2 (vessel tilt); then docs/MISSION-CONTROL.md backlog.
