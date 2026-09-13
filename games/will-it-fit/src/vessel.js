@@ -26,38 +26,45 @@ export function generateVessel(seed, stage = 1) {
   const rand = rng((seed ^ (stage * 0x9e3779b1)) >>> 0);
   const pick = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
 
-  // Aperture tightens as stages climb, with a floor that always admits the
-  // stream. Widened by a random slack so two stages never feel identical.
-  // All sizes are in the fine grid (config CELL), so they are double what
-  // the same vessel measured before the grain size was halved.
+  // BOWLS AND CUPS, not flasks. A tall, long-necked flask is physically
+  // spill-proof below about 90° of tilt — measured at seed 3, its lower rim
+  // corner sat 57.7 cells above a liquid surface reaching only 41.3 — so
+  // tilting could never threaten anything and the catcher had no game to
+  // play. A vessel whose rim is WIDE and LOW is the shape where a modest
+  // lean genuinely spills, and where how full it is decides how much.
+  //
+  // Row 0 is the rim and is the widest part; the body tapers inward toward
+  // the base. All sizes are in the fine grid (config CELL).
   const tightness = Math.min(1, (stage - 1) / 30);
-  const apMax = Math.round(26 - 14 * tightness);
-  const aperture = Math.max(8, pick(Math.max(8, apMax - 6), apMax));
 
-  const shapeStage = stage >= 10;
-  const belly = shapeStage
-    ? Math.min(GRID.W - 8, aperture + pick(8, 32))
-    : Math.min(GRID.W - 8, aperture + pick(8, 18));
-  const height = shapeStage ? pick(60, GRID.H - 8) : pick(56, 80);
-  const neckLen = shapeStage ? pick(4, 20) : pick(4, 10);
-  const flareLen = Math.max(4, pick(6, 16));
+  // The rim narrows with the stages — that is the "harder to catch" dial.
+  const rimMax = Math.round(34 - 18 * tightness);
+  const rim = Math.max(13, pick(Math.max(13, rimMax - 6), rimMax));
+
+  // And the vessel gets SHALLOWER — that is the "easier to spill" dial,
+  // because material reaches a low rim sooner.
+  const depthMax = Math.round(34 - 14 * tightness);
+  const height = Math.max(17, pick(Math.max(17, depthMax - 8), depthMax));
+
+  // Taper to the base. A steeper taper is a rounder bowl, a gentle one is
+  // closer to a straight-sided cup.
+  const taper = Math.min(rim - 8, pick(2, Math.max(3, rim >> 1)));
+  const base = Math.max(6, rim - taper);
 
   const rows = [];
   const mid = GRID.W >> 1;
   for (let y = 0; y < height; y++) {
-    let width;
-    if (y < neckLen) {
-      width = aperture;
-    } else if (y < neckLen + flareLen) {
-      // Ease from neck to belly. Integer lerp, no floats in the result.
-      const t = y - neckLen + 1;
-      width = aperture + Math.round(((belly - aperture) * t) / flareLen);
-    } else {
-      width = belly;
-    }
+    // Integer lerp from rim at the top to base at the bottom.
+    const width = height === 1
+      ? rim
+      : rim - Math.round(((rim - base) * y) / (height - 1));
     const half = width >> 1;
     rows.push({ l: mid - half, r: mid - half + width });
   }
+
+  const aperture = rim;
+  const belly = rim;
+  const neckLen = 0;
 
   const capacity = rows.reduce((n, r) => n + (r.r - r.l), 0);
   // Widest extent, so the sim can tell "clipped the shoulder and deflected
@@ -91,15 +98,20 @@ export function validate(vessel, nozzle) {
   if (vessel.aperture < nozzle) {
     problems.push(`aperture ${vessel.aperture} narrower than nozzle ${nozzle}`);
   }
-  if (vessel.capacity < 450) problems.push(`capacity ${vessel.capacity} too small`);
+  if (vessel.capacity < 150) problems.push(`capacity ${vessel.capacity} too small`);
   if (vessel.height > GRID.H) problems.push(`height ${vessel.height} exceeds grid`);
   for (let y = 0; y < vessel.height; y++) {
     const row = vessel.rows[y];
     if (row.l < 0 || row.r > GRID.W) problems.push(`row ${y} outside grid`);
     if (row.r - row.l < 1) problems.push(`row ${y} has no interior`);
   }
-  // A belly wider than the mouth is the point; a belly NARROWER than the
-  // mouth would trap material against an overhang the CA can't drain.
-  if (vessel.belly < vessel.aperture) problems.push('belly narrower than mouth');
+  // Bowls taper inward toward the base, so every row must be no wider than
+  // the rim above it — an overhang would trap material the CA cannot drain.
+  for (let y = 1; y < vessel.height; y++) {
+    if (vessel.rows[y].r - vessel.rows[y].l > vessel.rows[y - 1].r - vessel.rows[y - 1].l) {
+      problems.push(`row ${y} overhangs the row above`);
+      break;
+    }
+  }
   return problems;
 }

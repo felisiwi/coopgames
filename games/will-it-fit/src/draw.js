@@ -8,9 +8,20 @@ export function drawScene(ctx, sim, { aimPreview = [], flowing = false } = {}) {
   drawBackground(ctx, sim);
   drawSpout(ctx, sim);
   drawPreview(ctx, aimPreview);
+  // The vessel and everything in it are drawn in the vessel's own frame —
+  // the sim already works that way, so rendering just mirrors the same
+  // transform: slide along the plinth, then rotate about the base.
+  ctx.save();
+  const cx = (sim.col0 + ((sim.vessel.minL + sim.vessel.maxR) >> 1)) * CELL;
+  const cy = sim.pivotRow * CELL;
+  ctx.translate(sim.offset * CELL, 0);
+  ctx.translate(cx, cy);
+  ctx.rotate((sim.tilt * Math.PI) / 180);
+  ctx.translate(-cx, -cy);
   drawVesselBody(ctx, sim);
   drawMaterial(ctx, sim);
   drawVesselRim(ctx, sim);
+  ctx.restore();
   drawDrops(ctx, sim);
   if (flowing) drawPourGlow(ctx, sim);
 }
@@ -27,8 +38,8 @@ function drawBackground(ctx, sim) {
   // A full-width table meant anything you missed fell in front of solid
   // ground, which reads as landing, not as loss. With void either side, a
   // miss visibly drops away into nothing — which is the point.
-  const px0 = (sim.col0 + sim.vessel.minL) * CELL - 14;
-  const px1 = (sim.col0 + sim.vessel.maxR) * CELL + 14;
+  const px0 = (sim.col0 + sim.vessel.minL + sim.offset) * CELL - 14;
+  const px1 = (sim.col0 + sim.vessel.maxR + sim.offset) * CELL + 14;
 
   ctx.save();
   ctx.globalAlpha = 0.16;

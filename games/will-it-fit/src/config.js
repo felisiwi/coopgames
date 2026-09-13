@@ -78,7 +78,11 @@ export const TABLE_Y = 520; // where the vessel stands, in logical pixels
 export const VESSEL = {
   MIN_COL: 30,              // travel limits, in world cells
   MAX_COL: 290,
-  MAX_TILT: 34,             // degrees either way
+  // Must exceed 45°. Below that, a liquid parcel moving (+1,-1) — the only
+  // way material can climb toward a lowered rim — is uphill, so a
+  // partly-filled vessel can NEVER pour however hard you lean it. Above
+  // 45° that same step is downhill and the bowl empties as it should.
+  MAX_TILT: 62,             // degrees either way
   TILT_PER_SPEED: 5,        // degrees of lean per cell/tick of travel
   SPEED_FOR_MAX_TILT: 7,    // cells/tick that pins the lean at MAX_TILT
 };
@@ -87,7 +91,11 @@ export const VESSEL = {
 export const GRID = { W: 70, H: 112 };
 
 export const SOURCE = {
-  VOLUME: 2800,  // grains available per stage; the stage ends when dry
+  // Grains per stage, as a fraction of the vessel's capacity. Relative
+  // rather than absolute because vessels now vary hugely in size: a fixed
+  // count would drown a late shallow cup and barely wet an early bowl.
+  // Below 1 so a clean pour nearly fills it and spilling really costs you.
+  FILL_RATIO: 0.85,
 };
 
 // Materials are ONE parameterised ruleset, not several (proven during

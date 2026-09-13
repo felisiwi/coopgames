@@ -85,7 +85,7 @@ export function traceArc(angleDeg, pressure, steps = 220, stopRow = Infinity) {
 export const OUTCOME = { CAUGHT: 'caught', SPILLED: 'spilled' };
 
 export class Sim {
-  constructor({ seed = 1, stage = 1, material = 'water', volume = SOURCE.VOLUME } = {}) {
+  constructor({ seed = 1, stage = 1, material = 'water', volume = null } = {}) {
     this.seed = seed >>> 0;
     this.stage = stage;
     this.material = MATERIALS[material] || MATERIALS.water;
@@ -106,8 +106,10 @@ export class Sim {
     this.pressure = SPOUT.PRESSURE_DEFAULT;
     this.corked = true;
 
-    this.startVolume = volume; // what the source held at stage start
-    this.remaining = volume;   // droplets still in the source
+    // Sized to this vessel unless the caller overrides it (tests do).
+    const vol = volume ?? Math.round(this.vessel.capacity * SOURCE.FILL_RATIO);
+    this.startVolume = vol;  // what the source held at stage start
+    this.remaining = vol;    // grains still in the source
     this.caught = 0;           // settled inside the vessel
     this.spilled = 0;          // lost to the abyss or over the rim
     this.ticks = 0;
@@ -420,9 +422,18 @@ export class Sim {
         const sx = (this.rand() % FP) < Math.abs(gvx) ? (gvx < 0 ? -1 : 1) : 0;
         const sy = (this.rand() % FP) < Math.abs(gvy) ? (gvy < 0 ? -1 : 1) : 0;
 
-        // Along gravity, then its two components separately.
+        // Along gravity, then its two components separately — and, past 45°
+        // of tilt, the CLIMB: a step to (sx, -1). That looks like moving up
+        // the grid but under a steeply rotated gravity it is downhill, and
+        // it is the only way liquid can reach a rim that leaning has
+        // dropped below the surface. Without it a partly-filled vessel can
+        // never pour, whatever the angle.
+        const climbs = Math.abs(gvx) > Math.abs(gvy);
+        const order = climbs
+          ? [[sx, sy], [sx, 0], [sx, -1], [0, sy]]
+          : [[sx, sy], [0, sy], [sx, 0]];
         let moved = false;
-        for (const [dx, dy] of [[sx, sy], [0, sy], [sx, 0]]) {
+        for (const [dx, dy] of order) {
           if (dx === 0 && dy === 0) continue;
           const tx = x + dx;
           const ty = y + dy;
@@ -453,7 +464,12 @@ export class Sim {
           let bestX = x;
           for (let k = 1; k <= flow; k++) {
             const nx = x + d * k;
-            if (this.escapes(x, y, nx, y)) { slid = true; break; }
+            // NO escape check here. Levelling is not pouring: a liquid
+            // finding its own level slides sideways in both directions, and
+            // letting that spill meant water at the rim leaked out at ANY
+            // tilt including zero — the rim row could never hold anything.
+            // Material leaves only when GRAVITY carries it over the lip,
+            // which is the gravity-driven branch above.
             if (!inside(v, nx, y) || g[y * GRID.W + nx] !== 0) break;
             bestX = nx;
             // A gap along gravity: fall into it rather than sliding on.

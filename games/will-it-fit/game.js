@@ -4,12 +4,16 @@
 //
 // Per games/README.md this file never imports PeerJS or shared/net.js.
 //
-// BUILD STAGE 1 (see DESIGN.md build plan): solo, no networking, upright
-// static vessel. You play the POURER — aim by angle and pressure, pull the
-// cork, land the arc in the mouth. Vessel tilt is stage 2, and the grid is
-// already bottle-local so that lands as a gravity rotation rather than a
-// rewrite. Lockstep sync is stage 4; `net` is accepted and unused for now.
-import { STAGE, SPOUT, SOURCE, FP, TABLE_Y } from './src/config.js';
+// BUILD STAGE 2 (see DESIGN.md build plan): solo, no networking. You play
+// the CATCHER, which is the skill seat — move the bowl to intercept a
+// stream that will not stay still, without leaning so hard that you slop
+// what you have already caught. The source aims itself, sweeping slowly, so
+// there is always somewhere to be. Tap to unstop it (Q23).
+//
+// Tilt is not a separate control: it is induced by how fast you move. A
+// free tilt would only ever cost you, so nobody would use it. Lockstep sync
+// is stage 4; `net` is accepted and unused for now.
+import { STAGE, SPOUT, FP, TABLE_Y, VESSEL } from './src/config.js';
 import { Sim, traceArc } from './src/sim.js';
 import { drawScene, drawHud, drawBanner } from './src/draw.js';
 
@@ -37,15 +41,17 @@ export default function start({ canvas, net, seed = 1 }) {
 
   function makeSim() {
     const material = MATERIAL_ORDER[(stage - 1) % MATERIAL_ORDER.length];
-    return new Sim({ seed, stage, material, volume: SOURCE.VOLUME });
+    return new Sim({ seed, stage, material });
   }
 
   // ── input ────────────────────────────────────────────────────────────
   // Mouse aims (angle from the spout toward the cursor); wheel or W/S sets
   // pressure; click or space pulls the cork.
-  const pointer = { x: STAGE.W * 0.6, y: TABLE_Y - 80 };
+  const pointer = { x: STAGE.W * 0.5, y: TABLE_Y - 80 };
   let pressure = SPOUT.PRESSURE_DEFAULT;
   let corkOpen = false;
+  let vesselCol = null;   // where the bowl is, in world cells
+  let lastVesselCol = null;
 
   function toStage(e) {
     const r = canvas.getBoundingClientRect();
@@ -81,19 +87,21 @@ export default function start({ canvas, net, seed = 1 }) {
   window.addEventListener('keydown', onKey);
   window.addEventListener('keyup', onKey);
 
-  // Angle is derived from the pointer but rounded to whole degrees before
-  // it ever reaches the sim — the sim must never see a float.
-  function aimAngle() {
-    const dx = pointer.x - SPOUT.X;
-    const dy = pointer.y - SPOUT.Y;
-    const deg = Math.round((-Math.atan2(dy, dx) * 180) / Math.PI);
+  // The source aims itself, sweeping slowly back and forth so the stream
+  // never stays put. That sweep is what forces the catcher to move, and
+  // moving is what induces the lean that spills a full bowl — the whole
+  // loop of the game hangs off it. Seeded from the stage so both peers
+  // (stage 4) see the identical sweep without syncing anything.
+  function autoAim() {
+    const phase = (sim.ticks / 260) + stage * 1.7;
+    const deg = -14 + Math.round(Math.sin(phase) * 9);
     return Math.max(SPOUT.ANGLE_MIN, Math.min(SPOUT.ANGLE_MAX, deg));
   }
 
   // Ghost arc. traceArc runs the sim's own launch and integration code, so
   // the preview cannot promise a trajectory the simulation won't follow.
   function preview() {
-    const raw = traceArc(aimAngle(), pressure, 220, sim.mouthRow + sim.vessel.height);
+    const raw = traceArc(autoAim(), pressure, 220, sim.mouthRow + sim.vessel.height);
     const pts = [];
     for (let i = 0; i < raw.length; i += 4) {
       pts.push({ x: (raw[i].x / FP) * STAGE.CELL, y: (raw[i].y / FP) * STAGE.CELL });
@@ -127,6 +135,7 @@ export default function start({ canvas, net, seed = 1 }) {
     stage += 1;
     sim = makeSim();
     countedSpill = 0;
+    vesselCol = null;
     phase = 'play';
     phaseT = 0;
   }
@@ -149,7 +158,26 @@ export default function start({ canvas, net, seed = 1 }) {
     last = now;
 
     if (phase === 'play') {
-      sim.setAim(aimAngle(), pressure);
+      // Where the bowl should be: straight under the pointer, clamped to
+      // the plinth's travel. Position is instant (Q2) — only the lean is a
+      // consequence.
+      const wantCol = Math.max(
+        VESSEL.MIN_COL,
+        Math.min(VESSEL.MAX_COL, Math.round(pointer.x / STAGE.CELL)),
+      );
+      if (vesselCol === null) { vesselCol = wantCol; lastVesselCol = wantCol; }
+      vesselCol = wantCol;
+
+      // Lean from travel speed. Instant in both directions: stop moving and
+      // you are upright on the same frame, so it stays predictable.
+      const speed = vesselCol - lastVesselCol;
+      lastVesselCol = vesselCol;
+      const lean = Math.max(-1, Math.min(1, speed / VESSEL.SPEED_FOR_MAX_TILT))
+        * VESSEL.MAX_TILT;
+      const basePivot = sim.col0 + ((sim.vessel.minL + sim.vessel.maxR) >> 1);
+      sim.setVessel(vesselCol - basePivot, lean);
+
+      sim.setAim(autoAim(), pressure);
       sim.setCork(corkOpen);
       for (let i = 0; i < TICKS_PER_FRAME; i++) sim.tick();
       drainForSpills();
@@ -195,7 +223,8 @@ export default function start({ canvas, net, seed = 1 }) {
     } else if (phase === 'over') {
       drawBanner(ctx, 'The reserve is empty', `reached stage ${best} — press R to begin again`);
     } else if (!corkOpen && sim.remaining === sim.startVolume) {
-      drawBanner(ctx, 'Aim, then hold to pour', 'mouse aims · wheel or W/S sets pressure · hold click or space');
+      drawBanner(ctx, 'Move the bowl, then pour',
+        'mouse moves the bowl · hold click or space to unstop · moving fast makes it lean');
     }
     ctx.restore();
   }

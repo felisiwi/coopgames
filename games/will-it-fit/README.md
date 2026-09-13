@@ -30,14 +30,15 @@ start sliding out of a tipped mouth.
 | stage | what | status |
 |---|---|---|
 | 1 | CA in a static upright vessel, solo, with the arc | **done** |
-| 2 | Vessel tilt via rotated gravity | next |
+| 2 | Vessel tilt via rotated gravity | **done**, unplayed |
 | 3 | Stages, pool economy, role swap | partly (economy is in) |
 | 4 | Lockstep netcode + hub integration | not started |
 | 5 | Mobile tilt input | not started |
 
-Right now you play the **pourer**. The vessel is static, so there is nobody to catch yet —
-vessel control arrives in stage 2, and the grid is already bottle-local so that lands as a
-gravity rotation rather than a rewrite.
+Since stage 2 you play the **catcher**, which is the skill seat. The source aims itself,
+sweeping slowly so the stream never stays put; you move the bowl to intercept it and hold the
+cork open. Moving fast makes the bowl lean, and a lean spills what you have already caught —
+so the fuller it gets, the more carefully you have to chase.
 
 ## Playing
 
@@ -45,8 +46,8 @@ Open [`index.html`](index.html) directly, or via a static server.
 
 | | |
 |---|---|
-| aim | move the mouse — the ghost arc shows where it lands |
-| pressure | mouse wheel, or `W` / `S` |
+| move the bowl | move the mouse |
+| lean | not a control — induced by how fast you move |
 | pour | hold click, or hold `space` |
 | restart | `R` |
 

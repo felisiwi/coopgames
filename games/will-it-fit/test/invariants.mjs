@@ -2,7 +2,7 @@
 // the game's own modules and drives the simulation directly.
 //
 //   node games/will-it-fit/test/invariants.mjs
-import { FP, GRID, SPOUT, MATERIALS, SOURCE, PHYS, STAGE, TABLE_Y } from '../src/config.js';
+import { FP, GRID, SPOUT, MATERIALS, SOURCE, PHYS, STAGE, TABLE_Y, VESSEL } from '../src/config.js';
 import { generateVessel, validate, inside, rng } from '../src/vessel.js';
 import { Sim, traceArc, launchVelocity } from '../src/sim.js';
 
@@ -25,14 +25,41 @@ function run(sim, { ticks = 20000, aim } = {}) {
 
 // Search the actual control range for an aim that lands material in the
 // vessel. Doubles as proof that the control space contains a solution.
+const aimCache = new Map();
+function probeAim(seed, stage, a, p, volume = 40) {
+  const probe = new Sim({ seed, stage, volume });
+  probe.setAim(a, p);
+  probe.setCork(true);
+  for (let i = 0; i < 1500 && !probe.done; i++) probe.tick();
+  return probe;
+}
 function findAim(sim) {
-  for (let p = SPOUT.PRESSURE_MIN; p <= SPOUT.PRESSURE_MAX; p++) {
+  const key = `${sim.seed}/${sim.stage}`;
+  if (aimCache.has(key)) return aimCache.get(key);
+  let best = null;
+  for (let p = SPOUT.PRESSURE_MIN; p <= SPOUT.PRESSURE_MAX && !best; p++) {
     for (let a = SPOUT.ANGLE_MIN; a <= SPOUT.ANGLE_MAX; a++) {
-      const probe = new Sim({ seed: sim.seed, stage: sim.stage, volume: 60 });
-      probe.setAim(a, p);
-      probe.setCork(true);
-      for (let i = 0; i < 4000 && !probe.done; i++) probe.tick();
-      if (probe.caught > 30) return { angle: a, pressure: p, caught: probe.caught };
+      const probe = probeAim(sim.seed, sim.stage, a, p);
+      if (probe.caught > 20) { best = { angle: a, pressure: p, caught: probe.caught }; break; }
+    }
+  }
+  aimCache.set(key, best);
+  return best;
+}
+
+// An aim that both lands material AND loses some — needed to exercise the
+// rim/shoulder collision. Derived rather than hard-coded: vessel shapes
+// change, and a stale constant silently stops testing anything (this test
+// already passed vacuously once for exactly that reason). A clip always
+// sits near the edge of the landing window, so walk out from a good aim
+// rather than searching the whole space.
+function findClipAim(seed, stage = 1) {
+  const base = findAim(new Sim({ seed, stage }));
+  if (!base) return null;
+  for (let d = 1; d <= 14; d++) {
+    for (const a of [base.angle - d, base.angle + d]) {
+      const probe = probeAim(seed, stage, a, base.pressure, 80);
+      if (probe.caught > 10 && probe.spilled > 10) return { angle: a, pressure: base.pressure };
     }
   }
   return null;
@@ -167,8 +194,9 @@ console.log('\n3. the handoff');
   // only settle where it actually lands — converting it to a cell at the
   // rim is what made the vessel feel like a wall the stream splatted
   // against. If this count ever returns to zero, that bug is back.
+  const landing = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -10, pressure: 3 };
   const s = new Sim({ seed: 3, stage: 1, volume: 300 });
-  s.setAim(-10, 3);
+  s.setAim(landing.angle, landing.pressure);
   s.setCork(true);
   let peakInside = 0;
   let sawDescending = false;
@@ -215,7 +243,8 @@ console.log('\n3. the handoff');
     orig(d);
     if (d.vx !== before) deflections++;
   };
-  t.setAim(-11, 3); // onto the shoulder
+  const clip = findClipAim(3) || { angle: -11, pressure: 3 };
+  t.setAim(clip.angle, clip.pressure); // onto the rim/shoulder
   t.setCork(true);
 
   let penetrated = false;
@@ -283,13 +312,17 @@ console.log('\n6. determinism (lockstep depends on this)');
   }
   check('two sims with the same seed stay bit-identical', diverged === null, diverged || '');
 
+  // Both sims must have material actually in play, or they converge on the
+  // same empty terminal state and the checksums match for a boring reason.
+  const aim42 = findAim(new Sim({ seed: 42, stage: 7 })) || { angle: -22, pressure: 6 };
   const c = new Sim({ seed: 43, stage: 7, volume: 300 });
-  c.setAim(-22, 6); c.setCork(true);
+  c.setAim(aim42.angle, aim42.pressure); c.setCork(true);
   for (let i = 0; i < 300; i++) c.tick();
   const a2 = new Sim({ seed: 42, stage: 7, volume: 300 });
-  a2.setAim(-22, 6); a2.setCork(true);
+  a2.setAim(aim42.angle, aim42.pressure); a2.setCork(true);
   for (let i = 0; i < 300; i++) a2.tick();
-  check('a different seed produces a different checksum', c.checksum() !== a2.checksum());
+  check('a different seed produces a different checksum', c.checksum() !== a2.checksum(),
+    `caught ${a2.caught}/${c.caught}`);
 }
 {
   // The sim must not touch Math.random — that would desync peers silently.
@@ -329,6 +362,67 @@ console.log('\n7. materials behave differently');
   const ids = Object.values(MATERIALS).map((m) => m.id);
   check('material ids are unique and non-zero',
     new Set(ids).size === ids.length && !ids.includes(0));
+}
+
+console.log('\n7b. tilt (stage 2)');
+{
+  // Fill a bowl to a given fraction, then lean it and see what runs out.
+  const fillTo = (frac) => {
+    const s = new Sim({ seed: 3, stage: 1, volume: 4000 });
+    const aim = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -8, pressure: 2 };
+    s.setAim(aim.angle, aim.pressure);
+    s.setCork(true);
+    const target = Math.floor(s.vessel.capacity * frac);
+    for (let i = 0; i < 60000 && s.caught < target; i++) s.tick();
+    s.setCork(false);
+    for (let i = 0; i < 600; i++) s.tick();
+    return s;
+  };
+  const pour = (frac, tilt) => {
+    const s = fillTo(frac);
+    const before = s.caught;
+    s.setVessel(0, tilt);
+    for (let i = 0; i < 2000; i++) s.tick();
+    return before - s.caught;
+  };
+
+  check('upright holds everything, however full', pour(0.95, 0) === 0 && pour(0.4, 0) === 0);
+  check('a brimming bowl pours when leaned hard', pour(0.95, VESSEL.MAX_TILT) > 50,
+    `${pour(0.95, VESSEL.MAX_TILT)} grains`);
+  check('a half-full one pours less than a brimming one',
+    pour(0.7, VESSEL.MAX_TILT) < pour(0.95, VESSEL.MAX_TILT),
+    `${pour(0.7, VESSEL.MAX_TILT)} vs ${pour(0.95, VESSEL.MAX_TILT)}`);
+  check('a nearly-empty one is safe to swing', pour(0.15, VESSEL.MAX_TILT) === 0,
+    `${pour(0.15, VESSEL.MAX_TILT)} grains`);
+  // The reason MAX_TILT has to clear 45°: below it, the (+1,-1) step that
+  // lets liquid climb toward a lowered rim is uphill, so nothing can pour.
+  check('the tilt range clears the 45° threshold', VESSEL.MAX_TILT > 45,
+    `MAX_TILT ${VESSEL.MAX_TILT}`);
+}
+{
+  // Material that pours out must FALL, not evaporate — the same
+  // decide-and-delete trap as the mouth and the misses.
+  const s = new Sim({ seed: 3, stage: 1, volume: 4000 });
+  const aim = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -8, pressure: 2 };
+  s.setAim(aim.angle, aim.pressure);
+  s.setCork(true);
+  for (let i = 0; i < 60000 && s.caught < s.vessel.capacity * 0.95; i++) s.tick();
+  s.setCork(false);
+  for (let i = 0; i < 600; i++) s.tick();
+  const held = s.caught;
+  const total = s.caught + s.spilled + s.remaining + s.drops.length;
+  s.setVessel(0, VESSEL.MAX_TILT);
+  let sawFalling = 0;
+  let broke = null;
+  for (let i = 0; i < 900; i++) {
+    s.tick();
+    sawFalling = Math.max(sawFalling, s.drops.filter((d) => d.lost).length);
+    const now = s.caught + s.spilled + s.remaining + s.drops.length;
+    if (now !== total && broke === null) broke = `tick ${i}: ${now} vs ${total}`;
+  }
+  check('poured material becomes falling grains', sawFalling > 3, `peak ${sawFalling}`);
+  check('and pouring conserves material exactly', broke === null, broke || '');
+  check('the bowl actually emptied somewhat', s.caught < held, `${held} -> ${s.caught}`);
 }
 
 console.log('\n8. the aim preview cannot lie');
