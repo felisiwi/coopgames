@@ -6,6 +6,16 @@
 // in fixed-point units. Floats are allowed only in rendering. If you add a
 // number here that the sim touches, it must be an integer.
 
+// FEEL DIALS — the four numbers that set the pace, in the order you'll
+// most likely want them:
+//   STAGE.CELL            grain size. Smaller = finer grit.
+//   PHYS.GRAVITY          how fast the arc drops. Lower = more hang time.
+//   game.js TICKS_PER_FRAME   overall tempo. 1 is slow, 2 is brisk.
+//   SOURCE.VOLUME         how long a stage lasts.
+// Changing CELL rescales the world: if you halve it, halve SPEED_PER_
+// PRESSURE's pixel effect and QUARTER gravity to keep the same reach
+// (range goes as v²/g), and double every size in vessel.js.
+
 // Fixed-point: positions and velocities are integers scaled by FP.
 // 256 gives sub-cell precision with a huge headroom before overflow.
 export const FP = 256;
@@ -14,7 +24,11 @@ export const fp = (n) => Math.round(n * FP);
 export const STAGE = {
   W: 960,        // logical canvas, letterboxed into whatever we're given
   H: 600,
-  CELL: 6,       // pixels per CA cell; the sim works in cells, not pixels
+  // Pixels per CA cell. Halving this quarters the grain size, which is
+  // what turns a chunky sand toy into raked-garden grit. It also doubles
+  // the grid, so PHYS below is retuned to keep the same reach at half
+  // speed rather than inheriting a faster world for free.
+  CELL: 3,
 };
 
 // The source sits up and to the left; the vessel stands on the table.
@@ -29,34 +43,41 @@ export const SPOUT = {
   ANGLE_MIN: -60,
   ANGLE_MAX: 45,
   ANGLE_DEFAULT: -18,
-  // Pour pressure -> exit speed, in fixed-point units per tick.
+  // Pour pressure -> exit speed, in fixed-point CELLS per tick.
   PRESSURE_MIN: 1,
   PRESSURE_MAX: 10,
   PRESSURE_DEFAULT: 5,
-  SPEED_PER_PRESSURE: fp(0.55), // exit speed = pressure * this
-  NOZZLE: 3,                    // cells across the stream at the spout
-  RATE: 2,                      // droplets emitted per tick while uncorked
+  SPEED_PER_PRESSURE: fp(0.55),
+  NOZZLE: 5,     // cells across the stream at the spout
+  RATE: 2,       // grains emitted per tick while uncorked
 };
 
+// Slowed deliberately. Halving exit speed and QUARTERING gravity (in pixel
+// terms) keeps the same reach — range goes as v²/g — while roughly doubling
+// time of flight. The arc hangs instead of snapping, which is the whole
+// point: you should have time to watch it land and think about it.
 export const PHYS = {
-  GRAVITY: fp(0.055),   // per tick, applied to in-flight droplets only
-  MAX_FALL: fp(6),      // terminal velocity, keeps the handoff tractable
+  GRAVITY: fp(0.0275),
+  MAX_FALL: fp(2.5),   // terminal velocity, also keeps the handoff tractable
 };
 
 export const TABLE_Y = 520; // where the vessel stands, in logical pixels
 
-// The vessel's grid. Generous enough for a tall flask, cheap enough that a
-// full CA sweep is nothing.
-export const GRID = { W: 34, H: 56 };
+// The vessel's grid, in the finer cells.
+export const GRID = { W: 70, H: 112 };
 
 export const SOURCE = {
-  VOLUME: 900,   // droplets available per stage; the stage ends when dry
+  VOLUME: 2800,  // grains available per stage; the stage ends when dry
 };
 
 // Materials are ONE parameterised ruleset, not several (proven during
 // design — see DESIGN.md). `spread` is sideways slide chance, `cohesion`
 // is self-stickiness, `grain` is cells per grain. Probabilities are in
 // PERCENT (integers) so the sim stays float-free.
+//
+// Palette is spa/Japanese-garden rather than hot: deep celadon, soft
+// slate, warm clay. Every tone clears WCAG 1.4.11's 3:1 non-text contrast
+// against both background stops (measured, not guessed).
 export const MATERIALS = {
   water: {
     id: 1,
@@ -64,26 +85,29 @@ export const MATERIALS = {
     spread: 100,
     cohesion: 0,
     grain: 1,
-    color: '#C2410C',      // deep orange; 4.34:1 on cream (Q22)
-    shade: '#9A3208',
+    flow: 5,      // cells of lateral travel per tick — water finds its level fast
+    color: '#4F7A72',      // deep celadon — 3.96:1 on mist, 4.23:1 on paper
+    shade: '#3E615B',
   },
   slush: {
     id: 2,
-    name: 'Slush',
+    name: 'Mist',
     spread: 30,
     cohesion: 45,
     grain: 2,
-    color: '#D8643C',
-    shade: '#A8452A',
+    flow: 2,
+    color: '#5F7E93',      // soft slate — 3.53:1 / 3.77:1
+    shade: '#4B6675',
   },
   magma: {
     id: 3,
-    name: 'Magma',
+    name: 'Clay',
     spread: 15,
     cohesion: 60,
     grain: 1,
-    color: '#B02E12',
-    shade: '#7C1D0A',
+    flow: 1,      // clay barely creeps; it holds an angle
+    color: '#A9705A',      // warm clay — 3.35:1 / 3.58:1
+    shade: '#8A5A47',
   },
 };
 
@@ -91,14 +115,14 @@ export const MATERIAL_BY_ID = Object.fromEntries(
   Object.values(MATERIALS).map((m) => [m.id, m]),
 );
 
-// Paper cut-out palette. Pastel ground, vessel in darker two-tone.
+// Paper cut-out palette: rice paper, raked sand, sumi-ink vessel.
 export const PALETTE = {
-  skyTop: '#EADCEC',
-  skyBottom: '#F6E9DC',
-  table: '#DFCDBC',
-  vesselDark: '#4A4458',   // 7.79:1 on cream
-  vesselLit: '#6B6480',    // 4.68:1 on cream
-  spout: '#4A4458',
-  ink: '#2E2A3A',
-  abyss: 'rgba(74,68,88,0.10)',
+  skyTop: '#E7EAE3',
+  skyBottom: '#F3F0E8',
+  table: '#DCD8CB',
+  vesselDark: '#39443F',   // 8.34:1 on mist
+  vesselLit: '#5D6B65',    // 4.60:1 on mist
+  spout: '#39443F',
+  ink: '#2F3733',
+  abyss: 'rgba(57,68,63,0.09)',
 };

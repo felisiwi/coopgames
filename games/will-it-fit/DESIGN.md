@@ -123,7 +123,33 @@ no outline (Q22).
 
 **Look:** soft pastel gradient ground, vessel as a two-toned paper cut-out in darker shades,
 material vivid against it. Spilled material falls away into an abyss — there is no catch
-floor. Per-material colours still need the same contrast check before use.
+floor.
+
+**Revised after first play (2026-09-13).** The orange above was right on contrast and wrong on
+feeling: Kenny's note was that it "is not a restoring shade", and the target is spa / flow
+state / a Japanese garden rather than anything hot. Orange is out. The palette is now deep
+celadon, soft slate and warm clay on rice paper and mist, with a sumi-ink vessel — every tone
+re-measured against both background stops, all clearing 3:1:
+
+| | on mist `#E7EAE3` | on paper `#F3F0E8` |
+|---|---|---|
+| Water, deep celadon `#4F7A72` | 3.96:1 | 4.23:1 |
+| Mist, soft slate `#5F7E93` | 3.53:1 | 3.77:1 |
+| Clay, warm clay `#A9705A` | 3.35:1 | 3.58:1 |
+| vessel `#39443F` | 8.34:1 | 8.90:1 |
+
+The same note asked for finer, slower grains. Cell size halved (6px → 3px), which quarters
+grain area and doubles the grid. Pixel speed was halved and gravity **quartered** rather than
+halved — range goes as v²/g, so that preserves reach while roughly doubling time of flight —
+and the loop now runs one sim tick per frame instead of two. Net effect is an arc that hangs
+long enough to watch, at about four times the original flight duration.
+
+That change surfaced a real bug rather than just a tuning shift: a grain that moves one cell
+per tick spreads at a rate set by the grid resolution, so halving the cell size quartered how
+fast water levelled and it stopped reading as a liquid. Flow rate has to be a property of the
+material, not of how finely the world happens to be diced — hence the `flow` parameter (cells
+of lateral travel per tick: water 5, mist 2, clay 1). Water now settles to a surface roughness
+of 0.46 cells.
 
 ## Risks and open questions
 

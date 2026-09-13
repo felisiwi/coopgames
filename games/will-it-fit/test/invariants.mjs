@@ -233,6 +233,10 @@ console.log('\n7. materials behave differently');
     const sim = new Sim({ seed: 21, stage: 1, material: key, volume: 700 });
     const aim = findAim(sim) || { angle: -18, pressure: 5 };
     const s = run(sim, { aim, ticks: 40000 });
+    // `done` only means the source is empty and nothing is still airborne
+    // — grains are still streaming down the neck at that moment. Surface
+    // shape is a property of the material AT REST, so settle first.
+    for (let i = 0; i < 600; i++) s.tick();
     const surf = [...s.surface()].filter((v) => v >= 0);
     if (surf.length < 4) return null;
     const avg = surf.reduce((a, b) => a + b, 0) / surf.length;
@@ -241,7 +245,7 @@ console.log('\n7. materials behave differently');
   };
   const w = flatness('water');
   const m = flatness('magma');
-  check('water settles to a flat surface', w && w.rough < 3, w ? `rough=${w.rough.toFixed(2)}` : 'no data');
+  check('water settles to a flat surface', w && w.rough < 1.5, w ? `rough=${w.rough.toFixed(2)}` : 'no data');
   check('magma settles rougher than water', w && m && m.rough > w.rough,
     w && m ? `water ${w.rough.toFixed(2)} vs magma ${m.rough.toFixed(2)}` : 'no data');
 }

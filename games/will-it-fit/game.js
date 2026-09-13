@@ -17,7 +17,7 @@ const POOL_MAX = 600;
 const SPILL_COST = 1;                          // pool drained per lost droplet
 const MILESTONES = [10, 20, 40, 80, 160, 320]; // doubling, forever (Q14)
 const MATERIAL_ORDER = ['water', 'slush', 'magma'];
-const TICKS_PER_FRAME = 2;                     // sim ticks per rendered frame
+const TICKS_PER_FRAME = 1;                     // sim ticks per rendered frame — slow on purpose
 
 export default function start({ canvas, net, seed = 1 }) {
   const ctx = canvas.getContext('2d');

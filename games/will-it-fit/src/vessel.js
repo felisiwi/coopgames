@@ -28,17 +28,19 @@ export function generateVessel(seed, stage = 1) {
 
   // Aperture tightens as stages climb, with a floor that always admits the
   // stream. Widened by a random slack so two stages never feel identical.
+  // All sizes are in the fine grid (config CELL), so they are double what
+  // the same vessel measured before the grain size was halved.
   const tightness = Math.min(1, (stage - 1) / 30);
-  const apMax = Math.round(13 - 7 * tightness);
-  const aperture = Math.max(4, pick(Math.max(4, apMax - 3), apMax));
+  const apMax = Math.round(26 - 14 * tightness);
+  const aperture = Math.max(8, pick(Math.max(8, apMax - 6), apMax));
 
   const shapeStage = stage >= 10;
   const belly = shapeStage
-    ? Math.min(GRID.W - 4, aperture + pick(4, 16))
-    : Math.min(GRID.W - 4, aperture + pick(4, 9));
-  const height = shapeStage ? pick(30, GRID.H - 4) : pick(28, 40);
-  const neckLen = shapeStage ? pick(2, 10) : pick(2, 5);
-  const flareLen = Math.max(2, pick(3, 8));
+    ? Math.min(GRID.W - 8, aperture + pick(8, 32))
+    : Math.min(GRID.W - 8, aperture + pick(8, 18));
+  const height = shapeStage ? pick(60, GRID.H - 8) : pick(56, 80);
+  const neckLen = shapeStage ? pick(4, 20) : pick(4, 10);
+  const flareLen = Math.max(4, pick(6, 16));
 
   const rows = [];
   const mid = GRID.W >> 1;
@@ -83,7 +85,7 @@ export function validate(vessel, nozzle) {
   if (vessel.aperture < nozzle) {
     problems.push(`aperture ${vessel.aperture} narrower than nozzle ${nozzle}`);
   }
-  if (vessel.capacity < 120) problems.push(`capacity ${vessel.capacity} too small`);
+  if (vessel.capacity < 450) problems.push(`capacity ${vessel.capacity} too small`);
   if (vessel.height > GRID.H) problems.push(`height ${vessel.height} exceeds grid`);
   for (let y = 0; y < vessel.height; y++) {
     const row = vessel.rows[y];

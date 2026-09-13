@@ -204,7 +204,7 @@ export class Sim {
   // Bottom-up sweep so a falling cell cannot be moved twice in one tick.
   // Gravity is straight down in stage 1; stage 2 rotates this vector.
   stepCA() {
-    const { spread, cohesion } = this.material;
+    const { spread, cohesion, flow } = this.material;
     const g = this.grid;
     const v = this.vessel;
 
@@ -229,16 +229,34 @@ export class Sim {
 
         // Diagonal, then flat. Direction chosen from the PRNG so a pile
         // does not lean systematically to one side.
+        //
+        // `flow` is how many cells a grain may travel sideways in ONE tick.
+        // It has to exist: a grain that only ever moves one cell per tick
+        // spreads at a rate set by the grid resolution, so halving the cell
+        // size quartered how fast water levelled and it stopped reading as
+        // a liquid at all. Flow rate is a property of the material, not of
+        // how finely we happen to have diced the world.
         const dir = this.rand() & 1 ? 1 : -1;
+        let moved = false;
         for (const d of [dir, -dir]) {
-          if (inside(v, x + d, y + 1) && g[(y + 1) * GRID.W + x + d] === 0) {
-            g[(y + 1) * GRID.W + x + d] = g[i];
-            g[i] = 0;
-            break;
+          let bestX = x;
+          for (let k = 1; k <= flow; k++) {
+            const nx = x + d * k;
+            if (!inside(v, nx, y) || g[y * GRID.W + nx] !== 0) break;
+            bestX = nx;
+            // A gap below: fall into it immediately rather than sliding on.
+            if (inside(v, nx, y + 1) && g[(y + 1) * GRID.W + nx] === 0) {
+              g[(y + 1) * GRID.W + nx] = g[i];
+              g[i] = 0;
+              moved = true;
+              break;
+            }
           }
-          if (inside(v, x + d, y) && g[y * GRID.W + x + d] === 0) {
-            g[y * GRID.W + x + d] = g[i];
+          if (moved) break;
+          if (bestX !== x) {
+            g[y * GRID.W + bestX] = g[i];
             g[i] = 0;
+            moved = true;
             break;
           }
         }
