@@ -47,7 +47,7 @@ export const SPOUT = {
   PRESSURE_MIN: 1,
   PRESSURE_MAX: 10,
   PRESSURE_DEFAULT: 5,
-  SPEED_PER_PRESSURE: fp(0.55),
+  SPEED_PER_PRESSURE: fp(0.5),
   NOZZLE: 5,     // cells across the stream at the spout
   RATE: 2,       // grains emitted per tick while uncorked
 };
@@ -57,12 +57,12 @@ export const SPOUT = {
 // time of flight. The arc hangs instead of snapping, which is the whole
 // point: you should have time to watch it land and think about it.
 export const PHYS = {
-  GRAVITY: fp(0.022),
-  MAX_FALL: fp(2.5),       // terminal velocity in free flight
+  GRAVITY: fp(0.0182),
+  MAX_FALL: fp(2.27),      // terminal velocity in free flight
   // Terminal velocity once a grain is INSIDE the vessel. Lower, so the
   // stream eases into the pile instead of arriving at full speed — the
   // vessel should feel like it receives the pour, not like it blocks it.
-  INSIDE_MAX_FALL: fp(1.1),
+  INSIDE_MAX_FALL: fp(1.0),
 };
 
 export const TABLE_Y = 520; // where the vessel stands, in logical pixels

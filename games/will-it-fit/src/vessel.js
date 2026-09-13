@@ -60,6 +60,10 @@ export function generateVessel(seed, stage = 1) {
   }
 
   const capacity = rows.reduce((n, r) => n + (r.r - r.l), 0);
+  // Widest extent, so the sim can tell "clipped the shoulder and deflected
+  // off it" from "missed the vessel entirely and just kept falling".
+  const minL = Math.min(...rows.map((r) => r.l));
+  const maxR = Math.max(...rows.map((r) => r.r));
   return {
     rows,
     height,
@@ -67,6 +71,8 @@ export function generateVessel(seed, stage = 1) {
     belly,
     neckLen,
     mouth: { l: rows[0].l, r: rows[0].r },
+    minL,
+    maxR,
     capacity,
   };
 }

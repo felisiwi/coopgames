@@ -5,7 +5,7 @@ import { STAGE, GRID, PALETTE, SPOUT, MATERIAL_BY_ID, TABLE_Y, FP } from './conf
 const CELL = STAGE.CELL;
 
 export function drawScene(ctx, sim, { aimPreview = [], flowing = false } = {}) {
-  drawBackground(ctx);
+  drawBackground(ctx, sim);
   drawSpout(ctx, sim);
   drawPreview(ctx, aimPreview);
   drawVesselBody(ctx, sim);
@@ -15,22 +15,38 @@ export function drawScene(ctx, sim, { aimPreview = [], flowing = false } = {}) {
   if (flowing) drawPourGlow(ctx, sim);
 }
 
-function drawBackground(ctx) {
-  const sky = ctx.createLinearGradient(0, 0, 0, TABLE_Y);
+function drawBackground(ctx, sim) {
+  const sky = ctx.createLinearGradient(0, 0, 0, STAGE.H);
   sky.addColorStop(0, PALETTE.skyTop);
-  sky.addColorStop(1, PALETTE.skyBottom);
+  sky.addColorStop(0.75, PALETTE.skyBottom);
+  sky.addColorStop(1, PALETTE.skyTop);
   ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, STAGE.W, TABLE_Y);
+  ctx.fillRect(0, 0, STAGE.W, STAGE.H);
 
-  // The table is a paper strip; below it is the abyss spilled material
-  // falls into, so it fades rather than ending in a hard floor.
+  // The vessel stands on a narrow plinth, NOT a floor spanning the scene.
+  // A full-width table meant anything you missed fell in front of solid
+  // ground, which reads as landing, not as loss. With void either side, a
+  // miss visibly drops away into nothing — which is the point.
+  const px0 = (sim.col0 + sim.vessel.minL) * CELL - 14;
+  const px1 = (sim.col0 + sim.vessel.maxR) * CELL + 14;
+
+  ctx.save();
+  ctx.globalAlpha = 0.16;
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillRect(px0 + 4, TABLE_Y + 5, px1 - px0, 9);
+  ctx.restore();
+
   ctx.fillStyle = PALETTE.table;
-  ctx.fillRect(0, TABLE_Y, STAGE.W, 10);
-  const void_ = ctx.createLinearGradient(0, TABLE_Y + 10, 0, STAGE.H);
+  ctx.fillRect(px0, TABLE_Y, px1 - px0, 9);
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.fillRect(px0, TABLE_Y, px1 - px0, 2.5);
+
+  // Depth under the plinth, fading out — the abyss grains fall into.
+  const void_ = ctx.createLinearGradient(0, TABLE_Y + 9, 0, STAGE.H);
   void_.addColorStop(0, PALETTE.abyss);
-  void_.addColorStop(1, 'rgba(74,68,88,0)');
+  void_.addColorStop(1, 'rgba(57,68,63,0)');
   ctx.fillStyle = void_;
-  ctx.fillRect(0, TABLE_Y + 10, STAGE.W, STAGE.H - TABLE_Y - 10);
+  ctx.fillRect(px0, TABLE_Y + 9, px1 - px0, STAGE.H - TABLE_Y - 9);
 }
 
 // Vessel outline as a single polygon, walked down the left edge and back
@@ -142,14 +158,27 @@ function drawMaterial(ctx, sim) {
 }
 
 function drawDrops(ctx, sim) {
-  ctx.fillStyle = sim.material.color;
+  const baseAlpha = sim.material.alpha ?? 1;
   for (const d of sim.drops) {
     const px = (d.x / FP) * CELL;
     const py = (d.y / FP) * CELL;
+
+    // Grains falling past the table are on their way into the abyss, so
+    // they fade out over that drop rather than blinking off at the edge.
+    // Vanishing abruptly is what made a miss read as a deletion instead of
+    // a loss — the same complaint as the wall at the vessel mouth.
+    let a = baseAlpha;
+    if (py > TABLE_Y) {
+      a = baseAlpha * Math.max(0, 1 - (py - TABLE_Y) / (STAGE.H - TABLE_Y));
+      if (a <= 0.01) continue;
+    }
+
     // Stretch along travel so a fast stream reads as a stream.
     const speed = Math.hypot(d.vx, d.vy) / FP;
     const r = CELL * 0.5;
     ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = sim.material.color;
     ctx.translate(px, py);
     ctx.rotate(Math.atan2(d.vy, d.vx));
     ctx.beginPath();

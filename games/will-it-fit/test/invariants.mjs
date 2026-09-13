@@ -2,9 +2,11 @@
 // the game's own modules and drives the simulation directly.
 //
 //   node games/will-it-fit/test/invariants.mjs
-import { FP, GRID, SPOUT, MATERIALS, SOURCE, PHYS } from '../src/config.js';
+import { FP, GRID, SPOUT, MATERIALS, SOURCE, PHYS, STAGE, TABLE_Y } from '../src/config.js';
 import { generateVessel, validate, inside, rng } from '../src/vessel.js';
 import { Sim, traceArc, launchVelocity } from '../src/sim.js';
+
+const TABLE_ROW = Math.floor(TABLE_Y / STAGE.CELL);
 
 let pass = 0;
 let fail = 0;
@@ -181,6 +183,29 @@ console.log('\n3. the handoff');
     `peak in-flight inside = ${peakInside}`);
   check('they descend through it rather than sticking at the rim', sawDescending);
   check('and they all eventually settle or spill', s.done && s.drops.length === 0);
+}
+{
+  // The same complaint, the other seam: a grain that MISSES must fall away
+  // into the abyss, not blink out of existence in mid-air the instant it
+  // is doomed. It stays alive, keeps falling, and is only counted when it
+  // actually leaves the frame.
+  const s = new Sim({ seed: 3, stage: 1, volume: 200 });
+  s.setAim(-40, 4); // deliberately short of the mouth
+  s.setCork(true);
+  let peakLost = 0;
+  let deepest = 0;
+  for (let i = 0; i < 20000 && !s.done; i++) {
+    s.tick();
+    const lost = s.drops.filter((d) => d.lost);
+    peakLost = Math.max(peakLost, lost.length);
+    for (const d of lost) deepest = Math.max(deepest, d.y / FP | 0);
+  }
+  check('missed grains keep falling instead of vanishing', peakLost > 5,
+    `peak falling-lost = ${peakLost}`);
+  check('they fall past the plinth into the abyss', deepest > TABLE_ROW,
+    `deepest row ${deepest} vs plinth ${TABLE_ROW}`);
+  check('and are all accounted for once gone', s.done && s.caught + s.spilled === 200,
+    `caught ${s.caught} + spilled ${s.spilled}`);
 }
 
 console.log('\n4. conservation (the load-bearing invariant)');

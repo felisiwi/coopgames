@@ -19,6 +19,7 @@ import { generateVessel, inside } from './vessel.js';
 const INSIDE_MAX_FALL = PHYS.INSIDE_MAX_FALL;
 
 const WORLD_COLS = Math.floor(STAGE.W / STAGE.CELL);
+const WORLD_ROWS = Math.floor(STAGE.H / STAGE.CELL);
 const TABLE_ROW = Math.floor(TABLE_Y / STAGE.CELL);
 const SPOUT_COL = Math.floor(SPOUT.X / STAGE.CELL);
 const SPOUT_ROW = Math.floor(SPOUT.Y / STAGE.CELL);
@@ -151,7 +152,7 @@ export class Sim {
       // Spread the stream across the nozzle so it reads as a stream, not a
       // line of identical dots. Integer jitter only.
       const jitter = (this.rand() % (SPOUT.NOZZLE * FP)) - ((SPOUT.NOZZLE * FP) >> 1);
-      this.drops.push({ x: SPOUT_COL * FP + jitter, y: SPOUT_ROW * FP, vx, vy, inside: 0 });
+      this.drops.push({ x: SPOUT_COL * FP + jitter, y: SPOUT_ROW * FP, vx, vy, inside: 0, lost: 0 });
     }
   }
 
@@ -181,12 +182,34 @@ export class Sim {
         continue;
       }
 
+      // A grain already known to be lost still has to FALL. Deleting it the
+      // moment it was doomed is the same mistake the mouth handoff made:
+      // it vanished in mid-air instead of dropping away into the abyss.
+      // It is counted as spilled when it actually leaves the frame, which
+      // also makes the reserve tick down in time with what you can see.
+      if (d.lost) {
+        stepBallistic(d);
+        const lc = d.x / FP | 0;
+        const lr = d.y / FP | 0;
+        if (lc < -8 || lc > WORLD_COLS + 8 || lr > WORLD_ROWS + 8) {
+          this.spilled++;
+          continue;
+        }
+        kept.push(d);
+        continue;
+      }
+
       stepBallistic(d);
       const col = d.x / FP | 0;
       const row = d.y / FP | 0;
 
-      // Off the sides, or past the table: gone to the abyss.
-      if (col < 0 || col >= WORLD_COLS || row > TABLE_ROW + 6) {
+      // Off the sides entirely.
+      if (col < -8 || col > WORLD_COLS + 8) {
+        this.spilled++;
+        continue;
+      }
+      // Fell past the whole scene without ever meeting the vessel.
+      if (row > WORLD_ROWS + 8) {
         this.spilled++;
         continue;
       }
@@ -207,8 +230,18 @@ export class Sim {
           kept.push(d);
           continue;
         }
-        // Clipped the rim or the shoulder — lost.
-        this.spilled++;
+        // Missed the mouth. It is lost, but it does not disappear here —
+        // it keeps falling. If it came down over the vessel's shoulder it
+        // deflects off it and runs clear; if it was never near the vessel
+        // it simply carries on into the abyss.
+        d.lost = 1;
+        const overShoulder = gx >= this.vessel.minL - 2 && gx < this.vessel.maxR + 2;
+        if (overShoulder) {
+          const outward = gx < this.vessel.mouth.l ? -1 : 1;
+          d.vx = outward * (Math.abs(d.vx >> 1) + (FP >> 3));
+          d.vy = d.vy >> 2; // the shoulder takes most of the fall out of it
+        }
+        kept.push(d);
         continue;
       }
 
@@ -356,7 +389,7 @@ export class Sim {
       h = Math.imul(h, 16777619) >>> 0;
     };
     for (let i = 0; i < this.grid.length; i++) if (this.grid[i]) mix(i * 31 + this.grid[i]);
-    for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); mix(d.inside); }
+    for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); mix(d.inside); mix(d.lost); }
     mix(this.caught); mix(this.spilled); mix(this.remaining);
     return h >>> 0;
   }
