@@ -122,6 +122,11 @@ function drawMaterial(ctx, sim) {
   const g = sim.grid;
   const surf = sim.surface();
 
+  // Liquids are translucent, so the vessel reads through them. Drawn as one
+  // layer at a single alpha rather than per-cell, or the overlapping edges
+  // of adjacent cells would darken into a grid of seams.
+  ctx.save();
+  ctx.globalAlpha = sim.material.alpha ?? 1;
   for (let y = 0; y < sim.vessel.height; y++) {
     for (let x = 0; x < GRID.W; x++) {
       const id = g[y * GRID.W + x];
@@ -133,6 +138,7 @@ function drawMaterial(ctx, sim) {
       ctx.fillRect(x0 + x * CELL, y0 + y * CELL, CELL + 0.5, CELL + 0.5);
     }
   }
+  ctx.restore();
 }
 
 function drawDrops(ctx, sim) {
@@ -159,18 +165,40 @@ function drawSpout(ctx, sim) {
   ctx.save();
   ctx.translate(px, py);
 
-  // Vessel body of the source, hanging above.
-  ctx.fillStyle = PALETTE.vesselDark;
-  ctx.beginPath();
-  ctx.moveTo(-46, -52);
-  ctx.lineTo(22, -52);
-  ctx.quadraticCurveTo(30, -20, 16, -4);
-  ctx.lineTo(-40, -4);
-  ctx.quadraticCurveTo(-54, -24, -46, -52);
-  ctx.closePath();
+  // Vessel body of the source, hanging above. Its own level is drawn
+  // inside it rather than as a HUD bar — you can see how much is left by
+  // looking at the thing that holds it.
+  const body = () => {
+    ctx.beginPath();
+    ctx.moveTo(-46, -52);
+    ctx.lineTo(22, -52);
+    ctx.quadraticCurveTo(30, -20, 16, -4);
+    ctx.lineTo(-40, -4);
+    ctx.quadraticCurveTo(-54, -24, -46, -52);
+    ctx.closePath();
+  };
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  body();
   ctx.fill();
+
+  const left = sim.startVolume ? sim.remaining / sim.startVolume : 0;
+  if (left > 0) {
+    ctx.save();
+    body();
+    ctx.clip();
+    ctx.globalAlpha = sim.material.alpha ?? 1;
+    ctx.fillStyle = sim.material.color;
+    ctx.fillRect(-54, -4 - 48 * left, 90, 48 * left + 2);
+    ctx.restore();
+  }
+
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = PALETTE.vesselDark;
+  ctx.lineJoin = 'round';
+  body();
+  ctx.stroke();
   ctx.fillStyle = PALETTE.vesselLit;
-  ctx.fillRect(-40, -46, 10, 36);
+  ctx.fillRect(-42, -46, 5, 36);
 
   // The nozzle points where you're aiming.
   ctx.rotate((-sim.angle * Math.PI) / 180);
@@ -215,31 +243,27 @@ function drawPourGlow(ctx, sim) {
 
 // ── HUD ────────────────────────────────────────────────────────────────
 
+// ONE meter. There were three, and two of them were saying the same thing
+// twice: "spilled" is just the pool inverted, and the vessel's fill level is
+// already visible in the vessel. What is left is the only number with a
+// consequence — the pool, which now drains live as you spill rather than
+// updating once between stages, where it looked like it did nothing.
+//
+// Everything else is shown diegetically: the source's own level is drawn in
+// the source, and how full the vessel is you can simply see.
 export function drawHud(ctx, sim, { stage, pool, poolMax }) {
   ctx.save();
   ctx.font = '600 15px ui-rounded, "Trebuchet MS", system-ui, sans-serif';
   ctx.fillStyle = PALETTE.ink;
 
   ctx.textAlign = 'left';
-  ctx.fillText(`Stage ${stage}`, 24, 34);
-  ctx.fillText(`${sim.material.name}`, 24, 54);
+  ctx.fillText(`Stage ${stage} · ${sim.material.name}`, 24, 36);
 
-  // Source remaining.
-  bar(ctx, 24, 64, 150, 10, sim.remaining / sim.startVolume, sim.material.color);
-  ctx.fillText('source', 24, 90);
-
-  // Fill level of the vessel.
-  ctx.textAlign = 'right';
-  const pct = Math.round(sim.fillRatio * 100);
-  ctx.fillText(`${pct}% full`, STAGE.W - 24, 34);
-  bar(ctx, STAGE.W - 174, 44, 150, 10, sim.fillRatio, PALETTE.vesselDark);
-
-  ctx.fillText(`spilled ${sim.spilled}`, STAGE.W - 24, 78);
-
-  // The pool — the only real stake.
   ctx.textAlign = 'center';
-  ctx.fillText('pool', STAGE.W / 2, 34);
-  bar(ctx, STAGE.W / 2 - 110, 44, 220, 12, pool / poolMax, '#C2410C');
+  bar(ctx, STAGE.W / 2 - 130, 22, 260, 12, pool / poolMax, sim.material.color);
+  ctx.font = '500 12px ui-rounded, "Trebuchet MS", system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(47,55,51,0.65)';
+  ctx.fillText('reserve', STAGE.W / 2, 50);
   ctx.restore();
 }
 

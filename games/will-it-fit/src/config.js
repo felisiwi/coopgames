@@ -57,8 +57,12 @@ export const SPOUT = {
 // time of flight. The arc hangs instead of snapping, which is the whole
 // point: you should have time to watch it land and think about it.
 export const PHYS = {
-  GRAVITY: fp(0.0275),
-  MAX_FALL: fp(2.5),   // terminal velocity, also keeps the handoff tractable
+  GRAVITY: fp(0.022),
+  MAX_FALL: fp(2.5),       // terminal velocity in free flight
+  // Terminal velocity once a grain is INSIDE the vessel. Lower, so the
+  // stream eases into the pile instead of arriving at full speed — the
+  // vessel should feel like it receives the pour, not like it blocks it.
+  INSIDE_MAX_FALL: fp(1.1),
 };
 
 export const TABLE_Y = 520; // where the vessel stands, in logical pixels
@@ -86,6 +90,7 @@ export const MATERIALS = {
     cohesion: 0,
     grain: 1,
     flow: 5,      // cells of lateral travel per tick — water finds its level fast
+    alpha: 0.8,   // liquids are translucent; you should see the vessel through them
     color: '#4F7A72',      // deep celadon — 3.96:1 on mist, 4.23:1 on paper
     shade: '#3E615B',
   },
@@ -96,6 +101,7 @@ export const MATERIALS = {
     cohesion: 45,
     grain: 2,
     flow: 2,
+    alpha: 0.85,
     color: '#5F7E93',      // soft slate — 3.53:1 / 3.77:1
     shade: '#4B6675',
   },
@@ -106,6 +112,7 @@ export const MATERIALS = {
     cohesion: 60,
     grain: 1,
     flow: 1,      // clay barely creeps; it holds an angle
+    alpha: 1,     // clay is opaque
     color: '#A9705A',      // warm clay — 3.35:1 / 3.58:1
     shade: '#8A5A47',
   },

@@ -1,6 +1,7 @@
 # Will It Fit? — design
 
-Owner: kenny. Status: **designed, not built.** Nothing in this folder is code yet.
+Owner: kenny. Status: **build stage 1 shipped and revised twice from play feedback.** See
+[README.md](README.md) for what runs today and what is still owed.
 
 Produced by a grilling session (`.claude/skills/grilling`) on 2026-09-13 — 25 questions
 across five rounds, every branch resolved before any code. Where a decision went against
@@ -67,10 +68,16 @@ would reduce the cork to decoration.
 **What escalates — aperture, then vessel shape and height** (Q15). Two dials only. Vessel
 motion was considered and deliberately deferred.
 
-**Pool** (Q4, Q9, Q13, Q14, Q18). Session-only, no persistence. Spilling drains it; it
-refills at stages 10, 20, 40, 80, 160 — doubling forever. **No floor: at zero the run ends**,
-restart at stage 1 keeping a best-stage record. The pool is the only stake in the design, so
-it has to be able to run out.
+**Pool — one meter, draining live** (Q4, Q9, Q13, Q14, Q18). Session-only, no persistence.
+Spilling drains it; it refills at stages 10, 20, 40, 80, 160 — doubling forever. **No floor:
+at zero the run ends**, restart at stage 1 keeping a best-stage record. The pool is the only
+stake in the design, so it has to be able to run out.
+
+Revised after play: it originally reconciled once per stage and sat still while you played,
+so it read as doing nothing — and a separate "spilled" readout said the same thing inverted.
+It now drains one unit per grain the instant that grain is lost, and it is the **only** meter
+on screen. The source's level is drawn inside the source, and how full the vessel is you can
+simply see, so neither needs a bar. Called the *reserve* in-game.
 
 **Roles swap every stage** (Q21).
 
@@ -179,7 +186,16 @@ Resolve each explicitly during the build, the way `AGENTS.md` does.
    wants the same answer: a generator gate plus several seeds eyeballed before sign-off.
 6. **The pool economy is entirely untuned.** Spill cost, source volume per stage, and the
    doubling refill schedule are guesses. First real session with Felix is the tuning pass.
-7. **The flight/settle handoff at the vessel mouth** crosses coordinate systems and is where
+7. **RESOLVED, and it was real.** The flight/settle handoff at the vessel mouth was the
+   riskiest seam, and the first build got it wrong in exactly the predicted way: a grain was
+   converted to a cell the instant it crossed the mouth plane, losing all its momentum. Play
+   feedback was that the stream "hits the bottle thing and it's like a wall all of a sudden,
+   breaks the illusion" — which is precisely what the risk anticipated. Fixed by letting a
+   grain keep flying *inside* the vessel, colliding with walls and the pile, and only settling
+   where it actually lands. Locked in by a test asserting grains are in flight inside the
+   vessel (peak ~75 at once, formerly 0). The original wording, for the record:
+
+   **The flight/settle handoff at the vessel mouth** crosses coordinate systems and is where
    both determinism and game feel are most exposed. A cell arriving at a tilted mouth has to
    be admitted, deflected off the rim, or spilled, and getting that wrong makes near-misses
    feel arbitrary. Gate it with explicit tests for rim-clip cases, not just clean entries.

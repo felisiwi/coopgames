@@ -13,8 +13,12 @@ import { STAGE, SPOUT, SOURCE, FP, TABLE_Y } from './src/config.js';
 import { Sim, traceArc } from './src/sim.js';
 import { drawScene, drawHud, drawBanner } from './src/draw.js';
 
-const POOL_MAX = 600;
-const SPILL_COST = 1;                          // pool drained per lost droplet
+// Reserve economy. A stage pours SOURCE.VOLUME (~2800) grains, so the
+// reserve has to be several stages deep or one bad pour ends the run. At
+// 3500 a sloppy stage (~800 spilled) costs about a quarter, and the
+// milestone refills at 10/20/40... are real relief. Guesswork until played.
+const POOL_MAX = 3500;
+const SPILL_COST = 1;                          // reserve drained per grain lost
 const MILESTONES = [10, 20, 40, 80, 160, 320]; // doubling, forever (Q14)
 const MATERIAL_ORDER = ['water', 'slush', 'magma'];
 const TICKS_PER_FRAME = 1;                     // sim ticks per rendered frame — slow on purpose
@@ -27,6 +31,7 @@ export default function start({ canvas, net, seed = 1 }) {
   let best = 1;
   let phase = 'play'; // play | between | over
   let phaseT = 0;
+  let poolShown = POOL_MAX; // eased toward `pool` so the meter glides
   let sim = makeSim();
   let running = true;
 
@@ -97,19 +102,31 @@ export default function start({ canvas, net, seed = 1 }) {
   }
 
   // ── round flow ───────────────────────────────────────────────────────
+  // The reserve drains LIVE, one unit per grain lost, rather than being
+  // reconciled once the stage ends. Settling up afterwards is why it looked
+  // like it did nothing: the only meter on screen sat still through the one
+  // part of the game where you can affect it.
+  let countedSpill = 0;
+  function drainForSpills() {
+    const newly = sim.spilled - countedSpill;
+    if (newly <= 0) return;
+    countedSpill = sim.spilled;
+    pool = Math.max(0, pool - newly * SPILL_COST);
+    if (pool === 0) { best = Math.max(best, stage); phase = 'over'; phaseT = 0; }
+  }
+
   function endStage() {
-    pool -= sim.spilled * SPILL_COST;
     if (MILESTONES.includes(stage)) pool = POOL_MAX;
     pool = Math.min(POOL_MAX, pool);
     best = Math.max(best, stage);
-    if (pool <= 0) { pool = 0; phase = 'over'; }
-    else { phase = 'between'; }
+    phase = pool <= 0 ? 'over' : 'between';
     phaseT = 0;
   }
 
   function nextStage() {
     stage += 1;
     sim = makeSim();
+    countedSpill = 0;
     phase = 'play';
     phaseT = 0;
   }
@@ -117,7 +134,9 @@ export default function start({ canvas, net, seed = 1 }) {
   function restart() {
     stage = 1;
     pool = POOL_MAX;
+    poolShown = POOL_MAX;
     sim = makeSim();
+    countedSpill = 0;
     phase = 'play';
     phaseT = 0;
   }
@@ -133,11 +152,17 @@ export default function start({ canvas, net, seed = 1 }) {
       sim.setAim(aimAngle(), pressure);
       sim.setCork(corkOpen);
       for (let i = 0; i < TICKS_PER_FRAME; i++) sim.tick();
-      if (sim.done) endStage();
+      drainForSpills();
+      if (phase === 'play' && sim.done) endStage();
     } else {
       phaseT += dt;
       if (phase === 'between' && phaseT > 1.8) nextStage();
     }
+
+    // Ease the meter toward its true value rather than snapping. Frame-rate
+    // independent, so it glides the same on 60Hz and 144Hz.
+    poolShown += (pool - poolShown) * (1 - Math.exp(-6 * dt));
+    if (Math.abs(pool - poolShown) < 0.5) poolShown = pool;
 
     render();
     requestAnimationFrame(frame);
@@ -162,13 +187,13 @@ export default function start({ canvas, net, seed = 1 }) {
       aimPreview: phase === 'play' && !corkOpen ? preview() : [],
       flowing: sim.flowing,
     });
-    drawHud(ctx, sim, { stage, pool, poolMax: POOL_MAX });
+    drawHud(ctx, sim, { stage, pool: poolShown, poolMax: POOL_MAX });
 
     if (phase === 'between') {
       const kept = Math.round(sim.fillRatio * 100);
-      drawBanner(ctx, `${kept}% caught`, `spilled ${sim.spilled} — pool ${pool}`);
+      drawBanner(ctx, `${kept}% caught`, `reserve ${Math.round(pool)}`);
     } else if (phase === 'over') {
-      drawBanner(ctx, 'Out of material', `reached stage ${best} — press R to start again`);
+      drawBanner(ctx, 'The reserve is empty', `reached stage ${best} — press R to begin again`);
     } else if (!corkOpen && sim.remaining === sim.startVolume) {
       drawBanner(ctx, 'Aim, then hold to pour', 'mouse aims · wheel or W/S sets pressure · hold click or space');
     }

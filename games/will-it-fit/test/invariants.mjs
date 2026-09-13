@@ -160,6 +160,28 @@ console.log('\n3. the handoff');
   check('a hopeless aim catches nothing', s.caught === 0, `caught=${s.caught}`);
   check('and loses everything', s.spilled === 200, `spilled=${s.spilled}`);
 }
+{
+  // The wall test. A grain must KEEP FLYING after it crosses the mouth and
+  // only settle where it actually lands — converting it to a cell at the
+  // rim is what made the vessel feel like a wall the stream splatted
+  // against. If this count ever returns to zero, that bug is back.
+  const s = new Sim({ seed: 3, stage: 1, volume: 300 });
+  s.setAim(-10, 3);
+  s.setCork(true);
+  let peakInside = 0;
+  let sawDescending = false;
+  for (let i = 0; i < 20000 && !s.done; i++) {
+    s.tick();
+    const inFlightInside = s.drops.filter((d) => d.inside);
+    peakInside = Math.max(peakInside, inFlightInside.length);
+    // Somebody should be genuinely travelling down the neck, not hovering.
+    if (inFlightInside.some((d) => d.vy > 0)) sawDescending = true;
+  }
+  check('grains keep flying after entering the vessel', peakInside > 10,
+    `peak in-flight inside = ${peakInside}`);
+  check('they descend through it rather than sticking at the rim', sawDescending);
+  check('and they all eventually settle or spill', s.done && s.drops.length === 0);
+}
 
 console.log('\n4. conservation (the load-bearing invariant)');
 {

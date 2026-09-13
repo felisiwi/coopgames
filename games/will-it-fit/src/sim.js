@@ -16,6 +16,8 @@
 import { FP, STAGE, SPOUT, PHYS, GRID, SOURCE, MATERIALS, TABLE_Y } from './config.js';
 import { generateVessel, inside } from './vessel.js';
 
+const INSIDE_MAX_FALL = PHYS.INSIDE_MAX_FALL;
+
 const WORLD_COLS = Math.floor(STAGE.W / STAGE.CELL);
 const TABLE_ROW = Math.floor(TABLE_Y / STAGE.CELL);
 const SPOUT_COL = Math.floor(SPOUT.X / STAGE.CELL);
@@ -149,7 +151,7 @@ export class Sim {
       // Spread the stream across the nozzle so it reads as a stream, not a
       // line of identical dots. Integer jitter only.
       const jitter = (this.rand() % (SPOUT.NOZZLE * FP)) - ((SPOUT.NOZZLE * FP) >> 1);
-      this.drops.push({ x: SPOUT_COL * FP + jitter, y: SPOUT_ROW * FP, vx, vy });
+      this.drops.push({ x: SPOUT_COL * FP + jitter, y: SPOUT_ROW * FP, vx, vy, inside: 0 });
     }
   }
 
@@ -157,6 +159,28 @@ export class Sim {
     const kept = [];
     for (const d of this.drops) {
       const prevRow = d.y / FP | 0;
+      const prevCol = d.x / FP | 0;
+
+      if (d.inside) {
+        // Inside the vessel the grain KEEPS its momentum and keeps
+        // travelling. Converting it to a cell the instant it crossed the
+        // mouth is what made the vessel feel like a wall: the stream
+        // arrived beautifully and then stopped dead at the rim. A grain
+        // should carry its arc down the neck and only become part of the
+        // pile when it actually lands on something.
+        //
+        // Light drag while inside so it eases into the pile rather than
+        // slamming. Integer arithmetic: >> is an arithmetic shift, so this
+        // stays exact and identical on both peers.
+        d.vx = (d.vx * 7) >> 3;
+        stepBallistic(d);
+        if (d.vy > INSIDE_MAX_FALL) d.vy = INSIDE_MAX_FALL;
+
+        if (this.resolveInside(d, prevCol, prevRow)) continue; // it settled
+        kept.push(d);
+        continue;
+      }
+
       stepBallistic(d);
       const col = d.x / FP | 0;
       const row = d.y / FP | 0;
@@ -168,14 +192,19 @@ export class Sim {
       }
 
       // ── the handoff ──────────────────────────────────────────────
-      // A droplet is admitted only on the tick it CROSSES the mouth
-      // plane, and only if it is within the mouth span at that moment.
-      // Testing the crossing rather than "is below the rim" is what stops
-      // a fast droplet tunnelling through the rim in a single step.
+      // A grain is admitted only on the tick it CROSSES the mouth plane,
+      // and only if it is within the mouth span at that moment. Testing
+      // the crossing rather than "is below the rim" is what stops a fast
+      // grain tunnelling through the rim in a single step.
+      //
+      // Admission no longer means landing — it flips `inside` and the
+      // grain flies on. That is the whole difference between a stream
+      // pouring into a vessel and a stream hitting a wall.
       if (prevRow < this.mouthRow && row >= this.mouthRow) {
         const gx = col - this.col0;
         if (gx >= this.vessel.mouth.l && gx < this.vessel.mouth.r) {
-          this.admit(gx);
+          d.inside = 1;
+          kept.push(d);
           continue;
         }
         // Clipped the rim or the shoulder — lost.
@@ -188,15 +217,58 @@ export class Sim {
     this.drops = kept;
   }
 
-  // Turn an in-flight droplet into a settled cell at the mouth. If the
-  // neck is already full, the vessel has overflowed and it is lost.
-  admit(gx) {
-    const i = gx; // row 0
-    if (this.grid[i] !== 0) {
+  // Move a grain that is inside the vessel, bouncing it off walls and
+  // settling it when it meets the floor or the pile. Returns true if the
+  // grain stopped being a grain this tick (settled or spilled).
+  resolveInside(d, prevCol, prevRow) {
+    const v = this.vessel;
+    let gx = (d.x / FP | 0) - this.col0;
+    let gy = (d.y / FP | 0) - this.mouthRow;
+    const pgx = prevCol - this.col0;
+    const pgy = prevRow - this.mouthRow;
+
+    // Below the base: settle on the floor.
+    if (gy >= v.height) {
+      this.settleAt(gx, v.height - 1, pgx);
+      return true;
+    }
+    if (gy < 0) return false; // still in the mouth plane, keep flying
+
+    // Into a wall: slide down it, losing most of the sideways motion.
+    // Grains should run down the inside of a narrowing neck, not stop.
+    if (!inside(v, gx, gy)) {
+      const row = v.rows[gy];
+      const clamped = Math.max(row.l, Math.min(row.r - 1, gx));
+      d.x = (clamped + this.col0) * FP + (FP >> 1);
+      d.vx = -(d.vx >> 2);
+      gx = clamped;
+      if (!inside(v, gx, gy)) { this.settleAt(pgx, pgy, pgx); return true; }
+    }
+
+    // Into the pile: stop just above whatever it hit.
+    if (this.grid[gy * GRID.W + gx] !== 0) {
+      this.settleAt(gx, gy - 1, pgx);
+      return true;
+    }
+    return false;
+  }
+
+  // Place a settled grain, climbing out of any occupied cell. A grain with
+  // nowhere left to go has overflowed the vessel and is lost.
+  settleAt(gx, gy, fallbackX) {
+    const v = this.vessel;
+    let x = gx;
+    let y = gy;
+    if (y >= v.height) y = v.height - 1;
+    if (!inside(v, x, y)) x = fallbackX;
+
+    while (y >= 0 && (!inside(v, x, y) || this.grid[y * GRID.W + x] !== 0)) y--;
+
+    if (y < 0 || !inside(v, x, y)) {
       this.spilled++;
       return;
     }
-    this.grid[i] = this.material.id;
+    this.grid[y * GRID.W + x] = this.material.id;
     this.caught++;
   }
 
@@ -284,7 +356,7 @@ export class Sim {
       h = Math.imul(h, 16777619) >>> 0;
     };
     for (let i = 0; i < this.grid.length; i++) if (this.grid[i]) mix(i * 31 + this.grid[i]);
-    for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); }
+    for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); mix(d.inside); }
     mix(this.caught); mix(this.spilled); mix(this.remaining);
     return h >>> 0;
   }
