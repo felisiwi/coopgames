@@ -1,0 +1,7 @@
+{
+  "id": "will-it-fit",
+  "name": "Will It Fit?",
+  "description": "One of you pours, the other catches. Arc the stream into the vessel and keep it inside — every drop you spill is gone for good.",
+  "players": { "min": 1, "max": 2 },
+  "owner": "kenny"
+}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Will It Fit? (solo dev) — coopgames</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #E4D7E6;
+      overflow: hidden;
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+      color: #2E2A3A;
+    }
+    canvas { display: block; }
+    #hud {
+      position: fixed;
+      left: 10px;
+      bottom: 10px;
+      font-size: 12px;
+      line-height: 1.6;
+      background: rgba(246, 233, 220, 0.82);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    #hud a { color: #C2410C; }
+    #hud kbd {
+      background: #EADCEC;
+      border: 1px solid rgba(74,68,88,0.3);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: ui-monospace, monospace;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <div><a href="../../">&larr; hub</a> &middot; solo dev entry — build stage 1 (pourer only, no networking)</div>
+    <div>mouse aims &middot; <kbd>wheel</kbd> or <kbd>W</kbd>/<kbd>S</kbd> pressure &middot;
+      hold <kbd>click</kbd> or <kbd>space</kbd> to pour &middot; <kbd>R</kbd> restart</div>
+    <div>?seed=N for a different run</div>
+  </div>
+
+  <script type="module">
+    import start from './game.js';
+
+    // Fakes the hub's net object. Build stage 1 is solo, so nothing is
+    // sent — this exists to match the contract, not because it's used.
+    const listeners = [];
+    const fakeNet = {
+      send(msg) { if (window.LOG_NET) console.log('[dev net] send', msg); },
+      onMessage(fn) { listeners.push(fn); },
+      _emit(msg) { listeners.forEach((fn) => fn(msg)); },
+      peerId: 'solo-dev',
+      isHost: true,
+    };
+    window.fakeNet = fakeNet;
+    window.LOG_NET = false;
+
+    const canvas = document.getElementById('game');
+    function fit() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    fit();
+    window.addEventListener('resize', fit);
+
+    const params = new URLSearchParams(window.location.search);
+    const seed = params.has('seed')
+      ? Number(params.get('seed'))
+      : Math.floor(Math.random() * 1_000_000);
+
+    start({
+      canvas,
+      net: fakeNet,
+      seed,
+      role: 'host',
+      players: { min: 1, max: 2 },
+    });
+  </script>
+</body>
+</html>
