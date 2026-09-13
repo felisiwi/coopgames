@@ -1,7 +1,6 @@
 # Last session
 
-**2026-09-13 — Will It Fit? stage 1, signed off (Kenny)** — 43/43 headless,
-not hub-launched yet; see `games/will-it-fit/README.md`.
+**2026-09-13 — Will It Fit? stage 1 signed off (Kenny)** — 43/43 headless, not hub-launched; see its README.
 
 **2026-09-11/12 — Windward W0.6: wave amplitude fixed to boat scale, boat
 bob/tilt, explicit boat-model load, HUD clear of hub pill** (commit
