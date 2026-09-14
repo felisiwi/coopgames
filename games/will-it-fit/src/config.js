@@ -67,7 +67,15 @@ export const POUR = {
   RATE_START: fp(0.25), // grains per tick the moment you open it
   RATE_MAX: fp(5),
   PRESSURE_START: fp(1.6),
-  PRESSURE_MAX: fp(9),
+  // Topped out so the arc ALWAYS falls inside the frame. Measured at the
+  // fixed aim against a representative rim height, the stream lands at:
+  //   p5 -> col 238   p6 -> col 265   p7 -> col 287
+  //   p8 -> col 305   p9 -> col 324   p10 -> col 340
+  // The bowl's travel ends at col 290 and the frame at 320, so anything
+  // above 7 throws material somewhere the catcher cannot reach and then
+  // off the edge entirely. At 7 a full-tilt pour still arcs down onto the
+  // far end of the bowl's reach, which is the fastest it can usefully be.
+  PRESSURE_MAX: fp(7),
 };
 
 // Slowed deliberately. Halving exit speed and QUARTERING gravity (in pixel

@@ -14,16 +14,13 @@
 // free tilt would only ever cost you, so nobody would use it. Lockstep sync
 // is stage 4; `net` is accepted and unused for now.
 import { STAGE, SPOUT, FP, TABLE_Y, VESSEL } from './src/config.js';
+import {
+  RESERVE_MAX, SPILL_COST, MILESTONES,
+  stageVolume, afterStage, drain, runOver,
+} from './src/economy.js';
 import { Sim, traceArc } from './src/sim.js';
 import { drawScene, drawHud, drawBanner } from './src/draw.js';
 
-// Reserve economy. A stage pours SOURCE.VOLUME (~2800) grains, so the
-// reserve has to be several stages deep or one bad pour ends the run. At
-// 3500 a sloppy stage (~800 spilled) costs about a quarter, and the
-// milestone refills at 10/20/40... are real relief. Guesswork until played.
-const POOL_MAX = 3500;
-const SPILL_COST = 1;                          // reserve drained per grain lost
-const MILESTONES = [10, 20, 40, 80, 160, 320]; // doubling, forever (Q14)
 const MATERIAL_ORDER = ['water', 'slush', 'magma'];
 const TICKS_PER_FRAME = 1;                     // sim ticks per rendered frame — slow on purpose
 
@@ -31,18 +28,22 @@ export default function start({ canvas, net, seed = 1 }) {
   const ctx = canvas.getContext('2d');
 
   let stage = 1;
-  let pool = POOL_MAX;
+  let reserve = RESERVE_MAX;
   let best = 1;
   let phase = 'play'; // play | between | over
   let phaseT = 0;
-  let poolShown = POOL_MAX; // eased toward `pool` so the meter glides
+  let reserveShown = RESERVE_MAX; // eased toward `reserve` so the meter glides
   let dryStage = false;     // finished a stage having caught nothing
   let sim = makeSim();
   let running = true;
 
   function makeSim() {
     const material = MATERIAL_ORDER[(stage - 1) % MATERIAL_ORDER.length];
-    return new Sim({ seed, stage, material });
+    // The stage is poured OUT OF the reserve: a full measure if there is
+    // one to spare, otherwise whatever is left. This is what makes a bad
+    // stage bite — the next one is shorter, and the one after shorter
+    // still, until a milestone refills the tank.
+    return new Sim({ seed, stage, material, volume: stageVolume(seed, stage, reserve) });
   }
 
   // ── input ────────────────────────────────────────────────────────────
@@ -128,19 +129,18 @@ export default function start({ canvas, net, seed = 1 }) {
     const newly = sim.spilled - countedSpill;
     if (newly <= 0) return;
     countedSpill = sim.spilled;
-    pool = Math.max(0, pool - newly * SPILL_COST);
-    if (pool === 0) { best = Math.max(best, stage); phase = 'over'; phaseT = 0; }
+    reserve = drain(reserve, newly);
+    if (reserve === 0) { best = Math.max(best, stage); phase = 'over'; phaseT = 0; }
   }
 
   function endStage() {
-    if (MILESTONES.includes(stage)) pool = POOL_MAX;
-    pool = Math.min(POOL_MAX, pool);
+    reserve = afterStage(reserve, stage);
     best = Math.max(best, stage);
     // Pouring a whole stage away without catching a single grain ends the
     // run outright, however much reserve is left. There is no recovering
     // from not playing.
     dryStage = sim.caught === 0;
-    phase = (pool <= 0 || dryStage) ? 'over' : 'between';
+    phase = runOver(reserve, sim.caught) ? 'over' : 'between';
     phaseT = 0;
   }
 
@@ -155,8 +155,8 @@ export default function start({ canvas, net, seed = 1 }) {
 
   function restart() {
     stage = 1;
-    pool = POOL_MAX;
-    poolShown = POOL_MAX;
+    reserve = RESERVE_MAX;
+    reserveShown = RESERVE_MAX;
     dryStage = false;
     leanSpeed = 0;
     sim = makeSim();
@@ -207,8 +207,8 @@ export default function start({ canvas, net, seed = 1 }) {
 
     // Ease the meter toward its true value rather than snapping. Frame-rate
     // independent, so it glides the same on 60Hz and 144Hz.
-    poolShown += (pool - poolShown) * (1 - Math.exp(-6 * dt));
-    if (Math.abs(pool - poolShown) < 0.5) poolShown = pool;
+    reserveShown += (reserve - reserveShown) * (1 - Math.exp(-6 * dt));
+    if (Math.abs(reserve - reserveShown) < 0.5) reserveShown = reserve;
 
     render();
     requestAnimationFrame(frame);
@@ -233,11 +233,11 @@ export default function start({ canvas, net, seed = 1 }) {
       aimPreview: phase === 'play' && !corkOpen ? preview() : [],
       flowing: sim.flowing,
     });
-    drawHud(ctx, sim, { stage, pool: poolShown, poolMax: POOL_MAX });
+    drawHud(ctx, sim, { stage, reserve: reserveShown, reserveMax: RESERVE_MAX });
 
     if (phase === 'between') {
       const kept = Math.round(sim.fillRatio * 100);
-      drawBanner(ctx, `${kept}% caught`, `reserve ${Math.round(pool)}`);
+      drawBanner(ctx, `${kept}% caught`, `reserve ${Math.round(reserve)}`);
     } else if (phase === 'over') {
       drawBanner(ctx,
         dryStage ? 'Not a drop caught' : 'The reserve is empty',
@@ -263,4 +263,4 @@ export default function start({ canvas, net, seed = 1 }) {
   return { destroy };
 }
 
-export { MILESTONES, POOL_MAX, MATERIAL_ORDER, SPILL_COST };
+export { MATERIAL_ORDER };

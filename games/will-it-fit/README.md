@@ -59,7 +59,13 @@ quickly. As the stream speeds up it also throws further, so the landing point wa
 you — hold too long and it sails clean past the bowl. Release and the ramp resets, so a tap is
 a careful splash and a long hold is a torrent you have to chase.
 
-The run ends if the reserve empties, **or** if you pour a whole stage away without catching a
+**The meter is the tank.** There is one quantity of material in the game. Every stage is poured
+out of it, whatever you spill is gone, and the next stage is played with the remainder — so a
+sloppy run starves itself, each stage shorter than the last, until a milestone (10, 20, 40, 80…)
+refills it. Material you *catch* is not consumed; it goes back in the tank between stages, so
+spilling is the only way to lose ground.
+
+The run ends if the tank empties, **or** if you pour a whole stage away without catching a
 single grain.
 
 ## How it works
@@ -90,10 +96,10 @@ generation is seeded so both peers build the identical vessel with nothing cross
 node games/will-it-fit/test/invariants.mjs
 ```
 
-53 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
+70 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
 (240 vessels validated), ballistics and the pour ramp, the handoff, conservation of material,
-filling and overflow, tilt and pouring-out, determinism, material behaviour, and that the aim
-preview matches the real droplet path exactly.
+filling and overflow, tilt and pouring-out, the reserve economy, determinism, material
+behaviour, and that the aim preview matches the real droplet path exactly.
 
 Two things they caught during the build: the aim angle convention was inverted relative to its
 own documentation and the range barely permitted a lob at all, and the preview originally had

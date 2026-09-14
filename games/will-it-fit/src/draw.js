@@ -291,7 +291,7 @@ function drawPourGlow(ctx, sim) {
 //
 // Everything else is shown diegetically: the source's own level is drawn in
 // the source, and how full the vessel is you can simply see.
-export function drawHud(ctx, sim, { stage, pool, poolMax }) {
+export function drawHud(ctx, sim, { stage, reserve, reserveMax }) {
   ctx.save();
   ctx.font = '600 15px ui-rounded, "Trebuchet MS", system-ui, sans-serif';
   ctx.fillStyle = PALETTE.ink;
@@ -300,7 +300,7 @@ export function drawHud(ctx, sim, { stage, pool, poolMax }) {
   ctx.fillText(`Stage ${stage} · ${sim.material.name}`, 24, 36);
 
   ctx.textAlign = 'center';
-  bar(ctx, STAGE.W / 2 - 130, 22, 260, 12, pool / poolMax, sim.material.color);
+  bar(ctx, STAGE.W / 2 - 130, 22, 260, 12, reserve / reserveMax, sim.material.color);
   ctx.font = '500 12px ui-rounded, "Trebuchet MS", system-ui, sans-serif';
   ctx.fillStyle = 'rgba(47,55,51,0.65)';
   ctx.fillText('reserve', STAGE.W / 2, 50);
