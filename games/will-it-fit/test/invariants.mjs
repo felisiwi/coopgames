@@ -161,6 +161,73 @@ console.log('\n1. vessel generation');
     `min ${Math.min(...late)}`);
 }
 
+console.log('\n1b. bowls are broad and shallow');
+{
+  const ratios = [];
+  const caps = [];
+  for (let seed = 1; seed <= 30; seed++) {
+    for (const stage of [1, 5, 20, 40]) {
+      const v = generateVessel(seed, stage);
+      ratios.push(v.height / (v.rows[0].r - v.rows[0].l));
+      if (stage === 1) caps.push(v.capacity);
+    }
+  }
+  // A cup is spill-proof; a broad flat dish is not. Depth is deliberately a
+  // fraction of the rim rather than an independent number.
+  check('every vessel is wider than it is deep', Math.max(...ratios) < 0.75,
+    `deepest ratio ${Math.max(...ratios).toFixed(2)}`);
+  check('and they get shallower as stages climb',
+    generateVessel(3, 40).height / generateVessel(3, 40).rows[0].r
+    < generateVessel(3, 1).height / generateVessel(3, 1).rows[0].r);
+  const avgCap = caps.reduce((a, b) => a + b, 0) / caps.length;
+  check('a stage-1 bowl holds enough for a real stage', avgCap > 1200,
+    `average capacity ${Math.round(avgCap)}`);
+}
+
+console.log('\n1c. the pourer carries the source');
+{
+  const s = new Sim({ seed: 3, stage: 1 });
+  s.setSpout(9999);
+  check('the source clamps to the far end of its run', s.spoutCol === SPOUT.MAX_COL,
+    `${s.spoutCol}`);
+  s.setSpout(-50);
+  check('and to the near end', s.spoutCol === SPOUT.MIN_COL, `${s.spoutCol}`);
+
+  // The arc is structural, not a matter of keeping the two travel ranges
+  // apart. Even the slowest grain the spout can produce lands well
+  // downrange, so the pourer can never park over the bowl and drop
+  // material straight in. An earlier version of this test asserted the
+  // ranges must not overlap — the wrong invariant. They do overlap, and it
+  // does not matter, because a minimum arc of ~46 cells is built in.
+  const firstLanding = (col) => {
+    const t2 = new Sim({ seed: 3, stage: 1, volume: 40 });
+    t2.setSpout(col);
+    t2.setAim(SPOUT.ANGLE_FIXED);
+    t2.setCork(true);
+    const rim = t2.mouthRow;
+    const prev = new Map();
+    for (let i = 0; i < 900; i++) {
+      t2.tick();
+      for (const d of t2.drops) {
+        const py = prev.get(d);
+        const y = d.y / FP | 0;
+        if (py !== undefined && py < rim && y >= rim) return d.x / FP | 0;
+        prev.set(d, y);
+      }
+    }
+    return null;
+  };
+  const cols = [SPOUT.MIN_COL, 70, SPOUT.MAX_COL];
+  const offsets = cols.map((c) => firstLanding(c) - c);
+  check('even the slowest pour arcs well downrange', Math.min(...offsets) > 35,
+    `offsets ${offsets.join(', ')} cells`);
+
+  // Carrying the source must actually move where material lands.
+  const near = firstLanding(SPOUT.MIN_COL);
+  const far = firstLanding(SPOUT.MAX_COL);
+  check('carrying it along the run moves the stream', far > near + 50, `${near} -> ${far}`);
+}
+
 console.log('\n2. ballistics');
 {
   const sim = new Sim({ seed: 1, volume: 1 });

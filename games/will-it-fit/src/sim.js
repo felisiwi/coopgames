@@ -73,9 +73,9 @@ export function stepBallistic(d) {
 
 // The predicted flight path, in fixed-point world cells. Cheap: no Sim,
 // no grid, no allocation beyond the points themselves.
-export function traceArcFromSpeed(angleDeg, speedFP, steps = 220, stopRow = Infinity) {
+export function traceArcFromSpeed(angleDeg, speedFP, steps = 220, stopRow = Infinity, fromCol = SPOUT_COL) {
   const { vx, vy } = launchFromSpeed(angleDeg, speedFP);
-  const d = { x: SPOUT_COL * FP, y: SPOUT_ROW * FP, vx, vy };
+  const d = { x: fromCol * FP, y: SPOUT_ROW * FP, vx, vy };
   const pts = [];
   for (let i = 0; i < steps; i++) {
     stepBallistic(d);
@@ -120,6 +120,7 @@ export class Sim {
 
     this.tilt = 0;    // degrees, integer; rotates the world around the grid
     this.offset = 0;  // vessel travel along the plinth, in world cells
+    this.spoutCol = SPOUT_COL; // the pourer carries the source along a run
 
     this.angle = SPOUT.ANGLE_FIXED;
     this.corked = true;
@@ -175,6 +176,12 @@ export class Sim {
       x: ((dx * c - dy * s) / FP | 0) + this.pivotCol * FP,
       y: ((dx * s + dy * c) / FP | 0) + this.pivotRow * FP,
     };
+  }
+
+  // The pourer's position. Integer cells, like everything else the sim
+  // reads, so it survives lockstep unchanged.
+  setSpout(col) {
+    this.spoutCol = Math.max(SPOUT.MIN_COL, Math.min(SPOUT.MAX_COL, Math.round(col))) | 0;
   }
 
   setVessel(offsetCols, tiltDeg) {
@@ -263,7 +270,7 @@ export class Sim {
       // Spread the stream across the nozzle so it reads as a stream, not a
       // line of identical dots. Integer jitter only.
       const jitter = (this.rand() % (SPOUT.NOZZLE * FP)) - ((SPOUT.NOZZLE * FP) >> 1);
-      this.drops.push({ x: SPOUT_COL * FP + jitter, y: SPOUT_ROW * FP, vx, vy, inside: 0, lost: 0 });
+      this.drops.push({ x: this.spoutCol * FP + jitter, y: SPOUT_ROW * FP, vx, vy, inside: 0, lost: 0 });
     }
   }
 
@@ -284,7 +291,9 @@ export class Sim {
         // Light drag while inside so it eases into the pile rather than
         // slamming. Integer arithmetic: >> is an arithmetic shift, so this
         // stays exact and identical on both peers.
-        d.vx = (d.vx * 7) >> 3;
+        // Heavier drag than before: the sand was too energetic and the
+        // stream drilled into the pile instead of being absorbed by it.
+        d.vx = (d.vx * 3) >> 2;
         stepBallistic(d);
         if (d.vy > INSIDE_MAX_FALL) d.vy = INSIDE_MAX_FALL;
 
@@ -606,7 +615,7 @@ export class Sim {
     };
     for (let i = 0; i < this.grid.length; i++) if (this.grid[i]) mix(i * 31 + this.grid[i]);
     for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); mix(d.inside); mix(d.lost); }
-    mix(this.pourTicks); mix(this.emitAcc); mix(this.speedFP); mix(this.tilt); mix(this.offset);
+    mix(this.pourTicks); mix(this.emitAcc); mix(this.speedFP); mix(this.spoutCol); mix(this.tilt); mix(this.offset);
     mix(this.caught); mix(this.spilled); mix(this.remaining);
     return h >>> 0;
   }

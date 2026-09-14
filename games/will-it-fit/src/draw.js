@@ -200,14 +200,18 @@ function drawDrops(ctx, sim) {
 }
 
 function drawSpout(ctx, sim) {
-  const px = SPOUT.X;
+  const px = sim.spoutCol * CELL;
   const py = SPOUT.Y;
   ctx.save();
   ctx.translate(px, py);
 
-  // Vessel body of the source, hanging above. Its own level is drawn
-  // inside it rather than as a HUD bar — you can see how much is left by
-  // looking at the thing that holds it.
+  // Nearly twice the size it was. This is the tank — the same material the
+  // meter counts — so its level has to be readable at a glance rather than
+  // being a detail in the corner. A bigger vessel also means the drop in
+  // level as you pour is a real, visible movement.
+  const S = 1.85;
+  ctx.scale(S, S);
+
   const body = () => {
     ctx.beginPath();
     ctx.moveTo(-46, -52);
@@ -217,7 +221,18 @@ function drawSpout(ctx, sim) {
     ctx.quadraticCurveTo(-54, -24, -46, -52);
     ctx.closePath();
   };
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+
+  // Paper shadow, so it reads as an object above the table rather than a
+  // sticker on the background.
+  ctx.save();
+  ctx.globalAlpha = 0.16;
+  ctx.fillStyle = PALETTE.ink;
+  ctx.translate(3, 4);
+  body();
+  ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
   body();
   ctx.fill();
 
@@ -228,29 +243,33 @@ function drawSpout(ctx, sim) {
     ctx.clip();
     ctx.globalAlpha = sim.material.alpha ?? 1;
     ctx.fillStyle = sim.material.color;
-    ctx.fillRect(-54, -4 - 48 * left, 90, 48 * left + 2);
+    ctx.fillRect(-56, -4 - 48 * left, 92, 48 * left + 2);
+    // A lighter band at the surface so the level itself is legible.
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = sim.material.color;
+    ctx.fillRect(-56, -4 - 48 * left, 92, 2);
     ctx.restore();
   }
 
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 3.5;
   ctx.strokeStyle = PALETTE.vesselDark;
   ctx.lineJoin = 'round';
   body();
   ctx.stroke();
   ctx.fillStyle = PALETTE.vesselLit;
-  ctx.fillRect(-42, -46, 5, 36);
+  ctx.fillRect(-42, -46, 4, 36);
 
-  // The nozzle points where you're aiming.
+  // The nozzle points where it is aiming.
   ctx.rotate((-sim.angle * Math.PI) / 180);
   ctx.fillStyle = PALETTE.vesselDark;
-  ctx.fillRect(0, -7, 30, 14);
+  ctx.fillRect(0, -6, 28, 12);
   ctx.fillStyle = PALETTE.vesselLit;
-  ctx.fillRect(0, -7, 30, 4);
+  ctx.fillRect(0, -6, 28, 3);
 
   // Cork, drawn plugged or pulled aside.
   ctx.fillStyle = sim.corked ? PALETTE.ink : 'rgba(46,42,58,0.25)';
   ctx.beginPath();
-  ctx.arc(sim.corked ? 30 : 46, sim.corked ? 0 : -16, 7, 0, Math.PI * 2);
+  ctx.arc(sim.corked ? 28 : 42, sim.corked ? 0 : -14, 6, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
@@ -276,7 +295,7 @@ function drawPourGlow(ctx, sim) {
   ctx.globalAlpha = 0.12;
   ctx.fillStyle = sim.material.color;
   ctx.beginPath();
-  ctx.arc(SPOUT.X + 28, SPOUT.Y, 16, 0, Math.PI * 2);
+  ctx.arc(sim.spoutCol * CELL + 40, SPOUT.Y, 20, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }

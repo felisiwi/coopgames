@@ -22,6 +22,7 @@ import { Sim, traceArcFromSpeed } from './src/sim.js';
 import { drawScene, drawHud, drawBanner } from './src/draw.js';
 
 const MATERIAL_ORDER = ['water', 'slush', 'magma'];
+const GRID_MID = 42;                           // middle of the vessel grid
 const TICKS_PER_FRAME = 1;                     // sim ticks per rendered frame — slow on purpose
 
 export default function start({ canvas, net, seed = 1 }) {
@@ -54,6 +55,10 @@ export default function start({ canvas, net, seed = 1 }) {
   let vesselCol = null;   // where the bowl is, in world cells
   let lastVesselCol = null;
   let leanSpeed = 0;      // smoothed travel speed, drives the lean
+  // Which seat the mouse is driving. In two-player these are two people;
+  // solo, Tab switches so the pourer's seat can be felt before the netcode
+  // exists to give it to somebody else.
+  let seat = 'catcher';   // catcher | pourer
 
   function toStage(e) {
     const r = canvas.getBoundingClientRect();
@@ -85,6 +90,10 @@ export default function start({ canvas, net, seed = 1 }) {
       corkOpen = e.type === 'keydown' && phase !== 'over';
     }
     if (e.type !== 'keydown') return;
+    if (e.code === 'Tab') {
+      e.preventDefault();
+      seat = seat === 'catcher' ? 'pourer' : 'catcher';
+    }
     if (e.code === 'KeyR' && phase === 'over') restart();
   };
 
@@ -176,10 +185,16 @@ export default function start({ canvas, net, seed = 1 }) {
       // Where the bowl should be: straight under the pointer, clamped to
       // the plinth's travel. Position is instant (Q2) — only the lean is a
       // consequence.
-      const wantCol = Math.max(
-        VESSEL.MIN_COL,
-        Math.min(VESSEL.MAX_COL, Math.round(pointer.x / STAGE.CELL)),
-      );
+      const pointerCol = Math.round(pointer.x / STAGE.CELL);
+      if (seat === 'pourer') {
+        // The pourer carries the source along its own run; the bowl stays
+        // where it was left.
+        sim.setSpout(pointerCol);
+        if (vesselCol === null) { vesselCol = sim.col0 + (GRID_MID); lastVesselCol = vesselCol; }
+      }
+      const wantCol = seat === 'catcher'
+        ? Math.max(VESSEL.MIN_COL, Math.min(VESSEL.MAX_COL, pointerCol))
+        : vesselCol;
       if (vesselCol === null) { vesselCol = wantCol; lastVesselCol = wantCol; }
       vesselCol = wantCol;
 
@@ -244,7 +259,7 @@ export default function start({ canvas, net, seed = 1 }) {
         `reached stage ${best} — press R, or tap, to begin again`);
     } else if (!corkOpen && sim.remaining === sim.startVolume) {
       drawBanner(ctx, 'Move the bowl, then pour',
-        'move to place the bowl · hold to pour, it builds the longer you hold · moving fast makes it lean');
+        'move to place the bowl · hold to pour · Tab to carry the pot instead');
     }
     ctx.restore();
   }

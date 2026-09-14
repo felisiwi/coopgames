@@ -47,6 +47,7 @@ Open [`index.html`](index.html) directly, or via a static server.
 | | |
 |---|---|
 | move the bowl | move the mouse, or drag on a phone |
+| carry the pot | `Tab` to switch seats, then move (two-player: that's the other person) |
 | pour | **hold** click / `space` / `P`, or hold a finger down |
 | lean | not a control — induced by how fast you move |
 | restart | `R`, or tap |
@@ -102,10 +103,11 @@ generation is seeded so both peers build the identical vessel with nothing cross
 node games/will-it-fit/test/invariants.mjs
 ```
 
-70 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
+77 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
 (240 vessels validated), ballistics and the pour ramp, the handoff, conservation of material,
-filling and overflow, tilt and pouring-out, the reserve economy, determinism, material
-behaviour, and that the aim preview matches the real droplet path exactly.
+filling and overflow, tilt and pouring-out, the reserve economy, the source's travel,
+determinism, material behaviour, and that the aim preview matches the real droplet path
+exactly.
 
 Two things they caught during the build: the aim angle convention was inverted relative to its
 own documentation and the range barely permitted a lob at all, and the preview originally had

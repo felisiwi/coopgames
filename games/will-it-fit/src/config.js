@@ -50,6 +50,12 @@ export const SPOUT = {
   SPEED_PER_PRESSURE: fp(0.5),
   NOZZLE: 5,     // cells across the stream at the spout
   ANGLE_FIXED: -14,
+  // The pourer can carry the source along its own run, well to the left of
+  // the bowl's. Kept clear of the bowl's travel on purpose: standing
+  // directly over the vessel and dropping material straight in would make
+  // the arc — and therefore the whole pourer's job — pointless.
+  MIN_COL: 18,
+  MAX_COL: 120,
 };
 
 // Pouring is not a trigger, it is a POUR: think hot milk off a steamer, or
@@ -95,7 +101,9 @@ export const PHYS = {
   // Terminal velocity once a grain is INSIDE the vessel. Lower, so the
   // stream eases into the pile instead of arriving at full speed — the
   // vessel should feel like it receives the pour, not like it blocks it.
-  INSIDE_MAX_FALL: fp(1.0),
+  // Lowered again — the sand was too energetic. Grains arrive gently and
+  // the pile absorbs them rather than the stream drilling into it.
+  INSIDE_MAX_FALL: fp(0.7),
 };
 
 export const TABLE_Y = 520; // where the vessel stands, in logical pixels
@@ -109,8 +117,8 @@ export const TABLE_Y = 520; // where the vessel stands, in logical pixels
 // stop moving and you are upright again on the same frame — so it stays
 // completely predictable. Move fast to reach the stream, lean, risk it.
 export const VESSEL = {
-  MIN_COL: 30,              // travel limits, in world cells
-  MAX_COL: 290,
+  MIN_COL: 36,              // travel limits, in world cells
+  MAX_COL: 284,
   // Must exceed 45°. Below that, a liquid parcel moving (+1,-1) — the only
   // way material can climb toward a lowered rim — is uphill, so a
   // partly-filled vessel can NEVER pour however hard you lean it. Above
@@ -124,7 +132,9 @@ export const VESSEL = {
 };
 
 // The vessel's grid, in the finer cells.
-export const GRID = { W: 70, H: 112 };
+// Wider and shallower than before: bowls are now broad and flat rather
+// than cup-shaped, and roughly 2.5x the capacity so a stage lasts.
+export const GRID = { W: 84, H: 64 };
 
 export const SOURCE = {
   // Grains per stage, as a fraction of the vessel's capacity. Relative

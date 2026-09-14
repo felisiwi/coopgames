@@ -38,18 +38,20 @@ export function generateVessel(seed, stage = 1) {
   const tightness = Math.min(1, (stage - 1) / 30);
 
   // The rim narrows with the stages — that is the "harder to catch" dial.
-  const rimMax = Math.round(34 - 18 * tightness);
-  const rim = Math.max(13, pick(Math.max(13, rimMax - 6), rimMax));
+  const rimMax = Math.round(60 - 26 * tightness);
+  const rim = Math.max(22, pick(Math.max(22, rimMax - 8), rimMax));
 
-  // And the vessel gets SHALLOWER — that is the "easier to spill" dial,
-  // because material reaches a low rim sooner.
-  const depthMax = Math.round(34 - 14 * tightness);
-  const height = Math.max(17, pick(Math.max(17, depthMax - 8), depthMax));
+  // SHALLOW. Depth is a fraction of the rim, not an independent number, so
+  // every vessel is a broad flat bowl rather than a cup — which is what
+  // makes leaning it actually threaten the contents. It also gets
+  // shallower with the stages: material reaches a low rim sooner.
+  const depthPct = 62 - Math.round(18 * tightness);   // 62% of rim -> 44%
+  const height = Math.max(12, Math.round((rim * depthPct) / 100));
 
   // Taper to the base. A steeper taper is a rounder bowl, a gentle one is
-  // closer to a straight-sided cup.
-  const taper = Math.min(rim - 8, pick(2, Math.max(3, rim >> 1)));
-  const base = Math.max(6, rim - taper);
+  // closer to a straight-sided dish.
+  const taper = Math.min(rim - 14, pick(4, Math.max(5, rim >> 2)));
+  const base = Math.max(10, rim - taper);
 
   const rows = [];
   const mid = GRID.W >> 1;
