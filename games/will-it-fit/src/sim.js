@@ -13,7 +13,7 @@
 // Stage 1 scope: the vessel is upright and static. The grid is already
 // bottle-LOCAL, so stage 2 adds tilt by rotating gravity rather than by
 // rewriting any of this.
-import { FP, STAGE, SPOUT, PHYS, GRID, SOURCE, MATERIALS, TABLE_Y, VESSEL } from './config.js';
+import { FP, STAGE, SPOUT, POUR, PHYS, GRID, SOURCE, MATERIALS, TABLE_Y, VESSEL } from './config.js';
 import { generateVessel, inside } from './vessel.js';
 
 const INSIDE_MAX_FALL = PHYS.INSIDE_MAX_FALL;
@@ -102,8 +102,7 @@ export class Sim {
     this.tilt = 0;    // degrees, integer; rotates the world around the grid
     this.offset = 0;  // vessel travel along the plinth, in world cells
 
-    this.angle = SPOUT.ANGLE_DEFAULT;
-    this.pressure = SPOUT.PRESSURE_DEFAULT;
+    this.angle = SPOUT.ANGLE_FIXED;
     this.corked = true;
 
     // Sized to this vessel unless the caller overrides it (tests do).
@@ -113,7 +112,8 @@ export class Sim {
     this.caught = 0;           // settled inside the vessel
     this.spilled = 0;          // lost to the abyss or over the rim
     this.ticks = 0;
-    this.emitPhase = 0;
+    this.pourTicks = 0;  // how long the pour has been running, for the ramp
+    this.emitAcc = 0;    // fixed-point accumulator for fractional flow rate
   }
 
   // ── the rotating frame (stage 2) ────────────────────────────────────
@@ -163,16 +163,35 @@ export class Sim {
   }
 
   // ── controls ────────────────────────────────────────────────────────
-  setAim(angleDeg, pressure) {
+  // Angle only. Exit speed is no longer anybody's choice — it comes from
+  // how long the pour has been running (see POUR in config). A pressure
+  // argument here would be a control that silently does nothing.
+  setAim(angleDeg) {
     this.angle = Math.max(SPOUT.ANGLE_MIN, Math.min(SPOUT.ANGLE_MAX, Math.round(angleDeg)));
-    this.pressure = Math.max(
-      SPOUT.PRESSURE_MIN,
-      Math.min(SPOUT.PRESSURE_MAX, Math.round(pressure)),
-    );
   }
 
   setCork(open) {
+    const wasOpen = !this.corked;
     this.corked = !open;
+    // Closing resets the ramp, so a tap is a careful splash and a long hold
+    // is a torrent. That reset is what makes the cork worth touching.
+    if (wasOpen && this.corked) {
+      this.pourTicks = 0;
+      this.emitAcc = 0;
+    }
+  }
+
+  // 0 at the instant you open it, FP at full flow. Eased quadratically, so
+  // it creeps and then runs away from you.
+  get rampFP() {
+    const t = Math.min(FP, (this.pourTicks * FP / POUR.RAMP_TICKS) | 0);
+    return (t * t / FP) | 0;
+  }
+
+  get pourPressure() {
+    const r = this.rampFP;
+    const raw = POUR.PRESSURE_START + ((POUR.PRESSURE_MAX - POUR.PRESSURE_START) * r / FP | 0);
+    return Math.max(SPOUT.PRESSURE_MIN, Math.min(SPOUT.PRESSURE_MAX, (raw / FP) | 0)) || 1;
   }
 
   get flowing() {
@@ -196,10 +215,23 @@ export class Sim {
   }
 
   emit() {
-    if (!this.flowing) return;
-    for (let i = 0; i < SPOUT.RATE && this.remaining > 0; i++) {
+    if (!this.flowing) {
+      return;
+    }
+    this.pourTicks++;
+
+    // Fractional flow rate through a fixed-point accumulator, so a dribble
+    // really is one grain every few ticks rather than the minimum of one
+    // per tick that an integer rate would force.
+    const r = this.rampFP;
+    const rateFP = POUR.RATE_START + ((POUR.RATE_MAX - POUR.RATE_START) * r / FP | 0);
+    this.emitAcc += rateFP;
+    const n = (this.emitAcc / FP) | 0;
+    this.emitAcc -= n * FP;
+
+    for (let i = 0; i < n && this.remaining > 0; i++) {
       this.remaining--;
-      const { vx, vy } = launchVelocity(this.angle, this.pressure);
+      const { vx, vy } = launchVelocity(this.angle, this.pourPressure);
       // Spread the stream across the nozzle so it reads as a stream, not a
       // line of identical dots. Integer jitter only.
       const jitter = (this.rand() % (SPOUT.NOZZLE * FP)) - ((SPOUT.NOZZLE * FP) >> 1);
@@ -546,6 +578,7 @@ export class Sim {
     };
     for (let i = 0; i < this.grid.length; i++) if (this.grid[i]) mix(i * 31 + this.grid[i]);
     for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); mix(d.inside); mix(d.lost); }
+    mix(this.pourTicks); mix(this.emitAcc); mix(this.tilt); mix(this.offset);
     mix(this.caught); mix(this.spilled); mix(this.remaining);
     return h >>> 0;
   }

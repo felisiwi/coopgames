@@ -36,6 +36,7 @@ export default function start({ canvas, net, seed = 1 }) {
   let phase = 'play'; // play | between | over
   let phaseT = 0;
   let poolShown = POOL_MAX; // eased toward `pool` so the meter glides
+  let dryStage = false;     // finished a stage having caught nothing
   let sim = makeSim();
   let running = true;
 
@@ -48,10 +49,10 @@ export default function start({ canvas, net, seed = 1 }) {
   // Mouse aims (angle from the spout toward the cursor); wheel or W/S sets
   // pressure; click or space pulls the cork.
   const pointer = { x: STAGE.W * 0.5, y: TABLE_Y - 80 };
-  let pressure = SPOUT.PRESSURE_DEFAULT;
   let corkOpen = false;
   let vesselCol = null;   // where the bowl is, in world cells
   let lastVesselCol = null;
+  let leanSpeed = 0;      // smoothed travel speed, drives the lean
 
   function toStage(e) {
     const r = canvas.getBoundingClientRect();
@@ -63,27 +64,34 @@ export default function start({ canvas, net, seed = 1 }) {
     return { x: cx, y: cy };
   }
 
+  // Pointer events rather than mouse events, so a finger held on a phone
+  // behaves exactly like a held mouse button. Pouring is a HOLD throughout:
+  // press and it starts as a dribble, keep holding and it builds, let go
+  // and it stops and resets.
   const onMove = (e) => { const p = toStage(e); pointer.x = p.x; pointer.y = p.y; };
-  const onDown = (e) => { e.preventDefault(); corkOpen = true; };
-  const onUp = () => { corkOpen = false; };
-  const onWheel = (e) => {
+  const onDown = (e) => {
     e.preventDefault();
-    pressure = clampPressure(pressure - Math.sign(e.deltaY));
+    const p = toStage(e);
+    pointer.x = p.x;
+    pointer.y = p.y;
+    if (phase === 'over') { restart(); return; }
+    corkOpen = true;
   };
+  const onUp = () => { corkOpen = false; };
   const onKey = (e) => {
-    if (e.code === 'Space') { e.preventDefault(); corkOpen = e.type === 'keydown'; }
+    if (e.code === 'Space' || e.code === 'KeyP') {
+      e.preventDefault();
+      corkOpen = e.type === 'keydown' && phase !== 'over';
+    }
     if (e.type !== 'keydown') return;
-    if (e.code === 'KeyW' || e.code === 'ArrowUp') pressure = clampPressure(pressure + 1);
-    if (e.code === 'KeyS' || e.code === 'ArrowDown') pressure = clampPressure(pressure - 1);
     if (e.code === 'KeyR' && phase === 'over') restart();
   };
-  const clampPressure = (p) =>
-    Math.max(SPOUT.PRESSURE_MIN, Math.min(SPOUT.PRESSURE_MAX, p));
 
-  canvas.addEventListener('mousemove', onMove);
-  canvas.addEventListener('mousedown', onDown);
-  window.addEventListener('mouseup', onUp);
-  canvas.addEventListener('wheel', onWheel, { passive: false });
+  canvas.addEventListener('pointermove', onMove);
+  canvas.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onUp);
+  canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
   window.addEventListener('keydown', onKey);
   window.addEventListener('keyup', onKey);
 
@@ -92,16 +100,17 @@ export default function start({ canvas, net, seed = 1 }) {
   // moving is what induces the lean that spills a full bowl — the whole
   // loop of the game hangs off it. Seeded from the stage so both peers
   // (stage 4) see the identical sweep without syncing anything.
+  // Fixed. The stream walks outward on its own as the pour builds, so there
+  // is no need to wave it about — and the sweep that used to do that is
+  // what made the chase feel like it was looping.
   function autoAim() {
-    const phase = (sim.ticks / 260) + stage * 1.7;
-    const deg = -14 + Math.round(Math.sin(phase) * 9);
-    return Math.max(SPOUT.ANGLE_MIN, Math.min(SPOUT.ANGLE_MAX, deg));
+    return SPOUT.ANGLE_FIXED;
   }
 
   // Ghost arc. traceArc runs the sim's own launch and integration code, so
   // the preview cannot promise a trajectory the simulation won't follow.
   function preview() {
-    const raw = traceArc(autoAim(), pressure, 220, sim.mouthRow + sim.vessel.height);
+    const raw = traceArc(autoAim(), sim.pourPressure, 220, sim.mouthRow + sim.vessel.height);
     const pts = [];
     for (let i = 0; i < raw.length; i += 4) {
       pts.push({ x: (raw[i].x / FP) * STAGE.CELL, y: (raw[i].y / FP) * STAGE.CELL });
@@ -127,7 +136,11 @@ export default function start({ canvas, net, seed = 1 }) {
     if (MILESTONES.includes(stage)) pool = POOL_MAX;
     pool = Math.min(POOL_MAX, pool);
     best = Math.max(best, stage);
-    phase = pool <= 0 ? 'over' : 'between';
+    // Pouring a whole stage away without catching a single grain ends the
+    // run outright, however much reserve is left. There is no recovering
+    // from not playing.
+    dryStage = sim.caught === 0;
+    phase = (pool <= 0 || dryStage) ? 'over' : 'between';
     phaseT = 0;
   }
 
@@ -144,6 +157,8 @@ export default function start({ canvas, net, seed = 1 }) {
     stage = 1;
     pool = POOL_MAX;
     poolShown = POOL_MAX;
+    dryStage = false;
+    leanSpeed = 0;
     sim = makeSim();
     countedSpill = 0;
     phase = 'play';
@@ -170,14 +185,17 @@ export default function start({ canvas, net, seed = 1 }) {
 
       // Lean from travel speed. Instant in both directions: stop moving and
       // you are upright on the same frame, so it stays predictable.
+      // Smoothed travel speed. A raw per-frame delta is far too noisy to
+      // drive a lean — it made the bowl judder.
       const speed = vesselCol - lastVesselCol;
       lastVesselCol = vesselCol;
-      const lean = Math.max(-1, Math.min(1, speed / VESSEL.SPEED_FOR_MAX_TILT))
+      leanSpeed += (speed - leanSpeed) / VESSEL.TILT_SMOOTH;
+      const lean = Math.max(-1, Math.min(1, leanSpeed / VESSEL.SPEED_FOR_MAX_TILT))
         * VESSEL.MAX_TILT;
       const basePivot = sim.col0 + ((sim.vessel.minL + sim.vessel.maxR) >> 1);
       sim.setVessel(vesselCol - basePivot, lean);
 
-      sim.setAim(autoAim(), pressure);
+      sim.setAim(autoAim());
       sim.setCork(corkOpen);
       for (let i = 0; i < TICKS_PER_FRAME; i++) sim.tick();
       drainForSpills();
@@ -221,10 +239,12 @@ export default function start({ canvas, net, seed = 1 }) {
       const kept = Math.round(sim.fillRatio * 100);
       drawBanner(ctx, `${kept}% caught`, `reserve ${Math.round(pool)}`);
     } else if (phase === 'over') {
-      drawBanner(ctx, 'The reserve is empty', `reached stage ${best} — press R to begin again`);
+      drawBanner(ctx,
+        dryStage ? 'Not a drop caught' : 'The reserve is empty',
+        `reached stage ${best} — press R, or tap, to begin again`);
     } else if (!corkOpen && sim.remaining === sim.startVolume) {
       drawBanner(ctx, 'Move the bowl, then pour',
-        'mouse moves the bowl · hold click or space to unstop · moving fast makes it lean');
+        'move to place the bowl · hold to pour, it builds the longer you hold · moving fast makes it lean');
     }
     ctx.restore();
   }

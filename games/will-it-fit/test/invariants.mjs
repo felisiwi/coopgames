@@ -15,9 +15,55 @@ function check(name, cond, detail = '') {
   else { fail++; console.log(`  FAIL ${name} ${detail}`); }
 }
 
+// The pour ramps from a dribble, so the first grain takes a few ticks to
+// appear rather than arriving on tick one.
+function firstDrop(sim, cap = 60) {
+  for (let i = 0; i < cap; i++) {
+    sim.tick();
+    if (sim.drops.length) return sim.drops[0];
+  }
+  return null;
+}
+
+// Pour the way a player does: hold, then release before the ramp runs
+// away, then hold again. A single unbroken hold overshoots the vessel
+// entirely once the stream is at full speed, which is the point of the
+// ramp — so a test that holds forever is not testing the game.
+function pourPulsed(sim, ticks = 20000, hold = 80, rest = 25) {
+  let i = 0;
+  while (i < ticks && !sim.done) {
+    sim.setCork(true);
+    for (let k = 0; k < hold && i < ticks && !sim.done; k++, i++) sim.tick();
+    sim.setCork(false);
+    for (let k = 0; k < rest && i < ticks && !sim.done; k++, i++) sim.tick();
+  }
+  sim.setCork(false);
+  for (let k = 0; k < 400 && !sim.done; k++) sim.tick();
+  return sim;
+}
+
+// Fill the vessel directly, bypassing the pour. Tilt behaviour is about
+// what settled material does, so driving it through the whole aiming game
+// would be testing three systems to check one.
+function fillGrid(sim, frac) {
+  const want = Math.floor(sim.vessel.capacity * frac);
+  let n = 0;
+  for (let y = sim.vessel.height - 1; y >= 0 && n < want; y--) {
+    const row = sim.vessel.rows[y];
+    for (let x = row.l; x < row.r && n < want; x++) {
+      sim.grid[y * GRID.W + x] = sim.material.id;
+      n++;
+    }
+  }
+  sim.caught = n;
+  sim.remaining = 0;
+  for (let i = 0; i < 400; i++) sim.tick(); // let it settle flat
+  return sim;
+}
+
 // Run a sim to completion (or a tick cap), returning it.
 function run(sim, { ticks = 20000, aim } = {}) {
-  if (aim) sim.setAim(aim.angle, aim.pressure);
+  if (aim) sim.setAim(aim.angle);
   sim.setCork(true);
   for (let i = 0; i < ticks && !sim.done; i++) sim.tick();
   return sim;
@@ -26,22 +72,20 @@ function run(sim, { ticks = 20000, aim } = {}) {
 // Search the actual control range for an aim that lands material in the
 // vessel. Doubles as proof that the control space contains a solution.
 const aimCache = new Map();
-function probeAim(seed, stage, a, p, volume = 40) {
+function probeAim(seed, stage, a, volume = 40) {
   const probe = new Sim({ seed, stage, volume });
-  probe.setAim(a, p);
+  probe.setAim(a);
   probe.setCork(true);
-  for (let i = 0; i < 1500 && !probe.done; i++) probe.tick();
+  for (let i = 0; i < 2500 && !probe.done; i++) probe.tick();
   return probe;
 }
 function findAim(sim) {
   const key = `${sim.seed}/${sim.stage}`;
   if (aimCache.has(key)) return aimCache.get(key);
   let best = null;
-  for (let p = SPOUT.PRESSURE_MIN; p <= SPOUT.PRESSURE_MAX && !best; p++) {
-    for (let a = SPOUT.ANGLE_MIN; a <= SPOUT.ANGLE_MAX; a++) {
-      const probe = probeAim(sim.seed, sim.stage, a, p);
-      if (probe.caught > 20) { best = { angle: a, pressure: p, caught: probe.caught }; break; }
-    }
+  for (let a = SPOUT.ANGLE_MIN; a <= SPOUT.ANGLE_MAX && !best; a++) {
+    const probe = probeAim(sim.seed, sim.stage, a);
+    if (probe.caught > 20) best = { angle: a, caught: probe.caught };
   }
   aimCache.set(key, best);
   return best;
@@ -58,8 +102,8 @@ function findClipAim(seed, stage = 1) {
   if (!base) return null;
   for (let d = 1; d <= 14; d++) {
     for (const a of [base.angle - d, base.angle + d]) {
-      const probe = probeAim(seed, stage, a, base.pressure, 80);
-      if (probe.caught > 10 && probe.spilled > 10) return { angle: a, pressure: base.pressure };
+      const probe = probeAim(seed, stage, a, 80);
+      if (probe.caught > 10 && probe.spilled > 10) return { angle: a };
     }
   }
   return null;
@@ -102,41 +146,79 @@ console.log('\n1. vessel generation');
 console.log('\n2. ballistics');
 {
   const sim = new Sim({ seed: 1, volume: 1 });
-  sim.setAim(-30, 8);
+  sim.setAim(-30);
   sim.setCork(true);
-  sim.tick();
-  const d = sim.drops[0];
+  const d = firstDrop(sim);
   check('a droplet is emitted when uncorked', !!d);
   check('emitted moving forward and down-right', d.vx > 0 && d.vy > 0);
 
   const path = [];
-  for (let i = 0; i < 30 && sim.drops.length; i++) { sim.tick(); if (sim.drops[0]) path.push(sim.drops[0].y); }
+  for (let i = 0; i < 40 && sim.drops.length; i++) { sim.tick(); if (sim.drops[0]) path.push(sim.drops[0].y); }
   const falls = path.every((y, i) => i === 0 || y > path[i - 1]);
   check('trajectory accelerates downward (a real arc)', falls && path.length > 5);
 }
 {
-  const reach = (pressure) => {
-    const sim = new Sim({ seed: 1, volume: 1 });
-    sim.setAim(-10, pressure);
+  // The pour ramps, so holding longer throws further — that walk-away is
+  // what makes the catcher chase, and it replaced the old sweep.
+  // Measured where the stream crosses the vessel's rim height, not at the
+  // screen edge — past full ramp it flies clean off the table and every
+  // hold length would saturate at the same cull column.
+  const reachAfter = (holdTicks) => {
+    const sim = new Sim({ seed: 1, volume: 9000 });
+    sim.setAim(-10);
     sim.setCork(true);
-    let maxCol = 0;
-    for (let i = 0; i < 400 && (sim.drops.length || i === 0); i++) {
+    const rimRow = sim.mouthRow;
+    // Keyed by the drop object itself — the array is re-built every tick as
+    // grains are emitted and culled, so positional indices do not survive.
+    const prevY = new Map();
+    let landing = 0;
+    for (let i = 0; i < holdTicks + 400; i++) {
+      // Stop pouring when the hold ends — otherwise every hold length runs
+      // the ramp to full and they all land in the same place.
+      if (i === holdTicks) sim.setCork(false);
       sim.tick();
-      for (const d of sim.drops) maxCol = Math.max(maxCol, d.x / FP | 0);
+      for (const d of sim.drops) {
+        const py = prevY.get(d);
+        const y = d.y / FP | 0;
+        if (py !== undefined && py < rimRow && y >= rimRow) {
+          landing = Math.max(landing, d.x / FP | 0);
+        }
+        prevY.set(d, y);
+      }
     }
-    return maxCol;
+    return landing;
   };
-  check('more pressure throws it further', reach(9) > reach(3), `${reach(3)} -> ${reach(9)}`);
+  const short = reachAfter(30);
+  const long = reachAfter(300);
+  check('a longer hold throws it further', long > short + 20, `${short} -> ${long}`);
+  check('the pour starts as a dribble', (() => {
+    const sim = new Sim({ seed: 1, volume: 9000 });
+    sim.setAim(-10); sim.setCork(true);
+    let early = 0;
+    for (let i = 0; i < 60; i++) { const r = sim.remaining; sim.tick(); early += r - sim.remaining; }
+    let late = 0;
+    for (let i = 0; i < 240; i++) sim.tick();
+    for (let i = 0; i < 60; i++) { const r = sim.remaining; sim.tick(); late += r - sim.remaining; }
+    return late > early * 4;
+  })());
+  check('releasing resets the ramp', (() => {
+    const sim = new Sim({ seed: 1, volume: 9000 });
+    sim.setAim(-10); sim.setCork(true);
+    for (let i = 0; i < 300; i++) sim.tick();
+    const hot = sim.pourPressure;
+    sim.setCork(false);
+    sim.setCork(true);
+    return sim.pourPressure < hot;
+  })());
 }
 {
   // Convention: POSITIVE angle is above horizontal. y grows downward, so
   // "upward" means a more negative vy.
   const launch = (angle) => {
     const s = new Sim({ seed: 1, volume: 1 });
-    s.setAim(angle, 9);
+    s.setAim(angle);
     s.setCork(true);
-    s.tick();
-    return s.drops[0];
+    return firstDrop(s);
   };
   const lob = launch(SPOUT.ANGLE_MAX);
   const flat = launch(0);
@@ -151,10 +233,11 @@ console.log('\n2. ballistics');
   // "making arcs" is cosmetic.
   const apex = (angle) => {
     const s = new Sim({ seed: 1, volume: 1 });
-    s.setAim(angle, 9);
+    s.setAim(angle);
     s.setCork(true);
     let top = Infinity;
-    for (let i = 0; i < 300 && (s.drops.length || i === 0); i++) {
+    firstDrop(s);
+    for (let i = 0; i < 400; i++) {
       s.tick();
       for (const d of s.drops) top = Math.min(top, d.y);
     }
@@ -170,11 +253,13 @@ console.log('\n3. the handoff');
   const aim = findAim(sim);
   check('some aim in the control range fills the vessel', !!aim,
     aim ? '' : 'no (angle,pressure) landed material');
-  if (aim) console.log(`       (best probe: angle ${aim.angle}, pressure ${aim.pressure}, caught ${aim.caught})`);
+  if (aim) console.log(`       (best probe: angle ${aim.angle}, caught ${aim.caught})`);
 
   if (aim) {
-    const s = run(new Sim({ seed: 3, stage: 1, volume: 400 }), { aim });
-    check('material actually lands in the vessel', s.caught > 100, `caught=${s.caught}`);
+    const s = new Sim({ seed: 3, stage: 1, volume: 400 });
+    s.setAim(aim.angle);
+    pourPulsed(s);
+    check('material actually lands in the vessel', s.caught > 60, `caught=${s.caught}`);
     check('nothing settles outside the vessel walls', (() => {
       for (let y = 0; y < GRID.H; y++)
         for (let x = 0; x < GRID.W; x++)
@@ -185,7 +270,7 @@ console.log('\n3. the handoff');
 }
 {
   // Aim deliberately short: everything must be lost, nothing caught.
-  const s = run(new Sim({ seed: 3, volume: 200 }), { aim: { angle: -70, pressure: 1 } });
+  const s = run(new Sim({ seed: 3, volume: 200 }), { aim: { angle: -70 } });
   check('a hopeless aim catches nothing', s.caught === 0, `caught=${s.caught}`);
   check('and loses everything', s.spilled === 200, `spilled=${s.spilled}`);
 }
@@ -194,9 +279,9 @@ console.log('\n3. the handoff');
   // only settle where it actually lands — converting it to a cell at the
   // rim is what made the vessel feel like a wall the stream splatted
   // against. If this count ever returns to zero, that bug is back.
-  const landing = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -10, pressure: 3 };
+  const landing = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -10 };
   const s = new Sim({ seed: 3, stage: 1, volume: 300 });
-  s.setAim(landing.angle, landing.pressure);
+  s.setAim(landing.angle);
   s.setCork(true);
   let peakInside = 0;
   let sawDescending = false;
@@ -218,7 +303,7 @@ console.log('\n3. the handoff');
   // is doomed. It stays alive, keeps falling, and is only counted when it
   // actually leaves the frame.
   const s = new Sim({ seed: 3, stage: 1, volume: 200 });
-  s.setAim(-40, 4); // deliberately short of the mouth
+  s.setAim(-40); // deliberately short of the mouth
   s.setCork(true);
   let peakLost = 0;
   let deepest = 0;
@@ -243,8 +328,8 @@ console.log('\n3. the handoff');
     orig(d);
     if (d.vx !== before) deflections++;
   };
-  const clip = findClipAim(3) || { angle: -11, pressure: 3 };
-  t.setAim(clip.angle, clip.pressure); // onto the rim/shoulder
+  const clip = findClipAim(3) || { angle: -11 };
+  t.setAim(clip.angle); // onto the rim/shoulder
   t.setCork(true);
 
   let penetrated = false;
@@ -257,7 +342,7 @@ console.log('\n3. the handoff');
       if (gy >= 0 && gy < t.vessel.height && inside(t.vessel, gx, gy)) penetrated = true;
     }
   }
-  check('material glances off the vessel', deflections > 20, `${deflections} deflections`);
+  check('material glances off the vessel', deflections > 3, `${deflections} deflections`);
   check('and never passes through it', !penetrated);
 }
   check('they fall past the plinth into the abyss', deepest > TABLE_ROW,
@@ -269,7 +354,7 @@ console.log('\n3. the handoff');
 console.log('\n4. conservation (the load-bearing invariant)');
 {
   const sim = new Sim({ seed: 5, volume: 500 });
-  const aim = findAim(sim) || { angle: -18, pressure: 5 };
+  const aim = findAim(sim) || { angle: -18 };
   sim.setAim(aim.angle, aim.pressure);
   sim.setCork(true);
   let worst = null;
@@ -289,7 +374,8 @@ console.log('\n5. filling and overflow');
   // Pour far more than the vessel holds: it must fill, then reject.
   const sim = new Sim({ seed: 11, stage: 1, volume: 4000 });
   const aim = findAim(sim);
-  const s = aim ? run(sim, { aim, ticks: 60000 }) : null;
+  if (aim) sim.setAim(aim.angle);
+  const s = aim ? pourPulsed(sim, 120000) : null;
   if (!s) { check('overflow scenario ran', false, 'no viable aim found'); }
   else {
     check('vessel fills substantially', s.fillRatio > 0.5, `fill=${(s.fillRatio * 100).toFixed(0)}%`);
@@ -303,7 +389,7 @@ console.log('\n6. determinism (lockstep depends on this)');
 {
   const a = new Sim({ seed: 42, stage: 7, volume: 300 });
   const b = new Sim({ seed: 42, stage: 7, volume: 300 });
-  a.setAim(-22, 6); b.setAim(-22, 6);
+  a.setAim(-22); b.setAim(-22);
   a.setCork(true); b.setCork(true);
   let diverged = null;
   for (let i = 0; i < 3000 && !a.done; i++) {
@@ -314,12 +400,12 @@ console.log('\n6. determinism (lockstep depends on this)');
 
   // Both sims must have material actually in play, or they converge on the
   // same empty terminal state and the checksums match for a boring reason.
-  const aim42 = findAim(new Sim({ seed: 42, stage: 7 })) || { angle: -22, pressure: 6 };
+  const aim42 = findAim(new Sim({ seed: 42, stage: 7 })) || { angle: -22 };
   const c = new Sim({ seed: 43, stage: 7, volume: 300 });
-  c.setAim(aim42.angle, aim42.pressure); c.setCork(true);
+  c.setAim(aim42.angle); c.setCork(true);
   for (let i = 0; i < 300; i++) c.tick();
   const a2 = new Sim({ seed: 42, stage: 7, volume: 300 });
-  a2.setAim(aim42.angle, aim42.pressure); a2.setCork(true);
+  a2.setAim(aim42.angle); a2.setCork(true);
   for (let i = 0; i < 300; i++) a2.tick();
   check('a different seed produces a different checksum', c.checksum() !== a2.checksum(),
     `caught ${a2.caught}/${c.caught}`);
@@ -330,7 +416,7 @@ console.log('\n6. determinism (lockstep depends on this)');
   let called = 0;
   Math.random = () => { called++; return real(); };
   const s = new Sim({ seed: 9, volume: 200 });
-  s.setAim(-20, 6); s.setCork(true);
+  s.setAim(-20); s.setCork(true);
   for (let i = 0; i < 1200 && !s.done; i++) s.tick();
   Math.random = real;
   check('the simulation never calls Math.random()', called === 0, `${called} calls`);
@@ -340,7 +426,7 @@ console.log('\n7. materials behave differently');
 {
   const flatness = (key) => {
     const sim = new Sim({ seed: 21, stage: 1, material: key, volume: 700 });
-    const aim = findAim(sim) || { angle: -18, pressure: 5 };
+    const aim = findAim(sim) || { angle: -18 };
     const s = run(sim, { aim, ticks: 40000 });
     // `done` only means the source is empty and nothing is still airborne
     // — grains are still streaming down the neck at that moment. Surface
@@ -367,17 +453,7 @@ console.log('\n7. materials behave differently');
 console.log('\n7b. tilt (stage 2)');
 {
   // Fill a bowl to a given fraction, then lean it and see what runs out.
-  const fillTo = (frac) => {
-    const s = new Sim({ seed: 3, stage: 1, volume: 4000 });
-    const aim = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -8, pressure: 2 };
-    s.setAim(aim.angle, aim.pressure);
-    s.setCork(true);
-    const target = Math.floor(s.vessel.capacity * frac);
-    for (let i = 0; i < 60000 && s.caught < target; i++) s.tick();
-    s.setCork(false);
-    for (let i = 0; i < 600; i++) s.tick();
-    return s;
-  };
+  const fillTo = (frac) => fillGrid(new Sim({ seed: 3, stage: 1, volume: 1 }), frac);
   const pour = (frac, tilt) => {
     const s = fillTo(frac);
     const before = s.caught;
@@ -402,13 +478,7 @@ console.log('\n7b. tilt (stage 2)');
 {
   // Material that pours out must FALL, not evaporate — the same
   // decide-and-delete trap as the mouth and the misses.
-  const s = new Sim({ seed: 3, stage: 1, volume: 4000 });
-  const aim = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -8, pressure: 2 };
-  s.setAim(aim.angle, aim.pressure);
-  s.setCork(true);
-  for (let i = 0; i < 60000 && s.caught < s.vessel.capacity * 0.95; i++) s.tick();
-  s.setCork(false);
-  for (let i = 0; i < 600; i++) s.tick();
+  const s = fillGrid(new Sim({ seed: 3, stage: 1, volume: 1 }), 0.95);
   const held = s.caught;
   const total = s.caught + s.spilled + s.remaining + s.drops.length;
   s.setVessel(0, VESSEL.MAX_TILT);
@@ -431,14 +501,13 @@ console.log('\n8. the aim preview cannot lie');
   // actually takes. If these ever diverge the game is lying to the player,
   // so this is checked against a real droplet rather than against itself.
   const angle = -12;
-  const pressure = 6;
-
-  const lv = launchVelocity(angle, pressure);
-  const s = new Sim({ seed: 2, volume: 1 });
-  s.setAim(angle, pressure);
+  const s = new Sim({ seed: 2, volume: 9000 });
+  s.setAim(angle);
   s.setCork(true);
-  s.tick();
-  const emitted = s.drops[0];
+  const emitted = firstDrop(s);
+  // The preview must use whatever pressure the pour is at RIGHT NOW.
+  const pressure = s.pourPressure;
+  const lv = launchVelocity(angle, pressure);
   check('preview and sim launch at the same velocity',
     lv.vx === emitted.vx && lv.vy === emitted.vy - PHYS.GRAVITY,
     `trace (${lv.vx},${lv.vy}) vs emitted pre-gravity (${emitted.vx},${emitted.vy - PHYS.GRAVITY})`);

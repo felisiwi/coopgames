@@ -49,7 +49,25 @@ export const SPOUT = {
   PRESSURE_DEFAULT: 5,
   SPEED_PER_PRESSURE: fp(0.5),
   NOZZLE: 5,     // cells across the stream at the spout
-  RATE: 2,       // grains emitted per tick while uncorked
+  ANGLE_FIXED: -14,
+};
+
+// Pouring is not a trigger, it is a POUR: think hot milk off a steamer, or
+// bronze out of a crucible. It starts as a dribble and accelerates the
+// longer you hold, slowly at first and then quickly. Release and it resets,
+// so a tap is a careful splash and a long hold is a torrent.
+//
+// The ramp is the whole skill: as the stream speeds up it also throws
+// FURTHER, so the landing point walks away from you and you have to move
+// the bowl to follow, or let go. That is why the source no longer sweeps on
+// its own — the chase is caused by your own pour instead of by an arbitrary
+// oscillation, which is what made it look like it was looping and juddering.
+export const POUR = {
+  RAMP_TICKS: 240,      // hold time to reach full flow
+  RATE_START: fp(0.25), // grains per tick the moment you open it
+  RATE_MAX: fp(5),
+  PRESSURE_START: fp(1.6),
+  PRESSURE_MAX: fp(9),
 };
 
 // Slowed deliberately. Halving exit speed and QUARTERING gravity (in pixel
@@ -84,7 +102,10 @@ export const VESSEL = {
   // 45° that same step is downhill and the bowl empties as it should.
   MAX_TILT: 62,             // degrees either way
   TILT_PER_SPEED: 5,        // degrees of lean per cell/tick of travel
-  SPEED_FOR_MAX_TILT: 7,    // cells/tick that pins the lean at MAX_TILT
+  SPEED_FOR_MAX_TILT: 9,    // cells/tick that pins the lean at MAX_TILT
+  // Raw per-frame mouse delta is far too noisy to drive a lean directly —
+  // it made the bowl judder. Smoothed over roughly this many frames.
+  TILT_SMOOTH: 7,
 };
 
 // The vessel's grid, in the finer cells.
