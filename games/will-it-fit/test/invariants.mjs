@@ -3,7 +3,7 @@
 //
 //   node games/will-it-fit/test/invariants.mjs
 import { FP, GRID, SPOUT, MATERIALS, SOURCE, PHYS, STAGE, TABLE_Y, VESSEL } from '../src/config.js';
-import { generateVessel, validate, inside, rng } from '../src/vessel.js';
+import { generateVessel, validate, inside, rng, archetypeFor, ARCHETYPES } from '../src/vessel.js';
 import { Sim, traceArc, launchVelocity } from '../src/sim.js';
 import {
   RESERVE_MAX, MILESTONES, stageVolume, drain, afterStage, runOver,
@@ -161,27 +161,50 @@ console.log('\n1. vessel generation');
     `min ${Math.min(...late)}`);
 }
 
-console.log('\n1b. bowls are broad and shallow');
+console.log('\n1b. the four vessels alternate');
 {
-  const ratios = [];
-  const caps = [];
-  for (let seed = 1; seed <= 30; seed++) {
-    for (const stage of [1, 5, 20, 40]) {
-      const v = generateVessel(seed, stage);
-      ratios.push(v.height / (v.rows[0].r - v.rows[0].l));
-      if (stage === 1) caps.push(v.capacity);
+  const seen = [1, 2, 3, 4, 5, 6, 7, 8].map((st) => archetypeFor(st));
+  check('the shapes rotate stage by stage',
+    seen.join(',') === 'bowl,bottle,plate,wine,bowl,bottle,plate,wine', seen.join(','));
+  check('every shape appears within any four stages',
+    new Set(seen.slice(0, 4)).size === ARCHETYPES.length);
+
+  const of = (kind) => {
+    for (let st = 1; st <= 8; st++) {
+      if (archetypeFor(st) === kind) return generateVessel(3, st);
     }
-  }
-  // A cup is spill-proof; a broad flat dish is not. Depth is deliberately a
-  // fraction of the rim rather than an independent number.
-  check('every vessel is wider than it is deep', Math.max(...ratios) < 0.75,
-    `deepest ratio ${Math.max(...ratios).toFixed(2)}`);
-  check('and they get shallower as stages climb',
-    generateVessel(3, 40).height / generateVessel(3, 40).rows[0].r
-    < generateVessel(3, 1).height / generateVessel(3, 1).rows[0].r);
-  const avgCap = caps.reduce((a, b) => a + b, 0) / caps.length;
-  check('a stage-1 bowl holds enough for a real stage', avgCap > 1200,
-    `average capacity ${Math.round(avgCap)}`);
+    return null;
+  };
+  const plate = of('plate');
+  const bowl = of('bowl');
+  const bottle = of('bottle');
+  const wine = of('wine');
+  const ratio = (v) => v.height / v.aperture;
+
+  // The four are deliberately OPPOSED, so the skill being tested changes
+  // from stage to stage rather than just scaling up. A plate is trivial to
+  // pour into and impossible to hold; a wine bottle is the reverse. An
+  // earlier version of this block asserted every vessel must be wider than
+  // deep — true when they were all bowls, and exactly what the rotation is
+  // meant to stop being true.
+  check('a plate is far wider than it is deep', ratio(plate) < 0.3,
+    `ratio ${ratio(plate).toFixed(2)}`);
+  check('a bowl is open to its full width', bowl.aperture === bowl.belly,
+    `rim ${bowl.aperture}, widest ${bowl.belly}`);
+  check('a bottle has a real neck', bottle.aperture < bottle.belly * 0.6,
+    `neck ${bottle.aperture} vs belly ${bottle.belly}`);
+  check('a wine bottle has the narrowest throat of all',
+    wine.aperture < bottle.aperture && wine.aperture < bowl.aperture,
+    `wine ${wine.aperture}, bottle ${bottle.aperture}, bowl ${bowl.aperture}`);
+  check('and is the deepest relative to its mouth', ratio(wine) > 2,
+    `ratio ${ratio(wine).toFixed(2)}`);
+
+  // A shape nobody can fill is not a difficulty curve, it is a dead stage.
+  const caps = [plate, bowl, bottle, wine].map((v) => v.capacity);
+  check('all four hold enough for a stage', Math.min(...caps) > 400, caps.join(', '));
+  check('every archetype admits the stream',
+    [plate, bowl, bottle, wine].every((v) => v.aperture >= SPOUT.NOZZLE),
+    [plate, bowl, bottle, wine].map((v) => v.aperture).join(', '));
 }
 
 console.log('\n1c. the pourer carries the source');
@@ -511,58 +534,47 @@ console.log('\n6. determinism (lockstep depends on this)');
 
 console.log('\n7. materials behave differently');
 {
-  // Tip a column of material into the middle of the vessel and let it find
-  // its own shape. Pouring it in through the aiming game would make this
-  // depend on the ramp and the catchable band as well as on the material —
-  // and now the band is narrow, too little landed to measure at all, so
-  // both materials read as a perfectly flat single cell.
-  // Measured in a flat wide box, NOT in a generated bowl. A bowl's taper
-  // forces every material into the same shape — water, slush and magma all
-  // settled to width 20 and depth 4 in one — so the vessel hid the very
-  // difference being tested. This is an invariant about the CA ruleset, so
-  // it is tested against the ruleset.
-  const flatBox = (sim, width, height) => {
-    const mid = GRID.W >> 1;
-    const l = mid - (width >> 1);
-    const rows = [];
-    for (let y = 0; y < height; y++) rows.push({ l, r: l + width });
-    sim.vessel = {
-      ...sim.vessel, rows, height, minL: l, maxR: l + width,
-      mouth: { l, r: l + width }, capacity: width * height,
-    };
-    sim.grid.fill(0);
-    return sim;
-  };
-
+  // Spread a fixed pile in a flat box and see how far each runs. Measured
+  // in a box rather than a generated vessel: a vessel's own walls force
+  // every material into the same shape, which hid the difference entirely.
+  // Measured at 30 ticks, before the fluid end finishes levelling — these
+  // materials differ in RATE, and given long enough even clay flattens.
   const spread = (key) => {
-    const s = flatBox(new Sim({ seed: 21, stage: 1, material: key, volume: 1 }), 45, 16);
+    const s = new Sim({ seed: 21, stage: 1, material: key, volume: 1 });
     const mid = GRID.W >> 1;
-    let placed = 0;
-    for (let y = 1; y < 14 && placed < 90; y++) {
-      for (let d = -1; d <= 1 && placed < 90; d++) {
-        s.grid[y * GRID.W + mid + d] = s.material.id;
-        placed++;
-      }
+    const l = mid - 30;
+    const w = 61;
+    const h = 14;
+    const rows = [];
+    for (let y = 0; y < h; y++) rows.push({ l, r: l + w });
+    s.vessel = {
+      ...s.vessel, rows, height: h, minL: l, maxR: l + w,
+      mouth: { l, r: l + w }, capacity: w * h,
+    };
+    s.grid.fill(0);
+    let n = 0;
+    for (let y = 1; y < 12 && n < 66; y++) {
+      for (let d = -1; d <= 1 && n < 66; d++) { s.grid[y * GRID.W + mid + d] = s.material.id; n++; }
     }
-    s.caught = placed;
+    s.caught = n;
     s.remaining = 0;
-    // Measured BEFORE equilibrium. These materials differ in how fast they
-    // spread, not in where they end up — given long enough even magma
-    // levels out, and at 2000 ticks all three read an identical 39 of 45.
-    // At 120 they separate cleanly: water 38, slush 30, magma 18.
-    for (let i = 0; i < 120; i++) s.tick();
+    for (let i = 0; i < 30; i++) s.tick();
     const cols = new Set();
-    for (let y = 0; y < s.vessel.height; y++)
+    for (let y = 0; y < h; y++) {
       for (let x = 0; x < GRID.W; x++) if (s.grid[y * GRID.W + x]) cols.add(x);
+    }
     return cols.size;
   };
 
-  const w = spread('water');
-  const sl = spread('slush');
-  const m = spread('magma');
-  check('water runs out fast and wide', w > 32, `${w} of 45 cells`);
-  check('magma creeps instead of running', m < w - 10, `water ${w} vs magma ${m}`);
-  check('slush sits between the two', sl < w && sl > m, `water ${w}, slush ${sl}, magma ${m}`);
+  const order = ['water', 'milk', 'oil', 'smoothie', 'slush', 'clay'];
+  const widths = order.map(spread);
+  check('the clumpiness axis is monotonic',
+    widths.every((v, i) => i === 0 || v <= widths[i - 1]),
+    order.map((k, i) => `${k} ${widths[i]}`).join(', '));
+  check('water runs far further than clay', widths[0] > widths[5] * 3,
+    `water ${widths[0]} vs clay ${widths[5]}`);
+  check('the thick end genuinely holds a slope', widths[4] < widths[0] - 10,
+    `slush ${widths[4]} vs water ${widths[0]}`);
 }
 {
   const ids = Object.values(MATERIALS).map((m) => m.id);

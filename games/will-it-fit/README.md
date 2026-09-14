@@ -89,9 +89,16 @@ fastidiousness: lockstep netcode (stage 4) means both peers run the identical si
 only inputs cross the wire, and a single float or stray `Math.random()` would desync them into
 teleporting material. There is a test asserting the sim never calls `Math.random`.
 
-**Materials are one parameterised ruleset.** `spread` (sideways slide chance), `cohesion`
-(self-stickiness) and `grain` cover water through molten steel. Water levels out flat, magma
-piles in a cone. Adding a material is a table entry, not a new simulation.
+**Four vessels, rotating stage by stage** — bowl, bottle, plate, wine bottle. They are
+deliberately opposed rather than a difficulty ramp: a plate is trivial to pour into and
+impossible to hold steady, a wine bottle is nearly impossible to fill and holds everything. So
+the skill being tested changes from stage to stage instead of just scaling up.
+
+**Materials sit on one axis: clumpiness**, 0 (water) to 100 (clay), with every CA parameter
+derived from it. Water, milk, oil, smoothie, slush, clay. Adding one is choosing a number and a
+colour — not inventing a ruleset, and not a chance to make two materials behave identically by
+accident. The falloff is steep rather than linear: linear made the middle four
+indistinguishable, since every one of them finished levelling inside half a second.
 
 **Vessels are per-row interior spans** — for each grid row, which columns are inside. Bellies,
 necks and tapers are all the same code, wall collision is two integer comparisons, and
@@ -103,7 +110,7 @@ generation is seeded so both peers build the identical vessel with nothing cross
 node games/will-it-fit/test/invariants.mjs
 ```
 
-77 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
+83 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
 (240 vessels validated), ballistics and the pour ramp, the handoff, conservation of material,
 filling and overflow, tilt and pouring-out, the reserve economy, the source's travel,
 determinism, material behaviour, and that the aim preview matches the real droplet path

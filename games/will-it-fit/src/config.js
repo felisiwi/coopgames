@@ -152,40 +152,40 @@ export const SOURCE = {
 // Palette is spa/Japanese-garden rather than hot: deep celadon, soft
 // slate, warm clay. Every tone clears WCAG 1.4.11's 3:1 non-text contrast
 // against both background stops (measured, not guessed).
+// Materials sit on ONE axis: clumpiness, 0 (runs like water) to 100 (holds
+// its shape like clay). Every CA parameter is derived from it, so adding a
+// material is choosing a number and a colour — not inventing a ruleset, and
+// not a chance to accidentally make two materials behave identically.
+//
+//   spread   chance of sliding sideways at all
+//   cohesion chance of sticking to neighbours instead of moving
+//   flow     cells of lateral travel per tick (how fast it finds its level)
+//
+// Every colour is measured against BOTH background stops and clears WCAG
+// 1.4.11's 3:1 for non-text. Milk is a taupe rather than a white because a
+// pale liquid on rice paper is invisible — it reads as milk in shadow.
+// The falloff is deliberately steep rather than linear. Linear made the
+// middle four indistinguishable in play: every one of them finished
+// levelling inside half a second, so only water and clay looked different.
+// Squaring the flow and raising cohesion sharply means a smoothie still
+// visibly slumps while a slush holds a slope.
+function fromClump(clump) {
+  const fluid = 1 - clump / 100;              // 1 = water, 0 = clay
+  return {
+    clump,
+    spread: Math.max(6, Math.round(100 * fluid ** 1.6)),
+    cohesion: Math.round(clump * 0.9),
+    flow: Math.max(1, Math.round(7 * fluid ** 2)),
+  };
+}
+
 export const MATERIALS = {
-  water: {
-    id: 1,
-    name: 'Water',
-    spread: 100,
-    cohesion: 0,
-    grain: 1,
-    flow: 5,      // cells of lateral travel per tick — water finds its level fast
-    alpha: 0.8,   // liquids are translucent; you should see the vessel through them
-    color: '#4F7A72',      // deep celadon — 3.96:1 on mist, 4.23:1 on paper
-    shade: '#3E615B',
-  },
-  slush: {
-    id: 2,
-    name: 'Mist',
-    spread: 30,
-    cohesion: 45,
-    grain: 2,
-    flow: 2,
-    alpha: 0.85,
-    color: '#5F7E93',      // soft slate — 3.53:1 / 3.77:1
-    shade: '#4B6675',
-  },
-  magma: {
-    id: 3,
-    name: 'Clay',
-    spread: 15,
-    cohesion: 60,
-    grain: 1,
-    flow: 1,      // clay barely creeps; it holds an angle
-    alpha: 1,     // clay is opaque
-    color: '#A9705A',      // warm clay — 3.35:1 / 3.58:1
-    shade: '#8A5A47',
-  },
+  water:    { id: 1, name: 'Water',    ...fromClump(0),  alpha: 0.8,  color: '#4F7A72', shade: '#3E615B' },
+  milk:     { id: 2, name: 'Milk',     ...fromClump(12), alpha: 0.9,  color: '#857754', shade: '#6B6043' },
+  oil:      { id: 3, name: 'Oil',      ...fromClump(26), alpha: 0.85, color: '#5E6137', shade: '#4A4C2B' },
+  smoothie: { id: 4, name: 'Smoothie', ...fromClump(46), alpha: 0.95, color: '#8A5A78', shade: '#6E4760' },
+  slush:    { id: 5, name: 'Slush',    ...fromClump(66), alpha: 0.95, color: '#5F7E93', shade: '#4B6675' },
+  clay:     { id: 6, name: 'Clay',     ...fromClump(92), alpha: 1,    color: '#A9705A', shade: '#8A5A47' },
 };
 
 export const MATERIAL_BY_ID = Object.fromEntries(

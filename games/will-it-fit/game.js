@@ -21,7 +21,10 @@ import {
 import { Sim, traceArcFromSpeed } from './src/sim.js';
 import { drawScene, drawHud, drawBanner } from './src/draw.js';
 
-const MATERIAL_ORDER = ['water', 'slush', 'magma'];
+// Materials cycle on a different period from the four vessel shapes, so
+// the pairing keeps changing: clay into a plate one run, water into a wine
+// bottle the next.
+const MATERIAL_ORDER = ['water', 'milk', 'oil', 'smoothie', 'slush', 'clay'];
 const GRID_MID = 42;                           // middle of the vessel grid
 const TICKS_PER_FRAME = 1;                     // sim ticks per rendered frame — slow on purpose
 

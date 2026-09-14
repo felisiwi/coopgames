@@ -22,63 +22,72 @@ export function rng(seed) {
 
 // Stage 1-20 vary aperture; 10+ also vary shape and height (DESIGN.md Q15).
 // Everything returned is integer grid units.
+// The four shapes, rotating stage by stage. They are deliberately opposed:
+// a plate is trivial to pour into and impossible to hold steady, a wine
+// bottle is the reverse. Alternating them means the skill being tested
+// changes from stage to stage rather than just getting numerically harder.
+export const ARCHETYPES = ['bowl', 'bottle', 'plate', 'wine'];
+
+export function archetypeFor(stage) {
+  return ARCHETYPES[(stage - 1) % ARCHETYPES.length];
+}
+
 export function generateVessel(seed, stage = 1) {
   const rand = rng((seed ^ (stage * 0x9e3779b1)) >>> 0);
   const pick = (lo, hi) => lo + Math.floor(rand() * (hi - lo + 1));
-
-  // BOWLS AND CUPS, not flasks. A tall, long-necked flask is physically
-  // spill-proof below about 90° of tilt — measured at seed 3, its lower rim
-  // corner sat 57.7 cells above a liquid surface reaching only 41.3 — so
-  // tilting could never threaten anything and the catcher had no game to
-  // play. A vessel whose rim is WIDE and LOW is the shape where a modest
-  // lean genuinely spills, and where how full it is decides how much.
-  //
-  // Row 0 is the rim and is the widest part; the body tapers inward toward
-  // the base. All sizes are in the fine grid (config CELL).
   const tightness = Math.min(1, (stage - 1) / 30);
-
-  // The rim narrows with the stages — that is the "harder to catch" dial.
-  const rimMax = Math.round(60 - 26 * tightness);
-  const rim = Math.max(22, pick(Math.max(22, rimMax - 8), rimMax));
-
-  // SHALLOW. Depth is a fraction of the rim, not an independent number, so
-  // every vessel is a broad flat bowl rather than a cup — which is what
-  // makes leaning it actually threaten the contents. It also gets
-  // shallower with the stages: material reaches a low rim sooner.
-  const depthPct = 62 - Math.round(18 * tightness);   // 62% of rim -> 44%
-  const height = Math.max(12, Math.round((rim * depthPct) / 100));
-
-  // Taper to the base. A steeper taper is a rounder bowl, a gentle one is
-  // closer to a straight-sided dish.
-  const taper = Math.min(rim - 14, pick(4, Math.max(5, rim >> 2)));
-  const base = Math.max(10, rim - taper);
-
-  const rows = [];
+  const kind = archetypeFor(stage);
   const mid = GRID.W >> 1;
-  for (let y = 0; y < height; y++) {
-    // Integer lerp from rim at the top to base at the bottom.
-    const width = height === 1
-      ? rim
-      : rim - Math.round(((rim - base) * y) / (height - 1));
-    const half = width >> 1;
-    rows.push({ l: mid - half, r: mid - half + width });
+
+  // Each archetype is a list of [rows, width] segments from the rim down.
+  // One representation, four silhouettes — and because a segment can be
+  // narrower than the one below it, necks and bellies cost no extra code.
+  let segments;
+  if (kind === 'plate') {
+    // Barely a lip. Catching is easy, holding it is not.
+    const rim = Math.max(40, Math.round((74 - 20 * tightness) - pick(0, 8)));
+    const h = Math.max(5, Math.round((9 - 3 * tightness)));
+    segments = [[h, rim], [2, Math.max(12, rim - pick(10, 18))]];
+  } else if (kind === 'bowl') {
+    const rim = Math.max(26, Math.round((56 - 22 * tightness) - pick(0, 8)));
+    const h = Math.max(10, Math.round(rim * (0.58 - 0.16 * tightness)));
+    segments = [[h, rim], [Math.max(3, h >> 1), Math.max(12, rim - pick(8, 16))]];
+  } else if (kind === 'bottle') {
+    const neck = Math.max(9, Math.round((17 - 6 * tightness) - pick(0, 3)));
+    const neckLen = pick(7, 12);
+    const belly = Math.max(neck + 10, Math.round((44 - 12 * tightness) - pick(0, 6)));
+    const bellyLen = pick(20, 28);
+    segments = [[neckLen, neck], [5, Math.round((neck + belly) / 2)], [bellyLen, belly]];
+  } else {
+    // Wine: a long narrow throat over a deep body. Very hard to fill,
+    // almost impossible to spill.
+    const neck = Math.max(7, Math.round((12 - 4 * tightness) - pick(0, 2)));
+    const neckLen = pick(16, 22);
+    const belly = Math.max(neck + 14, Math.round((38 - 10 * tightness) - pick(0, 5)));
+    const bellyLen = pick(22, 30);
+    segments = [[neckLen, neck], [6, Math.round((neck + belly) / 2)], [bellyLen, belly]];
   }
 
-  const aperture = rim;
-  const belly = rim;
-  const neckLen = 0;
+  const rows = [];
+  for (const [len, width] of segments) {
+    for (let i = 0; i < len && rows.length < GRID.H - 2; i++) {
+      const w = Math.min(width, GRID.W - 4);
+      const half = w >> 1;
+      rows.push({ l: mid - half, r: mid - half + w });
+    }
+  }
 
+  const height = rows.length;
   const capacity = rows.reduce((n, r) => n + (r.r - r.l), 0);
-  // Widest extent, so the sim can tell "clipped the shoulder and deflected
-  // off it" from "missed the vessel entirely and just kept falling".
   const minL = Math.min(...rows.map((r) => r.l));
   const maxR = Math.max(...rows.map((r) => r.r));
   return {
+    kind,
     rows,
     height,
-    aperture,
-    belly,
-    neckLen,
+    aperture: rows[0].r - rows[0].l,
+    belly: maxR - minL,
+    neckLen: segments[0][0],
     mouth: { l: rows[0].l, r: rows[0].r },
     minL,
     maxR,
@@ -107,13 +116,22 @@ export function validate(vessel, nozzle) {
     if (row.l < 0 || row.r > GRID.W) problems.push(`row ${y} outside grid`);
     if (row.r - row.l < 1) problems.push(`row ${y} has no interior`);
   }
-  // Bowls taper inward toward the base, so every row must be no wider than
-  // the rim above it — an overhang would trap material the CA cannot drain.
-  for (let y = 1; y < vessel.height; y++) {
-    if (vessel.rows[y].r - vessel.rows[y].l > vessel.rows[y - 1].r - vessel.rows[y - 1].l) {
-      problems.push(`row ${y} overhangs the row above`);
-      break;
-    }
+  // Bellies are the point now, so "no row wider than the one above" is out.
+  // What matters instead is that every cell can actually be reached from
+  // the mouth: a pocket the falling material can never get into would be
+  // capacity that can never be filled. Flood fill from the rim.
+  const seen = new Set();
+  const stack = [];
+  for (let x = vessel.rows[0].l; x < vessel.rows[0].r; x++) stack.push([x, 0]);
+  while (stack.length) {
+    const [x, y] = stack.pop();
+    const key = y * 1000 + x;
+    if (seen.has(key) || !inside(vessel, x, y)) continue;
+    seen.add(key);
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+  if (seen.size !== vessel.capacity) {
+    problems.push(`${vessel.capacity - seen.size} cells unreachable from the mouth`);
   }
   return problems;
 }
