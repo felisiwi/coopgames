@@ -23,7 +23,7 @@ import {
   stageVolume, afterStage, drain, runOver,
 } from './src/economy.js';
 import { Sim, traceArcFromSpeed } from './src/sim.js';
-import { drawScene, drawHud, drawBanner } from './src/draw.js';
+import { drawScene, drawHud, drawBanner, drawRotateHint } from './src/draw.js';
 import { seatFor, mergeInputs, emptyInput } from './src/seats.js';
 import { createLockstep, DEFAULT_DELAY } from './src/lockstep.js';
 
@@ -342,6 +342,13 @@ export default function start({ canvas, net, seed = 1, role = 'host' }) {
           : 'move · hold to pour · Tab to swap seats');
     }
     ctx.restore();
+
+    // A tall screen cannot show a wide table. Ask for a turn — over
+    // the top of a simulation that keeps running, since pausing one
+    // peer of a lockstep pair would stall the other.
+    if (canvas.height > canvas.width * 1.05) {
+      drawRotateHint(ctx, canvas.width, canvas.height);
+    }
   }
   requestAnimationFrame(frame);
 

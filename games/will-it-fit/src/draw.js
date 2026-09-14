@@ -339,6 +339,53 @@ function bar(ctx, x, y, w, h, ratio, color) {
   ctx.restore();
 }
 
+// Portrait phones. The world is a fixed 320x200 cells and cannot be
+// reshaped to suit a screen — WORLD_COLS is used by the simulation, so two
+// peers on different aspect ratios would desync outright. So the honest
+// answer to a tall screen is to ask for a wide one.
+//
+// Drawn in the canvas rather than in the page so it works through the hub
+// as well as the solo entry, and deliberately NON-blocking: the simulation
+// keeps running underneath, because pausing one peer of a lockstep pair
+// would stall the other or desync both.
+export function drawRotateHint(ctx, w, h) {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = 'rgba(231, 234, 227, 0.93)';
+  ctx.fillRect(0, 0, w, h);
+
+  const cx = w / 2;
+  const cy = h / 2;
+  const s = Math.min(w, h) / 320;
+
+  ctx.translate(cx, cy - 30 * s);
+  ctx.scale(s, s);
+
+  // A phone, tipping.
+  ctx.rotate(-0.35);
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = PALETTE.vesselDark;
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  roundRect(ctx, -42, -72, 84, 144, 12);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = PALETTE.vesselDark;
+  ctx.fillRect(-14, -62, 28, 5);
+  ctx.restore();
+
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = PALETTE.ink;
+  const big = Math.max(18, Math.min(34, w / 18));
+  ctx.font = `700 ${big}px ui-rounded, "Trebuchet MS", system-ui, sans-serif`;
+  ctx.fillText('Turn your phone sideways', cx, cy + 90 * s);
+  ctx.font = `500 ${big * 0.55}px ui-rounded, "Trebuchet MS", system-ui, sans-serif`;
+  ctx.fillStyle = 'rgba(47,55,51,0.7)';
+  ctx.fillText('the table is wider than it is tall', cx, cy + 90 * s + big * 1.3);
+  ctx.restore();
+}
+
 export function drawBanner(ctx, text, sub) {
   ctx.save();
   ctx.textAlign = 'center';
