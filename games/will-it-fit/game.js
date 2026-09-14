@@ -4,15 +4,19 @@
 //
 // Per games/README.md this file never imports PeerJS or shared/net.js.
 //
-// BUILD STAGE 2 (see DESIGN.md build plan): solo, no networking. You play
-// the CATCHER, which is the skill seat — move the bowl to intercept a
-// stream that will not stay still, without leaning so hard that you slop
-// what you have already caught. The source aims itself, sweeping slowly, so
-// there is always somewhere to be. Tap to unstop it (Q23).
+// BUILD STAGE 4: two seats, lockstep, solo fallback.
 //
-// Tilt is not a separate control: it is induced by how fast you move. A
-// free tilt would only ever cost you, so nobody would use it. Lockstep sync
-// is stage 4; `net` is accepted and unused for now.
+// The POURER carries the source along its run and works the cork. The
+// CATCHER carries the vessel and, by moving it, makes it lean. They swap
+// every stage. Solo, one person drives both and Tab switches between them.
+//
+// Two-player runs in LOCKSTEP: both peers simulate everything from the same
+// integer input stream and only inputs cross the wire. That costs a few
+// frames of input delay, which a pouring game absorbs and a fighting game
+// could not — the opposite call to Dino Rumble, for the opposite reason.
+//
+// Solo or networked is decided by a short handshake before anything is
+// simulated, so the two peers can never start from different states.
 import { STAGE, SPOUT, FP, TABLE_Y, VESSEL } from './src/config.js';
 import {
   RESERVE_MAX, SPILL_COST, MILESTONES,
@@ -20,15 +24,18 @@ import {
 } from './src/economy.js';
 import { Sim, traceArcFromSpeed } from './src/sim.js';
 import { drawScene, drawHud, drawBanner } from './src/draw.js';
+import { seatFor, mergeInputs, emptyInput } from './src/seats.js';
+import { createLockstep, DEFAULT_DELAY } from './src/lockstep.js';
 
 // Materials cycle on a different period from the four vessel shapes, so
 // the pairing keeps changing: clay into a plate one run, water into a wine
 // bottle the next.
 const MATERIAL_ORDER = ['water', 'milk', 'oil', 'smoothie', 'slush', 'clay'];
-const GRID_MID = 42;                           // middle of the vessel grid
 const TICKS_PER_FRAME = 1;                     // sim ticks per rendered frame — slow on purpose
 
-export default function start({ canvas, net, seed = 1 }) {
+const HANDSHAKE_FRAMES = 90;   // ~1.5s to find a peer before going solo
+
+export default function start({ canvas, net, seed = 1, role = 'host' }) {
   const ctx = canvas.getContext('2d');
 
   let stage = 1;
@@ -40,6 +47,40 @@ export default function start({ canvas, net, seed = 1 }) {
   let dryStage = false;     // finished a stage having caught nothing
   let sim = makeSim();
   let running = true;
+
+  // ── solo or networked ────────────────────────────────────────────────
+  // Nothing is simulated until this is settled. If one peer started solo
+  // and the other in lockstep they would be running different games from
+  // frame one, so the handshake gates the whole loop rather than switching
+  // mid-run.
+  let mode = 'deciding';        // deciding | solo | net
+  let handshakeLeft = HANDSHAKE_FRAMES;
+  let sawPeer = false;
+  let desyncAt = null;
+
+  const lockstep = createLockstep({
+    delay: DEFAULT_DELAY,
+    send: (m) => net && net.send(m),
+    onDesync: (d) => { desyncAt = d; },
+  });
+
+  if (net && net.onMessage) {
+    net.onMessage((msg) => {
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.t === 'hello') {
+        sawPeer = true;
+        // Answer, so a peer that arrived after our first hello still hears
+        // one. Cheap, and it makes the handshake order-independent.
+        net.send({ t: 'hello' });
+        return;
+      }
+      if (msg.t === 'i' || msg.t === 'c') {
+        sawPeer = true;
+        lockstep.receive(msg);
+      }
+    });
+  }
+  if (net && net.send) net.send({ t: 'hello' });
 
   function makeSim() {
     const material = MATERIAL_ORDER[(stage - 1) % MATERIAL_ORDER.length];
@@ -55,13 +96,16 @@ export default function start({ canvas, net, seed = 1 }) {
   // pressure; click or space pulls the cork.
   const pointer = { x: STAGE.W * 0.5, y: TABLE_Y - 80 };
   let corkOpen = false;
-  let vesselCol = null;   // where the bowl is, in world cells
-  let lastVesselCol = null;
-  let leanSpeed = 0;      // smoothed travel speed, drives the lean
+  // Last known value for each seat, so the seat nobody is driving this
+  // frame holds still instead of snapping to zero.
+  let heldBowl = (VESSEL.MIN_COL + VESSEL.MAX_COL) >> 1;
+  let heldSpout = SPOUT.MIN_COL + 30;
+  let heldCork = 0;
   // Which seat the mouse is driving. In two-player these are two people;
   // solo, Tab switches so the pourer's seat can be felt before the netcode
   // exists to give it to somebody else.
-  let seat = 'catcher';   // catcher | pourer
+  let soloSeat = 'catcher';   // which seat Tab has the solo player in
+  const seatNow = () => (mode === 'net' ? seatFor(role, stage) : soloSeat);
 
   function toStage(e) {
     const r = canvas.getBoundingClientRect();
@@ -95,7 +139,9 @@ export default function start({ canvas, net, seed = 1 }) {
     if (e.type !== 'keydown') return;
     if (e.code === 'Tab') {
       e.preventDefault();
-      seat = seat === 'catcher' ? 'pourer' : 'catcher';
+      // Only meaningful solo: in a two-player game the seats are handed
+      // out by role and swap on their own each stage.
+      if (mode !== 'net') soloSeat = soloSeat === 'catcher' ? 'pourer' : 'catcher';
     }
     if (e.code === 'KeyR' && phase === 'over') restart();
   };
@@ -160,7 +206,6 @@ export default function start({ canvas, net, seed = 1 }) {
     stage += 1;
     sim = makeSim();
     countedSpill = 0;
-    vesselCol = null;
     phase = 'play';
     phaseT = 0;
   }
@@ -170,7 +215,6 @@ export default function start({ canvas, net, seed = 1 }) {
     reserve = RESERVE_MAX;
     reserveShown = RESERVE_MAX;
     dryStage = false;
-    leanSpeed = 0;
     sim = makeSim();
     countedSpill = 0;
     phase = 'play';
@@ -184,40 +228,62 @@ export default function start({ canvas, net, seed = 1 }) {
     const dt = Math.min(0.25, (now - last) / 1000);
     last = now;
 
+    // Settle solo-or-networked before simulating anything at all.
+    if (mode === 'deciding') {
+      handshakeLeft -= 1;
+      if (sawPeer) mode = 'net';
+      else if (handshakeLeft <= 0) mode = 'solo';
+      else if (handshakeLeft % 30 === 0 && net && net.send) net.send({ t: 'hello' });
+      render();
+      requestAnimationFrame(frame);
+      return;
+    }
+
     if (phase === 'play') {
-      // Where the bowl should be: straight under the pointer, clamped to
-      // the plinth's travel. Position is instant (Q2) — only the lean is a
-      // consequence.
+      const seat = seatNow();
       const pointerCol = Math.round(pointer.x / STAGE.CELL);
-      if (seat === 'pourer') {
-        // The pourer carries the source along its own run; the bowl stays
-        // where it was left.
-        sim.setSpout(pointerCol);
-        if (vesselCol === null) { vesselCol = sim.col0 + (GRID_MID); lastVesselCol = vesselCol; }
+
+      // This peer's intent, for its own seat only. Integers, because this
+      // is exactly what goes on the wire.
+      const mine = emptyInput();
+      if (seat === 'catcher') {
+        mine.bowl = Math.max(VESSEL.MIN_COL, Math.min(VESSEL.MAX_COL, pointerCol));
+        heldBowl = mine.bowl;
+      } else {
+        mine.spout = pointerCol;
+        mine.cork = corkOpen ? 1 : 0;
+        heldSpout = mine.spout;
+        heldCork = mine.cork;
       }
-      const wantCol = seat === 'catcher'
-        ? Math.max(VESSEL.MIN_COL, Math.min(VESSEL.MAX_COL, pointerCol))
-        : vesselCol;
-      if (vesselCol === null) { vesselCol = wantCol; lastVesselCol = wantCol; }
-      vesselCol = wantCol;
 
-      // Lean from travel speed. Instant in both directions: stop moving and
-      // you are upright on the same frame, so it stays predictable.
-      // Smoothed travel speed. A raw per-frame delta is far too noisy to
-      // drive a lean — it made the bowl judder.
-      const speed = vesselCol - lastVesselCol;
-      lastVesselCol = vesselCol;
-      leanSpeed += (speed - leanSpeed) / VESSEL.TILT_SMOOTH;
-      const lean = Math.max(-1, Math.min(1, leanSpeed / VESSEL.SPEED_FOR_MAX_TILT))
-        * VESSEL.MAX_TILT;
-      const basePivot = sim.col0 + ((sim.vessel.minL + sim.vessel.maxR) >> 1);
-      sim.setVessel(vesselCol - basePivot, lean);
-
-      sim.setAim(autoAim());
-      sim.setCork(corkOpen);
-      for (let i = 0; i < TICKS_PER_FRAME; i++) sim.tick();
-      drainForSpills();
-      if (phase === 'play' && sim.done) endStage();
+      if (mode === 'solo') {
+        // One pair of hands: the seat you are not in holds its last value.
+        const merged = mergeInputs(
+          { spout: seat === 'pourer' ? mine.spout : heldSpout,
+            cork: seat === 'pourer' ? mine.cork : heldCork },
+          { bowl: seat === 'catcher' ? mine.bowl : heldBowl },
+        );
+        sim.applyInput(merged);
+        for (let i = 0; i < TICKS_PER_FRAME; i++) sim.tick();
+        drainForSpills();
+        if (phase === 'play' && sim.done) endStage();
+      } else {
+        lockstep.submitLocal(mine);
+        const f = lockstep.step();
+        if (f) {
+          const iAmCatcher = seat === 'catcher';
+          const catcherIn = iAmCatcher ? f.local : f.remote;
+          const pourerIn = iAmCatcher ? f.remote : f.local;
+          sim.applyInput(mergeInputs(pourerIn, catcherIn));
+          for (let i = 0; i < TICKS_PER_FRAME; i++) sim.tick();
+          lockstep.checkpoint(sim.checksum());
+          drainForSpills();
+          if (phase === 'play' && sim.done) endStage();
+        }
+        // If f is null the other peer's input for this frame has not
+        // arrived. Hold the picture exactly where it is rather than
+        // simulating ahead and guessing — a wrong guess is a desync.
+      }
     } else {
       phaseT += dt;
       if (phase === 'between' && phaseT > 1.8) nextStage();
@@ -256,13 +322,24 @@ export default function start({ canvas, net, seed = 1 }) {
     if (phase === 'between') {
       const kept = Math.round(sim.fillRatio * 100);
       drawBanner(ctx, `${kept}% caught`, `reserve ${Math.round(reserve)}`);
+    } else if (mode === 'deciding') {
+      drawBanner(ctx, 'Looking for a partner…', 'starts solo if nobody joins');
+    } else if (desyncAt) {
+      drawBanner(ctx, 'Out of step',
+        `the two sides diverged at frame ${desyncAt.frame} — reload to resync`);
+    } else if (mode === 'net' && lockstep.waiting && lockstep.stalledFor > 12) {
+      drawBanner(ctx, 'Waiting for your partner…', `${lockstep.stalledFor} frames behind`);
     } else if (phase === 'over') {
       drawBanner(ctx,
         dryStage ? 'Not a drop caught' : 'The reserve is empty',
         `reached stage ${best} — press R, or tap, to begin again`);
     } else if (!corkOpen && sim.remaining === sim.startVolume) {
-      drawBanner(ctx, 'Move the bowl, then pour',
-        'move to place the bowl · hold to pour · Tab to carry the pot instead');
+      drawBanner(ctx, seatNow() === 'catcher' ? 'Catch it' : 'Pour it',
+        mode === 'net'
+          ? (seatNow() === 'catcher'
+            ? 'move to place the bowl — your partner pours'
+            : 'move to carry the pot · hold to pour — your partner catches')
+          : 'move · hold to pour · Tab to swap seats');
     }
     ctx.restore();
   }

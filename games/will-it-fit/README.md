@@ -31,8 +31,8 @@ start sliding out of a tipped mouth.
 |---|---|---|
 | 1 | CA in a static upright vessel, solo, with the arc | **done** |
 | 2 | Vessel tilt via rotated gravity | **done**, unplayed |
-| 3 | Stages, pool economy, role swap | partly (economy is in) |
-| 4 | Lockstep netcode + hub integration | not started |
+| 3 | Stages, economy, role swap | **done** |
+| 4 | Lockstep netcode + hub integration | **code done**, never run against a real peer |
 | 5 | Mobile tilt input | not started |
 
 Since stage 2 you play the **catcher**, which is the skill seat. The source aims itself,
@@ -110,7 +110,7 @@ generation is seeded so both peers build the identical vessel with nothing cross
 node games/will-it-fit/test/invariants.mjs
 ```
 
-83 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
+103 checks, headless, no browser — per the tool-economy rule in `AGENTS.md`. Vessel generation
 (240 vessels validated), ballistics and the pour ramp, the handoff, conservation of material,
 filling and overflow, tilt and pouring-out, the reserve economy, the source's travel,
 determinism, material behaviour, and that the aim preview matches the real droplet path

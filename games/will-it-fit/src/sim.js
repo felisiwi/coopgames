@@ -121,6 +121,8 @@ export class Sim {
     this.tilt = 0;    // degrees, integer; rotates the world around the grid
     this.offset = 0;  // vessel travel along the plinth, in world cells
     this.spoutCol = SPOUT_COL; // the pourer carries the source along a run
+    this.bowlCol = null;       // world column of the vessel centre
+    this.leanFP = 0;           // smoothed travel speed, fixed point
 
     this.angle = SPOUT.ANGLE_FIXED;
     this.corked = true;
@@ -182,6 +184,37 @@ export class Sim {
   // reads, so it survives lockstep unchanged.
   setSpout(col) {
     this.spoutCol = Math.max(SPOUT.MIN_COL, Math.min(SPOUT.MAX_COL, Math.round(col))) | 0;
+  }
+
+  // THE input entry point for a lockstep game. One tick of intent, as
+  // integers, in; everything the simulation needs derived from it here —
+  // deterministically, on both peers.
+  //
+  // The lean in particular has to be computed in here rather than in the
+  // render loop. It used to be a floating-point exponential average of
+  // mouse movement, which two machines would never agree on; as integer
+  // fixed point driven off the same input stream, they cannot disagree.
+  applyInput(input) {
+    const bowl = Math.max(VESSEL.MIN_COL, Math.min(VESSEL.MAX_COL, input.bowl | 0));
+    if (this.bowlCol === null) this.bowlCol = bowl;
+    const travelled = bowl - this.bowlCol;
+    this.bowlCol = bowl;
+
+    // Integer exponential smoothing of travel speed.
+    this.leanFP += ((travelled * FP) - this.leanFP) / VESSEL.TILT_SMOOTH | 0;
+    const capFP = VESSEL.SPEED_FOR_MAX_TILT * FP;
+    const clamped = Math.max(-capFP, Math.min(capFP, this.leanFP));
+    const tilt = (clamped * VESSEL.MAX_TILT / capFP) | 0;
+
+    const basePivot = this.col0 + ((this.vessel.minL + this.vessel.maxR) >> 1);
+    this.setVessel(bowl - basePivot, tilt);
+    this.setSpout(input.spout);
+    this.setCork(!!input.cork);
+  }
+
+  // Where the vessel should start: under the middle of its own run.
+  get homeCol() {
+    return (VESSEL.MIN_COL + VESSEL.MAX_COL) >> 1;
   }
 
   setVessel(offsetCols, tiltDeg) {
@@ -615,7 +648,7 @@ export class Sim {
     };
     for (let i = 0; i < this.grid.length; i++) if (this.grid[i]) mix(i * 31 + this.grid[i]);
     for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); mix(d.inside); mix(d.lost); }
-    mix(this.pourTicks); mix(this.emitAcc); mix(this.speedFP); mix(this.spoutCol); mix(this.tilt); mix(this.offset);
+    mix(this.pourTicks); mix(this.emitAcc); mix(this.speedFP); mix(this.spoutCol); mix(this.bowlCol | 0); mix(this.leanFP); mix(this.tilt); mix(this.offset);
     mix(this.caught); mix(this.spilled); mix(this.remaining);
     return h >>> 0;
   }

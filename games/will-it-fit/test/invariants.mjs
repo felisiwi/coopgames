@@ -8,6 +8,8 @@ import { Sim, traceArc, launchVelocity } from '../src/sim.js';
 import {
   RESERVE_MAX, MILESTONES, stageVolume, drain, afterStage, runOver,
 } from '../src/economy.js';
+import { seatFor, otherSeat, mergeInputs, emptyInput } from '../src/seats.js';
+import { createLockstep, DEFAULT_DELAY } from '../src/lockstep.js';
 
 const TABLE_ROW = Math.floor(TABLE_Y / STAGE.CELL);
 
@@ -729,6 +731,111 @@ console.log('\n8. the aim preview cannot lie');
   for (let i = 0; i < 2000; i++) traceArc(-20, 5, 220);
   const ms = Number(process.hrtime.bigint() - t0) / 1e6;
   check('2000 previews cost under 150ms', ms < 150, `${ms.toFixed(1)}ms`);
+}
+
+console.log('\n9. two seats');
+{
+  const host = [1, 2, 3, 4].map((st) => seatFor('host', st));
+  const guest = [1, 2, 3, 4].map((st) => seatFor('guest', st));
+  check('the seats swap every stage', host.join(',') === 'catcher,pourer,catcher,pourer',
+    host.join(','));
+  check('the two peers are never in the same seat',
+    host.every((h, i) => h !== guest[i]), `${host.join(',')} / ${guest.join(',')}`);
+  check('nobody is stuck as the faucet for a whole run',
+    new Set(host).size === 2 && new Set(guest).size === 2);
+  check('otherSeat is its own inverse',
+    otherSeat(otherSeat('catcher')) === 'catcher' && otherSeat('catcher') === 'pourer');
+
+  // Each seat may only touch its own controls. A peer reaching into the
+  // other's fields would desync rather than cheat, so the split is kept
+  // explicit to make that bug obvious instead of mysterious.
+  const merged = mergeInputs({ bowl: 999, spout: 40, cork: 1 }, { bowl: 150, spout: 999, cork: 0 });
+  check('the pourer supplies only spout and cork', merged.spout === 40 && merged.cork === 1);
+  check('the catcher supplies only the bowl', merged.bowl === 150);
+  check('an empty input is all zeroes', Object.values(emptyInput()).every((v) => v === 0));
+}
+
+console.log('\n10. lockstep');
+{
+  const sent = [];
+  const ls = createLockstep({ delay: 3, send: (m) => sent.push(m) });
+  check('the opening frames need no input', ls.ready());
+  ls.submitLocal({ bowl: 5, spout: 6, cork: 1 });
+  check('local intent is scheduled ahead by the delay', sent[0].f === 3, `frame ${sent[0].f}`);
+  check('and crosses the wire as plain integers',
+    typeof sent[0].b === 'number' && typeof sent[0].s === 'number' && typeof sent[0].c === 'number');
+
+  for (let i = 0; i < 3; i++) ls.step();
+  check('it stalls rather than guessing past a missing input', ls.step() === null);
+  check('and reports how far behind it is', ls.stalledFor > 0);
+  ls.receive({ t: 'i', f: 3, b: 1, s: 2, c: 0 });
+  const f = ls.step();
+  check('and resumes once the peer catches up', f !== null && f.frame === 3);
+}
+{
+  // Two peers, two simulations, a lagged link. They must stay bit-identical
+  // and agree on the score — the whole promise of lockstep.
+  const runPair = (lag) => {
+    const pipe = { a: [], b: [] };
+    const A = createLockstep({ delay: 6, send: (m) => pipe.a.push({ m, at: lag }) });
+    const B = createLockstep({ delay: 6, send: (m) => pipe.b.push({ m, at: lag }) });
+    const simA = new Sim({ seed: 9, stage: 1, volume: 2500 });
+    const simB = new Sim({ seed: 9, stage: 1, volume: 2500 });
+    simA.setAim(SPOUT.ANGLE_FIXED);
+    simB.setAim(SPOUT.ANGLE_FIXED);
+    let mismatch = null;
+    for (let t = 0; t < 1200; t++) {
+      for (const k of ['a', 'b']) {
+        const tgt = k === 'a' ? B : A;
+        const q = pipe[k];
+        while (q.length && q[0].at <= 0) tgt.receive(q.shift().m);
+        for (const it of q) it.at -= 1;
+      }
+      const bowl = 150 + Math.round(50 * Math.sin(t / 40));
+      const spout = 55 + (t % 45);
+      const cork = t % 300 < 250 ? 1 : 0;
+      A.submitLocal({ bowl, spout: 0, cork: 0 });
+      B.submitLocal({ bowl: 0, spout, cork });
+      for (const [ls2, sim, catcher] of [[A, simA, true], [B, simB, false]]) {
+        const fr = ls2.step();
+        if (!fr) continue;
+        const cin = catcher ? fr.local : fr.remote;
+        const pin = catcher ? fr.remote : fr.local;
+        sim.applyInput(mergeInputs(pin, cin));
+        sim.tick();
+        ls2.checkpoint(sim.checksum());
+      }
+      if (A.frame === B.frame && simA.checksum() !== simB.checksum() && !mismatch) {
+        mismatch = `t=${t}`;
+      }
+    }
+    return { mismatch, a: simA, b: simB, A, B };
+  };
+
+  for (const lag of [0, 3, 5]) {
+    const r = runPair(lag);
+    check(`peers stay identical at ${lag} frames of lag`,
+      r.mismatch === null && !r.A.desynced && !r.B.desynced, r.mismatch || 'desync flagged');
+    check(`and agree on the score at ${lag} frames of lag`,
+      r.a.caught === r.b.caught && r.a.spilled === r.b.spilled,
+      `caught ${r.a.caught}/${r.b.caught}, spilled ${r.a.spilled}/${r.b.spilled}`);
+  }
+}
+{
+  // Divergence must be caught and reported, never left to drift: carrying
+  // on silently shows each player a different game while both believe it
+  // is shared.
+  let flagged = null;
+  const A = createLockstep({ delay: 2, send: () => {}, onDesync: (d) => { flagged = d; } });
+  A.receive({ t: 'c', f: 60, k: 123456 });
+  for (let i = 0; i < 60; i++) {
+    A.submitLocal({ bowl: 1, spout: 1, cork: 0 });
+    A.receive({ t: 'i', f: i, b: 1, s: 1, c: 0 });
+    A.step();
+  }
+  A.checkpoint(999);
+  check('a checksum mismatch is reported loudly', flagged !== null,
+    flagged ? '' : 'divergence went unnoticed');
 }
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
