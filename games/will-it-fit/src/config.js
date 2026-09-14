@@ -66,16 +66,23 @@ export const POUR = {
   RAMP_TICKS: 240,      // hold time to reach full flow
   RATE_START: fp(0.25), // grains per tick the moment you open it
   RATE_MAX: fp(5),
-  PRESSURE_START: fp(1.6),
-  // Topped out so the arc ALWAYS falls inside the frame. Measured at the
-  // fixed aim against a representative rim height, the stream lands at:
-  //   p5 -> col 238   p6 -> col 265   p7 -> col 287
-  //   p8 -> col 305   p9 -> col 324   p10 -> col 340
-  // The bowl's travel ends at col 290 and the frame at 320, so anything
-  // above 7 throws material somewhere the catcher cannot reach and then
-  // off the edge entirely. At 7 a full-tilt pour still arcs down onto the
-  // far end of the bowl's reach, which is the fastest it can usefully be.
-  PRESSURE_MAX: fp(7),
+
+  // Exit speed in fixed-point CELLS PER TICK, not in integer "pressure".
+  // Integer pressure made the landing point teleport: measured at the fixed
+  // aim it went 97 -> 140 -> 177 -> 210 -> 238 -> 287, so every step opened
+  // a 30-50 cell hole in the arc with nothing landing inside it, and where
+  // that hole fell depended on exactly when the counter ticked over. A
+  // continuous speed sweeps the landing point smoothly instead.
+  SPEED_START: fp(0.5),
+  SPEED_MAX: fp(3.5),   // was pressure 7; still arcs down inside the frame
+
+  // THE THROTTLE. Speed may only rise in proportion to grains actually
+  // emitted, so the stream can never accelerate faster than the sand is
+  // flowing. Sized so the landing point walks at most about a cell per
+  // grain: near the bottom of the range the landing point moves roughly 86
+  // cells per cell/tick of speed, so ~1/86 of a cell/tick per grain keeps
+  // the arc continuous. With no flow there is no acceleration at all.
+  SPEED_STEP_PER_GRAIN: 3,
 };
 
 // Slowed deliberately. Halving exit speed and QUARTERING gravity (in pixel

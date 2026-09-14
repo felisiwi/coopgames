@@ -50,12 +50,17 @@ function makeRng(seed) {
 // Launch velocity for an aim. Exported so the on-screen ghost arc and the
 // real stream are computed by the SAME code — a preview with its own copy
 // of this maths is a preview that eventually lies.
-export function launchVelocity(angleDeg, pressure) {
-  const speed = pressure * SPOUT.SPEED_PER_PRESSURE;
+export function launchFromSpeed(angleDeg, speedFP) {
   return {
-    vx: (speed * cosDeg(angleDeg)) / FP | 0,
-    vy: (speed * -sinDeg(angleDeg)) / FP | 0,
+    vx: (speedFP * cosDeg(angleDeg)) / FP | 0,
+    vy: (speedFP * -sinDeg(angleDeg)) / FP | 0,
   };
+}
+
+// Pressure form, kept for tools and tests that want a coarse dial. The
+// game itself no longer uses integer pressure — see POUR in config.
+export function launchVelocity(angleDeg, pressure) {
+  return launchFromSpeed(angleDeg, pressure * SPOUT.SPEED_PER_PRESSURE);
 }
 
 // Integrate one droplet forward, same arithmetic the sim uses. Mutates.
@@ -68,6 +73,20 @@ export function stepBallistic(d) {
 
 // The predicted flight path, in fixed-point world cells. Cheap: no Sim,
 // no grid, no allocation beyond the points themselves.
+export function traceArcFromSpeed(angleDeg, speedFP, steps = 220, stopRow = Infinity) {
+  const { vx, vy } = launchFromSpeed(angleDeg, speedFP);
+  const d = { x: SPOUT_COL * FP, y: SPOUT_ROW * FP, vx, vy };
+  const pts = [];
+  for (let i = 0; i < steps; i++) {
+    stepBallistic(d);
+    const col = d.x / FP | 0;
+    const row = d.y / FP | 0;
+    if (col < 0 || col >= WORLD_COLS || row > stopRow) break;
+    pts.push({ x: d.x, y: d.y });
+  }
+  return pts;
+}
+
 export function traceArc(angleDeg, pressure, steps = 220, stopRow = Infinity) {
   const { vx, vy } = launchVelocity(angleDeg, pressure);
   const d = { x: SPOUT_COL * FP, y: SPOUT_ROW * FP, vx, vy };
@@ -114,6 +133,7 @@ export class Sim {
     this.ticks = 0;
     this.pourTicks = 0;  // how long the pour has been running, for the ramp
     this.emitAcc = 0;    // fixed-point accumulator for fractional flow rate
+    this.speedFP = POUR.SPEED_START; // exit speed, throttled by actual flow
   }
 
   // ── the rotating frame (stage 2) ────────────────────────────────────
@@ -178,6 +198,7 @@ export class Sim {
     if (wasOpen && this.corked) {
       this.pourTicks = 0;
       this.emitAcc = 0;
+      this.speedFP = POUR.SPEED_START;
     }
   }
 
@@ -188,10 +209,10 @@ export class Sim {
     return (t * t / FP) | 0;
   }
 
+  // Equivalent coarse pressure, for display and for tests that think in
+  // those units. The simulation itself uses speedFP.
   get pourPressure() {
-    const r = this.rampFP;
-    const raw = POUR.PRESSURE_START + ((POUR.PRESSURE_MAX - POUR.PRESSURE_START) * r / FP | 0);
-    return Math.max(SPOUT.PRESSURE_MIN, Math.min(SPOUT.PRESSURE_MAX, (raw / FP) | 0)) || 1;
+    return Math.max(1, Math.round(this.speedFP / SPOUT.SPEED_PER_PRESSURE));
   }
 
   get flowing() {
@@ -229,9 +250,16 @@ export class Sim {
     const n = (this.emitAcc / FP) | 0;
     this.emitAcc -= n * FP;
 
+    // Throttle: the stream may only speed up in proportion to the grains
+    // actually leaving the spout, so it can never outrun the flow of sand.
+    // No grains this tick means no acceleration at all.
+    const target = POUR.SPEED_START
+      + ((POUR.SPEED_MAX - POUR.SPEED_START) * r / FP | 0);
+    this.speedFP = Math.min(target, this.speedFP + n * POUR.SPEED_STEP_PER_GRAIN);
+
     for (let i = 0; i < n && this.remaining > 0; i++) {
       this.remaining--;
-      const { vx, vy } = launchVelocity(this.angle, this.pourPressure);
+      const { vx, vy } = launchFromSpeed(this.angle, this.speedFP);
       // Spread the stream across the nozzle so it reads as a stream, not a
       // line of identical dots. Integer jitter only.
       const jitter = (this.rand() % (SPOUT.NOZZLE * FP)) - ((SPOUT.NOZZLE * FP) >> 1);
@@ -578,7 +606,7 @@ export class Sim {
     };
     for (let i = 0; i < this.grid.length; i++) if (this.grid[i]) mix(i * 31 + this.grid[i]);
     for (const d of this.drops) { mix(d.x); mix(d.y); mix(d.vx); mix(d.vy); mix(d.inside); mix(d.lost); }
-    mix(this.pourTicks); mix(this.emitAcc); mix(this.tilt); mix(this.offset);
+    mix(this.pourTicks); mix(this.emitAcc); mix(this.speedFP); mix(this.tilt); mix(this.offset);
     mix(this.caught); mix(this.spilled); mix(this.remaining);
     return h >>> 0;
   }

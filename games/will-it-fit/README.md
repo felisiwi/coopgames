@@ -53,6 +53,12 @@ Open [`index.html`](index.html) directly, or via a static server.
 
 `?seed=N` for a specific run.
 
+**The stream is continuous.** Exit speed is a fixed-point value, not an integer "pressure" —
+with integers the landing point teleported between a handful of fixed spots (97, 140, 177, 210,
+238, 287), leaving a 43-cell hole in the arc with nothing landing inside it. And the speed may
+only rise in proportion to grains actually leaving the spout, so the stream can never
+accelerate faster than the sand is flowing. Largest hole is now 3 cells.
+
 **Pouring is a pour, not a trigger.** Think hot milk off a steamer, or bronze out of a
 crucible: it starts as a dribble and accelerates the longer you hold, slowly at first and then
 quickly. As the stream speeds up it also throws further, so the landing point walks away from

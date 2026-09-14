@@ -32,7 +32,11 @@ function firstDrop(sim, cap = 60) {
 // away, then hold again. A single unbroken hold overshoots the vessel
 // entirely once the stream is at full speed, which is the point of the
 // ramp — so a test that holds forever is not testing the game.
-function pourPulsed(sim, ticks = 20000, hold = 80, rest = 25) {
+// Holds must be long enough for the throttled ramp to walk the stream out
+// as far as the vessel. At 80 ticks the speed throttle keeps it landing
+// around col 125, short of a centred bowl at ~150-170, so every probe came
+// back empty and it looked like no aim worked at all.
+function pourPulsed(sim, ticks = 20000, hold = 220, rest = 30) {
   let i = 0;
   while (i < ticks && !sim.done) {
     sim.setCork(true);
@@ -91,10 +95,15 @@ function probeAim(seed, stage, a, volume = 400) {
 function findAim(sim) {
   const key = `${sim.seed}/${sim.stage}`;
   if (aimCache.has(key)) return aimCache.get(key);
+  // Take the BEST angle, not the first one that clears a threshold. Taking
+  // the first meant scanning from the steepest end and settling for a
+  // marginal aim, which then left downstream tests catching almost nothing.
   let best = null;
-  for (let a = SPOUT.ANGLE_MIN; a <= SPOUT.ANGLE_MAX && !best; a++) {
+  for (let a = SPOUT.ANGLE_MIN; a <= SPOUT.ANGLE_MAX; a += 3) {
     const probe = probeAim(sim.seed, sim.stage, a);
-    if (probe.caught > 15) best = { angle: a, caught: probe.caught };
+    if (probe.caught > 15 && (!best || probe.caught > best.caught)) {
+      best = { angle: a, caught: probe.caught };
+    }
   }
   aimCache.set(key, best);
   return best;
@@ -291,10 +300,12 @@ console.log('\n3. the handoff');
   const landing = findAim(new Sim({ seed: 3, stage: 1 })) || { angle: -10 };
   const s = new Sim({ seed: 3, stage: 1, volume: 300 });
   s.setAim(landing.angle);
-  s.setCork(true);
   let peakInside = 0;
   let sawDescending = false;
+  // Pulsed, like every other pour test — an unbroken hold walks the stream
+  // straight past the bowl and nothing ever enters it.
   for (let i = 0; i < 20000 && !s.done; i++) {
+    s.setCork(i % 250 < 220);
     s.tick();
     const inFlightInside = s.drops.filter((d) => d.inside);
     peakInside = Math.max(peakInside, inFlightInside.length);

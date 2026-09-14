@@ -18,7 +18,7 @@ import {
   RESERVE_MAX, SPILL_COST, MILESTONES,
   stageVolume, afterStage, drain, runOver,
 } from './src/economy.js';
-import { Sim, traceArc } from './src/sim.js';
+import { Sim, traceArcFromSpeed } from './src/sim.js';
 import { drawScene, drawHud, drawBanner } from './src/draw.js';
 
 const MATERIAL_ORDER = ['water', 'slush', 'magma'];
@@ -111,7 +111,7 @@ export default function start({ canvas, net, seed = 1 }) {
   // Ghost arc. traceArc runs the sim's own launch and integration code, so
   // the preview cannot promise a trajectory the simulation won't follow.
   function preview() {
-    const raw = traceArc(autoAim(), sim.pourPressure, 220, sim.mouthRow + sim.vessel.height);
+    const raw = traceArcFromSpeed(autoAim(), sim.speedFP, 220, sim.mouthRow + sim.vessel.height);
     const pts = [];
     for (let i = 0; i < raw.length; i += 4) {
       pts.push({ x: (raw[i].x / FP) * STAGE.CELL, y: (raw[i].y / FP) * STAGE.CELL });
