@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>coopgames</title>
   <link rel="stylesheet" href="hub.css" />
 </head>
@@ -137,13 +140,31 @@
       });
     }
 
+    // Size the canvas from the VISUAL viewport at device pixel ratio.
+    // window.innerHeight chases the mobile address bar as it shows and
+    // hides, and a backing store measured in CSS pixels is soft on any
+    // retina screen — between them that is most of why a game launched
+    // from the hub looked wrong on a phone.
+    function sizeCanvas() {
+      const vv = window.visualViewport;
+      const w = Math.round(vv ? vv.width : window.innerWidth);
+      const h = Math.round(vv ? vv.height : window.innerHeight);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      els.canvas.style.width = w + 'px';
+      els.canvas.style.height = h + 'px';
+      els.canvas.width = Math.round(w * dpr);
+      els.canvas.height = Math.round(h * dpr);
+    }
+
     async function launchGame(game, { net, seed, role }) {
       els.header.hidden = true;
       els.lobby.hidden = true;
       els.launchError.hidden = true;
       els.canvas.hidden = false;
-      els.canvas.width = window.innerWidth;
-      els.canvas.height = window.innerHeight;
+      sizeCanvas();
+      window.addEventListener('resize', sizeCanvas);
+      window.addEventListener('orientationchange', () => setTimeout(sizeCanvas, 150));
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', sizeCanvas);
 
       try {
         const mod = await import(`./${game.path}game.js`);

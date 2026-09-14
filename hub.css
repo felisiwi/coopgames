@@ -1,4 +1,5 @@
 html, body {
+  overscroll-behavior: none;   /* no pull-to-refresh mid-game */
   margin: 0;
   padding: 0;
   min-height: 100%;
@@ -133,6 +134,13 @@ header p {
 }
 
 #game-canvas {
+  /* A drag has to reach the game, not scroll the page, and a long press
+     must not pop the selection menu. Without this, moving anything on a
+     phone scrolls the hub instead. */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
   display: block;
   position: fixed;
   inset: 0;
