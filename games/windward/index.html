@@ -15,6 +15,7 @@
   <canvas id="game"></canvas>
   <script type="module">
     import start from './game.js';
+    import { CONFIG } from './src/config.js';
 
     // Fakes the hub's net object for solo testing. There's no second peer:
     // send() just logs, and onMessage() only fires if you drive it
@@ -35,6 +36,17 @@
 
     const params = new URLSearchParams(window.location.search);
     const seed = params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
+
+    // Island-density A/B overrides (I2, 2026-09-16) — mutate CONFIG directly
+    // before start() calls scatterIslands, so Felix can compare densities on
+    // localhost without a rebuild. Solo dev entry only; the hub doesn't wire
+    // these through (see games/windward/src/config.js's Island scattering
+    // comment for what each knob does).
+    if (params.has('span')) CONFIG.ISLAND_SCATTER_AREA = Number(params.get('span'));
+    if (params.has('count')) CONFIG.ISLAND_SCATTER_COUNT_CAP = Number(params.get('count'));
+    if (params.has('pitch')) CONFIG.ISLAND_SCATTER_PITCH_OVERRIDE = Number(params.get('pitch'));
+    if (params.has('big')) CONFIG.ISLAND_SCATTER_LARGE_COUNT = Number(params.get('big'));
+    if (params.has('medium')) CONFIG.ISLAND_SCATTER_MEDIUM_COUNT = Number(params.get('medium'));
 
     start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
   </script>

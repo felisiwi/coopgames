@@ -1,12 +1,22 @@
 // node games/windward/src/island-scatter.test.js — guards island-scatter.js
 // against the failure modes that matter for a multiplayer world: islands
-// overlapping or crowding, sizes outside the tuned range, an island parked
-// on top of spawn, and (most important for multiplayer) any nondeterminism
-// that would let host and guest disagree about where the islands are.
+// overlapping or crowding, sizes outside their kind's tuned range, an
+// island parked on top of spawn, empty-sea coverage regressions, and (most
+// important for multiplayer) any nondeterminism that would let host and
+// guest disagree about where the islands are.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { CONFIG } from './config.js';
-import { scatterIslands, buildIslandParams, footprintRadius } from './island-scatter.js';
+import {
+  scatterIslands,
+  buildIslandParams,
+  footprintRadius,
+  starterBearing,
+  STARTER_NEAR_EDGE_DISTANCE_M,
+  cameraViewWidth,
+  gridPitch,
+  windowOccupancy,
+} from './island-scatter.js';
 
 let passed = 0;
 
@@ -36,6 +46,7 @@ check('scatterIslands is deterministic: same seed produces an identical field', 
   assert.equal(a.length, b.length, 'island counts diverged for the same seed');
   for (let i = 0; i < a.length; i++) {
     assert.equal(a[i].seed, b[i].seed, `island ${i} seed diverged`);
+    assert.equal(a[i].kind, b[i].kind, `island ${i} kind diverged`);
     assert.equal(a[i].params.ISLAND_RADIUS, b[i].params.ISLAND_RADIUS, `island ${i} radius diverged`);
     assert.equal(a[i].params.ISLAND_CENTER_X, b[i].params.ISLAND_CENTER_X, `island ${i} X diverged`);
     assert.equal(a[i].params.ISLAND_CENTER_Z, b[i].params.ISLAND_CENTER_Z, `island ${i} Z diverged`);
@@ -51,106 +62,132 @@ check('different seeds produce a different field', () => {
   assert.ok(!same, 'two different seeds produced an identical island field (suspiciously deterministic)');
 });
 
-check('radii stay within the configured ISLAND_SCATTER_MIN/MAX_RADIUS range', () => {
+check("every island's radius matches its own kind's configured range (starter counts as skerry-sized)", () => {
+  const ranges = {
+    starter: [CONFIG.ISLAND_SCATTER_SKERRY_MIN_RADIUS, CONFIG.ISLAND_SCATTER_SKERRY_MAX_RADIUS],
+    skerry: [CONFIG.ISLAND_SCATTER_SKERRY_MIN_RADIUS, CONFIG.ISLAND_SCATTER_SKERRY_MAX_RADIUS],
+    medium: [CONFIG.ISLAND_SCATTER_MEDIUM_MIN_RADIUS, CONFIG.ISLAND_SCATTER_MEDIUM_MAX_RADIUS],
+    large: [CONFIG.ISLAND_SCATTER_LARGE_MIN_RADIUS, CONFIG.ISLAND_SCATTER_LARGE_MAX_RADIUS],
+  };
   const islands = scatterIslands(777);
-  for (const { params } of islands) {
+  for (const { params, kind } of islands) {
+    const [min, max] = ranges[kind];
     assert.ok(
-      params.ISLAND_RADIUS >= CONFIG.ISLAND_SCATTER_MIN_RADIUS && params.ISLAND_RADIUS <= CONFIG.ISLAND_SCATTER_MAX_RADIUS,
-      `radius ${params.ISLAND_RADIUS} outside [${CONFIG.ISLAND_SCATTER_MIN_RADIUS}, ${CONFIG.ISLAND_SCATTER_MAX_RADIUS}]`,
+      params.ISLAND_RADIUS >= min - 1e-6 && params.ISLAND_RADIUS <= max + 1e-6,
+      `${kind} radius ${params.ISLAND_RADIUS} outside [${min}, ${max}]`,
     );
   }
 });
 
-check('same-cluster islands respect CLUSTER_SPACING; different-cluster islands respect the wider MIN_SPACING', () => {
-  const islands = scatterIslands(4242);
-  for (let i = 0; i < islands.length; i++) {
-    for (let j = i + 1; j < islands.length; j++) {
-      const a = islands[i];
-      const b = islands[j];
-      const dist = Math.hypot(a.params.ISLAND_CENTER_X - b.params.ISLAND_CENTER_X, a.params.ISLAND_CENTER_Z - b.params.ISLAND_CENTER_Z);
-      const sameCluster = a.cluster === b.cluster;
-      const spacing = sameCluster ? CONFIG.ISLAND_SCATTER_CLUSTER_SPACING : CONFIG.ISLAND_SCATTER_MIN_SPACING;
-      const required = footprintRadius(a.params) + footprintRadius(b.params) + spacing;
-      assert.ok(
-        dist >= required - 1e-6,
-        `islands ${i} and ${j} (${sameCluster ? 'same' : 'different'} cluster) are ${dist.toFixed(1)}m apart, need >= ${required.toFixed(1)}m`,
-      );
-    }
-  }
-});
-
-check('clusters actually cluster: CLUSTER_SPACING is configured tighter than MIN_SPACING', () => {
+check('ISLAND_SCATTER_SKERRY_MAX_RADIUS stays under half the grid pitch (what makes the no-overlap-check skerry fill safe)', () => {
+  const pitch = gridPitch();
   assert.ok(
-    CONFIG.ISLAND_SCATTER_CLUSTER_SPACING < CONFIG.ISLAND_SCATTER_MIN_SPACING,
-    'intra-cluster spacing should be tighter than inter-cluster spacing, or clusters read as one uniform field again',
+    CONFIG.ISLAND_SCATTER_SKERRY_MAX_RADIUS < pitch / 2,
+    `skerry max radius ${CONFIG.ISLAND_SCATTER_SKERRY_MAX_RADIUS}m is not under half the ${pitch.toFixed(1)}m pitch`,
   );
 });
 
-check('every island reports a cluster index within [0, ISLAND_SCATTER_CLUSTER_COUNT)', () => {
-  const islands = scatterIslands(555);
-  for (const { cluster } of islands) {
-    assert.ok(
-      Number.isInteger(cluster) && cluster >= 0 && cluster < CONFIG.ISLAND_SCATTER_CLUSTER_COUNT,
-      `cluster index ${cluster} out of range`,
-    );
+check('large islands respect ISLAND_SCATTER_LARGE_MIN_SPACING from each other, for seeds 1-3', () => {
+  for (const seed of [1, 2, 3]) {
+    const large = scatterIslands(seed).filter((isl) => isl.kind === 'large');
+    for (let i = 0; i < large.length; i++) {
+      for (let j = i + 1; j < large.length; j++) {
+        const dist = Math.hypot(
+          large[i].params.ISLAND_CENTER_X - large[j].params.ISLAND_CENTER_X,
+          large[i].params.ISLAND_CENTER_Z - large[j].params.ISLAND_CENTER_Z,
+        );
+        assert.ok(
+          dist >= CONFIG.ISLAND_SCATTER_LARGE_MIN_SPACING - 1e-6,
+          `seed ${seed}: large islands ${i} and ${j} are ${dist.toFixed(0)}m apart, need >= ${CONFIG.ISLAND_SCATTER_LARGE_MIN_SPACING}m`,
+        );
+      }
+    }
   }
 });
 
-check('clusters with 2+ members have a nearest-sibling gap well within the fixed camera\'s sight window', () => {
-  // Derived in config.js's comment: the fixed camera's shallow, narrow
-  // framing only shows flat sea level out to roughly 54-90m past the boat
-  // at zoom=1 — this bounds well above that (150m) so it catches a real
-  // regression (e.g. CLUSTER_RADIUS creeping back up) without being flaky
-  // over a handful of seeds.
+check('all ISLAND_SCATTER_LARGE_COUNT and ISLAND_SCATTER_MEDIUM_COUNT landmarks place at default config, for seeds 1-3', () => {
+  for (const seed of [1, 2, 3]) {
+    const islands = scatterIslands(seed);
+    const large = islands.filter((isl) => isl.kind === 'large').length;
+    const medium = islands.filter((isl) => isl.kind === 'medium').length;
+    assert.equal(large, CONFIG.ISLAND_SCATTER_LARGE_COUNT, `seed ${seed}: placed ${large}/${CONFIG.ISLAND_SCATTER_LARGE_COUNT} large islands`);
+    assert.equal(medium, CONFIG.ISLAND_SCATTER_MEDIUM_COUNT, `seed ${seed}: placed ${medium}/${CONFIG.ISLAND_SCATTER_MEDIUM_COUNT} medium islands`);
+  }
+});
+
+check('coverage: VIEW x VIEW windows are mostly non-empty and mostly hold 2+ islands, for seeds 1-3 (prints the histogram)', () => {
+  // The metric that actually answers "does this read as empty sea" —
+  // config.js's Island scattering comment has why mean nearest-neighbour
+  // distance was the wrong metric (measured: it hid two failed placement
+  // designs that were 68-93% empty by this measure).
+  const view = cameraViewWidth();
+  console.log(`    VIEW=${view.toFixed(1)}m pitch=${gridPitch().toFixed(1)}m`);
+  for (const seed of [1, 2, 3]) {
+    const islands = scatterIslands(seed);
+    const { histogram, median, totalWindows } = windowOccupancy(islands, CONFIG.ISLAND_SCATTER_AREA, view);
+    console.log(
+      `    seed ${seed}: placed=${islands.length} windows(n=${totalWindows}) 0=${histogram.pct0.toFixed(1)}% 1=${histogram.pct1.toFixed(1)}% ` +
+        `2=${histogram.pct2.toFixed(1)}% 3+=${histogram.pct3plus.toFixed(1)}% median=${median}`,
+    );
+    assert.ok(histogram.pct0 < 10, `seed ${seed}: ${histogram.pct0.toFixed(1)}% of windows are empty, expected < 10%`);
+    assert.ok(median >= 2, `seed ${seed}: median window has ${median} islands, expected >= 2`);
+  }
+});
+
+check('placed island count at default config stays in a sane range, for seeds 1-3', () => {
+  for (const seed of [1, 2, 3]) {
+    const count = scatterIslands(seed).length;
+    assert.ok(count >= 80 && count <= 150, `seed ${seed}: placed ${count} islands, expected [80, 150]`);
+  }
+});
+
+check('the spawn cell (world origin) never gets a randomly-placed island — only the starter is allowed that close', () => {
+  const pitch = gridPitch();
+  const area = CONFIG.ISLAND_SCATTER_AREA;
+  const half = area / 2;
+  const spawnI = Math.min(Math.round(area / pitch) - 1, Math.max(0, Math.floor(half / pitch)));
+  const cellLo = -half + pitch * spawnI;
+  const cellHi = cellLo + pitch;
+
+  const islands = scatterIslands(99);
+  for (const { params, isStarter } of islands) {
+    if (isStarter) continue;
+    const inSpawnCell = params.ISLAND_CENTER_X > cellLo && params.ISLAND_CENTER_X < cellHi && params.ISLAND_CENTER_Z > cellLo && params.ISLAND_CENTER_Z < cellHi;
+    assert.ok(!inSpawnCell, `island at (${params.ISLAND_CENTER_X.toFixed(0)}, ${params.ISLAND_CENTER_Z.toFixed(0)}) was placed inside the forced-empty spawn cell [${cellLo.toFixed(0)}, ${cellHi.toFixed(0)}]`);
+  }
+});
+
+check('the starter island always exists (islands[0], isStarter: true, kind: starter) and its near coastline sits exactly STARTER_NEAR_EDGE_DISTANCE_M past spawn, on the camera-visible bearing', () => {
   const seeds = [1, 2, 3, 4, 5, 42, 989370];
-  const gaps = [];
+  const bearing = starterBearing();
+  assert.ok(Math.abs(Math.hypot(bearing.x, bearing.z) - 1) < 1e-9, 'starterBearing should be a unit vector');
+
   for (const seed of seeds) {
     const islands = scatterIslands(seed);
-    const byCluster = new Map();
-    for (const island of islands) {
-      if (!byCluster.has(island.cluster)) byCluster.set(island.cluster, []);
-      byCluster.get(island.cluster).push(island);
-    }
-    for (const members of byCluster.values()) {
-      if (members.length < 2) continue;
-      let best = Infinity;
-      for (let i = 0; i < members.length; i++) {
-        for (let j = i + 1; j < members.length; j++) {
-          const gap =
-            Math.hypot(
-              members[i].params.ISLAND_CENTER_X - members[j].params.ISLAND_CENTER_X,
-              members[i].params.ISLAND_CENTER_Z - members[j].params.ISLAND_CENTER_Z,
-            ) -
-            footprintRadius(members[i].params) -
-            footprintRadius(members[j].params);
-          if (gap < best) best = gap;
-        }
-      }
-      gaps.push(best);
-    }
-  }
-  assert.ok(gaps.length > 0, 'no cluster in this sample ever got 2+ members — cannot check sibling visibility');
-  gaps.sort((a, b) => a - b);
-  const median = gaps[Math.floor(gaps.length / 2)];
-  assert.ok(median < 150, `median nearest-sibling gap ${median.toFixed(0)}m is too wide to reliably spot from a neighbouring island`);
-});
+    const starter = islands.find((isl) => isl.isStarter);
+    assert.ok(starter, `seed ${seed}: no starter island was placed at all`);
+    assert.equal(islands[0], starter, `seed ${seed}: starter island should always be islands[0]`);
+    assert.equal(starter.kind, 'starter', `seed ${seed}: starter island's kind should be 'starter'`);
 
-check('no island footprint encroaches on the spawn clearance around the origin', () => {
-  const islands = scatterIslands(99);
-  for (const { params } of islands) {
+    const { params } = starter;
     const distFromSpawn = Math.hypot(params.ISLAND_CENTER_X, params.ISLAND_CENTER_Z);
-    const clearance = distFromSpawn - footprintRadius(params);
+    const nearEdge = distFromSpawn - footprintRadius(params);
     assert.ok(
-      clearance >= CONFIG.ISLAND_SCATTER_SPAWN_CLEARANCE - 1e-6,
-      `island at (${params.ISLAND_CENTER_X}, ${params.ISLAND_CENTER_Z}) leaves only ${clearance.toFixed(1)}m clearance, need >= ${CONFIG.ISLAND_SCATTER_SPAWN_CLEARANCE}`,
+      Math.abs(nearEdge - STARTER_NEAR_EDGE_DISTANCE_M) < 1e-6,
+      `seed ${seed}: starter island's near edge is ${nearEdge.toFixed(1)}m past spawn, expected exactly ${STARTER_NEAR_EDGE_DISTANCE_M}m`,
     );
+
+    // Its centre should lie along starterBearing() from the origin, not off to the side.
+    const observedBearingX = params.ISLAND_CENTER_X / distFromSpawn;
+    const observedBearingZ = params.ISLAND_CENTER_Z / distFromSpawn;
+    assert.ok(Math.abs(observedBearingX - bearing.x) < 1e-9 && Math.abs(observedBearingZ - bearing.z) < 1e-9, `seed ${seed}: starter island isn't on starterBearing()`);
   }
 });
 
 check('buildIslandParams scales landform distances up and down with radius, keeping frequency*radius roughly constant', () => {
-  const small = buildIslandParams(CONFIG.ISLAND_SCATTER_MIN_RADIUS, 0, 0);
+  const small = buildIslandParams(CONFIG.ISLAND_SCATTER_SKERRY_MIN_RADIUS, 0, 0);
   const base = buildIslandParams(CONFIG.ISLAND_RADIUS, 0, 0);
-  const large = buildIslandParams(CONFIG.ISLAND_SCATTER_MAX_RADIUS, 0, 0);
+  const large = buildIslandParams(CONFIG.ISLAND_SCATTER_LARGE_MAX_RADIUS, 0, 0);
 
   assert.ok(small.ISLAND_PEAK_HEIGHT < base.ISLAND_PEAK_HEIGHT, 'a smaller island should have a lower peak');
   assert.ok(large.ISLAND_PEAK_HEIGHT > base.ISLAND_PEAK_HEIGHT, 'a bigger island should have a higher peak');
@@ -172,8 +209,8 @@ check('buildIslandParams scales landform distances up and down with radius, keep
 });
 
 check('tree attempts scale with area (radius^2) and stay within sane bounds', () => {
-  const small = buildIslandParams(CONFIG.ISLAND_SCATTER_MIN_RADIUS, 0, 0);
-  const large = buildIslandParams(CONFIG.ISLAND_SCATTER_MAX_RADIUS, 0, 0);
+  const small = buildIslandParams(CONFIG.ISLAND_SCATTER_SKERRY_MIN_RADIUS, 0, 0);
+  const large = buildIslandParams(CONFIG.ISLAND_SCATTER_LARGE_MAX_RADIUS, 0, 0);
   assert.ok(small.ISLAND_TREE_ATTEMPTS > 0, 'smallest island should still attempt to plant some trees');
   assert.ok(large.ISLAND_TREE_ATTEMPTS > small.ISLAND_TREE_ATTEMPTS, 'a bigger island should attempt more trees than a smaller one');
   assert.ok(large.ISLAND_TREE_ATTEMPTS <= 1200, 'tree attempts should be capped for the biggest islands');

@@ -177,68 +177,73 @@ export const CONFIG = {
   ISLAND_COLOR_TRUNK: 0x928164,
 
   // --- Island scattering (src/island-scatter.js) ---
-  // Places ISLAND_SCATTER_CLUSTER_COUNT clusters across the world, each
-  // holding up to ISLAND_SCATTER_CLUSTER_SIZE islands packed close together
-  // (tight skerry groups, real open water between groups — not one
-  // evenly-spaced field; Felix, 2026-09-16, after playing the first flat
-  // version: "I sailed a long way to reach one island and can't see any
-  // others from it... Skerry fields cluster, not even spacing"). Every
-  // island is the Skerry shape above scaled to its own radius
-  // (island-scatter.js's header has the full scaling rules — landform
-  // distances scale with radius, noise frequencies scale inversely, sea
-  // bathymetry/angles/palette don't scale at all) plus a per-island seed
-  // offset, so no two islands in a field look identical. Deterministic from
-  // the session `seed` alone — no placement data crosses the wire
-  // (AGENTS.md's "world must be identical on both peers").
+  // I2 archipelago density pass, third and current design (Felix,
+  // 2026-09-16). The first two attempts (per-cluster rejection sampling,
+  // then a single flat 75m jittered grid with weighted size tiers) both
+  // measured out as failures, not just under-tuned — see
+  // island-scatter.js's header for the measurements (93% of cells dead on
+  // the flat-grid version; two-thirds of 135m windows empty). Root cause
+  // both times: grid/gap pitch chosen from a TARGET spacing number instead
+  // of measured from the camera and the actual footprint sizes doing the
+  // placing.
   //
-  // CLUSTER_RADIUS/CLUSTER_SPACING below are sized against the fixed
-  // camera's actual sight distance, not guessed. Working through
-  // src/camera.js's own geometry (FIXED_CAMERA_DISTANCE=125,
-  // FIXED_CAMERA_ELEVATION_DEG=52, FIXED_CAMERA_FOV_DEG=30 at zoom=1):
-  // camera height above the boat = 125*sin(52deg) = ~98.5m, and the
-  // shallowest ray in frame (top edge, elevation-halfFOV = 37deg below
-  // horizontal) hits sea level only ~54m PAST the boat's own position —
-  // this fixed, narrow, steeply-down-looking rig (chosen for wind/compass
-  // readability, DESIGN.md's Camera section) shows a much smaller patch of
-  // open sea than the "~120m across the screen" width figure alone
-  // suggests. What actually matters for "can I see that OTHER island" is
-  // the open-water GAP between coastlines (not centre-to-centre distance,
-  // since a big island's shore can be much closer than its centre) — so the
-  // real target is an intra-cluster gap safely under that ~54-90m sight
-  // window. Tuned empirically (12 seeds) to land there: median nearest-
-  // sibling gap ~50m, comfortably inside the window even before accounting
-  // for zoom-out (ZOOM_MAX=2.5 stretches the same ~54m to ~135m).
-  ISLAND_SCATTER_CLUSTER_COUNT: 8, // 3-20, how many skerry groups to scatter — more = more to explore, heavier scene
-  ISLAND_SCATTER_CLUSTER_SIZE: 3, // 2-6, target islands per group (some groups place fewer — see island-scatter.js)
-  ISLAND_SCATTER_CLUSTER_RADIUS: 250, // 100-500m, how far a group's islands can spread from its centre
-  ISLAND_SCATTER_CLUSTER_SPACING: 30, // 15-100m, open-water gap required between islands in the SAME group — tight, a boat-width channel
+  // This version measures first: VIEW (island-scatter.js's
+  // cameraViewWidth) is the fixed camera's real visible width at max
+  // zoom-out, read from FIXED_CAMERA_DISTANCE/FOV/ZOOM_MAX — not guessed.
+  // Base grid pitch = VIEW / ISLAND_SCATTER_PITCH_VIEW_DIVISOR, clamped to
+  // [PITCH_MIN, PITCH_MAX] — index.html's ?pitch= overrides it directly for
+  // A/B'ing on localhost. One skerry per cell, no overlap check needed
+  // (SKERRY_MAX_RADIUS is kept under half the pitch by construction, and
+  // jitter is bounded to JITTER_FRACTION of the pitch, so two adjacent
+  // cells' skerries can't reach each other). Large/medium "landmark"
+  // islands are reserved FIRST, before skerries fill in: each removes
+  // every grid cell within (its own radius + CELL_EXCLUSION_GAP) of its
+  // centre from the pool, so nothing placed later can land on top of it;
+  // LARGE_MIN_SPACING is an extra explicit floor between large centres
+  // specifically, since two big radii near the same cell-removal boundary
+  // could otherwise still land closer than feels right for a "landmark."
+  // ?big=/?medium= override the counts.
+  //
+  // The starter island (still the one deterministic, always-in-view-at-t=0
+  // placement, STARTER_NEAR_EDGE_DISTANCE_M below) is skerry-sized and
+  // placed before the grid pass; its own cell-exclusion zone is carved out
+  // of the grid the same way a landmark's is, so nothing else can spawn on
+  // top of it. The grid cell containing world origin (where both boats
+  // spawn, +-BOAT_SPAWN_OFFSET) is removed outright before anything is
+  // placed — simpler and more literal than the old SPAWN_CLEARANCE radius
+  // check it replaces.
+  ISLAND_SCATTER_PITCH_VIEW_DIVISOR: 2.5,
+  ISLAND_SCATTER_PITCH_MIN: 50, // metres
+  // Felix, 2026-09-16: raised from 80 to 110 after localhost review —
+  // VIEW/2.5=119.1m clamps to this, so 110 is the default pitch outright,
+  // no ?pitch= override needed to get it.
+  ISLAND_SCATTER_PITCH_MAX: 110, // metres
+  ISLAND_SCATTER_PITCH_OVERRIDE: null, // index.html's ?pitch= sets this; null = derive from VIEW
 
-  // Radius range, metres — the knob for "20s to 3min+ to sail around"
-  // (mission brief). Derived, not guessed: ISLAND_RADIUS=75m above was tuned
-  // to a ~90-120s lap, i.e. its ~2*pi*75m coastline circumference at a
-  // calibrated "typical, not max-speed" pace of ~4.5 m/s (2*pi*75 / 105s
-  // midpoint). Inverting lapTimeS = 2*pi*R / 4.5 for the target range:
-  //   20s   -> R ~= 14m,  floored to a clean 15m
-  //   180s+ -> R ~= 129m for exactly 3:00, rounded UP to 150m so the biggest
-  //            islands are comfortably past 3 minutes, not right on the line
-  ISLAND_SCATTER_MIN_RADIUS: 15, // 10-50m, smallest scattered island (~20s lap)
-  ISLAND_SCATTER_MAX_RADIUS: 150, // 100-300m, largest scattered island (~3.5min lap)
+  ISLAND_SCATTER_JITTER_FRACTION: 0.25, // +-this fraction of the pitch, applied to each grid cell's centre
+  ISLAND_SCATTER_CELL_EXCLUSION_GAP: 30, // metres, added to a placed island's own radius when clearing grid cells around it
 
-  // Open-water gap required between two islands' rendered footprints
-  // (coastline + wobble + falloff + mesh margin, island-scatter.js's
-  // footprintRadius) when they belong to DIFFERENT clusters — not
-  // centre-to-centre, so bigger islands automatically claim more clearance.
-  // This is what keeps clusters reading as separate groups; the much
-  // tighter ISLAND_SCATTER_CLUSTER_SPACING above governs islands within the
-  // same group.
-  ISLAND_SCATTER_MIN_SPACING: 200, // 100-500m, open-water gap between DIFFERENT groups' footprints
+  ISLAND_SCATTER_LARGE_COUNT: 3, // index.html's ?big= overrides
+  ISLAND_SCATTER_LARGE_MIN_RADIUS: 120,
+  ISLAND_SCATTER_LARGE_MAX_RADIUS: 150,
+  ISLAND_SCATTER_LARGE_MIN_SPACING: 250, // metres, centre-to-centre floor between two large islands specifically
 
-  // Square world region (metres, centred on the origin/spawn) cluster
-  // centres are scattered within — same convention as SCATTER_AREA above.
-  ISLAND_SCATTER_AREA: 2400, // 1200-4000m, world span clusters can appear in
+  ISLAND_SCATTER_MEDIUM_COUNT: 10, // index.html's ?medium= overrides
+  ISLAND_SCATTER_MEDIUM_MIN_RADIUS: 50,
+  ISLAND_SCATTER_MEDIUM_MAX_RADIUS: 80,
 
-  // No island's footprint may come within this of world origin, where both
-  // boats spawn (+-BOAT_SPAWN_OFFSET) — keeps the opening view clear water
-  // instead of a wall of coastline at first sight.
-  ISLAND_SCATTER_SPAWN_CLEARANCE: 150, // 60-300m, keep-out radius around spawn
+  // Always < half of even ISLAND_SCATTER_PITCH_MIN (25m) — see header on
+  // why that's what makes the no-overlap-check fill safe.
+  ISLAND_SCATTER_SKERRY_MIN_RADIUS: 10,
+  ISLAND_SCATTER_SKERRY_MAX_RADIUS: 22,
+
+  // Square world region (metres, centred on the origin/spawn) the grid
+  // covers. index.html's ?span= overrides this for A/B'ing on localhost.
+  ISLAND_SCATTER_AREA: 1200, // 1000-1200m per the I2 density brief
+
+  // Optional hard cap on total placed skerries (landmarks are unaffected),
+  // purely for A/B'ing density on localhost without touching this file —
+  // index.html's ?count= sets this. null/0 = no cap, fill every remaining
+  // cell.
+  ISLAND_SCATTER_COUNT_CAP: null,
 };

@@ -16,7 +16,7 @@ import { createWater, seaHeightCPU } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
 import { createIsland } from './src/island.js';
-import { scatterIslands } from './src/island-scatter.js';
+import { scatterIslands, cameraViewWidth, gridPitch, windowOccupancy } from './src/island-scatter.js';
 import { createWake } from './src/wake.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
@@ -118,7 +118,38 @@ export default function start({ canvas, net, seed, role }) {
   scene.add(water.mesh);
 
   scene.add(createScatter(seed));
-  for (const island of scatterIslands(seed)) {
+  const scatteredIslands = scatterIslands(seed);
+  // Debug: confirm placement/reachability at a glance without hunting for
+  // specks in the rendered scene (Felix, 2026-09-16 — "I need to know
+  // whether they're being placed where I can reach them, not whether
+  // they're lit"). `kind` is starter/large/medium/skerry — island-scatter.js's
+  // scatterIslands.
+  console.table(
+    scatteredIslands.map((island, i) => ({
+      i,
+      kind: island.kind,
+      seed: island.seed,
+      x: Math.round(island.params.ISLAND_CENTER_X),
+      z: Math.round(island.params.ISLAND_CENTER_Z),
+      radius: Math.round(island.params.ISLAND_RADIUS),
+      distFromSpawn: Math.round(Math.hypot(island.params.ISLAND_CENTER_X, island.params.ISLAND_CENTER_Z)),
+    })),
+  );
+  // Aggregate density readout (I2, 2026-09-16, third pass) — VIEW/pitch and
+  // a windowed-occupancy histogram (VIEW x VIEW windows), not mean
+  // nearest-neighbour distance: that metric hid the "one island, empty sea"
+  // problem the first two placement designs actually had (a few close pairs
+  // pull the mean down while most of the world stays empty) — config.js's
+  // Island scattering comment has the measurement.
+  {
+    const view = cameraViewWidth();
+    const { histogram, median, totalWindows } = windowOccupancy(scatteredIslands, CONFIG.ISLAND_SCATTER_AREA, view);
+    console.log(
+      `island-scatter: VIEW=${view.toFixed(1)}m pitch=${gridPitch().toFixed(1)}m placed=${scatteredIslands.length} span=${CONFIG.ISLAND_SCATTER_AREA}m ` +
+        `windows(${view.toFixed(0)}m, n=${totalWindows}): 0=${histogram.pct0.toFixed(1)}% 1=${histogram.pct1.toFixed(1)}% 2=${histogram.pct2.toFixed(1)}% 3+=${histogram.pct3plus.toFixed(1)}% median=${median}`,
+    );
+  }
+  for (const island of scatteredIslands) {
     scene.add(createIsland(island.seed, island.params).group);
   }
 
