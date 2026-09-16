@@ -1,20 +1,18 @@
 # Last session
 
-**2026-09-16 — Windward I3: harmonise island tessellation** (commit
-a21f9a1). Confirmed cause: `ISLAND_GRID_CELL_SIZE` and both noise FREQ
-keys scaled with each island's own radius in `island-scatter.js`'s
-`buildIslandParams` — a 10-22m skerry meshed at ~0.7m cells, a 120-150m
-landmark at ~11m, same wild spread for noise wavelength. Fixed: moved
-all three into `UNSCALED_KEYS` — one absolute world-space cell size and
-noise wavelength shared by every island regardless of size; `island.js`
-segment count switched `round`->`ceil` so a cell can't run locally
-bigger than target. Default cell size 4m (was 5.5m); seed 1's full
-scattered field (97 islands) measures 171,248 total vertices, under the
-200k budget, no coarser-cell fallback needed. `?cell=` added to
-index.html's A/B knobs; island-lab.html gets a "Preview radius" slider
-(10-150m) that runs the real `buildIslandParams` scaling so
-skerry/medium/large tessellation can be checked without leaving the lab.
-island.test.js 6/6, island-scatter.test.js 14/14.
+**2026-09-16 — Windward I3b: one facet scale for everything; ART.md
+directive merged** (commit 26f4b40; `shared/ART.md` PR #2 merged as
+4694e80: 4m target facet/2-6m acceptable, plus a small-props exemption
+for trunks/canopies/buoys that can't physically carry a 2m facet).
+Water tile SEG 256->223 (3.125m->3.587m spacing — the closest the wave
+shader's own aliasing bound allows, not the full 4m); pine trunk/canopy
+radial segments 5/6->4 (still under 2m regardless, capped by their own
+radius); boat (CC0 `ship-small.glb`) reported, left as-is (hull median
+facet ~0.28m). New `?wire=1` forces scene-wide wireframe + a
+true-4m-snapped `GridHelper` on the water for one-screenshot comparison.
+`main` had 3 unpushed commits carried over from the I3 session — pushed
+and curl-verified live. `games/windward/HANDOVER.md` rewritten (density
+solved, facet rule, lab slider, URL overrides).
 
 ## Today's sessions
 
@@ -24,14 +22,17 @@ island.test.js 6/6, island-scatter.test.js 14/14.
 - Windward: split island/lighting presets, applied Sunset + Skerry tuning.
 - Windward: island scattering (cluster rejection sampling, commit 5b30b6a).
 - Windward I2: archipelago density, landmark-first grid.
-- Windward I3: harmonise island tessellation (this session).
+- Windward I3: harmonise island tessellation.
+- Windward I3b: one facet scale for everything; ART.md directive merged
+  (this session).
 - Will It Fit? stage 1 signed off (Kenny, 2026-09-13) — 43/43 headless,
   not hub-launched; see its README.
 
 ## Next
 
-1. Play-test the new landmark-first field for feel (97-104 islands at
-   pitch=110 — right density, or tune further?).
+1. Play-test the field for feel now density is settled (97-104 islands
+   at pitch=110m) — first real multiplayer session is the actual tuning
+   pass, per `games/windward/HANDOVER.md`.
 2. Will It Fit? stage 2 (vessel tilt) — Kenny's next step, carried over.
 3. Windward: gust telegraphing (W3); boat-island collision/grounding not
    built yet (heightAt is exposed per-island but game.js doesn't sample it).
