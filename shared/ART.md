@@ -56,4 +56,6 @@ handmade.
 ## Camera & scale
 Fixed three-quarter camera: elevation 52°, azimuth 45°, FOV 30° (reads
 almost isometric), distance 125m, zoom 0.5–2.5×. Boat ~6m long. Water
-plane 320m/side. Wind arrow 7m above boat, length 3–11m by strength.
+plane 800m/side (I1, raised from 320m — sized so its edge never enters the
+fixed camera's frustum at any zoom, not to cover "the whole world"; see
+`src/water.js`). Wind arrow 7m above boat, length 3–11m by strength.

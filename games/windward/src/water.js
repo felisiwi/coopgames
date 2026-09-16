@@ -22,8 +22,17 @@ import * as THREE from '../vendor/three/three.module.js';
 export const WAVE_AMP = 0.4; // metres, max total displacement at full wind strength (boat ~6m long — stays well clear of swallowing the hull)
 export const WAVE_LEN = 12; // metres, dominant wavelength (~2 boat lengths; DESIGN.md target is 1-3x)
 export const WAVE_SPEED = 1.2; // rad/s, dominant component's phase speed
-export const SEG = 160; // plane subdivisions per side
-export const SIZE = 320; // metres per side — sized to cover the fixed camera (52deg elevation) at max zoom, not the whole world; the plane follows the boat (see createWater), so it doesn't need to
+// SIZE/SEG raised together (I1, from 320/160) — headless camera-frustum check
+// against src/camera.js's actual fixed-camera math (ray-cast every zoom
+// 0.5-2.5 x aspect ratios up to 32:9) found the OLD 320m tile's real edge
+// entering frame from zoom ~1.5 up, showing background colour through a hard
+// seam ~160-183m from the boat — a pre-existing bug, unrelated to any
+// island. At SIZE=800 (half-width 400m) no ray in that same sweep ever
+// reaches the edge, so it's geometrically unreachable rather than merely
+// hidden by timing fog to it. SEG=256 keeps vertex spacing (SIZE/SEG=3.125m)
+// under water.test.js's aliasing bound (< shortestWavelength/2 = 3.6m).
+export const SEG = 256; // plane subdivisions per side
+export const SIZE = 800; // metres per side — boat-centred moving tile (see createWater); sized so its edge never enters the fixed camera's frustum at any zoom/aspect, not to cover "the whole world"
 export const WATER_COLOR = 0x2f7fd6;
 export const LIGHT_AZIMUTH_DEG = 55; // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
 export const LIGHT_ELEVATION_DEG = 26; // low-ish on purpose: a near-overhead light barely shades small facet tilts
