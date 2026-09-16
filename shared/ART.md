@@ -21,6 +21,13 @@ Flat shading, pure flat shapes. No outlines. No PBR metalness, no specular
 highlights, no reflections. Use `MeshLambertMaterial` or `MeshBasicMaterial`
 with `flatShading: true`, not `MeshStandardMaterial`.
 
+One facet scale for everything: every mesh — terrain, water, trees, boats,
+buoys, anything added later — is built so its polygons read at roughly the
+same world-space size on screen. Target facet size **4m**, acceptable range
+**2-6m**. Nothing is subdivided finer because it's small, nothing coarser
+because it's big — a facet-scale mismatch (say, a hand-tuned boat asset
+aside) is a bug to fix, not a size-appropriate choice.
+
 ## Water
 Toy-like: flat colour, no sparkle, no foam spray. Wave height and chop
 scale with wind strength — the sea is how the player reads the wind. Calm
