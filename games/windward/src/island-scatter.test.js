@@ -184,7 +184,7 @@ check('the starter island always exists (islands[0], isStarter: true, kind: star
   }
 });
 
-check('buildIslandParams scales landform distances up and down with radius, keeping frequency*radius roughly constant', () => {
+check('buildIslandParams scales landform distances up and down with radius', () => {
   const small = buildIslandParams(CONFIG.ISLAND_SCATTER_SKERRY_MIN_RADIUS, 0, 0);
   const base = buildIslandParams(CONFIG.ISLAND_RADIUS, 0, 0);
   const large = buildIslandParams(CONFIG.ISLAND_SCATTER_LARGE_MAX_RADIUS, 0, 0);
@@ -192,20 +192,28 @@ check('buildIslandParams scales landform distances up and down with radius, keep
   assert.ok(small.ISLAND_PEAK_HEIGHT < base.ISLAND_PEAK_HEIGHT, 'a smaller island should have a lower peak');
   assert.ok(large.ISLAND_PEAK_HEIGHT > base.ISLAND_PEAK_HEIGHT, 'a bigger island should have a higher peak');
 
-  // Wiggle count around the coastline ~= circumference * frequency; holding
-  // radius * frequency constant holds that count constant across sizes.
-  const wiggleSmall = small.ISLAND_RADIUS * small.ISLAND_COAST_NOISE_FREQ;
-  const wiggleBase = base.ISLAND_RADIUS * base.ISLAND_COAST_NOISE_FREQ;
-  const wiggleLarge = large.ISLAND_RADIUS * large.ISLAND_COAST_NOISE_FREQ;
-  assert.ok(Math.abs(wiggleSmall - wiggleBase) < 1e-9, 'small island wiggle count drifted from base');
-  assert.ok(Math.abs(wiggleLarge - wiggleBase) < 1e-9, 'large island wiggle count drifted from base');
-
   // Sea bathymetry and the mesh's water-overlap margin are physically
   // independent of island size — must stay exactly the Skerry values.
   assert.equal(small.ISLAND_ABYSS_DEPTH, CONFIG.ISLAND_ABYSS_DEPTH);
   assert.equal(large.ISLAND_ABYSS_DEPTH, CONFIG.ISLAND_ABYSS_DEPTH);
   assert.equal(small.ISLAND_MESH_MARGIN, CONFIG.ISLAND_MESH_MARGIN);
   assert.equal(large.ISLAND_MESH_MARGIN, CONFIG.ISLAND_MESH_MARGIN);
+});
+
+check('grid cell size and noise frequency are absolute world-space values — no radius scaling (I3, 2026-09-16)', () => {
+  const small = buildIslandParams(CONFIG.ISLAND_SCATTER_SKERRY_MIN_RADIUS, 0, 0);
+  const large = buildIslandParams(CONFIG.ISLAND_SCATTER_LARGE_MAX_RADIUS, 0, 0);
+
+  // Previously these scaled with radius (LINEAR_KEYS/INVERSE_KEYS), which is
+  // exactly what harmonise-tessellation set out to stop: a tiny skerry
+  // meshed at absurdly fine cells and a big landmark at absurdly coarse
+  // ones, same for noise wavelength.
+  assert.equal(small.ISLAND_GRID_CELL_SIZE, CONFIG.ISLAND_GRID_CELL_SIZE, 'grid cell size should not scale with radius');
+  assert.equal(large.ISLAND_GRID_CELL_SIZE, CONFIG.ISLAND_GRID_CELL_SIZE, 'grid cell size should not scale with radius');
+  assert.equal(small.ISLAND_COAST_NOISE_FREQ, CONFIG.ISLAND_COAST_NOISE_FREQ, 'coastline noise frequency should not scale with radius');
+  assert.equal(large.ISLAND_COAST_NOISE_FREQ, CONFIG.ISLAND_COAST_NOISE_FREQ, 'coastline noise frequency should not scale with radius');
+  assert.equal(small.ISLAND_HEIGHT_NOISE_FREQ, CONFIG.ISLAND_HEIGHT_NOISE_FREQ, 'terrain noise frequency should not scale with radius');
+  assert.equal(large.ISLAND_HEIGHT_NOISE_FREQ, CONFIG.ISLAND_HEIGHT_NOISE_FREQ, 'terrain noise frequency should not scale with radius');
 });
 
 check('tree attempts scale with area (radius^2) and stay within sane bounds', () => {

@@ -43,21 +43,32 @@
 // island" failure AGENTS.md's audit flagged for the single-island
 // generator). Each field scales by physical category instead:
 //  - visible landform distances (coastline wobble, beach falloff, peak
-//    height, terrain bump size, mesh facet size, sand/grass/tree height
-//    bands) scale LINEARLY with radius, so a tiny island reads as a small
-//    low rock and a big one as a proper hill — not a shrunk/stretched copy
-//    of the same terrain.
-//  - noise frequencies scale INVERSELY with radius, so every island gets
-//    roughly the same number of coastline wiggles / terrain bumps
-//    regardless of size, instead of a huge island looking suspiciously
-//    smooth or a tiny one looking like chaotic static.
+//    height, terrain bump size, sand/grass/tree height bands) scale
+//    LINEARLY with radius, so a tiny island reads as a small low rock and a
+//    big one as a proper hill — not a shrunk/stretched copy of the same
+//    terrain.
 //  - tree planting attempts scale with radius^2 (area), clamped, so tree
 //    DENSITY stays roughly constant instead of raw count.
 //  - everything else is physically independent of the island's size and is
 //    carried over unscaled from the Skerry preset: the mesh margin (a fixed
 //    water-overlap requirement, not a visual size), the underwater
 //    shelf/abyss (the sea's own bathymetry, not the island's), slope-angle
-//    thresholds, per-tree render scale, and the palette.
+//    thresholds, per-tree render scale, the palette — and, since I3
+//    (2026-09-16), noise frequency and mesh cell size too. Those two used to
+//    scale INVERSELY with radius (so every island kept roughly the same
+//    wiggle count / same number of mesh facets across its coastline) and
+//    LINEARLY (facet size growing with the island) respectively; measured
+//    result at the size range this field actually places (10-150m radius,
+//    a ~7x spread): a 15m skerry tessellated at ~0.7m mesh cells against a
+//    150m landmark's ~11m cells, and coastline noise wavelength scaled the
+//    same wild ~7x — wildly inconsistent "handmade facet" chunkiness and
+//    noise texture between islands, not the intentional per-size read the
+//    other LINEAR_KEYS give. Cell size and noise wavelength are a rendering
+//    resolution choice, not a landform feature, so they're now one absolute
+//    world-space value shared by every island regardless of size — a tiny
+//    island still naturally gets fewer wiggles/bumps than a big one (fewer
+//    wavelengths fit around a smaller circumference), it's just not
+//    *forced* to match everyone else's wiggle count any more.
 import { CONFIG } from './config.js';
 
 const LINEAR_KEYS = [
@@ -65,27 +76,29 @@ const LINEAR_KEYS = [
   'ISLAND_FALLOFF_WIDTH',
   'ISLAND_PEAK_HEIGHT',
   'ISLAND_HEIGHT_NOISE_AMPLITUDE',
-  'ISLAND_GRID_CELL_SIZE',
   'ISLAND_SAND_MAX_HEIGHT',
   'ISLAND_GRASS_MAX_HEIGHT',
   'ISLAND_TREE_MIN_HEIGHT',
   'ISLAND_TREE_MAX_HEIGHT',
 ];
 
-const INVERSE_KEYS = ['ISLAND_COAST_NOISE_FREQ', 'ISLAND_HEIGHT_NOISE_FREQ'];
-
 // Scales with radius^2 (area) below, clamped between MIN/MAX_TREE_ATTEMPTS —
 // listed separately from LINEAR_KEYS since it isn't a plain multiply.
 const AREA_SCALED_KEYS = ['ISLAND_TREE_ATTEMPTS'];
 
 // Kept exactly as the Skerry preset regardless of this island's radius (see
-// header). Not consulted by buildIslandParams below (it starts from a full
-// `{ ...CONFIG }` copy already carrying these) — listed for documentation
-// and so island-scatter.test.js can assert the scaling categories cover
-// every ISLAND_* key with no gaps.
+// header — as of I3, that now includes noise frequency and grid cell size,
+// previously INVERSE_KEYS/LINEAR_KEYS members respectively). Not consulted
+// by buildIslandParams below (it starts from a full `{ ...CONFIG }` copy
+// already carrying these) — listed for documentation and so
+// island-scatter.test.js can assert the scaling categories cover every
+// ISLAND_* key with no gaps.
 const UNSCALED_KEYS = [
   'ISLAND_MESH_MARGIN',
+  'ISLAND_COAST_NOISE_FREQ',
   'ISLAND_PEAK_SHAPE',
+  'ISLAND_HEIGHT_NOISE_FREQ',
+  'ISLAND_GRID_CELL_SIZE',
   'ISLAND_ROCK_MIN_SLOPE_DEG',
   'ISLAND_TREE_MAX_SLOPE_DEG',
   'ISLAND_TREE_SCALE_MIN',
@@ -163,7 +176,6 @@ export function buildIslandParams(radius, x, z) {
   params.ISLAND_CENTER_Z = z;
 
   for (const key of LINEAR_KEYS) params[key] = CONFIG[key] * scale;
-  for (const key of INVERSE_KEYS) params[key] = CONFIG[key] / scale;
   for (const key of AREA_SCALED_KEYS) {
     const scaled = Math.round(CONFIG[key] * scale * scale);
     params[key] = Math.min(MAX_TREE_ATTEMPTS, Math.max(MIN_TREE_ATTEMPTS, scaled));

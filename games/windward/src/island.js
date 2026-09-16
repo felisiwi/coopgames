@@ -115,7 +115,10 @@ function createTerrainMesh(heightAt, params) {
   const half =
     params.ISLAND_RADIUS + params.ISLAND_COAST_NOISE_AMPLITUDE + params.ISLAND_FALLOFF_WIDTH / 2 + params.ISLAND_MESH_MARGIN;
   const size = half * 2;
-  const seg = Math.round(size / params.ISLAND_GRID_CELL_SIZE);
+  // ceil, not round: ISLAND_GRID_CELL_SIZE is an absolute world-space target
+  // (I3, 2026-09-16) — rounding down could make a cell locally bigger than
+  // that target, which is the thing this value is supposed to guarantee.
+  const seg = Math.ceil(size / params.ISLAND_GRID_CELL_SIZE);
 
   const geometry = new THREE.PlaneGeometry(size, size, seg, seg);
   geometry.rotateX(-Math.PI / 2);

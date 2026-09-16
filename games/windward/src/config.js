@@ -133,6 +133,12 @@ export const CONFIG = {
   ISLAND_RADIUS: 75, // metres, base coastline radius before noise wobble (~310m diameter) — targets a ~90-120s lap at typical (non-max) sailing speed
   ISLAND_MESH_MARGIN: 22, // 15-50m the mesh extends past the noisy coastline into shallow water, so it always overlaps the moving water tile with no seam regardless of wave phase
 
+  // FREQ values are absolute (1/m), the same physical wavelength for every
+  // island regardless of radius (I3, 2026-09-16 — island-scatter.js's
+  // buildIslandParams no longer scales these; see its header). A tiny
+  // skerry naturally gets fewer coastline wiggles/terrain bumps than a
+  // large landmark, instead of every island being force-fed the same
+  // wiggle count.
   ISLAND_COAST_NOISE_FREQ: 0.032, // 0.01-0.05 (1/m), higher = more jagged/noisy coastline, lower = smoother rounder island
   ISLAND_COAST_NOISE_AMPLITUDE: 40, // 10-40m, how far the coastline wobbles off the base circle — higher = more irregular
   ISLAND_FALLOFF_WIDTH: 32, // 20-80m, width of the land-to-water transition band — lower = cliff-like coast, higher = gradual beach taper
@@ -142,7 +148,14 @@ export const CONFIG = {
   ISLAND_HEIGHT_NOISE_FREQ: 0.018, // 0.008-0.03 (1/m), higher = smaller/choppier terrain bumps, lower = broad rolling hills
   ISLAND_HEIGHT_NOISE_AMPLITUDE: 9, // 3-15m, how much the height-noise layer perturbs the dome — higher = craggier
 
-  ISLAND_GRID_CELL_SIZE: 5.5, // 4-10m, mesh cell size — bigger = chunkier flat-shaded facets ("handmade"), smaller = smoother but less stylised
+  // Absolute world-space value (I3, 2026-09-16), the same mesh resolution
+  // for every island regardless of radius — island-scatter.js's
+  // buildIslandParams no longer scales this either, for the same reason as
+  // the FREQ fields above (previously a 15m skerry meshed at ~0.7m cells and
+  // a 150m landmark at ~11m; see that file's header). 4m keeps seed 1's
+  // whole scattered field (~97 islands) under a 200k total-vertex budget
+  // (171,248 measured) — index.html's ?cell= overrides for A/B'ing.
+  ISLAND_GRID_CELL_SIZE: 4, // 4-10m, mesh cell size — bigger = chunkier flat-shaded facets ("handmade"), smaller = smoother but less stylised
 
   // Vertex-colour thresholds (slope from a finite-difference gradient, like
   // BOAT_TILT_GRADIENT_EPS above).

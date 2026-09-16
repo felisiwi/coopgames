@@ -47,6 +47,10 @@
     if (params.has('pitch')) CONFIG.ISLAND_SCATTER_PITCH_OVERRIDE = Number(params.get('pitch'));
     if (params.has('big')) CONFIG.ISLAND_SCATTER_LARGE_COUNT = Number(params.get('big'));
     if (params.has('medium')) CONFIG.ISLAND_SCATTER_MEDIUM_COUNT = Number(params.get('medium'));
+    // I3, 2026-09-16: mesh cell size is absolute world-space now (every
+    // island shares it, src/island-scatter.js), so a single override here
+    // A/B's tessellation density/vertex-count across the whole field at once.
+    if (params.has('cell')) CONFIG.ISLAND_GRID_CELL_SIZE = Number(params.get('cell'));
 
     start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
   </script>

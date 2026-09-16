@@ -70,6 +70,18 @@
   </div>
 
   <fieldset>
+    <legend>Tessellation check (I3, 2026-09-16)</legend>
+    <div class="field">
+      <label>
+        <span class="name">Preview radius — skerry to landmark</span>
+        <span class="val" id="previewRadiusVal"></span>
+      </label>
+      <input type="range" id="previewRadius" min="10" max="150" step="1" />
+    </div>
+    <p class="note">Rebuilds the preview island at this radius via island-scatter.js's buildIslandParams — the same scaling a real scattered island gets, without leaving the lab. Facet chunkiness and terrain-bump scale (below) are absolute world-space values now, so they should look the same "grain" at every tier; landform size (coastline wobble, peak height, tree bands) still scales with radius.</p>
+  </fieldset>
+
+  <fieldset>
     <legend>Island presets (src/island-presets.js)</legend>
     <div class="seed-row">
       <label for="islandPresetSelect">Load</label>
@@ -111,6 +123,7 @@
 import * as THREE from './vendor/three/three.module.js';
 import { CONFIG } from './src/config.js';
 import { createIsland } from './src/island.js';
+import { buildIslandParams } from './src/island-scatter.js';
 import { createWater } from './src/water.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
@@ -249,6 +262,12 @@ for (const f of NUMERIC_FIELDS) {
   input.addEventListener('input', () => {
     CONFIG[f.key] = Number(input.value);
     refresh();
+    // Keep the tessellation-check preview radius following the base
+    // template radius by default, so dragging THIS slider still directly
+    // resizes the previewed island the way it always has — only touching
+    // the new "Preview radius" slider itself breaks that link, to check a
+    // different tier without disturbing the template value being tuned.
+    if (f.key === 'ISLAND_RADIUS') syncPreviewRadiusToConfig();
     if (f.rebuild !== false) markDirty();
     updateCopyText();
   });
@@ -294,6 +313,45 @@ const seedInput = document.getElementById('seed');
 seedInput.value = seed;
 seedInput.addEventListener('input', () => {
   seed = Number(seedInput.value) || 0;
+  markDirty();
+});
+
+// --- preview-radius field: NOT a config.js key — local lab state that
+// re-derives a full scaled params object via island-scatter.js's
+// buildIslandParams (10-150m spans skerry through large-landmark, matching
+// ISLAND_SCATTER_SKERRY/MEDIUM/LARGE_MIN/MAX_RADIUS in config.js) so I3's
+// "cell size and noise frequency read the same at every tier" claim can be
+// checked without leaving the lab. Defaults to the base Skerry radius
+// (scale factor 1, i.e. identical to the old single-island preview). --------
+const previewRadiusInput = document.getElementById('previewRadius');
+const previewRadiusVal = document.getElementById('previewRadiusVal');
+let previewRadius = CONFIG.ISLAND_RADIUS;
+previewRadiusInput.value = previewRadius;
+
+function tierFor(radius) {
+  if (radius <= CONFIG.ISLAND_SCATTER_SKERRY_MAX_RADIUS) return 'skerry';
+  if (radius <= CONFIG.ISLAND_SCATTER_MEDIUM_MAX_RADIUS) return 'medium';
+  return 'large';
+}
+function refreshPreviewRadius() {
+  previewRadiusVal.textContent = `${previewRadius}m (${tierFor(previewRadius)})`;
+}
+// Re-syncs the preview to the base template radius (CONFIG.ISLAND_RADIUS) —
+// called whenever that field changes directly (slider or preset load), so
+// it keeps behaving like a direct resize unless this slider itself is the
+// one being dragged. Clamps only the on-screen handle (this slider's range
+// is 10-150m, the tier bounds); the actual preview still uses the real
+// unclamped value.
+function syncPreviewRadiusToConfig() {
+  previewRadius = CONFIG.ISLAND_RADIUS;
+  previewRadiusInput.value = Math.min(150, Math.max(10, previewRadius));
+  refreshPreviewRadius();
+}
+refreshPreviewRadius();
+
+previewRadiusInput.addEventListener('input', () => {
+  previewRadius = Number(previewRadiusInput.value);
+  refreshPreviewRadius();
   markDirty();
 });
 
@@ -345,6 +403,7 @@ function applyPreset(values, keys) {
     if (!input) continue;
     input.value = COLOR_KEYS.has(key) ? hexString(values[key]) : values[key];
   }
+  if ('ISLAND_RADIUS' in values) syncPreviewRadiusToConfig();
   readouts.forEach((refresh) => refresh());
   markDirty();
   updateCopyText();
@@ -481,6 +540,7 @@ const wind = { dir: 0, strength: 0.5 }; // fixed moderate chop, just for "what I
 
 // --- island (re)build, driven by the `dirty` flag set from the panel ----
 let islandGroup = null;
+let lastParams = null; // scaled params from the last rebuild, for camera framing below
 
 function disposeObject3D(obj) {
   obj.traverse((child) => {
@@ -497,7 +557,8 @@ function rebuildIsland() {
     scene.remove(islandGroup);
     disposeObject3D(islandGroup);
   }
-  islandGroup = createIsland(seed).group;
+  lastParams = buildIslandParams(previewRadius, CONFIG.ISLAND_CENTER_X, CONFIG.ISLAND_CENTER_Z);
+  islandGroup = createIsland(seed, lastParams).group;
   scene.add(islandGroup);
 }
 
@@ -562,7 +623,8 @@ function frame(now) {
   }
   syncLighting();
 
-  target.set(CONFIG.ISLAND_CENTER_X, CONFIG.ISLAND_PEAK_HEIGHT * 0.35, CONFIG.ISLAND_CENTER_Z);
+  const peakHeight = lastParams ? lastParams.ISLAND_PEAK_HEIGHT : CONFIG.ISLAND_PEAK_HEIGHT;
+  target.set(CONFIG.ISLAND_CENTER_X, peakHeight * 0.35, CONFIG.ISLAND_CENTER_Z);
   camera.position.set(
     target.x + radius * Math.sin(polar) * Math.sin(azimuth),
     target.y + radius * Math.cos(polar),
