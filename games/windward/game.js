@@ -16,6 +16,7 @@ import { createWater, seaHeightCPU } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
 import { createIsland } from './src/island.js';
+import { scatterIslands } from './src/island-scatter.js';
 import { createWake } from './src/wake.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
@@ -117,7 +118,9 @@ export default function start({ canvas, net, seed, role }) {
   scene.add(water.mesh);
 
   scene.add(createScatter(seed));
-  scene.add(createIsland(seed).group);
+  for (const island of scatterIslands(seed)) {
+    scene.add(createIsland(island.seed, island.params).group);
+  }
 
   const windArrow = createWindArrow();
   scene.add(windArrow.object);

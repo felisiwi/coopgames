@@ -115,11 +115,16 @@ export const CONFIG = {
   WAKE_STERN_OFFSET: 3, // meters behind the boat's position
 
   // --- Islands (I1, src/island.js) ---
-  // ONE fixed granite-and-pine island for this stage. Position/size are
-  // plain numbers (not seeded) so where it is stays put across sessions;
-  // the coastline/terrain noise below IS seeded from the session `seed`
-  // (offset per layer, same convention as scatter.js/wind.js) so its shape
-  // still varies game to game while staying identical on both peers.
+  // This block is the Skerry shape template: island-lab.html still tunes and
+  // previews ONE island with these exact values (position/size plain numbers
+  // so the lab's preview island stays put; coastline/terrain noise seeded
+  // from the session `seed`, same convention as scatter.js/wind.js). The
+  // live game no longer places a single island here — src/island-scatter.js
+  // (config block below) scatters a whole field, each island this same
+  // Skerry shape scaled to its own radius. Keep tuning the shape by editing
+  // these values (and re-saving the Skerry preset in island-lab.html); the
+  // scatter picks them up automatically since it scales off CONFIG, not a
+  // frozen copy.
   //
   // Values below: "Skerry" island-shape preset (src/island-presets.js),
   // tuned at seed 989370 in island-lab.html (Felix, 2026-09-16).
@@ -170,4 +175,41 @@ export const CONFIG = {
   ISLAND_COLOR_GRANITE_PEAK: 0x809bb0, // slightly deeper/duller than lower granite so peaks read as farther/higher
   ISLAND_COLOR_PINE: 0x35694c,
   ISLAND_COLOR_TRUNK: 0x928164,
+
+  // --- Island scattering (src/island-scatter.js) ---
+  // Places ISLAND_SCATTER_COUNT islands across the world, each the Skerry
+  // shape above scaled to its own radius (island-scatter.js's header has the
+  // full scaling rules — landform distances scale with radius, noise
+  // frequencies scale inversely, sea bathymetry/angles/palette don't scale
+  // at all) plus a per-island seed offset, so no two islands in a field look
+  // identical. Deterministic from the session `seed` alone — no placement
+  // data crosses the wire (AGENTS.md's "world must be identical on both
+  // peers").
+  ISLAND_SCATTER_COUNT: 8, // 3-15, how many islands to scatter — more = more to explore, heavier scene
+
+  // Radius range, metres — the knob for "20s to 3min+ to sail around"
+  // (mission brief). Derived, not guessed: ISLAND_RADIUS=75m above was tuned
+  // to a ~90-120s lap, i.e. its ~2*pi*75m coastline circumference at a
+  // calibrated "typical, not max-speed" pace of ~4.5 m/s (2*pi*75 / 105s
+  // midpoint). Inverting lapTimeS = 2*pi*R / 4.5 for the target range:
+  //   20s   -> R ~= 14m,  floored to a clean 15m
+  //   180s+ -> R ~= 129m for exactly 3:00, rounded UP to 150m so the biggest
+  //            islands are comfortably past 3 minutes, not right on the line
+  ISLAND_SCATTER_MIN_RADIUS: 15, // 10-50m, smallest scattered island (~20s lap)
+  ISLAND_SCATTER_MAX_RADIUS: 150, // 100-300m, largest scattered island (~3.5min lap)
+
+  // Open-water gap required between two islands' rendered footprints
+  // (coastline + wobble + falloff + mesh margin, island-scatter.js's
+  // footprintRadius) — not centre-to-centre, so bigger islands automatically
+  // claim more clearance around themselves.
+  ISLAND_SCATTER_MIN_SPACING: 150, // 50-400m, open-water gap between island footprints
+
+  // Square world region (metres, centred on the origin/spawn) islands are
+  // scattered within — same convention as SCATTER_AREA above.
+  ISLAND_SCATTER_AREA: 2400, // 1200-4000m, world span islands can appear in
+
+  // No island's footprint may come within this of world origin, where both
+  // boats spawn (+-BOAT_SPAWN_OFFSET) — keeps the opening view clear water
+  // instead of a wall of coastline at first sight.
+  ISLAND_SCATTER_SPAWN_CLEARANCE: 150, // 60-300m, keep-out radius around spawn
 };
