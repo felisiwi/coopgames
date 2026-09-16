@@ -32,10 +32,15 @@ scale with wind strength — the sea is how the player reads the wind. Calm
 - Fill (hemisphere): sky `0x89c4f4` / ground `0x1c4a70`, intensity 0.7
 
 ## Islands
-Not built yet — current placeholder is scattered buoys/rocks, not islands.
-When built: mix of pink granite with dark pines, grassy green, low sandy
-scrub. Each island must read as distinguishable from its neighbours at a
-distance.
+Granite-and-pine (I1, `src/island.js`): noisy-radial-falloff heightfield,
+coarse flat-shaded grid, vertex-coloured by height/slope — no textures.
+Sandy/grass fringe at the waterline, grass on gentle mid-elevation slopes,
+pink granite on steep slopes and near the peak, dark pine (instanced,
+suitable slopes only). Colours (`src/config.js`'s `ISLAND_COLOR_*`):
+sand `0xd9c48a` · grass `0x5da84a` · granite `0xc98f86` · granite (peak)
+`0xb87d74` · pine `0x244a2e` · trunk `0x5b4232`. Each island must read as
+distinguishable from its neighbours at a distance — not yet checked, since
+I1 is a single island; revisit once a second one exists (I2/I3).
 
 ## Sky and distance
 A few soft scattered clouds. Light golden haze at distance so far islands

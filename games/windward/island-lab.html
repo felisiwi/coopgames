@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Windward — island lab</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0a1a2a; overflow: hidden; }
+  #scene { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+  #scene.dragging { cursor: grabbing; }
+
+  #panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 320px;
+    overflow-y: auto; box-sizing: border-box; padding: 12px;
+    background: rgba(10, 26, 42, 0.85); color: #eaf6ff;
+    font: 12px/1.4 monospace; -webkit-font-smoothing: antialiased;
+  }
+  #panel h1 { font-size: 13px; margin: 0 0 4px; color: #ffcc66; }
+  #panel .sub { margin: 0 0 12px; color: rgba(234,246,255,0.65); font-size: 11px; }
+  #panel fieldset {
+    border: 1px solid rgba(234,246,255,0.2); border-radius: 4px;
+    margin: 0 0 10px; padding: 6px 8px 8px;
+  }
+  #panel legend { padding: 0 4px; color: #8fd3ff; font-size: 11px; }
+  .field { margin: 6px 0; }
+  .field label {
+    display: flex; justify-content: space-between; gap: 8px;
+    font-size: 11px; margin-bottom: 2px;
+  }
+  .field label .val { color: #78dc96; white-space: nowrap; }
+  .field.derived label .name::after { content: ' *'; color: #ffcc66; }
+  .field input[type="range"] { width: 100%; accent-color: #ffcc66; }
+  .field input[type="color"] {
+    width: 100%; height: 22px; border: none; border-radius: 3px;
+    background: none; padding: 0; cursor: pointer;
+  }
+  .seed-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+  .seed-row label { font-size: 11px; white-space: nowrap; }
+  .seed-row input, .seed-row select {
+    flex: 1; font: 12px monospace; background: rgba(234,246,255,0.08); color: #eaf6ff;
+    border: 1px solid rgba(234,246,255,0.25); border-radius: 3px; padding: 3px 5px;
+  }
+  #presetOut { height: 140px; }
+
+  #copyBtn, #savePresetBtn {
+    display: block; width: 100%; margin: 4px 0 8px; padding: 6px;
+    background: #ffcc66; color: #0a1a2a; border: none; border-radius: 3px;
+    font: 12px monospace; font-weight: bold; cursor: pointer;
+  }
+  #copyBtn:active, #savePresetBtn:active { background: #e0b458; }
+  #copyStatus, #presetStatus { font-size: 11px; color: #78dc96; min-height: 14px; display: block; margin-bottom: 6px; }
+  #copyOut, #presetOut {
+    width: 100%; box-sizing: border-box; height: 220px; resize: vertical;
+    background: rgba(234,246,255,0.06); color: #eaf6ff;
+    border: 1px solid rgba(234,246,255,0.25); border-radius: 3px;
+    font: 11px/1.4 monospace; padding: 6px;
+  }
+  .note { color: rgba(234,246,255,0.55); font-size: 10px; margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="panel">
+  <h1>Windward — island lab</h1>
+  <p class="sub">Drag to orbit, scroll to zoom. No boat, no sailing — silhouette only.</p>
+
+  <div class="seed-row">
+    <label for="seed">Seed</label>
+    <input type="number" id="seed" step="1" />
+  </div>
+
+  <fieldset>
+    <legend>Presets (src/island-presets.js)</legend>
+    <div class="seed-row">
+      <label for="presetSelect">Load</label>
+      <select id="presetSelect"></select>
+    </div>
+    <div class="seed-row">
+      <label for="presetName">Name</label>
+      <input type="text" id="presetName" placeholder="e.g. granite" />
+    </div>
+    <button id="savePresetBtn" type="button">Save preset (block below, for island-presets.js)</button>
+    <span id="presetStatus"></span>
+    <textarea id="presetOut" readonly spellcheck="false"></textarea>
+  </fieldset>
+
+  <button id="copyBtn" type="button">Copy values as config.js block</button>
+  <span id="copyStatus"></span>
+  <textarea id="copyOut" readonly spellcheck="false"></textarea>
+  <p class="note">* no explicit range in config.js — slider range picked for tuning, not a spec.</p>
+
+  <div id="fields"></div>
+</div>
+
+<script type="module">
+import * as THREE from './vendor/three/three.module.js';
+import { CONFIG } from './src/config.js';
+import { createIsland } from './src/island.js';
+import { createWater } from './src/water.js';
+import { createSky } from './src/sky.js';
+import { createSunGlow } from './src/sunGlow.js';
+import { ISLAND_PRESETS } from './src/island-presets.js';
+
+// --- field definitions: every ISLAND_* constant in config.js. Ranges are
+// copied from that file's own comments where one exists; fields marked
+// `derived: true` have no explicit range there, so the min/max here is a
+// reasonable guess for tuning, not a spec (see the panel's footnote). ------
+const NUMERIC_FIELDS = [
+  { group: 'Position', key: 'ISLAND_CENTER_X', label: 'Island position — X', min: -300, max: 300, step: 5, unit: 'm', derived: true },
+  { group: 'Position', key: 'ISLAND_CENTER_Z', label: 'Island position — Z (out from spawn)', min: 0, max: 600, step: 5, unit: 'm', derived: true },
+
+  { group: 'Size & coastline', key: 'ISLAND_RADIUS', label: 'Island radius', min: 60, max: 260, step: 5, unit: 'm', derived: true },
+  { group: 'Size & coastline', key: 'ISLAND_MESH_MARGIN', label: 'Underwater mesh overlap', min: 15, max: 50, step: 1, unit: 'm' },
+  { group: 'Size & coastline', key: 'ISLAND_COAST_NOISE_FREQ', label: 'Coastline jaggedness (frequency)', min: 0.01, max: 0.05, step: 0.001, unit: '/m' },
+  { group: 'Size & coastline', key: 'ISLAND_COAST_NOISE_AMPLITUDE', label: 'Coastline wobble (amount)', min: 10, max: 40, step: 1, unit: 'm' },
+  { group: 'Size & coastline', key: 'ISLAND_FALLOFF_WIDTH', label: 'Beach / coast transition width', min: 20, max: 80, step: 1, unit: 'm' },
+
+  { group: 'Terrain height', key: 'ISLAND_PEAK_HEIGHT', label: 'Peak height', min: 20, max: 60, step: 1, unit: 'm' },
+  { group: 'Terrain height', key: 'ISLAND_PEAK_SHAPE', label: 'Peak sharpness (low = broad dome)', min: 0.4, max: 1.0, step: 0.01 },
+  { group: 'Terrain height', key: 'ISLAND_HEIGHT_NOISE_FREQ', label: 'Terrain bump scale (high = smaller bumps)', min: 0.008, max: 0.03, step: 0.001, unit: '/m' },
+  { group: 'Terrain height', key: 'ISLAND_HEIGHT_NOISE_AMPLITUDE', label: 'Terrain bumpiness amount', min: 3, max: 15, step: 0.5, unit: 'm' },
+  { group: 'Terrain height', key: 'ISLAND_GRID_CELL_SIZE', label: 'Facet chunkiness (mesh cell size)', min: 4, max: 10, step: 0.5, unit: 'm' },
+
+  { group: 'Vegetation & rock', key: 'ISLAND_SAND_MAX_HEIGHT', label: 'Sand / grass fringe height', min: 1, max: 5, step: 0.1, unit: 'm' },
+  { group: 'Vegetation & rock', key: 'ISLAND_GRASS_MAX_HEIGHT', label: 'Grass upper height limit', min: 15, max: 30, step: 1, unit: 'm' },
+  { group: 'Vegetation & rock', key: 'ISLAND_ROCK_MIN_SLOPE_DEG', label: 'Bare-granite slope threshold', min: 25, max: 45, step: 1, unit: '°' },
+  { group: 'Vegetation & rock', key: 'ISLAND_TREE_MIN_HEIGHT', label: 'Tree lower height limit', min: 1, max: 6, step: 0.1, unit: 'm' },
+  { group: 'Vegetation & rock', key: 'ISLAND_TREE_MAX_HEIGHT', label: 'Tree upper height limit', min: 20, max: 40, step: 1, unit: 'm' },
+  { group: 'Vegetation & rock', key: 'ISLAND_TREE_MAX_SLOPE_DEG', label: 'Tree max slope', min: 20, max: 40, step: 1, unit: '°' },
+  { group: 'Vegetation & rock', key: 'ISLAND_TREE_ATTEMPTS', label: 'Tree density (planting attempts)', min: 100, max: 800, step: 10, derived: true },
+  { group: 'Vegetation & rock', key: 'ISLAND_TREE_SCALE_MIN', label: 'Tree size — min', min: 0.5, max: 1.5, step: 0.05 },
+  { group: 'Vegetation & rock', key: 'ISLAND_TREE_SCALE_MAX', label: 'Tree size — max', min: 0.5, max: 1.5, step: 0.05 },
+
+  { group: 'Underwater shelf (never rendered)', key: 'ISLAND_SHELF_WIDTH', label: 'Shelf width', min: 30, max: 100, step: 1, unit: 'm' },
+  { group: 'Underwater shelf (never rendered)', key: 'ISLAND_SHELF_DEPTH', label: 'Shelf depth', min: 3, max: 10, step: 0.5, unit: 'm' },
+  { group: 'Underwater shelf (never rendered)', key: 'ISLAND_ABYSS_DEPTH', label: 'Deep-water depth', min: 20, max: 50, step: 1, unit: 'm' },
+  { group: 'Underwater shelf (never rendered)', key: 'ISLAND_ABYSS_TRANSITION_WIDTH', label: 'Shelf-to-deep transition width', min: 80, max: 250, step: 5, unit: 'm' },
+
+  // Lighting (golden-hour pass): `rebuild: false` so dragging these doesn't
+  // trigger an island-mesh rebuild — they take effect live every frame via
+  // syncLighting() below instead (see the three.js scene setup further down).
+  { group: 'Lighting', key: 'LIGHT_AZIMUTH_DEG', label: 'Sun azimuth', min: 0, max: 360, step: 1, unit: '°', derived: true, rebuild: false },
+  { group: 'Lighting', key: 'LIGHT_ELEVATION_DEG', label: 'Sun elevation', min: 5, max: 60, step: 1, unit: '°', derived: true, rebuild: false },
+  { group: 'Lighting', key: 'SUN_INTENSITY', label: 'Sun intensity', min: 0, max: 2, step: 0.05, derived: true, rebuild: false },
+  { group: 'Lighting', key: 'HEMI_INTENSITY', label: 'Ambient fill intensity', min: 0, max: 1.5, step: 0.05, derived: true, rebuild: false },
+  { group: 'Lighting', key: 'GLOW_SIZE', label: 'Glow size', min: 0, max: 400, step: 5, unit: 'm', derived: true, rebuild: false },
+  { group: 'Lighting', key: 'GLOW_DISTANCE', label: 'Glow distance from camera', min: 200, max: 1800, step: 10, unit: 'm', derived: true, rebuild: false },
+  { group: 'Lighting', key: 'GLOW_OPACITY', label: 'Glow opacity', min: 0, max: 1, step: 0.05, derived: true, rebuild: false },
+];
+
+const COLOR_FIELDS = [
+  { group: 'Colours', key: 'ISLAND_COLOR_SAND', label: 'Sand colour' },
+  { group: 'Colours', key: 'ISLAND_COLOR_GRASS', label: 'Grass colour' },
+  { group: 'Colours', key: 'ISLAND_COLOR_GRANITE', label: 'Granite colour' },
+  { group: 'Colours', key: 'ISLAND_COLOR_GRANITE_PEAK', label: 'Granite (peak) colour' },
+  { group: 'Colours', key: 'ISLAND_COLOR_PINE', label: 'Pine colour' },
+  { group: 'Colours', key: 'ISLAND_COLOR_TRUNK', label: 'Trunk colour' },
+
+  { group: 'Lighting', key: 'SUN_COLOR', label: 'Sun colour', rebuild: false },
+  { group: 'Lighting', key: 'HEMI_SKY_COLOR', label: 'Ambient sky colour', rebuild: false },
+  { group: 'Lighting', key: 'HEMI_GROUND_COLOR', label: 'Ambient ground/shadow colour', rebuild: false },
+  { group: 'Lighting', key: 'SKY_HORIZON_COLOR', label: 'Sky — horizon colour', rebuild: false },
+  { group: 'Lighting', key: 'SKY_ZENITH_COLOR', label: 'Sky — zenith colour', rebuild: false },
+  { group: 'Lighting', key: 'GLOW_COLOR', label: 'Glow colour', rebuild: false },
+];
+
+const ALL_KEYS = [...NUMERIC_FIELDS.map((f) => f.key), ...COLOR_FIELDS.map((f) => f.key)];
+
+function decimalsOf(step) {
+  const s = String(step);
+  const i = s.indexOf('.');
+  return i === -1 ? 0 : s.length - i - 1;
+}
+
+function hexString(n) {
+  return '#' + n.toString(16).padStart(6, '0');
+}
+
+// --- build the panel, grouped by `field.group` in the order fields appear
+// above (which mirrors config.js's own top-to-bottom order). -------------
+let dirty = true; // triggers the first build
+function markDirty() { dirty = true; }
+
+const fieldsRoot = document.getElementById('fields');
+const groups = new Map();
+function groupFor(name) {
+  if (groups.has(name)) return groups.get(name);
+  const fieldset = document.createElement('fieldset');
+  const legend = document.createElement('legend');
+  legend.textContent = name;
+  fieldset.appendChild(legend);
+  fieldsRoot.appendChild(fieldset);
+  groups.set(name, fieldset);
+  return fieldset;
+}
+
+const readouts = []; // { update() } for keeping labels in sync
+const inputsByKey = new Map(); // key -> <input>, so presets can push values back into the panel
+
+for (const f of NUMERIC_FIELDS) {
+  const fieldset = groupFor(f.group);
+  const decimals = decimalsOf(f.step);
+  const wrap = document.createElement('div');
+  wrap.className = 'field' + (f.derived ? ' derived' : '');
+
+  const label = document.createElement('label');
+  const name = document.createElement('span');
+  name.className = 'name';
+  name.textContent = f.label;
+  const val = document.createElement('span');
+  val.className = 'val';
+  label.appendChild(name);
+  label.appendChild(val);
+
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.min = f.min;
+  input.max = f.max;
+  input.step = f.step;
+  input.value = CONFIG[f.key];
+
+  function refresh() {
+    val.textContent = Number(CONFIG[f.key]).toFixed(decimals) + (f.unit ? f.unit : '');
+  }
+  refresh();
+
+  input.addEventListener('input', () => {
+    CONFIG[f.key] = Number(input.value);
+    refresh();
+    if (f.rebuild !== false) markDirty();
+    updateCopyText();
+  });
+
+  wrap.appendChild(label);
+  wrap.appendChild(input);
+  fieldset.appendChild(wrap);
+  readouts.push(refresh);
+  inputsByKey.set(f.key, input);
+}
+
+for (const f of COLOR_FIELDS) {
+  const fieldset = groupFor(f.group);
+  const wrap = document.createElement('div');
+  wrap.className = 'field';
+
+  const label = document.createElement('label');
+  const name = document.createElement('span');
+  name.className = 'name';
+  name.textContent = f.label;
+  label.appendChild(name);
+
+  const input = document.createElement('input');
+  input.type = 'color';
+  input.value = hexString(CONFIG[f.key]);
+
+  input.addEventListener('input', () => {
+    CONFIG[f.key] = parseInt(input.value.slice(1), 16);
+    if (f.rebuild !== false) markDirty();
+    updateCopyText();
+  });
+
+  wrap.appendChild(label);
+  wrap.appendChild(input);
+  fieldset.appendChild(wrap);
+  inputsByKey.set(f.key, input);
+}
+
+// --- seed field --------------------------------------------------------
+const params = new URLSearchParams(window.location.search);
+let seed = params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
+const seedInput = document.getElementById('seed');
+seedInput.value = seed;
+seedInput.addEventListener('input', () => {
+  seed = Number(seedInput.value) || 0;
+  markDirty();
+});
+
+// --- copy-values button --------------------------------------------------
+const copyOut = document.getElementById('copyOut');
+const copyStatus = document.getElementById('copyStatus');
+
+function formatValue(key) {
+  if (key.startsWith('ISLAND_COLOR_')) return hexString(CONFIG[key]).replace('#', '0x');
+  const def = NUMERIC_FIELDS.find((f) => f.key === key);
+  const decimals = def ? decimalsOf(def.step) : 4;
+  const n = Number(Number(CONFIG[key]).toFixed(decimals));
+  return String(n);
+}
+
+function updateCopyText() {
+  const lines = ALL_KEYS.map((key) => `  ${key}: ${formatValue(key)},`);
+  copyOut.value = `// Pasted from games/windward/island-lab.html (seed ${seed})\n${lines.join('\n')}`;
+}
+updateCopyText();
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(copyOut.value);
+    copyStatus.textContent = 'Copied.';
+  } catch {
+    copyOut.select();
+    document.execCommand('copy');
+    copyStatus.textContent = 'Copied (fallback).';
+  }
+  setTimeout(() => { copyStatus.textContent = ''; }, 1500);
+});
+
+// --- presets (src/island-presets.js): dropdown loads one as a tuning
+// starting point; "Save preset" formats the current values as a block to
+// hand back to Claude to paste into that file. Presets live in the repo
+// file, not browser storage, so both Felix and Kenny (and Claude) can read
+// them across machines/sessions. ------------------------------------------
+const presetSelect = document.getElementById('presetSelect');
+const presetNameInput = document.getElementById('presetName');
+const presetOut = document.getElementById('presetOut');
+const presetStatus = document.getElementById('presetStatus');
+
+const placeholderOption = document.createElement('option');
+placeholderOption.value = '';
+placeholderOption.textContent = ISLAND_PRESETS.length ? '— load a preset —' : '(no presets yet)';
+presetSelect.appendChild(placeholderOption);
+ISLAND_PRESETS.forEach((preset, i) => {
+  const opt = document.createElement('option');
+  opt.value = String(i);
+  opt.textContent = preset.name;
+  presetSelect.appendChild(opt);
+});
+
+function applyPreset(values) {
+  for (const key of ALL_KEYS) {
+    if (!(key in values)) continue;
+    CONFIG[key] = values[key];
+    const input = inputsByKey.get(key);
+    if (!input) continue;
+    input.value = key.startsWith('ISLAND_COLOR_') ? hexString(values[key]) : values[key];
+  }
+  readouts.forEach((refresh) => refresh());
+  markDirty();
+  updateCopyText();
+}
+
+presetSelect.addEventListener('change', () => {
+  if (presetSelect.value === '') return;
+  const preset = ISLAND_PRESETS[Number(presetSelect.value)];
+  if (!preset) return;
+  applyPreset(preset.values);
+  presetNameInput.value = preset.name;
+});
+
+function formatPresetBlock(name) {
+  const lines = ALL_KEYS.map((key) => `      ${key}: ${formatValue(key)},`);
+  return (
+    `  {\n` +
+    `    name: '${name}',\n` +
+    `    values: {\n${lines.join('\n')}\n    },\n` +
+    `  },\n` +
+    `// tuned at seed ${seed} in island-lab.html`
+  );
+}
+
+document.getElementById('savePresetBtn').addEventListener('click', async () => {
+  const name = presetNameInput.value.trim();
+  if (!name) {
+    presetStatus.textContent = 'Name the preset first.';
+    setTimeout(() => { presetStatus.textContent = ''; }, 1500);
+    return;
+  }
+  presetOut.value = formatPresetBlock(name);
+  try {
+    await navigator.clipboard.writeText(presetOut.value);
+    presetStatus.textContent = 'Copied — hand this block back to Claude for island-presets.js.';
+  } catch {
+    presetOut.select();
+    document.execCommand('copy');
+    presetStatus.textContent = 'Copied (fallback) — hand this block back to Claude for island-presets.js.';
+  }
+  setTimeout(() => { presetStatus.textContent = ''; }, 3000);
+});
+
+// --- three.js scene: same sky/lighting/materials as game.js (shared/ART.md) ---
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio || 1);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const sky = createSky();
+scene.add(sky.mesh);
+
+const camera = new THREE.PerspectiveCamera(CONFIG.FIXED_CAMERA_FOV_DEG, 1, 0.1, 3000);
+
+const hemi = new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(CONFIG.SUN_COLOR, CONFIG.SUN_INTENSITY);
+const sunOffset = new THREE.Vector3();
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 1500;
+sun.shadow.camera.left = -420;
+sun.shadow.camera.right = 420;
+sun.shadow.camera.top = 420;
+sun.shadow.camera.bottom = -420;
+sun.shadow.radius = 4;
+scene.add(sun);
+scene.add(sun.target);
+
+const sunGlow = createSunGlow();
+scene.add(sunGlow.sprite);
+
+// Same fields as game.js's CONFIG, but re-applied every frame (see frame()
+// below) instead of once at load, so this panel's sliders take effect live
+// — same reasoning as `rebuild: false` on the Lighting fields above.
+function syncLighting() {
+  sun.color.set(CONFIG.SUN_COLOR);
+  sun.intensity = CONFIG.SUN_INTENSITY;
+  sun.shadow.bias = CONFIG.SUN_SHADOW_BIAS;
+  hemi.color.set(CONFIG.HEMI_SKY_COLOR);
+  hemi.groundColor.set(CONFIG.HEMI_GROUND_COLOR);
+  hemi.intensity = CONFIG.HEMI_INTENSITY;
+  const az = (CONFIG.LIGHT_AZIMUTH_DEG * Math.PI) / 180;
+  const el = (CONFIG.LIGHT_ELEVATION_DEG * Math.PI) / 180;
+  sunOffset.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).multiplyScalar(500);
+}
+
+const water = createWater();
+scene.add(water.mesh);
+const wind = { dir: 0, strength: 0.5 }; // fixed moderate chop, just for "what I'll get" context
+
+// --- island (re)build, driven by the `dirty` flag set from the panel ----
+let islandGroup = null;
+
+function disposeObject3D(obj) {
+  obj.traverse((child) => {
+    if (child.geometry) child.geometry.dispose();
+    if (child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      mats.forEach((m) => m.dispose());
+    }
+  });
+}
+
+function rebuildIsland() {
+  if (islandGroup) {
+    scene.remove(islandGroup);
+    disposeObject3D(islandGroup);
+  }
+  islandGroup = createIsland(seed).group;
+  scene.add(islandGroup);
+}
+
+// --- orbit camera: drag to orbit, wheel to zoom (no OrbitControls vendored,
+// and this needs full free orbit, unlike the game's fixed three-quarter cam). --
+let azimuth = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180;
+let polar = ((90 - CONFIG.FIXED_CAMERA_ELEVATION_DEG) * Math.PI) / 180;
+let radius = CONFIG.FIXED_CAMERA_DISTANCE * 1.5;
+const MIN_POLAR = (5 * Math.PI) / 180;
+const MAX_POLAR = (85 * Math.PI) / 180;
+const MIN_RADIUS = 30;
+const MAX_RADIUS = 900;
+
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
+
+canvas.addEventListener('pointerdown', (e) => {
+  dragging = true;
+  lastX = e.clientX;
+  lastY = e.clientY;
+  canvas.classList.add('dragging');
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - lastX;
+  const dy = e.clientY - lastY;
+  lastX = e.clientX;
+  lastY = e.clientY;
+  azimuth -= dx * 0.006;
+  polar = Math.min(MAX_POLAR, Math.max(MIN_POLAR, polar - dy * 0.006));
+});
+function endDrag() {
+  dragging = false;
+  canvas.classList.remove('dragging');
+}
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  radius = Math.min(MAX_RADIUS, Math.max(MIN_RADIUS, radius + e.deltaY * 0.4));
+}, { passive: false });
+
+function resize() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  renderer.setSize(width, height, false);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+const target = new THREE.Vector3();
+const start = performance.now();
+
+function frame(now) {
+  if (dirty) {
+    rebuildIsland();
+    dirty = false;
+  }
+  syncLighting();
+
+  target.set(CONFIG.ISLAND_CENTER_X, CONFIG.ISLAND_PEAK_HEIGHT * 0.35, CONFIG.ISLAND_CENTER_Z);
+  camera.position.set(
+    target.x + radius * Math.sin(polar) * Math.sin(azimuth),
+    target.y + radius * Math.cos(polar),
+    target.z + radius * Math.sin(polar) * Math.cos(azimuth),
+  );
+  camera.lookAt(target);
+
+  sun.position.copy(target).add(sunOffset);
+  sun.target.position.copy(target);
+  sky.update(camera);
+  sunGlow.update(camera);
+
+  const elapsedSeconds = (now - start) / 1000;
+  water.update(elapsedSeconds, wind, { x: target.x, z: target.z });
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

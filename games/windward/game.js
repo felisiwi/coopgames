@@ -15,6 +15,7 @@ import { createHud, updateHud } from './src/hud.js';
 import { createWater, seaHeightCPU } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
+import { createIsland } from './src/island.js';
 import { createWake } from './src/wake.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
@@ -116,6 +117,7 @@ export default function start({ canvas, net, seed, role }) {
   scene.add(water.mesh);
 
   scene.add(createScatter(seed));
+  scene.add(createIsland(seed).group);
 
   const windArrow = createWindArrow();
   scene.add(windArrow.object);

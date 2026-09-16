@@ -66,9 +66,10 @@ export const CONFIG = {
   BOAT_SPAWN_OFFSET: 10, // meters apart on X before any 'pos' has synced
 
   // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
-  // Single tuning point; src/sky.js and src/sunGlow.js both read straight
-  // from CONFIG (no local copies) so game.js can't drift out of sync with
-  // either.
+  // Single tuning point so island-lab.html can expose these as sliders,
+  // same reason the ISLAND_* fields below live here instead of in
+  // src/island.js. src/sky.js and src/sunGlow.js both read straight from
+  // CONFIG (no local copies) so game.js and the lab can't drift apart.
   SUN_COLOR: 0xffd9a6, // warm gold, was flat white
   SUN_INTENSITY: 1.0,
   LIGHT_AZIMUTH_DEG: 55, // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
@@ -110,4 +111,58 @@ export const CONFIG = {
   WAKE_SPAWN_INTERVAL_S: 0.12,
   WAKE_LIFETIME_S: 1.4,
   WAKE_STERN_OFFSET: 3, // meters behind the boat's position
+
+  // --- Islands (I1, src/island.js) ---
+  // ONE fixed granite-and-pine island for this stage. Position/size are
+  // plain numbers (not seeded) so where it is stays put across sessions;
+  // the coastline/terrain noise below IS seeded from the session `seed`
+  // (offset per layer, same convention as scatter.js/wind.js) so its shape
+  // still varies game to game while staying identical on both peers.
+  ISLAND_CENTER_X: 55, // metres, world space
+  ISLAND_CENTER_Z: 145, // metres — far enough from the (+-10, 0) boat spawn for a real approach (Felix, 2026-09-16: was 220, moved out so the island isn't visible from spawn as a fixed point)
+  ISLAND_RADIUS: 105, // metres, base coastline radius before noise wobble (~310m diameter) — targets a ~90-120s lap at typical (non-max) sailing speed
+  ISLAND_MESH_MARGIN: 22, // 15-50m the mesh extends past the noisy coastline into shallow water, so it always overlaps the moving water tile with no seam regardless of wave phase
+
+  ISLAND_COAST_NOISE_FREQ: 0.032, // 0.01-0.05 (1/m), higher = more jagged/noisy coastline, lower = smoother rounder island
+  ISLAND_COAST_NOISE_AMPLITUDE: 40, // 10-40m, how far the coastline wobbles off the base circle — higher = more irregular
+  ISLAND_FALLOFF_WIDTH: 32, // 20-80m, width of the land-to-water transition band — lower = cliff-like coast, higher = gradual beach taper
+
+  ISLAND_PEAK_HEIGHT: 29, // 20-60m, terrain height at the island's centre before noise
+  ISLAND_PEAK_SHAPE: 0.48, // 0.4-1.0, exponent on the radial dome — lower = broader granite massif with a flatter top, higher = one pointed peak
+  ISLAND_HEIGHT_NOISE_FREQ: 0.009, // 0.008-0.03 (1/m), higher = smaller/choppier terrain bumps, lower = broad rolling hills
+  ISLAND_HEIGHT_NOISE_AMPLITUDE: 11, // 3-15m, how much the height-noise layer perturbs the dome — higher = craggier
+
+  ISLAND_GRID_CELL_SIZE: 5, // 4-10m, mesh cell size — bigger = chunkier flat-shaded facets ("handmade"), smaller = smoother but less stylised
+
+  // Vertex-colour thresholds (slope from a finite-difference gradient, like
+  // BOAT_TILT_GRADIENT_EPS above).
+  ISLAND_SAND_MAX_HEIGHT: 1, // 1-5m, below this + gentle slope reads as sandy/grass fringe
+  ISLAND_GRASS_MAX_HEIGHT: 25, // 15-30m, above this it leans rocky even on gentle slopes (bare upper-slope granite)
+  ISLAND_ROCK_MIN_SLOPE_DEG: 25, // 25-45deg, slope steeper than this always reads as bare granite, regardless of height
+
+  ISLAND_TREE_MIN_HEIGHT: 1.8, // 1-6m, no trees on the beach fringe below this
+  ISLAND_TREE_MAX_HEIGHT: 23, // 20-40m, no trees above this (bare granite near the peak)
+  ISLAND_TREE_MAX_SLOPE_DEG: 27, // 20-40deg, no trees on slopes steeper than this
+  ISLAND_TREE_ATTEMPTS: 800, // candidate points tried; how many actually land in the valid height/slope band (and so get planted) varies with the terrain, not just this number
+  ISLAND_TREE_SCALE_MIN: 0.7, // 0.5-1.5, per-tree random scale range, for a handmade/uneven look
+  ISLAND_TREE_SCALE_MAX: 1.5,
+
+  // Underwater shelf (I1 item 3) — never rendered (opaque water hides it),
+  // only sampled later for keel/draught. Built into the same heightfield
+  // now because retrofitting a depth model onto a mesh that only ever
+  // defined height >= 0 would mean redoing the terrain function from
+  // scratch.
+  ISLAND_SHELF_WIDTH: 51, // 30-100m beyond the coastline — wider = gentler underwater slope
+  ISLAND_SHELF_DEPTH: 5.5, // 3-10m, depth at the outer edge of the shelf (still "shallow" by boat-draught standards)
+  ISLAND_ABYSS_DEPTH: 37, // 20-50m, depth the seabed eases toward well beyond the shelf
+  ISLAND_ABYSS_TRANSITION_WIDTH: 125, // 80-250m, distance beyond the shelf over which depth eases from ISLAND_SHELF_DEPTH to ISLAND_ABYSS_DEPTH
+
+  // Palette (mirrors shared/ART.md's Islands section) — pink granite with
+  // dark pines, grassy green, low sandy scrub, per the mission brief.
+  ISLAND_COLOR_SAND: 0xd9c48a,
+  ISLAND_COLOR_GRASS: 0x5da84a,
+  ISLAND_COLOR_GRANITE: 0xeec0af,
+  ISLAND_COLOR_GRANITE_PEAK: 0xa0afa3, // slightly deeper/duller than lower granite so peaks read as farther/higher
+  ISLAND_COLOR_PINE: 0x176929,
+  ISLAND_COLOR_TRUNK: 0x966c53,
 };
