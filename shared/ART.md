@@ -25,8 +25,14 @@ One facet scale for everything: every mesh — terrain, water, trees, boats,
 buoys, anything added later — is built so its polygons read at roughly the
 same world-space size on screen. Target facet size **4m**, acceptable range
 **2-6m**. Nothing is subdivided finer because it's small, nothing coarser
-because it's big — a facet-scale mismatch (say, a hand-tuned boat asset
-aside) is a bug to fix, not a size-appropriate choice.
+because it's big — a facet-scale mismatch is a bug to fix, not a
+size-appropriate choice.
+
+Exception: props physically smaller than the facet size itself (tree
+trunks, canopies, buoys) can't carry a 2m+ facet without ceasing to read as
+their shape — they're exempt from the 2m floor. Keep the lowest segment
+count that still reads (a trunk, a cone, a float), never finer than that
+floor requires.
 
 ## Water
 Toy-like: flat colour, no sparkle, no foam spray. Wave height and chop
