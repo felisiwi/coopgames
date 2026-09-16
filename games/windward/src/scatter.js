@@ -18,27 +18,36 @@ function mulberry32(seed) {
 
 const BUOY_COLORS = [0xff5533, 0xffcc33];
 
+// MeshLambertMaterial + flatShading, not MeshStandardMaterial (shared/ART.md's
+// Materials rule: no PBR metalness, no specular highlights).
 function createBuoy(rand, index) {
   const group = new THREE.Group();
   const pole = new THREE.Mesh(
     new THREE.CylinderGeometry(0.08, 0.08, 1.6, 6),
-    new THREE.MeshStandardMaterial({ color: 0x333333 }),
+    new THREE.MeshLambertMaterial({ color: 0x333333, flatShading: true }),
   );
   pole.position.y = 0.8;
+  pole.castShadow = true;
+  pole.receiveShadow = true;
   const float = new THREE.Mesh(
     new THREE.SphereGeometry(0.35, 8, 6),
-    new THREE.MeshStandardMaterial({ color: BUOY_COLORS[index % BUOY_COLORS.length], flatShading: true }),
+    new THREE.MeshLambertMaterial({ color: BUOY_COLORS[index % BUOY_COLORS.length], flatShading: true }),
   );
   float.position.y = 1.5;
+  float.castShadow = true;
+  float.receiveShadow = true;
   group.add(pole, float);
   return group;
 }
 
 function createRock(rand) {
-  return new THREE.Mesh(
+  const rock = new THREE.Mesh(
     new THREE.IcosahedronGeometry(0.7 + rand() * 0.7, 0),
-    new THREE.MeshStandardMaterial({ color: 0x776f64, flatShading: true }),
+    new THREE.MeshLambertMaterial({ color: 0x776f64, flatShading: true }),
   );
+  rock.castShadow = true;
+  rock.receiveShadow = true;
+  return rock;
 }
 
 // XOR'd off `seed` so this scatter's stream doesn't collide with wind.js's

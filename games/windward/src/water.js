@@ -34,8 +34,6 @@ export const WAVE_SPEED = 1.2; // rad/s, dominant component's phase speed
 export const SEG = 256; // plane subdivisions per side
 export const SIZE = 800; // metres per side — boat-centred moving tile (see createWater); sized so its edge never enters the fixed camera's frustum at any zoom/aspect, not to cover "the whole world"
 export const WATER_COLOR = 0x2f7fd6;
-export const LIGHT_AZIMUTH_DEG = 55; // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
-export const LIGHT_ELEVATION_DEG = 26; // low-ish on purpose: a near-overhead light barely shades small facet tilts
 
 // Four summed sines, each at its own small angle off the wind axis (so crests
 // cross instead of running parallel — see file header) and its own
@@ -141,6 +139,7 @@ export function createWater() {
   };
 
   const mesh = new THREE.Mesh(geometry, material);
+  mesh.receiveShadow = true;
 
   const spacing = SIZE / SEG;
 

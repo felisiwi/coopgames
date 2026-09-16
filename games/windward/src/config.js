@@ -65,9 +65,32 @@ export const CONFIG = {
 
   BOAT_SPAWN_OFFSET: 10, // meters apart on X before any 'pos' has synced
 
-  // Water tuning (WAVE_AMP, WAVE_LEN, WAVE_SPEED, SEG, SIZE, WATER_COLOR,
-  // light angle) lives in src/water.js — self-contained so the JS boat-bob
-  // mirror and the GLSL displacement can't drift apart (see that file).
+  // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
+  // Single tuning point; src/sky.js and src/sunGlow.js both read straight
+  // from CONFIG (no local copies) so game.js can't drift out of sync with
+  // either.
+  SUN_COLOR: 0xffd9a6, // warm gold, was flat white
+  SUN_INTENSITY: 1.0,
+  LIGHT_AZIMUTH_DEG: 55, // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
+  LIGHT_ELEVATION_DEG: 16, // low, for long golden-hour shadows (was 26 pre-golden-hour-pass)
+  SUN_SHADOW_BIAS: -0.0008, // reduce acne; loosened from -0.0005 for the lower elevation above
+
+  HEMI_SKY_COLOR: 0xffe3bf, // warm pale — ambient bounce off a golden sky
+  HEMI_GROUND_COLOR: 0x22406b, // deep blue-indigo — cool shadow fill
+  HEMI_INTENSITY: 0.55, // kept below the sun's contribution so lit/shadow contrast reads
+
+  SKY_HORIZON_COLOR: 0xffd9a0,
+  SKY_ZENITH_COLOR: 0x5b96d8,
+  SKY_RADIUS: 1000, // world units — the dome (src/sky.js) is re-centred on the camera every frame, so this only needs to clear camera.far, not "cover the world"
+
+  GLOW_COLOR: 0xffe6b8,
+  GLOW_SIZE: 180, // world units, sprite scale (billboard, always faces camera)
+  GLOW_DISTANCE: 900, // world units from the camera, along the sun's direction
+  GLOW_OPACITY: 0.55,
+
+  // Water tuning (WAVE_AMP, WAVE_LEN, WAVE_SPEED, SEG, SIZE, WATER_COLOR)
+  // lives in src/water.js — self-contained so the JS boat-bob mirror and
+  // the GLSL displacement can't drift apart (see that file).
 
   // Boat bob/tilt from the wave surface (W0.6). Gradient is a finite
   // difference of src/water.js's seaHeightCPU, sampled this many meters

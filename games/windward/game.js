@@ -12,10 +12,12 @@ import { initialWind, createWindController, stepWindController } from './src/win
 import { createBoatMesh, loadBoatModel } from './src/boat.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud } from './src/hud.js';
-import { createWater, seaHeightCPU, LIGHT_AZIMUTH_DEG, LIGHT_ELEVATION_DEG } from './src/water.js';
+import { createWater, seaHeightCPU } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
 import { createWake } from './src/wake.js';
+import { createSky } from './src/sky.js';
+import { createSunGlow } from './src/sunGlow.js';
 import { createInputState } from '../../shared/input.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
@@ -57,24 +59,58 @@ function approachSpeed(current, target, dt) {
 export default function start({ canvas, net, seed, role }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio || 1);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x89c4f4);
+  const sky = createSky();
+  scene.add(sky.mesh);
 
   const isFixedCamera = CONFIG.CAMERA_MODE === 'fixed';
   const cameraFov = isFixedCamera ? CONFIG.FIXED_CAMERA_FOV_DEG : CONFIG.CHASE_CAMERA_FOV_DEG;
   const camera = new THREE.PerspectiveCamera(cameraFov, 1, 0.1, 2000);
 
-  // Low-ish angle (W0.7, src/water.js's LIGHT_AZIMUTH_DEG/LIGHT_ELEVATION_DEG)
-  // so the sea's flat-shaded facets actually vary in brightness — a
-  // near-overhead light barely shades small facet tilts. HemisphereLight
-  // replaces the flat AmbientLight as fill, tinted sky/deep-water blue.
-  scene.add(new THREE.HemisphereLight(0x89c4f4, 0x1c4a70, 0.7));
-  const sun = new THREE.DirectionalLight(0xffffff, 0.9);
-  const lightAz = (LIGHT_AZIMUTH_DEG * Math.PI) / 180;
-  const lightEl = (LIGHT_ELEVATION_DEG * Math.PI) / 180;
-  sun.position.set(Math.sin(lightAz) * Math.cos(lightEl), Math.sin(lightEl), Math.cos(lightAz) * Math.cos(lightEl)).multiplyScalar(20);
+  // Golden-hour lighting (2026-09-16 pass, shared/ART.md): warm low sun,
+  // cool-tinted HemisphereLight fill so shadowed faces read blue against
+  // golden lit ones. Low elevation (CONFIG.LIGHT_ELEVATION_DEG) so the
+  // sea's flat-shaded facets actually vary in brightness and shadows run
+  // long — a near-overhead light barely shades small facet tilts.
+  scene.add(new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY));
+  const sun = new THREE.DirectionalLight(CONFIG.SUN_COLOR, CONFIG.SUN_INTENSITY);
+  const lightAz = (CONFIG.LIGHT_AZIMUTH_DEG * Math.PI) / 180;
+  const lightEl = (CONFIG.LIGHT_ELEVATION_DEG * Math.PI) / 180;
+  // Same azimuth/elevation as before, kept as a constant offset (not an
+  // absolute position) so updateSunPosition() below can re-anchor it to the
+  // boat every frame instead of the light staying fixed near world origin
+  // while the boat sails away from it.
+  const sunOffset = new THREE.Vector3(
+    Math.sin(lightAz) * Math.cos(lightEl),
+    Math.sin(lightEl),
+    Math.cos(lightAz) * Math.cos(lightEl),
+  ).multiplyScalar(20);
+
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.near = 1;
+  sun.shadow.camera.far = 500;
+  sun.shadow.camera.left = -150;
+  sun.shadow.camera.right = 150;
+  sun.shadow.camera.top = 150;
+  sun.shadow.camera.bottom = -150;
+  sun.shadow.radius = 4; // blur, for "soft"
+  sun.shadow.bias = CONFIG.SUN_SHADOW_BIAS; // reduce acne at the low elevation
   scene.add(sun);
+  scene.add(sun.target); // target must be in the scene graph for its matrixWorld to update
+
+  const sunGlow = createSunGlow();
+  scene.add(sunGlow.sprite);
+
+  // Keeps the shadow frustum (fixed size, boat-centred) travelling with the
+  // boat instead of drifting out of range as it sails from spawn.
+  function updateSunPosition(boatPosition) {
+    sun.position.copy(boatPosition).add(sunOffset);
+    sun.target.position.copy(boatPosition);
+  }
 
   const water = createWater();
   scene.add(water.mesh);
@@ -188,6 +224,7 @@ export default function start({ canvas, net, seed, role }) {
 
   selfBoat.group.position.set(self.x, 0, self.z);
   selfBoat.group.rotation.y = self.heading;
+  updateSunPosition(selfBoat.group.position);
   if (isFixedCamera) {
     snapFixedCamera(camera, selfBoat.group.position, zoom);
   } else {
@@ -233,6 +270,7 @@ export default function start({ canvas, net, seed, role }) {
     bobBoat(selfBoat.group, self.x, self.z, self.heading, nowS, wind);
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
+    updateSunPosition(selfBoat.group.position);
 
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
@@ -253,6 +291,8 @@ export default function start({ canvas, net, seed, role }) {
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }
+    sky.update(camera);
+    sunGlow.update(camera);
     updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed);
 
     renderer.render(scene, camera);
