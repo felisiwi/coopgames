@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- viewport-fit=cover reaches under the notch; user-scalable=no stops a
+       stray double-tap zooming the board mid-pour. -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#E7EAE3" />
+  <title>Will It Fit? (solo dev) — coopgames</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #E7EAE3;
+      overflow: hidden;
+      overscroll-behavior: none;
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+      color: #2F3733;
+    }
+    /* position:fixed rather than height:100% — mobile browsers shrink the
+       visual viewport when the address bar shows, and a percentage height
+       chases it, which is what leaves a game sitting in a short strip. */
+    body { position: fixed; inset: 0; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      /* Without this a drag scrolls the page instead of moving the bowl,
+         and a long press pops the selection menu. */
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #hud {
+      position: fixed;
+      left: max(10px, env(safe-area-inset-left));
+      bottom: max(10px, env(safe-area-inset-bottom));
+      font-size: 12px;
+      line-height: 1.6;
+      background: rgba(243, 240, 232, 0.82);
+      padding: 8px 12px;
+      border-radius: 8px;
+      pointer-events: none;
+      max-width: min(92vw, 620px);
+    }
+    #hud a { color: #A9705A; pointer-events: auto; }
+    #hud kbd {
+      background: #E7EAE3;
+      border: 1px solid rgba(57, 68, 63, 0.3);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: ui-monospace, monospace;
+    }
+    /* The keyboard hints are noise on a touch device. */
+    @media (pointer: coarse) { #hud .keys { display: none; } }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <div><a href="../../">&larr; hub</a> &middot; solo dev entry</div>
+    <div class="keys">move to place &middot; hold <kbd>click</kbd> / <kbd>space</kbd> / <kbd>P</kbd> to pour
+      &middot; <kbd>Tab</kbd> swaps seats &middot; <kbd>R</kbd> restart</div>
+    <div>drag to place &middot; hold to pour</div>
+  </div>
+
+  <script type="module">
+    import start from './game.js';
+
+    const listeners = [];
+    const fakeNet = {
+      send(msg) { if (window.LOG_NET) console.log('[dev net] send', msg); },
+      onMessage(fn) { listeners.push(fn); },
+      _emit(msg) { listeners.forEach((fn) => fn(msg)); },
+      peerId: 'solo-dev',
+      isHost: true,
+    };
+    window.fakeNet = fakeNet;
+    window.LOG_NET = false;
+
+    const canvas = document.getElementById('game');
+
+    // Size the backing store to the REAL pixels available, capped so a 3x
+    // phone does not ask the CA renderer for nine times the fill rate.
+    function fit() {
+      const vv = window.visualViewport;
+      const w = Math.round(vv ? vv.width : window.innerWidth);
+      const h = Math.round(vv ? vv.height : window.innerHeight);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+    fit();
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', () => setTimeout(fit, 150));
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+
+    const params = new URLSearchParams(window.location.search);
+    const seed = params.has('seed')
+      ? Number(params.get('seed'))
+      : Math.floor(Math.random() * 1_000_000);
+
+    start({
+      canvas,
+      net: fakeNet,
+      seed,
+      role: params.get('role') === 'guest' ? 'guest' : 'host',
+      players: { min: 1, max: 2 },
+    });
+  </script>
+</body>
+</html>
