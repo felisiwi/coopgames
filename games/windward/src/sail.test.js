@@ -1,7 +1,7 @@
 // node games/windward/src/sail.test.js — plain node, no framework, no
 // Three.js import chain (sail.js is pure math, runs headless by design).
 import assert from 'node:assert/strict';
-import { boatSpeed, speedFactor, idealTrimRad, trimMultiplier } from './sail.js';
+import { boatSpeed, speedFactor, idealTrimRad, trimMultiplier, leewardSign } from './sail.js';
 
 const DEG = Math.PI / 180;
 let passed = 0;
@@ -69,11 +69,60 @@ check('trim: ideal sheet angle gives full multiplier at several points of sail',
   }
 });
 
-check('trim: badly wrong sheet angle floors at 0.5, never 0', () => {
+check('trim: badly wrong sheet angle floors at 0.25, never 0', () => {
   const angle = 90 * DEG;
   const ideal = idealTrimRad(angle);
   const worst = trimMultiplier(ideal + 180 * DEG, ideal);
-  assert.equal(worst, 0.5);
+  assert.equal(worst, 0.25);
+  assert.ok(worst > 0, 'must never floor at exactly 0 (DESIGN.md: never stuck)');
+});
+
+check('trim: monotonic in trim quality (multiplier never increases as |actual-ideal| grows)', () => {
+  const ideal = idealTrimRad(90 * DEG); // beam reach, ideal = 45deg
+  for (const dir of [1, -1]) {
+    let last = Infinity;
+    for (let diffDeg = 0; diffDeg <= 90; diffDeg += 1) {
+      const mult = trimMultiplier(ideal + dir * diffDeg * DEG, ideal);
+      assert.ok(mult <= last + 1e-12, `multiplier increased moving ${diffDeg}deg from ideal: ${mult} after ${last}`);
+      last = mult;
+    }
+  }
+});
+
+check('trim: beam-reach speed spread across the full sheet range is roughly 2-3x (W0.8 item 1)', () => {
+  const heading = 90 * DEG; // wind dead abeam
+  const windFrom = 0;
+  const strength = 1;
+  const best = boatSpeed(heading, windFrom, strength, idealTrimRad(90 * DEG));
+  const worstSheetIn = boatSpeed(heading, windFrom, strength, 0 * DEG);
+  const worstSheetOut = boatSpeed(heading, windFrom, strength, 90 * DEG);
+  const worst = Math.min(worstSheetIn, worstSheetOut);
+  const ratio = best / worst;
+  assert.ok(ratio >= 2 && ratio <= 3.2, `expected ~2-3x spread on a beam reach, got ${ratio.toFixed(2)}x`);
+});
+
+check('leewardSign: flips exactly twice per revolution (head-to-wind, dead downwind/gybe)', () => {
+  const windFrom = 0.7; // arbitrary, non-zero to catch axis-alignment bugs
+  let signChanges = 0;
+  let last = null;
+  for (let deg = 1; deg < 360; deg += 1) {
+    const sign = leewardSign(deg * DEG, windFrom);
+    if (last !== null && sign !== last) signChanges += 1;
+    last = sign;
+  }
+  assert.equal(signChanges, 2, `expected exactly 2 sign changes per revolution, got ${signChanges}`);
+});
+
+check('leewardSign: consistent side across all four wind quarters', () => {
+  // For a fixed heading, moving the wind from one side to the other must
+  // flip the sign — this is what "sail must swing to both sides" (W0.8
+  // item 2) actually depends on, independent of the mesh/rendering side.
+  const heading = 0;
+  for (const windFromDeg of [10, 45, 80]) {
+    const port = leewardSign(heading, -windFromDeg * DEG);
+    const starboard = leewardSign(heading, windFromDeg * DEG);
+    assert.notEqual(port, starboard, `expected opposite sides at +-${windFromDeg}deg`);
+  }
 });
 
 check('trim: ideal sheet is tighter close-hauled than downwind', () => {

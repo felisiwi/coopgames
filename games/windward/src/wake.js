@@ -24,7 +24,7 @@ export function createWake() {
     const slot = pool[nextSlot];
     nextSlot = (nextSlot + 1) % pool.length;
     slot.age = 0;
-    slot.baseScale = 0.4 + Math.min(1, speed / CONFIG.MAX_SPEED) * 1.2;
+    slot.baseScale = 0.4 + Math.min(1, speed / CONFIG.BOAT_MAX_SPEED) * 1.2;
     slot.mesh.position.set(x, 0.05, z);
     slot.mesh.visible = true;
   }

@@ -27,6 +27,10 @@ Final speed = `maxSpeed * strength * speedFactor(angle) * trimMultiplier(...)`.
 
 ## Trim (manual, not automatic)
 
+**Curve retuned 2026-09-12 (W0.8, see the W0.8 section below for the full
+diagnosis) — window/floor numbers below superseded.** Original values (±15°
+full-speed window, 0.5 floor) are kept here for the historical record.
+
 Second control, meant to be fiddly-fun, not automatic. Ideal sheet angle is a
 function of angle off the wind: `idealTrim = angle / 2` (close-hauled → sheeted
 in tight near 11°; running → eased out near 90°) — the standard "sheet at roughly
@@ -41,7 +45,7 @@ Controls: sheet in/out reuses `shared/input.js`'s four-flag state, reinterpreted
 `up` (W or ↑) = sheet in, `down` (S or ↓) = sheet out, `left`/`right` (A/D or ←/→)
 = turn. No changes to `shared/input.js` needed; Windward just reads the flags with
 different meaning than the template's dot-mover does. Sheet adjusts at 60°/s
-between 0° (full in) and 90° (full out). Turn rate 90°/s.
+between 0° (full in) and 90° (full out). Turn rate 90°/s (superseded, W0.8).
 
 Sail mesh renders at the actual current sheet angle (visible swing to leeward).
 HUD shows a trim bar/hint (ease vs. sheet-in) comparing actual to ideal.
@@ -76,6 +80,9 @@ the default because it fights the wind/compass readability goal.
 
 1 unit = 1 meter. Boat ~6m long. `maxSpeed` = 8 m/s (~15.5 kn) at full strength
 and the 100° peak — tuned to feel brisk in a chase cam, not a realism target.
+**Raised to `BOAT_MAX_SPEED` = 14 m/s (2026-09-12, W0.8) — see the W0.8 section
+below**; self.speed also no longer snaps straight to that target, it eases
+there under SAIL_FORCE/DRAG.
 
 **Boat asset (added 2026-09-11, Batch 2):** the placeholder box hull is
 replaced by Kenney's "Pirate Kit" `ship-small.glb` (CC0, `assets/LICENSE.txt`
@@ -137,6 +144,11 @@ dev entries already do this).
 
 ## Wind
 
+**Cadence superseded 2026-09-12 (W0.8, see the W0.8 section below) — wind no
+longer snaps to a new value, it holds then eases.** Delivery/ordering/net
+contract gap below still hold, just triggered by phase changes instead of a
+single "changed" instant.
+
 - **Cadence**: changes every 25–40s, uniformly random in that range. No
   pre-telegraphing in W0 (deferred to W3 per the mission's stage split) — wind
   just changes and the HUD updates immediately.
@@ -182,6 +194,93 @@ hub-internal (`shared/net.js` reduces the object before handing it to
 unused for position sync). `heading`/`dir` in radians. `strength` normalized
 `0..1`. `ts`/`seq`: `ts` is `performance.now()`-style, informational only (no
 interpolation logic in W0); `seq` is the ordering guard above.
+
+## W0.8 — sailing feel and HUD (2026-09-12)
+
+Felix played W0.7 and reported six feel notes. In priority order:
+
+**1. Trim didn't affect speed — diagnosed, not a wiring bug.** `self.trim`
+was correctly read from input and correctly multiplied into `boatSpeed` —
+verified headlessly (trim keys update `self.trim`, `leewardSign * self.trim`
+feeds `setSailAngle`, `trimMultiplier` receives the right values). The real
+cause: `idealTrim` is itself capped to `0..90°` (angle/2, angle ∈ `0..180°`),
+so at a mid-range point of sail (beam reach, ideal = 45°) the *largest* diff
+a player can actually produce by sheeting fully in or fully out is only 45°
+either direction — nowhere near the old window+floor's 90° needed to reach
+the 0.5 floor. Worst case landed around a 1.25x speed spread, imperceptible.
+Fix: narrowed the full-speed window (15°→8°) and moved the floor from 0.5 to
+0.25, reached at 50° instead of 90° (`TRIM_FULL_WINDOW_DEG`, `src/sail.js`).
+A beam reach now spans roughly 2.9x between best and worst sheet position —
+inside the "obviously slow / obviously fast" target. `trimMultiplier` stays
+a pure function of `|actual - ideal|`, still floors above 0 (never stuck),
+still monotonic moving away from ideal (all three re-tested in
+`sail.test.js`).
+
+**2. Sail swings to both sides — math was already correct, mesh wasn't
+legible.** `leewardSign` (unchanged since W0.6) does flip exactly twice per
+revolution at the two structurally correct points (head-to-wind, dead
+downwind/gybe) — confirmed with a full 360° sweep in `sail.test.js`. The
+`sail-a` mesh, though, is modeled symmetric about its own mount point (local
+X spans ≈ -2.2..2.2, read directly out of `assets/ship-small.glb`'s
+accessor data) rather than hanging off one edge of the mast, so a pure
+Y-axis rotation swings a shape that's already centered on the pivot —
+reading as a subtle lean, not "the boom slung hard over," which is very
+plausibly what "the sail only ever sits on one side" was describing.
+`src/boat.js`'s `applySailAngle` now couples the rotation to a lateral
+slide of the pivot's mount point (`SAIL_SWING_OFFSET` = 1.4m at full 90°
+trim, `sin(angle) * offset`) so the whole assembly visibly moves toward the
+leeward side, not just rotates in place. Not verified visually this stage
+(no Chrome tools) — Felix's call once played.
+
+**3. Boat was too slow — raised, plus real weight.** `BOAT_MAX_SPEED` 8→14
+m/s (1.75x, mid the requested 1.5–2x range). `TURN_RATE` scaled by the same
+1.5x (90°→135°/s) to keep turning radius (speed / angular rate) from
+ballooning at the new top speed. `self.speed` no longer snaps straight to
+the sail model's target speed each frame — `game.js`'s `approachSpeed` eases
+it there at `SAIL_FORCE` = 6 m/s² accelerating, `DRAG` = 4 m/s² decelerating
+(slightly slower to shed speed than to gain it), so trim/heading/wind
+changes land with some inertia instead of an instant jump. All four are
+named `CONFIG` constants.
+
+**4. Wind model — hold, then ease, never snap.** Replaced the old "pick a
+new random wind every 25–40s" with a two-phase state machine
+(`src/wind.js`'s `createWindController`/`stepWindController`): hold a
+steady wind for `WIND_HOLD_MIN_S..MAX_S` (40–60s), then ease to a new random
+target over `WIND_TRANSITION_MIN_S..MAX_S` (8–12s), smoothstep-eased so
+there's no snap at either end and direction takes the shortest angular path
+across the 0/2π wrap. A small bounded sine wobble
+(`WIND_NOISE_AMPLITUDE`/`WIND_NOISE_FREQ_HZ`) is layered onto *strength*
+only during a transition, so it doesn't complicate the "direction never
+jumps faster than the transition allows" guarantee (tested in
+`wind.test.js` by bounding the per-step delta against smoothstep's peak
+rate). Host still owns the timer; the guest only ever applies incoming
+`wind` messages. **Delivery changed to keep the guest's view smooth too**:
+during a transition the host resends every `WIND_TRANSITION_SEND_INTERVAL_S`
+(0.5s) instead of waiting for the 5s hold-phase heartbeat; both cadences
+also fire immediately on a phase boundary. Message shape (`{ type: 'wind',
+dir, strength, seq }`) and the ordering/`seq` guard are unchanged — the
+guest doesn't need to know about phases, it just applies whatever arrives
+more often now.
+
+**5. HUD layout + units.** The wind/trim text panel and the compass rose
+were side by side (`src/hud.js`); when the text grew wider than the gap
+between them it rendered under the rose's opaque background (the "wind 85°
+strength 64%" clipped-by-dial screenshot). Restructured into a single
+right-anchored column — rose, then text, then a new trim bar, each in a
+fixed vertical slot — so no two elements can ever occupy the same
+horizontal space regardless of text length. Wind now shows both m/s (honest
+range `WIND_STRENGTH_MIN_MS..MAX_MS` = 2–14 m/s, mapped linearly from the
+existing 0..1 strength) and knots; boat speed shows in knots
+(`CONFIG.MS_TO_KNOTS` = 1.943844, the physical m/s→kn conversion).
+
+**6. Replaced "ideal 71°" with an actionable trim hint.** `src/hud.js`'s
+`trimHint` compares actual vs. ideal trim and returns `sheet in N°` / `ease
+N°` / `trimmed ✓`, using the *same* `TRIM_FULL_WINDOW_DEG` the physics model
+uses for "full speed" — so the HUD's "you're OK" claim can't drift out of
+sync with what's actually rewarded. A new small canvas below the text draws
+this as a bar too: a track from 0–90°, the full-speed window highlighted
+around the ideal point, and a marker for the actual sheet position. The old
+`ease out (S)` hint text is gone, folded into the same line.
 
 ## Deferred to later stages
 

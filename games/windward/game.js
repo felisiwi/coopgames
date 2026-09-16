@@ -8,7 +8,7 @@
 import * as THREE from './vendor/three/three.module.js';
 import { CONFIG } from './src/config.js';
 import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './src/sail.js';
-import { initialWind, nextWind, nextChangeDelaySeconds } from './src/wind.js';
+import { initialWind, createWindController, stepWindController } from './src/wind.js';
 import { createBoatMesh, loadBoatModel } from './src/boat.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud } from './src/hud.js';
@@ -40,6 +40,18 @@ function bobBoat(group, x, z, headingRad, nowS, wind) {
   group.position.y = y;
   group.rotation.x = Math.min(max, Math.max(-max, -slopeForward * CONFIG.BOAT_TILT_GAIN));
   group.rotation.z = Math.min(max, Math.max(-max, slopeRight * CONFIG.BOAT_TILT_GAIN));
+}
+
+// Eases self.speed toward the sail model's instantaneous target
+// (src/sail.js's boatSpeed) at CONFIG.SAIL_FORCE m/s^2 when speeding up,
+// CONFIG.DRAG m/s^2 when shedding speed, instead of snapping to a new speed
+// the instant heading/trim/wind changes — gives the boat some weight (W0.8
+// item 3).
+function approachSpeed(current, target, dt) {
+  const diff = target - current;
+  const rate = diff >= 0 ? CONFIG.SAIL_FORCE : CONFIG.DRAG;
+  const step = Math.sign(diff) * Math.min(Math.abs(diff), rate * dt);
+  return current + step;
 }
 
 export default function start({ canvas, net, seed, role }) {
@@ -94,14 +106,21 @@ export default function start({ canvas, net, seed, role }) {
   const other = { x: null, z: null, heading: 0, speed: 0 };
 
   // --- wind: seed-derived until the first real message, host-authoritative
-  // after that (games/windward/DESIGN.md's "Net contract gap" section) ---
-  let wind = initialWind(seed);
+  // after that (games/windward/DESIGN.md's "Net contract gap" section).
+  // Host runs a hold/transition state machine (src/wind.js's
+  // stepWindController); the guest only ever applies incoming 'wind'
+  // messages, never runs its own timer (W0.8: replaces the old instant
+  // snap-to-new-wind with a gradual ease, see DESIGN.md's "Wind" section).
+  const nowS0 = performance.now() / 1000;
+  let windController = role === 'host' ? createWindController(seed, nowS0) : null;
+  let wind = role === 'host' ? windController.current : initialWind(seed);
   let windSeq = role === 'host' ? 0 : -1; // guest applies any real message (seq >= 0)
   let heardFromPeer = false;
-  let windChangeAt = performance.now() / 1000 + nextChangeDelaySeconds();
-  let windHeartbeatAt = performance.now() / 1000 + CONFIG.WIND_HEARTBEAT_S;
+  let windHeartbeatAt = nowS0 + CONFIG.WIND_HEARTBEAT_S; // hold-phase resend cadence
+  let windTransitionSendAt = nowS0; // transition-phase resend cadence (faster, so the guest eases too)
 
   function sendWind() {
+    windSeq += 1;
     net.send({ type: 'wind', dir: wind.dir, strength: wind.strength, seq: windSeq });
   }
 
@@ -182,13 +201,18 @@ export default function start({ canvas, net, seed, role }) {
     const nowS = now / 1000;
 
     if (role === 'host') {
-      if (nowS >= windChangeAt) {
-        windSeq += 1;
-        wind = nextWind();
-        windChangeAt = nowS + nextChangeDelaySeconds();
-        windHeartbeatAt = nowS + CONFIG.WIND_HEARTBEAT_S;
-        sendWind();
-      } else if (nowS >= windHeartbeatAt) {
+      const prevPhase = windController.phase;
+      windController = stepWindController(windController, nowS);
+      wind = windController.current;
+      const justChangedPhase = windController.phase !== prevPhase;
+
+      if (windController.phase === 'transition') {
+        if (justChangedPhase || nowS >= windTransitionSendAt) {
+          windTransitionSendAt = nowS + CONFIG.WIND_TRANSITION_SEND_INTERVAL_S;
+          windHeartbeatAt = nowS + CONFIG.WIND_HEARTBEAT_S;
+          sendWind();
+        }
+      } else if (justChangedPhase || nowS >= windHeartbeatAt) {
         windHeartbeatAt = nowS + CONFIG.WIND_HEARTBEAT_S;
         sendWind();
       }
@@ -199,7 +223,8 @@ export default function start({ canvas, net, seed, role }) {
     if (input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
     if (input.down) self.trim = Math.min(CONFIG.TRIM_MAX, self.trim + CONFIG.TRIM_RATE * dt);
 
-    self.speed = boatSpeed(self.heading, wind.dir, wind.strength, self.trim);
+    const targetSpeed = boatSpeed(self.heading, wind.dir, wind.strength, self.trim);
+    self.speed = approachSpeed(self.speed, targetSpeed, dt);
     self.x += Math.sin(self.heading) * self.speed * dt;
     self.z += Math.cos(self.heading) * self.speed * dt;
 
@@ -228,7 +253,7 @@ export default function start({ canvas, net, seed, role }) {
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }
-    updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading);
+    updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed);
 
     renderer.render(scene, camera);
     requestAnimationFrame(frame);

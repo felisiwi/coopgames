@@ -1,16 +1,43 @@
 // Single tuning point for Windward (games/windward/DESIGN.md decisions).
 export const CONFIG = {
-  MAX_SPEED: 8, // m/s, full strength + 100° peak
-  TURN_RATE: Math.PI / 2, // 90 deg/s
+  // Sail speed/feel (W0.8). BOAT_MAX_SPEED is the target-speed formula's
+  // ceiling (src/sail.js's boatSpeed, unchanged shape, ~1.75x the W0.6
+  // value of 8 so full-wind/well-trimmed feels brisk). self.speed doesn't
+  // snap to that target instantly any more — game.js eases it there at
+  // SAIL_FORCE m/s^2 when speeding up, DRAG m/s^2 when shedding speed (a
+  // gust dying, a bad tack), giving the boat some weight. TURN_RATE scaled
+  // up by roughly the same ratio so turning radius (speed / angular rate)
+  // doesn't balloon into "bathtub" territory now that top speed is higher.
+  BOAT_MAX_SPEED: 14, // m/s, full strength + 100° peak, ideal trim
+  SAIL_FORCE: 6, // m/s^2, accel toward target speed
+  DRAG: 4, // m/s^2, decel toward target speed (slightly slower to shed than gain)
+  TURN_RATE: (Math.PI / 2) * 1.5, // 135 deg/s (was 90 deg/s at BOAT_MAX_SPEED 8)
   TRIM_RATE: Math.PI / 3, // 60 deg/s
   TRIM_MIN: 0,
   TRIM_MAX: Math.PI / 2, // sheet range: 0 (full in) .. 90deg (full out)
 
   NET_SEND_HZ: 20,
 
-  WIND_CHANGE_MIN_S: 25,
-  WIND_CHANGE_MAX_S: 40,
+  // Wind cadence (W0.8): hold steady for WIND_HOLD_*_S, then ease to a new
+  // random target over WIND_TRANSITION_*_S (src/wind.js's stepWindController)
+  // — never an instant snap. WIND_HEARTBEAT_S still bounds a late-join's
+  // wait during a hold; WIND_TRANSITION_SEND_INTERVAL_S is how often the
+  // host resends while actively transitioning, so the guest's view eases
+  // too instead of jumping once every heartbeat.
+  WIND_HOLD_MIN_S: 40,
+  WIND_HOLD_MAX_S: 60,
+  WIND_TRANSITION_MIN_S: 8,
+  WIND_TRANSITION_MAX_S: 12,
+  WIND_TRANSITION_SEND_INTERVAL_S: 0.5,
+  WIND_NOISE_AMPLITUDE: 0.02, // +-2% strength wobble during a transition, never on direction
+  WIND_NOISE_FREQ_HZ: 0.15, // slow (~6.7s period) so it reads as flutter, not jitter
   WIND_HEARTBEAT_S: 5, // resend current wind at least this often (late-join)
+
+  // Wind strength (0..1) -> real m/s, for the HUD (W0.8). Honest numbers:
+  // a light-ish breeze at strength 0 up to a strong breeze at strength 1.
+  WIND_STRENGTH_MIN_MS: 2,
+  WIND_STRENGTH_MAX_MS: 14,
+  MS_TO_KNOTS: 1.943844, // 1 m/s = 1.943844 kn (1 nm = 1852m, kn = m/s * 3600/1852)
 
   // W0.5 default: fixed-orientation three-quarter camera (never rotates with
   // the boat, so wind/compass stay readable regardless of heading). Set to
