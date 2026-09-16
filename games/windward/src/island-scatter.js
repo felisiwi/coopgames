@@ -1,5 +1,7 @@
-// Scatters a field of islands across the world (src/config.js's
-// ISLAND_SCATTER_* block). Every island is the Skerry shape (CONFIG's
+// Scatters a field of island CLUSTERS across the world (src/config.js's
+// ISLAND_SCATTER_* block) — tight skerry groups with open water between
+// groups, not one evenly-spaced field (see scatterIslands below for the
+// two-level placement itself). Every island is the Skerry shape (CONFIG's
 // ISLAND_* block, tuned in island-lab.html) scaled to its own radius, plus a
 // per-island seed offset for coastline/terrain/tree variation — not a copy
 // of the same island at different sizes. Deterministic from the session
@@ -118,50 +120,121 @@ export function buildIslandParams(radius, x, z) {
   return params;
 }
 
+// Places one cluster's centre: rejection-sampled against ISLAND_SCATTER_AREA
+// and every previously placed cluster centre, using clusterRadius (not any
+// member's real footprint — members aren't drawn yet) as the reservation
+// size. This is deliberately a NOMINAL reservation, not a worst-case one: an
+// earlier version reserved `clusterRadius + largest-possible-member-footprint`
+// per cluster, which is safe but wildly over-conservative (the biggest
+// scatterable island's footprint alone is ~280m) — in a modest world that
+// starved almost half of all clusters of a centre at all. The real footprint
+// checks in the member-placement loop below are exact and still prevent any
+// actual overlap; this step only needs to keep centres from being pointlessly
+// close before anyone knows how big their members will be.
+function placeClusterCenter(rand, half, clusterRadius, existingCenters) {
+  for (let attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
+    const cx = (rand() * 2 - 1) * half;
+    const cz = (rand() * 2 - 1) * half;
+    if (Math.hypot(cx, cz) - clusterRadius < CONFIG.ISLAND_SCATTER_SPAWN_CLEARANCE) continue;
+
+    const tooClose = existingCenters.some(
+      (o) => Math.hypot(cx - o.x, cz - o.z) < clusterRadius * 2 + CONFIG.ISLAND_SCATTER_MIN_SPACING,
+    );
+    if (tooClose) continue;
+
+    return { x: cx, z: cz };
+  }
+  return null;
+}
+
+// Places one member island uniformly inside its cluster's disk (polar
+// sampling: r = clusterRadius*sqrt(rand()) gives uniform area density, not
+// centre-biased). Checked against every previously placed island in the
+// whole field, not just its own cluster — using ISLAND_SCATTER_MIN_SPACING
+// against a different cluster's members and the much tighter
+// ISLAND_SCATTER_CLUSTER_SPACING against its own cluster-mates, so
+// same-cluster islands can sit close (the "tight skerry group") while
+// different clusters still keep real open water between them.
+function placeClusterMember(rand, center, clusterRadius, footprint, clusterIndex, placedIslands) {
+  for (let attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
+    const r = clusterRadius * Math.sqrt(rand());
+    const theta = rand() * Math.PI * 2;
+    const x = center.x + r * Math.cos(theta);
+    const z = center.z + r * Math.sin(theta);
+
+    if (Math.hypot(x, z) - footprint < CONFIG.ISLAND_SCATTER_SPAWN_CLEARANCE) continue;
+
+    const overlaps = placedIslands.some((other) => {
+      const gapNeeded =
+        footprint +
+        footprintRadius(other.params) +
+        (other.cluster === clusterIndex ? CONFIG.ISLAND_SCATTER_CLUSTER_SPACING : CONFIG.ISLAND_SCATTER_MIN_SPACING);
+      return Math.hypot(x - other.params.ISLAND_CENTER_X, z - other.params.ISLAND_CENTER_Z) < gapNeeded;
+    });
+    if (overlaps) continue;
+
+    return { x, z };
+  }
+  return null;
+}
+
 // Returns [{ seed, params }, ...] — one entry per successfully placed
 // island, ready to pass straight to island.js's createIsland(seed, params).
-// Deterministic in `seed` alone; CONFIG.ISLAND_SCATTER_* controls count,
-// size range, and spacing.
+// Deterministic in `seed` alone; CONFIG.ISLAND_SCATTER_* controls cluster
+// count/size, size range, and both spacing rules.
+//
+// Two levels, not one flat scatter: ISLAND_SCATTER_CLUSTER_COUNT cluster
+// centres are placed first (spread across the world, ISLAND_SCATTER_MIN_SPACING
+// apart), then up to ISLAND_SCATTER_CLUSTER_SIZE islands are scattered inside
+// each cluster's ISLAND_SCATTER_CLUSTER_RADIUS disk, packed close
+// (ISLAND_SCATTER_CLUSTER_SPACING) — tight skerry groups with real open water
+// between groups, not one evenly-spaced field (Felix, 2026-09-16: "Skerry
+// fields cluster — tight groups with open water between, not even spacing").
+//
+// A cluster's members span the full configured size range (15-150m radius),
+// so occasionally a cluster draws one of the largest islands and can't fit
+// two more of similar size in the same disk without violating spacing —
+// that member (or a whole cluster centre, if the world's too crowded) is
+// skipped rather than overlapping or looping forever, same "skip and warn"
+// behaviour as the flat scatter this replaces. Tuned empirically (12 seeds)
+// at the shipped defaults: ~70% of member slots fill, no cluster centre ever
+// fails, and where a cluster does get >=2 members their nearest-neighbour
+// gap is a median ~50m — see the header note on CLUSTER_RADIUS/CLUSTER_SPACING
+// below for why that number is the actual design target.
 export function scatterIslands(seed) {
   const rand = mulberry32((seed ^ 0x9e3a7cc1) >>> 0);
   const half = CONFIG.ISLAND_SCATTER_AREA / 2;
   const islands = [];
+  const centers = [];
 
-  for (let i = 0; i < CONFIG.ISLAND_SCATTER_COUNT; i++) {
-    const radius = CONFIG.ISLAND_SCATTER_MIN_RADIUS + rand() * (CONFIG.ISLAND_SCATTER_MAX_RADIUS - CONFIG.ISLAND_SCATTER_MIN_RADIUS);
-    const islandSeed = (seed ^ (0x2f1b4c53 + i * 0x9e3779b9)) >>> 0;
-    const params = buildIslandParams(radius, 0, 0);
-    const footprint = footprintRadius(params);
-
-    let placed = false;
-    for (let attempt = 0; attempt < MAX_PLACEMENT_ATTEMPTS; attempt++) {
-      const x = (rand() * 2 - 1) * half;
-      const z = (rand() * 2 - 1) * half;
-
-      const distFromSpawn = Math.sqrt(x * x + z * z);
-      if (distFromSpawn - footprint < CONFIG.ISLAND_SCATTER_SPAWN_CLEARANCE) continue;
-
-      const overlapsExisting = islands.some((other) => {
-        const dx = x - other.params.ISLAND_CENTER_X;
-        const dz = z - other.params.ISLAND_CENTER_Z;
-        const dist = Math.sqrt(dx * dx + dz * dz);
-        return dist < footprint + footprintRadius(other.params) + CONFIG.ISLAND_SCATTER_MIN_SPACING;
-      });
-      if (overlapsExisting) continue;
-
-      params.ISLAND_CENTER_X = x;
-      params.ISLAND_CENTER_Z = z;
-      islands.push({ seed: islandSeed, params });
-      placed = true;
-      break;
+  for (let c = 0; c < CONFIG.ISLAND_SCATTER_CLUSTER_COUNT; c++) {
+    const center = placeClusterCenter(rand, half, CONFIG.ISLAND_SCATTER_CLUSTER_RADIUS, centers);
+    if (!center) {
+      if (typeof console !== 'undefined') {
+        console.warn(`island-scatter: could not place cluster ${c}'s centre after ${MAX_PLACEMENT_ATTEMPTS} attempts — skipping`);
+      }
+      continue;
     }
+    centers.push(center);
 
-    // A crowded config (too many/large islands for ISLAND_SCATTER_AREA) can
-    // run out of room for one island — skip it rather than looping forever
-    // or letting it overlap. Both peers draw the same rand() sequence and
-    // hit the same failure, so this stays deterministic either way.
-    if (!placed && typeof console !== 'undefined') {
-      console.warn(`island-scatter: could not place island ${i} after ${MAX_PLACEMENT_ATTEMPTS} attempts — skipping`);
+    for (let m = 0; m < CONFIG.ISLAND_SCATTER_CLUSTER_SIZE; m++) {
+      const radius =
+        CONFIG.ISLAND_SCATTER_MIN_RADIUS + rand() * (CONFIG.ISLAND_SCATTER_MAX_RADIUS - CONFIG.ISLAND_SCATTER_MIN_RADIUS);
+      const islandSeed = (seed ^ (0x2f1b4c53 + (c * CONFIG.ISLAND_SCATTER_CLUSTER_SIZE + m) * 0x9e3779b9)) >>> 0;
+      const params = buildIslandParams(radius, 0, 0);
+      const footprint = footprintRadius(params);
+
+      const position = placeClusterMember(rand, center, CONFIG.ISLAND_SCATTER_CLUSTER_RADIUS, footprint, c, islands);
+      if (!position) {
+        if (typeof console !== 'undefined') {
+          console.warn(`island-scatter: could not place cluster ${c} member ${m} after ${MAX_PLACEMENT_ATTEMPTS} attempts — skipping`);
+        }
+        continue;
+      }
+
+      params.ISLAND_CENTER_X = position.x;
+      params.ISLAND_CENTER_Z = position.z;
+      islands.push({ seed: islandSeed, params, cluster: c });
     }
   }
 

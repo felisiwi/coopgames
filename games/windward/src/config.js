@@ -177,15 +177,41 @@ export const CONFIG = {
   ISLAND_COLOR_TRUNK: 0x928164,
 
   // --- Island scattering (src/island-scatter.js) ---
-  // Places ISLAND_SCATTER_COUNT islands across the world, each the Skerry
-  // shape above scaled to its own radius (island-scatter.js's header has the
-  // full scaling rules — landform distances scale with radius, noise
-  // frequencies scale inversely, sea bathymetry/angles/palette don't scale
-  // at all) plus a per-island seed offset, so no two islands in a field look
-  // identical. Deterministic from the session `seed` alone — no placement
-  // data crosses the wire (AGENTS.md's "world must be identical on both
-  // peers").
-  ISLAND_SCATTER_COUNT: 8, // 3-15, how many islands to scatter — more = more to explore, heavier scene
+  // Places ISLAND_SCATTER_CLUSTER_COUNT clusters across the world, each
+  // holding up to ISLAND_SCATTER_CLUSTER_SIZE islands packed close together
+  // (tight skerry groups, real open water between groups — not one
+  // evenly-spaced field; Felix, 2026-09-16, after playing the first flat
+  // version: "I sailed a long way to reach one island and can't see any
+  // others from it... Skerry fields cluster, not even spacing"). Every
+  // island is the Skerry shape above scaled to its own radius
+  // (island-scatter.js's header has the full scaling rules — landform
+  // distances scale with radius, noise frequencies scale inversely, sea
+  // bathymetry/angles/palette don't scale at all) plus a per-island seed
+  // offset, so no two islands in a field look identical. Deterministic from
+  // the session `seed` alone — no placement data crosses the wire
+  // (AGENTS.md's "world must be identical on both peers").
+  //
+  // CLUSTER_RADIUS/CLUSTER_SPACING below are sized against the fixed
+  // camera's actual sight distance, not guessed. Working through
+  // src/camera.js's own geometry (FIXED_CAMERA_DISTANCE=125,
+  // FIXED_CAMERA_ELEVATION_DEG=52, FIXED_CAMERA_FOV_DEG=30 at zoom=1):
+  // camera height above the boat = 125*sin(52deg) = ~98.5m, and the
+  // shallowest ray in frame (top edge, elevation-halfFOV = 37deg below
+  // horizontal) hits sea level only ~54m PAST the boat's own position —
+  // this fixed, narrow, steeply-down-looking rig (chosen for wind/compass
+  // readability, DESIGN.md's Camera section) shows a much smaller patch of
+  // open sea than the "~120m across the screen" width figure alone
+  // suggests. What actually matters for "can I see that OTHER island" is
+  // the open-water GAP between coastlines (not centre-to-centre distance,
+  // since a big island's shore can be much closer than its centre) — so the
+  // real target is an intra-cluster gap safely under that ~54-90m sight
+  // window. Tuned empirically (12 seeds) to land there: median nearest-
+  // sibling gap ~50m, comfortably inside the window even before accounting
+  // for zoom-out (ZOOM_MAX=2.5 stretches the same ~54m to ~135m).
+  ISLAND_SCATTER_CLUSTER_COUNT: 8, // 3-20, how many skerry groups to scatter — more = more to explore, heavier scene
+  ISLAND_SCATTER_CLUSTER_SIZE: 3, // 2-6, target islands per group (some groups place fewer — see island-scatter.js)
+  ISLAND_SCATTER_CLUSTER_RADIUS: 250, // 100-500m, how far a group's islands can spread from its centre
+  ISLAND_SCATTER_CLUSTER_SPACING: 30, // 15-100m, open-water gap required between islands in the SAME group — tight, a boat-width channel
 
   // Radius range, metres — the knob for "20s to 3min+ to sail around"
   // (mission brief). Derived, not guessed: ISLAND_RADIUS=75m above was tuned
@@ -200,13 +226,16 @@ export const CONFIG = {
 
   // Open-water gap required between two islands' rendered footprints
   // (coastline + wobble + falloff + mesh margin, island-scatter.js's
-  // footprintRadius) — not centre-to-centre, so bigger islands automatically
-  // claim more clearance around themselves.
-  ISLAND_SCATTER_MIN_SPACING: 150, // 50-400m, open-water gap between island footprints
+  // footprintRadius) when they belong to DIFFERENT clusters — not
+  // centre-to-centre, so bigger islands automatically claim more clearance.
+  // This is what keeps clusters reading as separate groups; the much
+  // tighter ISLAND_SCATTER_CLUSTER_SPACING above governs islands within the
+  // same group.
+  ISLAND_SCATTER_MIN_SPACING: 200, // 100-500m, open-water gap between DIFFERENT groups' footprints
 
-  // Square world region (metres, centred on the origin/spawn) islands are
-  // scattered within — same convention as SCATTER_AREA above.
-  ISLAND_SCATTER_AREA: 2400, // 1200-4000m, world span islands can appear in
+  // Square world region (metres, centred on the origin/spawn) cluster
+  // centres are scattered within — same convention as SCATTER_AREA above.
+  ISLAND_SCATTER_AREA: 2400, // 1200-4000m, world span clusters can appear in
 
   // No island's footprint may come within this of world origin, where both
   // boats spawn (+-BOAT_SPAWN_OFFSET) — keeps the opening view clear water

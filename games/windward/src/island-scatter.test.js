@@ -61,17 +61,78 @@ check('radii stay within the configured ISLAND_SCATTER_MIN/MAX_RADIUS range', ()
   }
 });
 
-check('no two islands crowd closer than their footprints + ISLAND_SCATTER_MIN_SPACING', () => {
+check('same-cluster islands respect CLUSTER_SPACING; different-cluster islands respect the wider MIN_SPACING', () => {
   const islands = scatterIslands(4242);
   for (let i = 0; i < islands.length; i++) {
     for (let j = i + 1; j < islands.length; j++) {
-      const a = islands[i].params;
-      const b = islands[j].params;
-      const dist = Math.hypot(a.ISLAND_CENTER_X - b.ISLAND_CENTER_X, a.ISLAND_CENTER_Z - b.ISLAND_CENTER_Z);
-      const required = footprintRadius(a) + footprintRadius(b) + CONFIG.ISLAND_SCATTER_MIN_SPACING;
-      assert.ok(dist >= required - 1e-6, `islands ${i} and ${j} are ${dist.toFixed(1)}m apart, need >= ${required.toFixed(1)}m`);
+      const a = islands[i];
+      const b = islands[j];
+      const dist = Math.hypot(a.params.ISLAND_CENTER_X - b.params.ISLAND_CENTER_X, a.params.ISLAND_CENTER_Z - b.params.ISLAND_CENTER_Z);
+      const sameCluster = a.cluster === b.cluster;
+      const spacing = sameCluster ? CONFIG.ISLAND_SCATTER_CLUSTER_SPACING : CONFIG.ISLAND_SCATTER_MIN_SPACING;
+      const required = footprintRadius(a.params) + footprintRadius(b.params) + spacing;
+      assert.ok(
+        dist >= required - 1e-6,
+        `islands ${i} and ${j} (${sameCluster ? 'same' : 'different'} cluster) are ${dist.toFixed(1)}m apart, need >= ${required.toFixed(1)}m`,
+      );
     }
   }
+});
+
+check('clusters actually cluster: CLUSTER_SPACING is configured tighter than MIN_SPACING', () => {
+  assert.ok(
+    CONFIG.ISLAND_SCATTER_CLUSTER_SPACING < CONFIG.ISLAND_SCATTER_MIN_SPACING,
+    'intra-cluster spacing should be tighter than inter-cluster spacing, or clusters read as one uniform field again',
+  );
+});
+
+check('every island reports a cluster index within [0, ISLAND_SCATTER_CLUSTER_COUNT)', () => {
+  const islands = scatterIslands(555);
+  for (const { cluster } of islands) {
+    assert.ok(
+      Number.isInteger(cluster) && cluster >= 0 && cluster < CONFIG.ISLAND_SCATTER_CLUSTER_COUNT,
+      `cluster index ${cluster} out of range`,
+    );
+  }
+});
+
+check('clusters with 2+ members have a nearest-sibling gap well within the fixed camera\'s sight window', () => {
+  // Derived in config.js's comment: the fixed camera's shallow, narrow
+  // framing only shows flat sea level out to roughly 54-90m past the boat
+  // at zoom=1 — this bounds well above that (150m) so it catches a real
+  // regression (e.g. CLUSTER_RADIUS creeping back up) without being flaky
+  // over a handful of seeds.
+  const seeds = [1, 2, 3, 4, 5, 42, 989370];
+  const gaps = [];
+  for (const seed of seeds) {
+    const islands = scatterIslands(seed);
+    const byCluster = new Map();
+    for (const island of islands) {
+      if (!byCluster.has(island.cluster)) byCluster.set(island.cluster, []);
+      byCluster.get(island.cluster).push(island);
+    }
+    for (const members of byCluster.values()) {
+      if (members.length < 2) continue;
+      let best = Infinity;
+      for (let i = 0; i < members.length; i++) {
+        for (let j = i + 1; j < members.length; j++) {
+          const gap =
+            Math.hypot(
+              members[i].params.ISLAND_CENTER_X - members[j].params.ISLAND_CENTER_X,
+              members[i].params.ISLAND_CENTER_Z - members[j].params.ISLAND_CENTER_Z,
+            ) -
+            footprintRadius(members[i].params) -
+            footprintRadius(members[j].params);
+          if (gap < best) best = gap;
+        }
+      }
+      gaps.push(best);
+    }
+  }
+  assert.ok(gaps.length > 0, 'no cluster in this sample ever got 2+ members — cannot check sibling visibility');
+  gaps.sort((a, b) => a - b);
+  const median = gaps[Math.floor(gaps.length / 2)];
+  assert.ok(median < 150, `median nearest-sibling gap ${median.toFixed(0)}m is too wide to reliably spot from a neighbouring island`);
 });
 
 check('no island footprint encroaches on the spawn clearance around the origin', () => {
