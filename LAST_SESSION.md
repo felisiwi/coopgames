@@ -1,39 +1,35 @@
 # Last session
 
-**2026-09-11/12 — Windward W0.6: wave amplitude fixed to boat scale, boat
-bob/tilt, explicit boat-model load, HUD clear of hub pill** (commit
-f92c58c, pushed to main). W0.5's water amplitude (up to 4.4m) was
-submerging the ~6m boat; W0.6 caps displacement at 0.5m and gets visibility
-from crest/trough shading instead. Also fixed a hub-level canvas-sizing bug
-(`hub.css`) that was silently breaking rendering of any game launched
-through the hub picker.
+**2026-09-16 — Windward island scattering: N Skerry-shaped islands across
+the world, 20s-3min+ lap sizes** (commit 09a8a38, local — see "next" below
+re: push). Replaces the single fixed island with `island-scatter.js`:
+seeded rejection-sampling placement (min spacing + spawn clearance), each
+island the Skerry shape scaled to its own radius (landform scales linearly,
+noise frequency inversely, tree density by area; bathymetry/angles/palette
+unscaled). Radius range derived from the existing 75m/~105s-lap tuning,
+calibrated to a ~4.5 m/s typical sailing pace. `island.js` now takes an
+optional per-island params object (defaults to CONFIG, so island-lab.html
+and island.test.js are unchanged). 8/8 new tests pass; full windward suite
+(37 assertions across 7 files) still green. Decided without asking: the
+4.5 m/s speed calibration and which ISLAND_* fields scale with size —
+documented in island-scatter.js's header, Felix's call to revise.
 
 ## Today's sessions
 
-- Hub scaffold, CC0 tileset, `generateIsland(seed)`, manifest.js, vercel.json.
-- `shared/net.js` on vendored PeerJS + hub lobby; found PeerJS's shipped TURN
-  hosts have no DNS record (fixed later with Open Relay TURN).
-- Stage D (PR #1): drop-in play — host plays solo, guest gets `'launch'`.
-- Windward W0 (felix): DESIGN.md from `/grill-me`, sail speed/trim model
-  (10/10 headless tests), boat/camera/wind/hud modules, 20 Hz `pos` sync.
-- Windward W0.5 (felix): fixed-orientation camera, real CC0 boat model,
-  wind-aligned water shader, HUD compass rose, buoy/rock scatter, wake;
-  wrap screenshot caught and fixed a stretched compass canvas + invisible
-  water.
-- Windward W0.6 (felix): wave amplitude capped at 0.5m (boat scale — W0.5's
-  4.4m was submerging the boat), crest/trough shading for visibility at that
-  scale, JS/GLSL wave-height parity (`water.test.js`), boat model load made
-  explicit (fixed `boat.test.js`'s stray fetch stack trace), boat bob/tilt
-  from the wave surface, HUD pushed clear of the hub's waiting-for-friend
-  pill, and a `hub.css` canvas-sizing feedback-loop bug (missing explicit
-  width/height let Three.js's own `renderer.setSize()` balloon the canvas
-  on every resize) that was breaking rendering for any game through the hub.
+- Windward W0.8: sailing feel + HUD retune.
+- Windward: visual reference docs added.
+- Windward: water tile edge fix at high zoom; golden-hour lighting pass.
+- Windward I1: procedural granite island + island-lab.html tuning tool.
+- Windward: split island/lighting presets, applied Sunset + Skerry tuning.
+- chore: gitignore macOS .DS_Store.
+- Windward island scattering (this session, see header above).
 
 ## Next
 
-1. Play-test Windward W0.6 (hub, two real networks per AGENTS.md risk #1);
-   tune `src/config.js` (turn rate, trim window, wind cadence, tilt gain).
-2. Windward: gust telegraphing (W3); islands/claiming/scoring (W1) not in
-   scope — scatter.js's buoys/rocks are throwaway.
-3. Otherwise per docs/MISSION-CONTROL.md backlog (Archipelago tuning from
-   real play, hub lobby polish).
+1. Play-test the scattered field in the hub (visual check — do the small
+   ~15-20m islands read as recognizable skerries, or too noisy/broken?).
+2. Push to origin — repo is several commits ahead of `origin/main`
+   (workspace convention: no local-only backlogs).
+3. Windward: gust telegraphing (W3); boat-island collision/grounding not
+   built yet (heightAt is exposed per-island but game.js doesn't sample it
+   for the boat).
