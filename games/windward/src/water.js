@@ -29,9 +29,17 @@ export const WAVE_SPEED = 1.2; // rad/s, dominant component's phase speed
 // seam ~160-183m from the boat — a pre-existing bug, unrelated to any
 // island. At SIZE=800 (half-width 400m) no ray in that same sweep ever
 // reaches the edge, so it's geometrically unreachable rather than merely
-// hidden by timing fog to it. SEG=256 keeps vertex spacing (SIZE/SEG=3.125m)
-// under water.test.js's aliasing bound (< shortestWavelength/2 = 3.6m).
-export const SEG = 256; // plane subdivisions per side
+// hidden by timing fog to it.
+//
+// SEG (I3b, 2026-09-16, shared/ART.md's one-facet-scale rule — target 4m,
+// 2-6m acceptable): 4m itself fails water.test.js's aliasing bound (spacing
+// must stay < shortestWavelength/2 = 3.6m, WAVE_LEN * 0.6 / 2 — any coarser
+// and the wave shader's own geometry can't resolve its shortest summed
+// component, reading as jittery/aliased crests instead of a shape). 223 is
+// the largest SEG (== smallest facet) that still clears that bound —
+// SIZE/223 = 3.587m, the closest this tile can get to 4m while staying
+// readable. (Was SEG=256 / 3.125m.)
+export const SEG = 223; // plane subdivisions per side
 export const SIZE = 800; // metres per side — boat-centred moving tile (see createWater); sized so its edge never enters the fixed camera's frustum at any zoom/aspect, not to cover "the whole world"
 export const WATER_COLOR = 0x2f7fd6;
 

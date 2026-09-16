@@ -153,12 +153,26 @@ function createTerrainMesh(heightAt, params) {
 const TRUNK_HEIGHT = 1.6;
 const CANOPY_HEIGHT = 3.2;
 
+// Radial segment counts (I3b, 2026-09-16, shared/ART.md's one-facet-scale
+// rule — target 4m, 2-6m acceptable). Both were well under the 2m floor at
+// their original segment counts (trunk chord ~0.18-0.24m at 5 sides;
+// canopy chord ~1.1m at 6), and both stay under 2m even at 3 — the
+// smallest radius a THREE.CylinderGeometry/ConeGeometry can form a volume
+// with — since a tree this size physically can't carry a 2m+ facet. 4
+// sides is as close as either gets to the floor without degenerating into
+// a bare triangular prism/pyramid: trunk chord ~0.21-0.28m, canopy chord
+// ~1.56m (max possible at 3 sides would be ~1.9m — see island-scatter
+// notes in the I3b commit for the math). Reduced anyway, per the
+// directive's "nothing subdivided finer because it's small."
+const TRUNK_RADIAL_SEGMENTS = 4;
+const CANOPY_RADIAL_SEGMENTS = 4;
+
 function createTrees(seed, heightAt, params) {
   const rand = mulberry32((seed ^ 0x2c6f1a9d) >>> 0);
   const group = new THREE.Group();
 
-  const trunkGeometry = new THREE.CylinderGeometry(0.15, 0.2, TRUNK_HEIGHT, 5);
-  const canopyGeometry = new THREE.ConeGeometry(1.1, CANOPY_HEIGHT, 6);
+  const trunkGeometry = new THREE.CylinderGeometry(0.15, 0.2, TRUNK_HEIGHT, TRUNK_RADIAL_SEGMENTS);
+  const canopyGeometry = new THREE.ConeGeometry(1.1, CANOPY_HEIGHT, CANOPY_RADIAL_SEGMENTS);
   const trunkMaterial = new THREE.MeshLambertMaterial({ color: params.ISLAND_COLOR_TRUNK, flatShading: true });
   const canopyMaterial = new THREE.MeshLambertMaterial({ color: params.ISLAND_COLOR_PINE, flatShading: true });
 

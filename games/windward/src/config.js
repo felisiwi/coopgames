@@ -259,4 +259,12 @@ export const CONFIG = {
   // index.html's ?count= sets this. null/0 = no cap, fill every remaining
   // cell.
   ISLAND_SCATTER_COUNT_CAP: null,
+
+  // Debug wireframe (I3b, 2026-09-16) — index.html's ?wire=1 sets this.
+  // game.js forces every material's `wireframe` on and drops a 4m
+  // reference GridHelper on the water, so facet sizes across terrain,
+  // water and trees can be compared directly in one screenshot (shared/
+  // ART.md's one-facet-scale rule).
+  DEBUG_WIREFRAME: false,
+  DEBUG_WIREFRAME_GRID_CELL: 4, // metres, matches the ART.md target facet size
 };

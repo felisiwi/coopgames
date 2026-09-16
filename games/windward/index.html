@@ -51,6 +51,10 @@
     // island shares it, src/island-scatter.js), so a single override here
     // A/B's tessellation density/vertex-count across the whole field at once.
     if (params.has('cell')) CONFIG.ISLAND_GRID_CELL_SIZE = Number(params.get('cell'));
+    // I3b, 2026-09-16: wireframe everything + a 4m reference grid on the
+    // water, for comparing facet sizes across terrain/water/trees in one
+    // screenshot (shared/ART.md's one-facet-scale rule).
+    if (params.get('wire') === '1') CONFIG.DEBUG_WIREFRAME = true;
 
     start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
   </script>

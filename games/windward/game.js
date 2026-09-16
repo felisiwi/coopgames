@@ -12,7 +12,7 @@ import { initialWind, createWindController, stepWindController } from './src/win
 import { createBoatMesh, loadBoatModel } from './src/boat.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud } from './src/hud.js';
-import { createWater, seaHeightCPU } from './src/water.js';
+import { createWater, seaHeightCPU, SIZE as WATER_SIZE } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
 import { createIsland } from './src/island.js';
@@ -116,6 +116,35 @@ export default function start({ canvas, net, seed, role }) {
 
   const water = createWater();
   scene.add(water.mesh);
+
+  // Debug wireframe (I3b, 2026-09-16, index.html's ?wire=1, shared/ART.md's
+  // one-facet-scale rule) — a 4m GridHelper as a screen ruler, boat-centred
+  // and snapped to true world-space 4m multiples (independent of the
+  // water tile's own lattice, so the grid reads as an exact reference
+  // rather than drifting with whatever spacing the wave shader needs).
+  // forceWireframe() (called every frame, below) is what actually turns
+  // every mesh's material wireframe-on — trees/boats can still be created
+  // or finish loading after this point (async GLTF, lazy otherBoat).
+  let wireGrid = null;
+  if (CONFIG.DEBUG_WIREFRAME) {
+    const cell = CONFIG.DEBUG_WIREFRAME_GRID_CELL;
+    wireGrid = new THREE.GridHelper(WATER_SIZE, Math.round(WATER_SIZE / cell), 0xff00ff, 0xff00ff);
+    wireGrid.position.y = 0.05; // just above sea level, avoid z-fighting with the water surface
+    scene.add(wireGrid);
+  }
+
+  // Forces every mesh's material wireframe-on, called every frame below so
+  // it also catches meshes created/loaded after this point (async boat
+  // GLTF, lazily-created otherBoat) — cheap enough for a debug-only path.
+  function forceWireframe() {
+    scene.traverse((child) => {
+      if (!child.material) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      for (const m of materials) {
+        if (m && 'wireframe' in m) m.wireframe = true;
+      }
+    });
+  }
 
   scene.add(createScatter(seed));
   const scatteredIslands = scatterIslands(seed);
@@ -321,6 +350,13 @@ export default function start({ canvas, net, seed, role }) {
 
     water.update(nowS, wind, selfBoat.group.position);
     windArrow.update(selfBoat.group.position, wind);
+
+    if (wireGrid) {
+      const cell = CONFIG.DEBUG_WIREFRAME_GRID_CELL;
+      wireGrid.position.x = Math.round(selfBoat.group.position.x / cell) * cell;
+      wireGrid.position.z = Math.round(selfBoat.group.position.z / cell) * cell;
+      forceWireframe();
+    }
 
     if (isFixedCamera) {
       updateFixedCamera(camera, selfBoat.group.position, dt, zoom);
