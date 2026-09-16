@@ -37,8 +37,8 @@ coarse flat-shaded grid, vertex-coloured by height/slope — no textures.
 Sandy/grass fringe at the waterline, grass on gentle mid-elevation slopes,
 pink granite on steep slopes and near the peak, dark pine (instanced,
 suitable slopes only). Colours (`src/config.js`'s `ISLAND_COLOR_*`):
-sand `0xd9c48a` · grass `0x5da84a` · granite `0xc98f86` · granite (peak)
-`0xb87d74` · pine `0x244a2e` · trunk `0x5b4232`. Each island must read as
+sand `0xd9c48a` · grass `0x5da84a` · granite `0xb2c8ef` · granite (peak)
+`0x809bb0` · pine `0x35694c` · trunk `0x928164`. Each island must read as
 distinguishable from its neighbours at a distance — not yet checked, since
 I1 is a single island; revisit once a second one exists (I2/I3).
 

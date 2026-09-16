@@ -70,24 +70,26 @@ export const CONFIG = {
   // same reason the ISLAND_* fields below live here instead of in
   // src/island.js. src/sky.js and src/sunGlow.js both read straight from
   // CONFIG (no local copies) so game.js and the lab can't drift apart.
+  // Values below: "Sunset" lighting preset (src/light-presets.js), tuned at
+  // seed 989370 in island-lab.html (Felix, 2026-09-16).
   SUN_COLOR: 0xffd9a6, // warm gold, was flat white
-  SUN_INTENSITY: 1.0,
-  LIGHT_AZIMUTH_DEG: 55, // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
-  LIGHT_ELEVATION_DEG: 16, // low, for long golden-hour shadows (was 26 pre-golden-hour-pass)
+  SUN_INTENSITY: 1.4,
+  LIGHT_AZIMUTH_DEG: 50, // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
+  LIGHT_ELEVATION_DEG: 10, // low, for long golden-hour shadows (was 26 pre-golden-hour-pass)
   SUN_SHADOW_BIAS: -0.0008, // reduce acne; loosened from -0.0005 for the lower elevation above
 
-  HEMI_SKY_COLOR: 0xffe3bf, // warm pale — ambient bounce off a golden sky
-  HEMI_GROUND_COLOR: 0x22406b, // deep blue-indigo — cool shadow fill
-  HEMI_INTENSITY: 0.55, // kept below the sun's contribution so lit/shadow contrast reads
+  HEMI_SKY_COLOR: 0xcbc9ad, // warm pale — ambient bounce off a golden sky
+  HEMI_GROUND_COLOR: 0x21406a, // deep blue-indigo — cool shadow fill
+  HEMI_INTENSITY: 0.45, // kept below the sun's contribution so lit/shadow contrast reads
 
-  SKY_HORIZON_COLOR: 0xffd9a0,
-  SKY_ZENITH_COLOR: 0x5b96d8,
+  SKY_HORIZON_COLOR: 0xecf8f1,
+  SKY_ZENITH_COLOR: 0x00faff,
   SKY_RADIUS: 1000, // world units — the dome (src/sky.js) is re-centred on the camera every frame, so this only needs to clear camera.far, not "cover the world"
 
-  GLOW_COLOR: 0xffe6b8,
+  GLOW_COLOR: 0xffe5b8,
   GLOW_SIZE: 180, // world units, sprite scale (billboard, always faces camera)
-  GLOW_DISTANCE: 900, // world units from the camera, along the sun's direction
-  GLOW_OPACITY: 0.55,
+  GLOW_DISTANCE: 340, // world units from the camera, along the sun's direction
+  GLOW_OPACITY: 0.65,
 
   // Water tuning (WAVE_AMP, WAVE_LEN, WAVE_SPEED, SEG, SIZE, WATER_COLOR)
   // lives in src/water.js — self-contained so the JS boat-bob mirror and
@@ -118,31 +120,34 @@ export const CONFIG = {
   // the coastline/terrain noise below IS seeded from the session `seed`
   // (offset per layer, same convention as scatter.js/wind.js) so its shape
   // still varies game to game while staying identical on both peers.
+  //
+  // Values below: "Skerry" island-shape preset (src/island-presets.js),
+  // tuned at seed 989370 in island-lab.html (Felix, 2026-09-16).
   ISLAND_CENTER_X: 55, // metres, world space
   ISLAND_CENTER_Z: 145, // metres — far enough from the (+-10, 0) boat spawn for a real approach (Felix, 2026-09-16: was 220, moved out so the island isn't visible from spawn as a fixed point)
-  ISLAND_RADIUS: 105, // metres, base coastline radius before noise wobble (~310m diameter) — targets a ~90-120s lap at typical (non-max) sailing speed
+  ISLAND_RADIUS: 75, // metres, base coastline radius before noise wobble (~310m diameter) — targets a ~90-120s lap at typical (non-max) sailing speed
   ISLAND_MESH_MARGIN: 22, // 15-50m the mesh extends past the noisy coastline into shallow water, so it always overlaps the moving water tile with no seam regardless of wave phase
 
   ISLAND_COAST_NOISE_FREQ: 0.032, // 0.01-0.05 (1/m), higher = more jagged/noisy coastline, lower = smoother rounder island
   ISLAND_COAST_NOISE_AMPLITUDE: 40, // 10-40m, how far the coastline wobbles off the base circle — higher = more irregular
   ISLAND_FALLOFF_WIDTH: 32, // 20-80m, width of the land-to-water transition band — lower = cliff-like coast, higher = gradual beach taper
 
-  ISLAND_PEAK_HEIGHT: 29, // 20-60m, terrain height at the island's centre before noise
-  ISLAND_PEAK_SHAPE: 0.48, // 0.4-1.0, exponent on the radial dome — lower = broader granite massif with a flatter top, higher = one pointed peak
-  ISLAND_HEIGHT_NOISE_FREQ: 0.009, // 0.008-0.03 (1/m), higher = smaller/choppier terrain bumps, lower = broad rolling hills
-  ISLAND_HEIGHT_NOISE_AMPLITUDE: 11, // 3-15m, how much the height-noise layer perturbs the dome — higher = craggier
+  ISLAND_PEAK_HEIGHT: 44, // 20-60m, terrain height at the island's centre before noise
+  ISLAND_PEAK_SHAPE: 1, // 0.4-1.0, exponent on the radial dome — lower = broader granite massif with a flatter top, higher = one pointed peak
+  ISLAND_HEIGHT_NOISE_FREQ: 0.018, // 0.008-0.03 (1/m), higher = smaller/choppier terrain bumps, lower = broad rolling hills
+  ISLAND_HEIGHT_NOISE_AMPLITUDE: 9, // 3-15m, how much the height-noise layer perturbs the dome — higher = craggier
 
-  ISLAND_GRID_CELL_SIZE: 5, // 4-10m, mesh cell size — bigger = chunkier flat-shaded facets ("handmade"), smaller = smoother but less stylised
+  ISLAND_GRID_CELL_SIZE: 5.5, // 4-10m, mesh cell size — bigger = chunkier flat-shaded facets ("handmade"), smaller = smoother but less stylised
 
   // Vertex-colour thresholds (slope from a finite-difference gradient, like
   // BOAT_TILT_GRADIENT_EPS above).
   ISLAND_SAND_MAX_HEIGHT: 1, // 1-5m, below this + gentle slope reads as sandy/grass fringe
   ISLAND_GRASS_MAX_HEIGHT: 25, // 15-30m, above this it leans rocky even on gentle slopes (bare upper-slope granite)
-  ISLAND_ROCK_MIN_SLOPE_DEG: 25, // 25-45deg, slope steeper than this always reads as bare granite, regardless of height
+  ISLAND_ROCK_MIN_SLOPE_DEG: 35, // 25-45deg, slope steeper than this always reads as bare granite, regardless of height
 
-  ISLAND_TREE_MIN_HEIGHT: 1.8, // 1-6m, no trees on the beach fringe below this
-  ISLAND_TREE_MAX_HEIGHT: 23, // 20-40m, no trees above this (bare granite near the peak)
-  ISLAND_TREE_MAX_SLOPE_DEG: 27, // 20-40deg, no trees on slopes steeper than this
+  ISLAND_TREE_MIN_HEIGHT: 4.4, // 1-6m, no trees on the beach fringe below this
+  ISLAND_TREE_MAX_HEIGHT: 34, // 20-40m, no trees above this (bare granite near the peak)
+  ISLAND_TREE_MAX_SLOPE_DEG: 37, // 20-40deg, no trees on slopes steeper than this
   ISLAND_TREE_ATTEMPTS: 800, // candidate points tried; how many actually land in the valid height/slope band (and so get planted) varies with the terrain, not just this number
   ISLAND_TREE_SCALE_MIN: 0.7, // 0.5-1.5, per-tree random scale range, for a handmade/uneven look
   ISLAND_TREE_SCALE_MAX: 1.5,
@@ -161,8 +166,8 @@ export const CONFIG = {
   // dark pines, grassy green, low sandy scrub, per the mission brief.
   ISLAND_COLOR_SAND: 0xd9c48a,
   ISLAND_COLOR_GRASS: 0x5da84a,
-  ISLAND_COLOR_GRANITE: 0xeec0af,
-  ISLAND_COLOR_GRANITE_PEAK: 0xa0afa3, // slightly deeper/duller than lower granite so peaks read as farther/higher
-  ISLAND_COLOR_PINE: 0x176929,
-  ISLAND_COLOR_TRUNK: 0x966c53,
+  ISLAND_COLOR_GRANITE: 0xb2c8ef,
+  ISLAND_COLOR_GRANITE_PEAK: 0x809bb0, // slightly deeper/duller than lower granite so peaks read as farther/higher
+  ISLAND_COLOR_PINE: 0x35694c,
+  ISLAND_COLOR_TRUNK: 0x928164,
 };

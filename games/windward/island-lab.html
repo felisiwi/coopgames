@@ -40,16 +40,16 @@
     flex: 1; font: 12px monospace; background: rgba(234,246,255,0.08); color: #eaf6ff;
     border: 1px solid rgba(234,246,255,0.25); border-radius: 3px; padding: 3px 5px;
   }
-  #presetOut { height: 140px; }
+  #islandPresetOut, #lightPresetOut { height: 140px; }
 
-  #copyBtn, #savePresetBtn {
+  #copyBtn, #saveIslandPresetBtn, #saveLightPresetBtn {
     display: block; width: 100%; margin: 4px 0 8px; padding: 6px;
     background: #ffcc66; color: #0a1a2a; border: none; border-radius: 3px;
     font: 12px monospace; font-weight: bold; cursor: pointer;
   }
-  #copyBtn:active, #savePresetBtn:active { background: #e0b458; }
-  #copyStatus, #presetStatus { font-size: 11px; color: #78dc96; min-height: 14px; display: block; margin-bottom: 6px; }
-  #copyOut, #presetOut {
+  #copyBtn:active, #saveIslandPresetBtn:active, #saveLightPresetBtn:active { background: #e0b458; }
+  #copyStatus, #islandPresetStatus, #lightPresetStatus { font-size: 11px; color: #78dc96; min-height: 14px; display: block; margin-bottom: 6px; }
+  #copyOut, #islandPresetOut, #lightPresetOut {
     width: 100%; box-sizing: border-box; height: 220px; resize: vertical;
     background: rgba(234,246,255,0.06); color: #eaf6ff;
     border: 1px solid rgba(234,246,255,0.25); border-radius: 3px;
@@ -70,18 +70,33 @@
   </div>
 
   <fieldset>
-    <legend>Presets (src/island-presets.js)</legend>
+    <legend>Island presets (src/island-presets.js)</legend>
     <div class="seed-row">
-      <label for="presetSelect">Load</label>
-      <select id="presetSelect"></select>
+      <label for="islandPresetSelect">Load</label>
+      <select id="islandPresetSelect"></select>
     </div>
     <div class="seed-row">
-      <label for="presetName">Name</label>
-      <input type="text" id="presetName" placeholder="e.g. granite" />
+      <label for="islandPresetName">Name</label>
+      <input type="text" id="islandPresetName" placeholder="e.g. granite" />
     </div>
-    <button id="savePresetBtn" type="button">Save preset (block below, for island-presets.js)</button>
-    <span id="presetStatus"></span>
-    <textarea id="presetOut" readonly spellcheck="false"></textarea>
+    <button id="saveIslandPresetBtn" type="button">Save preset (block below, for island-presets.js)</button>
+    <span id="islandPresetStatus"></span>
+    <textarea id="islandPresetOut" readonly spellcheck="false"></textarea>
+  </fieldset>
+
+  <fieldset>
+    <legend>Lighting presets (src/light-presets.js)</legend>
+    <div class="seed-row">
+      <label for="lightPresetSelect">Load</label>
+      <select id="lightPresetSelect"></select>
+    </div>
+    <div class="seed-row">
+      <label for="lightPresetName">Name</label>
+      <input type="text" id="lightPresetName" placeholder="e.g. sunset" />
+    </div>
+    <button id="saveLightPresetBtn" type="button">Save preset (block below, for light-presets.js)</button>
+    <span id="lightPresetStatus"></span>
+    <textarea id="lightPresetOut" readonly spellcheck="false"></textarea>
   </fieldset>
 
   <button id="copyBtn" type="button">Copy values as config.js block</button>
@@ -100,6 +115,7 @@ import { createWater } from './src/water.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
 import { ISLAND_PRESETS } from './src/island-presets.js';
+import { LIGHT_PRESETS } from './src/light-presets.js';
 
 // --- field definitions: every ISLAND_* constant in config.js. Ranges are
 // copied from that file's own comments where one exists; fields marked
@@ -165,6 +181,12 @@ const COLOR_FIELDS = [
 ];
 
 const ALL_KEYS = [...NUMERIC_FIELDS.map((f) => f.key), ...COLOR_FIELDS.map((f) => f.key)];
+
+// Two independent preset kinds (island shape vs lighting) so loading/saving
+// one never touches the other's keys.
+const ALL_FIELDS = [...NUMERIC_FIELDS, ...COLOR_FIELDS];
+const LIGHT_KEYS = ALL_FIELDS.filter((f) => f.group === 'Lighting').map((f) => f.key);
+const ISLAND_KEYS = ALL_FIELDS.filter((f) => f.group !== 'Lighting').map((f) => f.key);
 
 function decimalsOf(step) {
   const s = String(step);
@@ -279,8 +301,10 @@ seedInput.addEventListener('input', () => {
 const copyOut = document.getElementById('copyOut');
 const copyStatus = document.getElementById('copyStatus');
 
+const COLOR_KEYS = new Set(COLOR_FIELDS.map((f) => f.key));
+
 function formatValue(key) {
-  if (key.startsWith('ISLAND_COLOR_')) return hexString(CONFIG[key]).replace('#', '0x');
+  if (COLOR_KEYS.has(key)) return hexString(CONFIG[key]).replace('#', '0x');
   const def = NUMERIC_FIELDS.find((f) => f.key === key);
   const decimals = def ? decimalsOf(def.step) : 4;
   const n = Number(Number(CONFIG[key]).toFixed(decimals));
@@ -305,50 +329,29 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
   setTimeout(() => { copyStatus.textContent = ''; }, 1500);
 });
 
-// --- presets (src/island-presets.js): dropdown loads one as a tuning
-// starting point; "Save preset" formats the current values as a block to
-// hand back to Claude to paste into that file. Presets live in the repo
-// file, not browser storage, so both Felix and Kenny (and Claude) can read
-// them across machines/sessions. ------------------------------------------
-const presetSelect = document.getElementById('presetSelect');
-const presetNameInput = document.getElementById('presetName');
-const presetOut = document.getElementById('presetOut');
-const presetStatus = document.getElementById('presetStatus');
+// --- presets (src/island-presets.js + src/light-presets.js): each dropdown
+// loads one as a tuning starting point; each "Save preset" formats the
+// current values (for that kind's keys only) as a block to hand back to
+// Claude to paste into its file. The two kinds never touch each other's
+// keys, so picking a lighting preset can't disturb the loaded island preset
+// (or vice versa). Presets live in the repo files, not browser storage, so
+// both Felix and Kenny (and Claude) can read them across machines/sessions. --
 
-const placeholderOption = document.createElement('option');
-placeholderOption.value = '';
-placeholderOption.textContent = ISLAND_PRESETS.length ? '— load a preset —' : '(no presets yet)';
-presetSelect.appendChild(placeholderOption);
-ISLAND_PRESETS.forEach((preset, i) => {
-  const opt = document.createElement('option');
-  opt.value = String(i);
-  opt.textContent = preset.name;
-  presetSelect.appendChild(opt);
-});
-
-function applyPreset(values) {
-  for (const key of ALL_KEYS) {
+function applyPreset(values, keys) {
+  for (const key of keys) {
     if (!(key in values)) continue;
     CONFIG[key] = values[key];
     const input = inputsByKey.get(key);
     if (!input) continue;
-    input.value = key.startsWith('ISLAND_COLOR_') ? hexString(values[key]) : values[key];
+    input.value = COLOR_KEYS.has(key) ? hexString(values[key]) : values[key];
   }
   readouts.forEach((refresh) => refresh());
   markDirty();
   updateCopyText();
 }
 
-presetSelect.addEventListener('change', () => {
-  if (presetSelect.value === '') return;
-  const preset = ISLAND_PRESETS[Number(presetSelect.value)];
-  if (!preset) return;
-  applyPreset(preset.values);
-  presetNameInput.value = preset.name;
-});
-
-function formatPresetBlock(name) {
-  const lines = ALL_KEYS.map((key) => `      ${key}: ${formatValue(key)},`);
+function formatPresetBlock(name, keys) {
+  const lines = keys.map((key) => `      ${key}: ${formatValue(key)},`);
   return (
     `  {\n` +
     `    name: '${name}',\n` +
@@ -358,23 +361,71 @@ function formatPresetBlock(name) {
   );
 }
 
-document.getElementById('savePresetBtn').addEventListener('click', async () => {
-  const name = presetNameInput.value.trim();
-  if (!name) {
-    presetStatus.textContent = 'Name the preset first.';
-    setTimeout(() => { presetStatus.textContent = ''; }, 1500);
-    return;
-  }
-  presetOut.value = formatPresetBlock(name);
-  try {
-    await navigator.clipboard.writeText(presetOut.value);
-    presetStatus.textContent = 'Copied — hand this block back to Claude for island-presets.js.';
-  } catch {
-    presetOut.select();
-    document.execCommand('copy');
-    presetStatus.textContent = 'Copied (fallback) — hand this block back to Claude for island-presets.js.';
-  }
-  setTimeout(() => { presetStatus.textContent = ''; }, 3000);
+function setupPresetPicker({ presets, keys, selectId, nameId, saveBtnId, outId, statusId, fileLabel }) {
+  const select = document.getElementById(selectId);
+  const nameInput = document.getElementById(nameId);
+  const out = document.getElementById(outId);
+  const status = document.getElementById(statusId);
+
+  const placeholderOption = document.createElement('option');
+  placeholderOption.value = '';
+  placeholderOption.textContent = presets.length ? '— load a preset —' : '(no presets yet)';
+  select.appendChild(placeholderOption);
+  presets.forEach((preset, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = preset.name;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener('change', () => {
+    if (select.value === '') return;
+    const preset = presets[Number(select.value)];
+    if (!preset) return;
+    applyPreset(preset.values, keys);
+    nameInput.value = preset.name;
+  });
+
+  document.getElementById(saveBtnId).addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    if (!name) {
+      status.textContent = 'Name the preset first.';
+      setTimeout(() => { status.textContent = ''; }, 1500);
+      return;
+    }
+    out.value = formatPresetBlock(name, keys);
+    try {
+      await navigator.clipboard.writeText(out.value);
+      status.textContent = `Copied — hand this block back to Claude for ${fileLabel}.`;
+    } catch {
+      out.select();
+      document.execCommand('copy');
+      status.textContent = `Copied (fallback) — hand this block back to Claude for ${fileLabel}.`;
+    }
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  });
+}
+
+setupPresetPicker({
+  presets: ISLAND_PRESETS,
+  keys: ISLAND_KEYS,
+  selectId: 'islandPresetSelect',
+  nameId: 'islandPresetName',
+  saveBtnId: 'saveIslandPresetBtn',
+  outId: 'islandPresetOut',
+  statusId: 'islandPresetStatus',
+  fileLabel: 'island-presets.js',
+});
+
+setupPresetPicker({
+  presets: LIGHT_PRESETS,
+  keys: LIGHT_KEYS,
+  selectId: 'lightPresetSelect',
+  nameId: 'lightPresetName',
+  saveBtnId: 'saveLightPresetBtn',
+  outId: 'lightPresetOut',
+  statusId: 'lightPresetStatus',
+  fileLabel: 'light-presets.js',
 });
 
 // --- three.js scene: same sky/lighting/materials as game.js (shared/ART.md) ---
