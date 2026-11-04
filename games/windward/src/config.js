@@ -98,6 +98,9 @@ export const CONFIG = {
   SETTLEMENT_FIND_CLEARANCE: 10, // keep houses this far from a find's prop
   SETTLEMENT_MAX_SLOPE_DEG: 20, // steeper ground than this gets no house
 
+  // Phones (src/touch.js): render at most this pixel ratio on touch screens.
+  TOUCH_MAX_PIXEL_RATIO: 1.5,
+
   // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
   // Single tuning point so island-lab.html can expose these as sliders,
   // same reason the ISLAND_* fields below live here instead of in

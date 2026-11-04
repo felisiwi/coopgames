@@ -17,6 +17,7 @@ import { partnerState } from './src/partner.js';
 import { placeDiscoverables, makeIsWater, bothNear, distanceToVisit } from './src/discover.js';
 import { createPropForDiscoverable, createFlare, createBuilding } from './src/props.js';
 import { placeSettlements } from './src/settlements.js';
+import { wantsTouchControls, createTouchControls } from './src/touch.js';
 import { createWater, seaHeightCPU, SIZE as WATER_SIZE } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
@@ -65,7 +66,10 @@ function approachSpeed(current, target, dt) {
 
 export default function start({ canvas, net, seed, role }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  // Phones: cap the render resolution (a 3x screen at full resolution is
+  // 9x the pixels for little visible gain on flat-shaded shapes).
+  const isTouch = wantsTouchControls();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isTouch ? CONFIG.TOUCH_MAX_PIXEL_RATIO : Infinity));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -318,14 +322,17 @@ export default function start({ canvas, net, seed, role }) {
 
   const input = createInputState();
 
-  function onKeyDown(e) {
-    if (e.code !== 'Space' || e.repeat) return;
-    e.preventDefault(); // no page scroll
+  function doPing() {
     const nowS = performance.now() / 1000;
     if (nowS - lastPingS < CONFIG.PING_COOLDOWN_S) return;
     lastPingS = nowS;
     addPing(self.x, self.z, false);
     net.send({ type: 'ping', x: self.x, z: self.z });
+  }
+  function onKeyDown(e) {
+    if (e.code !== 'Space' || e.repeat) return;
+    e.preventDefault(); // no page scroll
+    doPing();
   }
   window.addEventListener('keydown', onKeyDown);
 
@@ -335,6 +342,17 @@ export default function start({ canvas, net, seed, role }) {
     zoom = Math.min(CONFIG.ZOOM_MAX, Math.max(CONFIG.ZOOM_MIN, zoom + e.deltaY * CONFIG.ZOOM_WHEEL_SENSITIVITY));
   }
   canvas.addEventListener('wheel', onWheel, { passive: false });
+
+  // Touch controls (src/touch.js): steer buttons, sheet slider, ping,
+  // pinch zoom. Only on touch screens (or ?touch=1).
+  const touch = isTouch ? createTouchControls({
+    canvas,
+    getTrim: () => self.trim,
+    getZoom: () => zoom,
+    onPing: doPing,
+    onZoom: (z) => { zoom = z; },
+  }) : null;
+  let lastTouchTrim = null;
 
   const posInterval = setInterval(() => {
     net.send({
@@ -358,6 +376,7 @@ export default function start({ canvas, net, seed, role }) {
   resize();
 
   const hud = createHud(canvas);
+  if (isTouch) hud.notice.style.bottom = '108px'; // clear of the thumb controls
 
   selfBoat.group.position.set(self.x, 0, self.z);
   selfBoat.group.rotation.y = self.heading;
@@ -392,10 +411,19 @@ export default function start({ canvas, net, seed, role }) {
       }
     }
 
-    if (input.left || input.right) hasSteered = true;
+    const steerLeft = input.left || (touch?.left ?? false);
+    const steerRight = input.right || (touch?.right ?? false);
+    if (steerLeft || steerRight) hasSteered = true;
     if (input.up || input.down) hasTrimmed = true;
-    if (input.left) self.heading -= CONFIG.TURN_RATE * dt;
-    if (input.right) self.heading += CONFIG.TURN_RATE * dt;
+    if (steerLeft) self.heading -= CONFIG.TURN_RATE * dt;
+    if (steerRight) self.heading += CONFIG.TURN_RATE * dt;
+    // The slider sets the sheet absolutely, but only when it moves — so the
+    // keyboard still works on a touch laptop.
+    if (touch && touch.trim !== null && touch.trim !== lastTouchTrim) {
+      self.trim = touch.trim;
+      lastTouchTrim = touch.trim;
+      hasTrimmed = true;
+    }
     if (input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
     if (input.down) self.trim = Math.min(CONFIG.TRIM_MAX, self.trim + CONFIG.TRIM_RATE * dt);
 
@@ -485,7 +513,9 @@ export default function start({ canvas, net, seed, role }) {
     }
     sky.update(camera);
     sunGlow.update(camera);
-    setLegendVisible(hud, !(hasSteered && hasTrimmed));
+    // Touch screens get labelled buttons instead of the keyboard legend.
+    setLegendVisible(hud, !touch && !(hasSteered && hasTrimmed));
+    touch?.sync();
     const bearingTo = (x, z) => Math.atan2(x - self.x, z - self.z);
     const friendPing = [...pings].reverse().find((p) => p.fromFriend);
     updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed, {
@@ -504,6 +534,7 @@ export default function start({ canvas, net, seed, role }) {
     window.removeEventListener('resize', resize);
     canvas.removeEventListener('wheel', onWheel);
     window.removeEventListener('keydown', onKeyDown);
+    touch?.destroy();
     input.destroy();
   });
 }
