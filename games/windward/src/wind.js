@@ -31,7 +31,7 @@ export function initialWind(seed) {
 export function nextWindTarget() {
   return {
     dir: Math.random() * Math.PI * 2,
-    strength: 0.4 + Math.random() * 0.6,
+    strength: CONFIG.WIND_TARGET_STRENGTH_MIN + Math.random() * (CONFIG.WIND_TARGET_STRENGTH_MAX - CONFIG.WIND_TARGET_STRENGTH_MIN),
   };
 }
 

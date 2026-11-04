@@ -72,7 +72,46 @@ export function createHud(canvas) {
   ].join(';');
   parent.appendChild(bar);
 
-  return { text, rose, roseCtx: rose.getContext('2d'), bar, barCtx: bar.getContext('2d') };
+  // Stage 1 (2026-11-04, design audit check 1): a key legend, bottom-left,
+  // shown until the player has both steered and trimmed once. A/D steer and
+  // W/S trim is a non-obvious remap of WASD, and nothing said so before.
+  const legend = document.createElement('div');
+  legend.textContent = LEGEND_TEXT;
+  legend.style.cssText = [
+    'position:fixed', 'left:12px', 'bottom:12px',
+    'font:12px monospace', 'color:#eaf6ff', 'background:rgba(10,26,42,0.55)',
+    'padding:6px 8px', 'border-radius:4px', 'pointer-events:none',
+    'transition:opacity 1.2s',
+  ].join(';');
+  parent.appendChild(legend);
+
+  // Stage 1 (audit check 4): one-line notices, bottom-centre — currently
+  // only "your friend has left".
+  const notice = document.createElement('div');
+  notice.style.cssText = [
+    'position:fixed', 'left:50%', 'bottom:12px', 'transform:translateX(-50%)',
+    'font:13px monospace', 'color:#eaf6ff', 'background:rgba(10,26,42,0.7)',
+    'padding:6px 10px', 'border-radius:4px', 'pointer-events:none',
+    'opacity:0', 'transition:opacity 1.2s',
+  ].join(';');
+  parent.appendChild(notice);
+
+  return {
+    text, rose, roseCtx: rose.getContext('2d'), bar, barCtx: bar.getContext('2d'),
+    legend, notice,
+  };
+}
+
+export const LEGEND_TEXT = 'A/D steer · W sheet in · S ease out · scroll zoom';
+
+export function setLegendVisible(hud, visible) {
+  hud.legend.style.opacity = visible ? '1' : '0';
+}
+
+// text: string to show, or null to fade the notice out.
+export function setNotice(hud, text) {
+  if (text) hud.notice.textContent = text;
+  hud.notice.style.opacity = text ? '1' : '0';
 }
 
 function drawBearingArrow(ctx, cx, cy, r, bearingRad, color, width) {

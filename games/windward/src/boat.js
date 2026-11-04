@@ -47,6 +47,19 @@ export function loadBoatModel() {
   return gltfPromise;
 }
 
+// Exported for boat.test.js. Keeps what the Kenney colormap look depends on
+// (texture, colour, transparency, sidedness) and drops PBR-only properties.
+export function toFlatLambert(m) {
+  return new THREE.MeshLambertMaterial({
+    map: m.map ?? null,
+    color: m.color ? m.color.clone() : 0xffffff,
+    transparent: m.transparent ?? false,
+    opacity: m.opacity ?? 1,
+    side: m.side ?? THREE.FrontSide,
+    flatShading: true,
+  });
+}
+
 export function createBoatMesh(color) {
   const group = new THREE.Group();
   let sailPivot = null;
@@ -76,10 +89,18 @@ export function createBoatMesh(color) {
       sailPivot.add(sail);
       applySailAngle(sailPivot, sailMountX, pendingAngle);
 
+      // Stage 1 (2026-11-04, design audit check 6): the GLB's glTF
+      // pbrMetallicRoughness materials load as MeshStandardMaterial, which
+      // shared/ART.md bans. Swap each for a flat Lambert carrying the same
+      // texture and colour — runs after the sail tint above, so the tint is
+      // kept. Per-instance materials, so two boats never share one.
       model.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
+          child.material = Array.isArray(child.material)
+            ? child.material.map(toFlatLambert)
+            : toFlatLambert(child.material);
         }
       });
 

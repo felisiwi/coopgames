@@ -65,6 +65,18 @@ export const CONFIG = {
 
   BOAT_SPAWN_OFFSET: 10, // meters apart on X before any 'pos' has synced
 
+  // Stage 1 (2026-11-04, design audit). Partner presence: no 'pos' for this
+  // long = they've left (src/partner.js); the "friend left" note then shows
+  // for PARTNER_LEFT_NOTICE_S before fading.
+  PARTNER_TIMEOUT_S: 5,
+  PARTNER_LEFT_NOTICE_S: 12,
+  // Wind strength range for each new target the host picks (src/wind.js's
+  // nextWindTarget). Was 0.4-1.0, which kept the sea from ever going calm
+  // (audit: waves only varied 1.75x). Lower floor = real lulls you can see
+  // on the water. Too low and the boat crawls; tune by feel.
+  WIND_TARGET_STRENGTH_MIN: 0.2,
+  WIND_TARGET_STRENGTH_MAX: 1.0,
+
   // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
   // Single tuning point so island-lab.html can expose these as sliders,
   // same reason the ISLAND_* fields below live here instead of in

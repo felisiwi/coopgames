@@ -11,7 +11,9 @@ import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './src/sail.j
 import { initialWind, createWindController, stepWindController } from './src/wind.js';
 import { createBoatMesh, loadBoatModel } from './src/boat.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
-import { createHud, updateHud } from './src/hud.js';
+import { createHud, updateHud, setLegendVisible, setNotice } from './src/hud.js';
+import { spawnPose } from './src/spawn.js';
+import { partnerState } from './src/partner.js';
 import { createWater, seaHeightCPU, SIZE as WATER_SIZE } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
@@ -197,14 +199,16 @@ export default function start({ canvas, net, seed, role }) {
   let otherBoat = null; // created lazily on the peer's first 'pos' (drop-in play)
   let otherWake = null; // created alongside otherBoat
 
-  const self = {
-    x: role === 'host' ? -CONFIG.BOAT_SPAWN_OFFSET : CONFIG.BOAT_SPAWN_OFFSET,
-    z: 0,
-    heading: role === 'host' ? Math.PI / 2 : -Math.PI / 2,
-    trim: 0,
-    speed: 0,
-  };
+  // Stage 1: spawn facing across the wind at ideal trim (src/spawn.js) —
+  // previously fixed east/west, sheeted in, and ~1 in 8 seeds started
+  // stuck in the no-go zone.
+  const self = { ...spawnPose(seed, role), speed: 0 };
   const other = { x: null, z: null, heading: 0, speed: 0 };
+  let otherLastPosAtS = null; // for partnerState() (src/partner.js)
+  let partnerLeftAtS = null; // when the "friend left" notice started
+  // Key legend stays up until the player has both steered and trimmed.
+  let hasSteered = false;
+  let hasTrimmed = false;
 
   // --- wind: seed-derived until the first real message, host-authoritative
   // after that (games/windward/DESIGN.md's "Net contract gap" section).
@@ -237,6 +241,7 @@ export default function start({ canvas, net, seed, role }) {
     }
 
     if (msg.type === 'pos') {
+      otherLastPosAtS = performance.now() / 1000;
       other.x = msg.x;
       other.z = msg.z;
       other.heading = msg.heading;
@@ -320,6 +325,8 @@ export default function start({ canvas, net, seed, role }) {
       }
     }
 
+    if (input.left || input.right) hasSteered = true;
+    if (input.up || input.down) hasTrimmed = true;
     if (input.left) self.heading -= CONFIG.TURN_RATE * dt;
     if (input.right) self.heading += CONFIG.TURN_RATE * dt;
     if (input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
@@ -336,6 +343,26 @@ export default function start({ canvas, net, seed, role }) {
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
     updateSunPosition(selfBoat.group.position);
+
+    // Stage 1: a partner who stops sending 'pos' has left (src/partner.js).
+    // Remove their boat rather than leave it frozen; a new 'pos' recreates
+    // it via the lazy path in onMessage (drop-in play).
+    if (otherBoat && partnerState(otherLastPosAtS, nowS) === 'left') {
+      scene.remove(otherBoat.group);
+      scene.remove(otherWake.group);
+      otherBoat = null;
+      otherWake = null;
+      other.x = null;
+      partnerLeftAtS = nowS;
+      setNotice(hud, 'Your friend has left. Keep sailing, or close the tab.');
+    }
+    if (partnerLeftAtS !== null) {
+      const back = partnerState(otherLastPosAtS, nowS) === 'present';
+      if (back || nowS - partnerLeftAtS > CONFIG.PARTNER_LEFT_NOTICE_S) {
+        setNotice(hud, null);
+        partnerLeftAtS = null;
+      }
+    }
 
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
@@ -365,6 +392,7 @@ export default function start({ canvas, net, seed, role }) {
     }
     sky.update(camera);
     sunGlow.update(camera);
+    setLegendVisible(hud, !(hasSteered && hasTrimmed));
     updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed);
 
     renderer.render(scene, camera);
