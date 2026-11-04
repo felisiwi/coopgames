@@ -282,6 +282,51 @@ this as a bar too: a track from 0–90°, the full-speed window highlighted
 around the ideal point, and a marker for the actual sheet position. The old
 `ease out (S)` hint text is gone, folded into the same line.
 
+## First minutes: the wind teaches in stages (Felix, 2026-11-04)
+
+Not built yet — a direction for the opening of every session.
+
+- **Start with an easy wind from behind.** The first wind is a gentle
+  run or broad reach for the spawn heading, so the only thing a new
+  player has to work out is *where to point*. No tacking, no fiddly trim.
+- **Then the wind changes**, so the player discovers the next skill
+  themselves: hauling the sail in as the wind comes round, and later
+  tacking through the no-go zone.
+- Today the opposite happens: `src/spawn.js` faces the boat across the
+  wind (a beam reach) and wind shifts are random from the start
+  (`src/wind.js`). Implementing this means seeding the first wind
+  relative to the spawn heading and scripting the first one or two shifts
+  (host-authoritative as now, so both players get the same lesson).
+
+## Phone controls: Control Lab findings (Felix, 2026-11-04)
+
+Explored in a throwaway prototype (claude.ai artifact "Windward Control
+Lab", simplified top-down sea using the real sail numbers). Felix's
+verdicts so far:
+
+- **Steering: hold to aim.** Hold a finger on the water where you want to
+  go; the boat turns towards it. Liked the variant with a **speed line**
+  (line to the finger coloured green fast / red no-go, knots shown in a
+  pill *above* the finger). Overlay turn buttons rejected: they feel
+  mirrored when sailing south. Steering never goes into the no-go zone.
+- **Sheet: a second thumb.** Two favourites:
+  - **Move it like the dot** — the thumb moves the dot along the arc in
+    the same direction; finding the sweet spot feels like a bullseye.
+  - **Pull the rope** — the thumb holds the end of the sheet: pull *away
+    from the boat* to haul in, back towards it to ease. Fully eased is
+    reached at a ring just outside the arc (never cover the boat). The
+    rope sags as it slackens — Felix likes that.
+  - Plain up/down was confusing ("which way?"); the sail's side flips
+    with the tack, so screen-direction rules don't map.
+- **Feedback: the sweet-spot arc** round the boat (green zone + dot).
+- **Hints: thumb arrow + ghost thumb.** The arrow points the way to move
+  the *thumb*, floating ~80px above it so the thumb doesn't hide it; a
+  dashed ghost thumb appears when the sail has been off for a moment.
+  Anything shown at a finger must sit above it, not under it.
+- Wind is read at the boat (streaks on the water + no-go wedge), not from
+  a corner compass. HUD in corners with the boat in the middle was
+  rejected as hard to read.
+
 ## Deferred to later stages
 
 Gust telegraphing (W3, per cadence decision above). Islands, claiming, scoring —
