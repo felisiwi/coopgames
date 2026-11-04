@@ -12,9 +12,10 @@
 import * as THREE from '../vendor/three/three.module.js';
 
 const COLORS = {
-  faluRed: 0xc0392b, // Swedish red-ochre boathouses
+  faluRed: 0xd2432c, // falu red, pushed brighter so it stays red under the golden light (ART.md: bold storybook)
+  doorRed: 0x9c2f22, // darker red for door panels inside the white frame
   white: 0xf4f1e8,
-  roof: 0x3a3a44,
+  roof: 0x6b6672, // weathered grey, not black (ART.md: never grim)
   wood: 0x8a7f72,
   pole: 0x333333, // ART.md buoy pole
   buoyRed: 0xff5533, // ART.md buoy floats
@@ -47,16 +48,67 @@ function lighthouse() {
   return g;
 }
 
+// Sjöbod — a west-coast boathouse: falu-red walls, white corner trim, a
+// pitched roof running the length of the house, double doors on the gable
+// end facing the water. (First stand-in used a 3-sided cone for the roof,
+// which reads as a black pyramid, not a pitched roof.)
 function boathouse() {
   const g = new THREE.Group();
-  g.add(mesh(new THREE.BoxGeometry(5, 3.4, 7), COLORS.faluRed, 1.7));
-  const roof = mesh(new THREE.CylinderGeometry(0.01, 3.6, 2.2, 3), COLORS.roof, 4.5);
-  roof.scale.set(1, 1, 2.1); // a triangular prism along the house's length
-  roof.rotation.y = Math.PI / 2;
-  g.add(roof);
-  const doors = mesh(new THREE.BoxGeometry(2.2, 2.4, 0.2), COLORS.white, 1.2);
-  doors.position.z = 3.55; // sea side
+  const W = 4.4; // across
+  const L = 6.4; // along the facing direction (local +z = towards the sea)
+  const H = 2.8; // wall height
+
+  g.add(mesh(new THREE.BoxGeometry(W, H, L), COLORS.faluRed, H / 2));
+
+  // Gable roof: a triangle profile extruded along the house's length, with
+  // a little overhang on every side.
+  const overhang = 0.35;
+  const ridge = 1.6;
+  const profile = new THREE.Shape();
+  profile.moveTo(-W / 2 - overhang, 0);
+  profile.lineTo(W / 2 + overhang, 0);
+  profile.lineTo(0, ridge);
+  profile.closePath();
+  const roofGeo = new THREE.ExtrudeGeometry(profile, { depth: L + overhang * 2, bevelEnabled: false });
+  roofGeo.translate(0, 0, -(L + overhang * 2) / 2);
+  g.add(mesh(roofGeo, COLORS.roof, H));
+
+  // Gable triangles under the roof, same red, so the ends aren't open.
+  const gable = new THREE.Shape();
+  gable.moveTo(-W / 2, 0);
+  gable.lineTo(W / 2, 0);
+  gable.lineTo(0, ridge - 0.15);
+  gable.closePath();
+  for (const z of [L / 2, -L / 2]) {
+    const tri = mesh(new THREE.ShapeGeometry(gable), COLORS.faluRed, H);
+    tri.position.z = z + (z > 0 ? 0.01 : -0.01);
+    tri.material = tri.material.clone();
+    tri.material.side = THREE.DoubleSide;
+    g.add(tri);
+  }
+
+  // White corner posts and a white frame round the sea-side doors.
+  for (const x of [-W / 2, W / 2]) {
+    for (const z of [-L / 2, L / 2]) {
+      const post = mesh(new THREE.BoxGeometry(0.22, H, 0.22), COLORS.white, H / 2);
+      post.position.set(x, H / 2, z);
+      g.add(post);
+    }
+  }
+  const frame = mesh(new THREE.BoxGeometry(2.3, 2.2, 0.12), COLORS.white, 1.1);
+  frame.position.z = L / 2 + 0.06;
+  g.add(frame);
+  const doors = mesh(new THREE.BoxGeometry(1.9, 1.95, 0.14), COLORS.doorRed, 1.0);
+  doors.position.z = L / 2 + 0.09;
   g.add(doors);
+  // Stilts under the seaward half — it stands half over the water.
+  for (const x of [-W / 2 + 0.3, W / 2 - 0.3]) {
+    for (const z of [L / 2 - 0.3, 0.3]) {
+      const stilt = mesh(new THREE.CylinderGeometry(0.16, 0.16, 2.2, 4), COLORS.wood, -1.1);
+      stilt.position.set(x, -1.1, z);
+      g.add(stilt);
+    }
+  }
   return g;
 }
 

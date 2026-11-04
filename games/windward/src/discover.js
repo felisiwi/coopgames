@@ -140,6 +140,7 @@ function placeAt(island, index, kind, angle, isWater) {
     const standR = kind === 'lighthouse' ? Math.max(0, coast - 6)
       : kind === 'marker' ? coast + 14
       : kind === 'cairn' ? Math.max(0, coast - 3)
+      : kind === 'boathouse' ? coast - 1 // back on the shore, front half out over the water on stilts
       : coast;
     const dx = Math.sin(angle);
     const dz = Math.cos(angle);
