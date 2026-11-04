@@ -1,5 +1,14 @@
 # Last session
 
+**2026-11-04 — Design audits (PR #3, branch felix/design-audit, not
+merged).** New `design-audit` skill (6 hub-wide checks + per-game
+`design-checks.md`, AUDIT.md reports), Archipelago serendipity map
+(`?debug=serendipity`, headless dead-zone %: 78-80% for seeds 1-3) and
+`?spot=N` photo spots. First audits: Archipelago 1 pass/3 weak/2 fail/3
+playtest; Windward 2/3/4/0. Hub bug found, not fixed: "Connection lost"
+panel is inside the hidden `#lobby`, so drops just freeze the partner.
+Windward P1 (Polyfork props) prompt agreed but not started.
+
 **2026-09-16 — Windward I3b: one facet scale for everything; ART.md
 directive merged** (commit 26f4b40; `shared/ART.md` PR #2 merged as
 4694e80: 4m target facet/2-6m acceptable, plus a small-props exemption
