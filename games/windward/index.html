@@ -56,6 +56,11 @@
     // screenshot (shared/ART.md's one-facet-scale rule).
     if (params.get('wire') === '1') CONFIG.DEBUG_WIREFRAME = true;
 
+    // Stage 2: finds normally need BOTH boats nearby; with no second peer in
+    // the solo dev entry, let one boat find things so you can test alone.
+    // The hub keeps the real rule.
+    CONFIG.DISCOVER_REQUIRE_BOTH = false;
+
     start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
   </script>
 </body>

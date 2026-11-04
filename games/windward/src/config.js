@@ -77,6 +77,21 @@ export const CONFIG = {
   WIND_TARGET_STRENGTH_MIN: 0.2,
   WIND_TARGET_STRENGTH_MAX: 1.0,
 
+  // Stage 2 (2026-11-04): discoverables (src/discover.js). Found only when
+  // BOTH boats are within DISCOVER_RADIUS of the prop's visit point at once.
+  DISCOVER_RADIUS: 25, // metres
+  DISCOVER_VISIT_OFFSET: 8, // metres off the coast where a boat "arrives"
+  DISCOVER_REQUIRE_BOTH: true, // solo dev entry turns this off so one boat can test
+  // Audit measurement: open water further than this from anything
+  // discoverable is a dead zone. ~half the max-zoom view width (~298m):
+  // nothing worth sailing to anywhere on screen.
+  DISCOVER_DEAD_ZONE_M: 150,
+  DISCOVER_DEAD_ZONE_TARGET_PCT: 25, // skerry fill stops once under this
+  DISCOVER_SKERRY_MAX: 20, // ...or at this many skerry finds, whichever first
+  // Ping (space): a flare at your boat and a marker on both compass roses.
+  PING_DURATION_S: 5,
+  PING_COOLDOWN_S: 1.5,
+
   // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
   // Single tuning point so island-lab.html can expose these as sliders,
   // same reason the ISLAND_* fields below live here instead of in

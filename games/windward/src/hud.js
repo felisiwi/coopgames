@@ -102,7 +102,7 @@ export function createHud(canvas) {
   };
 }
 
-export const LEGEND_TEXT = 'A/D steer · W sheet in · S ease out · scroll zoom';
+export const LEGEND_TEXT = 'A/D steer · W sheet in · S ease out · space ping · scroll zoom';
 
 export function setLegendVisible(hud, visible) {
   hud.legend.style.opacity = visible ? '1' : '0';
@@ -112,6 +112,16 @@ export function setLegendVisible(hud, visible) {
 export function setNotice(hud, text) {
   if (text) hud.notice.textContent = text;
   hud.notice.style.opacity = text ? '1' : '0';
+}
+
+// A dot on the rose's rim pointing towards something (your friend, a ping).
+function drawRimDot(ctx, cx, cy, r, bearingRad, color, size) {
+  const x = cx + Math.sin(bearingRad) * r;
+  const y = cy - Math.cos(bearingRad) * r;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function drawBearingArrow(ctx, cx, cy, r, bearingRad, color, width) {
@@ -182,7 +192,11 @@ function drawTrimBar(ctx, trimDeg, idealDeg) {
   ctx.fill();
 }
 
-export function updateHud(hud, wind, trimRad, idealTrimRadValue, headingRad, boatSpeedMS) {
+// extras (Stage 2, all optional):
+//   foundText      e.g. "found 3/23", appended to the text column
+//   partnerBearing bearing (heading convention) from you to your friend's boat
+//   pingBearing    bearing to the most recent ping, while it's live
+export function updateHud(hud, wind, trimRad, idealTrimRadValue, headingRad, boatSpeedMS, extras = {}) {
   const windDeg = Math.round(((wind.dir * 180) / Math.PI + 360) % 360);
   const windMs = strengthToMs(wind.strength);
   const trimDeg = Math.round(trimRad / DEG);
@@ -192,7 +206,8 @@ export function updateHud(hud, wind, trimRad, idealTrimRadValue, headingRad, boa
     `wind ${String(windDeg).padStart(3, '0')}°\n` +
     `${windMs.toFixed(1)} m/s / ${msToKnots(windMs).toFixed(1)} kn\n` +
     `speed ${msToKnots(boatSpeedMS).toFixed(1)} kn\n` +
-    trimHint(trimDeg, idealDeg);
+    trimHint(trimDeg, idealDeg) +
+    (extras.foundText ? `\n${extras.foundText}` : '');
 
   const ctx = hud.roseCtx;
   const cx = ROSE_SIZE / 2;
@@ -212,6 +227,8 @@ export function updateHud(hud, wind, trimRad, idealTrimRadValue, headingRad, boa
 
   drawBearingArrow(ctx, cx, cy, r - 6, wind.dir + Math.PI, '#8fd3ff', 2); // wind: blows-to
   drawBearingArrow(ctx, cx, cy, r - 14, headingRad, '#ffcc66', 3); // boat heading
+  if (extras.partnerBearing != null) drawRimDot(ctx, cx, cy, r, extras.partnerBearing, '#66ccff', 4);
+  if (extras.pingBearing != null) drawRimDot(ctx, cx, cy, r, extras.pingBearing, '#ffcc33', 6);
 
   drawTrimBar(hud.barCtx, trimDeg, idealDeg);
 }

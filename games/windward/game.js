@@ -14,6 +14,8 @@ import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera 
 import { createHud, updateHud, setLegendVisible, setNotice } from './src/hud.js';
 import { spawnPose } from './src/spawn.js';
 import { partnerState } from './src/partner.js';
+import { placeDiscoverables, makeIsWater, bothNear, distanceToVisit } from './src/discover.js';
+import { createPropForDiscoverable, createFlare } from './src/props.js';
 import { createWater, seaHeightCPU, SIZE as WATER_SIZE } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
@@ -184,6 +186,19 @@ export default function start({ canvas, net, seed, role }) {
     scene.add(createIsland(island.seed, island.params).group);
   }
 
+  // Stage 2: discoverables — seeded, identical on both peers, so only
+  // "found" events cross the wire. Found only when BOTH boats are near
+  // (CONFIG.DISCOVER_REQUIRE_BOTH; the solo dev entry turns it off).
+  const discoverables = placeDiscoverables(scatteredIslands, seed, makeIsWater(scatteredIslands));
+  const props = new Map();
+  for (const d of discoverables) {
+    const prop = createPropForDiscoverable(d);
+    scene.add(prop.group);
+    scene.add(prop.ring);
+    props.set(d.id, prop);
+  }
+  const found = new Set();
+
   const windArrow = createWindArrow();
   scene.add(windArrow.object);
 
@@ -227,6 +242,35 @@ export default function start({ canvas, net, seed, role }) {
   function sendWind() {
     windSeq += 1;
     net.send({ type: 'wind', dir: wind.dir, strength: wind.strength, seq: windSeq });
+    // Piggyback the full found list on the host's wind heartbeat, so a guest
+    // who joins late (drop-in) or missed a 'found' catches up.
+    if (found.size) net.send({ type: 'found-all', ids: [...found] });
+  }
+
+  // One notice line at a time (src/hud.js setNotice); `kind` lets a
+  // situation clear only its own notice.
+  const notice = { text: null, untilS: 0, kind: null };
+  function showNotice(text, seconds, kind) {
+    notice.text = text;
+    notice.untilS = performance.now() / 1000 + seconds;
+    notice.kind = kind;
+  }
+
+  function markFound(id) {
+    if (found.has(id) || !props.has(id)) return;
+    found.add(id);
+    props.get(id).setFound(true);
+    const d = discoverables.find((x) => x.id === id);
+    showNotice(`Discovered: ${d.label} (${found.size}/${discoverables.length})`, 4, 'found');
+  }
+
+  // Pings: a flare at the pinging boat plus a dot on both compass roses.
+  const pings = []; // { flare, startS, x, z, fromFriend }
+  let lastPingS = -Infinity;
+  function addPing(x, z, fromFriend) {
+    const flare = createFlare(x, z);
+    scene.add(flare.object);
+    pings.push({ flare, startS: performance.now() / 1000, x, z, fromFriend });
   }
 
   net.onMessage((msg) => {
@@ -252,6 +296,13 @@ export default function start({ canvas, net, seed, role }) {
         otherWake = createWake();
         scene.add(otherWake.group);
       }
+    } else if (msg.type === 'found' && role === 'guest') {
+      markFound(msg.id);
+    } else if (msg.type === 'found-all' && role === 'guest' && Array.isArray(msg.ids)) {
+      for (const id of msg.ids) if (!found.has(id)) { found.add(id); props.get(id)?.setFound(true); }
+    } else if (msg.type === 'ping') {
+      addPing(msg.x, msg.z, true);
+      showNotice('Your friend pinged — follow the gold dot on the compass', 3, 'ping');
     } else if (msg.type === 'wind' && role === 'guest') {
       if (msg.seq > windSeq) {
         wind = { dir: msg.dir, strength: msg.strength };
@@ -261,6 +312,17 @@ export default function start({ canvas, net, seed, role }) {
   });
 
   const input = createInputState();
+
+  function onKeyDown(e) {
+    if (e.code !== 'Space' || e.repeat) return;
+    e.preventDefault(); // no page scroll
+    const nowS = performance.now() / 1000;
+    if (nowS - lastPingS < CONFIG.PING_COOLDOWN_S) return;
+    lastPingS = nowS;
+    addPing(self.x, self.z, false);
+    net.send({ type: 'ping', x: self.x, z: self.z });
+  }
+  window.addEventListener('keydown', onKeyDown);
 
   let zoom = 1;
   function onWheel(e) {
@@ -354,15 +416,41 @@ export default function start({ canvas, net, seed, role }) {
       otherWake = null;
       other.x = null;
       partnerLeftAtS = nowS;
-      setNotice(hud, 'Your friend has left. Keep sailing, or close the tab.');
+      showNotice('Your friend has left. Keep sailing, or close the tab.', CONFIG.PARTNER_LEFT_NOTICE_S, 'left');
     }
-    if (partnerLeftAtS !== null) {
-      const back = partnerState(otherLastPosAtS, nowS) === 'present';
-      if (back || nowS - partnerLeftAtS > CONFIG.PARTNER_LEFT_NOTICE_S) {
-        setNotice(hud, null);
-        partnerLeftAtS = null;
+    if (partnerLeftAtS !== null && partnerState(otherLastPosAtS, nowS) === 'present') {
+      if (notice.kind === 'left') notice.untilS = 0; // they're back
+      partnerLeftAtS = null;
+    }
+
+    // Stage 2: discovery. The host decides (one authority, no races) and
+    // tells the guest; the guest only applies 'found' messages.
+    const partnerPos = otherBoat && other.x !== null ? other : null;
+    for (const d of discoverables) {
+      if (found.has(d.id)) continue;
+      const selfNear = distanceToVisit(d, self.x, self.z) <= CONFIG.DISCOVER_RADIUS;
+      if (!selfNear) continue;
+      const together = CONFIG.DISCOVER_REQUIRE_BOTH ? bothNear(d, self, partnerPos) : true;
+      if (together && role === 'host') {
+        markFound(d.id);
+        net.send({ type: 'found', id: d.id });
+      } else if (!together && (notice.kind === 'alone' || nowS >= notice.untilS)) {
+        showNotice(`${d.label} — bring your friend here to discover it`, 0.3, 'alone');
       }
     }
+
+    // Pings: animate, expire.
+    for (let i = pings.length - 1; i >= 0; i--) {
+      const t = (nowS - pings[i].startS) / CONFIG.PING_DURATION_S;
+      if (t >= 1) {
+        scene.remove(pings[i].flare.object);
+        pings[i].flare.dispose();
+        pings.splice(i, 1);
+      } else {
+        pings[i].flare.update(t);
+      }
+    }
+    setNotice(hud, nowS < notice.untilS ? notice.text : null);
 
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
@@ -393,7 +481,13 @@ export default function start({ canvas, net, seed, role }) {
     sky.update(camera);
     sunGlow.update(camera);
     setLegendVisible(hud, !(hasSteered && hasTrimmed));
-    updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed);
+    const bearingTo = (x, z) => Math.atan2(x - self.x, z - self.z);
+    const friendPing = [...pings].reverse().find((p) => p.fromFriend);
+    updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed, {
+      foundText: `found ${found.size}/${discoverables.length}`,
+      partnerBearing: partnerPos ? bearingTo(partnerPos.x, partnerPos.z) : null,
+      pingBearing: friendPing ? bearingTo(friendPing.x, friendPing.z) : null,
+    });
 
     renderer.render(scene, camera);
     requestAnimationFrame(frame);
@@ -404,6 +498,7 @@ export default function start({ canvas, net, seed, role }) {
     clearInterval(posInterval);
     window.removeEventListener('resize', resize);
     canvas.removeEventListener('wheel', onWheel);
+    window.removeEventListener('keydown', onKeyDown);
     input.destroy();
   });
 }
