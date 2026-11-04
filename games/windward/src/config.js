@@ -92,6 +92,12 @@ export const CONFIG = {
   PING_DURATION_S: 5,
   PING_COOLDOWN_S: 1.5,
 
+  // Settlements (src/settlements.js) — scenery cottages and boathouses.
+  // Counts per island tier live in SETTLEMENT_COUNTS there.
+  SETTLEMENT_SPACING: 8, // metres between buildings
+  SETTLEMENT_FIND_CLEARANCE: 10, // keep houses this far from a find's prop
+  SETTLEMENT_MAX_SLOPE_DEG: 20, // steeper ground than this gets no house
+
   // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
   // Single tuning point so island-lab.html can expose these as sliders,
   // same reason the ISLAND_* fields below live here instead of in

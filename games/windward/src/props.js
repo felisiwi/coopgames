@@ -10,6 +10,7 @@
 // smaller than the 4m facet target and use the fewest segments that still
 // read as their shape (ART.md's small-props exemption).
 import * as THREE from '../vendor/three/three.module.js';
+import { mergeGeometries } from '../vendor/three/utils/BufferGeometryUtils.js';
 
 const COLORS = {
   faluRed: 0xd2432c, // falu red, pushed brighter so it stays red under the golden light (ART.md: bold storybook)
@@ -23,6 +24,10 @@ const COLORS = {
   rock: 0x776f64, // ART.md rocks
   lantern: 0xffe08a,
   gold: 0xffcc33,
+  ochre: 0xe2a53b, // west-coast ochre-yellow houses
+  tileRed: 0xa8432f, // red clay roof tiles
+  glass: 0x4f6f8a,
+  chimney: 0x8f8679,
 };
 
 const materialCache = new Map();
@@ -48,22 +53,15 @@ function lighthouse() {
   return g;
 }
 
-// Sjöbod — a west-coast boathouse: falu-red walls, white corner trim, a
-// pitched roof running the length of the house, double doors on the gable
-// end facing the water. (First stand-in used a 3-sided cone for the roof,
-// which reads as a black pyramid, not a pitched roof.)
-function boathouse() {
+// Shared gable-house shape for boathouses and cottages: box walls, a
+// triangle-profile roof extruded along the house's length with a small
+// overhang, matching gable triangles, white corner trim. Local +z is the
+// gable end that faces the sea.
+function gableHouse({ W, L, H, ridge, wall, roof }) {
   const g = new THREE.Group();
-  const W = 4.4; // across
-  const L = 6.4; // along the facing direction (local +z = towards the sea)
-  const H = 2.8; // wall height
+  g.add(mesh(new THREE.BoxGeometry(W, H, L), wall, H / 2));
 
-  g.add(mesh(new THREE.BoxGeometry(W, H, L), COLORS.faluRed, H / 2));
-
-  // Gable roof: a triangle profile extruded along the house's length, with
-  // a little overhang on every side.
   const overhang = 0.35;
-  const ridge = 1.6;
   const profile = new THREE.Shape();
   profile.moveTo(-W / 2 - overhang, 0);
   profile.lineTo(W / 2 + overhang, 0);
@@ -71,37 +69,51 @@ function boathouse() {
   profile.closePath();
   const roofGeo = new THREE.ExtrudeGeometry(profile, { depth: L + overhang * 2, bevelEnabled: false });
   roofGeo.translate(0, 0, -(L + overhang * 2) / 2);
-  g.add(mesh(roofGeo, COLORS.roof, H));
+  g.add(mesh(roofGeo, roof, H));
 
-  // Gable triangles under the roof, same red, so the ends aren't open.
   const gable = new THREE.Shape();
   gable.moveTo(-W / 2, 0);
   gable.lineTo(W / 2, 0);
   gable.lineTo(0, ridge - 0.15);
   gable.closePath();
-  for (const z of [L / 2, -L / 2]) {
-    const tri = mesh(new THREE.ShapeGeometry(gable), COLORS.faluRed, H);
-    tri.position.z = z + (z > 0 ? 0.01 : -0.01);
-    tri.material = tri.material.clone();
-    tri.material.side = THREE.DoubleSide;
+  for (const z of [L / 2 + 0.01, -L / 2 - 0.01]) {
+    const tri = new THREE.Mesh(new THREE.ShapeGeometry(gable), doubleSided(wall));
+    tri.position.set(0, H, z);
     g.add(tri);
   }
 
-  // White corner posts and a white frame round the sea-side doors.
   for (const x of [-W / 2, W / 2]) {
     for (const z of [-L / 2, L / 2]) {
-      const post = mesh(new THREE.BoxGeometry(0.22, H, 0.22), COLORS.white, H / 2);
+      const post = mesh(new THREE.BoxGeometry(0.2, H, 0.2), COLORS.white, H / 2);
       post.position.set(x, H / 2, z);
       g.add(post);
     }
   }
+  return g;
+}
+
+const doubleSidedCache = new Map();
+function doubleSided(color) {
+  if (!doubleSidedCache.has(color)) {
+    doubleSidedCache.set(color, new THREE.MeshLambertMaterial({ color, flatShading: true, side: THREE.DoubleSide }));
+  }
+  return doubleSidedCache.get(color);
+}
+
+// Sjöbod — a west-coast boathouse: falu red, grey roof, white trim, double
+// doors on the sea gable, front half on stilts over the water. (The first
+// stand-in used a 3-sided cone for the roof, which read as a black pyramid.)
+function boathouse() {
+  const W = 4.4;
+  const L = 6.4;
+  const H = 2.8;
+  const g = gableHouse({ W, L, H, ridge: 1.6, wall: COLORS.faluRed, roof: COLORS.roof });
   const frame = mesh(new THREE.BoxGeometry(2.3, 2.2, 0.12), COLORS.white, 1.1);
   frame.position.z = L / 2 + 0.06;
   g.add(frame);
   const doors = mesh(new THREE.BoxGeometry(1.9, 1.95, 0.14), COLORS.doorRed, 1.0);
   doors.position.z = L / 2 + 0.09;
   g.add(doors);
-  // Stilts under the seaward half — it stands half over the water.
   for (const x of [-W / 2 + 0.3, W / 2 - 0.3]) {
     for (const z of [L / 2 - 0.3, 0.3]) {
       const stilt = mesh(new THREE.CylinderGeometry(0.16, 0.16, 2.2, 4), COLORS.wood, -1.1);
@@ -109,6 +121,76 @@ function boathouse() {
       g.add(stilt);
     }
   }
+  return g;
+}
+
+// Stuga — a small cottage. Mostly falu red with a grey roof; ochre and
+// white ones get a red-tile roof. White window frames, a door on the sea
+// gable, a chimney.
+const COTTAGE_VARIANTS = {
+  red: { wall: COLORS.faluRed, roof: COLORS.roof },
+  ochre: { wall: COLORS.ochre, roof: COLORS.tileRed },
+  white: { wall: COLORS.white, roof: COLORS.tileRed },
+};
+
+function cottage(variant = 'red') {
+  const v = COTTAGE_VARIANTS[variant] ?? COTTAGE_VARIANTS.red;
+  const W = 3.8;
+  const L = 5.2;
+  const H = 2.4;
+  const g = gableHouse({ W, L, H, ridge: 1.7, wall: v.wall, roof: v.roof });
+  const trim = variant === 'white' ? COLORS.faluRed : COLORS.white; // white houses get red trim
+
+  const door = mesh(new THREE.BoxGeometry(1, 1.8, 0.12), trim, 0.9);
+  door.position.z = L / 2 + 0.06;
+  g.add(door);
+  for (const side of [-1, 1]) {
+    for (const z of [-1.2, 1.2]) {
+      const frame = mesh(new THREE.BoxGeometry(0.12, 0.95, 0.95), trim, 1.4);
+      frame.position.set(side * (W / 2 + 0.06), 1.4, z);
+      g.add(frame);
+      const glass = mesh(new THREE.BoxGeometry(0.14, 0.65, 0.65), COLORS.glass, 1.4);
+      glass.position.set(side * (W / 2 + 0.07), 1.4, z);
+      g.add(glass);
+    }
+  }
+  const chimney = mesh(new THREE.BoxGeometry(0.6, 1.4, 0.6), COLORS.chimney, H + 1.3);
+  chimney.position.set(0.7, H + 1.3, -1.2);
+  g.add(chimney);
+  return g;
+}
+
+// Collapse a built group into one mesh per material (a cottage: 18 meshes
+// -> ~6), so ~50 houses cost a few hundred draw calls, not ~1000.
+function mergeByMaterial(group) {
+  group.updateMatrixWorld(true);
+  const byMaterial = new Map();
+  group.traverse((o) => {
+    if (!o.isMesh) return;
+    const geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld);
+    for (const name of Object.keys(geo.attributes)) if (name !== 'position' && name !== 'normal') geo.deleteAttribute(name);
+    if (!byMaterial.has(o.material)) byMaterial.set(o.material, []);
+    byMaterial.get(o.material).push(geo);
+  });
+  const merged = new THREE.Group();
+  for (const [material, geos] of byMaterial) {
+    const m = new THREE.Mesh(mergeGeometries(geos), material);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    merged.add(m);
+  }
+  return merged;
+}
+
+// Settlement buildings are scenery repeated ~50 times per world: build
+// each kind+variant once and clone (clones share geometry and materials).
+const templates = new Map();
+export function createBuilding(b) {
+  const key = `${b.kind}:${b.variant}`;
+  if (!templates.has(key)) templates.set(key, mergeByMaterial(b.kind === 'boathouse' ? boathouse() : cottage(b.variant)));
+  const g = templates.get(key).clone();
+  g.position.set(b.x, b.y, b.z);
+  g.rotation.y = b.facing;
   return g;
 }
 

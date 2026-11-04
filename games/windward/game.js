@@ -15,7 +15,8 @@ import { createHud, updateHud, setLegendVisible, setNotice } from './src/hud.js'
 import { spawnPose } from './src/spawn.js';
 import { partnerState } from './src/partner.js';
 import { placeDiscoverables, makeIsWater, bothNear, distanceToVisit } from './src/discover.js';
-import { createPropForDiscoverable, createFlare } from './src/props.js';
+import { createPropForDiscoverable, createFlare, createBuilding } from './src/props.js';
+import { placeSettlements } from './src/settlements.js';
 import { createWater, seaHeightCPU, SIZE as WATER_SIZE } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
@@ -198,6 +199,10 @@ export default function start({ canvas, net, seed, role }) {
     props.set(d.id, prop);
   }
   const found = new Set();
+
+  // Settlements: scenery cottages and boathouses, seeded like the finds and
+  // kept clear of them (src/settlements.js).
+  for (const b of placeSettlements(scatteredIslands, seed, discoverables)) scene.add(createBuilding(b));
 
   const windArrow = createWindArrow();
   scene.add(windArrow.object);
