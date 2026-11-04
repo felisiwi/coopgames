@@ -14,7 +14,6 @@
   <canvas id="world"></canvas>
   <script type="module">
     import start from './game.js';
-    import { CONFIG } from './src/config.js';
 
     // Fakes the hub's net object for solo testing (games/README.md "Solo
     // dev entry"). No second peer: send() logs, onMessage() only fires if
@@ -32,14 +31,9 @@
     const canvas = document.getElementById('world');
 
     const params = new URLSearchParams(window.location.search);
-    // ?spot=N (visual changelog) pins the seed from CONFIG.PHOTO_SPOTS so
-    // before/after screenshots always show the same island.
-    const spot = params.has('spot') ? CONFIG.PHOTO_SPOTS[params.get('spot')] : null;
-    const seed = spot ? spot.seed
-      : params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
-    const debug = params.get('debug');
-    document.getElementById('seed-label').textContent =
-      `seed: ${seed}${debug ? ` (debug=${debug})` : ''}${spot ? ` — spot ${params.get('spot')}: ${spot.label}` : ''}`;
+    const seed = params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
+    const debug = params.get('debug') === '1';
+    document.getElementById('seed-label').textContent = `seed: ${seed}${debug ? ' (debug)' : ''}`;
 
     start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
   </script>

@@ -97,9 +97,9 @@ starts with an empty one). Same shape as above: the check, its principle,
 and why it matters. Audit them after the hub-wide six. If a game has no
 `design-checks.md`, say so in the report and suggest two or three.
 
-If a per-game check depends on a measurement (e.g. Archipelago's dead-zone
-% from `src/serendipity.js`), run it for at least 3 seeds and quote the
-numbers.
+If a per-game check depends on a measurement (e.g. a dead-zone % — the
+share of the world too far from anything worth finding), run it for at
+least 3 seeds and quote the numbers.
 
 ## Procedure
 

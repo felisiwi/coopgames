@@ -4,7 +4,6 @@
 import { CONFIG } from './src/config.js';
 import { generateIsland } from './src/island.js';
 import { renderIsland, loadTileImages } from './src/render.js';
-import { serendipityField } from './src/serendipity.js';
 import { createInputState } from '../../shared/input.js';
 
 const WATER_TYPES = new Set(['deep_water', 'shallow_water']);
@@ -23,17 +22,8 @@ function lerp(a, b, t) {
 export default function start({ canvas, net, seed, role, players }) {
   const ctx = canvas.getContext('2d');
   const island = generateIsland(seed);
-  const params = new URLSearchParams(window.location.search);
-  const debugParam = params.get('debug');
-  // ?debug=serendipity: whole-map view, fog off, dead zones tinted (design
-  // audit). ?spot=N: a fixed photo spot from CONFIG.PHOTO_SPOTS for the
-  // visual changelog — fog off, input ignored. Both are dev-only views.
-  const serendipity = debugParam === 'serendipity' ? serendipityField(island) : null;
-  const photoSpot = params.has('spot') ? CONFIG.PHOTO_SPOTS[params.get('spot')] || null : null;
-  const debug = debugParam === '1' || !!serendipity || !!(photoSpot && photoSpot.fit);
-  const spawn = photoSpot && !photoSpot.fit
-    ? { x: photoSpot.x, y: photoSpot.y }
-    : role === 'guest' ? island.spawnB : island.spawnA;
+  const spawn = role === 'guest' ? island.spawnB : island.spawnA;
+  const debug = new URLSearchParams(window.location.search).get('debug') === '1';
 
   // Player position is a grid tile (x, y) plus an in-flight move: while
   // `t < 1` the render position is lerped from (fromX, fromY) toward
@@ -119,8 +109,6 @@ export default function start({ canvas, net, seed, role, players }) {
           player.x = player.toX;
           player.y = player.toY;
         }
-      } else if (photoSpot) {
-        // photo spot: camera stays put, no movement
       } else if (input.up) {
         tryStartMove(0, -1);
       } else if (input.down) {
@@ -143,13 +131,7 @@ export default function start({ canvas, net, seed, role, players }) {
         }
       }
 
-      renderIsland(ctx, canvas, island, images, {
-        debug,
-        camera: pos,
-        entities: photoSpot ? [] : entities,
-        fog: photoSpot ? null : fog,
-        serendipity,
-      });
+      renderIsland(ctx, canvas, island, images, { debug, camera: pos, entities, fog });
 
       requestAnimationFrame(frame);
     }

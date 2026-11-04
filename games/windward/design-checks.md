@@ -10,7 +10,8 @@ west coast of Sweden; each player keeps their own boat.
 Nothing yet. Islands are scenery; there are no objects, landmarks or
 pickups. Props (jetties, boathouses, lighthouses, channel markers) arrive
 with stage P1. When they do, list which ones count here and add a
-serendipity measurement like Archipelago's.
+dead-zone measurement: the share of open water too far from
+anything worth sailing to.
 
 ## Sailing is a skill you can feel yourself getting better at
 **Principle:** the wind, the no-go zone and sail trim are the game's core

@@ -14,24 +14,6 @@ export const CONFIG = {
   // Networking
   NET_SEND_HZ: 20, // own-position broadcast rate over net.send
 
-  // Serendipity map (design audit, 2026-11-04) — see src/serendipity.js and
-  // design-checks.md. A walkable tile further than this many WALKING steps
-  // from anything discoverable is a "dead zone". 10 = 2x VISION_RADIUS: you
-  // could walk a full screen of fog in any direction and find nothing.
-  SERENDIPITY_DEAD_ZONE_TILES: 10,
-  DISCOVERABLE_TYPES: ['landmark'], // tile types that count as "worth finding"
-
-  // Photo spots for the visual changelog (?spot=N in the solo dev entry).
-  // Fixed seed + fixed camera tile, fog off, no input — so before/after
-  // screenshots compare the same view. Coordinates are absolute tiles, not
-  // "wherever the landmark is", on purpose: a generator change that moves
-  // the landmark should SHOW as a different picture.
-  PHOTO_SPOTS: {
-    1: { seed: 1, fit: true, label: 'seed 1, whole island' },
-    2: { seed: 1, x: 25, y: 22, label: 'seed 1, landmark close-up' },
-    3: { seed: 1, x: 7, y: 26, label: 'seed 1, host spawn' },
-  },
-
   // Tile art — curated "Thick" 128x72 PNGs in assets/tiles/ (Batch 2,
   // Screaming Brain Studios CC0 pack). Each PNG is the full 128x72 cell:
   // a flat isometric diamond top face PLUS an 8px "thickness" skirt below

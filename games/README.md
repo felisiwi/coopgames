@@ -154,7 +154,7 @@ fixed view, so "improved lighting" becomes two pictures you can compare.
 - Define 1–3 photo spots (a seed plus a fixed camera position) in your
   game's `CONFIG`, reachable from the solo entry as `?spot=N`. A spot
   turns off anything that varies between runs (fog, input, random seed).
-  Archipelago's `PHOTO_SPOTS` in `src/config.js` is the reference.
+  (No game has photo spots yet — Windward will be the first.)
 - Before and after a visual change, open each spot and screenshot it (the
   human does this; no capture tooling is installed — adding Playwright
   would be the repo's first npm dependency and needs Felix's explicit yes).

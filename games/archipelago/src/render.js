@@ -56,13 +56,12 @@ function mapBounds(size) {
 
 export function renderIsland(ctx, canvas, island, images, opts = {}) {
   const { size, grid } = island;
-  const { debug = false, camera = null, entities = [], fog = null, serendipity = null } = opts;
+  const { debug = false, camera = null, entities = [], fog = null } = opts;
   // Fog is a per-player Uint8Array (0 unseen / 1 seen / 2 visible), indexed
   // y * size + x — see Stage 2 audit resolution #3. ?debug=1 ignores it so
   // eyeballing generator output never depends on how much a player has
   // explored.
   const fogActive = fog && !debug;
-  let serendipityLabel = null;
 
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -110,29 +109,6 @@ export function renderIsland(ctx, canvas, island, images, opts = {}) {
     }
   }
 
-  // ?debug=serendipity overlay (design audit): tint every walkable tile
-  // further than maxDist walking steps from a discoverable, using the same
-  // field the headless audit reports, so picture and number always agree.
-  if (serendipity) {
-    const { distance, maxDist, deadPct } = serendipity;
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const d = distance[y * size + x];
-        if (d < 0) continue; // water
-        const { x: sx, y: sy } = toScreen(x, y, originX, originY);
-        ctx.beginPath();
-        ctx.moveTo(sx, sy - CONFIG.TILE_STEP_Y);
-        ctx.lineTo(sx + CONFIG.TILE_STEP_X, sy);
-        ctx.lineTo(sx, sy + CONFIG.TILE_STEP_Y);
-        ctx.lineTo(sx - CONFIG.TILE_STEP_X, sy);
-        ctx.closePath();
-        ctx.fillStyle = d === 0 ? 'rgba(255, 220, 60, 0.85)' : d > maxDist ? 'rgba(230, 40, 40, 0.45)' : 'rgba(60, 200, 120, 0.25)';
-        ctx.fill();
-      }
-    }
-    serendipityLabel = `dead zone ${deadPct.toFixed(1)}% (> ${maxDist} steps from anything discoverable)`;
-  }
-
   // AGENTS.md depth-sorting rule: ground tiles first, then a single list of
   // movable entities sorted by map y then x (drawn on top, no baked trees
   // to interleave with in this tileset).
@@ -149,10 +125,4 @@ export function renderIsland(ctx, canvas, island, images, opts = {}) {
   }
 
   ctx.restore();
-
-  if (serendipityLabel) {
-    ctx.font = '14px monospace';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(serendipityLabel, 12, canvas.height - 14);
-  }
 }
