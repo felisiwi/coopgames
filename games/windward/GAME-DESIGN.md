@@ -1061,3 +1061,19 @@ north and Gullholmen and Härmanö south to explore in the early game.
 **Names are discovered.** Islands, skerries and natural harbours have no names on the
 chart/mini-map until you have seen them first; then the name appears (and stays, per Q9:
 knowledge crosses eras).
+
+## IDEA (Felix, 2026-11-05, not decided): you age, eras keep their own clocks
+
+Two clocks instead of one: the **world year** of each era, and **your own age**, which only
+moves forward. Early eras you play young, later eras older. When you hop back to an era you
+last saw as a young person, you return at your current (older) age, and that era's own clock
+has moved on too: people have grown, new places exist, your claims have developed or
+decayed. Familiar places feel new again. Fits "each era keeps its own world state" (Q40) and
+eras having spans (e.g. Crown shores 1706–1746) with room to move forward inside them.
+Nice side effect: the first jump to ~1700 makes you young, a peer of Brita.
+
+Open questions to grill: what advances your age (play time, jumps, story beats)?; what does
+an era's clock do while you're away (advance by your time away, or by story)?; what age
+changes in play (look, voice, what people expect of you, abilities such as weather sense)?;
+age bounds; how it fits "same character reimagined per era"; content cost (people at several
+ages).
