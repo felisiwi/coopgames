@@ -3,7 +3,7 @@
 // carries on if storage is blocked), and the real names.json accounts for all 15 of Felix's harbours.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { buildNameList, createNameBook, NAME_RADIUS_M, STORAGE_KEY } from './names.js';
+import { buildNameList, createNameBook, displayName, NAME_RADIUS_M, SIGHT_EXTRA_M, SAME_PLACE_M, STORAGE_KEY } from './names.js';
 import { labelScreenPos, createLabelQueue } from './name-labels.js';
 
 let passed = 0;
@@ -100,6 +100,70 @@ check('label queue: at most 3 at once, staggered, villages and harbours before s
   assert.equal(q.pop(3, 2).entry.name, 's1', 'then skerries, in the order found');
   assert.equal(q.pop(20, 0), null, 'everything left was stale (waited > 8 s) and is dropped');
   assert.equal(q.size, 0);
+});
+
+// ---- stage 1b: descriptive names before discovery -------------------------------------------------------------
+const described = [
+  { id: 'h', name: 'Hättan', kind: 'skerry', x: 0, z: 0, radius: NAME_RADIUS_M.skerry, desc: 'the Hood' },
+  { id: 'p', name: 'Plain', kind: 'skerry', x: 1000, z: 0, radius: NAME_RADIUS_M.skerry, desc: null },
+];
+
+check('a place shows its description until discovered, then the real name with the description underneath', () => {
+  assert.deepEqual(displayName(described[0], false), { title: 'the Hood', sub: null });
+  assert.deepEqual(displayName(described[0], true), { title: 'Hättan', sub: 'the Hood' });
+});
+
+check('a skerry without a description stays unnamed until discovered', () => {
+  assert.deepEqual(displayName(described[1], false), { title: null, sub: null });
+  const book = createNameBook(described, memoryStorage());
+  assert.deepEqual(book.sight(1000, 0), [], 'nothing to show for it from afar');
+  assert.deepEqual(book.update(1000, 0).map((e) => e.name), ['Plain'], 'but it is still discovered');
+});
+
+check('a described place is sighted before it is named, once, and not again after discovery', () => {
+  const book = createNameBook(described, memoryStorage());
+  const reach = NAME_RADIUS_M.skerry + SIGHT_EXTRA_M;
+  assert.deepEqual(book.sight(reach + 5, 0), [], 'too far');
+  assert.deepEqual(book.sight(reach - 5, 0).map((e) => e.name), ['Hättan'], 'sighted before the name is in reach');
+  assert.equal(book.isKnown('h'), false, 'sighted is not discovered');
+  assert.deepEqual(book.update(reach - 5, 0), [], 'still too far to be named');
+  assert.deepEqual(book.sight(reach - 20, 0), [], 'sighted only once');
+  assert.deepEqual(book.update(50, 0).map((e) => e.name), ['Hättan'], 'named when close');
+  const other = createNameBook(described, memoryStorage());
+  other.update(0, 0);
+  assert.deepEqual(other.sight(0, 0), [], 'a place already discovered is never sighted');
+});
+
+check('buildNameList attaches descriptions by name and merges extra harbours', () => {
+  const list = buildNameList({
+    names: { islands: [{ osm: 'relation/1', name: 'Hättan', kind: 'skerry', lon: 1, lat: 1 }], harbours: [] },
+    villages: [],
+    toGame: (lon, lat) => [lon * 10, lat * 10],
+    inside: () => true,
+    placeNames: { descriptions: { Hättan: 'the Hood' }, extraHarbours: [{ name: 'Dammholmen', lon: 5, lat: 5 }] },
+  });
+  assert.equal(list.find((e) => e.name === 'Hättan').desc, 'the Hood');
+  const dam = list.find((e) => e.name === 'Dammholmen');
+  assert.deepEqual([dam.kind, dam.id, dam.desc], ['harbour', 'harbour:Dammholmen', null]);
+});
+
+check('the same name close together is one place, the more important kind wins; far apart stays two', () => {
+  const base = { names: { islands: [], harbours: [] }, toGame: (lon, lat) => [lon, lat], inside: () => true };
+  const list = buildNameList({
+    ...base,
+    names: { islands: [{ osm: 'r/1', name: 'Käringön', kind: 'skerry', lon: 10, lat: 0 }, { osm: 'r/2', name: 'Käringön', kind: 'skerry', lon: 900, lat: 0 }], harbours: [] },
+    villages: [{ name: 'Käringön', lon: 10 + SAME_PLACE_M / 2, lat: 0 }],
+  });
+  assert.deepEqual(list.map((e) => `${e.kind}@${e.x}`), ['skerry@900', `village@${10 + SAME_PLACE_M / 2}`], 'the near skerry is the village; the far one is another place');
+});
+
+check('label queue: a sighting ranks half a step ahead of its own kind, so a described skerry is not buried behind bare ones', () => {
+  const q = createLabelQueue();
+  q.push({ entry: { name: 'skerry-hint', kind: 'skerry' }, hint: true }, 0);
+  q.push({ entry: { name: 'skerry', kind: 'skerry' } }, 0);
+  q.push({ entry: { name: 'village-hint', kind: 'village' }, hint: true }, 0);
+  q.push({ entry: { name: 'island', kind: 'island' } }, 0);
+  assert.deepEqual([0, 1, 2, 3].map((i) => q.pop(i, 0).entry.name), ['village-hint', 'island', 'skerry-hint', 'skerry']);
 });
 
 check('names.json accounts for all 15 of Felix\'s harbours, and the spawn is Grundsunds hamn', () => {

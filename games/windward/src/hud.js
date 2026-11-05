@@ -55,7 +55,8 @@ export function createHud(canvas) {
 
   const text = document.createElement('div');
   text.style.cssText = [
-    'position:fixed', `top:${TEXT_TOP}px`, `right:${COLUMN_RIGHT}px`, `width:${ROSE_SIZE}px`,
+    // min-width, not width: right-anchored, so a longer line ("places named 120") grows leftwards instead of running off-screen
+    'position:fixed', `top:${TEXT_TOP}px`, `right:${COLUMN_RIGHT}px`, `min-width:${ROSE_SIZE}px`,
     'font:12px monospace', 'color:#eaf6ff', 'background:rgba(10,26,42,0.55)',
     'padding:6px 8px', 'border-radius:4px', 'pointer-events:none', 'white-space:pre',
     'box-sizing:content-box',

@@ -523,13 +523,14 @@ export async function loadRealCoast(opts = {}) {
   const T = { start: now() };
   const coastUrl = new URL('../assets/coast/', import.meta.url).href;
   const dataUrl = new URL('../data/settlements-history.json', import.meta.url).href;
+  const placeNamesUrl = new URL('../data/place-names.json', import.meta.url).href; // descriptions + extra harbours (stage 1b)
   let bytes = 0;
   const io = {
     json: async (u) => { const t = await (await fetch(u)).text(); bytes += t.length; return JSON.parse(t); },
     bytes: async (u) => { const b = new Uint8Array(await (await fetch(u)).arrayBuffer()); bytes += b.length; return b; },
   };
-  const [coast, settlementsJson, skerryJson, namesJson] = await Promise.all([
-    loadCoast(coastUrl, io, COAST_TILES), io.json(dataUrl), io.json(coastUrl + 'skerries.json'), io.json(coastUrl + 'names.json'),
+  const [coast, settlementsJson, skerryJson, namesJson, placeNames] = await Promise.all([
+    loadCoast(coastUrl, io, COAST_TILES), io.json(dataUrl), io.json(coastUrl + 'skerries.json'), io.json(coastUrl + 'names.json'), io.json(placeNamesUrl),
   ]);
   T.loadDecodeMs = now() - T.start;
 
@@ -552,7 +553,7 @@ export async function loadRealCoast(opts = {}) {
   // ?cat=lon,lat starts at the open water nearest another point (testing).
   const [sx, sz] = world.toGame(...(opts.at || [namesJson.spawn.lon, namesJson.spawn.lat]));
   const spawn = findOpenWater(world, sx, sz);
-  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M) });
+  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames });
 
   const group = new THREE.Group();
   group.add(terrain.group, trees.group, props);
@@ -567,6 +568,7 @@ export async function loadRealCoast(opts = {}) {
   T.buildMs = now() - T.start;
   return {
     world, group, depthMap: world.depthMap, spawn, trees, terrain, clamp, update, names,
+    lights: lights.filter((l) => l.group).map((l) => ({ name: l.name, x: l.group.position.x, y: l.group.position.y, z: l.group.position.z })), // where gulls may perch (stage 1b)
     heightAt: world.heightAt,
     report: {
       bytesDownloadedByLoader: bytes, timings: { ...T, ...world.timings },

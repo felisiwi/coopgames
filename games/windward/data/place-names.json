@@ -1,0 +1,70 @@
+{
+  "_about": "Hand-curated place data for the real coast (stage 1b). Read by src/coast-world.js, merged into the name list by src/names.js buildNameList. Not generated: assets/coast/names.json is, and is rebuilt by tools/fetch-names.mjs, so these live here. Source for descriptions: Felix's Map Lab (GAME-DESIGN.md 'Chart naming'); they are lore, not etymology claims.",
+
+  "descriptions": {
+    "Gåsö": "Goose Isle",
+    "Grundsund": "the shallow sound",
+    "Fiskebäckskil": "the fish-brook inlet",
+    "Måseskär": "the Gull Skerry",
+    "Hättan": "the Hood",
+    "Käringön": "the Old Woman's Isle",
+    "Gullholmen": "the crowded islet",
+    "Hälleviksstrand": "the rock-slab bay",
+    "Storön": "the big island",
+    "Stora Kornö": "the barley isle",
+    "Stångehuvud": "the pole headland",
+    "Islandsberg": "the island hill",
+    "Gäven": "the outer rock"
+  },
+
+  "descriptionNotes": {
+    "Stora Kornö": "The Map Lab says 'Kornö = the barley isle'. OSM has Stora Kornö (island, 58.2978 N) and Kornö kalv (skerry); the description sits on the island. It lies in the 80 m edge-fade strip at the north border of today's window, so it is not on the chart yet; it appears when the window grows north. TODO(felix): confirm Stora Kornö is the Kornö meant.",
+    "Stångehuvud": "No entry in names.json or settlements, so no place yet. TODO(felix): confirm; geocode by exact OSM name when Overpass answers (it was at capacity, 2026-11-05).",
+    "Islandsberg": "As Stångehuvud. TODO(felix): confirm, geocode by exact OSM name."
+  },
+
+  "extraHarbours": [
+    {
+      "name": "Testholmen",
+      "lat": 58.22653,
+      "lon": 11.375535,
+      "source": "Felix confirmed 'Testholmarna-Usholmen = Testholmen'. Midpoint of OSM Lilla Testholmen (58.22542, 11.37618) and Stora Testholmen (58.22764, 11.37489), the only Testholmen inside the region.",
+      "note": "TODO(felix): confirm it is this pair; exact-name 'Testholmen' also exists at 58.00762,11.50017 and 58.31717,11.37716, both outside the region."
+    },
+    {
+      "name": "Dammholmen",
+      "lat": 58.23486,
+      "lon": 11.37083,
+      "source": "Felix confirmed 'DammholmeSkären = Dammholmen'. OSM relation/10250299."
+    },
+    {
+      "name": "Danholmen",
+      "lat": 58.10913,
+      "lon": 11.42811,
+      "source": "Felix confirmed 'Västra Danholmen = Danholmen'. OSM relation/10238702."
+    },
+    {
+      "name": "Vrakevik",
+      "lat": 58.238711,
+      "lon": 11.385059,
+      "source": "Felix's own pin in his Google Maps list 'Segling' (the name is his note), used as given."
+    },
+    {
+      "name": "Kråkholmen",
+      "lat": 58.104431,
+      "lon": 11.439134,
+      "source": "Felix's own pin 'Kråksundsgap, Kråkholmen' in 'Segling', used as given. The harbour Kråkesundsgap (OSM lights) is 3 km real away; both stay."
+    },
+    {
+      "name": "Grundsunds hamn",
+      "lat": 58.216,
+      "lon": 11.41577,
+      "source": "OSM leisure=marina node/4279916839 (the spawn in names.json). Felix's list: 'Grundsunds fiskehamn & gästhamn'."
+    }
+  ],
+
+  "favouritesCoveredElsewhere": {
+    "inside the region, already a village or harbour": ["Lysekil", "Vasholmarna", "Skarvesäter", "Gullholmen (Gästhamn)", "Käringön"],
+    "outside the region (58.085-58.30 N, 11.25-11.50 E), not placeable yet": ["Alvön", "Hunnebostrand", "Smögen", "Altarholmen", "Tornholmen", "Åstol", "Skärhamn", "Klädesholmen", "Nordön", "Rammen", "Skinnbroken (pin 57.859606, 11.561551)", "Bussholmen", "Marstrand", "Smörasken (approx. 58.0017, 11.475)"]
+  }
+}

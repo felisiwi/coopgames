@@ -2,6 +2,7 @@
 // follows the place on screen for a few seconds, then fades. DOM text over the canvas (crisp on a
 // phone, no font texture), pointer-events off so it never blocks the controls.
 import * as THREE from '../vendor/three/three.module.js';
+import { displayName } from './names.js';
 
 export const LABEL_SHOW_S = 5; // fully visible
 export const LABEL_FADE_S = 1.5; // then fades out
@@ -30,7 +31,11 @@ export function createLabelQueue({ max = LABEL_MAX_ACTIVE, gapS = LABEL_GAP_S, s
     pop(nowS, activeCount) {
       pending = pending.filter((p) => nowS - p.at <= staleS);
       if (!pending.length || activeCount >= max || nowS - lastAt < gapS) return null;
-      pending.sort((a, b) => (PRIORITY[a.item.entry.kind] ?? 9) - (PRIORITY[b.item.entry.kind] ?? 9) || a.seq - b.seq);
+      // A sighting (descriptive name only) ranks half a step ahead of a discovery of its own kind: a place with a
+      // description is a notable one, so in a dense archipelago it is not buried behind a dozen bare skerries
+      // (it would go stale unseen). Villages and harbours still come first.
+      const rank = (p) => (PRIORITY[p.item.entry.kind] ?? 9) - (p.item.hint ? 0.5 : 0);
+      pending.sort((a, b) => rank(a) - rank(b) || a.seq - b.seq);
       lastAt = nowS;
       return pending.shift().item;
     },
@@ -44,13 +49,15 @@ export function createNameLabels(container = document.body) {
   const active = []; // { el, wx, wy, wz, born }
   const queue = createLabelQueue();
   const v = new THREE.Vector3();
-  function spawn(entry, wy, nowS) {
+  function spawn(entry, wy, nowS, hint) {
       const el = document.createElement('div');
       el.style.cssText = 'position:fixed;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;z-index:6;'
         + 'text-align:center;font:italic 600 18px/1.15 Georgia,"Times New Roman",serif;color:#fbf3e2;letter-spacing:.02em;'
         + 'text-shadow:0 1px 3px rgba(12,28,44,.85),0 0 10px rgba(12,28,44,.55);white-space:nowrap';
-      el.textContent = entry.name;
-      const note = KIND_NOTE[entry.kind];
+      // hint: still undiscovered, so only the description; otherwise the real name over its description.
+      const { title, sub } = displayName(entry, !hint);
+      el.textContent = title;
+      const note = hint ? '' : sub || KIND_NOTE[entry.kind];
       if (note) {
         const sub = document.createElement('div');
         sub.style.cssText = 'font:11px/1.2 system-ui,sans-serif;font-style:normal;font-weight:500;opacity:.8;letter-spacing:.08em;text-transform:uppercase';
@@ -62,11 +69,12 @@ export function createNameLabels(container = document.body) {
   }
   return {
     // wy: height of the label above the water at the place. Shown when the queue allows.
-    show(entry, wy, nowS) { queue.push({ entry, wy }, nowS); },
+    // hint: true for a sighting (the descriptive name, before discovery).
+    show(entry, wy, nowS, hint = false) { queue.push({ entry, wy, hint }, nowS); },
     // Call every frame after the camera moved.
     update(camera, width, height, nowS) {
       const next = queue.pop(nowS, active.length);
-      if (next) spawn(next.entry, next.wy, nowS);
+      if (next) spawn(next.entry, next.wy, nowS, next.hint);
       for (let i = active.length - 1; i >= 0; i--) {
         const a = active[i];
         const age = nowS - a.born;
