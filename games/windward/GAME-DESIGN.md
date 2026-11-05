@@ -7,7 +7,8 @@ source of truth: when a decision changes, change it here first.
 Updated 2026-11-05 after Felix's first answers: the game is now framed as
 **era-jumping** with a retro opening (see "The opening" and "The frame"). The
 single-era pitch below is the *middle* of that frame, not the whole game.
-Era choice (Q1) is deliberately still open.
+*Update 2026-11-05: Q1 is SET (see "Shared understanding" and the
+decisions log); the grilling is complete.*
 
 Read with: `DESIGN.md` (sailing, controls, look), `shared/ART.md`.
 
@@ -242,8 +243,9 @@ Before any story, the first thing is just sailing.
   clear that sailing is fun in itself and that ports do things. Don't go
   deep on port mechanics yet; make the early hook clear.
 - **"The game" (story, chart) starts when you choose it**, for example from a
-  port. A second way in is the fog and thunder (see "Fog"); whether that
-  is an offer or a hijack is open.
+  port. A second way in is the fog and thunder (see "Fog"): lingering in edge fog
+  until thunder is an offer (a warning you can sail out of); only the
+  lightning-flash fog commits (SET, confirmed 2026-11-05).
 - This is the no-save lure: 5 minutes must already feel rewarding.
 - **Pre-story sailing is today's coast (SET, Q10):** the current free-sail
   mode, with its real present-day lights.
@@ -306,8 +308,8 @@ mystical.
   epochs.json (it lists Hållö 1842, Måseskär 1865, Pater Noster 1868, Eggskär
   1904).`
 - **Start location:** the densest cluster of Felix's favourite places, west
-  Orust around Käringön / Härmanö / Gullholmen / Hälleviksstrand.
-  `TODO(felix): confirm.`
+  Orust around Käringön / Härmanö / Gullholmen / Hälleviksstrand
+  (SET, confirmed 2026-11-05).
 - **Granddad's chart:** you inherit his nautical chart. It reveals a small
   part of an expandable mini-map with markers on sweet spots (Felix's
   favourite places). Deeper in you explore it yourself or buy further chart
@@ -519,6 +521,68 @@ Save sketch (not final):
   across eras (Q35 b-d). Knowledge keys already follow from "knowledge
   travels" (Q9); revisit the others if the pairs need them.
 
+## Shared understanding (CONFIRMED, Felix 2026-11-05)
+
+The grilling is complete: every branch of the design tree has been visited
+and Felix confirmed this summary, with the corrections folded in. Where this
+section and an older section disagree, this one wins; change the older text
+when you touch it.
+
+**Shape**
+- **Look:** Skagen-painter palette, pastel and slightly cold, blue-hour
+  light (branch `felix/windward-look`, `DESIGN.md` "Look pass 3").
+- **Start:** west Orust (Käringön / Härmanö / Gullholmen / Hälleviksstrand).
+- **Today's coast is never dead:** small life (fish, boats, birds); sailing
+  into a port or up to a house triggers something small (a wave, a tossed
+  fish); the story is offered quietly at a port. A **"just sail" mode stays
+  available.**
+- **Two ways into the story:** choose it at a port, or linger in edge fog
+  until thunder (a warning you can sail out of; only the lightning-flash fog
+  commits).
+- **~1905 is the opening chapter, not just a storm:** granddad's chart, the
+  lights teaching navigation, chill sailing. It ends in the storm that throws
+  you to ~1700.
+- **Phone = short trips that still feel rewarding; laptop = bigger
+  missions.** Five minutes must always be worth it.
+- **No ending:** stay in an era or move on; staying never stagnates.
+
+**Time**
+- Seasons run as one year across the timeline (autumn to winter in epoch I,
+  spring in New border, summer in Today); winter chapters can sit inside
+  eras.
+- First release builds for real: the end of New border, Crown shores, The
+  silver comes, Honour and Life, plus Today and the 1905 opening. The rest
+  are tastes and time-lapses.
+- Marstrand free port and smuggling are in; historical characters
+  (Lasse-Maja and others) at some point.
+
+**Sea and night**
+- Before 1840 you steer by sea marks (cairns, daymarks, beacon fires, church
+  towers); lighthouses from 1840. The marks becoming official is part of
+  showing time pass.
+- Night: short blue-hour summer nights; real dark in autumn/winter eras, the
+  1905 opening and storms; skip only in harbour.
+
+**Together**
+- Solo first, drop in/out any time, nobody commits to solo or co-op up front.
+- **Today's coast is the shared meeting place between times.**
+- The pair net sweeps different things per era (barrels, flotsam, herring,
+  contraband, wreck goods): not a fishing game. A smart ping is the cheap
+  first co-op feature.
+
+**The loop**
+- Granddad's chart reveals a place-based section of an expandable mini-map;
+  more sections come by exploring, barter or buying.
+- Works loop: get rights to a harbour, build a saltery / oil works yourself
+  (diorama feel, small workers optional), herring to oil (~10 to ~60
+  riksdaler), carry it by sea, sell to foreign ships, a little smuggling,
+  permits and inspections later in the era.
+
+**Title**
+- "Windward: Honour and Life" is the working title regardless; it is our own
+  phrase. Do not present it as a historical quote unless Olán or Holmberg
+  confirm the wording.
+
 ## Terms (new, Felix 2026-11-05)
 
 - **Epoch:** a long span (about 100+ years), roughly one release.
@@ -682,6 +746,57 @@ Q57 c):** Markdown with YAML frontmatter for characters, bonds and places
 example `[Old-New 2, Rules-Free 4, Thrift-Spend 2, Kin-Stranger 3,
 Caution-Daring 4]`.
 
+## Build first: stage 1, the lure (PROPOSAL, 2026-11-05)
+
+Scoped to what is already built. Nothing here is started; Felix decides.
+
+**What already exists on main** (read from `game.js` and `src/`, 2026-11-05):
+sailing (boat, sail trim, wind, fixed three-quarter camera, water, wake, sky),
+a procedurally scattered archipelago, settlements with buildings, lighthouse
+props, discoverables, a drop-in partner with a ping, phone controls and a
+HUD. Stages 1 and 2 of the old plan, the phone work and drop-in play are
+merged. Touch controls (`felix/windward-touch`, one commit) are not.
+
+**What exists only on branches (unmerged):** the Skagen look
+(`felix/windward-look`), the real-coast data and `epochs.json`
+(`felix/windward-real-coast`), 29 sourced lighthouses
+(`felix/windward-lighthouses`). All three are data or look work, not game
+logic.
+
+**What the lure still needs (checked by search, none exists in `src/`):**
+fog (the sky only sets `fog: false`), thunder, birds, fish and other small
+life, port or house arrival triggers, deck items, device-kept memory
+(`localStorage`), and a day-night cycle.
+
+**Proposed slice, in order** (each is playable and tested before the next):
+
+1. **Merge what exists.** Look, real-coast data and lighthouses reach main
+   (Felix merges; the touch controls branch too). Without the look the lure
+   is not the game Felix described.
+2. **Port or house arrival.** Sail up to a settlement building and get one
+   small reaction: gulls scatter, a wave, a tossed fish onto the deck. The
+   fallback is a simple port menu (start the story / leave). Uses the
+   existing settlements and a proximity check like `discover.js`.
+3. **Small life.** A few birds, fish and one drifting boat so the sea is
+   never dead. Cheap and decorative; no interaction rules.
+4. **Deck items and device memory.** Three or four items visible on the boat;
+   kept in `localStorage` (device-only, Q26 b).
+5. **Blue-hour sky.** A short fixed blue-hour moment first, with lighthouses
+   blinking on, before a full day-night cycle (Q50 a).
+6. **Quiet edge fog and the thunder warning.** One fog with a fixed edge
+   distance, a rumble that fades because the story does not exist yet. The
+   first piece that needs the fog numbers tuned (Q22 c).
+
+**Open before it starts (Felix decides):**
+- **Real west Orust coast or the procedural archipelago?** The playable game
+  today uses procedural islands; the real coast exists only as data in the
+  lab. Using the real coast in the lure is a large step; the proposal is to
+  keep the procedural islands for stage 1 and move to the real coast with
+  stage 3a, where the chart needs it. `TODO(felix): confirm.`
+- **Order of steps 3 to 6**, or drop any of them to ship the lure sooner.
+- **Mission control setup.** `AGENTS.md` expects a gated batch per commit and
+  one agent per folder; stage 1 should be run that way, in a worktree.
+
 ## Core loop: build a works (SET as a minimal first slice, Q31 c)
 
 - **The idea:** find a sheltered harbour, get the rights (crown land under
@@ -842,6 +957,8 @@ yet grilled), **INFERRED** (my reading, confirm).
 | 45 | Fog while visiting | **SET** (for now) | No crossing while visiting; edge fog is just fog. Later: host proposes, visitor consents, they cross together, if cheap (Q44 c). |
 | 46 | Characters, places, events | **SET** | File per character and per bond (sorted pair ids), ids never guessed, derived facts never stored, gaps reported, places as files, one event spine incl. the player's saved actions, history vs story, explicit scene casts. Date: year is the data, season derived from the era, chapters may override, shown as "Late summer 1787" (Q56 a). Echoes by thread id with a shared base temperament and +/-1 shift per era-version (Q54 a); bonds within an era only for now (Q55 a). Markdown + YAML for characters, bonds and places; JSON for events and epochs (Q57 c). Reference doc committed. |
 | 47 | Temperament | **SET** | Axes: Old ways-New ways, Rules-Free, Thrift-Spend, Kin-Stranger, Caution-Daring; 1-5; display only first, then small behaviours, visible once you have met someone, no hidden number (Q51-Q53). Scores on real people are marked story, not history. |
+| 48 | Shared understanding | **SET** | Felix confirmed the whole design on 2026-11-05 with corrections (look, start place, never-dead coast, two ways in, 1905 as a chapter, phone vs laptop, no ending, shared meeting place, pair net not a fishing game). See "Shared understanding". The grilling is complete. |
+| 49 | Build first | **PROPOSAL** | Stage 1, the lure, scoped to what is built: merge look, real-coast data and lighthouses; then port arrival, small life, deck items with device memory, blue hour, quiet edge fog and thunder. Open: procedural islands or real coast for stage 1. |
 
 ## Gaps (to grill)
 
