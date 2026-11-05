@@ -17,7 +17,7 @@ Lambert, Skagen palette (shared/ART.md). Keep src/boat.js's API: createBoatMesh(
 ## After the jump to ~1700: a small eka with a spritsail
 - A small **clinker eka** (open wooden boat), ~4–5 m real, one **spritsail**. Poor and
   humble: you start with almost nothing.
-- **Hull: dark tarred wood.** **Sails: tanned brown/red** (barked sails).
+- **Hull: dark tarred wood.** **Sails: tanned rust-brown** (barked sails; `esail=rust`, chosen 2026-11-05).
 - **Oars** lie in the boat (used in calm or in harbour).
 
 ## Both boats
