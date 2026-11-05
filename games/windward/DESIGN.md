@@ -298,6 +298,18 @@ Not built yet — a direction for the opening of every session.
   relative to the spawn heading and scripting the first one or two shifts
   (host-authoritative as now, so both players get the same lesson).
 
+## Upwind should still feel like sailing (Felix, 2026-11-05)
+
+Close to the no-go zone the boat barely moves even with perfect trim: the
+polar in `src/sail.js` smoothsteps all the way from 22.5° (0) to 90°
+(0.95), so 30° off the wind is ~0.7 kn and 45° is ~5 kn (at 0.75 wind).
+Proposed curve, trialled in the Control Lab:
+`[[22.5, 0], [28, 0.42], [45, 0.68], [90, 0.95], [100, 1], [180, 0.8]]`
+— 30° ~9 kn, 45° ~14 kn, beam reach unchanged at ~19 kn. Upwind stays
+slower than reaching (tacking still pays), but it never feels stopped.
+Not applied to the game yet; `sail.test.js` will need its expectations
+updated when it is.
+
 ## Phone controls: Control Lab findings (Felix, 2026-11-04)
 
 Explored in a throwaway prototype (claude.ai artifact "Windward Control
