@@ -1,7 +1,7 @@
 # Last session
 
 **2026-11-05: real-coast trial** (branch `felix/windward-coast-trial`, on `origin/main` e1812c7,
-NOT merged). Spike behind `?coast=real&debug=1`: west Orust window (1000 x 1224 m at 1:10) in the
+NOT merged). Spike behind `?coast=real&debug=1`: Käringön-to-Grundsund window (1118 x 1838 m at 1:10) in the
 real game, with a perf overlay. Results + recommendation: `games/windward/docs/COAST-TRIAL.md`.
 Felix reads the overlay on a real phone next. Earlier today: big merge to `main` (look, lighthouses,
 real-coast data, game design confirmed, epochs); the game on `main` still uses procedural islands.

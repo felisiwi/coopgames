@@ -25,8 +25,8 @@ import { createLighthouse, LIGHTHOUSES } from './lighthouses.js';
 
 export const COAST_SCALE = 10; // 1:10
 // West Orust: Käringön, Gullholmen, Härmanö, Hälleviksstrand, Måseskär, Hättan all fall inside.
-// ~10 km east-west, ~12 km north-south at real size (Måseskär and Gullholmen sit near the south/north edges).
-export const COAST_WINDOW = { w: 11.30, e: 11.47, s: 58.08, n: 58.19 };
+// ~11 km east-west, ~18 km north-south at real size: Käringön/Måseskär in the south up to Grundsund, Gåsö, Storön in the north.
+export const COAST_WINDOW = { w: 11.27, e: 11.46, s: 58.085, n: 58.25 };
 export const COAST_TILES = ['north']; // the one raster tile that holds the window
 // Game metres of height per real metre of height. 1:10 uniform would be 0.1 (3 m hills: flat next
 // to the procedural islands, whose peaks are 85 m on a 145 m radius). TODO(felix): confirm by eye.
