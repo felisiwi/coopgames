@@ -352,7 +352,8 @@ Opening-year options (kept for the record; about 1905 chosen):
   granddad's letters or log, plus one anachronistic object (a lamp part)
   whose purpose you learn later. The earlier idea that it lifts you from poor
   into the free-port heyday is not part of these contents; revisit if wanted.
-  How it is found is open.
+  **Found in two steps (SET, Q42 d):** the letters wash ashore first; the
+  lamp part turns up later, elsewhere.
 - **Eras do not unlock in order (SET, Q30 and Q34 b).** Unlocks are spaced
   across the timeline so moving back and forth in time is engaging and
   earlier eras stay relevant. They come as **cause-and-effect pairs**: every
@@ -409,8 +410,10 @@ Design this explicitly; it touches almost every system.
   simpler version first. You can only visit eras you have both unlocked (b);
   it needs no per-item unlock keys and no mist rendering. Later, option a:
   mist on whatever the visitor has not unlocked, and net-haul items from
-  locked eras arrive as a "mysterious find". Still open: if a visitor
-  lingers in the host's fog (Q24 a), whose story do the flashes commit?
+  locked eras arrive as a "mysterious find". **Fog while visiting (SET, Q44 c for now):** no
+  crossing while visiting; edge fog is just fog. Later idea: the host proposes
+  a crossing and the visitor consents, and they cross together, only if it is
+  not much extra work; otherwise a later feature.
 - **No early currency (SET, Q23 c):** barter and favours. Things the pair
   net sweeps up (barrels, flotsam) become gifts and trade goods for chart
   sections. No throwaway early economy; the real one is the trade stage.
@@ -458,9 +461,9 @@ Save sketch (not final):
   the others.
 - Visitors see the host's state; every player's own world stays their own
   (Q11).
-- **Open (round 9):** do we store only the player's actions per era and
-  derive how the world looks later from era rules, or store per-era
-  snapshots?
+- **Stored actions, derived looks (SET, Q40 a):** the save keeps what the
+  player did; how the world looks later comes from era rules at runtime. Each
+  cause-and-effect pair therefore needs its derivation rule written.
 
 ## Reasons to return, sea marks and flash patterns (SET, Felix 2026-11-05)
 
@@ -479,6 +482,18 @@ Save sketch (not final):
   Sandviksholmen and Kråksundsgap Södra in `lighthouses.js`). They also matter
   when sailing at night: at night, lights are how you navigate. A way-home
   sequence of patterns (Q38 b) is a possible later addition.
+- **Pairs, in build order (SET, Q41):** all four are in the plan.
+  (d) a hut on crown land in 1706 becomes a saltery in The silver comes,
+  ships first, both playable in release one. Then (a) a harbour claim, its
+  ruin, a heritage site; (b) a beacon fire, then a lighthouse on the same
+  skerry; (c) a smuggler's cache, then the same cove in Spirits at sea. The
+  later ones follow as their eras get built.
+- **Day and night (SET, Q43 a):** a full day-night cycle, with the season
+  setting the day length. Night is a gameplay trade-off, not just mood: it is
+  easier to slip past for smuggling and harder to navigate, and that is when
+  lighthouses, flash patterns and sea marks really matter. Keep it cosy and
+  phone-friendly (for example moonlit nights, beacon fires in early eras, a
+  sensible night length). The how is open (round 10).
 - **Not chosen:** knowledge keys, season and material needs, and people
   across eras (Q35 b-d). Knowledge keys already follow from "knowledge
   travels" (Q9); revisit the others if the pairs need them.
@@ -691,7 +706,7 @@ yet grilled), **INFERRED** (my reading, confirm).
 | 15 | Signature co-op move | **SET** (timing open) | The pair net, sweeping different things by era and place (fish is one use). May arrive with the visiting stage. Early co-op = smart ping + pair net. |
 | 16 | Port arrival | **SET** | Sensory reward + a small gift (a fish) + the story offered quietly. Fallback: a simple port menu. No long dialogue UI. |
 | 17 | What a visitor brings | **SET** | Your own stuff comes along; earnings go home. A trade cap later if needed. |
-| 18 | Visiting with different unlocks | **SET** (b first, then a) | Visit only eras both have unlocked first; later mist on what the visitor hasn't unlocked, with net-haul items from locked eras arriving as a mysterious find. Open: whose story the fog flashes commit while visiting. |
+| 18 | Visiting with different unlocks | **SET** (b first, then a) | Visit only eras both have unlocked first; later mist on what the visitor hasn't unlocked, with net-haul items from locked eras arriving as a mysterious find. Fog while visiting: no crossing for now (Q44 c). |
 | 19 | Treasure causality | **SET** | Something is lost during the opening (the storm takes granddad's sea chest) and found after the first jump. |
 | 20 | Stage order | **SET** | Lure, then co-op visiting, then chart/storm/jump, then trade. |
 | 21 | Chart shape | **SET** | Fixed sections first (inherited or bought), exploring reveals detail on top. |
@@ -713,8 +728,12 @@ yet grilled), **INFERRED** (my reading, confirm).
 | 37 | Per-era world state | **SET** | Each era keeps its own persistent state in the save; no goods cross, the world remembers (a 1706 claim is a ruin in 1820 and heritage in 1905). Keyed by era id. |
 | 38 | Reasons to return | **SET** (a + e) | Things you leave behind, and sea marks as anchors (kummel, daymarks, vårdkasar, church towers; lighthouses from 1840). Marks getting more official shows time passing. |
 | 39 | The opening stays locked | **SET** | The ~1905 opening stays locked until a later spaced unlock. Today's coast is always open. |
-| 40 | The sea chest | **SET** (contents) | Granddad's letters or log plus one anachronistic object (a lamp part) whose purpose you learn later. How it is found is open. |
+| 40 | The sea chest | **SET** (contents) | Granddad's letters or log plus one anachronistic object (a lamp part) whose purpose you learn later. Found in two steps: the letters wash ashore first, the lamp part turns up later, elsewhere (Q42 d). |
 | 41 | Flash patterns | **SET** (a) | Identify which light you see in fog, read with the chart because patterns repeat; they also matter at night. A way-home sequence is a possible later addition. |
+| 42 | Stored actions, derived looks | **SET** | The save keeps the player's actions per era; later looks come from era rules at runtime (Q40 a). |
+| 43 | Pair build order | **SET** | d first (hut 1706 to saltery, both in release one), then a (claim, ruin, heritage), b (beacon fire to lighthouse), c (smuggler's cache to Spirits at sea) (Q41). |
+| 44 | Day and night | **SET** (principle), how **OPEN** | A full cycle, season sets day length; night is a trade-off (easier to slip past, harder to navigate); cosy and phone-friendly (Q43 a). |
+| 45 | Fog while visiting | **SET** (for now) | No crossing while visiting; edge fog is just fog. Later: host proposes, visitor consents, they cross together, if cheap (Q44 c). |
 
 ## Gaps (to grill)
 
@@ -725,8 +744,8 @@ Recorded 2026-11-05; resolved ones move into the log above.
 - **Saving:** a world needs an owner and a save for visiting to mean
   "a friend's world". Before the story (stages 1-2) a visit is a room with
   no save; the first real save is needed at stage 3.
-- **How the sea chest is found (round 9)** after the jump, and how
-  "understands later" lands.
+- **How "understands later" lands:** which later moment explains the
+  letters and the lamp part.
 - **Stage 5 rewrite:** T0-T8 is the trade phase and still assumes one era;
   rewrite it around the works slice (Q31 c).
 - **Chart sections:** how many, what each reveals, who authors them, and
@@ -744,14 +763,16 @@ Recorded 2026-11-05; resolved ones move into the log above.
   layer anyway.
 - **Unmerged inputs:** lights (`felix/windward-lighthouses`) and the real
   coast and settlements (`felix/windward-real-coast`) are not on `main`.
-- **Stored or derived (round 9):** per-era state kept as the player's
-  actions with later looks derived from era rules, or as snapshots?
-- **The first cause-and-effect pair (round 9):** which authored pair ships
-  first.
+- **Derivation rules per pair:** the first one needed is pair d (hut to
+  saltery).
 - **Sea marks timeline:** a sourced list of what sea marks exist in each era.
-- **Night:** a day/night model, since lights are how you navigate at night;
-  when it ships and how it works with the seasons.
-- **Fog flashes while visiting:** whose story do they commit?
+- **Night (round 10):** length and season, skipping a night, how hard it is
+  to navigate, patrols and smuggling, early beacon fires, and whether the
+  lure has a night.
+- **Characters and bonds across eras:** a write-up from another project is
+  coming (characters and bonds as files, a shared date format, place ids, one
+  events table as the spine). Add a section when it arrives.
+- **Host-proposed crossing:** the later idea in Q44, only if cheap.
 - **Lights cross-check:** the lit years in `epochs.json` against the sourced
   built years in `lighthouses.js` (branch `felix/windward-lighthouses`).
 - **Source check for the epoch draft:** every date and figure (1706
