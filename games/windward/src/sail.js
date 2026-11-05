@@ -9,8 +9,14 @@ const NO_GO_HALF_DEG = 22.5;
 // strength/trim). Smoothstep-interpolated between consecutive points — one
 // continuous curve from the no-go edge through the peak to dead downwind,
 // no seams (DESIGN.md's explicit correction over independent pieces).
+// Felix 2026-11-05: two upwind points so close-hauled still feels like
+// sailing (was ~0.7 kn at 30 deg off the wind with perfect trim; now ~9 kn).
+// Trialled in the Control Lab prototype. Upwind stays slower than reaching,
+// so tacking and picking an angle still matter.
 const CURVE = [
   { deg: NO_GO_HALF_DEG, factor: 0 },
+  { deg: 28, factor: 0.42 },
+  { deg: 45, factor: 0.68 },
   { deg: 90, factor: 0.95 },
   { deg: 100, factor: 1.0 },
   { deg: 180, factor: 0.8 },

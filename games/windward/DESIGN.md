@@ -307,8 +307,8 @@ Proposed curve, trialled in the Control Lab:
 `[[22.5, 0], [28, 0.42], [45, 0.68], [90, 0.95], [100, 1], [180, 0.8]]`
 — 30° ~9 kn, 45° ~14 kn, beam reach unchanged at ~19 kn. Upwind stays
 slower than reaching (tacking still pays), but it never feels stopped.
-Not applied to the game yet; `sail.test.js` will need its expectations
-updated when it is.
+Applied to the game 2026-11-05 (`src/sail.js`), locked in by
+`sail.test.js`'s "upwind still sails" check.
 
 ## Phone controls: Control Lab findings (Felix, 2026-11-04)
 

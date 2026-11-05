@@ -138,4 +138,12 @@ check('boatSpeed without a trim argument assumes ideal trim (full speed)', () =>
   assert.equal(withoutTrim, withIdealTrim);
 });
 
+check('upwind still sails (2026-11-05): close-hauled is well under a reach but never near-stopped', () => {
+  const at = (deg) => speedFactor(deg * DEG);
+  assert.equal(at(22.5), 0); // no-go edge unchanged
+  assert.ok(at(30) > 0.4, `30 deg: ${at(30)}`); // was ~0.03
+  assert.ok(at(45) > 0.6 && at(45) < at(90), `45 deg: ${at(45)}`);
+  for (let d = 23; d < 100; d++) assert.ok(at(d + 1) >= at(d) - 1e-12, `not rising at ${d}`);
+});
+
 console.log(`\n${passed}/${passed} assertions passed`);
