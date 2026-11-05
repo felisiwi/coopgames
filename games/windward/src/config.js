@@ -8,7 +8,7 @@ export const CONFIG = {
   // gust dying, a bad tack), giving the boat some weight. TURN_RATE scaled
   // up by roughly the same ratio so turning radius (speed / angular rate)
   // doesn't balloon into "bathtub" territory now that top speed is higher.
-  BOAT_MAX_SPEED: 14, // m/s, full strength + 100° peak, ideal trim
+  BOAT_MAX_SPEED: 10, // m/s, full strength + 100° peak, ideal trim (14 felt too fast on a phone, Felix 2026-11-05)
   SAIL_FORCE: 6, // m/s^2, accel toward target speed
   DRAG: 4, // m/s^2, decel toward target speed (slightly slower to shed than gain)
   TURN_RATE: (Math.PI / 2) * 1.5, // 135 deg/s (was 90 deg/s at BOAT_MAX_SPEED 8)

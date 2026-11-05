@@ -13,7 +13,7 @@
 //                  'dot'  — your thumb moves the dot along the arc.
 //   tap the boat   ping your friend.
 //
-// Wind is read at the boat (no-go wedge + streaks on the water); trim from
+// Wind is read at the boat (streaks on the water + a chevron upwind); trim from
 // the sweet-spot arc round the boat. Hints float above the thumb, never
 // under it, and the "second thumb" ghost only appears once a first finger is
 // steering. All drawn on a 2D layer over the WebGL canvas.
@@ -261,19 +261,11 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     }
   }
 
-  function drawWedge(self, wind) {
+  // Felix 2026-11-05: no no-go "cake slice" — just a small blue chevron on the
+  // upwind side of the boat, pointing the way the wind blows.
+  function drawWindMark(self, wind) {
     const [bx, by] = boatScreen();
     const R = arcR() * 1.9;
-    ctx.fillStyle = 'rgba(255,110,80,0.18)';
-    ctx.beginPath();
-    ctx.moveTo(bx, by);
-    for (let k = 0; k <= 8; k++) {
-      const a = wind.dir - NO_GO_HALF + (k / 8) * 2 * NO_GO_HALF;
-      const s = screenAngle(a);
-      ctx.lineTo(bx + Math.cos(s) * R, by + Math.sin(s) * R);
-    }
-    ctx.closePath();
-    ctx.fill();
     const s = screenAngle(wind.dir);
     ctx.fillStyle = '#8fd3ff';
     arrowHead(bx + Math.cos(s) * (R + 10), by + Math.sin(s) * (R + 10), s + Math.PI, 9); // wind blows from here
@@ -398,7 +390,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     const [bx, by] = boatScreen();
 
     drawStreaks(wind);
-    drawWedge(self, wind);
+    drawWindMark(self, wind);
     drawArc(self, wind);
 
     for (const p of pointers.values()) {
