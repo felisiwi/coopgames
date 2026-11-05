@@ -4,6 +4,11 @@ Status: plan, not built. Written 2026-11-05 from Felix's brief. Grill it
 (`/grill-me`) before any of it is built, then keep this file as the single
 source of truth: when a decision changes, change it here first.
 
+Updated 2026-11-05 after Felix's first answers: the game is now framed as
+**era-jumping** with a retro opening (see "The opening" and "The frame"). The
+single-era pitch below is the *middle* of that frame, not the whole game.
+Era choice (Q1) is deliberately still open.
+
 Read with: `DESIGN.md` (sailing, controls, look), `shared/ART.md`.
 
 ## The pitch
@@ -33,6 +38,10 @@ each other, but here the board is a real coastline you sail across.
 Alternatives if the herring era doesn't feel right: the stone-quarrying
 1870s-1900s (granite to Europe, steam arriving), or the 1600s, when
 Bohuslän passed from Norway to Sweden (1658). Decide in the grill.
+
+> **Superseded in part (2026-11-05):** the game is no longer one era. This
+> section argues for era 3 below (free port + herring boom); it stays as the
+> case for that candidate. See "Era candidates".
 
 ## Pillars
 
@@ -202,18 +211,210 @@ Each stage is small, playable and tested before the next.
 Before T1: the real coast (stage R0) and the look (L1) should be in, and
 `game.js`'s single `other` player refactored to a players map.
 
-## Decisions for Felix (grill these)
+## The first minutes (SET, Felix 2026-11-05)
 
-1. Era: great herring period (1770s-1790s) or another?
-2. Shared fortune or separate? One shared purse and fleet, or each friend
-   their own money and a co-op layer on top?
-3. How much should provisions bite: barely (flavour) or properly (route
-   planning)?
-4. Session shape: drop in for 20 minutes, or long campaigns with saves?
-5. Player-to-player trading: only when moored together, or anywhere?
-6. Contraband and the free port: a fun risky option, or leave it out?
-7. Win condition: none (sandbox with goals), or a gentle end such as "own
-   the finest sloop on the coast" or "the herring leave in 1809"?
+Before any story, the first thing is just sailing.
+
+- A nice view, and you figure out the controls yourself. No tutorial wall.
+- Small interactions so it never feels dead: fish, another little boat,
+  birds, and so on.
+- Sailing into a port or up to a house triggers something early on, so it is
+  clear that sailing is fun in itself and that ports do things. Don't go
+  deep on port mechanics yet; make the early hook clear.
+- **"The game" (story, chart) starts when you choose it**, for example from a
+  port. Nothing forces the story on you.
+- This is the no-save lure: 5 minutes must already feel rewarding.
+
+## The opening: where the story starts (new, Felix 2026-11-05)
+
+When you choose the story, you start in a short slice of a later but still
+retro era: before 1950, maybe older. No GPS. It should feel retro and
+mystical.
+
+- **Opening year (open, option to weigh):** about 1905. Måseskär, Pater
+  Noster and Hållö stand nearby; small lights, cairns (*kummel*) and village
+  signal fires (*vårdkasar*) mark the coast; sail is still dominant.
+  `TODO(felix): confirm year; check each light's built year in lighthouse-lab
+  data before relying on "stand nearby in 1905".`
+- **Start location:** the densest cluster of Felix's favourite places, west
+  Orust around Käringön / Härmanö / Gullholmen / Hälleviksstrand.
+  `TODO(felix): confirm.`
+- **Granddad's chart:** you inherit his nautical chart. It reveals a small
+  part of an expandable mini-map with markers on sweet spots (Felix's
+  favourite places). Deeper in you explore it yourself or buy further chart
+  sections from people you meet.
+- **Teaching sailing and navigation:** lighthouses, cairns and village fires
+  are the tutorial. No pop-up lessons; the coast teaches.
+- **The storm:** after the first chart and some chill sailing, a storm rolls
+  in that you cannot escape wherever you are: thunder, the mysterious fog
+  with flashes, then the first era jump. Destination open (see below).
+- **The opening era locks after the first jump.** Much later you return to
+  it, when you have almost forgotten it, and the lighthouses carry meaning
+  then, for example their real flash patterns as a code or a way home.
+  **Open: what that meaning is.**
+
+Opening-year options (no pick):
+
+| Option | For | Against |
+|---|---|---|
+| ~1905 | Three real lights of different character nearby plus humbler marks (cairns, fires): a rich navigation lesson. Sail still dominant but the world feels old. | It sits inside era 6's window (1877-1906), so the opening spends era 6's taste and leaves it little contrast. Engines may be arriving. `TODO(felix): confirm.` |
+| Older (1850s-1870s) | Fewer lights, so fog bites harder and the mystery is stronger. | The three named lights may not be lit yet; fewer things to teach with. |
+| Later (up to 1949) | More photos and maps survive. | More engines, less retro and mystical. |
+
+## The frame: era-jumping (new, Felix 2026-11-05)
+
+- **Same character reimagined in every era** (different friends, partners,
+  historical figures). Only the player sees the overlaps; the story threads
+  across eras.
+- **Crossing = mysterious fog with lightning-like flashes.** Ordinary fog
+  still exists. Fog makes lighthouses essential, which is a feature.
+- **Heritage touch points** (standing stones, cairns, etc.) as clues,
+  points, treasures. Rock carvings are a much later release.
+- **Treasure across time:** treasure buried in a rich later era (by you,
+  unknowingly) is dug up in the poor early era. That lifts you from poor
+  fisher into the free-port heyday and smuggling. *Idea, not set.*
+- **The story unlocks eras; once unlocked you jump freely.**
+- **Era tastes are very small at first** but clearly different in look and
+  feel, to tease.
+- **Time is shown by what exists** (lighthouses, villages, boats), with a
+  sped-up time-lapse (towers rising) at era changes.
+- **Co-op across eras:** undecided, possibly a big mechanic later. Start with
+  everyone in the same era.
+- **What crosses a jump (SET):** knowledge travels (chart sections,
+  discoveries, history cards); stuff does not (boat, cargo, money), apart
+  from the one deliberate exception of buried treasure. Each era keeps its
+  own economy and boat, so a later era can ship as a later release.
+
+## Playing together: easy in, easy out (SET, Felix 2026-11-05)
+
+Design this explicitly; it touches almost every system.
+
+- **Before the story, anyone can join.** You just see each other nearby and
+  sail together. Sailing together should already have some small purpose, so
+  players get an "aha, it's better together" moment.
+- **Nobody chooses solo or co-op up front.** When you start the story, either
+  your solo adventure starts or you and your friend start together.
+- **Either player can drop in and out without breaking the other's game.**
+  Ideally both, not just the host.
+- **Story progress must never create annoying blockers between players.**
+  This is a design rule for every story mechanic, not a feature.
+- **Purses are separate (SET).** The drop-in/drop-out flow must define what
+  happens to shared contracts, cargo and co-op bonuses when someone leaves
+  mid-trip. Open, see Gaps.
+- **Technical tension:** today the host owns wind, finds and (later) markets,
+  and a host leaving ends the room. "Not just the host" needs a decision on
+  authority. Open, see Gaps.
+
+## Where the story is told: history layers (SET, Felix 2026-11-05)
+
+- **Start area: west Orust** (Käringön / Härmanö / Gullholmen /
+  Hälleviksstrand), the densest cluster of Felix's favourite places.
+- **History in two depths:** a broad scan of villages and big history for the
+  whole coast, plus deeper, more niche history for the start area.
+  Sourced like `settlements-history.json` (its confidence key), never from
+  memory.
+- **Technically an era is a year value** driving lighthouses, settlements,
+  boats and palette. Already prototyped for two of those four, unmerged:
+  `coast-lab.html` + `data/settlements-history.json` (branch
+  `felix/windward-real-coast`, settlement phases per year, sourced, 1700-2025)
+  and `lighthouse-lab.html` (branch `felix/windward-lighthouses`, towers by
+  built year, 1740-2025). Boats and palette are not year-driven yet.
+
+## Era candidates (written up, no pick)
+
+All dates are Felix's candidate windows. Historical facts beyond them are
+`TODO(felix): confirm` against the lab data, which cites its sources.
+"Buffer" = what extra years before or after the window would buy.
+
+1. **Tordenskjold's war, 1700-1720.**
+   For: dramatic; privateers and fortress (Carlsten) as gentle tension.
+   Against: war is the theme, which fights "no combat"; thin economy; few
+   or no lights, so fog is brutal.
+   Buffer: start earlier shows the coast before the war; end later runs into
+   era 2.
+2. **East India + herring returns, 1731-1774.**
+   For: Götheborg's sinking (1745) is a ready story beat and the "poor era"
+   to land in; a clear poor-to-rich arc into era 3.
+   Against: East India trade happens at Gothenburg, not the small-boat coast;
+   herring return date needs checking against the 1747 start in this doc.
+   Buffer: ending later at 1774 makes the free-port declaration the payoff.
+3. **Free port + herring boom, 1775-1794.**
+   For: every hook in this doc fits (shoals, Marstrand, smuggling, Carlsten);
+   the richest economy.
+   Against: the obvious choice, so least surprising; the free port ends 1794;
+   lights of today's kind are probably few. `TODO(felix): confirm.`
+   Buffer: start earlier to witness the port declared; end later is era 4.
+4. **Herring crash, Napoleonic smuggling, Lasse-Maja, 1795-1815.**
+   For: smuggling, a real folk character, a strong mood shift from era 3.
+   Against: the crash is grim for a cosy game (pillar 3); needs a gentle way
+   to show decline.
+   Buffer: start earlier lets the boom visibly end; end later shows recovery.
+5. **Lights go up, 1840-1876.**
+   For: the time-lapse of towers rising is this era; best fit for "fog makes
+   lighthouses essential"; sail still dominant.
+   Against: the herring economy is over, so trade needs other goods.
+   Buffer: start earlier is darker, with fewer lights; end later meets era 6.
+6. **Second herring boom + granite, 1877-1906.**
+   For: new good (granite); steam arriving gives a "last days of sail" mood.
+   Against: overlaps the ~1905 opening, so little contrast if both are used.
+   Buffer: end later is the opening's own date.
+7. **Today's summer coast (current free-sail mode).**
+   For: already built; the natural no-save lure and the real-coast reference.
+   Against: no mystery; the least "jump" feeling.
+   Buffer: n/a.
+
+First-jump destination (open): the poor era around 1745 (Götheborg sinks),
+or another exciting era first. No pick until Q1 is settled.
+
+## Decisions log
+
+Status: **OPEN**, **SET** (Felix said it), **INFERRED** (my reading, confirm).
+
+| # | Decision | Status | What we have |
+|---|---|---|---|
+| 1 | Era | **OPEN** | Held until Felix has seen the year-slider labs. Seven candidates above, no pick. |
+| 2 | Shared fortune or separate | **SET** | Separate purses (Q7). Must work with the drop-in/drop-out flow: what happens to shared contracts, cargo and bonuses when someone leaves mid-trip is open. |
+| 3 | Provisions | **SET** | One combined "stores" meter, planned but not at the start. It must matter enough to make you sail into ports. |
+| 4 | Session shape | **SET** | No-save mode is the lure: jump in, sail, pretty. The real game is saves + friends + story + history + trading. 5 minutes must still feel rewarding; longer play goes deeper. Phone = short trips, laptop = bigger missions. |
+| 5 | Player trade | **SET** | Only when moored together or close at sea; sea trades more limited. |
+| 6 | Contraband and free port | **SET** | Definitely in. Historical characters (Lasse-Maja and others) at some point. |
+| 7 | Win condition | **SET** | None. Stay in an era or move on; staying never stagnates, moving changes flavour and unlocks things. Later eras can be later releases, so plan them ahead. |
+| 8 | The lure / first minutes | **SET** | Free sailing first, alive with small interactions, an early port or house trigger. The story starts when you choose it, e.g. from a port. See "The first minutes". |
+| 9 | What crosses an era jump | **SET** | Knowledge travels; boat, cargo and money do not; buried treasure is the one exception. |
+| 10 | Solo vs co-op | **SET** | No up-front choice. Anyone joins before the story; start the story solo or together; either player can drop in or out; story never blocks the other player. See "Playing together". |
+| 11 | Light patterns in data | **SET, built, not merged** | Sourced characteristics (Lighthouse Directory) in `src/lighthouses.js` on branch `felix/windward-lighthouses` (commit `d02dcbf`). That worktree also has uncommitted edits. The meaning at the return is still open. |
+| 12 | Start area and history depth | **SET** | West Orust. Broad coast-wide history plus deeper niche history for the start area. |
+
+## Gaps (to grill)
+
+Recorded 2026-11-05; resolved ones move into the log above.
+
+- **Pre-story sailing: which year?** The free sailing before the story needs
+  a look and a set of lights. Is it the opening year, today's coast, or
+  something else? (It sets what the lure looks like.)
+- **Drop-in/out authority:** if the host owns wind, finds and markets, what
+  happens when the host leaves? Options include host migration, a
+  per-player view with no shared world state, or a lightweight server.
+- **Leaving mid-trip:** what happens to shared contracts, cargo and co-op
+  bonuses when one player leaves? (Purses are separate, SET.)
+- **Story without blockers:** the rule is set; the mechanism isn't. Do story
+  beats ever need both players, and if one is further ahead, who sees what?
+- **The "aha, better together" moment:** what small purpose does sailing
+  together have before the story?
+- **The early port/house trigger:** what happens when you sail into a port
+  or up to a house? Small, early, not deep.
+- **Treasure across time:** what exactly is recorded when you bury it, and
+  when does it become findable? What crosses is settled; this mechanic isn't.
+- **The returned-to opening:** what do the flash patterns unlock?
+- **Stage table (T0-T8)** assumes one era and trade first. Where do the
+  first minutes, the chart, the storm and the first jump go?
+- **Mini-map and chart sections:** data shape, and how "buy a chart
+  section" fits the markets.
+- **Coverage:** the settlements data has Käringön, Gullholmen and
+  Hälleviksstrand but not Härmanö. The start area needs the deeper history
+  layer anyway.
+- **Unmerged inputs:** lights (`felix/windward-lighthouses`) and the real
+  coast and settlements (`felix/windward-real-coast`) are not on `main`.
 
 ## Sources
 
