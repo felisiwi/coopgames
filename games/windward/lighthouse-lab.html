@@ -31,6 +31,22 @@
   #list button { display: block; width: 100%; text-align: left; margin: 0 0 3px; }
   #list small { display: block; color: rgba(234,246,255,0.6); font-size: 10px; }
   #info { margin-top: 6px; color: #78dc96; font-size: 11px; }
+  /* Phone: the panel becomes a short strip along the bottom so the scene shows;
+     towers are a sideways-scrolling row of chips. Desktop layout unchanged. */
+  @media (max-width: 700px) {
+    #panel {
+      top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: none;
+      border-radius: 12px 12px 0 0; padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+      overflow: visible;
+    }
+    #panel h1, #panel > p { display: none; }
+    #panel button { padding: 8px 12px; margin: 0 4px 6px 0; font-size: 13px; }
+    #list { display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+    #list button { display: inline-block; width: auto; flex: 0 0 auto; margin: 0; white-space: nowrap; }
+    #list small { display: none; }
+    #info { margin-top: 6px; font-size: 11px; max-height: 3.2em; overflow: hidden; }
+    .label { font-size: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -38,7 +54,7 @@
 <div id="labels"></div>
 <div id="panel">
   <h1>Windward — lighthouse lab</h1>
-  <p>Drag to orbit, wheel to zoom, click a name to fly to it.</p>
+  <p>Drag to orbit, wheel or pinch to zoom, click a name to fly to it.</p>
   <button id="gameCam" type="button">Game camera</button>
   <button id="frameAll" type="button">Frame all</button>
   <button id="boatBtn" type="button" class="on">Boat</button>
@@ -180,21 +196,39 @@ function frameAll() {
 document.getElementById('gameCam').addEventListener('click', () => setGameCam(!gameCam));
 document.getElementById('frameAll').addEventListener('click', frameAll);
 
-let dragging = false;
+// One finger (or mouse) orbits; two fingers pinch to zoom.
+const pointers = new Map();
 let lastX = 0;
 let lastY = 0;
+let pinchDist = 0;
+const spread = () => { const [a, b] = [...pointers.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
 canvas.addEventListener('pointerdown', (e) => {
-  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  lastX = e.clientX; lastY = e.clientY;
+  if (pointers.size === 2) pinchDist = spread();
   canvas.classList.add('dragging'); canvas.setPointerCapture(e.pointerId);
 });
 canvas.addEventListener('pointermove', (e) => {
-  if (!dragging) return;
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size >= 2) {
+    const d = spread();
+    if (pinchDist > 0) radius = Math.min(500, Math.max(15, radius * (pinchDist / d)));
+    pinchDist = d;
+    return;
+  }
   azimuth -= (e.clientX - lastX) * 0.006;
   // In game-camera mode the elevation is locked, as in play.
   if (!gameCam) polar = Math.min(1.5, Math.max(0.1, polar - (e.clientY - lastY) * 0.006));
   lastX = e.clientX; lastY = e.clientY;
 });
-const endDrag = () => { dragging = false; canvas.classList.remove('dragging'); };
+const endDrag = (e) => {
+  pointers.delete(e.pointerId);
+  pinchDist = 0;
+  const rest = [...pointers.values()][0];
+  if (rest) { lastX = rest.x; lastY = rest.y; } // no jump when one finger lifts
+  if (!pointers.size) canvas.classList.remove('dragging');
+};
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
 canvas.addEventListener('wheel', (e) => {
