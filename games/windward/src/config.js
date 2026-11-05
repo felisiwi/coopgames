@@ -8,7 +8,7 @@ export const CONFIG = {
   // gust dying, a bad tack), giving the boat some weight. TURN_RATE scaled
   // up by roughly the same ratio so turning radius (speed / angular rate)
   // doesn't balloon into "bathtub" territory now that top speed is higher.
-  BOAT_MAX_SPEED: 14, // m/s, full strength + 100° peak, ideal trim
+  BOAT_MAX_SPEED: 10, // m/s, full strength + 100° peak, ideal trim (14 felt too fast on a phone, Felix 2026-11-05)
   SAIL_FORCE: 6, // m/s^2, accel toward target speed
   DRAG: 4, // m/s^2, decel toward target speed (slightly slower to shed than gain)
   TURN_RATE: (Math.PI / 2) * 1.5, // 135 deg/s (was 90 deg/s at BOAT_MAX_SPEED 8)
@@ -97,6 +97,11 @@ export const CONFIG = {
   SETTLEMENT_SPACING: 8, // metres between buildings
   SETTLEMENT_FIND_CLEARANCE: 10, // keep houses this far from a find's prop
   SETTLEMENT_MAX_SLOPE_DEG: 20, // steeper ground than this gets no house
+
+  // Phone controls (src/phone.js), on touch screens or ?touch=1.
+  PHONE_SHEET: 'rope', // 'rope' (pull away to haul in) or 'dot' (move the dot along the arc); ?sheet= overrides
+  PHONE_MAX_PIXEL_RATIO: 1.5,
+  PHONE_STREAKS: 60, // wind streaks drawn on the water round the boat
 
   // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
   // Single tuning point so island-lab.html can expose these as sliders,
@@ -188,7 +193,7 @@ export const CONFIG = {
   // a 150m landmark at ~11m; see that file's header). 4m keeps seed 1's
   // whole scattered field (~97 islands) under a 200k total-vertex budget
   // (171,248 measured) — index.html's ?cell= overrides for A/B'ing.
-  ISLAND_GRID_CELL_SIZE: 4, // 4-10m, mesh cell size — bigger = chunkier flat-shaded facets ("handmade"), smaller = smoother but less stylised
+  ISLAND_GRID_CELL_SIZE: 3, // metres per terrain facet; was 4 — Felix 2026-11-05 found 4m triangles too big (shared/ART.md facet rule updated to 3m)
 
   // Vertex-colour thresholds (slope from a finite-difference gradient, like
   // BOAT_TILT_GRADIENT_EPS above).

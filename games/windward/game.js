@@ -17,7 +17,8 @@ import { partnerState } from './src/partner.js';
 import { placeDiscoverables, makeIsWater, bothNear, distanceToVisit } from './src/discover.js';
 import { createPropForDiscoverable, createFlare, createBuilding } from './src/props.js';
 import { placeSettlements } from './src/settlements.js';
-import { createWater, seaHeightCPU, SIZE as WATER_SIZE } from './src/water.js';
+import { wantsPhoneControls, createPhoneControls } from './src/phone.js';
+import { createWater, seaHeightCPU, createWaveState, stepWaves, SIZE as WATER_SIZE } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
 import { createIsland } from './src/island.js';
@@ -33,14 +34,14 @@ import { createInputState } from '../../shared/input.js';
 // Pitch/roll come from a finite-difference gradient of that same function
 // sampled a short distance ahead/right of the boat, clamped so a steep local
 // slope can't flip it.
-function bobBoat(group, x, z, headingRad, nowS, wind) {
+function bobBoat(group, x, z, headingRad, waves, wind) {
   const eps = CONFIG.BOAT_TILT_GRADIENT_EPS;
   const fwd = { x: Math.sin(headingRad), z: Math.cos(headingRad) };
   const right = { x: Math.cos(headingRad), z: -Math.sin(headingRad) };
 
-  const y = seaHeightCPU(x, z, nowS, wind.dir, wind.strength);
-  const yFwd = seaHeightCPU(x + fwd.x * eps, z + fwd.z * eps, nowS, wind.dir, wind.strength);
-  const yRight = seaHeightCPU(x + right.x * eps, z + right.z * eps, nowS, wind.dir, wind.strength);
+  const y = seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength);
+  const yFwd = seaHeightCPU(x + fwd.x * eps, z + fwd.z * eps, waves.phases, wind.dir, wind.strength);
+  const yRight = seaHeightCPU(x + right.x * eps, z + right.z * eps, waves.phases, wind.dir, wind.strength);
 
   const slopeForward = (yFwd - y) / eps;
   const slopeRight = (yRight - y) / eps;
@@ -65,7 +66,10 @@ function approachSpeed(current, target, dt) {
 
 export default function start({ canvas, net, seed, role }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  // Phones: cap render resolution (a 3x screen is 9x the pixels for little
+  // visible gain on flat shapes).
+  const isPhone = wantsPhoneControls();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isPhone ? CONFIG.PHONE_MAX_PIXEL_RATIO : Infinity));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -239,6 +243,7 @@ export default function start({ canvas, net, seed, role }) {
   const nowS0 = performance.now() / 1000;
   let windController = role === 'host' ? createWindController(seed, nowS0) : null;
   let wind = role === 'host' ? windController.current : initialWind(seed);
+  const waves = createWaveState(wind.dir); // src/water.js: per-component wave phases
   let windSeq = role === 'host' ? 0 : -1; // guest applies any real message (seq >= 0)
   let heardFromPeer = false;
   let windHeartbeatAt = nowS0 + CONFIG.WIND_HEARTBEAT_S; // hold-phase resend cadence
@@ -318,14 +323,17 @@ export default function start({ canvas, net, seed, role }) {
 
   const input = createInputState();
 
-  function onKeyDown(e) {
-    if (e.code !== 'Space' || e.repeat) return;
-    e.preventDefault(); // no page scroll
+  function doPing() {
     const nowS = performance.now() / 1000;
     if (nowS - lastPingS < CONFIG.PING_COOLDOWN_S) return;
     lastPingS = nowS;
     addPing(self.x, self.z, false);
     net.send({ type: 'ping', x: self.x, z: self.z });
+  }
+  function onKeyDown(e) {
+    if (e.code !== 'Space' || e.repeat) return;
+    e.preventDefault(); // no page scroll
+    doPing();
   }
   window.addEventListener('keydown', onKeyDown);
 
@@ -358,6 +366,15 @@ export default function start({ canvas, net, seed, role }) {
   resize();
 
   const hud = createHud(canvas);
+
+  // Phone controls (src/phone.js): hold to aim, second-thumb sheet, arc,
+  // wind at the boat. The corner HUD and keyboard legend are hidden there.
+  const phone = isPhone ? createPhoneControls({ canvas, camera, onPing: () => doPing() }) : null;
+  if (phone) {
+    for (const el of [hud.rose, hud.text, hud.bar, hud.legend]) el.style.display = 'none';
+    hud.notice.style.bottom = '44px';
+    windArrow.object.visible = false; // the no-go wedge + streaks show the wind instead
+  }
 
   selfBoat.group.position.set(self.x, 0, self.z);
   selfBoat.group.rotation.y = self.heading;
@@ -392,6 +409,7 @@ export default function start({ canvas, net, seed, role }) {
       }
     }
 
+    phone?.apply(self, wind, dt);
     if (input.left || input.right) hasSteered = true;
     if (input.up || input.down) hasTrimmed = true;
     if (input.left) self.heading -= CONFIG.TURN_RATE * dt;
@@ -406,7 +424,8 @@ export default function start({ canvas, net, seed, role }) {
 
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
-    bobBoat(selfBoat.group, self.x, self.z, self.heading, nowS, wind);
+    stepWaves(waves, dt, wind, self.x, self.z); // before anything samples the sea this frame
+    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, wind);
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
     updateSunPosition(selfBoat.group.position);
@@ -460,7 +479,7 @@ export default function start({ canvas, net, seed, role }) {
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
       otherBoat.group.rotation.y = other.heading;
-      bobBoat(otherBoat.group, other.x, other.z, other.heading, nowS, wind);
+      bobBoat(otherBoat.group, other.x, other.z, other.heading, waves, wind);
       // Trim isn't synced (DESIGN.md) — approximate the other boat's sail
       // with the ideal trim for its current point of sail.
       const otherIdeal = idealTrimRad(angleOffWind(other.heading, wind.dir));
@@ -468,7 +487,7 @@ export default function start({ canvas, net, seed, role }) {
       otherWake.update(dt, otherBoat.group.position, other.heading, other.speed);
     }
 
-    water.update(nowS, wind, selfBoat.group.position);
+    water.update(waves, wind, selfBoat.group.position);
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {
@@ -485,7 +504,7 @@ export default function start({ canvas, net, seed, role }) {
     }
     sky.update(camera);
     sunGlow.update(camera);
-    setLegendVisible(hud, !(hasSteered && hasTrimmed));
+    if (!phone) setLegendVisible(hud, !(hasSteered && hasTrimmed));
     const bearingTo = (x, z) => Math.atan2(x - self.x, z - self.z);
     const friendPing = [...pings].reverse().find((p) => p.fromFriend);
     updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed, {
@@ -495,6 +514,11 @@ export default function start({ canvas, net, seed, role }) {
     });
 
     renderer.render(scene, camera);
+    phone?.draw(nowS, {
+      partner: partnerPos,
+      pings,
+      foundText: `found ${found.size}/${discoverables.length}`,
+    });
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -504,6 +528,7 @@ export default function start({ canvas, net, seed, role }) {
     window.removeEventListener('resize', resize);
     canvas.removeEventListener('wheel', onWheel);
     window.removeEventListener('keydown', onKeyDown);
+    phone?.destroy();
     input.destroy();
   });
 }

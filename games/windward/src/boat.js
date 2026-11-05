@@ -1,54 +1,108 @@
-// Boat mesh: a vendored CC0 model (games/windward/assets/LICENSE.txt) with a
-// sail that swings around its mount point for trim (games/windward/DESIGN.md).
-// The swing angle/side is computed by the caller (src/sail.js's leewardSign
-// + the current trim) and passed to setSailAngle.
+// Boat mesh (2026-11-05): a small west-coast sailing boat built in code — white
+// hull, red bottom, wooden deck, a mast with a boom, a triangular mainsail and
+// a jib. Replaces the vendored Kenney pirate ship, whose square sail spans the
+// hull: swinging it like a fore-and-aft sail read as "the sail is on the wrong
+// side" and made close-hauled look like heading straight into the wind.
 //
-// Loading is async (GLTFLoader) and explicit: game.js calls loadBoatModel()
-// once at startup (W0.6 — previously createBoatMesh() triggered the load
-// itself, so merely importing/exercising this module in node, as
-// boat.test.js does, threw an unhandled `fetch` rejection for the
-// file:// GLTF url). createBoatMesh() returns `group` synchronously so the
-// caller can scene.add() it immediately (games/README.md's "run correctly
-// from t=0"); if loadBoatModel() has already been called (by any caller),
-// the model is attached to `group` once it resolves. setSailAngle queues
-// its last value so a call before load-complete isn't lost.
+// Here the boom points straight aft at zero trim and swings about the mast by
+// the angle game.js passes to setSailAngle (src/sail.js's leewardSign * trim),
+// so the sail sits to leeward by construction, and matches src/phone.js's
+// boomAngle(): heading + PI + leewardSign * trim.
+//
+// Built synchronously (no model file to load). loadBoatModel() is kept so the
+// existing call in game.js stays valid. Materials: flat Lambert only
+// (shared/ART.md); the sail carries the player colour, nothing else does.
 import * as THREE from '../vendor/three/three.module.js';
-import { GLTFLoader } from '../vendor/three/loaders/GLTFLoader.js';
 
-// The mesh's bow faces local +Z (verified against the source model: its hull
-// tapers to a point at +Z on its bow-stern axis, wide at -Z). game.js drives
-// `group.rotation.y = heading` and moves the boat along
-// (sin(heading), 0, cos(heading)) — rotating local +Z by rotation.y=heading
-// lands on exactly that vector, so this constant must stay local +Z.
+// The bow faces local +Z: game.js drives group.rotation.y = heading and moves
+// along (sin(heading), 0, cos(heading)), which is local +Z rotated by heading.
 export const BOW_LOCAL_DIRECTION = new THREE.Vector3(0, 0, 1);
 
-const MODEL_URL = new URL('../assets/ship-small.glb', import.meta.url).href;
-// The source hull measures ~8.8m along its bow-stern (Z) axis; scale to
-// DESIGN.md's "boat ~6m long" target.
-const MODEL_SCALE = 6 / 8.8;
+const COLORS = {
+  hull: 0xf4f1e8, // white topsides — reads against the dark sea
+  bottom: 0xb2382a, // red bottom paint
+  deck: 0xb58a5a, // varnished wood
+  spar: 0x5e4129, // mast and boom
+};
 
-// The sail-a mesh is modeled symmetric about its own mount point (local X
-// spans roughly -2.2..2.2, checked against the source .glb directly) rather
-// than hanging off one edge of the mast — so a pure Y-axis rotation swings
-// a shape that's already centered on the pivot, which reads as a subtle
-// lean rather than "the boom slung hard over to leeward" (W0.8 item 2,
-// reported as "the sail only ever sits on one side"). Coupling a lateral
-// slide to the rotation makes the swing unambiguous regardless of viewing
-// angle: at full ease the boom's mount point itself moves this many meters
-// toward the leeward side, on top of rotating.
-const SAIL_SWING_OFFSET = 1.4; // meters, at full 90deg trim
+// Hull stations from stern (-Z) to bow (+Z): [z, half-beam]. ~6m long
+// (DESIGN.md "boat ~6m long"), widest just aft of midships, bow to a point.
+const STATIONS = [[-2.9, 0.86], [-2.0, 1.08], [-0.6, 1.18], [0.8, 1.04], [1.9, 0.68], [2.6, 0.28], [3.0, 0]];
+const SHEER = (z) => 0.5 + 0.22 * Math.max(0, z / 3) ** 2; // deck edge, rising to the bow
+const CHINE_Y = -0.05;
+const KEEL_Y = -0.45;
 
-let gltfPromise = null;
-// Kicks off the (one-time, shared) model fetch. Call once from game.js
-// before creating any boats; createBoatMesh() only attaches the result if
-// this has already been called, it never starts the load itself.
-export function loadBoatModel() {
-  if (!gltfPromise) gltfPromise = new GLTFLoader().loadAsync(MODEL_URL);
-  return gltfPromise;
+const MAST_Z = 0.7;
+const MAST_H = 6.2; // above the deck
+const BOOM_Y = 1.15; // above the deck
+const BOOM_LEN = 3.1;
+const BELLY = 0.42; // metres the mainsail bellies out to leeward
+
+function lambert(color, side = THREE.FrontSide) {
+  return new THREE.MeshLambertMaterial({ color, flatShading: true, side });
 }
 
-// Exported for boat.test.js. Keeps what the Kenney colormap look depends on
-// (texture, colour, transparency, sidedness) and drops PBR-only properties.
+// A strip of quads between two polylines of equal length.
+function strip(a, b, out) {
+  for (let i = 0; i < a.length - 1; i++) {
+    out.push(...a[i], ...b[i], ...a[i + 1], ...a[i + 1], ...b[i], ...b[i + 1]);
+  }
+}
+function geometry(positions) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+function buildHull() {
+  const group = new THREE.Group();
+  const deckL = STATIONS.map(([z, w]) => [-w, SHEER(z), z]);
+  const deckR = STATIONS.map(([z, w]) => [w, SHEER(z), z]);
+  const chineL = STATIONS.map(([z, w]) => [-w * 0.86, CHINE_Y, z]);
+  const chineR = STATIONS.map(([z, w]) => [w * 0.86, CHINE_Y, z]);
+  const keel = STATIONS.map(([z]) => [0, KEEL_Y + Math.max(0, z / 3) * 0.3, z]);
+
+  const sides = [];
+  strip(deckL, chineL, sides);
+  strip(chineR, deckR, sides);
+  const sideMesh = new THREE.Mesh(geometry(sides), lambert(COLORS.hull, THREE.DoubleSide));
+
+  const bottom = [];
+  strip(chineL, keel, bottom);
+  strip(keel, chineR, bottom);
+  const bottomMesh = new THREE.Mesh(geometry(bottom), lambert(COLORS.bottom, THREE.DoubleSide));
+
+  // Flat transom across the stern.
+  const s = 0;
+  const transom = [
+    ...deckL[s], ...chineL[s], ...deckR[s], ...deckR[s], ...chineL[s], ...chineR[s],
+    ...chineL[s], ...keel[s], ...chineR[s],
+  ];
+  const transomMesh = new THREE.Mesh(geometry(transom), lambert(COLORS.hull, THREE.DoubleSide));
+
+  // Deck: a fan between the two deck edges, a touch below the sheer so the
+  // white topsides show a rim.
+  const deck = [];
+  const dl = deckL.map(([x, y, z]) => [x * 0.94, y - 0.04, z]);
+  const dr = deckR.map(([x, y, z]) => [x * 0.94, y - 0.04, z]);
+  strip(dr, dl, deck);
+  const deckMesh = new THREE.Mesh(geometry(deck), lambert(COLORS.deck, THREE.DoubleSide));
+
+  for (const m of [sideMesh, bottomMesh, transomMesh, deckMesh]) {
+    m.castShadow = true;
+    m.receiveShadow = true;
+    group.add(m);
+  }
+  return group;
+}
+
+export function loadBoatModel() {
+  return Promise.resolve(); // nothing to load any more (see header)
+}
+
+// Kept for src/stage1.test.js and any future vendored asset: turns a PBR
+// material into the flat Lambert shared/ART.md asks for.
 export function toFlatLambert(m) {
   return new THREE.MeshLambertMaterial({
     map: m.map ?? null,
@@ -62,67 +116,78 @@ export function toFlatLambert(m) {
 
 export function createBoatMesh(color) {
   const group = new THREE.Group();
-  let sailPivot = null;
-  let sailMountX = 0;
-  let pendingAngle = 0;
+  group.add(buildHull());
 
-  if (gltfPromise) {
-    gltfPromise.then((gltf) => {
-      const model = gltf.scene.clone(true); // shares geometry/materials; only the sail's material is cloned below
-      model.scale.setScalar(MODEL_SCALE);
+  const deckY = SHEER(MAST_Z) - 0.04;
+  const sailMat = lambert(color, THREE.DoubleSide);
+  const sparMat = lambert(COLORS.spar);
 
-      const hull = model.getObjectByName('ship-small');
-      const sail = model.getObjectByName('sail-a');
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, MAST_H, 5), sparMat);
+  mast.position.set(0, deckY + MAST_H / 2, MAST_Z);
+  mast.castShadow = true;
+  group.add(mast);
 
-      // Distinguish self/other by tinting the sail only (hull/flags stay the
-      // model's natural colors, shared across boat instances).
-      sail.material = sail.material.clone();
-      sail.material.color.set(color);
+  // Boom + mainsail swing together about the mast.
+  const pivot = new THREE.Group();
+  pivot.position.set(0, deckY, MAST_Z);
+  group.add(pivot);
+  const boom = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, BOOM_LEN, 4), sparMat);
+  boom.rotation.x = Math.PI / 2;
+  boom.position.set(0, BOOM_Y, -BOOM_LEN / 2);
+  boom.castShadow = true;
+  pivot.add(boom);
+  const boomEnd = new THREE.Object3D(); // for boat.test.js: where the sail's clew is
+  boomEnd.name = 'boom-end';
+  boomEnd.position.set(0, BOOM_Y, -BOOM_LEN);
+  pivot.add(boomEnd);
 
-      // Reparent the sail under a pivot at its mount point so rotating the
-      // pivot swings the boom sideways, same trick as the W0 placeholder boat.
-      sailPivot = new THREE.Group();
-      sailPivot.position.copy(sail.position);
-      sailMountX = sailPivot.position.x;
-      sail.position.set(0, 0, 0);
-      hull.add(sailPivot);
-      sailPivot.add(sail);
-      applySailAngle(sailPivot, sailMountX, pendingAngle);
+  // Mainsail: head at the masthead, tack at the gooseneck, clew at the boom
+  // end, plus one belly vertex pushed to leeward so it reads as full.
+  const head = [0, MAST_H - 0.1, 0];
+  const tack = [0, BOOM_Y + 0.05, 0];
+  const clew = [0, BOOM_Y + 0.05, -BOOM_LEN];
+  const mainGeo = geometry([...head, ...tack, ...clew]);
+  mainGeo.setAttribute('position', new THREE.Float32BufferAttribute([
+    ...head, ...tack, 0, 0, 0,
+    ...head, 0, 0, 0, ...clew,
+    ...tack, ...clew, 0, 0, 0,
+  ], 3));
+  const main = new THREE.Mesh(mainGeo, sailMat);
+  main.castShadow = true;
+  pivot.add(main);
 
-      // Stage 1 (2026-11-04, design audit check 6): the GLB's glTF
-      // pbrMetallicRoughness materials load as MeshStandardMaterial, which
-      // shared/ART.md bans. Swap each for a flat Lambert carrying the same
-      // texture and colour — runs after the sail tint above, so the tint is
-      // kept. Per-instance materials, so two boats never share one.
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
-          child.material = Array.isArray(child.material)
-            ? child.material.map(toFlatLambert)
-            : toFlatLambert(child.material);
-        }
-      });
+  // Jib: tack at the bow, head on the forestay, clew swinging with the sheet.
+  const jibTack = [0, SHEER(2.8) + 0.05, 2.8];
+  const jibHead = [0, deckY + MAST_H * 0.78, MAST_Z + 0.05];
+  const jibGeo = new THREE.BufferGeometry();
+  jibGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Array(9).fill(0), 3));
+  const jib = new THREE.Mesh(jibGeo, sailMat);
+  jib.castShadow = true;
+  group.add(jib);
 
-      group.add(model);
-    }).catch((err) => {
-      console.error('[windward] failed to load boat model', err);
-    });
+  function setSailAngle(angleRad) {
+    pivot.rotation.y = angleRad;
+    // Belly: in the pivot's frame the sail lies in the YZ plane; leeward is
+    // -X for a positive swing (see header), so push the belly that way.
+    const side = angleRad === 0 ? 0 : -Math.sign(angleRad);
+    const ease = Math.min(1, Math.abs(angleRad) / (Math.PI / 4)); // flatter when hard in
+    const b = [side * BELLY * (0.35 + 0.65 * ease), BOOM_Y + (MAST_H - BOOM_Y) * 0.38, -BOOM_LEN * 0.42];
+    const p = mainGeo.attributes.position;
+    for (const i of [2, 4, 8]) p.setXYZ(i, b[0], b[1], b[2]);
+    p.needsUpdate = true;
+    mainGeo.computeVertexNormals();
+
+    // Jib clew: ~2m aft of the tack, swung by most of the main's angle.
+    const a = angleRad * 0.85;
+    const jibClew = [jibTack[0] - Math.sin(a) * 2.1, deckY + 0.55, jibTack[2] - Math.cos(a) * 2.1];
+    const j = jibGeo.attributes.position;
+    j.setXYZ(0, ...jibHead);
+    j.setXYZ(1, ...jibTack);
+    j.setXYZ(2, ...jibClew);
+    j.needsUpdate = true;
+    jibGeo.computeVertexNormals();
   }
+  setSailAngle(0);
 
-  return {
-    group,
-    setSailAngle(angleRad) {
-      pendingAngle = angleRad;
-      if (sailPivot) applySailAngle(sailPivot, sailMountX, angleRad);
-    },
-  };
-}
-
-// Rotates the boom pivot AND slides its mount point toward the swing side
-// (see SAIL_SWING_OFFSET above) — the two together read as an unmistakable
-// swing to leeward, instead of a symmetric mesh quietly rotating in place.
-function applySailAngle(sailPivot, mountX, angleRad) {
-  sailPivot.rotation.y = angleRad;
-  sailPivot.position.x = mountX + Math.sin(angleRad) * SAIL_SWING_OFFSET;
+  return { group, setSailAngle };
 }
