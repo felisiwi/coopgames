@@ -89,7 +89,7 @@
    "weight": 12,
    "kind": "quiet",
    "vibe": "Poor, unsettled, hopeful",
-   "season": "Spring/summer"
+   "season": "Spring → summer"
   },
   {
    "id": "silver-sea",
@@ -100,7 +100,7 @@
    "kind": "boom",
    "release": "first (proposed)",
    "vibe": "Rich, rowdy, greedy",
-   "season": "Winter"
+   "season": "Summer → late summer → autumn"
   },
   {
    "id": "light-stone",
@@ -110,7 +110,7 @@
    "weight": 18,
    "kind": "light",
    "vibe": "Loss, then hope, then bustle",
-   "season": "Winter → spring → winter"
+   "season": "Late autumn → winter → late winter"
   },
   {
    "id": "engines",
@@ -120,7 +120,7 @@
    "weight": 14,
    "kind": "war",
    "vibe": "Sly, tense",
-   "season": "Autumn/winter"
+   "season": "A long, cold spring"
   },
   {
    "id": "summer",
@@ -196,7 +196,7 @@
     ]
    ],
    "vibe": "Contested, wary",
-   "season": "Winter fishing"
+   "season": "Summer"
   },
   {
    "name": "New border",
@@ -223,7 +223,7 @@
     ]
    ],
    "vibe": "Unsettled",
-   "season": "Summer"
+   "season": "Spring"
   },
   {
    "name": "Crown shores",
@@ -250,7 +250,7 @@
     ]
    ],
    "vibe": "Poor, hopeful",
-   "season": "Spring/summer"
+   "season": "Summer"
   },
   {
    "name": "The silver comes",
@@ -273,7 +273,7 @@
     ]
    ],
    "vibe": "Rising, busy",
-   "season": "Winter"
+   "season": "Summer"
   },
   {
    "name": "Honour and Life",
@@ -308,7 +308,7 @@
     ]
    ],
    "vibe": "Rich, rowdy, mischievous",
-   "season": "Winter, summer trading"
+   "season": "Late summer"
   },
   {
    "name": "Last silver",
@@ -327,7 +327,7 @@
     ]
    ],
    "vibe": "Anxious, stormy",
-   "season": "Late autumn"
+   "season": "Autumn"
   },
   {
    "name": "Empty harbours",
@@ -346,7 +346,7 @@
     ]
    ],
    "vibe": "Loss, melancholy",
-   "season": "Winter"
+   "season": "Late autumn, last leaves falling"
   },
   {
    "name": "Lights go up",
@@ -373,7 +373,7 @@
     ]
    ],
    "vibe": "Hope, safer seas",
-   "season": "Spring"
+   "season": "Crisp winter"
   },
   {
    "name": "The second silver",
@@ -400,7 +400,7 @@
     ]
    ],
    "vibe": "Industrial bustle",
-   "season": "Winter"
+   "season": "Late winter → early spring"
   },
   {
    "name": "Motor and canning",
@@ -411,7 +411,7 @@
    "verify": true,
    "events": [],
    "vibe": "Change, engines",
-   "season": "Spring"
+   "season": "Long, cold spring"
   },
   {
    "name": "Spirits at sea",
@@ -431,7 +431,7 @@
     ]
    ],
    "vibe": "Sly, night runs",
-   "season": "Autumn nights"
+   "season": "Long, cold spring"
   },
   {
    "name": "Mines and neutrality",
@@ -447,7 +447,7 @@
     ]
    ],
    "vibe": "Tense, watchful",
-   "season": "Winter"
+   "season": "Long, cold spring"
   },
   {
    "name": "Summer guests",
@@ -494,5 +494,6 @@
    "vibe": "Free sail, pretty",
    "season": "Summer"
   }
- ]
+ ],
+ "seasonArc": "Felix 2026-11-05: seasons run as one year across the timeline — spring (New Crown) to summer and autumn (Silver Sea), late autumn and winter (Light and Stone), a long cold spring (Engines and wars), then summer (Summer guests, Today). Season = mood of the era; the historical herring fishery was a winter fishery (see GAME-DESIGN.md)."
 }
