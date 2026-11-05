@@ -1135,3 +1135,7 @@ the current Grundsund region, consistent with the coast agent's finding.
   naturreservat on Härön by Kyrkesund (Tjörn), approx. 58.0017 N, 11.475 E (map centre on the
   page; may be off by a little). Outside the current Grundsund region (south edge 58.085 N);
   place it when the map grows south.
+
+**Boats:** see docs/BOAT-BRIEF.md: today = granddad's koster "Svalan" (varnished, white
+sails); ~1700 = a small tarred eka with a tanned spritsail and oars; masthead pennant in the
+player's colour; visible deck items, night lantern, worn and mended.
