@@ -433,7 +433,96 @@ Design this explicitly; it touches almost every system.
   and `lighthouse-lab.html` (branch `felix/windward-lighthouses`, towers by
   built year, 1740-2025). Boats and palette are not year-driven yet.
 
-## Era candidates (written up, no pick)
+## Terms (new, Felix 2026-11-05)
+
+- **Epoch:** a long span (about 100+ years), roughly one release.
+- **Era:** a chapter inside an epoch (10-40 years) with its own tone,
+  season, history and rules.
+- **Today's coast:** a separate setting, the summer free-sail lure. Not part
+  of any epoch.
+
+## Draft epoch: "Herring and Light", 1706-1906 (DRAFT, Felix 2026-11-05)
+
+Status: Felix's draft, not yet grilled. Every historical claim below is his
+research as he gave it. `TODO(felix): confirm each against a cited source
+before it ships` (the settlements data uses a confidence key for this). The
+span is 200 years, longer than the "about one release" guide, so which eras
+ship first is Q1.
+
+1. **Crown shores, 1706-1746.** Poor, quiet, hopeful; spring/summer. A 1706
+   ordinance lets Swedish subjects build huts and processing sheds on crown
+   land and fishing harbour sites; East India Company ships from 1731;
+   Götheborg sinks 1745.
+2. **The silver comes, 1747-1774.** The herring return; salteries; train-oil
+   boiling from about 1760.
+3. **Honour and Life, 1775-1794.** Marstrand free port (religious freedom,
+   toll-free imports, refuge for those whose crimes didn't touch "honour and
+   life"); smuggling; oil exported to Europe (reportedly lit Paris streets).
+   Permits from 1780; the 1783 inspection condemned 120 of 328 works, a
+   stricter phase once players know the era.
+4. **Last silver, 1795-1809.** Workers sacked by 1798, the Napoleonic wars,
+   herring gone 1808-09.
+5. **Empty harbours, 1810-1839.** Ruins and desolation; a time of loss in the
+   story. Lasse-Maja at Carlsten 1813-1839.
+6. **Lights go up, 1840-1876.** The great lighthouses lit; steamers.
+7. **The second silver, 1877-1906.** The herring return; canning, fish
+   guano, granite.
+
+**The loop across the epoch:** the opening (about 1905) is the end of the
+epoch; the storm throws you to about 1745; playing forward eventually brings
+you back to 1905 with all the lights lit. That is the "return to the first
+era" payoff. This replaces the earlier "start earlier / end later" candidate
+windows below (for example Tordenskjold's war, 1700-1720, no longer has its
+own era).
+
+## Core loop idea: build a works (DRAFT, Felix 2026-11-05)
+
+- **The idea:** find a sheltered harbour, get the rights (crown land under
+  1706, a lease elsewhere, a governor's permit from 1780), and build a
+  saltery or train-oil works.
+- **Why it works as a loop:** herring is boiled into oil. Real ratio about
+  10 riksdaler cost to about 60 sale per barrel, so processing multiplies
+  value. `TODO(felix): confirm the ratio against a source.`
+- **Feel:** a diorama. You sail in and do it yourself, simplified, not Age of
+  Empires. Small workers are optional.
+- **Trade around it:** French and foreign oil ships offer trade, and a little
+  smuggling. Rules tighten later in the era (permits, inspections).
+- **Open:** how this relates to the older trade and production systems (3 and
+  4 above) and to stage 5. See the grill.
+
+## Seasons (DRAFT, Felix 2026-11-05)
+
+Eras or chapters can be winter. The great herring fishery was a winter
+fishery: short days, storms, ice in inner fjords, open boats, seine nets.
+Winter should feel very different from the summer lure.
+
+## Title idea (OPEN, wording unverified)
+
+"Windward: Honour and Life", from the free-port asylum rule. **Checked
+2026-11-05, wording not confirmed:**
+- English Wikipedia ("Marstrand Free Port", section Criminals): "As long as
+  their crime concerned no matters of 'honour and life', they were afforded
+  full legal protection." Its only source for this is Olán (1917); it is not
+  a quote of the 1775 charter.
+- Swedish Wikipedia ("Frihamnen Marstrand"): refuge "på grund av skuld eller
+  mindre svåra förbrytelser" gave "säkerhet till person och egendom" (debt or
+  lesser crimes; security of person and property). It never uses "ära",
+  "heder" or "liv".
+- Grimberg, *Svenska folkets underbara öden* vol. VII, p. 73 (read at
+  runeberg.org/sfubon/7/0075.html): "Envar, som för skuld eller mindre svåra
+  förbrytelser tog sin tillflykt till Marstrand, åtnjöt där säkerhet till
+  person och egendom." Grimberg paraphrases the 1775 privilegium; it is not a
+  quote of the regulation.
+- Not found: any Swedish "honour and life" phrase (ära, heder, liv) in
+  anything read. Olán (1917), *Marstrands historia, krigsminnen och
+  badortslif*, could not be read online (only a catalogue stub). Still to try:
+  Libris or archive.org for Olán, and Holmberg (1867), which the English
+  Marstrand article cites for the 1775 decree.
+- The title idea also collides with the draft epoch: "Honour and Life" is
+  already the name of era 3 (1775-1794), while the epoch is "Herring and
+  Light".
+
+## Earlier era candidates (kept for the record; the epoch draft above now structures Q1)
 
 All dates are Felix's candidate windows. Historical facts beyond them are
 `TODO(felix): confirm` against the lab data, which cites its sources.
@@ -481,11 +570,12 @@ or another exciting era first. No pick until Q1 is settled.
 
 ## Decisions log
 
-Status: **OPEN**, **SET** (Felix said it), **INFERRED** (my reading, confirm).
+Status: **OPEN**, **SET** (Felix said it), **DRAFT** (Felix's proposal, not
+yet grilled), **INFERRED** (my reading, confirm).
 
 | # | Decision | Status | What we have |
 |---|---|---|---|
-| 1 | Era | **OPEN** | Held until Felix has seen the year-slider labs. Seven candidates above, no pick. |
+| 1 | Era | **OPEN** | Held until Felix has seen the year-slider labs. Now structured as the draft epoch "Herring and Light" (seven eras, 1706-1906) plus today's coast; which eras are built first is the question. No pick. |
 | 2 | Shared fortune or separate | **SET** | Separate purses (Q7). Must work with the drop-in/drop-out flow: what happens to shared contracts, cargo and bonuses when someone leaves mid-trip is open. |
 | 3 | Provisions | **SET** | One combined "stores" meter, planned but not at the start. It must matter enough to make you sail into ports. |
 | 4 | Session shape | **SET** | No-save mode is the lure: jump in, sail, pretty. The real game is saves + friends + story + history + trading. 5 minutes must still feel rewarding; longer play goes deeper. Phone = short trips, laptop = bigger missions. |
@@ -512,6 +602,11 @@ Status: **OPEN**, **SET** (Felix said it), **INFERRED** (my reading, confirm).
 | 25 | What persists before the story | **SET** | Small things kept on this device, moved into the save when the story starts. Device-only. |
 | 26 | Chart sections cut | **SET** | By place (west Orust = granddad's chart), each with its own history and sweet spots; lighthouses are markers inside sections. |
 | 27 | Stage cut | **SET** | Fog, beams and the thunder warning ship with the lure. Stage 3 splits into 3a (saving, chart, story start at a port) and 3b (storm, jump, time-lapse, sea chest). |
+| 28 | Terms | **SET** | Epoch (about 100+ years, roughly one release) and era (10-40 years, own tone, season, history, rules). |
+| 29 | Draft epoch | **DRAFT** | "Herring and Light" 1706-1906, seven eras; the opening is its end and playing forward returns you there. Historical claims unverified. |
+| 30 | Core loop: build a works | **DRAFT** | Get rights to a harbour, build a saltery or oil works, herring to oil multiplies value, sell to foreign ships; rules tighten later. Relationship to trade is open. |
+| 31 | Seasons | **DRAFT** | The herring fishery was a winter fishery; winter should feel very different from the summer lure. Model open. |
+| 32 | Title | **OPEN** | "Windward: Honour and Life". The phrase's Swedish wording is not confirmed; it is also the name of era 3. |
 
 ## Gaps (to grill)
 
@@ -545,6 +640,14 @@ Recorded 2026-11-05; resolved ones move into the log above.
   layer anyway.
 - **Unmerged inputs:** lights (`felix/windward-lighthouses`) and the real
   coast and settlements (`felix/windward-real-coast`) are not on `main`.
+- **Epoch grill (round 7):** which eras are built first (Q1), how eras
+  unlock, whether the works or route trade is the heart of stage 5, the
+  season model, and what the title names.
+- **Source check for the epoch draft:** every date and figure (1706
+  ordinance, 1780 permits, 1783 inspection, the riksdaler ratio) needs a
+  cited source.
+- **Pitch rewrite:** "The pitch" and "Why this era" still describe one era;
+  rewrite once Q1 is settled.
 
 ## Sources
 
@@ -553,3 +656,7 @@ Recorded 2026-11-05; resolved ones move into the log above.
 - Marstrand Free Port 1775-1794: https://en.wikipedia.org/wiki/Marstrand_Free_Port
 - NorFish herring landings 1520-1808 (licence to check):
   https://gbif.org/dataset/5cd986a3-9180-4a11-b2a7-7f340e062b52
+- Marstrand free port asylum wording (checked 2026-11-05, unconfirmed):
+  https://en.wikipedia.org/wiki/Marstrand_Free_Port and
+  https://sv.wikipedia.org/wiki/Frihamnen_Marstrand and
+  https://runeberg.org/sfubon/7/0075.html
