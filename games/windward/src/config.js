@@ -110,24 +110,69 @@ export const CONFIG = {
   // CONFIG (no local copies) so game.js and the lab can't drift apart.
   // Values below: "Sunset" lighting preset (src/light-presets.js), tuned at
   // seed 989370 in island-lab.html (Felix, 2026-09-16).
-  SUN_COLOR: 0xffd9a6, // warm gold, was flat white
-  SUN_INTENSITY: 1.4,
+  // Skagen pass (look pass 2, 2026-11-05): "den blå time" — high-key, pastel,
+  // slightly cold. Islands read dark because of LIGHT, not paint: a 10 degree
+  // sun lights a flat top at only sin(10) = 0.17, and the fill was dim and
+  // gold-tinted, so most ground sat on ~0.45 of its colour. The fill is now
+  // much stronger and cool, the sun softer, paler and a little higher, and the
+  // fill's ground colour a lilac (it tints the shadow side). The previous
+  // values ("Before") are kept in src/look-presets.js.
+  SUN_COLOR: 0xfff1e0, // soft warm white (was gold 0xffd9a6)
+  SUN_INTENSITY: 2.4, // (was 1.4). three.js r155+ no longer multiplies light by pi, so a diffuse surface receives intensity/pi of its colour: ~2.4 is what brings a flat top to ~0.2 of the colour from the sun
   LIGHT_AZIMUTH_DEG: 50, // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
-  LIGHT_ELEVATION_DEG: 10, // low, for long golden-hour shadows (was 26 pre-golden-hour-pass)
+  LIGHT_ELEVATION_DEG: 18, // still low enough for long soft shadows (was 10)
   SUN_SHADOW_BIAS: -0.0008, // reduce acne; loosened from -0.0005 for the lower elevation above
 
-  HEMI_SKY_COLOR: 0xcbc9ad, // warm pale — ambient bounce off a golden sky
-  HEMI_GROUND_COLOR: 0x21406a, // deep blue-indigo — cool shadow fill
-  HEMI_INTENSITY: 0.45, // kept below the sun's contribution so lit/shadow contrast reads
+  HEMI_SKY_COLOR: 0xdfe6ee, // cool pale sky haze (was warm 0xcbc9ad)
+  HEMI_GROUND_COLOR: 0xa79fbd, // lilac bounce: tints the shadow side (was deep indigo 0x21406a)
+  HEMI_INTENSITY: 2.4, // was 0.45, which lit the ground at 0.45/pi = 14% of its colour — the real reason islands read dark. 2.4 gives ~57% from the fill alone on a flat top, so shaded slopes stay light and the sun adds the rest
 
-  SKY_HORIZON_COLOR: 0xecf8f1,
-  SKY_ZENITH_COLOR: 0x00faff,
+  SKY_HORIZON_COLOR: 0xdfe6ee, // sky haze (was 0xecf8f1)
+  SKY_ZENITH_COLOR: 0xa9c4dc, // pale blue (was cyan 0x00faff)
   SKY_RADIUS: 1000, // world units — the dome (src/sky.js) is re-centred on the camera every frame, so this only needs to clear camera.far, not "cover the world"
 
-  GLOW_COLOR: 0xffe5b8,
+  GLOW_COLOR: 0xfff0dc, // (was 0xffe5b8)
   GLOW_SIZE: 180, // world units, sprite scale (billboard, always faces camera)
   GLOW_DISTANCE: 340, // world units from the camera, along the sun's direction
   GLOW_OPACITY: 0.65,
+
+  // Golden distance haze (Look Lab, 2026-11-05). Distances are multiples of
+  // the camera-to-boat distance so the haze looks the same at every zoom
+  // (the lab's 200-560 m fog was set for a ~170 m camera distance). Meshes
+  // use scene.fog; the water shader mixes the same colour itself.
+  HAZE_COLOR: 0xefe4cf, // sand haze (was golden 0xe9d3a6)
+  HAZE_MESH_NEAR_MUL: 1.18, // lab: fog 200..560 at camera distance ~170
+  HAZE_MESH_FAR_MUL: 3.3,
+  HAZE_WATER_NEAR_MUL: 1.0, // lab: water haze 170..520
+  HAZE_WATER_FAR_MUL: 3.06,
+  HAZE_WATER_STRENGTH: 0.85, // how much of the haze colour the far sea reaches
+
+  // --- Skagen palette (look pass 2, 2026-11-05) ---------------------------
+  // Paint for the sea and the ground. All colours are display (sRGB) values.
+  // The ?tune=1 panel (src/tune.js) overrides these live; nothing else does.
+  // Sea: shallow is pale sea-glass, deliberately NOT turquoise.
+  LOOK_SEA_DEEP: 0x5f8fb0,
+  LOOK_SEA_MID: 0x8fb4c9, // "open sea"
+  LOOK_SEA_SHALLOW: 0xa9d3cf,
+  LOOK_SHALLOW_SAT: 1.0, // 0 = grey, 1 = as painted, >1 = more vivid shallows
+  LOOK_SEA_BRIGHTNESS: 1.0, // multiplies the whole sea colour (before foam)
+  LOOK_FOAM: 0xf4f6f2,
+  LOOK_FOAM_WIND_AMOUNT: 0.7, // 0 = foam always full strength, 1 = foam fades to ~45% in a calm
+  // Ground (Bohuslän rules unchanged; only the paint moved).
+  LOOK_GRANITE: 0xe3c9c1, // pink-lilac
+  LOOK_GRANITE_PALE: 0xf1e1db, // sun-bleached domes
+  LOOK_GRANITE_SHADOW: 0xb7a3b3, // veins and cracks
+  LOOK_MEADOW: 0xb9cf8f, // sage, not neon
+  LOOK_MEADOW_2: 0x9fbf7a,
+  LOOK_MEADOW_COOL: 0x9dbda2, // where the meadow tint slider leads: a bluer sage
+  LOOK_HEATHER: 0xc4aed0,
+  LOOK_SAND: 0xefe4cf,
+  LOOK_WET: 0x8e8197, // wet rock at the waterline
+  LOOK_PINE: 0x6f9170,
+  LOOK_TRUNK: 0xa08c78,
+  LOOK_GRANITE_TINT: 0, // 0 = as painted, 1 = granite pulled halfway to the lilac shadow colour
+  LOOK_MEADOW_TINT: 0, // 0 = as painted, 1 = meadow pulled to LOOK_MEADOW_COOL
+  LOOK_ISLAND_BRIGHTNESS: 1.0, // multiplies the lit island colours (terrain, pines)
 
   // Water tuning (WAVE_AMP, WAVE_LEN, WAVE_SPEED, SEG, SIZE, WATER_COLOR)
   // lives in src/water.js — self-contained so the JS boat-bob mirror and
@@ -193,7 +238,11 @@ export const CONFIG = {
   // a 150m landmark at ~11m; see that file's header). 4m keeps seed 1's
   // whole scattered field (~97 islands) under a 200k total-vertex budget
   // (171,248 measured) — index.html's ?cell= overrides for A/B'ing.
-  ISLAND_GRID_CELL_SIZE: 3, // metres per terrain facet; was 4 — Felix 2026-11-05 found 4m triangles too big (shared/ART.md facet rule updated to 3m)
+  // 2026-11-05 (Look Lab port): terrain is smooth now, so this is sampling
+  // resolution, not facet size — fine enough for a crisp ~1 m wet-rock band
+  // at the waterline. src/island.js culls underwater cells nobody can see,
+  // which keeps the vertex count near the old 3 m mesh. Was 3 (4 before).
+  ISLAND_GRID_CELL_SIZE: 1.5, // metres per terrain grid cell
 
   // Vertex-colour thresholds (slope from a finite-difference gradient, like
   // BOAT_TILT_GRADIENT_EPS above).
@@ -204,7 +253,7 @@ export const CONFIG = {
   ISLAND_TREE_MIN_HEIGHT: 4.4, // 1-6m, no trees on the beach fringe below this
   ISLAND_TREE_MAX_HEIGHT: 34, // 20-40m, no trees above this (bare granite near the peak)
   ISLAND_TREE_MAX_SLOPE_DEG: 37, // 20-40deg, no trees on slopes steeper than this
-  ISLAND_TREE_ATTEMPTS: 800, // candidate points tried; how many actually land in the valid height/slope band (and so get planted) varies with the terrain, not just this number
+  ISLAND_TREE_ATTEMPTS: 2750, // candidate points tried (~1 per 25 m² of the island's bounding square at the base radius, the Look Lab's density); only the ~8% that land in a green pocket get planted (src/island-look.js's greenAmount), so this is far above the planted count
   ISLAND_TREE_SCALE_MIN: 0.7, // 0.5-1.5, per-tree random scale range, for a handmade/uneven look
   ISLAND_TREE_SCALE_MAX: 1.5,
 

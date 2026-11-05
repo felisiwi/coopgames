@@ -116,7 +116,11 @@ const UNSCALED_KEYS = [
 ];
 
 const MIN_TREE_ATTEMPTS = 40; // floor so the smallest islands still get a few trees
-const MAX_TREE_ATTEMPTS = 1200; // caps InstancedMesh size for the biggest islands
+// Raised from 1200 (Look Lab port): pines now grow only in the green pockets
+// (~8% of an island), so the same number of attempts plants ~12x fewer trees.
+// The lab's meadows hold about one pine per 40 m²; 9000 attempts on the
+// biggest island keeps that density. Still caps the InstancedMesh size.
+const MAX_TREE_ATTEMPTS = 9000;
 
 // Assumed camera aspect ratio for cameraViewWidth() below — three.js's
 // PerspectiveCamera.aspect is actually set from the live canvas size at

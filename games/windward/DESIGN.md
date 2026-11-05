@@ -319,7 +319,7 @@ islands "muted and sad". Settled:
 - **Split style.** Objects stay low-poly flat-shaded (boat, houses, pines,
   props). Islands and water get a smooth, painted treatment instead of
   facets. This replaces shared/ART.md's "one facet scale for everything"
-  for ground and sea — ART.md needs a PR when this is ported.
+  for ground and sea. ART.md updated in its own PR (#5, not merged).
 - **Water: smooth toon + shore foam.** Smooth waves with analytic normals,
   two soft painted light bands, colour by depth (turquoise shallows ->
   mid blue -> deep blue) from a baked island depth map, foam rings that
@@ -340,6 +340,71 @@ islands "muted and sad". Settled:
 
 The prototype is saved as `ref/look-lab.html` (and the controls one as
 `ref/control-lab.html`) — the reference to port from.
+
+### L1 port status (2026-11-05, branch `felix/windward-look`)
+
+Ported; judged by Felix on the Vercel preview, not yet merged. Where it lives:
+`src/water.js` (shader, wind marks), `src/depthmap.js` (depth bake),
+`src/island-look.js` (palette + green rule), `src/island.js` (smooth terrain,
+pines), `src/settlements.js` (houses prefer green), `game.js` (fog, wiring).
+Things that are NOT a literal copy of the lab, and why:
+
+- **Island heights/slopes are mapped onto the lab's statistics** before the lab's
+  thresholds apply (`getIslandLook`): game islands are far bigger and steeper
+  (a large island peaks ~85 m, median slope >1.0, vs ~15 m / 0.5 in the lab),
+  so the literal rule painted 1.6% green on a large island vs the lab's 7.5%.
+  A slope factor of 1.6 (`SLOPE_CALIBRATION`, fitted by sweep) lands the mean
+  meadow share at ~8%.
+- **Foam reads a shore-distance channel, not raw depth** (`depthmap.js`): shelf
+  slopes differ ~20x between small skerries and big cliff islands, so raw depth
+  made the white edge 6 m wide on skerries and a 0.3 m hairline on big islands.
+- **Wind marks and foam rings are accumulated in JS** (`stepMarks`), not
+  `uTime * (3 + 9 * wind)`: that is the old wobble bug's shape.
+- **Water light bands use the lab's 25 degree sun elevation** (game azimuth);
+  the game's own sun is at 10 degrees and a flat sea would never reach a band.
+  Island lighting is untouched, so ground can look darker than in the lab.
+- **Haze colour in the water shader is in display values** so it matches the
+  fog on meshes (the lab mixed a linear-space colour, which came out darker).
+- Hash noise has no `sin()` (integer hash in `island-look.js`, sin-free in GLSL).
+- `island-lab.html`'s colour and height-threshold sliders no longer drive the
+  ground colour (the palette is in `island-look.js`).
+
+### Look pass 2: Skagen palette (2026-11-05)
+
+Felix's verdict on L1: shallows too turquoise, foam a bit strong in light wind,
+islands too dark. Target mood: Skagenmålarna, "den blå time" — pastel, dreamy,
+slightly cold, high-key, silvery sea. The paint is `LOOK_*` in `src/config.js`.
+
+- **"Too dark" was the lights, not the paint.** three.js r155+ no longer
+  multiplies light by pi, so a diffuse surface gets `intensity / pi` of its
+  colour: the old fill (0.45) lit the ground at 14%. The fill is now 2.4 and
+  cool (`#dfe6ee` sky, lilac `#a79fbd` ground), the sun softer (2.4, pale
+  `#fff1e0`, elevation 18 instead of 10). Flat tops receive 0.81 of their
+  colour (was 0.13), slopes facing away 0.55 (was 0.06); lit/shaded stays ~1.5
+  so shadows read (`look-presets.test.js` checks this).
+- **Foam scales with wind** (`foamStrength`, `LOOK_FOAM_WIND_AMOUNT`) off a
+  low-passed wind (`stepFoamWind`, 3 s), never off time.
+- **`?tune=1`** shows a collapsed "Tune" panel (`src/tune.js`): 7 sliders and
+  Before / Skagen buttons; the address bar always holds the current values
+  (`src/look-presets.js`), so Felix can send a link back. Without `tune=1`
+  the panel is never loaded and URL look values are ignored. Pines are in the
+  panel's brightness/colour too; the shore foam colour and sea colours are
+  presets-only (edit `config.js`).
+
+### Look pass 3: Skagen is the default; ponds fixed (2026-11-05)
+
+Felix approved the Skagen light. The `LOOK_*` and lighting values in
+`src/config.js` ARE Skagen (a bare URL shows it); "Before" survives only as a
+preset in `src/look-presets.js`, reachable with `?tune=1`. Before/after renders
+are kept in `ref/look-skagen/`.
+
+- **Ponds rendered solid white.** The depth bake interpolated any coarse cell
+  whose four corners were land, so a pond *inside* such a cell was baked as
+  land: shore distance 0 everywhere, so the foam edge covered it. Low ground
+  (a corner under 4 m high) is now evaluated exactly. Measured on seed 1: 144
+  pond points over 0.3 m deep were baked as land, now 0 (8 of 19,941 shallow
+  edge slivers remain). Bake time is unchanged (~160-190 ms). Guarded by a
+  test in `depthmap.test.js` that fails with the old rule.
 
 ## Phone controls: Control Lab findings (Felix, 2026-11-04)
 

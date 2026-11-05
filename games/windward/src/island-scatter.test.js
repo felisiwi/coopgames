@@ -221,7 +221,7 @@ check('tree attempts scale with area (radius^2) and stay within sane bounds', ()
   const large = buildIslandParams(CONFIG.ISLAND_SCATTER_LARGE_MAX_RADIUS, 0, 0);
   assert.ok(small.ISLAND_TREE_ATTEMPTS > 0, 'smallest island should still attempt to plant some trees');
   assert.ok(large.ISLAND_TREE_ATTEMPTS > small.ISLAND_TREE_ATTEMPTS, 'a bigger island should attempt more trees than a smaller one');
-  assert.ok(large.ISLAND_TREE_ATTEMPTS <= 1200, 'tree attempts should be capped for the biggest islands');
+  assert.ok(large.ISLAND_TREE_ATTEMPTS <= 9000, 'tree attempts should be capped for the biggest islands');
 });
 
 console.log(`\n${passed}/${passed} assertions passed`);

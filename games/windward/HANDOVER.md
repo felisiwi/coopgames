@@ -31,14 +31,22 @@ if you need it.
   designs) passes for seeds 1-3: under 10% empty windows, median 2+ islands
   per window. First real two-player session is still the actual tuning
   pass — this is "right on paper," not yet confirmed in play.
-- Facet-scale rule lives in `shared/ART.md`'s Materials section: target 4m
-  facet, 2-6m acceptable range, nothing finer for being small or coarser for
-  being big — small props (trunks, canopies, buoys) are exempt from the 2m
-  floor since they can't physically carry it. Island terrain (absolute 4m
-  `ISLAND_GRID_CELL_SIZE`), water tile (3.587m — closest to 4m the wave
-  shader's own aliasing bound allows), and pine trunk/canopy (4 radial
-  segments, still under 2m regardless) are all audited against it. The boat
-  (CC0 `ship-small.glb`) is not — left as-is, hull median facet ~0.28m.
+- **Split style (L1, 2026-11-05, branch `felix/windward-look` — see DESIGN.md's
+  "L1 port status").** Objects stay low-poly and flat-shaded (boat, houses,
+  pines, props; `shared/ART.md`'s facet rule still applies to them, small props
+  exempt from the 2m floor). Islands and the sea are smooth and painted: the
+  facet rule no longer applies to ground or water. `ISLAND_GRID_CELL_SIZE` is
+  now 1.5 m of *sampling* resolution (unseen underwater cells are culled), and
+  the water tile's `SEG` only has to resolve the shortest wave (3.6 m bound in
+  `water.test.js`). The `shared/ART.md` update is its own PR (#5, not merged).
+- **Tuning the look on a phone:** add `?tune=1` to the solo entry
+  (`/games/windward/?seed=1&tune=1`). Sliders, Before / Skagen presets, and the
+  address bar always holds the current values (see DESIGN.md "Look pass 2").
+  Never shown without `tune=1`. To bake a pick in, copy its values into the
+  `LOOK_*` / lighting keys in `src/config.js`.
+- Island depth is baked once at start (`src/depthmap.js`, ~1.5 m texels, logged
+  as `depth-map: ...` in the console) and also feeds the water colour and
+  foam. Same seed gives the same map on both peers.
 - `island-lab.html` has a **10-150m "Preview radius" slider** (Tessellation
   check fieldset) that runs the real `buildIslandParams` scaling, so
   skerry/medium/large tessellation can be checked without leaving the lab.

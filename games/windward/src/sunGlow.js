@@ -37,6 +37,7 @@ export function createSunGlow() {
     transparent: true,
     depthWrite: false, // never blocks anything drawn after it
     blending: THREE.AdditiveBlending,
+    fog: false, // a sky-backdrop element like the dome: the golden haze must not wash it out
   });
   const sprite = new THREE.Sprite(material);
   sprite.scale.set(CONFIG.GLOW_SIZE, CONFIG.GLOW_SIZE, 1);

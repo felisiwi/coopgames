@@ -8,6 +8,14 @@
 // inland, facing the sea, kept clear of each other and of the finds.
 import { CONFIG } from './config.js';
 import { createIslandHeightField } from './island.js';
+import { getIslandLook, greenAmount, slopeAt, GREEN_THRESHOLD } from './island-look.js';
+
+// Look Lab port: houses prefer the green, flat pockets (where the meadow is,
+// and where the pines grow). The first attempts at each island only accept
+// green ground; if the island has little green near the village stretch, the
+// remaining attempts accept any gentle ground, so every island that should
+// have buildings still gets them.
+const PREFER_GREEN_ATTEMPTS = 120;
 
 function mulberry32(seed) {
   let a = seed >>> 0;
@@ -59,6 +67,7 @@ export function placeSettlements(islands, seed, avoid = []) {
     const cx = p.ISLAND_CENTER_X;
     const cz = p.ISLAND_CENTER_Z;
     const heightAt = createIslandHeightField(island.seed, p);
+    const look = getIslandLook(island.seed, p, heightAt);
     const maxR = p.ISLAND_RADIUS + p.ISLAND_COAST_NOISE_AMPLITUDE + 40;
 
     // A village clusters along one stretch of coast rather than spreading
@@ -80,6 +89,8 @@ export function placeSettlements(islands, seed, avoid = []) {
       const z = cz + Math.cos(angle) * r;
       const y = heightAt(x, z);
       if (!asBoathouse && (y < 0.6 || slopeDeg(heightAt, x, z) > CONFIG.SETTLEMENT_MAX_SLOPE_DEG)) continue;
+      if (!asBoathouse && attempt < PREFER_GREEN_ATTEMPTS
+        && greenAmount(y, slopeAt(heightAt, x, z, p.ISLAND_GRID_CELL_SIZE), x, z, look) < GREEN_THRESHOLD) continue;
       if (!clear(x, z, CONFIG.SETTLEMENT_SPACING)) continue;
       out.push({
         kind: asBoathouse ? 'boathouse' : 'cottage',
