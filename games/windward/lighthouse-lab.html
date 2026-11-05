@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Windward — lighthouse lab</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0a1a2a; overflow: hidden; }
+  #scene { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+  #scene.dragging { cursor: grabbing; }
+  #labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  .label {
+    position: absolute; transform: translate(-50%, -100%); white-space: nowrap;
+    font: 12px/1.2 system-ui, sans-serif; color: #fff7e0; padding: 2px 7px;
+    background: rgba(10, 26, 42, 0.72); border-radius: 10px;
+  }
+  #panel {
+    position: fixed; top: 10px; left: 10px; width: 250px; max-height: calc(100% - 20px);
+    overflow-y: auto; box-sizing: border-box; padding: 10px;
+    background: rgba(10, 26, 42, 0.85); color: #eaf6ff;
+    font: 12px/1.4 system-ui, sans-serif; border-radius: 8px;
+  }
+  #panel h1 { font-size: 13px; margin: 0 0 4px; color: #ffcc66; }
+  #panel p { margin: 0 0 8px; color: rgba(234,246,255,0.65); font-size: 11px; }
+  #panel button {
+    font: inherit; color: #eaf6ff; background: rgba(234,246,255,0.1);
+    border: 1px solid rgba(234,246,255,0.25); border-radius: 4px; padding: 4px 8px;
+    cursor: pointer; margin: 0 4px 6px 0;
+  }
+  #panel button.on { background: #ffcc66; color: #0a1a2a; border-color: #ffcc66; }
+  #list button { display: block; width: 100%; text-align: left; margin: 0 0 3px; }
+  #list small { display: block; color: rgba(234,246,255,0.6); font-size: 10px; }
+  #info { margin-top: 6px; color: #78dc96; font-size: 11px; }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="labels"></div>
+<div id="panel">
+  <h1>Windward — lighthouse lab</h1>
+  <p>Drag to orbit, wheel to zoom, click a name to fly to it.</p>
+  <button id="gameCam" type="button">Game camera</button>
+  <button id="frameAll" type="button">Frame all</button>
+  <button id="boatBtn" type="button" class="on">Boat</button>
+  <div id="list"></div>
+  <div id="info"></div>
+</div>
+
+<script type="module">
+import * as THREE from './vendor/three/three.module.js';
+import { CONFIG } from './src/config.js';
+import { createSky } from './src/sky.js';
+import { createBoatMesh } from './src/boat.js';
+import { LIGHTHOUSES, createLighthouse, triangleCount } from './src/lighthouses.js';
+
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const sky = createSky();
+scene.add(sky.mesh);
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
+
+// Same golden-hour lighting as game.js (values read from CONFIG).
+scene.add(new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY));
+const sun = new THREE.DirectionalLight(CONFIG.SUN_COLOR, CONFIG.SUN_INTENSITY);
+const lightAz = (CONFIG.LIGHT_AZIMUTH_DEG * Math.PI) / 180;
+const lightEl = (CONFIG.LIGHT_ELEVATION_DEG * Math.PI) / 180;
+const sunOffset = new THREE.Vector3(
+  Math.sin(lightAz) * Math.cos(lightEl), Math.sin(lightEl), Math.cos(lightAz) * Math.cos(lightEl),
+).multiplyScalar(100);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 300;
+for (const k of ['left', 'bottom']) sun.shadow.camera[k] = -80;
+for (const k of ['right', 'top']) sun.shadow.camera[k] = 80;
+sun.shadow.bias = CONFIG.SUN_SHADOW_BIAS;
+scene.add(sun, sun.target);
+
+// Flat stand-in sea (the real water shader is not needed to judge objects).
+const sea = new THREE.Mesh(
+  new THREE.PlaneGeometry(600, 600),
+  new THREE.MeshLambertMaterial({ color: 0x2f86a8, flatShading: true }),
+);
+sea.rotation.x = -Math.PI / 2;
+sea.receiveShadow = true;
+scene.add(sea);
+
+// --- the twelve, on small pink-granite rocks, in a 4 x 3 grid ---------------
+const COLS = 4;
+const SPACING = 26;
+const rockMat = new THREE.MeshLambertMaterial({ color: 0xc9a597, flatShading: true });
+const labelsEl = document.getElementById('labels');
+const listEl = document.getElementById('list');
+const towers = [];
+
+LIGHTHOUSES.forEach((info, i) => {
+  const col = i % COLS;
+  const row = Math.floor(i / COLS);
+  const x = (col - (COLS - 1) / 2) * SPACING;
+  const z = (row - 1) * SPACING;
+
+  const lh = createLighthouse(info.name);
+  lh.position.set(x, 0, z);
+  scene.add(lh);
+
+  const rockR = info.name === 'Vinga' ? 8.5 : 5.2;
+  const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(rockR, 0), rockMat);
+  rock.scale.set(1, 0.45, 1);
+  rock.rotation.y = i * 1.3;
+  rock.updateMatrixWorld(true);
+  rock.position.set(x, 0.7 - new THREE.Box3().setFromObject(rock).max.y, z);
+  rock.castShadow = rock.receiveShadow = true;
+  scene.add(rock);
+
+  const height = new THREE.Box3().setFromObject(lh).getSize(new THREE.Vector3()).y;
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = info.name;
+  labelsEl.appendChild(label);
+
+  const btn = document.createElement('button');
+  btn.innerHTML = `${info.name}<small>${height.toFixed(1)} m · ${triangleCount(lh)} tris</small>`;
+  btn.title = info.description;
+  btn.addEventListener('click', () => focusOn(i));
+  listEl.appendChild(btn);
+
+  towers.push({ info, x, z, height, label });
+});
+
+// A game boat for scale, parked next to the first tower.
+const boat = createBoatMesh(0xf5f0e3);
+boat.position.set(towers[0].x - 11, 0, towers[0].z + 9);
+boat.rotation.y = 0.6;
+scene.add(boat);
+document.getElementById('boatBtn').addEventListener('click', (e) => {
+  boat.visible = !boat.visible;
+  e.currentTarget.classList.toggle('on', boat.visible);
+});
+
+// --- orbit camera (no OrbitControls vendored) --------------------------------
+const GAME_POLAR = ((90 - CONFIG.FIXED_CAMERA_ELEVATION_DEG) * Math.PI) / 180;
+let azimuth = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180;
+let polar = (62 * Math.PI) / 180;
+let radius = 150;
+let fov = 45;
+let gameCam = false;
+const target = new THREE.Vector3(0, 6, 0);
+const goal = target.clone();
+const infoEl = document.getElementById('info');
+
+function setGameCam(on) {
+  gameCam = on;
+  document.getElementById('gameCam').classList.toggle('on', on);
+  if (on) {
+    polar = GAME_POLAR;
+    fov = CONFIG.FIXED_CAMERA_FOV_DEG;
+    radius = CONFIG.FIXED_CAMERA_DISTANCE;
+    azimuth = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180;
+  } else {
+    fov = 45;
+    radius = Math.min(radius, 90);
+  }
+}
+function focusOn(i) {
+  const t = towers[i];
+  goal.set(t.x, t.height * 0.45, t.z);
+  if (!gameCam) radius = 48;
+  infoEl.textContent = `${t.info.name} — ${t.info.lat.toFixed(4)}°N ${t.info.lon.toFixed(4)}°E · ${t.info.description}`;
+}
+function frameAll() {
+  goal.set(0, 6, 0);
+  radius = gameCam ? 330 : 150;
+  infoEl.textContent = '';
+}
+document.getElementById('gameCam').addEventListener('click', () => setGameCam(!gameCam));
+document.getElementById('frameAll').addEventListener('click', frameAll);
+
+let dragging = false;
+let lastX = 0;
+let lastY = 0;
+canvas.addEventListener('pointerdown', (e) => {
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  canvas.classList.add('dragging'); canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  azimuth -= (e.clientX - lastX) * 0.006;
+  // In game-camera mode the elevation is locked, as in play.
+  if (!gameCam) polar = Math.min(1.5, Math.max(0.1, polar - (e.clientY - lastY) * 0.006));
+  lastX = e.clientX; lastY = e.clientY;
+});
+const endDrag = () => { dragging = false; canvas.classList.remove('dragging'); };
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  radius = Math.min(500, Math.max(15, radius * (1 + e.deltaY * 0.001)));
+}, { passive: false });
+
+function resize() {
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  camera.aspect = window.innerWidth / window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const q = new URLSearchParams(location.search);
+if (q.get('game') === '1') setGameCam(true);
+const startIdx = LIGHTHOUSES.findIndex((l) => l.name === q.get('focus'));
+if (startIdx >= 0) { focusOn(startIdx); target.copy(goal); }
+
+const v = new THREE.Vector3();
+function frame() {
+  target.lerp(goal, 0.12);
+  camera.fov = fov;
+  camera.updateProjectionMatrix();
+  camera.position.set(
+    target.x + radius * Math.sin(polar) * Math.sin(azimuth),
+    target.y + radius * Math.cos(polar),
+    target.z + radius * Math.sin(polar) * Math.cos(azimuth),
+  );
+  camera.lookAt(target);
+  sun.position.copy(target).add(sunOffset);
+  sun.target.position.copy(target);
+  sky.update(camera);
+
+  for (const t of towers) {
+    v.set(t.x, t.height + 1.5, t.z).project(camera);
+    const visible = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
+    t.label.style.display = visible ? '' : 'none';
+    t.label.style.left = `${((v.x + 1) / 2) * window.innerWidth}px`;
+    t.label.style.top = `${((1 - v.y) / 2) * window.innerHeight}px`;
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
