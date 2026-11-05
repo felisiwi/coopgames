@@ -1,0 +1,508 @@
+{
+ "_note": "Windward epochs/eras DRAFT (2026-11-05, mission control with Felix). Single source for the epoch timeline and, later, the coast lab and game. Dates marked approx are approximate; 'verify' items were not source-checked yet. 2026-11-05 rev 2: Herring and Light split into New Crown / The Silver Sea / Light and Stone (Felix).",
+ "herringPeriods": [
+  {
+   "from": 1556,
+   "to": 1589,
+   "approx": true,
+   "verify": true
+  },
+  {
+   "from": 1660,
+   "to": 1680,
+   "approx": true,
+   "verify": true
+  },
+  {
+   "from": 1747,
+   "to": 1809,
+   "source": "https://www.herripedia.com/bohuslan/"
+  },
+  {
+   "from": 1877,
+   "to": 1906,
+   "source": "https://www.herripedia.com/bohuslan/"
+  },
+  {
+   "from": 1963,
+   "to": 1965,
+   "source": "https://www.herripedia.com/bohuslan/"
+  }
+ ],
+ "lighthouseBuilt": [
+  1782,
+  1841,
+  1842,
+  1849,
+  1865,
+  1868,
+  1883,
+  1890,
+  1890,
+  1891,
+  1904,
+  1905,
+  1930,
+  1934,
+  1935,
+  1936,
+  1938,
+  1939,
+  1939,
+  1939,
+  1941,
+  1954,
+  1964,
+  1965,
+  1974,
+  1974,
+  1974,
+  1977,
+  2020
+ ],
+ "markers": [
+  {
+   "year": 1700,
+   "label": "first jump lands"
+  },
+  {
+   "year": 1905,
+   "label": "time warp lands"
+  },
+  {
+   "year": 2015,
+   "label": "you start (casual)"
+  }
+ ],
+ "epochs": [
+  {
+   "id": "kings",
+   "name": "I · Kings and raiders",
+   "from": 800,
+   "to": 1657,
+   "weight": 12,
+   "kind": "med",
+   "vibe": "Mythic, raw",
+   "season": "Autumn → winter"
+  },
+  {
+   "id": "new-crown",
+   "name": "II · New Crown",
+   "from": 1658,
+   "to": 1746,
+   "weight": 12,
+   "kind": "quiet",
+   "vibe": "Poor, unsettled, hopeful",
+   "season": "Spring → summer"
+  },
+  {
+   "id": "silver-sea",
+   "name": "III · The Silver Sea",
+   "from": 1747,
+   "to": 1809,
+   "weight": 18,
+   "kind": "boom",
+   "release": "first (proposed)",
+   "vibe": "Rich, rowdy, greedy",
+   "season": "Summer → late summer → autumn"
+  },
+  {
+   "id": "light-stone",
+   "name": "IV · Light and Stone",
+   "from": 1810,
+   "to": 1906,
+   "weight": 18,
+   "kind": "light",
+   "vibe": "Loss, then hope, then bustle",
+   "season": "Late autumn → winter → late winter"
+  },
+  {
+   "id": "engines",
+   "name": "V · Engines and wars",
+   "from": 1907,
+   "to": 1949,
+   "weight": 14,
+   "kind": "war",
+   "vibe": "Sly, tense",
+   "season": "A long, cold spring"
+  },
+  {
+   "id": "summer",
+   "name": "VI · Summer guests",
+   "from": 1950,
+   "to": 1999,
+   "weight": 13,
+   "kind": "sum",
+   "vibe": "Friendly, cute, with a feud",
+   "season": "Summer"
+  },
+  {
+   "id": "today",
+   "name": "Today · the lure",
+   "from": 2000,
+   "to": 2026,
+   "weight": 13,
+   "kind": "light",
+   "vibe": "Easy, pretty",
+   "season": "Summer"
+  }
+ ],
+ "eras": [
+  {
+   "name": "Norse coast",
+   "from": 800,
+   "to": 1050,
+   "kind": "med",
+   "summary": "Bohuslän is part of Norway. Longships, chieftains, rock carvings already ancient.",
+   "verify": true,
+   "events": [],
+   "vibe": "Raw, mythic, open sea",
+   "season": "Autumn"
+  },
+  {
+   "name": "Fortress and fish",
+   "from": 1051,
+   "to": 1555,
+   "kind": "med",
+   "summary": "Towns and fortresses rise on a Norwegian coast; fishing villages are first recorded.",
+   "events": [
+    [
+     1293,
+     "Marstrand first recorded"
+    ],
+    [
+     1308,
+     "Bohus fortress begun (verify)"
+    ]
+   ],
+   "vibe": "Old, slow, stony",
+   "season": "Late autumn"
+  },
+  {
+   "name": "Border wars",
+   "from": 1556,
+   "to": 1657,
+   "kind": "boom",
+   "summary": "A herring period, then war between Sweden and Denmark-Norway over the coast.",
+   "verify": true,
+   "events": [
+    [
+     1556,
+     "~ Herring period begins (to ~1589)"
+    ],
+    [
+     1594,
+     "Smögen first recorded"
+    ],
+    [
+     1617,
+     "Hälleviksstrand first recorded"
+    ]
+   ],
+   "vibe": "Contested, wary",
+   "season": "Winter"
+  },
+  {
+   "name": "New border",
+   "from": 1658,
+   "to": 1705,
+   "kind": "quiet",
+   "summary": "Bohuslän becomes Swedish. Carlsten fortress rises over Marstrand.",
+   "events": [
+    [
+     1658,
+     "Treaty of Roskilde: Bohuslän becomes Swedish"
+    ],
+    [
+     1658,
+     "Carlsten fortress begun"
+    ],
+    [
+     1659,
+     "Käringön first recorded"
+    ],
+    [
+     1660,
+     "~ Short herring period (to ~1680)"
+    ],
+    [
+     1700,
+     "~ First jump lands you here"
+    ]
+   ],
+   "vibe": "Unsettled",
+   "season": "Spring"
+  },
+  {
+   "name": "Crown shores",
+   "from": 1706,
+   "to": 1746,
+   "kind": "quiet",
+   "summary": "A new law lets subjects build fishing huts on crown land. Göteborg trades with China.",
+   "events": [
+    [
+     1706,
+     "Ordinance: build huts on crown land"
+    ],
+    [
+     1719,
+     "Tordenskjold takes Marstrand"
+    ],
+    [
+     1731,
+     "East India Company founded"
+    ],
+    [
+     1745,
+     "Götheborg sinks at the harbour mouth"
+    ]
+   ],
+   "vibe": "Poor, hopeful",
+   "season": "Summer"
+  },
+  {
+   "name": "The silver comes",
+   "from": 1747,
+   "to": 1774,
+   "kind": "boom",
+   "summary": "The herring returns. Salteries and the first train-oil works.",
+   "events": [
+    [
+     1747,
+     "Great herring period begins"
+    ],
+    [
+     1760,
+     "~ Oil boiling on a factory scale"
+    ],
+    [
+     1766,
+     "Exported oil made toll-free"
+    ]
+   ],
+   "vibe": "Rising, busy",
+   "season": "Summer"
+  },
+  {
+   "name": "Honour and Life",
+   "from": 1775,
+   "to": 1794,
+   "kind": "boom",
+   "summary": "Marstrand is a free port: smugglers, refugees, foreign ships. Oil lights European streets.",
+   "events": [
+    [
+     1775,
+     "Marstrand free port opens"
+    ],
+    [
+     1780,
+     "Permits needed for new works"
+    ],
+    [
+     1782,
+     "Carlsten light lit"
+    ],
+    [
+     1783,
+     "Inspection condemns 120 works"
+    ],
+    [
+     1787,
+     "Peak: 429 oil works"
+    ],
+    [
+     1794,
+     "Free port closes"
+    ]
+   ],
+   "vibe": "Rich, rowdy, mischievous",
+   "season": "Late summer"
+  },
+  {
+   "name": "Last silver",
+   "from": 1795,
+   "to": 1809,
+   "kind": "boom",
+   "summary": "Works shed workers, wars rage in Europe, and the herring thins out.",
+   "events": [
+    [
+     1798,
+     "Almost all works workers sacked"
+    ],
+    [
+     1808,
+     "Last herring season (1808–09)"
+    ]
+   ],
+   "vibe": "Anxious, stormy",
+   "season": "Autumn"
+  },
+  {
+   "name": "Empty harbours",
+   "from": 1810,
+   "to": 1839,
+   "kind": "quiet",
+   "summary": "Ruined works and a desolate coast. Lasse-Maja sits in Carlsten.",
+   "events": [
+    [
+     1813,
+     "Lasse-Maja imprisoned at Carlsten"
+    ],
+    [
+     1839,
+     "Lasse-Maja pardoned"
+    ]
+   ],
+   "vibe": "Loss, melancholy",
+   "season": "Late autumn, last leaves falling"
+  },
+  {
+   "name": "Lights go up",
+   "from": 1840,
+   "to": 1876,
+   "kind": "light",
+   "summary": "The great lighthouses are lit one by one. Steamers appear.",
+   "events": [
+    [
+     1842,
+     "Hållö lit"
+    ],
+    [
+     1849,
+     "Nordkoster twin towers"
+    ],
+    [
+     1865,
+     "Måseskär lit"
+    ],
+    [
+     1868,
+     "Pater Noster lit"
+    ]
+   ],
+   "vibe": "Hope, safer seas",
+   "season": "Crisp winter"
+  },
+  {
+   "name": "The second silver",
+   "from": 1877,
+   "to": 1906,
+   "kind": "boom",
+   "summary": "Herring under the lights. Canneries, fish guano, granite quarries.",
+   "events": [
+    [
+     1877,
+     "Second herring period begins"
+    ],
+    [
+     1890,
+     "Vinga tower and Stångehuvud"
+    ],
+    [
+     1904,
+     "Eggskär lit"
+    ],
+    [
+     1905,
+     "Time warp lands you here"
+    ]
+   ],
+   "vibe": "Industrial bustle",
+   "season": "Late winter → early spring"
+  },
+  {
+   "name": "Motor and canning",
+   "from": 1907,
+   "to": 1916,
+   "kind": "war",
+   "summary": "Engines arrive in fishing boats; canneries and emigration.",
+   "verify": true,
+   "events": [],
+   "vibe": "Change, engines",
+   "season": "Long, cold spring"
+  },
+  {
+   "name": "Spirits at sea",
+   "from": 1917,
+   "to": 1938,
+   "kind": "war",
+   "summary": "Prohibition in Norway and rationing in Sweden: liquor smuggling along the coast.",
+   "verify": true,
+   "events": [
+    [
+     1917,
+     "Swedish alcohol ration book (verify)"
+    ],
+    [
+     1930,
+     "Mollösund light"
+    ]
+   ],
+   "vibe": "Sly, night runs",
+   "season": "Long, cold spring"
+  },
+  {
+   "name": "Mines and neutrality",
+   "from": 1939,
+   "to": 1949,
+   "kind": "war",
+   "summary": "War in Europe. Mines in the Skagerrak, a neutral coast, boats from occupied Norway.",
+   "verify": true,
+   "events": [
+    [
+     1939,
+     "Väcker and Ramskär lit"
+    ]
+   ],
+   "vibe": "Tense, watchful",
+   "season": "Long, cold spring"
+  },
+  {
+   "name": "Summer guests",
+   "from": 1950,
+   "to": 1979,
+   "kind": "sum",
+   "summary": "Holiday homes, leisure boats, bridges to the islands, and the friendly west-coast–east-coast feud begins: rich Stockholmers buying up fishermen's cottages.",
+   "events": [
+    [
+     1960,
+     "Tjörn bridges open (verify)"
+    ],
+    [
+     1963,
+     "Brief herring return (to 1965)"
+    ]
+   ],
+   "vibe": "Friendly, cute, with a feud",
+   "season": "Summer"
+  },
+  {
+   "name": "Leisure sailing",
+   "from": 1980,
+   "to": 1999,
+   "kind": "sum",
+   "summary": "Marinas and boatbuilding; the coast becomes a sailing playground.",
+   "verify": true,
+   "events": [],
+   "vibe": "Easy, playful",
+   "season": "Summer"
+  },
+  {
+   "name": "Summer coast",
+   "from": 2000,
+   "to": 2026,
+   "kind": "light",
+   "summary": "The lure: just sail, no save, the meeting place between times.",
+   "events": [
+    [
+     2020,
+     "New Södra Syster tower"
+    ]
+   ],
+   "vibe": "Free sail, pretty",
+   "season": "Summer"
+  }
+ ],
+ "seasonArc": "Felix 2026-11-05: seasons run as one year across the timeline — autumn to winter (Kings and raiders), spring (New Crown) to summer and autumn (Silver Sea), late autumn and winter (Light and Stone), a long cold spring (Engines and wars), then summer (Summer guests, Today). Season = mood of the era; the historical herring fishery was a winter fishery (see GAME-DESIGN.md).",
+ "flow": "Felix 2026-11-05: start casual on Today's coast → time warp to ~1905 (end of IV) → first jump to the end of New border (~1700), so soon after warming up the 1706 crown-land ordinance lets you claim and build. Eras unlock spaced out across the timeline, not in order, so moving back and forth stays engaging."
+}
