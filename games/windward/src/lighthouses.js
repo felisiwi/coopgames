@@ -22,7 +22,7 @@ export const LIGHTHOUSES = [
   { name: 'Pater Noster', lat: dm(57, 53.760), lon: dm(11, 27.951),
     description: 'Tall tapering red iron lattice tower, heavily cross-braced, red-and-white top section, green dome.' },
   { name: 'Vinga', lat: dm(57, 37.924), lon: dm(11, 36.078),
-    description: 'Square beige stone tower with gallery and lantern; a tall red-orange pyramid daymark beside it.' },
+    description: 'Square beige stone tower with gallery and lantern; a red-orange pyramid daymark beside it.' },
   { name: 'Valö', lat: dm(57, 33.050), lon: dm(11, 48.150),
     description: 'Small white tower with a teal-green band, white lantern top and steps to the door.' },
   { name: 'Väderöbod', lat: dm(58, 32.502), lon: dm(11, 1.823),
@@ -238,7 +238,7 @@ const BUILDERS = {
     tower.position.x = -2.6;
     g.add(tower);
     // daymark: truncated four-sided pyramid
-    frustum(g, 2.6, 0.25, 16.5, 0, ORANGE_RED, 4, { x: 4.2 });
+    frustum(g, 2.6, 0.25, 9, 0, ORANGE_RED, 4, { x: 4.2 }); // Felix: lower than the tower
   },
 
   // Small white tower, teal band, white lantern top, steps.
