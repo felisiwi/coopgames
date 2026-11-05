@@ -40,3 +40,14 @@ Same spots, same script, with and without the lure (`?lure=0`), moment running:
 ## Tests
 `for f in games/windward/src/*.test.js; do node $f; done` (28 files). New: `arrival`, `audio`, `life`,
 `harbour-moment`, `lure-data` (real coast); extended: `names`.
+
+## Label fixes (2026-11-05, after Felix's phone test)
+Two bugs in `src/name-labels.js`, root causes found with a headless repro that logs every label's box and why it stays or goes:
+1. **Overlap at the edge / under the compass.** Labels were clamped by their *centre* to a 10% margin and never compared with each other or the HUD
+   (at 390 px: Gåsö and Långholmen 24 px apart, both under the compass box). Now `layoutLabels`: clamp by the label's own size, keep clear of the
+   HUD boxes actually on screen (read from the DOM) and the bottom line, nearest first (a village / harbour / island / described place counts as
+   nearer than a bare skerry), the rest stack one or two rows or collapse. At most 4 names on a narrow screen, 6 on a wide one.
+2. **Names fading near the island.** Lifetime was a 6.5 s timer, and the first fix (keep only while on screen) still failed: a portrait phone sees only
+   about 20 m to each side, so a place 40-80 m away is "near" yet a screen-width off to the side. Now a name stays while the boat is near the place
+   (reach + 140 m; as an edge tag 170-ish m for a skerry), over the island when it is on screen, and fades only when you sail away or it is crowded.
+Evidence: parked 6 m from Hättan the name stayed at full opacity for 18 s (was gone at 8 s); sailing away it stays 41 -> 166 m, then fades.

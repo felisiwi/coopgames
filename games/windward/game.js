@@ -341,11 +341,14 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Names are discovered (src/names.js): shown once when the boat is near, remembered on this device.
   const nameBook = coast ? createNameBook(coast.names) : null;
   const nameLabels = coast ? createNameLabels() : null;
+  // Names already known from an earlier session show again when you are near them (no announcement).
+  if (coast) for (const e of coast.names) if (nameBook.isKnown(e.id)) nameLabels.track(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8);
   const namesLine = () => `names       ${nameBook.count()} / ${nameBook.total} discovered`;
   if (coast && debugOverlay) {
     debugOverlay.set('names', namesLine());
     window.__names = nameBook; // headless checks
     window.__self = self;
+    window.__labels = nameLabels;
     window.__coastHeight = coast.heightAt;
   }
   // Stage 1b, the lure: arriving slowly in a harbour (a bell, a wave, a fish on deck), small life on the water.
@@ -509,6 +512,9 @@ function startGame({ canvas, net, seed, role }, coast) {
   resize();
 
   const hud = createHud(canvas);
+  // The HUD boxes that are on screen (compass, wind text, trim bar, notice, key legend): names keep clear of them.
+  const hudRects = () => [hud.rose, hud.text, hud.bar, hud.notice, hud.legend].filter((el) => el && el.style.display !== 'none')
+    .map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0).map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height }));
   if (coast && debugOverlay) {
     const r = coast.report;
     const t = r.timings;
@@ -693,7 +699,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       pingBearing: friendPing ? bearingTo(friendPing.x, friendPing.z) : null,
     });
 
-    nameLabels?.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS);
+    nameLabels?.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS, self, hudRects);
     renderer.render(scene, camera);
     debugOverlay?.frame(now);
     phone?.draw(nowS, {

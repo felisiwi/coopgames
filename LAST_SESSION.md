@@ -2,7 +2,7 @@
 
 **2026-11-05: stage 1b, the lure** (branch `felix/windward-lure`, based on 43d1565, NOT merged). Harbour arrival
 (bell, wave, fish on deck), small life, descriptive names before discovery, "places named N" HUD, solo-dev line
-only with `?debug=1`. `?lure=0` switches it off. Details, sources, numbers: `games/windward/docs/LURE.md`.
+only with `?debug=1`. `?lure=0` = off. Label fixes after the phone test: LURE.md. Details, sources, numbers: `games/windward/docs/LURE.md`.
 
 Before that: 2026-11-05: stage 1a, real-coast foundation** (branch `felix/windward-coast-trial`, origin/main merged in,
 NOT merged to main). The real coast is the DEFAULT; `?coast=proc` = old islands. Region 58.085-58.30 N,
