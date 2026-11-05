@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windward — epoch timeline</title>
+<!-- Frozen reference (2026-11-05): the epoch/era slider Felix asked to keep as decided.
+     Data is embedded (a snapshot of data/epochs.json) so later edits can't change it.
+     Live version: coast-lab.html (shares data/epochs.json). -->
+<style>
+:root{--bg:#faf9f5;--card:#ffffff;--t1:#1f1e1d;--t2:#5f5e5a;--b:#d3d1c7}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1a19;--card:#242422;--t1:#f1efe8;--t2:#b4b2a9;--b:#444441}}
+html,body{margin:0;background:var(--bg);color:var(--t1);font:15px/1.5 system-ui,-apple-system,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:20px;font-weight:500;margin:0 0 4px}
+.sub{color:var(--t2);font-size:13px;margin:0 0 16px}
+.track{position:relative;height:30px;margin:0 0 6px}
+.seg{position:absolute;top:0;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;overflow:hidden;white-space:nowrap;transition:opacity .2s;cursor:pointer}
+.eras{position:relative;height:16px;margin:0 0 10px}
+.es{position:absolute;top:0;height:16px;border-radius:3px;transition:opacity .2s,transform .2s;cursor:pointer}
+.pins{position:relative;height:18px;font-size:11px;color:var(--t2)}
+.pin{position:absolute;transform:translateX(-50%);white-space:nowrap}
+input[type=range]{width:100%;margin:6px 0 14px;height:28px}
+.yr{font-size:38px;font-weight:500;line-height:1}
+.card{background:var(--card);border:0.5px solid var(--b);border-radius:12px;padding:14px 16px;margin-top:10px}
+.k{font-size:12px;color:var(--t2)}
+.v{font-size:15px;font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.ev{font-size:13px;color:var(--t2);padding:3px 0}
+.ev.on{color:var(--t1)}
+.ev b{font-weight:500;margin-right:6px}
+@media (max-width:600px){.seg{font-size:10px}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>Windward — epoch timeline</h1>
+<p class="sub">Drag the slider or tap an epoch or era. Epochs are drawn by importance, not to scale. Lighthouse count = current towers in our list of 29. "~" = approximate; eras marked "check" were not yet source-verified. Draft.</p>
+<div class="track" id="ep"></div>
+<div class="eras" id="er"></div>
+<div class="pins" id="pins"></div>
+<input type="range" id="s" min="0" max="1000" value="560" step="1" aria-label="Year">
+<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><div class="yr" id="y"></div><div class="k" id="ept"></div></div>
+<div class="card">
+<div class="v" id="en" style="font-size:17px"></div>
+<div class="k" id="et" style="margin-top:2px"></div>
+<div style="margin-top:8px" id="es"></div>
+<div class="stats">
+<div><div class="k">Herring</div><div class="v" id="hr"></div></div>
+<div><div class="k">Lighthouses standing</div><div class="v" id="lh"></div></div>
+<div><div class="k">Marstrand</div><div class="v" id="ms"></div></div>
+</div>
+<div style="margin-top:12px" id="evs"></div>
+</div>
+</main>
+<script type="application/json" id="data">{
+ "_note": "Windward epochs/eras DRAFT (2026-11-05, mission control with Felix). Single source for the epoch timeline and, later, the coast lab and game. Dates marked approx are approximate; 'verify' items were not source-checked yet.",
+ "herringPeriods": [
+  {
+   "from": 1556,
+   "to": 1589,
+   "approx": true,
+   "verify": true
+  },
+  {
+   "from": 1660,
+   "to": 1680,
+   "approx": true,
+   "verify": true
+  },
+  {
+   "from": 1747,
+   "to": 1809,
+   "source": "https://www.herripedia.com/bohuslan/"
+  },
+  {
+   "from": 1877,
+   "to": 1906,
+   "source": "https://www.herripedia.com/bohuslan/"
+  },
+  {
+   "from": 1963,
+   "to": 1965,
+   "source": "https://www.herripedia.com/bohuslan/"
+  }
+ ],
+ "lighthouseBuilt": [
+  1782,
+  1841,
+  1842,
+  1849,
+  1865,
+  1868,
+  1883,
+  1890,
+  1890,
+  1891,
+  1904,
+  1905,
+  1930,
+  1934,
+  1935,
+  1936,
+  1938,
+  1939,
+  1939,
+  1939,
+  1941,
+  1954,
+  1964,
+  1965,
+  1974,
+  1974,
+  1974,
+  1977,
+  2020
+ ],
+ "markers": [
+  {
+   "year": 1745,
+   "label": "first jump lands"
+  },
+  {
+   "year": 1905,
+   "label": "you start"
+  }
+ ],
+ "epochs": [
+  {
+   "id": "kings",
+   "name": "I · Kings and raiders",
+   "from": 800,
+   "to": 1657,
+   "weight": 14,
+   "kind": "med"
+  },
+  {
+   "id": "herring-light",
+   "name": "II · Herring and Light",
+   "from": 1658,
+   "to": 1906,
+   "weight": 46,
+   "kind": "boom",
+   "release": "first"
+  },
+  {
+   "id": "engines",
+   "name": "III · Engines and wars",
+   "from": 1907,
+   "to": 1949,
+   "weight": 16,
+   "kind": "war"
+  },
+  {
+   "id": "summer",
+   "name": "IV · Summer guests",
+   "from": 1950,
+   "to": 1999,
+   "weight": 13,
+   "kind": "sum"
+  },
+  {
+   "id": "today",
+   "name": "Today · the lure",
+   "from": 2000,
+   "to": 2026,
+   "weight": 11,
+   "kind": "light"
+  }
+ ],
+ "eras": [
+  {
+   "name": "Norse coast",
+   "from": 800,
+   "to": 1050,
+   "kind": "med",
+   "tone": "Viking age · raw, open sea",
+   "summary": "Bohuslän is part of Norway. Longships, chieftains, rock carvings already ancient.",
+   "verify": true,
+   "events": []
+  },
+  {
+   "name": "Fortress and fish",
+   "from": 1051,
+   "to": 1555,
+   "kind": "med",
+   "tone": "Medieval · summer",
+   "summary": "Towns and fortresses rise on a Norwegian coast; fishing villages are first recorded.",
+   "events": [
+    [
+     1293,
+     "Marstrand first recorded"
+    ],
+    [
+     1308,
+     "Bohus fortress begun (verify)"
+    ]
+   ]
+  },
+  {
+   "name": "Border wars",
+   "from": 1556,
+   "to": 1657,
+   "kind": "boom",
+   "tone": "Contested · winter fishing",
+   "summary": "A herring period, then war between Sweden and Denmark-Norway over the coast.",
+   "verify": true,
+   "events": [
+    [
+     1556,
+     "~ Herring period begins (to ~1589)"
+    ],
+    [
+     1594,
+     "Smögen first recorded"
+    ],
+    [
+     1617,
+     "Hälleviksstrand first recorded"
+    ]
+   ]
+  },
+  {
+   "name": "New border",
+   "from": 1658,
+   "to": 1705,
+   "kind": "quiet",
+   "tone": "Unsettled · summer",
+   "summary": "Bohuslän becomes Swedish. Carlsten fortress rises over Marstrand.",
+   "events": [
+    [
+     1658,
+     "Treaty of Roskilde: Bohuslän becomes Swedish"
+    ],
+    [
+     1658,
+     "Carlsten fortress begun"
+    ],
+    [
+     1659,
+     "Käringön first recorded"
+    ],
+    [
+     1660,
+     "~ Short herring period (to ~1680)"
+    ]
+   ]
+  },
+  {
+   "name": "Crown shores",
+   "from": 1706,
+   "to": 1746,
+   "kind": "quiet",
+   "tone": "Poor, hopeful · spring/summer",
+   "summary": "A new law lets subjects build fishing huts on crown land. Göteborg trades with China.",
+   "events": [
+    [
+     1706,
+     "Ordinance: build huts on crown land"
+    ],
+    [
+     1719,
+     "Tordenskjold takes Marstrand"
+    ],
+    [
+     1731,
+     "East India Company founded"
+    ],
+    [
+     1745,
+     "Götheborg sinks at the harbour mouth"
+    ]
+   ]
+  },
+  {
+   "name": "The silver comes",
+   "from": 1747,
+   "to": 1774,
+   "kind": "boom",
+   "tone": "Rising, busy · winter",
+   "summary": "The herring returns. Salteries and the first train-oil works.",
+   "events": [
+    [
+     1747,
+     "Great herring period begins"
+    ],
+    [
+     1760,
+     "~ Oil boiling on a factory scale"
+    ],
+    [
+     1766,
+     "Exported oil made toll-free"
+    ]
+   ]
+  },
+  {
+   "name": "Honour and Life",
+   "from": 1775,
+   "to": 1794,
+   "kind": "boom",
+   "tone": "Rich, rowdy · winter",
+   "summary": "Marstrand is a free port: smugglers, refugees, foreign ships. Oil lights European streets.",
+   "events": [
+    [
+     1775,
+     "Marstrand free port opens"
+    ],
+    [
+     1780,
+     "Permits needed for new works"
+    ],
+    [
+     1782,
+     "Carlsten light lit"
+    ],
+    [
+     1783,
+     "Inspection condemns 120 works"
+    ],
+    [
+     1787,
+     "Peak: 429 oil works"
+    ],
+    [
+     1794,
+     "Free port closes"
+    ]
+   ]
+  },
+  {
+   "name": "Last silver",
+   "from": 1795,
+   "to": 1809,
+   "kind": "boom",
+   "tone": "Anxious · late autumn",
+   "summary": "Works shed workers, wars rage in Europe, and the herring thins out.",
+   "events": [
+    [
+     1798,
+     "Almost all works workers sacked"
+    ],
+    [
+     1808,
+     "Last herring season (1808–09)"
+    ]
+   ]
+  },
+  {
+   "name": "Empty harbours",
+   "from": 1810,
+   "to": 1839,
+   "kind": "quiet",
+   "tone": "Loss · winter",
+   "summary": "Ruined works and a desolate coast. Lasse-Maja sits in Carlsten.",
+   "events": [
+    [
+     1813,
+     "Lasse-Maja imprisoned at Carlsten"
+    ],
+    [
+     1839,
+     "Lasse-Maja pardoned"
+    ]
+   ]
+  },
+  {
+   "name": "Lights go up",
+   "from": 1840,
+   "to": 1876,
+   "kind": "light",
+   "tone": "Hope · spring",
+   "summary": "The great lighthouses are lit one by one. Steamers appear.",
+   "events": [
+    [
+     1842,
+     "Hållö lit"
+    ],
+    [
+     1849,
+     "Nordkoster twin towers"
+    ],
+    [
+     1865,
+     "Måseskär lit"
+    ],
+    [
+     1868,
+     "Pater Noster lit"
+    ]
+   ]
+  },
+  {
+   "name": "The second silver",
+   "from": 1877,
+   "to": 1906,
+   "kind": "boom",
+   "tone": "Industrial bustle · winter",
+   "summary": "Herring under the lights. Canneries, fish guano, granite quarries.",
+   "events": [
+    [
+     1877,
+     "Second herring period begins"
+    ],
+    [
+     1890,
+     "Vinga tower and Stångehuvud"
+    ],
+    [
+     1904,
+     "Eggskär lit"
+    ],
+    [
+     1905,
+     "You start here"
+    ]
+   ]
+  },
+  {
+   "name": "Motor and canning",
+   "from": 1907,
+   "to": 1916,
+   "kind": "war",
+   "tone": "Change · all seasons",
+   "summary": "Engines arrive in fishing boats; canneries and emigration.",
+   "verify": true,
+   "events": []
+  },
+  {
+   "name": "Spirits at sea",
+   "from": 1917,
+   "to": 1938,
+   "kind": "war",
+   "tone": "Sly, night runs · autumn",
+   "summary": "Prohibition in Norway and rationing in Sweden: liquor smuggling along the coast.",
+   "verify": true,
+   "events": [
+    [
+     1917,
+     "Swedish alcohol ration book (verify)"
+    ],
+    [
+     1930,
+     "Mollösund light"
+    ]
+   ]
+  },
+  {
+   "name": "Mines and neutrality",
+   "from": 1939,
+   "to": 1949,
+   "kind": "war",
+   "tone": "Tense · winter",
+   "summary": "War in Europe. Mines in the Skagerrak, a neutral coast, boats from occupied Norway.",
+   "verify": true,
+   "events": [
+    [
+     1939,
+     "Väcker and Ramskär lit"
+    ]
+   ]
+  },
+  {
+   "name": "Summer guests",
+   "from": 1950,
+   "to": 1979,
+   "kind": "sum",
+   "tone": "Light, social · summer",
+   "summary": "Holiday homes, leisure boats, bridges to the islands.",
+   "events": [
+    [
+     1960,
+     "Tjörn bridges open (verify)"
+    ],
+    [
+     1963,
+     "Brief herring return (to 1965)"
+    ]
+   ]
+  },
+  {
+   "name": "Leisure sailing",
+   "from": 1980,
+   "to": 1999,
+   "kind": "sum",
+   "tone": "Easy · summer",
+   "summary": "Marinas and boatbuilding; the coast becomes a sailing playground.",
+   "verify": true,
+   "events": []
+  },
+  {
+   "name": "Summer coast",
+   "from": 2000,
+   "to": 2026,
+   "kind": "light",
+   "tone": "Free sail · summer",
+   "summary": "The lure: just sail, no save, the meeting place between times.",
+   "events": [
+    [
+     2020,
+     "New Södra Syster tower"
+    ]
+   ]
+  }
+ ]
+}</script>
+<script>
+const D=JSON.parse(document.getElementById('data').textContent);
+const C={med:['#EEEDFE','#3C3489','#AFA9EC'],quiet:['#F1EFE8','#444441','#B4B2A9'],boom:['#FAEEDA','#633806','#EF9F27'],light:['#E1F5EE','#085041','#5DCAA5'],war:['#FAECE7','#712B13','#F0997B'],sum:['#E6F1FB','#0C447C','#85B7EB']};
+const EP=D.epochs,ER=D.eras,LH=D.lighthouseBuilt,HR=D.herringPeriods;
+let acc=0;EP.forEach(e=>{e.x=acc;acc+=e.weight});
+function toYear(v){const p=v/10;for(const e of EP){if(p<=e.x+e.weight)return Math.round(e.from+(p-e.x)/e.weight*(e.to-e.from))}return EP[EP.length-1].to}
+function toPos(y){for(const e of EP){if(y<=e.to)return e.x+(Math.max(y,e.from)-e.from)/(e.to-e.from)*e.weight}return 100}
+const ep=document.getElementById('ep'),er=document.getElementById('er'),pins=document.getElementById('pins'),s=document.getElementById('s');
+EP.forEach(e=>{const d=document.createElement('div');d.className='seg';d.style.left=e.x+'%';d.style.width='calc('+e.weight+'% - 3px)';d.style.background=C[e.kind][0];d.style.color=C[e.kind][1];d.style.border='0.5px solid '+C[e.kind][2];d.textContent=innerWidth<600?e.name.split(' · ')[0]:e.name;d.title=e.name;d.onclick=()=>{s.value=Math.round((e.x+e.weight*0.5)*10);up()};ep.appendChild(d);e.el=d});
+ER.forEach(r=>{const d=document.createElement('div');d.className='es';const l=toPos(r.from),w=toPos(r.to)-l;d.style.left=l+'%';d.style.width='calc('+w+'% - 2px)';d.style.background=C[r.kind][2];d.title=r.name;d.onclick=()=>{s.value=Math.round((l+w*0.5)*10);up()};er.appendChild(d);r.el=d});
+D.markers.forEach(m=>{const d=document.createElement('div');d.className='pin';d.style.left=toPos(m.year)+'%';d.textContent='▲ '+m.label;pins.appendChild(d)});
+function up(){const y=toYear(+s.value);document.getElementById('y').textContent=y;
+const e=EP.find(e=>y>=e.from&&y<=e.to)||EP[EP.length-1];document.getElementById('ept').textContent='Epoch '+e.name;
+EP.forEach(x=>x.el.style.opacity=x===e?1:.45);
+const r=ER.find(r=>y>=r.from&&y<=r.to)||ER[ER.length-1];
+ER.forEach(x=>{x.el.style.opacity=x===r?1:.35;x.el.style.transform=x===r?'scaleY(1.4)':'none'});
+document.getElementById('en').textContent=r.name+'  ·  '+r.from+'–'+r.to+(r.verify?'  ·  check':'');
+document.getElementById('et').textContent=r.tone;document.getElementById('es').textContent=r.summary;
+const h=HR.find(p=>y>=p.from&&y<=p.to);document.getElementById('hr').textContent=h?'Boom ('+(h.approx?'~':'')+h.from+'–'+h.to+')':'Absent';
+document.getElementById('lh').textContent=LH.filter(b=>b<=y).length+' of '+LH.length;
+document.getElementById('ms').textContent=y<1293?'Not yet recorded':y>=1775&&y<=1794?'Free port':y<1658?'Norwegian town':y<1822?'Fortress town':'Fortress + bathing resort';
+document.getElementById('evs').innerHTML=r.events.length?r.events.map(([a,t])=>'<div class="ev'+(a<=y?' on':'')+'"><b>'+a+'</b>'+t+'</div>').join(''):'<div class="ev">No key events listed yet for this era.</div>'}
+s.oninput=up;const q=new URLSearchParams(location.search).get('year');if(q){let lo=0,hi=1000;for(let i=0;i<=1000;i++){if(toYear(i)>=+q){s.value=i;break}}}up();
+</script>
+</body>
+</html>
