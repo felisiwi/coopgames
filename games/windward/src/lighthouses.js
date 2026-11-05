@@ -89,8 +89,7 @@ const ENTRIES = [
     description: 'Short white cylinder with a gallery rail and a red conical roof.' },
   { name: 'Väcker', built: 1939, station: null, realHeight: 14, area: 'Havstenssund',
     lat: dm(58, 42.819), lon: dm(11, 9.718),
-    description: 'White round tower with a black band at the top, white lantern and a red roof.',
-    check: 'ibiblio says it stands on an unpainted conical stone base; left off per LIGHTHOUSES.md' },
+    description: 'White round tower with a black band at the top, white lantern and a red roof, on an unpainted conical stone base.' },
   { name: 'Ramskär', built: 1939, station: 1917, realHeight: 19, area: 'Havstenssund',
     lat: dm(58, 45.486), lon: dm(10, 59.560),
     description: 'Slim round tower: white base, one broad black band, white top, white lantern.' },
@@ -610,12 +609,17 @@ const BUILDERS = {
     });
   },
 
-  // White round tower, black band at the top, white lantern, red roof. (No stone base: see LIGHTHOUSES.md.)
+  // White round tower with a black band at the top, white lantern, red roof, on an
+  // unpainted round conical stone base (ibiblio).
   'Väcker'(g, H) {
-    roundTower(g, {
-      H, rBot: 2.3, rTop: 1.7, bands: [{ f: 0.88, color: WHITE }, { f: 0.12, color: BLACK }],
-      roof: 'cone', roofColor: RED, windows: [0.4],
-    });
+    const top = H - stackHeight(0.85, 1.3, 'cone');
+    const base = top * 0.32;
+    const black = top * 0.12;
+    taperStack(g, 3.3, 2.3, 0, [{ h: base, color: GREY }], 7);
+    box(g, 0.9, 1.6, 0.5, 0, DOOR, 0, apothem(3.3, 7) - 0.2);
+    taperStack(g, 2.3, 1.6, base, [{ h: top - base - black, color: WHITE }, { h: black, color: BLACK }], 7);
+    gallery(g, 2.4, top, WHITE);
+    lantern(g, top + 0.25, 0.85, 1.3, { frame: WHITE, roof: 'cone', roofColor: RED });
   },
 
   // Slim round tower: white base, one broad black band, white top, white lantern.

@@ -20,7 +20,7 @@ The game scales distances to about 1:8, so towers don't have to be at real heigh
 | Ursholmen | Koster | 1891 | 13 m (+10 m twin, no lantern) | White, black top band, black lantern | 13.1 m |
 | Valö | Göteborg south | 1935 (station 1885) | 10 m | White, green band | 12.7 m (teal band) |
 | Sandviksholmen | Hamburgö | 1939 | 7 m | White, red lantern roof | 12.7 m |
-| Väcker (Tjurpannan) | Havstenssund | 1939 | 14 m | White, black band at top, red roof | 14.6 m |
+| Väcker (Tjurpannan) | Havstenssund | 1939 | 14 m | White, black band at top, white lantern, red roof, on an unpainted round conical stone base | 14.6 m |
 | Ramskär | Havstenssund | 1939 (station 1917) | 19 m | White, one broad black band (twin of Väcker) | 14.3 m |
 | Väderöbod | Fjällbacka | 1964 (station 1867) | 19 m | Round red concrete | 16.0 m |
 | Södra Syster | Fjällbacka | 2020 (station 1951) | 9 m | White, black base | 13.5 m ⚠ ours is a black box with ladder |
@@ -53,7 +53,7 @@ Skipped: dozens of 3–6 m harbour lanterns and fiberglass cabinets. Use one gen
 
 - Hållö: white rubblestone tower, **conical red cast-iron watch room**, **black lantern**. Light: white flash every 12 s.
 - Måseskär: **red and white checkerboard** cast-iron skeleton with central cylinder. Dark since 1978 (lit 12 min at midnight each New Year's Eve).
-- Väcker: white tower, black band at the top, white lantern, red roof. **ibiblio also says it stands on a round conical stone base, unpainted.** The model has no base because Felix asked for "no grey base"; to restore it, add a grey `taperStack` under the tower in `src/lighthouses.js`.
+- Väcker: white tower, black band at the top, white lantern, red roof, standing on a round conical **unpainted stone base**. The model has the base (restored after briefly dropping it).
 - Also from ibiblio, not yet modelled: Mjölskär and Södra Syster stand on unpainted/black round stone bases; Södra Syster's lantern has been removed; Valö's green band is directly under the gallery; Sandviksholmen and Mollösund have octagonal lanterns.
 - Light characteristics are in `src/lighthouses.js` (`light`, `lit`, `lightNote`), copied from ibiblio only. Dark towers have `light: null`.
 
