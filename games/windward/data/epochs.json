@@ -1,0 +1,678 @@
+{
+ "_note": "Windward epochs/eras DRAFT (2026-11-05, mission control with Felix). Single source for the epoch timeline and, later, the coast lab and game. Dates marked approx are approximate; 'verify' items were not source-checked yet. 2026-11-05 rev 2: Herring and Light split into New Crown / The Silver Sea / Light and Stone (Felix). 2026-11-05 rev 3 (pass 5): every 'verify' item fact-checked against fetched pages; sources added; unsupported wording corrected or moved to 'flavour'; marstrandStatus added. Record: data/epochs-factcheck.md.",
+ "herringPeriods": [
+  {
+   "from": 1556,
+   "to": 1589,
+   "approx": true,
+   "sources": [
+    "https://digitaltmuseum.org/021029238579",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://www.kungalv.se/contentassets/4202e7d5d8114f149113dce49275ee7f/kulturmiljounderlag-2014.pdf"
+   ],
+   "variants": [
+    "1556-1588: sv.wikipedia Bohuslän",
+    "1556-1598: vastsverige.com Uddevalla page"
+   ]
+  },
+  {
+   "from": 1660,
+   "to": 1680,
+   "approx": true,
+   "sources": [
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://www.kungalv.se/contentassets/4202e7d5d8114f149113dce49275ee7f/kulturmiljounderlag-2014.pdf",
+    "https://www.vastsverige.com/uddevalla/guider1/Uddevallas-sillhistoria/"
+   ]
+  },
+  {
+   "from": 1747,
+   "to": 1809,
+   "source": "https://www.herripedia.com/bohuslan/",
+   "sources": [
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://www.kungalv.se/contentassets/4202e7d5d8114f149113dce49275ee7f/kulturmiljounderlag-2014.pdf",
+    "https://www.herripedia.com/bohuslan/"
+   ],
+   "variants": [
+    "1747-1808: vastsverige.com Uddevalla page; 1753-1809: a Bohusläns museum text on the same page as the 1747-1809 list"
+   ]
+  },
+  {
+   "from": 1877,
+   "to": 1906,
+   "source": "https://www.herripedia.com/bohuslan/",
+   "sources": [
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://www.kungalv.se/contentassets/4202e7d5d8114f149113dce49275ee7f/kulturmiljounderlag-2014.pdf",
+    "https://www.herripedia.com/bohuslan/"
+   ],
+   "variants": [
+    "1878-1898: vastsverige.com Uddevalla page"
+   ]
+  },
+  {
+   "from": 1963,
+   "to": 1965,
+   "source": "https://www.herripedia.com/bohuslan/",
+   "sources": [
+    "https://www.herripedia.com/bohuslan/"
+   ]
+  }
+ ],
+ "lighthouseBuilt": [
+  1782,
+  1841,
+  1842,
+  1849,
+  1865,
+  1868,
+  1883,
+  1890,
+  1890,
+  1891,
+  1904,
+  1905,
+  1930,
+  1934,
+  1935,
+  1936,
+  1938,
+  1939,
+  1939,
+  1939,
+  1941,
+  1954,
+  1964,
+  1965,
+  1974,
+  1974,
+  1974,
+  1977,
+  2020
+ ],
+ "markers": [
+  {
+   "year": 1745,
+   "label": "first jump lands"
+  },
+  {
+   "year": 1905,
+   "label": "you start"
+  }
+ ],
+ "epochs": [
+  {
+   "id": "kings",
+   "name": "I · Kings and raiders",
+   "from": 800,
+   "to": 1657,
+   "weight": 12,
+   "kind": "med",
+   "vibe": "Mythic, raw",
+   "season": "Summer"
+  },
+  {
+   "id": "new-crown",
+   "name": "II · New Crown",
+   "from": 1658,
+   "to": 1746,
+   "weight": 12,
+   "kind": "quiet",
+   "vibe": "Poor, unsettled, hopeful",
+   "season": "Spring/summer"
+  },
+  {
+   "id": "silver-sea",
+   "name": "III · The Silver Sea",
+   "from": 1747,
+   "to": 1809,
+   "weight": 18,
+   "kind": "boom",
+   "release": "first (proposed)",
+   "vibe": "Rich, rowdy, greedy",
+   "season": "Winter"
+  },
+  {
+   "id": "light-stone",
+   "name": "IV · Light and Stone",
+   "from": 1810,
+   "to": 1906,
+   "weight": 18,
+   "kind": "light",
+   "vibe": "Loss, then hope, then bustle",
+   "season": "Winter → spring → winter"
+  },
+  {
+   "id": "engines",
+   "name": "V · Engines and wars",
+   "from": 1907,
+   "to": 1949,
+   "weight": 14,
+   "kind": "war",
+   "vibe": "Sly, tense",
+   "season": "Autumn/winter"
+  },
+  {
+   "id": "summer",
+   "name": "VI · Summer guests",
+   "from": 1950,
+   "to": 1999,
+   "weight": 13,
+   "kind": "sum",
+   "vibe": "Friendly, cute, with a feud",
+   "season": "Summer"
+  },
+  {
+   "id": "today",
+   "name": "Today · the lure",
+   "from": 2000,
+   "to": 2026,
+   "weight": 13,
+   "kind": "light",
+   "vibe": "Easy, pretty",
+   "season": "Summer"
+  }
+ ],
+ "eras": [
+  {
+   "name": "Norse coast",
+   "from": 800,
+   "to": 1050,
+   "kind": "med",
+   "summary": "Bohuslän is part of Viken, the Norwegian realm. Bronze Age rock carvings (about 1700-500 BCE) are already ancient.",
+   "events": [],
+   "vibe": "Raw, mythic, open sea",
+   "season": "Summer",
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n",
+    "https://www.vastsverige.com/en/tanum/produkter/tanum-world-heritage/"
+   ]
+  },
+  {
+   "name": "Fortress and fish",
+   "from": 1051,
+   "to": 1555,
+   "kind": "med",
+   "summary": "Marstrand is founded in the 1200s on rich herring fishing and gets town privileges in 1442. Bohus fortress guards Norway's southern border.",
+   "events": [
+    [
+     1293,
+     "Marstrand first recorded",
+     "https://sv.wikipedia.org/wiki/Marstrand"
+    ],
+    [
+     1308,
+     "Bohus fortress begun by King Håkon Magnusson of Norway",
+     "https://www.ne.se/uppslagsverk/encyklopedi/l%C3%A5ng/bohus-f%C3%A4stning"
+    ],
+    [
+     1442,
+     "Marstrand gets town privileges",
+     "https://snl.no/Marstrand"
+    ]
+   ],
+   "vibe": "Old, slow, stony",
+   "season": "Summer",
+   "sources": [
+    "https://snl.no/Marstrand",
+    "https://www.ne.se/uppslagsverk/encyklopedi/l%C3%A5ng/bohus-f%C3%A4stning"
+   ]
+  },
+  {
+   "name": "Border wars",
+   "from": 1556,
+   "to": 1657,
+   "kind": "boom",
+   "summary": "A herring period (about 1556-1589), then repeated Swedish-Danish wars that burn Kungahälla and Uddevalla and press on Bohus.",
+   "events": [
+    [
+     1556,
+     "~ Herring period begins (to ~1589)",
+     "https://digitaltmuseum.org/021029238579"
+    ],
+    [
+     1563,
+     "Kungahälla burned, Uddevalla the year after",
+     "https://sv.wikipedia.org/wiki/Bohusl%C3%A4ns_historia"
+    ],
+    [
+     1594,
+     "Smögen first recorded",
+     "https://www.vastsverige.com/sotenas/artiklar/smogen/"
+    ],
+    [
+     1617,
+     "Hälleviksstrand first recorded",
+     "https://www.vastsverige.com/orust/produkter/halleviksstrand/"
+    ],
+    [
+     1643,
+     "Hannibal's Feud (to 1645): Uddevalla and Kungahälla burned again",
+     "https://sv.wikipedia.org/wiki/Bohusl%C3%A4ns_historia"
+    ],
+    [
+     1657,
+     "Crab Feud (to 1658): more raids on Bohuslän",
+     "https://sv.wikipedia.org/wiki/Bohusl%C3%A4ns_historia"
+    ]
+   ],
+   "vibe": "Contested, wary",
+   "season": "Winter fishing",
+   "sources": [
+    "https://digitaltmuseum.org/021029238579",
+    "https://sv.wikipedia.org/wiki/Bohusl%C3%A4ns_historia"
+   ]
+  },
+  {
+   "name": "New border",
+   "from": 1658,
+   "to": 1705,
+   "kind": "quiet",
+   "summary": "Bohuslän becomes Swedish. Carlsten fortress rises over Marstrand.",
+   "events": [
+    [
+     1658,
+     "Treaty of Roskilde: Bohuslän becomes Swedish",
+     "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n"
+    ],
+    [
+     1658,
+     "Carlsten fortress begun",
+     "https://sv.wikipedia.org/wiki/Marstrand"
+    ],
+    [
+     1659,
+     "Käringön first recorded",
+     "https://sv.wikipedia.org/wiki/K%C3%A4ring%C3%B6n"
+    ],
+    [
+     1660,
+     "~ Short herring period (to ~1680)",
+     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/"
+    ]
+   ],
+   "vibe": "Unsettled",
+   "season": "Summer",
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n",
+    "https://sv.wikipedia.org/wiki/Marstrand"
+   ]
+  },
+  {
+   "name": "Crown shores",
+   "from": 1706,
+   "to": 1746,
+   "kind": "quiet",
+   "summary": "A new law lets subjects build fishing huts on crown land. Göteborg trades with China.",
+   "events": [
+    [
+     1706,
+     "Ordinance: build huts on crown land"
+    ],
+    [
+     1719,
+     "Tordenskjold takes Marstrand"
+    ],
+    [
+     1731,
+     "East India Company founded"
+    ],
+    [
+     1745,
+     "Götheborg sinks at the harbour mouth"
+    ]
+   ],
+   "vibe": "Poor, hopeful",
+   "season": "Spring/summer"
+  },
+  {
+   "name": "The silver comes",
+   "from": 1747,
+   "to": 1774,
+   "kind": "boom",
+   "summary": "The herring returns. Salteries and the first train-oil works.",
+   "events": [
+    [
+     1747,
+     "Great herring period begins",
+     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/"
+    ],
+    [
+     1760,
+     "~ Oil boiling on a factory scale"
+    ],
+    [
+     1766,
+     "Exported oil made toll-free"
+    ]
+   ],
+   "vibe": "Rising, busy",
+   "season": "Winter"
+  },
+  {
+   "name": "Honour and Life",
+   "from": 1775,
+   "to": 1794,
+   "kind": "boom",
+   "summary": "Marstrand is a free port: smugglers, refugees, foreign ships. Oil lights European streets.",
+   "events": [
+    [
+     1775,
+     "Marstrand free port opens"
+    ],
+    [
+     1780,
+     "Permits needed for new works"
+    ],
+    [
+     1782,
+     "Carlsten light lit"
+    ],
+    [
+     1783,
+     "Inspection condemns 120 works"
+    ],
+    [
+     1787,
+     "Peak: 429 oil works"
+    ],
+    [
+     1794,
+     "Free port closes"
+    ]
+   ],
+   "vibe": "Rich, rowdy, mischievous",
+   "season": "Winter, summer trading"
+  },
+  {
+   "name": "Last silver",
+   "from": 1795,
+   "to": 1809,
+   "kind": "boom",
+   "summary": "Works shed workers, wars rage in Europe, and the herring thins out.",
+   "events": [
+    [
+     1798,
+     "Almost all works workers sacked"
+    ],
+    [
+     1808,
+     "Last herring season (1808–09)"
+    ]
+   ],
+   "vibe": "Anxious, stormy",
+   "season": "Late autumn"
+  },
+  {
+   "name": "Empty harbours",
+   "from": 1810,
+   "to": 1839,
+   "kind": "quiet",
+   "summary": "Ruined works and a desolate coast. Lasse-Maja sits in Carlsten.",
+   "events": [
+    [
+     1813,
+     "Lasse-Maja imprisoned at Carlsten"
+    ],
+    [
+     1839,
+     "Lasse-Maja pardoned"
+    ]
+   ],
+   "vibe": "Loss, melancholy",
+   "season": "Winter"
+  },
+  {
+   "name": "Lights go up",
+   "from": 1840,
+   "to": 1876,
+   "kind": "light",
+   "summary": "The great lighthouses are lit one by one. Steamers appear.",
+   "events": [
+    [
+     1842,
+     "Hållö lit"
+    ],
+    [
+     1849,
+     "Nordkoster twin towers"
+    ],
+    [
+     1865,
+     "Måseskär lit"
+    ],
+    [
+     1868,
+     "Pater Noster lit"
+    ]
+   ],
+   "vibe": "Hope, safer seas",
+   "season": "Spring"
+  },
+  {
+   "name": "The second silver",
+   "from": 1877,
+   "to": 1906,
+   "kind": "boom",
+   "summary": "Herring under the lights. Canneries, fish guano, granite quarries.",
+   "events": [
+    [
+     1877,
+     "Second herring period begins"
+    ],
+    [
+     1890,
+     "Vinga tower and Stångehuvud"
+    ],
+    [
+     1904,
+     "Eggskär lit"
+    ],
+    [
+     1905,
+     "You start here"
+    ]
+   ],
+   "vibe": "Industrial bustle",
+   "season": "Winter"
+  },
+  {
+   "name": "Motor and canning",
+   "from": 1907,
+   "to": 1916,
+   "kind": "war",
+   "summary": "Herring boats have engines by 1914; canneries are an established industry (Hälleviksstrand's starts in 1905); Swedish emigration to America stays high until the First World War nearly stops it.",
+   "events": [],
+   "vibe": "Change, engines",
+   "season": "Spring",
+   "sources": [
+    "https://runeberg.org/sweden14/2/0242.html",
+    "https://www.vastsverige.com/orust/produkter/halleviksstrand/",
+    "https://sv.wikipedia.org/wiki/Utvandringen_fr%C3%A5n_Sverige_till_Nordamerika"
+   ]
+  },
+  {
+   "name": "Spirits at sea",
+   "from": 1917,
+   "to": 1938,
+   "kind": "war",
+   "summary": "Norway bans spirits (1916-1927) and Sweden rations them with the motbok (1917-1955). Spirits are smuggled along the Bohuslän coast, above all around Strömstad in the early 1920s.",
+   "events": [
+    [
+     1917,
+     "Sweden's motbok, a ration book for spirits, is in force (to 1955)",
+     "https://sv.wikipedia.org/wiki/Motbok"
+    ],
+    [
+     1930,
+     "Mollösund light",
+     "https://ibiblio.org/lighthouse/swbohuc.htm"
+    ]
+   ],
+   "vibe": "Sly, night runs",
+   "season": "Autumn nights",
+   "designNote": "The 1917-1938 span is a design choice. The sources found cover the bans, the motbok and Strömstad smuggling in 1919-1923 (a local-history blog); no source was found for the 1930s.",
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Motbok",
+    "https://snl.no/forbudssaken",
+    "https://blog.zaramis.se/2020/12/29/spritsmugglarna-i-stromstad-pa-1920-talet/"
+   ]
+  },
+  {
+   "name": "Mines and neutrality",
+   "from": 1939,
+   "to": 1949,
+   "kind": "war",
+   "summary": "Sweden stays neutral through the whole war. After Denmark and Norway are occupied, Germany lays a mine barrier across the Skagerrak, and over 70,000 refugees come from Norway in 1940-1945.",
+   "events": [
+    [
+     1939,
+     "Väcker and Ramskär lit"
+    ],
+    [
+     1940,
+     "Germany lays the Skagerrak mine barrier (Hanstholm to Lindesnes), splitting the Swedish merchant fleet in two",
+     "https://sv.wikipedia.org/wiki/Sverige_under_andra_v%C3%A4rldskriget"
+    ]
+   ],
+   "vibe": "Tense, watchful",
+   "season": "Winter",
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Sverige_under_andra_v%C3%A4rldskriget",
+    "https://www.gu.se/nyheter/norska-flyktingar-forandrade-den-svenska-flyktingpolitiken"
+   ]
+  },
+  {
+   "name": "Summer guests",
+   "from": 1950,
+   "to": 1979,
+   "kind": "sum",
+   "summary": "Holiday homes (208,000 of Sweden's 596,000 were built in 1961-1980, the largest 20-year block), leisure boats, and bridges: the Tjörn bridge route opens in 1960.",
+   "events": [
+    [
+     1960,
+     "Tjörn bridge route opens (Almöbron, Stenungsöbron, Källösundsbron)",
+     "https://sv.wikipedia.org/wiki/Alm%C3%B6bron"
+    ],
+    [
+     1963,
+     "Brief herring return (to 1965)",
+     "https://www.herripedia.com/bohuslan/"
+    ]
+   ],
+   "vibe": "Friendly, cute, with a feud",
+   "season": "Summer",
+   "flavour": "the friendly west-coast-east-coast feud begins: rich Stockholmers buying up fishermen's cottages. (No source was found for this; it is a tone to play with.)",
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Fritidshus",
+    "https://sv.wikipedia.org/wiki/Alm%C3%B6bron"
+   ]
+  },
+  {
+   "name": "Leisure sailing",
+   "from": 1980,
+   "to": 1999,
+   "kind": "sum",
+   "summary": "Orust, a long-standing boatbuilding centre whose yards switched to plastic boats after 1950, builds leisure yachts: the first Najad is launched in 1971 and Hallberg-Rassy takes over its Ellös yard in 1972.",
+   "events": [
+    [
+     1980,
+     "Almöbron collapses after a ship collision; eight people die",
+     "https://sv.wikipedia.org/wiki/Alm%C3%B6bron"
+    ],
+    [
+     1981,
+     "The new Tjörnbron opens",
+     "https://sv.wikipedia.org/wiki/Alm%C3%B6bron"
+    ]
+   ],
+   "vibe": "Easy, playful",
+   "season": "Summer",
+   "designNote": "Sources date the leisure-boat and yacht-yard story to the 1960s-70s; calling 1980-1999 the \"leisure sailing\" era is a design choice, not a sourced date.",
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Orust",
+    "https://sv.wikipedia.org/wiki/Hallberg-Rassy",
+    "https://digitaltmuseum.se/021166009571/najadvarvet-varv"
+   ]
+  },
+  {
+   "name": "Summer coast",
+   "from": 2000,
+   "to": 2026,
+   "kind": "light",
+   "summary": "The lure: just sail, no save, the meeting place between times.",
+   "events": [
+    [
+     2020,
+     "New Södra Syster tower"
+    ]
+   ],
+   "vibe": "Free sail, pretty",
+   "season": "Summer"
+  }
+ ],
+ "marstrandStatus": [
+  {
+   "from": 800,
+   "to": 1200,
+   "label": "Not yet recorded",
+   "source": [
+    "https://snl.no/Marstrand",
+    "https://sv.wikipedia.org/wiki/Marstrand"
+   ]
+  },
+  {
+   "from": 1201,
+   "to": 1657,
+   "label": "Norwegian town",
+   "source": [
+    "https://snl.no/Marstrand"
+   ]
+  },
+  {
+   "from": 1658,
+   "to": 1774,
+   "label": "Swedish fortress town (Carlsten begun 1658)",
+   "source": [
+    "https://sv.wikipedia.org/wiki/Marstrand",
+    "https://snl.no/Marstrand"
+   ]
+  },
+  {
+   "from": 1775,
+   "to": 1794,
+   "label": "Free port",
+   "source": [
+    "https://sv.wikipedia.org/wiki/Marstrand"
+   ]
+  },
+  {
+   "from": 1795,
+   "to": 1821,
+   "label": "Swedish fortress town",
+   "source": [
+    "https://sv.wikipedia.org/wiki/Marstrand",
+    "https://snl.no/Marstrand"
+   ]
+  },
+  {
+   "from": 1822,
+   "to": 1881,
+   "label": "Fortress town and bathing resort",
+   "source": [
+    "https://www.bohuslansmuseum.se/samlingar-och-historia/gamla-historiska-artiklar/badorten-marstrand/",
+    "https://snl.no/Marstrand"
+   ]
+  },
+  {
+   "from": 1882,
+   "to": 2026,
+   "label": "Bathing resort (Carlsten decommissioned 1882)",
+   "source": [
+    "https://snl.no/Marstrand",
+    "https://www.bohuslansmuseum.se/samlingar-och-historia/gamla-historiska-artiklar/badorten-marstrand/"
+   ]
+  }
+ ]
+}

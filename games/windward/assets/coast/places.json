@@ -1,0 +1,386 @@
+{
+ "generated": "2026-11-05",
+ "notFound": [],
+ "places": [
+  {
+   "name": "Hållö",
+   "kind": "lighthouse",
+   "lat": 58.33682,
+   "lon": 11.21574,
+   "osm": "relation/10237986",
+   "osmName": "Hållö",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Måseskär",
+   "kind": "lighthouse",
+   "lat": 58.0938,
+   "lon": 11.33024,
+   "osm": "node/1531131727",
+   "osmName": "Måseskär fyr",
+   "candidates": 3,
+   "inside": true
+  },
+  {
+   "name": "Pater Noster",
+   "kind": "lighthouse",
+   "lat": 57.896,
+   "lon": 11.46581,
+   "osm": "way/945530149",
+   "osmName": "Pater Noster fyr",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Smögen",
+   "kind": "village",
+   "lat": 58.35364,
+   "lon": 11.22612,
+   "osm": "node/30903121",
+   "osmName": "Smögen",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Lysekil",
+   "kind": "village",
+   "lat": 58.27717,
+   "lon": 11.4431,
+   "osm": "node/26580816",
+   "osmName": "Lysekil",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Fiskebäckskil",
+   "kind": "village",
+   "lat": 58.24565,
+   "lon": 11.45663,
+   "osm": "node/845945773",
+   "osmName": "Fiskebäckskil",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Grundsund",
+   "kind": "village",
+   "lat": 58.21336,
+   "lon": 11.41924,
+   "osm": "node/3845368597",
+   "osmName": "Grundsund",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Gullholmen",
+   "kind": "village",
+   "lat": 58.17993,
+   "lon": 11.40585,
+   "osm": "node/1485582105",
+   "osmName": "Gullholmen",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Käringön",
+   "kind": "village",
+   "lat": 58.10985,
+   "lon": 11.36359,
+   "osm": "node/2235056035",
+   "osmName": "Käringön",
+   "candidates": 4,
+   "inside": true
+  },
+  {
+   "name": "Mollösund",
+   "kind": "village",
+   "lat": 58.07331,
+   "lon": 11.4755,
+   "osm": "node/245778489",
+   "osmName": "Mollösund",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Hälleviksstrand",
+   "kind": "village",
+   "lat": 58.12329,
+   "lon": 11.4454,
+   "osm": "node/245778450",
+   "osmName": "Hälleviksstrand",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Kyrkesund",
+   "kind": "village",
+   "lat": 58.01579,
+   "lon": 11.51494,
+   "osm": "node/809920467",
+   "osmName": "Kyrkesund",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Klädesholmen",
+   "kind": "village",
+   "lat": 57.9467,
+   "lon": 11.54179,
+   "osm": "node/809925834",
+   "osmName": "Klädesholmen",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Åstol",
+   "kind": "village",
+   "lat": 57.92297,
+   "lon": 11.58531,
+   "osm": "node/2235056032",
+   "osmName": "Åstol",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Skärhamn",
+   "kind": "village",
+   "lat": 57.99092,
+   "lon": 11.54979,
+   "osm": "node/29690590",
+   "osmName": "Skärhamn",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Marstrand",
+   "kind": "village",
+   "lat": 57.88676,
+   "lon": 11.5888,
+   "osm": "node/130148772",
+   "osmName": "Marstrand",
+   "candidates": 3,
+   "inside": true
+  },
+  {
+   "name": "Carlstens fästning",
+   "kind": "fortress",
+   "lat": 57.88621,
+   "lon": 11.57868,
+   "osm": "relation/3027727",
+   "osmName": "Carlstens Fästning",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Kornö",
+   "kind": "island",
+   "lat": 58.29776,
+   "lon": 11.37783,
+   "osm": "relation/10094463",
+   "osmName": "Stora Kornö",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Gåsö",
+   "kind": "island",
+   "lat": 58.23589,
+   "lon": 11.40587,
+   "osm": "relation/10604591",
+   "osmName": "Gåsö",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Storön",
+   "kind": "island",
+   "lat": 58.23793,
+   "lon": 11.38678,
+   "osm": "relation/10604590",
+   "osmName": "Storön",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Härmanö",
+   "kind": "island",
+   "lat": 58.16015,
+   "lon": 11.37571,
+   "osm": "relation/5463706",
+   "osmName": "Härmanö",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Härön",
+   "kind": "island",
+   "lat": 58.01582,
+   "lon": 11.49391,
+   "osm": "relation/5184106",
+   "osmName": "Härön",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Gottskär",
+   "kind": "village",
+   "lat": 57.38939,
+   "lon": 12.02067,
+   "osm": "node/762203868",
+   "osmName": "Gottskär",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Vrångö",
+   "kind": "village",
+   "lat": 57.57262,
+   "lon": 11.78125,
+   "osm": "node/2235056015",
+   "osmName": "Vrångö",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Hönö",
+   "kind": "village",
+   "lat": 57.69145,
+   "lon": 11.64649,
+   "osm": "node/2235001640",
+   "osmName": "Hönö",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Öckerö",
+   "kind": "village",
+   "lat": 57.70925,
+   "lon": 11.65641,
+   "osm": "node/61103335",
+   "osmName": "Öckerö",
+   "candidates": 3,
+   "inside": true
+  },
+  {
+   "name": "Donsö",
+   "kind": "village",
+   "lat": 57.59947,
+   "lon": 11.80296,
+   "osm": "node/2235001612",
+   "osmName": "Donsö",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Styrsö",
+   "kind": "village",
+   "lat": 57.61452,
+   "lon": 11.78046,
+   "osm": "node/2235056018",
+   "osmName": "Styrsö",
+   "candidates": 4,
+   "inside": true
+  },
+  {
+   "name": "Rörö",
+   "kind": "village",
+   "lat": 57.7812,
+   "lon": 11.61231,
+   "osm": "relation/5463652",
+   "osmName": "Rörö",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Göteborg",
+   "kind": "village",
+   "lat": 57.70723,
+   "lon": 11.96702,
+   "osm": "node/25930131",
+   "osmName": "Göteborg",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Kungshamn",
+   "kind": "village",
+   "lat": 58.36082,
+   "lon": 11.25114,
+   "osm": "node/29689990",
+   "osmName": "Kungshamn",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Strömstad",
+   "kind": "village",
+   "lat": 58.93776,
+   "lon": 11.17361,
+   "osm": "node/30983274",
+   "osmName": "Strömstad",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Fjällbacka",
+   "kind": "village",
+   "lat": 58.59875,
+   "lon": 11.28278,
+   "osm": "node/32309417",
+   "osmName": "Fjällbacka",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Hunnebostrand",
+   "kind": "village",
+   "lat": 58.44124,
+   "lon": 11.30108,
+   "osm": "node/1842051008",
+   "osmName": "Hunnebostrand",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Hamburgsund",
+   "kind": "village",
+   "lat": 58.5598,
+   "lon": 11.26381,
+   "osm": "node/324590172",
+   "osmName": "Hamburgsund",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Havstenssund",
+   "kind": "village",
+   "lat": 58.75316,
+   "lon": 11.18059,
+   "osm": "node/443636993",
+   "osmName": "Havstenssund",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Nordkoster",
+   "kind": "village",
+   "lat": 58.89939,
+   "lon": 11.00253,
+   "osm": "relation/10041804",
+   "osmName": "Nord-Koster",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Sydkoster",
+   "kind": "village",
+   "lat": 58.8806,
+   "lon": 11.03053,
+   "osm": "relation/1695145",
+   "osmName": "Syd-Koster",
+   "candidates": 1,
+   "inside": true
+  }
+ ]
+}

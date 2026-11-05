@@ -1,0 +1,64 @@
+{
+ "unit": "trees per 100 m^2 of GAME ground",
+ "density": {
+  "bare_rock": 0,
+  "heath": 0.05,
+  "meadow": 0.02,
+  "scrub": 0.5,
+  "forest": 1,
+  "village": 0.1
+ },
+ "budget": 3000,
+ "totals": {
+  "1:6": {
+   "total": 379252,
+   "byClass": {
+    "bare_rock": 0,
+    "heath": 6070,
+    "meadow": 3125,
+    "scrub": 21177,
+    "forest": 345639,
+    "village": 3241
+   },
+   "landKm2Game": 75.76,
+   "overBudgetBy": 126.4,
+   "densityScaleToFitBudget": 0.0079
+  },
+  "1:8": {
+   "total": 213330,
+   "byClass": {
+    "bare_rock": 0,
+    "heath": 3415,
+    "meadow": 1758,
+    "scrub": 11912,
+    "forest": 194422,
+    "village": 1823
+   },
+   "landKm2Game": 42.61,
+   "overBudgetBy": 71.1,
+   "densityScaleToFitBudget": 0.0141
+  },
+  "1:10": {
+   "total": 136531,
+   "byClass": {
+    "bare_rock": 0,
+    "heath": 2185,
+    "meadow": 1125,
+    "scrub": 7624,
+    "forest": 124430,
+    "village": 1167
+   },
+   "landKm2Game": 27.27,
+   "overBudgetBy": 45.5,
+   "densityScaleToFitBudget": 0.022
+  }
+ },
+ "viewDisc": {
+  "note": "trees inside a disc around the boat if the whole disc were forest",
+  "radii_m": {
+   "150": 707,
+   "250": 1963,
+   "400": 5027
+  }
+ }
+}

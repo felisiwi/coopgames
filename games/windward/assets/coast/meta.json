@@ -1,0 +1,144 @@
+{
+ "generated": "2026-11-05",
+ "bbox": {
+  "s": 57.33,
+  "n": 58.95,
+  "w": 10.85,
+  "e": 12.1
+ },
+ "metersPerPixelReal": 20,
+ "width": 3669,
+ "height": 9007,
+ "tiles": [
+  {
+   "id": "koster",
+   "x0": 146,
+   "y0": 0,
+   "width": 1615,
+   "height": 2780,
+   "files": {
+    "landHeight": "koster-land-height.png",
+    "depth": "koster-depth.png",
+    "classes": "koster-classes.png"
+   }
+  },
+  {
+   "id": "north",
+   "x0": 440,
+   "y0": 2780,
+   "width": 2348,
+   "height": 3336,
+   "files": {
+    "landHeight": "north-land-height.png",
+    "depth": "north-depth.png",
+    "classes": "north-classes.png"
+   }
+  },
+  {
+   "id": "south",
+   "x0": 1907,
+   "y0": 6116,
+   "width": 1762,
+   "height": 2891,
+   "files": {
+    "landHeight": "south-land-height.png",
+    "depth": "south-depth.png",
+    "classes": "south-classes.png"
+   }
+  }
+ ],
+ "projection": {
+  "kind": "equirectangular around box centre",
+  "latCentre": 58.14,
+  "metersPerDegLat": 111195,
+  "metersPerDegLon": 58693.78170073166,
+  "pixelToLonLat": "lon = bbox.w + x*mpp/metersPerDegLon ; lat = bbox.n - y*mpp/metersPerDegLat   (x,y = pixel coords, y down)"
+ },
+ "rasters": {
+  "<tile>-land-height.png": "16-bit grey. 0 = water. Land = round(height_m*10)+1 (decimetres + 1), stored in 1 m steps. Copernicus GLO-30 is a surface model (tree tops count).",
+  "<tile>-depth.png": "16-bit grey, decimetres in 1 m steps. 0 = land. Placeholder model: min(90, 0.5 + 0.04 * metres-to-shore). NOT sea-chart data.",
+  "<tile>-classes.png": "8-bit grey, 0 = water, 1..6 = land classes below. Tiles sit on one shared plane: pixel (x,y) of a tile is plane pixel (x0+x, y0+y)"
+ },
+ "classes": [
+  {
+   "value": 0,
+   "name": "water"
+  },
+  {
+   "value": 1,
+   "name": "bare_rock"
+  },
+  {
+   "value": 2,
+   "name": "heath"
+  },
+  {
+   "value": 3,
+   "name": "meadow"
+  },
+  {
+   "value": 4,
+   "name": "scrub"
+  },
+  {
+   "value": 5,
+   "name": "forest"
+  },
+  {
+   "value": 6,
+   "name": "village"
+  }
+ ],
+ "classPercentOfLand": {
+  "bare_rock": 7.9,
+  "heath": 16,
+  "meadow": 20.6,
+  "scrub": 5.6,
+  "forest": 45.6,
+  "village": 4.3
+ },
+ "classKm2": {
+  "bare_rock": 214.4,
+  "heath": 437.1,
+  "meadow": 562.4,
+  "scrub": 152.5,
+  "forest": 1244.3,
+  "village": 116.7
+ },
+ "landKm2": 2727.3,
+ "nmdRawCodeHistogram": {
+  "2": 95198,
+  "3": 883637,
+  "41": 501006,
+  "42": 1340205,
+  "51": 123317,
+  "52": 126837,
+  "53": 266898,
+  "61": 82914,
+  "62": 29180,
+  "111": 1119944,
+  "112": 233549,
+  "113": 224233,
+  "114": 366372,
+  "115": 376277,
+  "116": 302927,
+  "117": 372218,
+  "118": 295428,
+  "121": 15268,
+  "122": 2900,
+  "123": 3509,
+  "124": 9480,
+  "125": 40267,
+  "126": 103,
+  "127": 95,
+  "128": 3993
+ },
+ "rules": {
+  "SHORE_SCRUB_M": 60,
+  "MEADOW_MAX_SLOPE": 6,
+  "MEADOW_MAX_H": 25,
+  "MEADOW_MIN_INLAND_M": 100
+ },
+ "skerryCount": 5537,
+ "vanishedIsletsBurned": 2564
+}

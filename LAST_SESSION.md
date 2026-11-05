@@ -1,39 +1,41 @@
 # Last session
 
-**Describes `86cdda0` — branch `felix/windward-look`,
-2026-11-05, not merged.** L1 (`bf928f6`) ported the Look Lab look; pass 2 made it
-a Skagen palette with `?tune=1`; pass 3 (Felix approved Skagen): it is now the
-default (values in `src/config.js`; Before is only a preset) and small inland
-ponds no longer render solid white (depth bake, see DESIGN.md "Look pass 3").
-Before/after renders: `games/windward/ref/look-skagen/`.
-Preview: `/games/windward/?seed=1` (add `&tune=1` for the panel).
-`shared/ART.md` is its own PR: #5 (`felix/art-split-style`, not merged).
+**2026-11-05: big merge to `main`** (mission control, for Felix). Merged:
+PR #3 design-audit, PR #4 3m facets, PR #5 ART.md split style (facet target
+kept at 3m), `felix/windward-look` (Skagen look default, `?tune=1`, pond fix),
+`felix/windward-lighthouses` (29 towers, Play time-lapse, flash patterns),
+`felix/windward-real-coast` (Gottskär–Koster coast data, villages, population,
+history, coast-lab = map + timeline), `felix/game-design` (GAME-DESIGN.md
+confirmed: "Shared understanding (CONFIRMED)" wins over older sections) and
+`felix/epoch-timeline` (`data/epochs.json`, ref/epoch-timeline.html).
+The real coast is still lab-only; the game uses procedural islands.
 
-Where things are (why/deviations: `games/windward/DESIGN.md` "L1 port status"):
-- `src/water.js` lab shader + gust/line marks; marks and foam accumulate in JS
-- `src/depthmap.js` depth bake (1004x964 texels @ 1.5 m, ~150-180 ms in node)
-- `src/island-look.js` Bohuslän palette + green rule; `src/island.js` terrain
-- `game.js` fog and wiring; `src/settlements.js` houses prefer green
+Where things are:
+- Design: `games/windward/GAME-DESIGN.md`; look and labs: `DESIGN.md` ("Reference labs")
+- Look: `src/water.js`, `src/depthmap.js`, `src/island-look.js`, `src/config.js`
+- Lighthouses: `src/lighthouses.js`, `lighthouse-lab.html`, `LIGHTHOUSES.md`
+- Coast + history: `coast-lab.html`, `assets/coast/` (SOURCES.md), `data/`
+  (epochs.json + epochs-factcheck.md, settlements-history.json,
+  history-start-area.md)
 
-Unverified: headless Chromium (swiftshader) rendered desktop + iPhone 13 with no
-page errors, so the shaders compile; a real phone GPU is unchecked.
-`sun.shadow.normalBias = 0.25` (`game.js`) is a guess. TODO(felix): confirm.
-`island-lab.html` colour/threshold sliders no longer drive ground colour.
+Open (TODO(felix)): `sun.shadow.normalBias = 0.25` is a guess; real phone GPU
+unchecked; ddb-restricted population rows need CEDAR OK before commercial use;
+NMD CC0 wording to confirm; title wording ("Honour and Life") unverified.
+Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobby`.
 
 ## Today's sessions
 
-- Windward L1 Look Lab port; look pass 2 Skagen + `?tune=1`; pass 3: Skagen
-  default, pond fix, kept renders (this one).
+- Windward: phone controls, new boat, wave-wobble fix, 3m facets (earlier merge).
+- Look: L1 port → Skagen palette (pass 2) → Skagen default + pond fix (pass 3).
+- Lighthouses: 12 → 29 towers, real looks, year slider, Play, flash patterns.
+- Real coast: R0 → passes 2–5 (Gottskär, Koster, population, west-Orust history,
+  combined map + timeline, epochs fact-check).
+- Game design: /grill-me rounds 1–11, shared understanding confirmed.
 
 ## Next
 
-1. Fine-tune with `?tune=1` if wanted: bake a pick into `LOOK_*` and the
-   lighting keys in `src/config.js`. Also tunable there: `SLOPE_CALIBRATION`,
-   `HAZE_*`, `WATER_LIGHT_ELEVATION_DEG`.
-2. Merge `felix/windward-look` then PR #5 (a trial merge into `main` at
-   f3f1546 is clean). Remove the `../coopgames-windward-look` and
-   `../coopgames-art-split` worktrees only with Felix's OK.
-3. Carried over: play-test density (97-104 islands, pitch 110 m); Windward P1
-   (Polyfork props) agreed, not started; boat-island collision not built;
-   Will It Fit? stage 2 (Kenny); design-audit PR #3 unmerged (hub bug: the
-   "Connection lost" panel sits in the hidden `#lobby`).
+1. Real-coast trial in the game (west Orust window behind a flag; phone perf).
+2. Stage 1 lure: port/house arrival + deck items, small life, blue-hour sky and
+   day-night, edge fog + thunder warning (GAME-DESIGN.md "Build first").
+3. Worktrees on Felix's laptop can be removed now: coopgames-windward-look,
+   coopgames-lighthouses, coopgames-windward-real-coast, coopgames-art-split.

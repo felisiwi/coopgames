@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windward Coast Lab</title>
+<style>
+  :root {
+    --bg: #0e1a24; --panel: #14232f; --line: #28404f; --text: #e6eef2; --dim: #8fa6b3;
+    --accent: #6fd0d6; --warn: #f2b84b; --bad: #ff7a6b; --good: #8fe07a; --peek: 214px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; overflow: hidden; }
+  #app { display: grid; grid-template-columns: 1fr 360px; height: 100%; }
+  #stage { position: relative; min-width: 0; height: 100%; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+  canvas.drag { cursor: grabbing; }
+  #status { position: absolute; left: 12px; top: 10px; max-width: calc(100% - 230px); background: #0b141bd9; padding: 4px 8px; border-radius: 6px; font-size: 12px; color: var(--dim); }
+  #tools { position: absolute; right: 12px; top: 10px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .btnrow { display: flex; gap: 6px; }
+  aside { background: var(--panel); border-left: 1px solid var(--line); overflow: auto; padding: 0 16px 40px; }
+  h1 { font-size: 16px; margin: 14px 0 2px; }
+  h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 18px 0 6px; }
+  p.sub { margin: 0; color: var(--dim); font-size: 12px; }
+  button, input[type=number] { font: inherit; color: var(--text); background: #1c3140; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; min-height: 34px; }
+  button { cursor: pointer; } button.on { background: var(--accent); color: #06222a; border-color: var(--accent); font-weight: 600; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td, th { padding: 3px 4px; text-align: right; border-bottom: 1px solid var(--line); vertical-align: top; } th { color: var(--dim); font-weight: 500; } td:first-child, th:first-child { text-align: left; }
+  tr.rec td { color: var(--good); font-weight: 600; }
+  tr.cur td:first-child { box-shadow: inset 3px 0 var(--accent); padding-left: 8px; }
+  .sw { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; border: 1px solid #0006; }
+  .note { font-size: 12px; color: var(--dim); margin: 6px 0 0; }
+  .box { border-radius: 8px; padding: 8px 10px; font-size: 12px; margin-top: 8px; }
+  .box.bad { background: #3a1d1d; border: 1px solid var(--bad); color: #ffd2cc; }
+  .box.ok { background: #1d3a22; border: 1px solid var(--good); }
+  label { display: flex; gap: 6px; align-items: center; margin: 3px 0; min-height: 28px; }
+  a { color: var(--accent); }
+  details { margin-top: 8px; } summary { cursor: pointer; color: var(--dim); font-size: 12px; }
+  #loading { position: absolute; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--dim); text-align: center; padding: 20px; }
+
+  /* ---- year slider: two thumbs, 44 px touch targets ---- */
+  #years { position: sticky; top: 0; z-index: 3; background: var(--panel); padding: 8px 0 10px; border-bottom: 1px solid var(--line); }
+  #grab { display: none; width: 100%; height: 26px; padding: 0; border: 0; background: none; min-height: 26px; }
+  #grab::before { content: ""; display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto; }
+  .yrhead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+  .yrhead { gap: 10px; }
+  .yrhead b { font-size: 20px; letter-spacing: .01em; flex: none; } .yrhead span { color: var(--dim); font-size: 12px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }   /* one line always: a wrapping hint made the slider jump while scrubbing */
+  #yrTrack { position: relative; height: 44px; margin: 0 18px; touch-action: none; cursor: pointer; }
+  #yrRail { position: absolute; left: 0; right: 0; top: 20px; height: 4px; background: var(--line); border-radius: 2px; }
+  #yrFill { position: absolute; top: 20px; height: 4px; background: var(--accent); border-radius: 2px; }
+  .thumb { position: absolute; top: 4px; width: 36px; height: 36px; margin-left: -18px; border-radius: 50%; background: #e6eef2; border: 3px solid var(--accent); touch-action: none; cursor: grab; box-shadow: 0 1px 4px #0008; }
+  .thumb::after { content: ""; position: absolute; inset: -10px; }   /* invisible touch pad: measured from inside the 3px border, so this is ~56px wide */
+  .thumb:focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; }
+  #yrTicks { position: relative; height: 14px; margin: 0 18px; font-size: 10px; color: var(--dim); }
+  #yrTicks span { position: absolute; transform: translateX(-50%); }
+  #presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  #presets button { min-height: 40px; font-size: 13px; flex: 1 1 auto; }
+
+  /* ---- epoch band + era strip + pins: same axis as the slider (same side margins) ---- */
+  .epband { position: relative; height: 34px; margin: 4px 18px 5px; }
+  .seg { position: absolute; top: 0; height: 34px; border: 0; padding: 0; border-radius: 5px; font: 600 11px/1 system-ui, sans-serif; letter-spacing: -.01em; display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; cursor: pointer; transition: opacity .2s; min-height: 0; }
+  .erastrip { position: relative; height: 16px; margin: 0 18px 8px; }
+  .es { position: absolute; top: 0; height: 16px; border: 0; padding: 0; border-radius: 3px; cursor: pointer; transition: opacity .2s, transform .2s; min-height: 0; }
+  .es::after { content: ""; position: absolute; left: 0; right: 0; top: -2px; bottom: -12px; }        /* taller touch target than the 16 px bar */
+  .pins { position: relative; height: 16px; margin: 0 18px; font-size: 11px; color: var(--dim); }
+  .pin { position: absolute; transform: translateX(-50%); white-space: nowrap; background: none; border: 0; padding: 0 2px; min-height: 0; color: var(--dim); font-size: 11px; cursor: pointer; }
+  .pin:hover { color: var(--text); }
+  .card { background: #0f1c26; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .card .name { font-size: 15px; font-weight: 600; }
+  .card .when { color: var(--dim); font-size: 12px; margin-top: 1px; }
+  .card .summary { margin: 8px 0; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin: 8px 0; }
+  .stats .k { font-size: 11px; color: var(--dim); } .stats .v { font-size: 13px; font-weight: 600; }
+  .ev { font-size: 13px; color: var(--dim); padding: 2px 0; } .ev.on { color: var(--text); } .ev b { font-weight: 600; margin-right: 6px; }
+  .ev a, .card a.src { font-size: 11px; margin-left: 4px; }
+  .flag { color: var(--warn); }
+  /* ---- legend box near the map ---- */
+  #legendBox { position: absolute; right: 10px; bottom: 10px; z-index: 4; width: 214px; background: #0b141bef; border: 1px solid var(--line); border-radius: 10px; padding: 6px 9px 7px; font-size: 11px; line-height: 1.35; color: var(--text); }
+  #legendBox button { background: none; border: 0; padding: 0; min-height: 0; font: 700 11px system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); cursor: pointer; width: 100%; text-align: left; }
+  #legendBox.shut .lgBody { display: none; }
+  .lgRow { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+  .nw { white-space: nowrap; }
+  #legendBox.shut { width: auto; padding: 5px 10px; }
+  .lgLine { display: inline-block; width: 26px; height: 0; flex: none; }
+  .lgHouse { display: inline-block; width: 14px; height: 11px; flex: none; border: 1.5px solid #000b; }
+  .lgHouse.dashed { background: none; border: 1.5px dashed #e8e1d0; }
+  .lgChip { display: inline-block; width: 9px; height: 9px; border: 1px solid #0008; vertical-align: -1px; margin: 0 2px 0 6px; }
+  @media (max-width: 700px) {
+    #legendBox { left: 10px; right: auto; bottom: calc(var(--peek) + 6px); width: 190px; font-size: 10.5px; }
+    .epband { height: 38px; } .seg { height: 38px; font-size: 12px; }
+    .erastrip { height: 22px; } .es { height: 22px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    aside { padding-left: 10px; padding-right: 10px; }
+    .epband, .erastrip, .pins, #yrTrack, #yrTicks { margin-left: 14px; margin-right: 14px; }      /* more room for the epoch blocks: thumb-sized */
+    #app { grid-template-columns: 1fr; }
+    aside {
+      position: fixed; left: 0; right: 0; bottom: 0; height: 66vh; z-index: 10; border-left: 0; border-top: 1px solid var(--line);
+      border-radius: 16px 16px 0 0; box-shadow: 0 -6px 24px #0009; padding-bottom: calc(40px + env(safe-area-inset-bottom));
+      transform: translateY(calc(100% - var(--peek) - env(safe-area-inset-bottom))); transition: transform .22s ease; overflow: hidden;
+    }
+    aside.open { transform: none; overflow: auto; }
+    #grab { display: block; }
+    #years { padding-top: 0; }
+    #status { max-width: calc(100% - 24px); top: auto; bottom: calc(var(--peek) + 64px + env(safe-area-inset-bottom)); }
+    #tools { flex-direction: row; right: 10px; top: 10px; }
+    #presets button { min-height: 44px; font-size: 12px; padding: 4px 6px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="map"></canvas>
+    <div id="status">tap or hover the map</div>
+    <div id="tools">
+      <div class="btnrow" id="scales"></div>
+      <div class="btnrow"><button id="zin" aria-label="zoom in">+</button><button id="zout" aria-label="zoom out">−</button><button id="zfit">fit</button><button id="zboat">boat</button></div>
+    </div>
+    <div id="legendBox"><button id="lgToggle" aria-expanded="true">Legend ▾</button><div class="lgBody" id="lgBody"></div></div>
+    <div id="loading">Loading real coast data (about 7 MB)…</div>
+  </div>
+  <aside id="sheet">
+    <div id="years">
+      <button id="grab" aria-label="expand or collapse the panel"></button>
+      <div class="yrhead"><b id="yrText">2025</b><span id="yrHint">drag the two handles</span></div>
+      <div class="epband" id="epBand" role="group" aria-label="Epochs (drawn by weight, not to scale); tap to jump"></div>
+      <div class="erastrip" id="eraStrip" role="group" aria-label="Eras; tap to jump"></div>
+      <div class="pins" id="pins"></div>
+      <div id="yrTrack">
+        <div id="yrRail"></div><div id="yrFill"></div>
+        <div id="yrFrom" class="thumb" role="slider" tabindex="0" aria-label="From year" aria-valuemin="800" aria-valuemax="2025"></div>
+        <div id="yrTo" class="thumb" role="slider" tabindex="0" aria-label="To year" aria-valuemin="800" aria-valuemax="2025"></div>
+      </div>
+      <div id="yrTicks"></div>
+      <div id="presets"></div>
+    </div>
+
+    <h2 id="infoHead">The year</h2>
+    <div class="card" id="infoCard" aria-live="polite"></div>
+
+    <h1>Windward Coast Lab</h1>
+    <p class="sub">Real Bohuslän, Koster to Gottskär, year 800 to today. Map and timeline are one tool: the slider, the epoch band and the era strip share an axis. Preview only: not wired into the game.</p>
+
+    <h2>Trees near the boat</h2>
+    <div id="treecount" class="note" style="margin-top:0"></div>
+    <p class="note">Drag the white boat circle on the map. Trees come from <code>treesNear(x, z, 250)</code> and the land-cover classes; the same spot always gets the same trees.</p>
+
+    <h2>Layers</h2>
+    <label><input type="radio" name="mode" value="terrain" checked> Terrain (height and depth)</label>
+    <label><input type="radio" name="mode" value="cover"> Land cover (vegetation classes)</label>
+    <label><input type="checkbox" id="chkSettle" checked> Settlements (phase at the end year)</label>
+    <label id="lblLight" hidden><input type="checkbox" id="chkLight" checked> Lighthouses (built by the end year)</label>
+    <label><input type="checkbox" id="chkPlaces" checked> Place labels</label>
+    <label><input type="checkbox" id="chkRoute" checked> Routes</label>
+    <label><input type="checkbox" id="chkSkerries" checked> Skerries (min size enforced)</label>
+    <label><input type="checkbox" id="chkTrees" checked> Trees and boat</label>
+    <label title="Counts that originate in Tabellverket / the Demographic Data Base (restricted terms); see SOURCES.md"><input type="checkbox" id="chkDdb" checked> Include Tabellverket-derived counts (restricted terms)</label>
+    <p class="note" id="skerrynote"></p>
+    <div id="legend" class="note"></div>
+    <details id="setdetails"><summary>Settlements at this end year, with sources</summary><table id="setlist"></table></details>
+
+    <h2>Trips (average speed <input id="speed" type="number" min="1" max="14" step="0.5" value="6" style="width:60px"> m/s)</h2>
+    <div id="trips"></div>
+    <p class="note" id="tripnote"></p>
+
+    <h2>Land cover, whole map</h2>
+    <table id="cover"></table>
+    <p class="note">NMD 2018 (10 m), reduced to six classes by simple rules. Heath vs meadow and scrub vs forest are heuristics, see SOURCES.md.</p>
+
+    <h2>Tree budget if the whole map were planted</h2>
+    <table id="trees"></table>
+    <div id="treebox"></div>
+  </aside>
+</div>
+<script type="module" src="./src/coast-lab.js"></script>
+</body>
+</html>

@@ -1,0 +1,642 @@
+// Coast Lab: top-down preview of the real-coast data at three world scales,
+// with a year slider (settlements and lighthouses by year) and a draggable boat
+// that shows treesNear(). Preview only; not wired into the game.
+import { loadCoast, tripEstimate, recommendScale, fmtDuration } from './coast-data.js';
+import { makeTreesNear, classSamplerFromCoast, DEFAULT_RADIUS } from './trees-near.js';
+import { stateAt as stateAtYear, populationAt, houseWidth } from './history.js';
+import { buildAxis, describeYear, KIND_COLOURS } from './epochs.js';
+
+const SCALES = [6, 8, 10];
+const DEFAULT_SCALE = 10;                       // Felix: 1:10 is the default
+const YEAR_MIN = 800, YEAR_MAX = 2025;           // the slider runs from 800; data/epochs.json supplies the epochs
+const MIN_SKERRY_GM = 2.5;                      // smallest islet drawn, in GAME metres
+const TARGET_S = 20 * 60;
+let peekPx = 214;                               // collapsed bottom-sheet height on phones; measured from the sheet header (see syncPeek)
+const PRESETS = [
+  { label: 'Herring boom 1747–1809', from: 1747, to: 1809 },
+  { label: '1880–1900', from: 1880, to: 1900 },
+  { label: 'Today', from: 2025, to: 2025 },
+];
+const COVER_COL = {
+  bare_rock: [205, 183, 179], heath: [166, 122, 150], meadow: [168, 232, 81], scrub: [116, 170, 70], forest: [38, 96, 52], village: [232, 130, 60],
+};
+// one colour AND one shape per phase kind (shape helps if colours are hard to tell apart)
+const KIND = {                                  // phase -> roof colour
+  hamlet: { label: 'settled (no phase sourced)', color: '#e8e1d0', glyph: '■' },
+  'herring-boom': { label: 'herring boom', color: '#f2c94c', glyph: '■' },
+  decline: { label: 'decline', color: '#8f9ab5', glyph: '■' },
+  'canning/industry': { label: 'canning / industry', color: '#ee7d5e', glyph: '■' },
+  resort: { label: 'resort', color: '#7fd9b4', glyph: '■' },
+};
+// No population count at that year: the house is sized by phase and drawn as an outline only.
+const PHASE_W = { hamlet: 12, 'herring-boom': 26, decline: 16, 'canning/industry': 24, resort: 22 };
+const TREE_COL = { pine: '#1f4d2b', spruce: '#16392a', bush: '#6aaa48', juniper: '#4d8c70', birch: '#a6d870' };
+const ROUTE_COL = ['#fff3b0', '#ffb3d1'];
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('map'), ctx = canvas.getContext('2d');
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const isMobile = () => matchMedia('(max-width: 700px)').matches;
+const dpr = () => devicePixelRatio || 1;
+
+let C, S = DEFAULT_SCALE, mode = 'terrain', zoom = 0.05, cx = 0, cy = 0, speed = 6;
+const layers = { settle: true, light: true, places: true, route: true, skerries: true, trees: true };
+// Some old counts come (via sv.wikipedia) from Tabellverket / the Demographic Data Base, whose terms restrict bulk copying and
+// commercial use. They are tagged licence 'ddb-restricted' in the data; this switch (also ?ddb=0) leaves them out. See SOURCES.md.
+let useDdb = new URLSearchParams(location.search).get('ddb') !== '0';
+let settlements = [], lighthouses = null;
+let boat = { i: 0, j: 0 };                      // plane pixel coords: stays put when the scale changes
+const imgs = { terrain: new Map(), cover: new Map() };
+const treesFns = new Map();
+let treeCache = { key: '', list: [] };
+let lastPlaced = [];                              // houses drawn in the last frame (for browser tests)
+
+// ---------------------------------------------------------------- epochs: data/epochs.json is the single source (nothing copied)
+async function loadEpochs() {
+  try {
+    const r = await fetch(new URL('../data/epochs.json', import.meta.url));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } catch (err) {                                   // fall back to one plain epoch so the slider still works
+    console.warn('epochs.json not loaded:', err.message);
+    const all = { id: 'all', name: '800 to today', from: YEAR_MIN, to: 2026, weight: 100, kind: 'quiet', vibe: '', season: '' };
+    return { epochs: [all], eras: [{ ...all, summary: '', events: [] }], herringPeriods: [], lighthouseBuilt: [], markers: [], marstrandStatus: [] };
+  }
+}
+const EPOCH_DATA = await loadEpochs();
+const axis = buildAxis(EPOCH_DATA.epochs);
+
+// ---------------------------------------------------------------- years (URL: ?from=&to= or ?year=)
+const qs = new URLSearchParams(location.search);
+const qnum = (k) => { const v = parseInt(qs.get(k), 10); return Number.isFinite(v) ? clamp(v, YEAR_MIN, YEAR_MAX) : null; };
+const qYear = qnum('year');                       // ?year=1787 is the same as ?from=1787&to=1787 (from/to win if both are given)
+let yFrom = qnum('from') ?? qnum('to') ?? qYear ?? 2025, yTo = qnum('to') ?? qnum('from') ?? qYear ?? 2025;
+if (yFrom > yTo) [yFrom, yTo] = [yTo, yFrom];
+
+// ---------------------------------------------------------------- settlements: phase and population at a year (src/history.js)
+const stateAt = (st, y) => stateAtYear(st, y, YEAR_MAX);
+const popAt = (st, y) => populationAt(st, y, { useDdb });
+// Houses are oversized on purpose, but on a small map (phone, zoomed out) they would bury each other: scale them with zoom.
+const cssZoom = () => zoom / dpr();                                    // zoom in CSS px per game metre (zoom itself counts device px)
+const houseScale = () => clamp(Math.sqrt(cssZoom() / 0.055), 0.45, 1.5);
+// Below this zoom (px per game metre) houses that would overlap are merged into the biggest one ("+n" badge); zoom in and they separate.
+const CLUSTER_BELOW_ZOOM = 0.25;                  // CSS px per game metre
+function houseLayout(f) {
+  const items = [];
+  for (const s of settlements) {
+    const st = stateAt(s, yTo); if (!st) continue;
+    const [sx, sy] = toScreen(...lonLatToWorld(s.lon, s.lat)), pop = popAt(s, yTo);
+    items.push({ s, st, pop, sx, sy, unknown: s.firstRecorded == null, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
+  }
+  items.sort((a, b) => b.w - a.w);                                   // big houses first: they host the small ones they would cover
+  const pad = 6 * f, placed = [];
+  for (const it of items) {
+    const box = [it.sx - it.w / 2 - pad, it.sy - it.w * 0.39 - pad, it.sx + it.w / 2 + pad, it.sy + it.w * 0.39 + pad];
+    const host = cssZoom() < CLUSTER_BELOW_ZOOM ? placed.find((p) => box[0] < p.box[2] && box[2] > p.box[0] && box[1] < p.box[3] && box[3] > p.box[1]) : null;
+    if (host) host.members.push(it); else placed.push({ ...it, box, members: [] });
+  }
+  return { items, placed };
+}
+const clusterText = (p) => `${p.members.length} more here: ${p.members.map((m) => m.s.name).join(', ')}`;
+const fmtPop = (n) => n.toLocaleString('en-US');
+function shade(hex, amt) {                      // amt -1..1 : darker .. lighter
+  const n = parseInt(hex.slice(1), 16), mix = amt < 0 ? 0 : 255, k = Math.abs(amt);
+  const c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v + (mix - v) * k));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+// ---------------------------------------------------------------- tile images
+function buildImage(tile, kind) {
+  const stride = isMobile() ? 2 : 1;
+  const w = Math.ceil(tile.width / stride), h = Math.ceil(tile.height / stride);
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const x = cv.getContext('2d'), id = x.createImageData(w, h), d = id.data;
+  const names = C.meta.classes.map((c) => c.name);
+  for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) {
+    const p = Math.min(tile.height - 1, yy * stride) * tile.width + Math.min(tile.width - 1, xx * stride);
+    let c;
+    if (tile.land[p] > 0) {
+      if (kind === 'cover') c = COVER_COL[names[tile.classes[p]]] || [255, 0, 255];
+      else { const t = Math.min(1, (tile.land[p] - 1) / 10 / 70); c = [190 + 48 * t, 160 + 62 * t, 158 + 56 * t]; }
+    } else {
+      const dm = tile.depth[p] / 10;
+      c = dm < 12 ? [118 - 71 * (dm / 12), 214 - 80 * (dm / 12), 214 - 22 * (dm / 12)] : [47 - 29 * Math.min(1, (dm - 12) / 50), 134 - 71 * Math.min(1, (dm - 12) / 50), 192 - 72 * Math.min(1, (dm - 12) / 50)];
+    }
+    const o = (yy * w + xx) * 4; d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+  }
+  x.putImageData(id, 0, 0);
+  return cv;
+}
+const tileImage = (tile) => { const m = imgs[mode]; if (!m.has(tile.id)) m.set(tile.id, buildImage(tile, mode)); return m.get(tile.id); };
+
+// ---------------------------------------------------------------- view maths. World = game metres, origin = plane's north-west corner.
+const gm = () => C.mpp / S;                                         // game metres per raster pixel
+const insetPx = () => (isMobile() ? peekPx * dpr() : 0);          // phone: the collapsed bottom sheet covers this much
+const topPx = () => (isMobile() ? 56 * dpr() : 0);                 // phone: the zoom/scale buttons cover this much
+const centreY = () => (topPx() + canvas.height - insetPx()) / 2;
+const toScreen = (gx, gy) => [(gx - cx) * zoom + canvas.width / 2, (gy - cy) * zoom + centreY()];
+const toWorld = (sx, sy) => [(sx - canvas.width / 2) / zoom + cx, (sy - centreY()) / zoom + cy];
+const lonLatToWorld = (lon, lat) => { const [px, py] = C.toPx(lon, lat); return [px * gm(), py * gm()]; };
+const boatWorld = () => [boat.i * gm(), boat.j * gm()];
+const evtScreen = (e) => { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) * dpr(), (e.clientY - r.top) * dpr()]; };
+
+function niceLength(maxGm) {
+  let best = 1;
+  for (const m of [1, 2, 5]) for (let k = 0; k < 6; k++) { const v = m * 10 ** k; if (v <= maxGm) best = Math.max(best, v); }
+  return best;
+}
+
+// ---------------------------------------------------------------- trees near the boat
+function currentTrees() {
+  if (!treesFns.has(S)) treesFns.set(S, makeTreesNear({ classAt: classSamplerFromCoast(C, S), seed: 1 }));
+  const [bx, bz] = boatWorld();
+  const key = `${S}:${Math.round(bx)}:${Math.round(bz)}`;
+  if (treeCache.key !== key) treeCache = { key, list: treesFns.get(S)(bx, bz, DEFAULT_RADIUS) };
+  return treeCache.list;
+}
+
+// ---------------------------------------------------------------- drawing
+// An oversized house seen from above: gable roof (two shaded halves + ridge) and a chimney.
+// `estimated` = no population count: outline only, dashed.
+function drawHouse(x, y, w, color, estimated, f) {
+  const h = w * 0.78, x0 = x - w / 2, y0 = y - h / 2;
+  ctx.lineJoin = 'round';
+  if (estimated) {
+    ctx.setLineDash([4 * f, 3 * f]); ctx.strokeStyle = color; ctx.lineWidth = 2 * f;
+    ctx.strokeRect(x0, y0, w, h);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y); ctx.stroke(); ctx.setLineDash([]);
+  } else {
+    ctx.fillStyle = shade(color, -0.22); ctx.fillRect(x0, y0, w, h / 2);              // sunless slope
+    ctx.fillStyle = color; ctx.fillRect(x0, y, w, h / 2);                              // sunny slope
+    ctx.fillStyle = '#3a2a24'; ctx.fillRect(x0 + w * 0.68, y0 + h * 0.12, Math.max(2 * f, w * 0.13), Math.max(2 * f, w * 0.13));   // chimney
+    ctx.strokeStyle = '#000a'; ctx.lineWidth = 1.5 * f; ctx.strokeRect(x0, y0, w, h);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y); ctx.strokeStyle = '#0006'; ctx.stroke();
+  }
+}
+
+function draw() {
+  const f = dpr(), w = Math.round(canvas.clientWidth * f), h = Math.round(canvas.clientHeight * f);
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#0b141b'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (!C) return;
+  const k = zoom * gm();                                              // screen px per raster px
+  const [ox, oy] = toScreen(0, 0);
+  ctx.imageSmoothingEnabled = k < 1;
+  for (const t of C.tiles) ctx.drawImage(tileImage(t), ox + t.x0 * k, oy + t.y0 * k, t.width * k, t.height * k);
+
+  if (layers.skerries) {
+    ctx.fillStyle = '#c4a8a3'; ctx.strokeStyle = '#7d625e'; ctx.lineWidth = f;
+    for (const [lon, lat, wd] of C.skerries) {
+      const [sx, sy] = toScreen(...lonLatToWorld(lon, lat));
+      if (sx < -10 || sy < -10 || sx > canvas.width + 10 || sy > canvas.height + 10) continue;
+      const r = Math.max(Math.max(wd / S, MIN_SKERRY_GM) * zoom / 2, 0.9 * f);
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, 6.283); ctx.fill(); if (r > 2.5 * f) ctx.stroke();
+    }
+  }
+  if (layers.route) {
+    C.routes.forEach((rt, n) => {
+      ctx.strokeStyle = ROUTE_COL[n % ROUTE_COL.length]; ctx.lineWidth = 2.5 * f; ctx.setLineDash([8 * f, 5 * f]); ctx.beginPath();
+      rt.points.forEach(([lon, lat], i) => { const [sx, sy] = toScreen(...lonLatToWorld(lon, lat)); i ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy); });
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+  }
+
+  if (layers.trees) {
+    const trees = currentTrees();
+    for (const t of trees) {
+      const [sx, sy] = toScreen(t.x, t.z);
+      if (sx < -8 || sy < -8 || sx > canvas.width + 8 || sy > canvas.height + 8) continue;
+      ctx.fillStyle = TREE_COL[t.kind] || '#3a7d44';
+      ctx.beginPath(); ctx.arc(sx, sy, clamp(1.7 * t.size * zoom, 1.1 * f, 7 * f), 0, 6.283); ctx.fill();
+    }
+    const [bsx, bsy] = toScreen(...boatWorld());
+    document.body.dataset.boat = `${Math.round(bsx / f)},${Math.round(bsy / f)}`;      // CSS px; lets browser tests find the boat
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * f; ctx.setLineDash([6 * f, 4 * f]);
+    ctx.beginPath(); ctx.arc(bsx, bsy, DEFAULT_RADIUS * zoom, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#000c'; ctx.lineWidth = 2 * f;
+    ctx.beginPath(); ctx.moveTo(bsx, bsy - 9 * f); ctx.lineTo(bsx + 6 * f, bsy + 7 * f); ctx.lineTo(bsx - 6 * f, bsy + 7 * f); ctx.closePath(); ctx.stroke(); ctx.fill();
+  }
+
+  // labels share one collision list: settlements first, then lighthouses, then other places
+  ctx.font = `${12 * f}px system-ui, sans-serif`; ctx.textBaseline = 'middle';
+  const taken = [];
+  const hits = (box) => taken.some((b) => box[0] < b[0] + b[2] && box[0] + box[2] > b[0] && box[1] < b[1] + b[3] && box[1] + box[3] > b[1]);
+  // A label goes to the right of its marker; if that collides or runs off screen it tries the left, then below, then above;
+  // if nothing is clear it is skipped. hh = half the marker's height (device px) for the below/above tries.
+  const label = (text, sx, sy, dx = 10, hh = 8 * f) => {
+    const tw = ctx.measureText(text).width, bw = tw + 4 * f, bh = 16 * f, tries = [];
+    const add = (align, tx, ty, box) => tries.push({ align, tx, ty, box, fits: box[0] >= 0 && box[0] + box[2] <= canvas.width, clear: !hits(box) });
+    add('start', sx + dx * f, sy, [sx + (dx - 2) * f, sy - bh / 2, bw, bh]);
+    add('end', sx - dx * f, sy, [sx - (dx - 2) * f - bw, sy - bh / 2, bw, bh]);
+    add('center', sx, sy + hh + 3 * f + bh / 2, [sx - bw / 2, sy + hh + 3 * f, bw, bh]);
+    add('center', sx, sy - hh - 3 * f - bh / 2, [sx - bw / 2, sy - hh - 3 * f - bh, bw, bh]);
+    const pick = tries.find((t) => t.fits && t.clear) || tries.find((t) => t.clear);
+    if (!pick) return;
+    taken.push(pick.box);
+    ctx.textAlign = pick.align;
+    ctx.lineWidth = 3 * f; ctx.strokeStyle = '#000c'; ctx.strokeText(text, pick.tx, pick.ty);
+    ctx.fillStyle = '#fff'; ctx.fillText(text, pick.tx, pick.ty);
+    ctx.textAlign = 'start';
+  };
+  const onScreen = (sx, sy) => sx > -60 && sy > -20 && sx < canvas.width + 60 && sy < canvas.height + 20;
+  let counted = 0, estimated = 0, merged = 0;
+  if (layers.settle) {
+    const { items, placed } = houseLayout(f);
+    for (const it of items) { if (it.pop) counted++; else estimated++; }
+    for (const p of placed) {
+      const { s, st, pop, sx, sy, w } = p;
+      if (!onScreen(sx, sy)) continue;
+      if (s.firstRecorded != null && s.firstRecorded >= yFrom && s.firstRecorded <= yTo) {          // first recorded inside the window
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * f; ctx.beginPath(); ctx.rect(sx - w / 2 - 4 * f, sy - w * 0.39 - 4 * f, w + 8 * f, w * 0.78 + 8 * f); ctx.stroke();
+      }
+      if (p.members.length) {                                                                         // a pile: n smaller places hide behind this house
+        merged += p.members.length;
+        ctx.fillStyle = '#7d8a93'; ctx.strokeStyle = '#000b'; ctx.lineWidth = 1.5 * f;
+        for (const k of p.members.length > 1 ? [2, 1] : [1]) { ctx.beginPath(); ctx.rect(sx - w / 2 + 3 * f * k, sy - w * 0.39 - 3 * f * k, w, w * 0.78); ctx.fill(); ctx.stroke(); }
+      }
+      drawHouse(sx, sy, w, KIND[st.kind].color, !pop, f);
+      if (p.unknown) {                                                                                 // "?" = origin date unknown: drawn at every year, not hidden
+        const qx = sx - w / 2, qy = sy - w * 0.39;
+        ctx.fillStyle = '#14232f'; ctx.strokeStyle = '#e6eef2'; ctx.lineWidth = 1.5 * f; ctx.beginPath(); ctx.arc(qx, qy, 7.5 * f, 0, 6.283); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e6eef2'; ctx.font = `bold ${10 * f}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', qx, qy + 0.5 * f);
+        ctx.textAlign = 'start'; ctx.font = `${12 * f}px system-ui, sans-serif`;
+      }
+    }
+    for (const p of placed) { const k = p.members.length > 1 ? 6 * f : p.members.length ? 3 * f : 0; taken.push([p.sx - p.w / 2, p.sy - p.w * 0.39 - k, p.w + k, p.w * 0.78 + k]); }   // labels keep clear of every house and its pile
+    for (const p of placed) label((p.pop ? `${p.s.name} ${fmtPop(p.pop.value)}` : p.s.name) + (p.members.length ? ` +${p.members.length}` : ''), p.sx, p.sy, p.w / (2 * f) + 6 + (p.members.length > 1 ? 4 : p.members.length ? 1 : 0), p.w * 0.39 + (p.members.length ? 6 * f : 0));   // labels last, biggest places first
+    lastPlaced = placed.map((p) => ({ name: p.s.name, unknown: p.unknown, box: [p.sx - p.w / 2, p.sy - p.w * 0.39, p.sx + p.w / 2, p.sy + p.w * 0.39], members: p.members.map((m) => m.s.name) }));
+  } else lastPlaced = [];
+  document.body.dataset.drawn = `${lastPlaced.length},${merged}`;                                    // houses drawn, places merged into others
+  document.body.dataset.houses = `${counted},${estimated}`;                                         // counted,estimated (for browser tests)
+  if (lighthouses && layers.light) {
+    for (const l of lighthouses) {
+      if (l.built > yTo) continue;
+      const [sx, sy] = toScreen(...lonLatToWorld(l.lon, l.lat)); if (!onScreen(sx, sy)) continue;
+      if (l.built >= yFrom) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * f; ctx.beginPath(); ctx.arc(sx, sy, 10 * f, 0, 6.283); ctx.stroke(); }
+      ctx.fillStyle = '#ffd24a'; ctx.strokeStyle = '#000c'; ctx.lineWidth = 1.5 * f;
+      ctx.beginPath(); ctx.moveTo(sx, sy - 7 * f); ctx.lineTo(sx + 6 * f, sy + 5 * f); ctx.lineTo(sx - 6 * f, sy + 5 * f); ctx.closePath(); ctx.stroke(); ctx.fill();
+      label(`${l.name} ${l.built}`, sx, sy, 10);
+    }
+  }
+  if (layers.places) {
+    const order = [...C.places].sort((a, b) => (a.kind === 'village') - (b.kind === 'village'));
+    for (const p of order) {
+      if (layers.settle && settlements.some((s) => s.name === p.name)) continue;   // the settlement marker replaces the plain village dot
+      if (lighthouses && layers.light && p.kind === 'lighthouse') continue;       // real lighthouse layer replaces ours
+      const [sx, sy] = toScreen(...lonLatToWorld(p.lon, p.lat)); if (!onScreen(sx, sy)) continue;
+      ctx.fillStyle = p.kind === 'lighthouse' ? '#ffd24a' : p.kind === 'fortress' ? '#ff9e6b' : p.kind === 'island' ? '#ffffff' : '#ff5d73';
+      ctx.strokeStyle = '#000b'; ctx.lineWidth = 1.5 * f; ctx.beginPath();
+      if (p.kind === 'lighthouse') { ctx.moveTo(sx, sy - 6 * f); ctx.lineTo(sx + 5 * f, sy + 4 * f); ctx.lineTo(sx - 5 * f, sy + 4 * f); ctx.closePath(); }
+      else if (p.kind === 'fortress') ctx.rect(sx - 4 * f, sy - 4 * f, 8 * f, 8 * f);
+      else ctx.arc(sx, sy, (p.kind === 'island' ? 3 : 4) * f, 0, 6.283);
+      ctx.stroke(); ctx.fill(); label(p.name, sx, sy, 10);
+    }
+  }
+
+  // scale bar (game metres) + boat reference, above the phone sheet when collapsed
+  const bar = niceLength((canvas.width * 0.28) / zoom), bx = 16 * f, by = canvas.height - insetPx() - 40 * f;
+  ctx.strokeStyle = '#000c'; ctx.lineWidth = 4 * f;
+  ctx.beginPath(); ctx.moveTo(bx, by - 5 * f); ctx.lineTo(bx, by); ctx.lineTo(bx + bar * zoom, by); ctx.lineTo(bx + bar * zoom, by - 5 * f); ctx.stroke();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.8 * f; ctx.stroke();
+  ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#fff';
+  const txt = `${bar >= 1000 ? bar / 1000 + ' km' : bar + ' m'} game = ${((bar * S) / 1000).toFixed(bar * S < 1000 ? 2 : 1)} km real (1:${S})`;
+  ctx.lineWidth = 3 * f; ctx.strokeStyle = '#000c'; ctx.strokeText(txt, bx, by - 9 * f); ctx.fillText(txt, bx, by - 9 * f);
+  if (6 * zoom >= 3 * f) { ctx.fillStyle = '#ffd24a'; ctx.fillRect(bx, by + 8 * f, 6 * zoom, 4 * f); ctx.fillText('boat = 6 m', bx + 6 * zoom + 6 * f, by + 13 * f); }
+}
+
+// ---------------------------------------------------------------- scale / fit / boat
+function setScale(s) {
+  if (C && s !== S) { const k = S / s; cx *= k; cy *= k; }             // keep the same real spot centred
+  S = s;
+  document.querySelectorAll('#scales button').forEach((b) => b.classList.toggle('on', +b.dataset.s === S));
+  panelsScale(); draw();
+}
+function fit() {
+  const worldW = (C.width * C.mpp) / S, worldH = (C.height * C.mpp) / S;
+  zoom = Math.min(canvas.width / worldW, (canvas.height - insetPx() - topPx()) / worldH) * 0.95;
+  cx = worldW / 2; cy = worldH / 2; draw();
+}
+function goBoat() { zoom = Math.max(zoom, 0.28); [cx, cy] = boatWorld(); draw(); }
+function zoomAt(factor, sx, sy) {
+  const [wx, wy] = toWorld(sx, sy); zoom = clamp(zoom * factor, 0.003, 12);
+  cx = wx - (sx - canvas.width / 2) / zoom; cy = wy - (sy - centreY()) / zoom; draw();
+}
+
+// ---------------------------------------------------------------- info line (hover / tap)
+function clusterAt(sx, sy) {                          // a merged house under the pointer, or null
+  if (!layers.settle) return null;
+  const f = dpr(), near = 16 * f;
+  for (const p of houseLayout(f).placed) {
+    if (p.members.length && Math.abs(p.sx - sx) <= Math.max(p.w / 2 + 4 * f, near) && Math.abs(p.sy - sy) <= Math.max(p.w * 0.39 + 4 * f, near)) return p;
+  }
+  return null;
+}
+function infoAt(sx, sy) {
+  const f = dpr(), near = 16 * f, hits = [];                          // candidates near the pointer; the closest wins
+  if (layers.settle) for (const p of houseLayout(f).placed) {
+    const { s, st, pop, sx: px, sy: py, w } = p;
+    if (Math.abs(px - sx) <= Math.max(w / 2 + 4 * f, near) && Math.abs(py - sy) <= Math.max(w * 0.39 + 4 * f, near)) {
+      const ph = st.phase ? `${KIND[st.kind].label} ${st.phase.from}–${st.phase.to ?? 'ongoing'}` : 'no sourced phase at this year';
+      const pp = !pop ? 'population: no count, house size estimated from the phase (outline)'
+        : pop.mode === 'counted' ? `population ${fmtPop(pop.value)} (${pop.counts}, ${pop.year})`
+        : pop.mode === 'interpolated' ? `population about ${fmtPop(pop.value)} (between ${pop.from.year} and ${pop.to.year} counts)`
+        : `population ${fmtPop(pop.value)} (${pop.counts}, nearest count ${pop.year})`;
+      hits.push({ d: Math.hypot(px - sx, py - sy), cluster: p.members.length ? p : null,
+        text: `${s.name} · ${s.firstRecorded != null ? 'first recorded ' + s.firstRecorded : 'first record: date unknown (not found in the sources; shown at every year)'} · ${ph} · ${pp} · confidence ${s.confidence}` + (p.members.length ? ` · ${clusterText(p)} (tap to zoom in)` : '') });
+    }
+  }
+  if (lighthouses && layers.light) for (const l of lighthouses) {
+    if (l.built > yTo) continue;
+    const [px, py] = toScreen(...lonLatToWorld(l.lon, l.lat)), d = Math.hypot(px - sx, py - sy);
+    if (d <= near) hits.push({ d, text: `${l.name} lighthouse · built ${l.built}` });
+  }
+  if (hits.length) return hits.sort((a, b) => a.d - b.d)[0].text;
+  const [gx, gy] = toWorld(sx, sy), i = Math.floor(gx / gm()), j = Math.floor(gy / gm());
+  if (!C.inTile(i, j)) return 'outside the data';
+  const m = C.meta, lon = m.bbox.w + (i + 0.5) * C.mpp / m.projection.metersPerDegLon, lat = m.bbox.n - (j + 0.5) * C.mpp / m.projection.metersPerDegLat;
+  const where = C.isLand(i, j) ? `${m.classes[C.classAt(i, j)].name.replace('_', ' ')} · ${C.heightM(i, j).toFixed(1)} m high` : `sea · depth ${C.depthM(i, j).toFixed(1)} m (placeholder model)`;
+  return `${lat.toFixed(4)} N  ${lon.toFixed(4)} E · ${where}`;
+}
+
+// ---------------------------------------------------------------- pointer gestures: pan, drag the boat, pinch
+const pointers = new Map();
+let gesture = null, pinch = null;
+canvas.addEventListener('pointerdown', (e) => {
+  canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; gesture = null; return;
+  }
+  const [sx, sy] = evtScreen(e), [bsx, bsy] = toScreen(...boatWorld());
+  const hit = layers.trees && Math.hypot(sx - bsx, sy - bsy) <= Math.max(DEFAULT_RADIUS * zoom, 30 * dpr());
+  gesture = hit ? { type: 'boat', moved: 0, sx0: sx, sy0: sy, offx: bsx - sx, offy: bsy - sy } :   // keep the grab offset so the boat does not jump under the finger
+    { type: 'pan', x: e.clientX, y: e.clientY, cx, cy, moved: 0 };
+  canvas.classList.add('drag');
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pinch && pointers.size >= 2) {
+    const [a, b] = [...pointers.values()], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, r = canvas.getBoundingClientRect();
+    cx -= ((mx - pinch.mx) * dpr()) / zoom; cy -= ((my - pinch.my) * dpr()) / zoom;
+    zoomAt(d / pinch.d, (mx - r.left) * dpr(), (my - r.top) * dpr());
+    pinch = { d, mx, my }; return;
+  }
+  if (!gesture) { if (e.pointerType === 'mouse') $('status').textContent = infoAt(...evtScreen(e)); return; }
+  const [sx, sy] = evtScreen(e);
+  if (gesture.type === 'boat') {
+    gesture.moved = Math.max(gesture.moved, Math.hypot(sx - gesture.sx0, sy - gesture.sy0));
+    const [gx, gy] = toWorld(sx + gesture.offx, sy + gesture.offy); boat = { i: gx / gm(), j: gy / gm() }; draw(); panelsTrees();
+  } else {
+    gesture.moved = Math.max(gesture.moved, Math.hypot(e.clientX - gesture.x, e.clientY - gesture.y));
+    cx = gesture.cx - ((e.clientX - gesture.x) * dpr()) / zoom; cy = gesture.cy - ((e.clientY - gesture.y) * dpr()) / zoom; draw();
+  }
+});
+const endPointer = (e) => {
+  const wasTap = gesture && gesture.moved < 6 * (gesture.type === 'boat' ? dpr() : 1);
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (wasTap) {                                                            // tap = show info (phones have no hover); tap on a "+n" house zooms in
+    const [tx, ty] = evtScreen(e), c = clusterAt(tx, ty);
+    if (c) { $('status').textContent = infoAt(tx, ty); zoomAt(2.6, c.sx, c.sy); } else $('status').textContent = infoAt(tx, ty);
+  }
+  if (!pointers.size) { gesture = null; canvas.classList.remove('drag'); }
+};
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); const [sx, sy] = evtScreen(e); zoomAt(Math.exp(-e.deltaY * 0.0015), sx, sy); }, { passive: false });
+$('zin').onclick = () => zoomAt(1.5, canvas.width / 2, centreY());
+$('zout').onclick = () => zoomAt(1 / 1.5, canvas.width / 2, centreY());
+$('zfit').onclick = fit;
+$('zboat').onclick = goBoat;
+$('grab').onclick = () => $('sheet').classList.toggle('open');
+function buildLegend() {
+  const chips = Object.entries(KIND).map(([, k]) => `<span class="nw"><span class="lgChip" style="background:${k.color}"></span>${k.label.replace(' (no phase sourced)', '')}</span>`).join(' ');
+  $('lgBody').innerHTML =
+    `<div class="lgRow"><span class="lgLine" style="border-top:3px dashed ${ROUTE_COL[0]}"></span>Marstrand → Smögen</div>`
+    + `<div class="lgRow"><span class="lgLine" style="border-top:3px dashed ${ROUTE_COL[1]}"></span>Gottskär → Marstrand</div>`
+    + `<div style="margin-top:4px">Roof colour = phase:<br>${chips}</div>`
+    + `<div class="lgRow"><span class="lgHouse" style="background:#e8e1d0"></span>solid = counted population</div>`
+    + `<div class="lgRow"><span class="lgHouse dashed"></span>dashed = estimated, no count</div>`
+    + `<div class="lgRow">stack "+n" = places merged; zoom in</div>`
+    + `<div class="lgRow"><b style="border:1.5px solid #e6eef2;border-radius:50%;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;font-size:9px">?</b>date unknown (shown always)</div>`
+    + `<div class="lgRow"><span style="color:#ffd24a">▲</span>lighthouse</div>`
+    + `<div class="lgRow"><span class="lgHouse" style="background:none;border:2px solid #fff"></span>white frame = first recorded in the window</div>`;
+}
+buildLegend();
+if (isMobile()) { $('legendBox').classList.add('shut'); $('lgToggle').textContent = 'Legend ▸'; $('lgToggle').setAttribute('aria-expanded', 'false'); }   // on a phone the open legend would hide half the map: start as a chip
+$('lgToggle').onclick = () => { const shut = $('legendBox').classList.toggle('shut'); $('lgToggle').setAttribute('aria-expanded', String(!shut)); $('lgToggle').textContent = shut ? 'Legend ▸' : 'Legend ▾'; };
+// The phone sheet's collapsed height is whatever its header needs (band + strip + slider...); measure it instead of hard-coding it.
+function syncPeek() { peekPx = Math.round($('years').offsetHeight + 12); document.documentElement.style.setProperty('--peek', peekPx + 'px'); draw(); }
+new ResizeObserver(syncPeek).observe($('years'));
+new ResizeObserver(() => draw()).observe($('stage'));
+
+// ---------------------------------------------------------------- year slider (two thumbs)
+const track = $('yrTrack');
+const frac = (y) => axis.toPos(y) / 100;                                 // the SAME axis as the epoch band and era strip
+function layoutSlider() {
+  $('yrFrom').style.left = frac(yFrom) * 100 + '%'; $('yrTo').style.left = frac(yTo) * 100 + '%';
+  $('yrFill').style.left = frac(yFrom) * 100 + '%'; $('yrFill').style.width = (frac(yTo) - frac(yFrom)) * 100 + '%';
+  $('yrText').textContent = yFrom === yTo ? String(yTo) : `${yFrom} – ${yTo}`;
+  const d = describeYear(EPOCH_DATA, yTo);
+  $('yrHint').textContent = `${d.era.name} · ${d.epoch.season}`;        // era and season at the end year
+  highlightTimeline(d); renderInfo(d);
+  for (const [id, v] of [['yrFrom', yFrom], ['yrTo', yTo]]) $(id).setAttribute('aria-valuenow', v);
+  $('yrTo').style.zIndex = yFrom >= YEAR_MAX - 60 ? 1 : 2;
+  document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', +b.dataset.from === yFrom && +b.dataset.to === yTo));
+  document.body.dataset.from = yFrom; document.body.dataset.to = yTo;
+}
+function syncUrl() {
+  const u = new URL(location.href); u.searchParams.set('from', yFrom); u.searchParams.set('to', yTo);
+  try { history.replaceState(null, '', u); } catch { /* sandboxed frames */ }
+}
+function setYears(a, b) { yFrom = clamp(Math.min(a, b), YEAR_MIN, YEAR_MAX); yTo = clamp(Math.max(a, b), YEAR_MIN, YEAR_MAX); layoutSlider(); syncUrl(); panelsYear(); draw(); }
+function setThumb(which, y) { y = clamp(y, YEAR_MIN, YEAR_MAX); if (which === 'from') setYears(Math.min(y, yTo), yTo); else setYears(yFrom, Math.max(y, yFrom)); }
+const yearFromEvent = (e) => { const r = track.getBoundingClientRect(); return clamp(axis.toYear(clamp((e.clientX - r.left) / r.width, 0, 1) * 100), YEAR_MIN, YEAR_MAX); };
+let yDrag = null;
+track.addEventListener('pointerdown', (e) => {
+  track.setPointerCapture(e.pointerId); const y = yearFromEvent(e);
+  let which;
+  if (yFrom === yTo) which = Math.abs(y - yFrom) > 18 ? (y < yFrom ? 'from' : 'to') : 'both';   // thumbs overlap: on them = scrub one year; elsewhere on the rail = open a window
+  else which = Math.abs(y - yFrom) <= Math.abs(y - yTo) ? 'from' : 'to';
+  yDrag = { which, x0: e.clientX };
+  if (which === 'both') setYears(y, y); else setThumb(which, y);
+  e.preventDefault();
+});
+track.addEventListener('pointermove', (e) => {
+  if (!yDrag) return;
+  if (yDrag.which === 'both') { const y = yearFromEvent(e); setYears(y, y); return; }
+  setThumb(yDrag.which, yearFromEvent(e));
+});
+for (const ev of ['pointerup', 'pointercancel']) track.addEventListener(ev, () => { yDrag = null; });
+for (const [id, which] of [['yrFrom', 'from'], ['yrTo', 'to']]) {
+  $(id).addEventListener('keydown', (e) => {
+    const cur = which === 'from' ? yFrom : yTo;
+    const step = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -10, PageUp: 10 }[e.key];
+    let y = step ? cur + step : e.key === 'Home' ? YEAR_MIN : e.key === 'End' ? YEAR_MAX : null;
+    if (y === null) return; e.preventDefault();
+    if (yFrom === yTo) { y = clamp(y, YEAR_MIN, YEAR_MAX); setYears(y, y); }                  // overlapped handles: the keyboard scrubs the single year, like a drag on them
+    else setThumb(which, y);
+  });
+}
+$('presets').innerHTML = PRESETS.map((p) => `<button data-from="${p.from}" data-to="${p.to}">${p.label}</button>`).join('');
+$('presets').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setYears(+b.dataset.from, +b.dataset.to); });
+$('yrTicks').innerHTML = axis.epochs.map((e) => `<span style="left:${axis.toPos(e.from)}%">${e.from}</span>`).join('');   // one tick per epoch start
+
+// ---- epoch band, era strip, pins (built from epochs.json; the slider shares their axis)
+const epochShort = (e) => e.name.split(' · ')[0];                          // "I", "II", ... "Today"
+const midYear = (from, to) => axis.toYear((axis.toPos(from) + axis.toPos(to)) / 2);
+function buildTimeline() {
+  const band = $('epBand'), strip = $('eraStrip'), pins = $('pins');
+  band.innerHTML = ''; strip.innerHTML = ''; pins.innerHTML = '';
+  for (const e of axis.epochs) {
+    const b = document.createElement('button'), c = KIND_COLOURS[e.kind] || KIND_COLOURS.quiet;
+    b.className = 'seg'; b.type = 'button'; b.dataset.epoch = e.id; b.title = e.name; b.setAttribute('aria-label', `${e.name}, ${e.from} to ${e.to}`);
+    b.style.cssText = `left:${(e.x / axis.total) * 100}%;width:calc(${(e.weight / axis.total) * 100}% - 3px);background:${c[0]};color:${c[1]};border:0.5px solid ${c[2]}`;
+    b.textContent = epochShort(e); if (b.textContent.length > 3) b.style.fontSize = '10px';          // "Today" must fit its narrow block
+    b.onclick = () => { const y = midYear(e.from, e.to); setYears(y, y); };          // tap = jump to the middle of the epoch
+    band.appendChild(b);
+  }
+  for (const r of EPOCH_DATA.eras) {
+    const b = document.createElement('button'), l = axis.toPos(r.from), w = axis.toPos(r.to) - l;
+    b.className = 'es'; b.type = 'button'; b.dataset.era = r.name; b.title = `${r.name} ${r.from}–${r.to}`; b.setAttribute('aria-label', `${r.name}, ${r.from} to ${r.to}`);
+    b.style.cssText = `left:${l}%;width:calc(${w}% - 2px);background:${(KIND_COLOURS[r.kind] || KIND_COLOURS.quiet)[2]}`;
+    b.onclick = () => { const y = midYear(r.from, r.to); setYears(y, y); };
+    strip.appendChild(b);
+  }
+  for (const m of EPOCH_DATA.markers || []) {
+    const b = document.createElement('button');
+    b.className = 'pin'; b.type = 'button'; b.style.left = axis.toPos(m.year) + '%'; b.textContent = '▲ ' + m.label; b.title = `${m.label}: ${m.year}`;
+    b.onclick = () => setYears(m.year, m.year);
+    pins.appendChild(b);
+  }
+}
+function highlightTimeline(d) {
+  document.querySelectorAll('#epBand .seg').forEach((b) => { b.style.opacity = b.dataset.epoch === d.epoch.id ? 1 : 0.45; });
+  document.querySelectorAll('#eraStrip .es').forEach((b) => { const on = b.dataset.era === d.era.name; b.style.opacity = on ? 1 : 0.35; b.style.transform = on ? 'scaleY(1.4)' : 'none'; });
+}
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const srcLinks = (urls) => (urls || []).map((u, i) => `<a class="src" href="${esc(u)}" target="_blank" rel="noopener">src${urls.length > 1 ? i + 1 : ''}</a>`).join('');
+function renderInfo(d) {
+  const { era, epoch } = d, h = d.herring, lh = d.lighthouses, m = d.marstrand;
+  $('infoHead').textContent = yFrom === yTo ? `The year ${yTo}` : `The end year ${yTo} (window ${yFrom}–${yTo})`;
+  $('infoCard').innerHTML =
+    `<div class="name">${esc(era.name)}</div>`
+    + `<div class="when">${era.from}–${era.to} · epoch ${esc(epoch.name)}${era.verify ? ' · <span class="flag">not yet source-checked</span>' : ''}</div>`
+    + `<div class="summary">${esc(era.summary)} ${srcLinks(era.sources)}</div>`
+    + (era.flavour ? `<div class="summary" style="color:var(--dim);font-style:italic">Game flavour, not history: ${esc(era.flavour)}</div>` : '')
+    + (era.designNote ? `<div class="summary" style="color:var(--dim);font-size:12px">${esc(era.designNote)}</div>` : '')
+    + `<div class="stats">`
+    + `<div><div class="k">Tone</div><div class="v">${esc(era.vibe)}</div></div>`
+    + `<div><div class="k">Season</div><div class="v">${esc(era.season)}</div></div>`
+    + `<div><div class="k">Epoch feel</div><div class="v">${esc(epoch.vibe)} · ${esc(epoch.season)}</div></div>`
+    + `<div><div class="k">Herring</div><div class="v">${h ? `Boom (${h.approx ? '~' : ''}${h.from}–${h.to})` : 'Absent'}</div></div>`
+    + `<div><div class="k">Lighthouses standing</div><div class="v">${lh.n} of ${lh.of}</div></div>`
+    + `<div><div class="k">Marstrand</div><div class="v">${m ? esc(m.label) : '–'}${m ? ' ' + srcLinks([].concat(m.source || [])) : ''}</div></div>`
+    + `</div>`
+    + `<div>${d.events.length ? d.events.map((e) => `<div class="ev${e.on ? ' on' : ''}"><b>${e.year}</b>${esc(e.text)}${e.source ? srcLinks([e.source]) : ''}</div>`).join('') : '<div class="ev">No key events listed yet for this era.</div>'}</div>`;
+  document.body.dataset.era = era.name; document.body.dataset.epoch = epoch.id;
+}
+buildTimeline();
+
+// ---------------------------------------------------------------- side panel
+$('scales').innerHTML = SCALES.map((s) => `<button data-s="${s}">1:${s}</button>`).join('');
+$('scales').addEventListener('click', (e) => { if (e.target.dataset.s) setScale(+e.target.dataset.s); });
+document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => { mode = r.value; draw(); }));
+$('chkDdb').checked = useDdb;
+$('chkDdb').addEventListener('change', (e) => { useDdb = e.target.checked; draw(); panelsYear(); });
+for (const [id, key] of [['chkSettle', 'settle'], ['chkLight', 'light'], ['chkPlaces', 'places'], ['chkRoute', 'route'], ['chkSkerries', 'skerries'], ['chkTrees', 'trees']]) {
+  $(id).addEventListener('change', (e) => { layers[key] = e.target.checked; draw(); panelsTrees(); });
+}
+$('speed').addEventListener('input', (e) => { speed = Math.max(1, +e.target.value || 6); panelsTrips(); });
+
+function panelsTrips() {
+  $('trips').innerHTML = C.routes.map((rt) => {
+    const rec = recommendScale(rt.length_m, SCALES, speed, TARGET_S);
+    return `<table><caption style="text-align:left;color:var(--dim);font-size:12px;padding-top:6px">${rt.from} → ${rt.to}, ${(rt.length_m / 1000).toFixed(1)} km real</caption>
+      <tr><th>scale</th><th>game km</th><th>time</th><th>vs 20 min</th></tr>${SCALES.map((s) => {
+      const t = tripEstimate(rt.length_m, s, speed), d = t.seconds - TARGET_S;
+      return `<tr class="${s === rec ? 'rec' : ''} ${s === S ? 'cur' : ''}"><td>1:${s}${s === rec ? ' ★' : ''}</td><td>${(t.gameMeters / 1000).toFixed(1)}</td><td>${fmtDuration(t.seconds)}</td><td>${d >= 0 ? '+' : '−'}${fmtDuration(Math.abs(d))}</td></tr>`;
+    }).join('')}</table>`;
+  }).join('');
+  const r0 = C.routes[0];
+  $('tripnote').textContent = C.routes.map((rt) => `${rt.from} → ${rt.to}: open-sea alternative ${((rt.offshoreLength_m || 0) / 1000).toFixed(1)} km; ends sit ${rt.startSnap_m} m / ${rt.endSnap_m} m off the town points (harbours are too narrow for the 100 m clearance rule).`).join(' ')
+    + ` ★ = closest to 20 min; blue bar = the scale shown. Exactly 20 min at ${speed} m/s for ${r0.from} → ${r0.to} would be 1:${(r0.length_m / (speed * TARGET_S)).toFixed(1)}.`;
+}
+function panelsScale() {
+  panelsTrips();
+  $('skerrynote').textContent = `Islets narrower than ${MIN_SKERRY_GM} game m are drawn ${MIN_SKERRY_GM} m wide (= ${MIN_SKERRY_GM * S} m real at 1:${S}; ${C.skerries.length} islets under 25 m wide in the data).`;
+  const names = C.meta.classes.map((c) => c.name).slice(1);
+  $('cover').innerHTML = '<tr><th>class</th><th>% of land</th><th>km² real</th></tr>' + names.map((n) =>
+    `<tr><td><span class="sw" style="background:rgb(${COVER_COL[n]})"></span>${n.replace('_', ' ')}</td><td>${C.meta.classPercentOfLand[n]}</td><td>${C.meta.classKm2[n]}</td></tr>`).join('') + `<tr><td>land total</td><td>100</td><td>${C.meta.landKm2}</td></tr>`;
+  const T = C.trees.totals['1:' + S];
+  $('trees').innerHTML = '<tr><th>class</th><th>per 100 m²</th><th>trees</th></tr>' + names.map((n) =>
+    `<tr><td>${n.replace('_', ' ')}</td><td>${C.trees.density[n]}</td><td>${T.byClass[n].toLocaleString()}</td></tr>`).join('') + `<tr><td><b>whole map</b></td><td></td><td><b>${T.total.toLocaleString()}</b></td></tr>`;
+  $('treebox').innerHTML = `<div class="box bad"><b>Too heavy to plant everywhere.</b> ${T.total.toLocaleString()} is ${T.overBudgetBy}× the ${C.trees.budget.toLocaleString()} budget, so trees exist only inside the boat circle (<code>treesNear</code>).</div>`;
+  panelsTrees(); panelsYear();
+}
+function panelsTrees() {
+  if (!layers.trees) { $('treecount').textContent = 'Trees and boat are switched off.'; return; }
+  const n = currentTrees().length, full = Math.round((Math.PI * DEFAULT_RADIUS * DEFAULT_RADIUS) / 100);
+  $('treecount').innerHTML = `<b>${n.toLocaleString()}</b> trees within ${DEFAULT_RADIUS} m of the boat. A completely forested circle would hold about ${full.toLocaleString()}; phone budget is ${C.trees.budget.toLocaleString()}.`;
+  document.body.dataset.trees = n;
+}
+function panelsYear() {
+  $('legend').innerHTML = 'The legend is on the map. Several phases at one year: the latest-starting wins. Villages appear from their first record; those with no known origin date are drawn at every year with a "?".';
+  const rows = settlements.map((s) => ({ s, st: stateAt(s, yTo) })).filter((r) => r.st);
+  $('setlist').innerHTML = '<tr><th>name</th><th>first</th><th>pop.</th><th>phase</th><th>conf.</th><th>src</th></tr>' + rows.map(({ s, st }) => {
+    const pop = popAt(s, yTo);
+    const ph = st.phase ? `${KIND[st.kind].glyph} ${KIND[st.kind].label} ${st.phase.from}–${st.phase.to ?? '…'}` : '–';
+    const src = s.sources.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">${i + 1}</a>`).join(' ');
+    return `<tr><td>${s.name}</td><td>${s.firstRecorded ?? 'unknown'}</td><td>${pop ? fmtPop(pop.value) + (pop.mode === 'counted' ? '' : '~') : 'est.'}</td><td style="text-align:left">${ph}</td><td>${s.confidence}</td><td>${src}</td></tr>`;
+  }).join('');
+  $('setdetails').hidden = !settlements.length;
+}
+
+// ---------------------------------------------------------------- optional data: settlements, lighthouses
+async function loadSettlements() {
+  try {
+    const r = await fetch(new URL('../data/settlements-history.json', import.meta.url));
+    if (!r.ok) return [];
+    const j = await r.json();
+    return (j.settlements || []).filter((s) => Number.isFinite(s.lat) && Number.isFinite(s.lon) && Array.isArray(s.phases));
+  } catch { return []; }
+}
+// Another agent adds `built` years to src/lighthouses.js on felix/windward-lighthouses. Until that module
+// (and the lat/lon/built fields) exist here, the layer simply stays hidden. We never copy its data.
+async function loadLighthouses() {
+  try {
+    const mod = await import('./lighthouses.js');
+    const found = [], seen = new Set();
+    const visit = (v, depth) => {
+      if (!v || typeof v !== 'object' || seen.has(v) || depth > 4) return;
+      seen.add(v);
+      if (Array.isArray(v)) { v.forEach((x) => visit(x, depth + 1)); return; }
+      const lon = v.lon ?? v.lng, lat = v.lat;
+      if (Number.isFinite(lat) && Number.isFinite(lon) && Number.isFinite(v.built)) { found.push({ name: String(v.name || v.id || 'lighthouse'), lat, lon, built: v.built }); return; }
+      Object.values(v).forEach((x) => visit(x, depth + 1));
+    };
+    Object.values(mod).forEach((x) => visit(x, 0));
+    return found.length ? found : null;
+  } catch { return null; }
+}
+
+// ---------------------------------------------------------------- start
+try {
+  C = await loadCoast(new URL('../assets/coast/', import.meta.url).href);
+  [settlements, lighthouses] = await Promise.all([loadSettlements(), loadLighthouses()]);
+  if (lighthouses) $('lblLight').hidden = false;
+  const mars = C.places.find((p) => p.name === 'Marstrand');
+  const [bi, bj] = mars ? C.toPx(mars.lon, mars.lat) : [C.width / 2, C.height / 2];
+  boat = { i: bi + 14, j: bj - 6 };                                        // just off Marstrand
+  $('loading').remove();
+  canvas.width = Math.round(canvas.clientWidth * dpr()); canvas.height = Math.round(canvas.clientHeight * dpr());
+  layoutSlider(); setScale(DEFAULT_SCALE); fit();
+  // read-only hook for browser tests and debugging: what does the info line say at a coordinate?
+  window.__coastLab = { drawnHouses: () => lastPlaced, zoom: () => zoom, cssZoom: () => cssZoom(), infoAtLonLat: (lon, lat) => infoAt(...toScreen(...lonLatToWorld(lon, lat))), scale: () => S, houses: () => document.body.dataset.houses };
+  document.body.dataset.ready = '1';
+} catch (err) {
+  $('loading').textContent = 'Could not load coast data: ' + err.message;
+  console.error(err);
+}

@@ -444,3 +444,11 @@ verdicts so far:
 Gust telegraphing (W3, per cadence decision above). Islands, claiming, scoring —
 not this stage (see AGENTS.md's Windward concept). Sail trim automation,
 if it turns out manual trim isn't fun in practice — Felix's call after playing it.
+
+## Reference labs
+
+Frozen design references in `ref/`. Look, don't edit.
+
+- `ref/epoch-timeline.html` — the epoch band and era strip (epochs drawn by weight, not to scale; markers for "first jump lands" 1745 and "you start" 1905). The live version is the top of `coast-lab.html`, fed by `data/epochs.json`.
+
+(If `felix/windward-lighthouses` has its own "Reference labs" section near the top, fold the two together on merge.)
