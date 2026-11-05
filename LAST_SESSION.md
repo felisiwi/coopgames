@@ -1,9 +1,12 @@
 # Last session
 
-**Describes `bf928f6` — branch `felix/windward-look`, 2026-11-05, not merged.**
-Windward L1: the Look Lab look is ported into the real game. Boat, houses,
-pines and props stay low-poly; islands and sea are smooth and painted.
-Felix judges on his phone: https://coopgames-git-felix-windward-look-felisiwis-projects.vercel.app/games/windward/?seed=1
+**Describes `d574f6a` — branch `felix/windward-look`, 2026-11-05, not merged.**
+Windward L1 (code `bf928f6`) ported the Look Lab look; look pass 2 (`d574f6a`)
+repaints it as a Skagen-painter palette and adds the `?tune=1` panel (sliders,
+Before/Skagen, values mirrored into the URL). Islands were dark because of
+light (three.js r155+ gives intensity/pi), so the fill went 0.45 -> 2.4.
+Felix judges on his phone: add `?seed=1&tune=1` to /games/windward/ on the
+branch preview (real URL: deployments API, see below).
 `shared/ART.md` is its own PR: #5 (`felix/art-split-style`, not merged).
 
 Where things are (why/deviations: `games/windward/DESIGN.md` "L1 port status"):
@@ -13,8 +16,8 @@ Where things are (why/deviations: `games/windward/DESIGN.md` "L1 port status"):
 - `game.js` fog and wiring; `src/settlements.js` houses prefer green
 
 Unverified (node tests only, no browser was opened):
-- Shaders parse (pure-JS parser) but no GPU has compiled them. Blank or black
-  water on the phone: start at the fragment shader in `src/water.js`.
+- Headless Chromium (swiftshader) rendered desktop + iPhone 13 with no page
+  errors, so the shaders compile; a real phone GPU is still unchecked.
 - `sun.shadow.normalBias = 0.25` in `game.js` is a guess against shadow stripes
   on smooth ground at the 10 degree sun. TODO(felix): confirm.
 - Game lighting is untouched, so ground can look darker than the lab did.
@@ -22,12 +25,14 @@ Unverified (node tests only, no browser was opened):
 
 ## Today's sessions
 
-- Windward L1: Look Lab port (this session).
+- Windward L1: Look Lab port.
+- Windward look pass 2: Skagen palette, lights, `?tune=1` (this session).
 
 ## Next
 
-1. Felix: judge the preview; likely tuning: `SLOPE_CALIBRATION` (meadow share),
-   `HAZE_*` in `src/config.js`, `WATER_LIGHT_ELEVATION_DEG` in `src/water.js`.
+1. Felix: pick a look with `?tune=1`, send the link back; bake it into
+   `LOOK_*` and the lighting keys in `src/config.js`. Also tunable there:
+   `SLOPE_CALIBRATION`, `HAZE_*`, `WATER_LIGHT_ELEVATION_DEG`.
 2. Merge `felix/windward-look` then PR #5 (a trial merge into `main` at
    f3f1546 is clean). Remove the `../coopgames-windward-look` and
    `../coopgames-art-split` worktrees only with Felix's OK.
