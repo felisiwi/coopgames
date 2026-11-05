@@ -1,5 +1,5 @@
 {
- "_note": "Windward epochs/eras DRAFT (2026-11-05, mission control with Felix). Single source for the epoch timeline and, later, the coast lab and game. Dates marked approx are approximate; 'verify' items were not source-checked yet. 2026-11-05 rev 2: Herring and Light split into New Crown / The Silver Sea / Light and Stone (Felix). 2026-11-05 rev 3 (pass 5): every 'verify' item fact-checked against fetched pages; sources added; unsupported wording corrected or moved to 'flavour'; marstrandStatus added. Record: data/epochs-factcheck.md.",
+ "_note": "Windward epochs/eras DRAFT (2026-11-05, mission control with Felix). Single source for the epoch timeline and, later, the coast lab and game. Dates marked approx are approximate; 'verify' items were not source-checked yet. 2026-11-05 rev 2: Herring and Light split into New Crown / The Silver Sea / Light and Stone (Felix). 2026-11-05 rev 3 (pass 5): every 'verify' item fact-checked against fetched pages; sources added; unsupported wording corrected or moved to 'flavour'; marstrandStatus added. Record: data/epochs-factcheck.md. | merged 2026-11-05 with felix/game-design: seasons, markers, flow and firstRelease from Felix's decisions; fact-checked content from felix/windward-real-coast.",
  "herringPeriods": [
   {
    "from": 1556,
@@ -93,12 +93,16 @@
  ],
  "markers": [
   {
-   "year": 1745,
+   "year": 1700,
    "label": "first jump lands"
   },
   {
    "year": 1905,
-   "label": "you start"
+   "label": "time warp lands"
+  },
+  {
+   "year": 2015,
+   "label": "you start (casual)"
   }
  ],
  "epochs": [
@@ -110,7 +114,7 @@
    "weight": 12,
    "kind": "med",
    "vibe": "Mythic, raw",
-   "season": "Summer"
+   "season": "Autumn → winter"
   },
   {
    "id": "new-crown",
@@ -120,7 +124,7 @@
    "weight": 12,
    "kind": "quiet",
    "vibe": "Poor, unsettled, hopeful",
-   "season": "Spring/summer"
+   "season": "Spring → summer"
   },
   {
    "id": "silver-sea",
@@ -131,7 +135,7 @@
    "kind": "boom",
    "release": "first (proposed)",
    "vibe": "Rich, rowdy, greedy",
-   "season": "Winter"
+   "season": "Summer → late summer → autumn"
   },
   {
    "id": "light-stone",
@@ -141,7 +145,7 @@
    "weight": 18,
    "kind": "light",
    "vibe": "Loss, then hope, then bustle",
-   "season": "Winter → spring → winter"
+   "season": "Late autumn → winter → late winter"
   },
   {
    "id": "engines",
@@ -151,7 +155,7 @@
    "weight": 14,
    "kind": "war",
    "vibe": "Sly, tense",
-   "season": "Autumn/winter"
+   "season": "A long, cold spring"
   },
   {
    "id": "summer",
@@ -183,7 +187,7 @@
    "summary": "Bohuslän is part of Viken, the Norwegian realm. Bronze Age rock carvings (about 1700-500 BCE) are already ancient.",
    "events": [],
    "vibe": "Raw, mythic, open sea",
-   "season": "Summer",
+   "season": "Autumn",
    "sources": [
     "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n",
     "https://www.vastsverige.com/en/tanum/produkter/tanum-world-heritage/"
@@ -213,7 +217,7 @@
     ]
    ],
    "vibe": "Old, slow, stony",
-   "season": "Summer",
+   "season": "Late autumn",
    "sources": [
     "https://snl.no/Marstrand",
     "https://www.ne.se/uppslagsverk/encyklopedi/l%C3%A5ng/bohus-f%C3%A4stning"
@@ -258,7 +262,7 @@
     ]
    ],
    "vibe": "Contested, wary",
-   "season": "Winter fishing",
+   "season": "Winter",
    "sources": [
     "https://digitaltmuseum.org/021029238579",
     "https://sv.wikipedia.org/wiki/Bohusl%C3%A4ns_historia"
@@ -290,10 +294,14 @@
      1660,
      "~ Short herring period (to ~1680)",
      "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/"
+    ],
+    [
+     1700,
+     "~ First jump lands you here"
     ]
    ],
    "vibe": "Unsettled",
-   "season": "Summer",
+   "season": "Spring",
    "sources": [
     "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n",
     "https://sv.wikipedia.org/wiki/Marstrand"
@@ -324,7 +332,7 @@
     ]
    ],
    "vibe": "Poor, hopeful",
-   "season": "Spring/summer"
+   "season": "Summer"
   },
   {
    "name": "The silver comes",
@@ -348,7 +356,7 @@
     ]
    ],
    "vibe": "Rising, busy",
-   "season": "Winter"
+   "season": "Summer"
   },
   {
    "name": "Honour and Life",
@@ -383,7 +391,7 @@
     ]
    ],
    "vibe": "Rich, rowdy, mischievous",
-   "season": "Winter, summer trading"
+   "season": "Late summer"
   },
   {
    "name": "Last silver",
@@ -402,7 +410,7 @@
     ]
    ],
    "vibe": "Anxious, stormy",
-   "season": "Late autumn"
+   "season": "Autumn"
   },
   {
    "name": "Empty harbours",
@@ -421,7 +429,7 @@
     ]
    ],
    "vibe": "Loss, melancholy",
-   "season": "Winter"
+   "season": "Late autumn, last leaves falling"
   },
   {
    "name": "Lights go up",
@@ -448,7 +456,7 @@
     ]
    ],
    "vibe": "Hope, safer seas",
-   "season": "Spring"
+   "season": "Crisp winter"
   },
   {
    "name": "The second silver",
@@ -471,11 +479,11 @@
     ],
     [
      1905,
-     "You start here"
+     "Time warp lands you here"
     ]
    ],
    "vibe": "Industrial bustle",
-   "season": "Winter"
+   "season": "Late winter → early spring"
   },
   {
    "name": "Motor and canning",
@@ -485,7 +493,7 @@
    "summary": "Herring boats have engines by 1914; canneries are an established industry (Hälleviksstrand's starts in 1905); Swedish emigration to America stays high until the First World War nearly stops it.",
    "events": [],
    "vibe": "Change, engines",
-   "season": "Spring",
+   "season": "Long, cold spring",
    "sources": [
     "https://runeberg.org/sweden14/2/0242.html",
     "https://www.vastsverige.com/orust/produkter/halleviksstrand/",
@@ -511,7 +519,7 @@
     ]
    ],
    "vibe": "Sly, night runs",
-   "season": "Autumn nights",
+   "season": "Long, cold spring",
    "designNote": "The 1917-1938 span is a design choice. The sources found cover the bans, the motbok and Strömstad smuggling in 1919-1923 (a local-history blog); no source was found for the 1930s.",
    "sources": [
     "https://sv.wikipedia.org/wiki/Motbok",
@@ -537,7 +545,7 @@
     ]
    ],
    "vibe": "Tense, watchful",
-   "season": "Winter",
+   "season": "Long, cold spring",
    "sources": [
     "https://sv.wikipedia.org/wiki/Sverige_under_andra_v%C3%A4rldskriget",
     "https://www.gu.se/nyheter/norska-flyktingar-forandrade-den-svenska-flyktingpolitiken"
@@ -674,5 +682,20 @@
     "https://www.bohuslansmuseum.se/samlingar-och-historia/gamla-historiska-artiklar/badorten-marstrand/"
    ]
   }
- ]
+ ],
+ "seasonArc": "Felix 2026-11-05: seasons run as one year across the timeline — autumn to winter (Kings and raiders), spring (New Crown) to summer and autumn (Silver Sea), late autumn and winter (Light and Stone), a long cold spring (Engines and wars), then summer (Summer guests, Today). Season = mood of the era; the historical herring fishery was a winter fishery (see GAME-DESIGN.md).",
+ "flow": "Felix 2026-11-05: start casual on Today's coast → time warp to ~1905 (end of IV) → first jump to the end of New border (~1700), so soon after warming up the 1706 crown-land ordinance lets you claim and build. Eras unlock spaced out across the timeline, not in order, so moving back and forth stays engaging.",
+ "firstRelease": {
+  "note": "Q1 (Felix 2026-11-05): built for real first",
+  "eras": [
+   "New border (end, ~1700)",
+   "Crown shores",
+   "The silver comes",
+   "Honour and Life"
+  ],
+  "plus": [
+   "Today's coast",
+   "~1905 opening"
+  ]
+ }
 }
