@@ -8,8 +8,13 @@ export const TOSS_AT_S = 1.8; // and tosses the fish this long after the bell
 // Chosen to read against the varnished-wood deck (0xb58a5a) from the camera above: not browns.
 export const FISH_COLORS = { mackerel: 0x2f7d95, herring: 0xe6eef2, cod: 0x8fb08a, flounder: 0xe7d8b0 };
 // Where fish lie on the deck, in boat-local metres (+Z is the bow, the cockpit is aft of the mast).
-// Two rows in the cockpit, out toward the sides where the boom and sail do not hide them from the camera above.
-export const DECK_SLOTS_LOCAL = [[-0.55, 0.5, -2.0], [0.55, 0.5, -2.0], [-0.55, 0.5, -0.4], [0.55, 0.5, -0.4]];
+// Where fish lie, in boat-local metres (+Z is the bow), per boat. Koster (src/boats.js, deck at y ~ 0.5): clear of its crate (0, 2.1),
+// barrel (0.4, -0.25), chest (0, -2.7), the stern lantern's light pool and the boom. Eka: on the floorboards between its items.
+export const DECK_SLOTS = {
+  koster: [[-0.7, 0.52, -1.3], [0.85, 0.52, -1.6], [-0.7, 0.52, 0.9], [0.85, 0.52, 0.9]],
+  eka: [[-0.3, 0.16, 1.2], [0.3, 0.16, 1.2], [-0.3, 0.16, -0.6], [0.3, 0.16, -0.6]],
+};
+export const DECK_SLOTS_LOCAL = DECK_SLOTS.koster;
 const FISH_SCALE = 1.7; // fish are exaggerated like everything else here (a boat is 6 m, a cottage 10 m): readable from the camera
 const PERSON_SCALE = 1.8;
 
@@ -34,7 +39,8 @@ export function tossPosition(from, to, t, arcM = 3) {
   return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t + 4 * arcM * t * (1 - t), z: from.z + (to.z - from.z) * t };
 }
 
-export function createHarbourMoment({ THREE, scene, boatGroup, heightAt, deck, audio }) {
+export function createHarbourMoment({ THREE, scene, boatGroup, heightAt, deck, audio, boatType = 'koster' }) {
+  const SLOTS = DECK_SLOTS[boatType] || DECK_SLOTS.koster;
   const mat = (c) => new THREE.MeshLambertMaterial({ color: c, flatShading: true });
 
   // the person on the shore
@@ -69,7 +75,7 @@ export function createHarbourMoment({ THREE, scene, boatGroup, heightAt, deck, a
   };
 
   // fish lying on the deck, one per slot, riding with the boat
-  const slots = DECK_SLOTS_LOCAL.map(([x, y, z], i) => {
+  const slots = SLOTS.map(([x, y, z], i) => {
     const holder = new THREE.Group();
     holder.position.set(x, y, z);
     holder.rotation.y = (i % 2 ? 0.3 : -0.3) + i * 0.15; // each lies a little differently
@@ -127,7 +133,7 @@ export function createHarbourMoment({ THREE, scene, boatGroup, heightAt, deck, a
         const from = spot ? { x: spot.x, y: spot.y + handLocal.y * PERSON_SCALE, z: spot.z } : { x: boatGroup.position.x + 6, y: 4, z: boatGroup.position.z + 6 };
         const mesh = makeFish(pending.gift.kind);
         scene.add(mesh);
-        const slotWorld = boatGroup.localToWorld(tmp.set(...DECK_SLOTS_LOCAL[pending.slot]));
+        const slotWorld = boatGroup.localToWorld(tmp.set(...SLOTS[pending.slot]));
         const dist = Math.hypot(slotWorld.x - from.x, slotWorld.z - from.z);
         flying.push({ mesh, from, slot: pending.slot, startS: nowS, dur: Math.min(2.2, Math.max(0.8, dist / 10)) });
         pending = null;
@@ -135,7 +141,7 @@ export function createHarbourMoment({ THREE, scene, boatGroup, heightAt, deck, a
       for (let i = flying.length - 1; i >= 0; i--) {
         const f = flying[i];
         const t = (nowS - f.startS) / f.dur;
-        const target = boatGroup.localToWorld(tmp.set(...DECK_SLOTS_LOCAL[f.slot]));
+        const target = boatGroup.localToWorld(tmp.set(...SLOTS[f.slot]));
         if (t >= 1) {
           scene.remove(f.mesh);
           flying.splice(i, 1);

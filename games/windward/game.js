@@ -9,7 +9,7 @@ import * as THREE from './vendor/three/three.module.js';
 import { CONFIG } from './src/config.js';
 import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './src/sail.js';
 import { initialWind, createWindController, stepWindController } from './src/wind.js';
-import { createBoatMesh, loadBoatModel } from './src/boat.js';
+import { createBoatMesh, loadBoatModel } from './src/boats.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud, setLegendVisible, setNotice } from './src/hud.js';
 import { spawnPose } from './src/spawn.js';
@@ -34,6 +34,7 @@ import { createDebugOverlay } from './src/debug-overlay.js';
 import { stepAlongShore, shallowFactor, SHORE_BRAKE } from './src/shore.js';
 import { createNameBook } from './src/names.js';
 import { createNameLabels } from './src/name-labels.js';
+import { parseGameStyle } from './src/terrain-style.js';
 import { createArrivals, giftFor } from './src/arrival.js';
 import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
@@ -99,7 +100,7 @@ export default function start(args) {
   };
   const num = (k) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
   return import('./src/coast-world.js')
-    .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
+    .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, style: parseGameStyle(window.location.search), at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
     .then((coast) => { note.remove(); window.__coastReport = coast.report; startGame({ ...args, net }, coast); })
     .catch((err) => { note.textContent = `the coast failed to load: ${err && err.message}`; console.error(err); window.__coastError = String((err && err.stack) || err); });
 }
@@ -121,7 +122,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   const isPhone = wantsPhoneControls();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isPhone ? CONFIG.PHONE_MAX_PIXEL_RATIO : Infinity));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoftShadowMap is deprecated in this three.js (it logged a warning and fell back to this)
 
   const scene = new THREE.Scene();
   const sky = createSky();
@@ -309,6 +310,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       clearTimeout(repaintTimer);
       repaintTimer = setTimeout(() => {
         refreshPalette();
+        coast?.terrainStyle.style.refreshPalette(); // the crisp-zone material reads the palette too
         for (const g of islandGroups) recolorTerrain(g.children[0]);
       }, 200);
     }
@@ -323,7 +325,11 @@ function startGame({ canvas, net, seed, role }, coast) {
   const selfColor = role === 'host' ? 0xffcc66 : 0x66ccff;
   const otherColor = role === 'host' ? 0x66ccff : 0xffcc66;
 
-  const selfBoat = createBoatMesh(selfColor);
+  // Boats (src/boats.js, docs/boat-lab/README.md): today = Svalan, granddad's koster (gaff + jib, deck items, wear 0.8: the
+  // defaults). The player colour is the masthead pennant only. ?boat=eka = the ~1700 eka (rust sail) until the jump exists.
+  const boatType = new URLSearchParams(window.location.search).get('boat') === 'eka' ? 'eka' : 'koster';
+  const boatOptions = boatType === 'eka' ? { type: 'eka', sailTone: 'rust' } : { type: 'koster' };
+  const selfBoat = createBoatMesh(selfColor, boatOptions);
   scene.add(selfBoat.group);
   const selfWake = createWake();
   scene.add(selfWake.group);
@@ -349,6 +355,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     window.__names = nameBook; // headless checks
     window.__self = self;
     window.__labels = nameLabels;
+    window.__coastStyle = coast.terrainStyle;
     window.__coastHeight = coast.heightAt;
   }
   // Stage 1b, the lure: arriving slowly in a harbour (a bell, a wave, a fish on deck), small life on the water.
@@ -359,7 +366,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   audio?.armOnFirstGesture();
   const arrivals = lureOn ? createArrivals(coast.names) : null;
   const deck = lureOn ? createDeck() : null;
-  const moment = lureOn ? createHarbourMoment({ THREE, scene, boatGroup: selfBoat.group, heightAt: coast.heightAt, deck, audio }) : null;
+  const moment = lureOn ? createHarbourMoment({ THREE, scene, boatGroup: selfBoat.group, heightAt: coast.heightAt, deck, audio, boatType }) : null;
   const life = lureOn
     ? createLife({
       THREE, scene, heightAt: coast.heightAt, places: coast.names, lights: coast.lights,
@@ -447,7 +454,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       other.heading = msg.heading;
       other.speed = msg.speed;
       if (!otherBoat) {
-        otherBoat = createBoatMesh(otherColor);
+        otherBoat = createBoatMesh(otherColor, boatOptions);
         scene.add(otherBoat.group);
         otherWake = createWake();
         scene.add(otherWake.group);

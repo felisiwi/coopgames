@@ -7,6 +7,7 @@ import {
   slopeTan, slopeTanFromDeg, steepAmount, applySteep, terraceParts, riserAmount, riserFacing, riserWidthPx, terraceFade, lineAmount,
   STYLE_DEFAULT, STYLE_PRESETS, STYLE_KEYS, parseStyleParams, styleToSearch, presetMatching, cleanStyleValue,
   zonePalette, createTerrainStyle, attachTerrainStyle, TERRACE_ANCHOR_M,
+  STYLE_GAME, parseGameStyle, makeSlopeAt, makeGraniteTest,
 } from './terrain-style.js';
 import { PALETTE } from './island-look.js';
 
@@ -310,6 +311,30 @@ const NAMES = ['water', 'bare_rock', 'heath', 'meadow', 'scrub', 'forest', 'vill
   assert.equal(m1.material, hook.style.material); assert.equal(m2.material, hook.style.material);
   hook.apply(STYLE_PRESETS.current);
   assert.equal(m2.material, original);
+}
+
+// ---- stage 1c: the game's style, and trees keeping off painted granite ----
+{
+  assert.deepEqual(STYLE_GAME, { crisp: 1, soft: 0.82, rock: 1, slope: 55, terrace: 0, step: 2, line: 0, grain: 1 }, "Felix's values: crisp 1 soft 0.82 rock 1 slope 55 grain 1, terraces and lines off");
+  assert.deepEqual(parseGameStyle(''), STYLE_GAME, 'no params: the game style');
+  assert.deepEqual(parseGameStyle('?preset=current'), STYLE_DEFAULT, '?preset=current is the old per-vertex look (A/B)');
+  assert.equal(parseGameStyle('?soft=0.3').soft, 0.3, 'single keys still tune it');
+  assert.equal(parseGameStyle('?soft=0.3').slope, 55, 'and the rest stay Felix\'s');
+  assert.equal(parseGameStyle('?preset=terraced').terrace, 1);
+
+  // a 3 x 3 slope map: a steep middle (tan 55 deg = 1.43), flat elsewhere; window starts at (100, 200), 2 m cells
+  const world = { nx: 3, nz: 3, pxM: 2, x0: 100, z0: 200 };
+  const slope = new Float32Array([0, 0, 0, 0, 2.0, 0, 0, 0, 0]);
+  const at = makeSlopeAt(slope, world);
+  near(at(103, 203), 2.0); // the centre cell's middle
+  near(at(101, 201), 0); // a flat corner cell's middle
+  assert.ok(at(102, 203) > 0.5 && at(102, 203) < 2.0, 'bilinear between cells');
+  assert.equal(at(50, 50), 0, 'outside the window: flat');
+  const granite = makeGraniteTest(at, { rock: 1, slope: 55, soft: 0.82 });
+  assert.equal(granite(103, 203), true, 'steep ground is granite');
+  assert.equal(granite(101, 201), false, 'flat ground is not');
+  assert.equal(makeGraniteTest(at, { rock: 0, slope: 55, soft: 0.82 })(103, 203), false, 'rock rule off: nothing is granite (the old look keeps its trees)');
+  assert.equal(makeGraniteTest(at, { rock: 1, slope: 70, soft: 0 })(103, 203), false, 'a gentler slope than the threshold stays green');
 }
 
 console.log('terrain-style.test.js: all ok');

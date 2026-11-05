@@ -205,6 +205,9 @@ export const STYLE_SPECS = {
   grain: { type: 'bool' },
 };
 export const STYLE_KEYS = Object.keys(STYLE_SPECS);
+// What the GAME uses (Felix, 2026-11-05, from terrain-lab): crisp zones with soft edges, granite only on the steepest
+// ground (slope = the slider max), grain on, no terraces, no edge lines. ?preset=current gives the old per-vertex paint.
+export const STYLE_GAME = { ...STYLE_DEFAULT, crisp: 1, soft: 0.82, rock: 1, slope: 55, grain: 1 };
 const CRISP = { ...STYLE_DEFAULT, crisp: 1 };
 const ROCKS = { ...CRISP, rock: 1 };
 const TERRACED = { ...ROCKS, terrace: 1 };
@@ -227,9 +230,9 @@ export function cleanStyleValue(key, v) {
 }
 
 // ?preset=<id> sets a baseline; any individual key then overrides it. Unknown or bad values are ignored.
-export function parseStyleParams(search) {
+export function parseStyleParams(search, base = STYLE_DEFAULT) {
   const params = new URLSearchParams(search);
-  const out = { ...STYLE_DEFAULT, ...(STYLE_PRESETS[params.get('preset')] || {}) };
+  const out = { ...base, ...(STYLE_PRESETS[params.get('preset')] || {}) };
   for (const key of STYLE_KEYS) {
     if (!params.has(key)) continue;
     const v = cleanStyleValue(key, params.get(key));
@@ -237,6 +240,9 @@ export function parseStyleParams(search) {
   }
   return out;
 }
+
+// The game's version: Felix's values unless the link says otherwise (?preset=, or single keys like ?soft=0.3).
+export const parseGameStyle = (search) => parseStyleParams(search, STYLE_GAME);
 
 export function presetMatching(values) {
   for (const [id, p] of Object.entries(STYLE_PRESETS)) if (STYLE_KEYS.every((k) => Math.abs(p[k] - values[k]) < 1e-6)) return id;
@@ -420,7 +426,8 @@ export function createTerrainStyle(world, { passes = ZONE_SMOOTH_PASSES } = {}) 
   texture.colorSpace = THREE.NoColorSpace;
   texture.needsUpdate = true;
   // Slope map: one half-float per cell. A row is nx * 2 bytes, not a multiple of 4 for odd nx, so tell WebGL (default 4).
-  const slopeTexture = new THREE.DataTexture(bakeSlopeMap(world.H, world.nx, world.nz, world.pxM), world.nx, world.nz, THREE.RedFormat, THREE.HalfFloatType);
+  const slopeData = bakeSlopeMap(world.H, world.nx, world.nz, world.pxM);
+  const slopeTexture = new THREE.DataTexture(slopeData, world.nx, world.nz, THREE.RedFormat, THREE.HalfFloatType);
   slopeTexture.magFilter = THREE.LinearFilter;
   slopeTexture.minFilter = THREE.LinearFilter;
   slopeTexture.generateMipmaps = false;
@@ -477,7 +484,33 @@ export function createTerrainStyle(world, { passes = ZONE_SMOOTH_PASSES } = {}) 
     material.color.setScalar(CONFIG.LOOK_ISLAND_BRIGHTNESS);
   }
   setStyle(STYLE_DEFAULT);
-  return { material, texture, slopeTexture, setStyle, refreshPalette, bakeMs, dispose: () => { texture.dispose(); slopeTexture.dispose(); material.dispose(); } };
+  const slopeAt = makeSlopeAt(slopeData, world);
+  return { material, texture, slopeTexture, slopeAt, setStyle, refreshPalette, bakeMs, dispose: () => { texture.dispose(); slopeTexture.dispose(); material.dispose(); } };
+}
+
+// Bilinear slope (rise/run) at game metres from the baked slope map, the same numbers the shader reads. Outside the window: 0.
+export function makeSlopeAt(slope, world) {
+  const { nx, nz, pxM, x0, z0 } = world;
+  return (x, z) => {
+    const fx = (x - x0) / pxM - 0.5;
+    const fz = (z - z0) / pxM - 0.5;
+    if (fx < 0 || fz < 0 || fx > nx - 1 || fz > nz - 1) return 0;
+    const a = Math.min(nx - 2, Math.floor(fx));
+    const b = Math.min(nz - 2, Math.floor(fz));
+    const u = fx - a;
+    const v = fz - b;
+    const k = b * nx + a;
+    return (slope[k] * (1 - u) + slope[k + 1] * u) * (1 - v) + (slope[k + nx] * (1 - u) + slope[k + nx + 1] * u) * v;
+  };
+}
+
+// "Is (x, z) painted granite by the steep-ground rule?": the CPU twin of the shader's rule (rock on, slope above the
+// threshold, with the soft edge). Trees use it so nothing grows on bare painted rock. values: { rock, slope, soft }.
+export function makeGraniteTest(slopeAt, values) {
+  if (!values.rock) return () => false;
+  const thr = slopeTanFromDeg(values.slope);
+  const hw = slopeHalfWidth(values.soft);
+  return (x, z) => steepAmount(slopeAt(x, z), thr, hw) > 0.5;
 }
 
 // The one call the game needs: swaps the material on every terrain mesh between the current per-vertex paint
@@ -494,5 +527,8 @@ export function attachTerrainStyle(terrain, world, values = STYLE_DEFAULT, opts 
     for (const mesh of meshes) mesh.material = m;
   }
   apply(values);
-  return { apply, style, meshes };
+  // Where the current style paints granite (for trees); rebuilt when apply() changes the style.
+  let granite = makeGraniteTest(style.slopeAt, values);
+  const hook = { apply: (v) => { granite = makeGraniteTest(style.slopeAt, v); apply(v); }, style, meshes, isGranite: (x, z) => granite(x, z) };
+  return hook;
 }

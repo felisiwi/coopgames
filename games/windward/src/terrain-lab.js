@@ -29,7 +29,7 @@ async function main() {
   const isPhone = window.matchMedia?.('(pointer: coarse)').matches ?? false;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isPhone ? CONFIG.PHONE_MAX_PIXEL_RATIO : Infinity));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoftShadowMap is deprecated in this three.js
 
   const scene = new THREE.Scene();
   const sky = createSky();
