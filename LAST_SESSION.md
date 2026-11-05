@@ -40,6 +40,8 @@ solved, facet rule, lab slider, URL overrides).
   coast-lab.html, preview only; see games/windward/assets/coast/SOURCES.md.
 - Windward real coast pass 2 (same branch): map south to Gottskär (two tiles, 5.9 MB), treesNear(),
   settlements-history.json + year slider in coast-lab.html; not merged.
+- Windward real coast pass 3 (same branch): map north to Koster (6.8 MB), population houses by year
+  (SCB CC0 + sourced rows), better settlement sources; not merged.
 
 ## Next
 

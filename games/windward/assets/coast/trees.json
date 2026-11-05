@@ -11,46 +11,46 @@
  "budget": 3000,
  "totals": {
   "1:6": {
-   "total": 260886,
+   "total": 379252,
    "byClass": {
     "bare_rock": 0,
-    "heath": 4719,
-    "meadow": 2253,
-    "scrub": 10350,
-    "forest": 240507,
-    "village": 3057
+    "heath": 6070,
+    "meadow": 3125,
+    "scrub": 21177,
+    "forest": 345639,
+    "village": 3241
    },
-   "landKm2Game": 54.25,
-   "overBudgetBy": 87,
-   "densityScaleToFitBudget": 0.0115
+   "landKm2Game": 75.76,
+   "overBudgetBy": 126.4,
+   "densityScaleToFitBudget": 0.0079
   },
   "1:8": {
-   "total": 146748,
+   "total": 213330,
    "byClass": {
     "bare_rock": 0,
-    "heath": 2655,
-    "meadow": 1267,
-    "scrub": 5822,
-    "forest": 135285,
-    "village": 1719
+    "heath": 3415,
+    "meadow": 1758,
+    "scrub": 11912,
+    "forest": 194422,
+    "village": 1823
    },
-   "landKm2Game": 30.52,
-   "overBudgetBy": 48.9,
-   "densityScaleToFitBudget": 0.0204
+   "landKm2Game": 42.61,
+   "overBudgetBy": 71.1,
+   "densityScaleToFitBudget": 0.0141
   },
   "1:10": {
-   "total": 93918,
+   "total": 136531,
    "byClass": {
     "bare_rock": 0,
-    "heath": 1699,
-    "meadow": 811,
-    "scrub": 3726,
-    "forest": 86582,
-    "village": 1100
+    "heath": 2185,
+    "meadow": 1125,
+    "scrub": 7624,
+    "forest": 124430,
+    "village": 1167
    },
-   "landKm2Game": 19.53,
-   "overBudgetBy": 31.3,
-   "densityScaleToFitBudget": 0.0319
+   "landKm2Game": 27.27,
+   "overBudgetBy": 45.5,
+   "densityScaleToFitBudget": 0.022
   }
  },
  "viewDisc": {

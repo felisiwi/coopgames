@@ -1,5 +1,5 @@
 {
- "about": "Fishing villages and towns on the Coast Lab map, with SOURCED phases for the lab's year slider (1700-2025). Written by hand from fetched pages; nothing here comes from memory.",
+ "about": "Fishing villages and towns on the Coast Lab map, with SOURCED phases and population counts for the lab's year slider (1700-2025). Written by hand from fetched pages; nothing here comes from memory.",
  "generated": "2026-11-05",
  "kinds": [
   "hamlet",
@@ -9,37 +9,61 @@
   "resort"
  ],
  "confidenceKey": {
-  "high": "a museum, heritage-agency or municipality page states the year",
-  "medium": "sv.wikipedia or a tourism page states the year",
-  "low": "a decade or century only, years borrowed from the regional period, population-table reading, or the page flags its own claim as unsourced. An entry carries its weakest fact."
+  "high": "a museum, heritage-agency or municipal document states the year(s) for the place",
+  "medium": "sv.wikipedia or a tourism site states the year for the place; OR a museum/municipal source says the place took part in a named period and a museum gives that period's years",
+  "low": "a decade or century only, years borrowed from the regional period on a weaker statement, a reading of population numbers, or the page flags its own claim as unsourced. An entry carries its weakest dated fact."
  },
- "phaseRule": "At a given year the phase that covers it is shown; if several cover it, the one with the latest \"from\" wins. \"to\": null means no end year is stated (shown through 2025). A place is hidden before firstRecorded; with firstRecorded null it is drawn at every year as an outlined marker. Years with no phase show as plain \"settled\" (a display default, not data).",
+ "phaseRule": "At a given year the phase that covers it is shown; if several cover it, the one with the latest \"from\" wins. \"to\": null means no end year is stated (shown through 2025). A place is hidden before firstRecorded; with firstRecorded null it is drawn at every year. Years with no phase show as plain \"settled\" (a display default, not data).",
+ "populationRule": "population[] holds COUNTED observations only. At a year the lab uses the exact count, a straight-line interpolation between two counts at most 60 years apart, or the nearest count within 15 years; otherwise the house is drawn as an outline sized by its phase (\"estimated\"). Counts differ in what they measure (see each row's \"counts\" and the entry's \"parish.mapping\"); series have boundary breaks, noted in the rows.",
+ "populationSources": {
+  "scb": {
+   "what": "Statistics Sweden (SCB) Folkmängd per tätort, 1960-2023, read by POST from the PxWeb API; stored in tools/data/scb-tatort-population.json",
+   "licence": "CC0 1.0",
+   "url": "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+  },
+  "wikipedia": {
+   "what": "Figures as printed on sv.wikipedia (each row cites its page; \"note\" gives the upstream source it names: SCB småorter/islands, Folkräkningen 1900, Nordisk Familjebok, Hansson 1983)",
+   "licence": "text CC BY-SA 4.0; the figures are facts",
+   "url": "https://sv.wikipedia.org"
+  },
+  "ddbRestricted": {
+   "what": "Rows tagged licence \"ddb-restricted\" come from Tabellverket / the Demographic Data Base (Umeå), as printed on sv.wikipedia. Their terms forbid bulk download into your own database and commercial use. Kept as a handful of individually cited figures for a non-commercial preview. TODO(felix): confirm with CEDAR (Umeå) before any commercial release, or drop these rows (the lab has a switch).",
+   "licence": "restricted",
+   "url": "https://www.umu.se/en/centre-for-demographic-and-ageing-research/infrastructure-at-cedar/open-data/tabverk-on-the-web"
+  }
+ },
  "herringPeriods": {
-  "note": "Regional periods for all of Bohuslän; per-place phases above copy these years only where a source about that place says it took part.",
+  "note": "Regional periods for all of Bohuslän; per-place phases copy these years only where a source about that place says it took part.",
   "list": [
    {
     "from": 1747,
     "to": 1809,
     "label": "the great herring period",
+    "confidence": "high",
     "sources": [
+     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+     "https://www.kungalv.se/contentassets/4202e7d5d8114f149113dce49275ee7f/kulturmiljounderlag-2014.pdf",
      "https://sv.wikipedia.org/wiki/Sillperiod",
      "https://www.herripedia.com/bohuslan/"
     ],
     "variants": [
-     "1747-1808: vastsverige.com Uddevalla page, sv.wikipedia Marstrand, Rörö"
+     "1747-1808: sv.wikipedia Marstrand, Rörö; vastsverige.com Uddevalla page"
     ]
    },
    {
     "from": 1877,
     "to": 1906,
     "label": "the later herring period",
+    "confidence": "high",
     "sources": [
+     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+     "https://www.kungalv.se/contentassets/4202e7d5d8114f149113dce49275ee7f/kulturmiljounderlag-2014.pdf",
      "https://sv.wikipedia.org/wiki/Sillperiod",
      "https://www.herripedia.com/bohuslan/"
     ],
     "variants": [
      "1877-1900: sv.wikipedia Klädesholmen",
-     "1878-1898: vastsverige.com Uddevalla page, sv.wikipedia Marstrand"
+     "1878-1898: vastsverige.com Uddevalla page"
     ]
    }
   ]
@@ -51,26 +75,114 @@
    "lon": 11.22612,
    "osm": "node/30903121",
    "firstRecorded": 1594,
-   "firstRecordedNote": "\"Första gången Smögen nämndes i litteraturen var 1594\" (vastsverige.com)",
+   "firstRecordedNote": "\"Första gången Smögen nämndes i litteraturen var 1594\" (vastsverige.com).",
+   "firstRecordedSrc": 1,
    "phases": [
     {
      "from": 1900,
      "to": null,
      "kind": "resort",
-     "note": "Hotell Smögens Hafvsbad completed 1900; summer guests came for seaweed baths. End of the resort phase not stated.",
+     "note": "Hotell Smögens Hafvsbad completed 1900; summer guests came for seaweed baths. No end year stated.",
      "confidence": "medium",
      "src": [
-      0
+      1
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1900,
+     "value": 1113,
+     "counts": "municipalsamhälle (\"Befolkning runt ett municipalsamhälle 1900\")",
+     "src": 0,
+     "note": "upstream: Folkräkningen 1900"
+    },
+    {
+     "year": 1960,
+     "value": 1307,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 1369,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 1375,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 1537,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 1588,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 1662,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 1604,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 1514,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 1437,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 1329,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 1292,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 1280,
+     "counts": "tätort (SCB)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Kungshamns socken",
+    "mapping": "the village lies in this parish; counts are for the Smögen locality, not the parish",
+    "src": 0
+   },
    "sources": [
+    "https://sv.wikipedia.org/wiki/Sm%C3%B6gen",
     "https://www.vastsverige.com/sotenas/artiklar/smogen/",
-    "https://sv.wikipedia.org/wiki/Sm%C3%B6gen"
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "medium",
    "notes": [
-    "Granite quarrying \"tog fart under 1800-talets slut\" (century only, left out)."
+    "Granite quarrying \"tog fart under 1800-talets slut\": century only, left out. No place-specific herring years found."
    ]
   },
   {
@@ -80,12 +192,13 @@
    "osm": "node/29689990",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "Place page: the great herring period of the 1700s gave permanent settlement. Years are the regional period.",
+     "note": "Place page: permanent settlement came with \"den stora sillperioden under 1700-talet\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "low",
      "src": [
       0,
@@ -96,20 +209,239 @@
      "from": 1943,
      "to": null,
      "kind": "canning/industry",
-     "note": "Abba's whole production moved to Rösholmen in 1943 (Munkens cannery was there earlier, year not stated); moved to Hagaberg, Kungshamn, in the early 1970s.",
+     "note": "Abba's whole production moved to Rösholmen in 1943 (Munkens cannery was there before, year not stated); moved to Hagaberg, Kungshamn, in the early 1970s.",
      "confidence": "medium",
      "src": [
       0
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1960,
+     "value": 2787,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 2782,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 2866,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 2941,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 3066,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 3167,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 3144,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 3109,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 2871,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 2814,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 3657,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 3485,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 4743,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 4866,
+     "counts": "tätort Kungshamn (SCB unit \"Smögen, Kungshamn och Väjern\")",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Kungshamns socken (formed 1772)",
+    "mapping": "counts are the Kungshamn locality; from 2020 SCB counts Smögen, Kungshamn and Väjern as one tätort, so the later numbers include Smögen",
+    "src": 0
+   },
    "sources": [
     "https://sv.wikipedia.org/wiki/Kungshamn",
-    "https://sv.wikipedia.org/wiki/Sillperiod"
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "Name appears on a sea chart \"från tidigt 1600-tal\" (no year). A 1933 sale to Bröderne Ameln was NOT confirmed on the page and is left out."
+    "Name appears on a sea chart \"från tidigt 1600-tal\" (no year). A 1933 sale to Bröderne Ameln was not confirmed on the page and is left out."
+   ]
+  },
+  {
+   "name": "Hunnebostrand",
+   "lat": 58.44124,
+   "lon": 11.30108,
+   "osm": "node/1842051008",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
+   "phases": [
+    {
+     "from": 1863,
+     "to": 1978,
+     "kind": "canning/industry",
+     "note": "Stone industry: first quarry 1863 on Skalbergen; the epoch ended when the Lahälla quarry closed in 1978.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "population": [
+    {
+     "year": 1900,
+     "value": 1314,
+     "counts": "köpingsliknande samhälle, includes Ellene",
+     "src": 0,
+     "note": "upstream: Folkräkningen 1900"
+    },
+    {
+     "year": 1960,
+     "value": 1528,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1965,
+     "value": 1470,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1970,
+     "value": 1441,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1975,
+     "value": 1461,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1980,
+     "value": 1554,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1990,
+     "value": 1727,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1995,
+     "value": 1842,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2000,
+     "value": 1804,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2005,
+     "value": 1801,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2010,
+     "value": 1731,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2015,
+     "value": 2053,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2018,
+     "value": 1994,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2020,
+     "value": 2006,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2023,
+     "value": 1988,
+     "counts": "tätort (SCB)",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Tossene socken",
+    "mapping": "the village lies in this parish; counts are for the locality",
+    "src": 0
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Hunnebostrand",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "\"Kustsamhälle med anor från 1200-talet\" (century only)."
    ]
   },
   {
@@ -118,7 +450,8 @@
    "lon": 11.4431,
    "osm": "node/26580816",
    "firstRecorded": 1578,
-   "firstRecordedNote": "Name form \"Lusekijll\" 1578 (page sentence paraphrased by the fetch tool). The 1317 form \"Lysa\" refers to the church village.",
+   "firstRecordedNote": "Name form \"Lusekijll\" 1578. The 1317 form \"Lysa\" refers to the church village, not the town.",
+   "firstRecordedSrc": 0,
    "phases": [
     {
      "from": 1770,
@@ -131,22 +464,139 @@
      ]
     },
     {
-     "from": 1850,
-     "to": 1899,
+     "from": 1846,
+     "to": null,
      "kind": "resort",
-     "note": "\"Under 1800-talets senare hälft utvecklades Lysekil till en badort.\" Second half of the 1800s only; no exact years.",
-     "confidence": "low",
+     "note": "\"Lysekils historia som badort börjar 1846\" when consul Mollén built the first bath house. No end year stated (the old bath buildings burned in 1939, which is not the end of the era).",
+     "confidence": "medium",
      "src": [
-      0
+      1
      ]
     }
    ],
-   "sources": [
-    "https://sv.wikipedia.org/wiki/Lysekil"
+   "population": [
+    {
+     "year": 1750,
+     "value": 226,
+     "counts": "personer (Hansson 1983, via sv.wikipedia)",
+     "src": 0
+    },
+    {
+     "year": 1760,
+     "value": 332,
+     "counts": "personer (Hansson 1983, via sv.wikipedia)",
+     "src": 0
+    },
+    {
+     "year": 1770,
+     "value": 536,
+     "counts": "personer (Hansson 1983, via sv.wikipedia)",
+     "src": 0
+    },
+    {
+     "year": 1820,
+     "value": 391,
+     "counts": "personer (Hansson 1983, via sv.wikipedia)",
+     "src": 0
+    },
+    {
+     "year": 1960,
+     "value": 5969,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 6434,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 6783,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 7815,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 7674,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 7854,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 8010,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 7582,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 7568,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 7628,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 7734,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 7882,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 7728,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 7340,
+     "counts": "tätort (SCB)",
+     "src": 2
+    }
    ],
-   "confidence": "low",
+   "parish": {
+    "name": "Lysekils församling (since 1700; earlier Lyse socken)",
+    "mapping": "counts are for the town/locality",
+    "src": 0
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Lysekil",
+    "https://www.vastsverige.com/lysekil/artiklar/historisk-stadspromenad",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+   ],
+   "confidence": "medium",
    "notes": [
-    "Herring periods 1566-1587 and 1666-1675 are before the slider starts. Town rights 1 April 1903 are administrative, left out."
+    "Sladholmarna saltery and train-oil works (1788) are near Lysekil but not in the town; left out. Town rights 1 April 1903 are administrative."
    ]
   },
   {
@@ -156,13 +606,272 @@
    "osm": "node/845945773",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [],
+   "population": [
+    {
+     "year": 1750,
+     "value": 202,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1760,
+     "value": 245,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1769,
+     "value": 360,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1775,
+     "value": 381,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1785,
+     "value": 523,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1795,
+     "value": 688,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1805,
+     "value": 773,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1810,
+     "value": 755,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1820,
+     "value": 675,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1830,
+     "value": 792,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1840,
+     "value": 728,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1850,
+     "value": 812,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1860,
+     "value": 647,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1870,
+     "value": 664,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1880,
+     "value": 712,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1890,
+     "value": 689,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1900,
+     "value": 665,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1910,
+     "value": 587,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1920,
+     "value": 559,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1930,
+     "value": 497,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1940,
+     "value": 409,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1950,
+     "value": 370,
+     "counts": "kapellförsamling/kommun, excl. Östersidan (table T1)",
+     "src": 0,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1960,
+     "value": 426,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1965,
+     "value": 363,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1970,
+     "value": 311,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1975,
+     "value": 297,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1980,
+     "value": 389,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1990,
+     "value": 453,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1995,
+     "value": 483,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2000,
+     "value": 438,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2005,
+     "value": 417,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2010,
+     "value": 379,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2015,
+     "value": 262,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2018,
+     "value": 262,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2020,
+     "value": 248,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2023,
+     "value": 252,
+     "counts": "tätort (SCB)",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Fiskebäckskils socken (formerly Morlanda; later Skaftö socken)",
+    "mapping": "the pre-1960 rows are the chapel parish of Fiskebäckskil, whose main village this is",
+    "src": 0
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskil"
+    "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskil",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "Fishing village \"sedan 1500-talet\", large freight fleet in the 1800s: centuries only, no years."
+    "Fishing village \"sedan 1500-talet\" (century only). Kristineberg marine station 1877 is not herring or industry, left out."
    ]
   },
   {
@@ -172,13 +881,14 @@
    "osm": "node/3845368597",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "Place page: growth in \"de stora sillperioderna\". Years are the regional period.",
-     "confidence": "low",
+     "note": "Bohusläns museum record: \"Nuvarande samhället Grundsund har sitt ursprung i 1700-talets sillperiod\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "confidence": "medium",
      "src": [
       0,
       1
@@ -188,21 +898,224 @@
      "from": 1877,
      "to": 1906,
      "kind": "herring-boom",
-     "note": "Place page: growth in \"de stora sillperioderna\". Years are the regional period.",
+     "note": "Place page: growth in \"de stora sillperioderna\"; museum record: sjöbodar and salteries built \"mot slutet av 1800-talet\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "low",
      "src": [
-      0,
-      1
+      2,
+      0
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1810,
+     "value": 379,
+     "counts": "parish (Grundsunds församling; merged into Skaftö 1888)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1820,
+     "value": 466,
+     "counts": "parish (Grundsunds församling; merged into Skaftö 1888)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1830,
+     "value": 535,
+     "counts": "parish (Grundsunds församling; merged into Skaftö 1888)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1840,
+     "value": 473,
+     "counts": "parish (Grundsunds församling; merged into Skaftö 1888)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1850,
+     "value": 555,
+     "counts": "parish (Grundsunds församling; merged into Skaftö 1888)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1860,
+     "value": 567,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1870,
+     "value": 628,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1880,
+     "value": 800,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1890,
+     "value": 965,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1900,
+     "value": 1036,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1910,
+     "value": 1093,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1920,
+     "value": 1212,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1930,
+     "value": 1141,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1940,
+     "value": 976,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1950,
+     "value": 983,
+     "counts": "parish/locality as printed",
+     "src": 2,
+     "note": "upstream: SCB Folk- och bostadsräkningarna"
+    },
+    {
+     "year": 1960,
+     "value": 862,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 1965,
+     "value": 777,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 1970,
+     "value": 774,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 1975,
+     "value": 709,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 1980,
+     "value": 762,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 1990,
+     "value": 813,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 1995,
+     "value": 818,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2000,
+     "value": 737,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2005,
+     "value": 663,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2010,
+     "value": 627,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2015,
+     "value": 647,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2018,
+     "value": 649,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2020,
+     "value": 637,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2023,
+     "value": 616,
+     "counts": "tätort (SCB)",
+     "src": 3
+    }
+   ],
+   "parish": {
+    "name": "Grundsunds socken",
+    "mapping": "Grundsund is the kyrkby (main village) of this parish; the pre-1960 rows are the parish",
+    "src": 2
+   },
    "sources": [
+    "https://digitaltmuseum.org/021017762068",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
     "https://sv.wikipedia.org/wiki/Grundsund",
-    "https://sv.wikipedia.org/wiki/Sillperiod"
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "Fishing village \"åtminstone från 1600-talet\" (century only)."
+    "Church built 1798-99 and the scattered settlements took the name Grundsund (museum record); 1920 \"ett av länets största fiskelägen\". Single events, not phases."
    ]
   },
   {
@@ -212,13 +1125,14 @@
    "osm": "node/1485582105",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "Place page: salting works, cannery and sailmaker arrived during the great herring periods of the 1700s and 1800s. Years are the regional period.",
-     "confidence": "low",
+     "note": "Bohusläns museum record: salting works, cannery and sailmaker arrived during the great herring periods of the 1700s and 1800s. Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "confidence": "medium",
      "src": [
       0,
       1
@@ -228,8 +1142,8 @@
      "from": 1877,
      "to": 1906,
      "kind": "herring-boom",
-     "note": "As above (second period).",
-     "confidence": "low",
+     "note": "As above (second period). Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "confidence": "medium",
      "src": [
       0,
       1
@@ -239,16 +1153,163 @@
      "from": 1910,
      "to": null,
      "kind": "decline",
-     "note": "Population table: 811 in 1910, 466 in 1950, 85 in 2015. \"Decline\" is read from the numbers, not stated by the page.",
+     "note": "Read from the numbers (811 in 1910 down to 98 in 2023), not stated as such by a page.",
      "confidence": "low",
      "src": [
-      0
+      2
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1810,
+     "value": 357,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1820,
+     "value": 246,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1830,
+     "value": 293,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1840,
+     "value": 341,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1850,
+     "value": 391,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1860,
+     "value": 464,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1870,
+     "value": 485,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1880,
+     "value": 539,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1890,
+     "value": 685,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1900,
+     "value": 724,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1910,
+     "value": 811,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1920,
+     "value": 796,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1930,
+     "value": 692,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1940,
+     "value": 524,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1950,
+     "value": 466,
+     "counts": "parish (Gullholmens församling, includes Härmanö)",
+     "src": 2,
+     "licence": "ddb-restricted",
+     "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
+    },
+    {
+     "year": 1960,
+     "value": 313,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 1965,
+     "value": 232,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2023,
+     "value": 98,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Gullholmens socken",
+    "mapping": "the pre-1960 rows are the parish, which also holds Härmanö; Gullholmen is its main village",
+    "src": 2
+   },
    "sources": [
+    "https://digitaltmuseum.org/011014337355/gullholmen",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
     "https://sv.wikipedia.org/wiki/Gullholmen",
-    "https://sv.wikipedia.org/wiki/Sillperiod"
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
@@ -261,14 +1322,83 @@
    "lon": 11.36359,
    "osm": "node/2235056035",
    "firstRecorded": 1659,
-   "firstRecordedNote": "\"Käringön skrevs 1659 Kierlingøon\" (sv.wikipedia)",
-   "phases": [],
-   "sources": [
-    "https://sv.wikipedia.org/wiki/K%C3%A4ring%C3%B6n"
+   "firstRecordedNote": "\"Käringön skrevs 1659 Kierlingøon\"",
+   "firstRecordedSrc": 2,
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Tourism page: \"Redan på 1700-talet sattes Käringön på kartan i och med den stora sillperioden\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    }
    ],
-   "confidence": "medium",
+   "population": [
+    {
+     "year": 1900,
+     "value": 568,
+     "counts": "municipalsamhälle",
+     "src": 2,
+     "note": "upstream: Folkräkningen 1900; Almanack för alla"
+    },
+    {
+     "year": 1909,
+     "value": 614,
+     "counts": "municipalsamhälle",
+     "src": 2,
+     "note": "upstream: Folkräkningen 1900; Almanack för alla"
+    },
+    {
+     "year": 1925,
+     "value": 548,
+     "counts": "as printed (unlabelled)",
+     "src": 2,
+     "note": "upstream: Nordisk Familjebok; När, var, hur? 1945"
+    },
+    {
+     "year": 1944,
+     "value": 336,
+     "counts": "as printed (unlabelled)",
+     "src": 2,
+     "note": "upstream: Nordisk Familjebok; När, var, hur? 1945"
+    },
+    {
+     "year": 1960,
+     "value": 211,
+     "counts": "tätort (SCB)",
+     "src": 3
+    },
+    {
+     "year": 2020,
+     "value": 80,
+     "counts": "island residents (SCB islands list, via sv.wikipedia)",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 73,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Käringöns socken",
+    "mapping": "Käringön is the kyrkby of this one-island parish",
+    "src": 2
+   },
+   "sources": [
+    "https://www.vastsverige.com/orust/produkter/karingon/",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://sv.wikipedia.org/wiki/K%C3%A4ring%C3%B6n",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+   ],
+   "confidence": "low",
    "notes": [
-    "No herring years for the place; population fell from 614 (1909) to 83 (2015) but no collapse year is stated."
+    "The 1900 table says 515 but the text 568 for the municipalsamhälle; the labelled 568 is used."
    ]
   },
   {
@@ -278,6 +1408,7 @@
    "osm": "node/2235056032",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1970,
@@ -290,12 +1421,105 @@
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1900,
+     "value": 338,
+     "counts": "municipalsamhälle (\"Befolkning runt ett municipalsamhälle 1900\")",
+     "src": 0,
+     "note": "the page text says 365 for the same year"
+    },
+    {
+     "year": 1925,
+     "value": 448,
+     "counts": "as printed (unlabelled)",
+     "src": 0
+    },
+    {
+     "year": 1960,
+     "value": 540,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1965,
+     "value": 500,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1970,
+     "value": 430,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1975,
+     "value": 398,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1980,
+     "value": 378,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1990,
+     "value": 326,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1995,
+     "value": 296,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2000,
+     "value": 257,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2005,
+     "value": 238,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2010,
+     "value": 210,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2015,
+     "value": 189,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 0
+    },
+    {
+     "year": 2023,
+     "value": 159,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 0
+    }
+   ],
+   "parish": {
+    "name": "Stenkyrka socken",
+    "mapping": "the island lies in this parish; counts are for the Åstol locality",
+    "src": 0
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/%C3%85stol"
+    "https://sv.wikipedia.org/wiki/%C3%85stol",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "No first mention, herring or resort years on the page."
+    "No first mention or place-specific herring years found. A search snippet puts settlement in the mid-1700s; no year, not used."
    ]
   },
   {
@@ -305,6 +1529,7 @@
    "osm": "node/809925834",
    "firstRecorded": 1594,
    "firstRecordedNote": "\"På holländska kartor från 1594 kallades ön Cleefsholmen\"",
+   "firstRecordedSrc": 0,
    "phases": [
     {
      "from": 1747,
@@ -313,7 +1538,8 @@
      "note": "\"under den stora sillperioden 1747–1809\" (place page).",
      "confidence": "medium",
      "src": [
-      0
+      0,
+      1
      ]
     },
     {
@@ -347,8 +1573,108 @@
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1900,
+     "value": 755,
+     "counts": "fiskeläge incl. Koholmen",
+     "src": 0,
+     "note": "upstream: Folkräkningen 1900"
+    },
+    {
+     "year": 1944,
+     "value": 751,
+     "counts": "as printed (unlabelled)",
+     "src": 0
+    },
+    {
+     "year": 1960,
+     "value": 789,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 745,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 653,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 604,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 561,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 507,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 496,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 459,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 417,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 385,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 367,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 356,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 322,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 0
+    }
+   ],
+   "parish": {
+    "name": "Klädesholmens socken",
+    "mapping": "Klädesholmen is the kyrkby of this one-island parish",
+    "src": 0
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/Kl%C3%A4desholmen"
+    "https://sv.wikipedia.org/wiki/Kl%C3%A4desholmen",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": []
@@ -360,12 +1686,13 @@
    "osm": "node/29690590",
    "firstRecorded": 1724,
    "firstRecordedNote": "Name first appears in the Orust and Tjörn district court, 8 October 1724.",
+   "firstRecordedSrc": 0,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "Place page: herring handling with train-oil works and salteries \"under 1700-talet\". Years are the regional period.",
+     "note": "Place page: herring handling with train-oil works and salteries \"under 1700-talet\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "low",
      "src": [
       0,
@@ -373,9 +1700,108 @@
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1900,
+     "value": 589,
+     "counts": "municipalsamhälle",
+     "src": 0,
+     "note": "the page text says 598"
+    },
+    {
+     "year": 1960,
+     "value": 1286,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 1396,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 1463,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 1769,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 2335,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 2941,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 3147,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 3084,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 3180,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 3193,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 3495,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 3594,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 3678,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 3725,
+     "counts": "tätort (SCB)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Stenkyrka socken",
+    "mapping": "the village lies in this parish; counts are for the locality",
+    "src": 0
+   },
    "sources": [
     "https://sv.wikipedia.org/wiki/Sk%C3%A4rhamn",
-    "https://sv.wikipedia.org/wiki/Sillperiod"
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
@@ -389,12 +1815,13 @@
    "osm": "node/245778489",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "Place page: \"Med sillens återkomst på 1750-talet blomstrade samhället åter\". Years are the regional period.",
+     "note": "Place page: \"Med sillens återkomst på 1750-talet blomstrade samhället åter\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "low",
      "src": [
       0,
@@ -412,13 +1839,269 @@
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1750,
+     "value": 190,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1760,
+     "value": 207,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1769,
+     "value": 249,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1780,
+     "value": 351,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1790,
+     "value": 385,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1795,
+     "value": 432,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1805,
+     "value": 430,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1810,
+     "value": 388,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1820,
+     "value": 380,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1830,
+     "value": 393,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1840,
+     "value": 381,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1850,
+     "value": 482,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1860,
+     "value": 575,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1870,
+     "value": 618,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1880,
+     "value": 708,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1890,
+     "value": 891,
+     "counts": "parish as printed (the page does not say what each row counts)",
+     "src": 0,
+     "licence": "ddb-restricted",
+     "note": "upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)"
+    },
+    {
+     "year": 1900,
+     "value": 903,
+     "counts": "as printed",
+     "src": 0,
+     "note": "upstream: SCB Folkräkningen"
+    },
+    {
+     "year": 1910,
+     "value": 965,
+     "counts": "as printed",
+     "src": 0,
+     "note": "upstream: SCB Folkräkningen"
+    },
+    {
+     "year": 1920,
+     "value": 959,
+     "counts": "as printed",
+     "src": 0,
+     "note": "upstream: SCB Folkräkningen"
+    },
+    {
+     "year": 1930,
+     "value": 782,
+     "counts": "as printed",
+     "src": 0,
+     "note": "upstream: SCB Folkräkningen"
+    },
+    {
+     "year": 1940,
+     "value": 580,
+     "counts": "as printed",
+     "src": 0,
+     "note": "upstream: SCB Folkräkningen"
+    },
+    {
+     "year": 1950,
+     "value": 500,
+     "counts": "as printed",
+     "src": 0,
+     "note": "upstream: SCB Folkräkningen"
+    },
+    {
+     "year": 1960,
+     "value": 415,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 371,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 341,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 347,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 362,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 355,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 362,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 316,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 277,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 236,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 243,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 212,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 208,
+     "counts": "tätort (SCB)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Mollösunds socken",
+    "mapping": "Mollösund is the kyrkby of this parish; the pre-1960 rows are the parish",
+    "src": 0
+   },
    "sources": [
     "https://sv.wikipedia.org/wiki/Moll%C3%B6sund",
-    "https://sv.wikipedia.org/wiki/Sillperiod"
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "\"Roots back to the 1500s\": no year."
+    "\"Med anor tillbaka till 1500-talet\": century only."
    ]
   },
   {
@@ -428,44 +2111,154 @@
    "osm": "node/130148772",
    "firstRecorded": 1293,
    "firstRecordedNote": "\"Namnet Marstrand finns belagt från 1293\"",
+   "firstRecordedSrc": 0,
    "phases": [
     {
      "from": 1747,
-     "to": 1808,
+     "to": 1809,
      "kind": "herring-boom",
-     "note": "Place page: the herring period that began in 1747 ended in 1808.",
-     "confidence": "medium",
+     "note": "Kungälvs kommun heritage document lists the herring periods 1747-1809 and 1877-1906 and ties Marstrand's growth (free port 1775, population about 500 to 1500) to herring and the free port.",
+     "confidence": "high",
      "src": [
-      0
+      1,
+      2
      ]
     },
     {
-     "from": 1878,
-     "to": 1898,
+     "from": 1877,
+     "to": 1906,
      "kind": "herring-boom",
-     "note": "Place page lists 1878-1898, flagged \"källa behövs\" (citation needed) on the page itself.",
-     "confidence": "low",
+     "note": "Period years from the same municipal document and Bohusläns museum; Marstrand-specific effect in 1877-1906 is not spelled out.",
+     "confidence": "medium",
      "src": [
-      0
+      1,
+      2
      ]
     },
     {
      "from": 1822,
      "to": null,
      "kind": "resort",
-     "note": "The first \"badhus\" was created in 1822; one of the country's early spa resorts. End year not stated.",
+     "note": "Bath operations started in 1822 (Bohusläns museum and Kungälvs kommun both state it); Oscar II visited 1887-1907. No end year stated.",
+     "confidence": "high",
+     "src": [
+      3,
+      1
+     ]
+    },
+    {
+     "from": 1904,
+     "to": 1991,
+     "kind": "canning/industry",
+     "note": "Marstrands Mekaniska Verkstad: limited company formed 1904 (repair yard before), closed 1991.",
      "confidence": "medium",
      "src": [
-      0
+      4
      ]
     }
    ],
-   "sources": [
-    "https://sv.wikipedia.org/wiki/Marstrand"
+   "population": [
+    {
+     "year": 1960,
+     "value": 1158,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 1965,
+     "value": 1044,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 1970,
+     "value": 1072,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 1975,
+     "value": 1168,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 1980,
+     "value": 1150,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 1990,
+     "value": 1196,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 1995,
+     "value": 1337,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 2000,
+     "value": 1377,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 2005,
+     "value": 1432,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 2010,
+     "value": 1319,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 2015,
+     "value": 381,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 2018,
+     "value": 375,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 2020,
+     "value": 379,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    },
+    {
+     "year": 2023,
+     "value": 349,
+     "counts": "tätort (SCB); 2015 drop = boundary change, east of the sound became Arvidsvik",
+     "src": 5
+    }
    ],
-   "confidence": "low",
+   "parish": {
+    "name": "Marstrands församling",
+    "mapping": "counts are the Marstrand locality",
+    "src": 0
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Marstrand",
+    "https://www.kungalv.se/contentassets/4202e7d5d8114f149113dce49275ee7f/kulturmiljounderlag-2014.pdf",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://www.bohuslansmuseum.se/samlingar-och-historia/gamla-historiska-artiklar/badorten-marstrand/",
+    "https://sv.wikipedia.org/wiki/Marstrands_Mekaniska_Verkstad",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+   ],
+   "confidence": "medium",
    "notes": [
-    "Free port 15 Aug 1775 to 15 May 1794: not tied to herring on the page, so not a phase."
+    "Free port 15 Aug 1775 to 15 May 1794 (page states both). City privileges 1442 (municipal document)."
    ]
   },
   {
@@ -475,12 +2268,13 @@
    "osm": "node/245778450",
    "firstRecorded": 1617,
    "firstRecordedNote": "\"nämns i skriftliga källor första gången 1617\"",
+   "firstRecordedSrc": 0,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "Place page: herring fishing and salteries grew \"under 1700-talets stora sillperiod\". Years are the regional period.",
+     "note": "Place page: herring fishing and salteries grew \"under 1700-talets stora sillperiod\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "low",
      "src": [
       0,
@@ -488,13 +2282,123 @@
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1900,
+     "value": 438,
+     "counts": "folkräkning (as printed)",
+     "src": 0
+    },
+    {
+     "year": 1910,
+     "value": 503,
+     "counts": "folkräkning (as printed)",
+     "src": 0
+    },
+    {
+     "year": 1920,
+     "value": 484,
+     "counts": "folkräkning (as printed)",
+     "src": 0
+    },
+    {
+     "year": 1930,
+     "value": 415,
+     "counts": "folkräkning (as printed)",
+     "src": 0
+    },
+    {
+     "year": 1940,
+     "value": 346,
+     "counts": "folkräkning (as printed)",
+     "src": 0
+    },
+    {
+     "year": 1950,
+     "value": 277,
+     "counts": "folkräkning (as printed)",
+     "src": 0
+    },
+    {
+     "year": 1960,
+     "value": 229,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 209,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 200,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 198,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 245,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 256,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 225,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 225,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 214,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 187,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 0
+    },
+    {
+     "year": 2023,
+     "value": 181,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 0
+    }
+   ],
+   "parish": {
+    "name": "Morlanda socken",
+    "mapping": "the village lies in this parish; counts are for the locality",
+    "src": 0
+   },
    "sources": [
     "https://sv.wikipedia.org/wiki/H%C3%A4lleviksstrand",
-    "https://sv.wikipedia.org/wiki/Sillperiod"
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "Resort (\"vid 1800-talets slut\") and shipyard (early 1900s): no exact years."
+    "Resort (\"vid 1800-talets slut\") and shipyard (early 1900s): no years."
    ]
   },
   {
@@ -504,12 +2408,13 @@
    "osm": "node/809920467",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "A trankokeri (train-oil works) was built on Kålhuvudet in 1780 (place page). Years are the regional period.",
+     "note": "A trankokeri (train-oil works) was built on Kålhuvudet in 1780 (place page). Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "medium",
      "src": [
       0,
@@ -528,12 +2433,86 @@
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1909,
+     "value": 498,
+     "counts": "as printed (municipalsamhälle Kyrkesund och Björholmen)",
+     "src": 0,
+     "note": "upstream: Nordisk Familjebok; När, var, hur? 1945"
+    },
+    {
+     "year": 1924,
+     "value": 369,
+     "counts": "as printed (municipalsamhälle Kyrkesund och Björholmen)",
+     "src": 0,
+     "note": "upstream: Nordisk Familjebok; När, var, hur? 1945"
+    },
+    {
+     "year": 1944,
+     "value": 283,
+     "counts": "as printed (municipalsamhälle Kyrkesund och Björholmen)",
+     "src": 0,
+     "note": "upstream: Nordisk Familjebok; När, var, hur? 1945"
+    },
+    {
+     "year": 1960,
+     "value": 268,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 242,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 76,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 0
+    },
+    {
+     "year": 2015,
+     "value": 547,
+     "counts": "tätort (SCB); small localities merged into a tätort in 2015",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 543,
+     "counts": "tätort (SCB); small localities merged into a tätort in 2015",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 527,
+     "counts": "tätort (SCB); small localities merged into a tätort in 2015",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 534,
+     "counts": "tätort (SCB); small localities merged into a tätort in 2015",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Klövedals socken",
+    "mapping": "the village lies in this parish (Bohusläns museum); counts are for the locality",
+    "src": 3
+   },
    "sources": [
     "https://sv.wikipedia.org/wiki/Kyrkesund",
-    "https://sv.wikipedia.org/wiki/Sillperiod"
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
+    "https://www.bohuslansmuseum.se/rapport/trankokeriet-kalhuvudet/"
    ],
    "confidence": "low",
-   "notes": []
+   "notes": [
+    "The page's 1900 figure (515) equals Käringön's and is left out as a possible copy error."
+   ]
   },
   {
    "name": "Gottskär",
@@ -542,24 +2521,51 @@
    "osm": "node/762203868",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1881,
      "to": null,
      "kind": "resort",
-     "note": "1881 inn rights taken over by Gottskära Badhus AB; first hot-bath house 1882; regular steamboat from Kungsbacka 1883. End not stated.",
+     "note": "1881 inn rights taken over by Gottskära Badhus AB; first hot-bath house 1882; regular steamboat from Kungsbacka 1883. No end year stated.",
      "confidence": "medium",
      "src": [
       0
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1990,
+     "value": 774,
+     "counts": "tätort Gottskär (SCB); the 1990-1995 jump is a boundary change",
+     "src": 1
+    },
+    {
+     "year": 1995,
+     "value": 3420,
+     "counts": "tätort Gottskär (SCB); the 1990-1995 jump is a boundary change",
+     "src": 1
+    },
+    {
+     "year": 2000,
+     "value": 3541,
+     "counts": "tätort Gottskär (SCB); the 1990-1995 jump is a boundary change",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Onsala socken (not stated outright on the page; \"Se även Onsala socken\")",
+    "mapping": "counts are the Gottskär locality, later part of the Onsala tätort",
+    "src": 0
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/Gottsk%C3%A4r"
+    "https://sv.wikipedia.org/wiki/Gottsk%C3%A4r",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "medium",
    "notes": [
-    "The page says it was a köpstad \"till 1539\": an end of status, not a first mention. No herring on the page."
+    "The page says it was a köpstad \"till 1539\": an end of status, not a first mention."
    ]
   },
   {
@@ -569,14 +2575,105 @@
    "osm": "node/2235056015",
    "firstRecorded": 1254,
    "firstRecordedNote": "Named \"Wranghø\" in King Valdemar's land register, 1254.",
+   "firstRecordedSrc": 0,
    "phases": [],
+   "population": [
+    {
+     "year": 1960,
+     "value": 327,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1965,
+     "value": 305,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1970,
+     "value": 293,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1975,
+     "value": 302,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1980,
+     "value": 329,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1990,
+     "value": 349,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1995,
+     "value": 382,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2000,
+     "value": 381,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2005,
+     "value": 379,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2010,
+     "value": 364,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2015,
+     "value": 351,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2018,
+     "value": 368,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2020,
+     "value": 377,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2023,
+     "value": 368,
+     "counts": "tätort (SCB)",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Styrsö socken",
+    "mapping": "counts are the Vrångö locality; the island lies in this parish",
+    "src": 0
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/Vr%C3%A5ng%C3%B6"
+    "https://sv.wikipedia.org/wiki/Vr%C3%A5ng%C3%B6",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "medium",
-   "notes": [
-    "No herring, industry or resort years on the page."
-   ]
+   "notes": []
   },
   {
    "name": "Hönö",
@@ -585,13 +2682,108 @@
    "osm": "node/2235001640",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
-   "phases": [],
+   "firstRecordedSrc": null,
+   "phases": [
+    {
+     "from": 1877,
+     "to": 1906,
+     "kind": "herring-boom",
+     "note": "Öckerö-area fishing page (municipal tourism): \"När sillen kom tillbaka till kusten hösten 1877\". Area-wide, not Hönö-specific; end year is the regional one.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    }
+   ],
+   "population": [
+    {
+     "year": 1960,
+     "value": 2557,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 2756,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 3396,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 3563,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 3924,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 4559,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 4707,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 4815,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 5045,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 5110,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 5293,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 5555,
+     "counts": "island residents (SCB islands list, via sv.wikipedia)",
+     "src": 3
+    }
+   ],
+   "parish": {
+    "name": "Öckerö socken",
+    "mapping": "counts are the Hönö locality; from 2018 SCB merges it with Öckerö, so 2020 uses the island residents figure",
+    "src": 3
+   },
    "sources": [
+    "https://www.vastsverige.com/visitockero/centrum-for-fiske/",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
     "https://sv.wikipedia.org/wiki/H%C3%B6n%C3%B6"
    ],
    "confidence": "low",
    "notes": [
-    "Fishing motorised 1903, ice store 1915 (vastsverige.com, Öckerö kommun): single events, not phases. 123 fishing boats in 1945 (a snapshot)."
+    "Fishing motorised 1903, ice store 1915, Hönökakan 1904: single events, not phases."
    ]
   },
   {
@@ -601,13 +2793,95 @@
    "osm": "node/61103335",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [],
+   "population": [
+    {
+     "year": 1960,
+     "value": 1652,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 1965,
+     "value": 1937,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 1970,
+     "value": 2262,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 1975,
+     "value": 2565,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 1980,
+     "value": 2700,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 1990,
+     "value": 2913,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 1995,
+     "value": 3136,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 2000,
+     "value": 3190,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 2005,
+     "value": 3269,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 2010,
+     "value": 3488,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 2015,
+     "value": 3568,
+     "counts": "tätort Öckerö (SCB unit 1407TC109, merged with Hönö from 2018)",
+     "src": 0
+    },
+    {
+     "year": 2020,
+     "value": 3570,
+     "counts": "island residents (SCB islands list, via sv.wikipedia)",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Öckerö socken",
+    "mapping": "Öckerö is the main village of this parish; counts are the locality",
+    "src": 2
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6%20(%C3%B6)"
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
+    "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6%20(%C3%B6)",
+    "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6_(%C3%B6)"
    ],
    "confidence": "low",
    "notes": [
-    "Propeller factory 1960 (vastsverige.com): a single event, not a phase."
+    "New church 1906: a single event."
    ]
   },
   {
@@ -617,8 +2891,95 @@
    "osm": "node/2235001612",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [],
+   "population": [
+    {
+     "year": 1960,
+     "value": 1099,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 1965,
+     "value": 1162,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 1970,
+     "value": 1172,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 1975,
+     "value": 1209,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 1980,
+     "value": 1213,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 1990,
+     "value": 1376,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 1995,
+     "value": 1396,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 2000,
+     "value": 1405,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 2005,
+     "value": 1405,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 2010,
+     "value": 1407,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 2015,
+     "value": 1446,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 2018,
+     "value": 1453,
+     "counts": "tätort (SCB)",
+     "src": 0
+    },
+    {
+     "year": 2020,
+     "value": 1551,
+     "counts": "island residents (SCB islands list, via sv.wikipedia)",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Styrsö socken",
+    "mapping": "counts are the Donsö locality; the island lies in this parish",
+    "src": 1
+   },
    "sources": [
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
     "https://sv.wikipedia.org/wiki/Dons%C3%B6"
    ],
    "confidence": "low",
@@ -633,13 +2994,125 @@
    "osm": "node/2235056018",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
-   "phases": [],
+   "firstRecordedSrc": null,
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Göteborgs Stad heritage document (2021): the former saltery on Vargö (in Styrsö parish) \"tillkom under den långa sillperioden på 1700-talet\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    },
+    {
+     "from": 1902,
+     "to": 1969,
+     "kind": "resort",
+     "note": "Styrsö Hafsbad's restaurant opened 1902 and burned in 1969; the page does not call the island a resort, the city document mentions \"badortstiden\" buildings.",
+     "confidence": "low",
+     "src": [
+      2,
+      0
+     ]
+    }
+   ],
+   "population": [
+    {
+     "year": 1960,
+     "value": 890,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 1965,
+     "value": 911,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 1970,
+     "value": 933,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 1975,
+     "value": 1129,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 1980,
+     "value": 1169,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 1990,
+     "value": 1205,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 1995,
+     "value": 1367,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 2000,
+     "value": 1381,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 2005,
+     "value": 1331,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 2010,
+     "value": 1304,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 2015,
+     "value": 1324,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 2018,
+     "value": 1350,
+     "counts": "tätort Styrsö (SCB unit \"Styrsö och Donsö\", merged with Donsö from 2020)",
+     "src": 3
+    },
+    {
+     "year": 2020,
+     "value": 1341,
+     "counts": "island residents (SCB islands list, via sv.wikipedia)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Styrsö socken",
+    "mapping": "Styrsö is the kyrkby of this parish; counts are the locality",
+    "src": 2
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/Styrs%C3%B6"
+    "https://www5.goteborg.se/prod/fastighetskontoret/etjanst/planobygg.nsf/vyFiler/Br%C3%A4nn%C3%B6%20-%20Handel%20och%20bost%C3%A4der-Plan%20ut%C3%B6kat%20f%C3%B6rfarande%20-%20granskning-Kulturmilj%C3%B6/$File/11.%20Kultur.pdf",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://sv.wikipedia.org/wiki/Styrs%C3%B6",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "Name from the 1200s: century only. Styrsö Hafsbad restaurant opened 1902, but the page does not call the island a resort."
+    "Name from the 1200s: century only."
    ]
   },
   {
@@ -649,6 +3122,7 @@
    "osm": "relation/5463652",
    "firstRecorded": null,
    "firstRecordedNote": "no year found in the sources read",
+   "firstRecordedSrc": null,
    "phases": [
     {
      "from": 1747,
@@ -671,8 +3145,100 @@
      ]
     }
    ],
+   "population": [
+    {
+     "year": 1960,
+     "value": 363,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1965,
+     "value": 319,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1970,
+     "value": 305,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1975,
+     "value": 270,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1980,
+     "value": 268,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1990,
+     "value": 277,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1995,
+     "value": 286,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2000,
+     "value": 299,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2005,
+     "value": 283,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2010,
+     "value": 269,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2015,
+     "value": 262,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2018,
+     "value": 244,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2020,
+     "value": 250,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2023,
+     "value": 253,
+     "counts": "tätort (SCB)",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Öckerö socken",
+    "mapping": "Rörö is the northernmost inhabited island of this parish; counts are the locality",
+    "src": 0
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/R%C3%B6r%C3%B6"
+    "https://sv.wikipedia.org/wiki/R%C3%B6r%C3%B6",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "medium",
    "notes": [
@@ -686,23 +3252,618 @@
    "osm": "node/25930131",
    "firstRecorded": 1621,
    "firstRecordedNote": "\"fick sina stadsprivilegier 1621\" (town charter).",
-   "phases": [],
+   "firstRecordedSrc": 1,
+   "phases": [
+    {
+     "from": 1910,
+     "to": null,
+     "kind": "canning/industry",
+     "note": "Göteborgs fiskhamn (fish harbour) started in 1910 (Öckerö-area fishing page).",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "population": [
+    {
+     "year": 1900,
+     "value": 152172,
+     "counts": "stad med förstäder",
+     "src": 1
+    },
+    {
+     "year": 1960,
+     "value": 443843,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 471619,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 485785,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 470529,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 456684,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 465474,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 480839,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 495822,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 510491,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 549839,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 572799,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 592042,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 607882,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 674529,
+     "counts": "tätort (SCB)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "n/a (city)",
+    "mapping": "counts are the city/tätort",
+    "src": 1
+   },
    "sources": [
-    "https://sv.wikipedia.org/wiki/G%C3%B6teborg"
+    "https://www.vastsverige.com/visitockero/centrum-for-fiske/",
+    "https://sv.wikipedia.org/wiki/G%C3%B6teborg",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "medium",
    "notes": [
-    "A fetched page that states Göteborg's own role in the herring trade was not found; claims seen only in search snippets are left out."
+    "A fetched page that states Göteborg's own role in the herring trade was not found; snippet-only claims are left out."
+   ]
+  },
+  {
+   "name": "Strömstad",
+   "lat": 58.93776,
+   "lon": 11.17361,
+   "osm": "node/30983274",
+   "firstRecorded": 1667,
+   "firstRecordedNote": "\"Strömmen fick köpingsrättigheter 1667\" (köping rights, not a first mention of the name).",
+   "firstRecordedSrc": 1,
+   "phases": [
+    {
+     "from": 1782,
+     "to": null,
+     "kind": "resort",
+     "note": "Spring-water drinking at Lejonkällan 1782; the page says the start of the bath resort \"inte klarlagt\". No end year.",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "population": [
+    {
+     "year": 1960,
+     "value": 3985,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 4255,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 4447,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 4735,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 4693,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 5403,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 5776,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 5969,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 6110,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 6288,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 7176,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 7374,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 7470,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 7836,
+     "counts": "tätort (SCB)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Strömstads församling (since 1670, out of Skee socken)",
+    "mapping": "counts are the town/tätort",
+    "src": 1
+   },
+   "sources": [
+    "https://www.vastsverige.com/stromstad/artikel/historia/",
+    "https://sv.wikipedia.org/wiki/Str%C3%B6mstad",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Town rights confirmed 15 April 1676. Herring \"under den stora sillfiskeperioden under 1700-talets andra hälft\": no years."
+   ]
+  },
+  {
+   "name": "Fjällbacka",
+   "lat": 58.59875,
+   "lon": 11.28278,
+   "osm": "node/32309417",
+   "firstRecorded": 1617,
+   "firstRecordedNote": "\"Fjällbacka omnämns första gången 1617 som Fieldbacke.\"",
+   "firstRecordedSrc": 0,
+   "phases": [],
+   "population": [
+    {
+     "year": 1900,
+     "value": 714,
+     "counts": "municipalsamhälle",
+     "src": 0,
+     "note": "upstream: Folkräkningen 1900"
+    },
+    {
+     "year": 1960,
+     "value": 568,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1965,
+     "value": 556,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1970,
+     "value": 606,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1975,
+     "value": 643,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1980,
+     "value": 691,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1990,
+     "value": 911,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 1995,
+     "value": 927,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2000,
+     "value": 806,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2005,
+     "value": 812,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2010,
+     "value": 859,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2015,
+     "value": 850,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2018,
+     "value": 858,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2020,
+     "value": 819,
+     "counts": "tätort (SCB)",
+     "src": 1
+    },
+    {
+     "year": 2023,
+     "value": 816,
+     "counts": "tätort (SCB)",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Kville socken",
+    "mapping": "the village lies in this parish; counts are the locality",
+    "src": 0
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Fj%C3%A4llbacka",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "Fish canning \"ända in på 1960-talet\": decade only."
+   ]
+  },
+  {
+   "name": "Hamburgsund",
+   "lat": 58.5598,
+   "lon": 11.26381,
+   "osm": "node/324590172",
+   "firstRecorded": 1585,
+   "firstRecordedNote": "Mentioned in 1585 as a customs station (Öresundstullen documents).",
+   "firstRecordedSrc": 0,
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Place page: several trankokerier along the sound \"under 1700-talets sillperiod\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    }
+   ],
+   "population": [
+    {
+     "year": 1960,
+     "value": 400,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1965,
+     "value": 445,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1970,
+     "value": 536,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1975,
+     "value": 587,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1980,
+     "value": 606,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1990,
+     "value": 659,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 1995,
+     "value": 745,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2000,
+     "value": 765,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2005,
+     "value": 801,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2010,
+     "value": 818,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2015,
+     "value": 706,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2018,
+     "value": 709,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2020,
+     "value": 708,
+     "counts": "tätort (SCB)",
+     "src": 2
+    },
+    {
+     "year": 2023,
+     "value": 696,
+     "counts": "tätort (SCB)",
+     "src": 2
+    }
+   ],
+   "parish": {
+    "name": "Kville socken (not stated in the text; inferred from the Kville distrikt)",
+    "mapping": "counts are the locality",
+    "src": 0
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Hamburgsund",
+    "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+   ],
+   "confidence": "low",
+   "notes": []
+  },
+  {
+   "name": "Havstenssund",
+   "lat": 58.75316,
+   "lon": 11.18059,
+   "osm": "node/443636993",
+   "firstRecorded": 1196,
+   "firstRecordedNote": "The area is first mentioned in connection with a sea battle in 1196 (the area, not necessarily the village).",
+   "firstRecordedSrc": 0,
+   "phases": [],
+   "population": [
+    {
+     "year": 2023,
+     "value": 127,
+     "counts": "småort (SCB, via sv.wikipedia)",
+     "src": 0
+    }
+   ],
+   "parish": {
+    "name": "Tanums socken",
+    "mapping": "counts are the småort",
+    "src": 0
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Havstenssund"
+   ],
+   "confidence": "low",
+   "notes": []
+  },
+  {
+   "name": "Nordkoster",
+   "lat": 58.89939,
+   "lon": 11.00253,
+   "osm": "relation/10041804",
+   "firstRecorded": 1388,
+   "firstRecordedNote": "The Koster page dates the first written information about a resident population on Koster to 1388; the split between Nord- and Sydkoster was only seen in a fetch summary.",
+   "firstRecordedSrc": 0,
+   "phases": [],
+   "population": [
+    {
+     "year": 1917,
+     "value": 190,
+     "counts": "island residents",
+     "src": 1
+    },
+    {
+     "year": 2005,
+     "value": 105,
+     "counts": "bofasta (permanent residents) on the island",
+     "src": 1
+    },
+    {
+     "year": 2012,
+     "value": 125,
+     "counts": "bofasta (permanent residents) on the island",
+     "src": 1
+    },
+    {
+     "year": 2020,
+     "value": 118,
+     "counts": "bofasta (permanent residents) on the island",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Tjärnö socken",
+    "mapping": "the island lies in this parish; counts are the island",
+    "src": 1
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Koster",
+    "https://sv.wikipedia.org/wiki/Nordkoster"
+   ],
+   "confidence": "low",
+   "notes": []
+  },
+  {
+   "name": "Sydkoster",
+   "lat": 58.8806,
+   "lon": 11.03053,
+   "osm": "relation/1695145",
+   "firstRecorded": 1388,
+   "firstRecordedNote": "First written information about a resident population on Koster, 1388 (six of seven farms were on Sydkoster).",
+   "firstRecordedSrc": 0,
+   "phases": [],
+   "population": [
+    {
+     "year": 1917,
+     "value": 323,
+     "counts": "island residents / bofasta",
+     "src": 1
+    },
+    {
+     "year": 1975,
+     "value": 215,
+     "counts": "island residents / bofasta",
+     "src": 1
+    },
+    {
+     "year": 2012,
+     "value": 238,
+     "counts": "island residents / bofasta",
+     "src": 1
+    },
+    {
+     "year": 2020,
+     "value": 193,
+     "counts": "island residents / bofasta",
+     "src": 1
+    }
+   ],
+   "parish": {
+    "name": "Tjärnö socken",
+    "mapping": "the island lies in this parish; counts are the island",
+    "src": 1
+   },
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Koster",
+    "https://sv.wikipedia.org/wiki/Sydkoster"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "1754: 54 people on Syd- and Nordkoster together; left out (not split)."
    ]
   }
  ],
  "unsourced": [
-  "firstRecorded year: Kungshamn, Fiskebäckskil, Grundsund, Gullholmen, Åstol, Mollösund, Kyrkesund, Gottskär, Hönö, Öckerö, Donsö, Styrsö, Rörö (the pages give only a century or nothing)",
-  "place-specific herring years for: Smögen, Käringön, Åstol, Fiskebäckskil, Lysekil, Vrångö, Hönö, Öckerö, Donsö, Styrsö, Gottskär, Göteborg",
-  "canning / fish-industry years: Smögen, Lysekil (Luckey cannery 1893 seen only in a search snippet), Fiskebäckskil, Grundsund, Käringön, Mollösund, Skärhamn (shipyards), Hönö, Öckerö, Donsö, Styrsö",
-  "Smögen and Kungshamn granite-quarrying years (only \"1800-talets slut\" / early 1800s)",
-  "resort years: Smögen end year, Marstrand end year, Gottskär end year, Hälleviksstrand (\"1800-talets slut\"), Lysekil exact years",
-  "Bohusläns museum, Riksantikvarieämbetet and municipality pages were not reached; every phase rests on sv.wikipedia or vastsverige.com"
+  "firstRecorded year: Kungshamn, Hunnebostrand, Fiskebäckskil, Grundsund, Gullholmen, Åstol, Mollösund, Kyrkesund, Gottskär, Hönö, Öckerö, Donsö, Styrsö, Rörö (pages give a century or nothing)",
+  "place-specific herring years for: Smögen, Åstol, Fiskebäckskil, Lysekil, Vrångö, Öckerö, Donsö, Gottskär, Göteborg, Strömstad, Fjällbacka, Havstenssund",
+  "canning / fish-industry years: Smögen, Lysekil, Fiskebäckskil, Grundsund, Käringön, Mollösund, Skärhamn (shipyards), Hönö, Öckerö, Donsö, Styrsö",
+  "granite quarrying years: Smögen, Kungshamn (only \"1800-talets slut\")",
+  "resort END years: every resort phase (Smögen, Lysekil, Marstrand, Gottskär, Strömstad)",
+  "population before 1960 for: Smögen/Kungshamn/Marstrand (only 1900 or none), Vrångö, Hönö, Öckerö, Donsö, Styrsö, Rörö, Strömstad, Fjällbacka (1900 only), Hamburgsund, Havstenssund, Gottskär",
+  "Tabellverket / Demographic Data Base: not readable by the tools (JavaScript search tool, no download), terms restrictive; no counts were taken from it directly",
+  "SCB parish-level historical statistics: no readable source found; SCB tätort tables start in 1960",
+  "bebyggelseregistret.raa.se, kmr.raa.se, sotenas.se, orust.se, tjorn.se, kungsbacka.se, Länsstyrelsen pages were not reachable; Bohusläns museum, Kungälvs kommun, Göteborgs Stad and digitaltmuseum.org (Bohusläns museum records) were"
  ],
- "licenceNote": "Text of sv.wikipedia is CC BY-SA 4.0; this file stores facts (dates) and the page URL as the source. Lantmäteriet Historiska kartor was NOT used (its licence for the service could not be confirmed; the English page only says it has withdrawn copyright claims for the maps)."
+ "licenceNote": "Text of sv.wikipedia is CC BY-SA 4.0; this file stores facts (dates, counts) and the page URL as the source. Lantmäteriet Historiska kartor was NOT used (its licence for the service could not be confirmed)."
 }

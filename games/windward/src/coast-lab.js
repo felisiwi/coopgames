@@ -3,6 +3,7 @@
 // that shows treesNear(). Preview only; not wired into the game.
 import { loadCoast, tripEstimate, recommendScale, fmtDuration } from './coast-data.js';
 import { makeTreesNear, classSamplerFromCoast, DEFAULT_RADIUS } from './trees-near.js';
+import { stateAt as stateAtYear, populationAt, houseWidth } from './history.js';
 
 const SCALES = [6, 8, 10];
 const DEFAULT_SCALE = 10;                       // Felix: 1:10 is the default
@@ -19,13 +20,15 @@ const COVER_COL = {
   bare_rock: [205, 183, 179], heath: [166, 122, 150], meadow: [168, 232, 81], scrub: [116, 170, 70], forest: [38, 96, 52], village: [232, 130, 60],
 };
 // one colour AND one shape per phase kind (shape helps if colours are hard to tell apart)
-const KIND = {
-  hamlet: { label: 'settled (no phase sourced)', color: '#e8e1d0', shape: 'dot', glyph: '●' },
-  'herring-boom': { label: 'herring boom', color: '#f2c94c', shape: 'diamond', glyph: '◆' },
-  decline: { label: 'decline', color: '#8f9ab5', shape: 'down', glyph: '▼' },
-  'canning/industry': { label: 'canning / industry', color: '#ee7d5e', shape: 'square', glyph: '■' },
-  resort: { label: 'resort', color: '#7fd9b4', shape: 'star', glyph: '★' },
+const KIND = {                                  // phase -> roof colour
+  hamlet: { label: 'settled (no phase sourced)', color: '#e8e1d0', glyph: '■' },
+  'herring-boom': { label: 'herring boom', color: '#f2c94c', glyph: '■' },
+  decline: { label: 'decline', color: '#8f9ab5', glyph: '■' },
+  'canning/industry': { label: 'canning / industry', color: '#ee7d5e', glyph: '■' },
+  resort: { label: 'resort', color: '#7fd9b4', glyph: '■' },
 };
+// No population count at that year: the house is sized by phase and drawn as an outline only.
+const PHASE_W = { hamlet: 12, 'herring-boom': 26, decline: 16, 'canning/industry': 24, resort: 22 };
 const TREE_COL = { pine: '#1f4d2b', spruce: '#16392a', bush: '#6aaa48', juniper: '#4d8c70', birch: '#a6d870' };
 const ROUTE_COL = ['#fff3b0', '#ffb3d1'];
 
@@ -37,6 +40,9 @@ const dpr = () => devicePixelRatio || 1;
 
 let C, S = DEFAULT_SCALE, mode = 'terrain', zoom = 0.05, cx = 0, cy = 0, speed = 6;
 const layers = { settle: true, light: true, places: true, route: true, skerries: true, trees: true };
+// Some old counts come (via sv.wikipedia) from Tabellverket / the Demographic Data Base, whose terms restrict bulk copying and
+// commercial use. They are tagged licence 'ddb-restricted' in the data; this switch (also ?ddb=0) leaves them out. See SOURCES.md.
+let useDdb = new URLSearchParams(location.search).get('ddb') !== '0';
 let settlements = [], lighthouses = null;
 let boat = { i: 0, j: 0 };                      // plane pixel coords: stays put when the scale changes
 const imgs = { terrain: new Map(), cover: new Map() };
@@ -49,19 +55,16 @@ const qnum = (k) => { const v = parseInt(qs.get(k), 10); return Number.isFinite(
 let yFrom = qnum('from') ?? qnum('to') ?? 2025, yTo = qnum('to') ?? qnum('from') ?? 2025;
 if (yFrom > yTo) [yFrom, yTo] = [yTo, yFrom];
 
-// ---------------------------------------------------------------- settlements: phase at a year
-function phaseAt(s, y) {
-  let best = null;
-  for (const p of s.phases) {
-    const end = p.to ?? YEAR_MAX;
-    if (p.from <= y && y <= end && (!best || p.from >= best.from)) best = p;   // latest-starting phase wins
-  }
-  return best;
-}
-function stateAt(s, y) {
-  if (s.firstRecorded != null && y < s.firstRecorded) return null;              // not there yet
-  const ph = phaseAt(s, y);
-  return { kind: ph ? ph.kind : 'hamlet', phase: ph };
+// ---------------------------------------------------------------- settlements: phase and population at a year (src/history.js)
+const stateAt = (st, y) => stateAtYear(st, y, YEAR_MAX);
+const popAt = (st, y) => populationAt(st, y, { useDdb });
+// Houses are oversized on purpose, but on a small map (phone, zoomed out) they would bury each other: scale them with zoom.
+const houseScale = () => clamp(Math.sqrt(zoom / 0.055), 0.45, 1.5);
+const fmtPop = (n) => n.toLocaleString('en-US');
+function shade(hex, amt) {                      // amt -1..1 : darker .. lighter
+  const n = parseInt(hex.slice(1), 16), mix = amt < 0 ? 0 : 255, k = Math.abs(amt);
+  const c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v + (mix - v) * k));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
 }
 
 // ---------------------------------------------------------------- tile images
@@ -115,13 +118,22 @@ function currentTrees() {
 }
 
 // ---------------------------------------------------------------- drawing
-function shapePath(shape, x, y, r) {
-  ctx.beginPath();
-  if (shape === 'diamond') { ctx.moveTo(x, y - r * 1.25); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r * 1.25); ctx.lineTo(x - r, y); ctx.closePath(); }
-  else if (shape === 'down') { ctx.moveTo(x - r * 1.1, y - r * 0.9); ctx.lineTo(x + r * 1.1, y - r * 0.9); ctx.lineTo(x, y + r * 1.1); ctx.closePath(); }
-  else if (shape === 'square') ctx.rect(x - r * 0.9, y - r * 0.9, r * 1.8, r * 1.8);
-  else if (shape === 'star') { for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + (k * Math.PI) / 5, rr = k % 2 ? r * 0.55 : r * 1.35; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); }
-  else ctx.arc(x, y, r * 0.85, 0, 6.283);
+// An oversized house seen from above: gable roof (two shaded halves + ridge) and a chimney.
+// `estimated` = no population count: outline only, dashed.
+function drawHouse(x, y, w, color, estimated, f) {
+  const h = w * 0.78, x0 = x - w / 2, y0 = y - h / 2;
+  ctx.lineJoin = 'round';
+  if (estimated) {
+    ctx.setLineDash([4 * f, 3 * f]); ctx.strokeStyle = color; ctx.lineWidth = 2 * f;
+    ctx.strokeRect(x0, y0, w, h);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y); ctx.stroke(); ctx.setLineDash([]);
+  } else {
+    ctx.fillStyle = shade(color, -0.22); ctx.fillRect(x0, y0, w, h / 2);              // sunless slope
+    ctx.fillStyle = color; ctx.fillRect(x0, y, w, h / 2);                              // sunny slope
+    ctx.fillStyle = '#3a2a24'; ctx.fillRect(x0 + w * 0.68, y0 + h * 0.12, Math.max(2 * f, w * 0.13), Math.max(2 * f, w * 0.13));   // chimney
+    ctx.strokeStyle = '#000a'; ctx.lineWidth = 1.5 * f; ctx.strokeRect(x0, y0, w, h);
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y); ctx.strokeStyle = '#0006'; ctx.stroke();
+  }
 }
 
 function draw() {
@@ -180,18 +192,26 @@ function draw() {
     ctx.fillStyle = '#fff'; ctx.fillText(text, sx + dx * f, sy);
   };
   const onScreen = (sx, sy) => sx > -60 && sy > -20 && sx < canvas.width + 60 && sy < canvas.height + 20;
+  let counted = 0, estimated = 0;
   if (layers.settle) {
+    const items = [];
     for (const s of settlements) {
       const st = stateAt(s, yTo); if (!st) continue;
       const [sx, sy] = toScreen(...lonLatToWorld(s.lon, s.lat)); if (!onScreen(sx, sy)) continue;
-      const kd = KIND[st.kind], r = 6 * f;
-      if (s.firstRecorded != null && s.firstRecorded >= yFrom && s.firstRecorded <= yTo) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * f; ctx.beginPath(); ctx.arc(sx, sy, r + 5 * f, 0, 6.283); ctx.stroke(); }
-      shapePath(kd.shape, sx, sy, r);
-      if (s.firstRecorded == null) { ctx.fillStyle = kd.color + '55'; ctx.fill(); ctx.strokeStyle = kd.color; ctx.lineWidth = 2 * f; ctx.stroke(); }
-      else { ctx.fillStyle = kd.color; ctx.fill(); ctx.strokeStyle = '#000c'; ctx.lineWidth = 1.5 * f; ctx.stroke(); }
-      label(s.name, sx, sy, 12);
+      const pop = popAt(s, yTo);
+      items.push({ s, st, pop, sx, sy, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
     }
+    items.sort((a, b) => b.w - a.w);                                   // big houses first, so small ones sit on top and stay visible
+    for (const { s, st, pop, sx, sy, w } of items) {
+      if (s.firstRecorded != null && s.firstRecorded >= yFrom && s.firstRecorded <= yTo) {          // first recorded inside the window
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * f; ctx.beginPath(); ctx.rect(sx - w / 2 - 4 * f, sy - w * 0.39 - 4 * f, w + 8 * f, w * 0.78 + 8 * f); ctx.stroke();
+      }
+      drawHouse(sx, sy, w, KIND[st.kind].color, !pop, f);
+      if (pop) counted++; else estimated++;
+    }
+    for (const { s, pop, sx, sy, w } of items) label(pop ? `${s.name} ${fmtPop(pop.value)}` : s.name, sx, sy, w / (2 * f) + 6);   // labels last, biggest places first
   }
+  document.body.dataset.houses = `${counted},${estimated}`;                                         // counted,estimated (for browser tests)
   if (lighthouses && layers.light) {
     for (const l of lighthouses) {
       if (l.built > yTo) continue;
@@ -248,20 +268,26 @@ function zoomAt(factor, sx, sy) {
 
 // ---------------------------------------------------------------- info line (hover / tap)
 function infoAt(sx, sy) {
-  const f = dpr(), near = 16 * f;
+  const f = dpr(), near = 16 * f, hits = [];                          // candidates near the pointer; the closest wins
   if (layers.settle) for (const s of settlements) {
     const st = stateAt(s, yTo); if (!st) continue;
-    const [px, py] = toScreen(...lonLatToWorld(s.lon, s.lat));
-    if (Math.hypot(px - sx, py - sy) <= near) {
+    const [px, py] = toScreen(...lonLatToWorld(s.lon, s.lat)), pop = popAt(s, yTo);
+    const w = (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f;
+    if (Math.abs(px - sx) <= Math.max(w / 2 + 4 * f, near) && Math.abs(py - sy) <= Math.max(w * 0.39 + 4 * f, near)) {
       const ph = st.phase ? `${KIND[st.kind].label} ${st.phase.from}–${st.phase.to ?? 'ongoing'}` : 'no sourced phase at this year';
-      return `${s.name} · first recorded ${s.firstRecorded ?? 'not sourced'} · ${ph} · confidence ${s.confidence}`;
+      const pp = !pop ? 'population: no count, house size estimated from the phase (outline)'
+        : pop.mode === 'counted' ? `population ${fmtPop(pop.value)} (${pop.counts}, ${pop.year})`
+        : pop.mode === 'interpolated' ? `population about ${fmtPop(pop.value)} (between ${pop.from.year} and ${pop.to.year} counts)`
+        : `population ${fmtPop(pop.value)} (${pop.counts}, nearest count ${pop.year})`;
+      hits.push({ d: Math.hypot(px - sx, py - sy), text: `${s.name} · first recorded ${s.firstRecorded ?? 'not sourced'} · ${ph} · ${pp} · confidence ${s.confidence}` });
     }
   }
   if (lighthouses && layers.light) for (const l of lighthouses) {
     if (l.built > yTo) continue;
-    const [px, py] = toScreen(...lonLatToWorld(l.lon, l.lat));
-    if (Math.hypot(px - sx, py - sy) <= near) return `${l.name} lighthouse · built ${l.built}`;
+    const [px, py] = toScreen(...lonLatToWorld(l.lon, l.lat)), d = Math.hypot(px - sx, py - sy);
+    if (d <= near) hits.push({ d, text: `${l.name} lighthouse · built ${l.built}` });
   }
+  if (hits.length) return hits.sort((a, b) => a.d - b.d)[0].text;
   const [gx, gy] = toWorld(sx, sy), i = Math.floor(gx / gm()), j = Math.floor(gy / gm());
   if (!C.inTile(i, j)) return 'outside the data';
   const m = C.meta, lon = m.bbox.w + (i + 0.5) * C.mpp / m.projection.metersPerDegLon, lat = m.bbox.n - (j + 0.5) * C.mpp / m.projection.metersPerDegLat;
@@ -371,6 +397,8 @@ $('yrTicks').innerHTML = [1700, 1800, 1900, 2025].map((y) => `<span style="left:
 $('scales').innerHTML = SCALES.map((s) => `<button data-s="${s}">1:${s}</button>`).join('');
 $('scales').addEventListener('click', (e) => { if (e.target.dataset.s) setScale(+e.target.dataset.s); });
 document.querySelectorAll('input[name=mode]').forEach((r) => r.addEventListener('change', () => { mode = r.value; draw(); }));
+$('chkDdb').checked = useDdb;
+$('chkDdb').addEventListener('change', (e) => { useDdb = e.target.checked; draw(); panelsYear(); });
 for (const [id, key] of [['chkSettle', 'settle'], ['chkLight', 'light'], ['chkPlaces', 'places'], ['chkRoute', 'route'], ['chkSkerries', 'skerries'], ['chkTrees', 'trees']]) {
   $(id).addEventListener('change', (e) => { layers[key] = e.target.checked; draw(); panelsTrees(); });
 }
@@ -408,13 +436,15 @@ function panelsTrees() {
   document.body.dataset.trees = n;
 }
 function panelsYear() {
-  $('legend').innerHTML = Object.entries(KIND).map(([, k]) => `<span style="color:${k.color};white-space:nowrap">${k.glyph}</span> ${k.label}`).join(' &nbsp; ')
-    + '<br>Hollow marker = first record not sourced. White ring = first recorded within the selected years. A phase is what the sources say; years with no sourced phase show as "settled". Several phases at one year: the latest-starting wins.';
+  $('legend').innerHTML = 'House = settlement, seen from above. Roof colour = phase: '
+    + Object.values(KIND).map((k) => `<span style="color:${k.color}">${k.glyph}</span> ${k.label}`).join(' &nbsp; ')
+    + '<br>Size = population at the end year (log scale). <b>Solid</b> = a counted population; <b>dashed outline</b> = no count, size set by phase (estimated). White frame = first recorded within the selected years. Several phases at one year: the latest-starting wins.';
   const rows = settlements.map((s) => ({ s, st: stateAt(s, yTo) })).filter((r) => r.st);
-  $('setlist').innerHTML = '<tr><th>name</th><th>first</th><th>phase</th><th>conf.</th><th>src</th></tr>' + rows.map(({ s, st }) => {
+  $('setlist').innerHTML = '<tr><th>name</th><th>first</th><th>pop.</th><th>phase</th><th>conf.</th><th>src</th></tr>' + rows.map(({ s, st }) => {
+    const pop = popAt(s, yTo);
     const ph = st.phase ? `${KIND[st.kind].glyph} ${KIND[st.kind].label} ${st.phase.from}–${st.phase.to ?? '…'}` : '–';
     const src = s.sources.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">${i + 1}</a>`).join(' ');
-    return `<tr><td>${s.name}</td><td>${s.firstRecorded ?? '?'}</td><td style="text-align:left">${ph}</td><td>${s.confidence}</td><td>${src}</td></tr>`;
+    return `<tr><td>${s.name}</td><td>${s.firstRecorded ?? '?'}</td><td>${pop ? fmtPop(pop.value) + (pop.mode === 'counted' ? '' : '~') : 'est.'}</td><td style="text-align:left">${ph}</td><td>${s.confidence}</td><td>${src}</td></tr>`;
   }).join('');
   $('setdetails').hidden = !settlements.length;
 }
@@ -458,6 +488,8 @@ try {
   $('loading').remove();
   canvas.width = Math.round(canvas.clientWidth * dpr()); canvas.height = Math.round(canvas.clientHeight * dpr());
   layoutSlider(); setScale(DEFAULT_SCALE); fit();
+  // read-only hook for browser tests and debugging: what does the info line say at a coordinate?
+  window.__coastLab = { infoAtLonLat: (lon, lat) => infoAt(...toScreen(...lonLatToWorld(lon, lat))), scale: () => S, houses: () => document.body.dataset.houses };
   document.body.dataset.ready = '1';
 } catch (err) {
   $('loading').textContent = 'Could not load coast data: ' + err.message;

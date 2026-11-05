@@ -89,7 +89,7 @@
    "lon": 11.36359,
    "osm": "node/2235056035",
    "osmName": "Käringön",
-   "candidates": 3,
+   "candidates": 4,
    "inside": true
   },
   {
@@ -199,7 +199,7 @@
    "lon": 11.38678,
    "osm": "relation/10604590",
    "osmName": "Storön",
-   "candidates": 1,
+   "candidates": 2,
    "inside": true
   },
   {
@@ -279,7 +279,7 @@
    "lon": 11.78046,
    "osm": "node/2235056018",
    "osmName": "Styrsö",
-   "candidates": 3,
+   "candidates": 4,
    "inside": true
   },
   {
@@ -309,6 +309,76 @@
    "lon": 11.25114,
    "osm": "node/29689990",
    "osmName": "Kungshamn",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Strömstad",
+   "kind": "village",
+   "lat": 58.93776,
+   "lon": 11.17361,
+   "osm": "node/30983274",
+   "osmName": "Strömstad",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Fjällbacka",
+   "kind": "village",
+   "lat": 58.59875,
+   "lon": 11.28278,
+   "osm": "node/32309417",
+   "osmName": "Fjällbacka",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Hunnebostrand",
+   "kind": "village",
+   "lat": 58.44124,
+   "lon": 11.30108,
+   "osm": "node/1842051008",
+   "osmName": "Hunnebostrand",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Hamburgsund",
+   "kind": "village",
+   "lat": 58.5598,
+   "lon": 11.26381,
+   "osm": "node/324590172",
+   "osmName": "Hamburgsund",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Havstenssund",
+   "kind": "village",
+   "lat": 58.75316,
+   "lon": 11.18059,
+   "osm": "node/443636993",
+   "osmName": "Havstenssund",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Nordkoster",
+   "kind": "village",
+   "lat": 58.89939,
+   "lon": 11.00253,
+   "osm": "relation/10041804",
+   "osmName": "Nord-Koster",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Sydkoster",
+   "kind": "village",
+   "lat": 58.8806,
+   "lon": 11.03053,
+   "osm": "relation/1695145",
+   "osmName": "Syd-Koster",
    "candidates": 1,
    "inside": true
   }

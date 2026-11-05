@@ -35,8 +35,9 @@ fs.mkdirSync(CACHE, { recursive: true });
 
 // ---------------------------------------------------------------- config
 // One plane for the whole box (so distance fields have no seams), cropped into two tiles on output.
-const BBOX = { s: 57.33, n: 58.45, w: 11.0, e: 12.1 };
-const TILE_DEFS = [
+const BBOX = { s: 57.33, n: 58.95, w: 10.85, e: 12.1 };
+const TILE_DEFS = [                                          // ordered north to south; each tile starts where the one above ends
+  { id: 'koster', s: 58.45, n: 58.95, w: 10.9, e: 11.45 },  // pass 3: Strömstad, Koster, Väderöarna
   { id: 'north', s: 57.85, n: 58.45, w: 11.0, e: 11.8 },   // Smogen .. Marstrand (pass 1 area)
   { id: 'south', s: 57.33, n: 57.85, w: 11.5, e: 12.1 },   // Goteborg archipelago .. Gottskar
 ];
@@ -100,6 +101,9 @@ const WANT = [
   // pass 2: south of Marstrand, plus Kungshamn
   ['Gottskär', 'village'], ['Vrångö', 'village'], ['Hönö', 'village'], ['Öckerö', 'village'], ['Donsö', 'village'], ['Styrsö', 'village'],
   ['Rörö', 'village'], ['Göteborg', 'village'], ['Kungshamn', 'village'],
+  // pass 3: Koster extension
+  ['Strömstad', 'village'], ['Fjällbacka', 'village'], ['Hunnebostrand', 'village'], ['Hamburgsund', 'village'],
+  ['Havstenssund', 'village'], ['Nordkoster', 'village', ['Nordkoster', 'Nord-Koster']], ['Sydkoster', 'village', ['Sydkoster', 'Syd-Koster']],   // OSM spells the islands with a hyphen
 ];
 function placeScore(kind, tags) {
   const p = tags.place;
@@ -176,7 +180,7 @@ const tiles = TILE_DEFS.map((t) => ({
   x0: Math.floor(((t.w - BBOX.w) * plane.mLon) / MPP), x1: Math.min(W, Math.ceil(((t.e - BBOX.w) * plane.mLon) / MPP)),
   y0: Math.floor(((BBOX.n - t.n) * M_PER_DEG_LAT) / MPP), y1: Math.min(H, Math.ceil(((BBOX.n - t.s) * M_PER_DEG_LAT) / MPP)),
 }));
-tiles[1].y0 = tiles[0].y1;
+for (let k = 1; k < tiles.length; k++) tiles[k].y0 = tiles[k - 1].y1;
 const tileOf = new Uint8Array(W * H);                 // 0 = not in any tile, 1 = north, 2 = south
 tiles.forEach((t, k) => { for (let j = t.y0; j < t.y1; j++) tileOf.fill(k + 1, j * W + t.x0, j * W + t.x1); });
 for (const t of tiles) log(`  tile ${t.id}: x ${t.x0}..${t.x1}, y ${t.y0}..${t.y1}  (${t.x1 - t.x0} x ${t.y1 - t.y0})`);
@@ -188,11 +192,13 @@ const coastParts = [
   await overpass(coastQuery(57.85, 11.0, 58.45, 11.8), path.join(CACHE, 'coastlines.json')),        // north tile (pass 1 file)
   await overpass(coastQuery(57.85, 11.8, 58.45, 12.1), path.join(CACHE, 'coastlines-east.json')),   // strip east of it: keeps distance fields honest at the tile edge
   await overpass(coastQuery(57.33, 11.0, 57.85, 12.1), path.join(CACHE, 'coastlines-south.json')),  // pass 2: south extension
+  await overpass(coastQuery(58.45, 10.85, 58.95, 11.6), path.join(CACHE, 'coastlines-koster.json')), // pass 3: Koster extension (+ strip east of it)
 ];
 const coastJson = { elements: [...new Map(coastParts.flatMap((j) => j.elements).map((e) => [e.id, e])).values()] }; // de-duplicated by OSM way id
 await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N58_00_E011_00_DEM/Copernicus_DSM_COG_10_N58_00_E011_00_DEM.tif', path.join(CACHE, 'dem-N58E011.tif'));
 await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N57_00_E011_00_DEM/Copernicus_DSM_COG_10_N57_00_E011_00_DEM.tif', path.join(CACHE, 'dem-N57E011.tif'));
 await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N57_00_E012_00_DEM/Copernicus_DSM_COG_10_N57_00_E012_00_DEM.tif', path.join(CACHE, 'dem-N57E012.tif'));
+await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N58_00_E010_00_DEM/Copernicus_DSM_COG_10_N58_00_E010_00_DEM.tif', path.join(CACHE, 'dem-N58E010.tif'));
 await download('https://geodata.naturvardsverket.se/nedladdning/marktacke/NMD2018/bas_lan_ogen/O_lan_nmd2018bas_ogeneraliserad_v1_1.zip', path.join(CACHE, 'nmd-O.zip'));
 await download('https://geodata.naturvardsverket.se/nedladdning/marktacke/NMD2018/bas_lan_ogen/N_lan_nmd2018bas_ogeneraliserad_v1_1.zip', path.join(CACHE, 'nmd-N.zip'));
 const NMD_COUNTIES = ['O', 'N'];                     // O = Vastra Gotaland, N = Halland (Gottskar is in Kungsbacka)
@@ -272,7 +278,7 @@ lap('done');
 // ---- 5. heights from Copernicus GLO-30
 log('4. heights');
 const dem = {};
-for (const key of ['N57E011', 'N57E012', 'N58E011']) {
+for (const key of ['N57E011', 'N57E012', 'N58E010', 'N58E011']) {
   const t = openTiff(path.join(CACHE, `dem-${key}.tif`));
   dem[key] = { w: t.width, h: t.height, lat0: +key.slice(1, 3), lon0: +key.slice(4, 7), data: t.readWindow(0, 0, t.width, t.height).data };
   t.close();
@@ -379,9 +385,9 @@ lap('land classes: ' + JSON.stringify(classPct));
 // ---- 7. write rasters
 log('6. rasters');
 const landH = new Uint16Array(W * H);
-for (let p = 0; p < landH.length; p++) if (land[p]) landH[p] = Math.min(65535, Math.round(hgt[p] * 2) * 5 + 1);   // 0.5 m steps (stored as decimetres): far finer than a 30 m model deserves, and it halves the file
+for (let p = 0; p < landH.length; p++) if (land[p]) landH[p] = Math.min(65535, Math.round(hgt[p]) * 10 + 1);   // 1 m steps (stored as decimetres): the 30 m satellite model is not accurate to better than a few metres, and coarser steps keep the file small
 const depthDm = new Uint16Array(W * H);
-for (let p = 0; p < depthDm.length; p++) if (!land[p]) depthDm[p] = Math.round(Math.min(DEPTH_MAX_M, DEPTH_BASE_M + DEPTH_PER_M * shoreM(d2Land[p])) * 2) * 5;   // 0.5 m steps
+for (let p = 0; p < depthDm.length; p++) if (!land[p]) depthDm[p] = Math.round(Math.min(DEPTH_MAX_M, DEPTH_BASE_M + DEPTH_PER_M * shoreM(d2Land[p])) * 1) * 10;   // 1 m steps
 const classOut = new Uint8Array(W * H); for (let p = 0; p < classOut.length; p++) classOut[p] = land[p] ? cls[p] : 0;
 const files = {};
 function writeOut(name, buf) { fs.writeFileSync(path.join(OUT, name), buf); files[name] = buf.length; }
@@ -491,8 +497,8 @@ const meta = {
     pixelToLonLat: 'lon = bbox.w + x*mpp/metersPerDegLon ; lat = bbox.n - y*mpp/metersPerDegLat   (x,y = pixel coords, y down)',
   },
   rasters: {
-    '<tile>-land-height.png': '16-bit grey. 0 = water. Land = round(height_m*10)+1 (decimetres + 1), stored in 0.5 m steps. Copernicus GLO-30 is a surface model (tree tops count).',
-    '<tile>-depth.png': `16-bit grey, decimetres in 0.5 m steps. 0 = land. Placeholder model: min(${DEPTH_MAX_M}, ${DEPTH_BASE_M} + ${DEPTH_PER_M} * metres-to-shore). NOT sea-chart data.`,
+    '<tile>-land-height.png': '16-bit grey. 0 = water. Land = round(height_m*10)+1 (decimetres + 1), stored in 1 m steps. Copernicus GLO-30 is a surface model (tree tops count).',
+    '<tile>-depth.png': `16-bit grey, decimetres in 1 m steps. 0 = land. Placeholder model: min(${DEPTH_MAX_M}, ${DEPTH_BASE_M} + ${DEPTH_PER_M} * metres-to-shore). NOT sea-chart data.`,
     '<tile>-classes.png': '8-bit grey, 0 = water, 1..6 = land classes below. Tiles sit on one shared plane: pixel (x,y) of a tile is plane pixel (x0+x, y0+y)',
   },
   classes: CLASSES.map((name, value) => ({ value, name })),
