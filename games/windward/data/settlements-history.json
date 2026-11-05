@@ -1123,40 +1123,40 @@
    "lat": 58.17993,
    "lon": 11.40585,
    "osm": "node/1485582105",
-   "firstRecorded": null,
-   "firstRecordedNote": "no year found in the sources read",
-   "firstRecordedSrc": null,
+   "firstRecorded": 1588,
+   "firstRecordedNote": "The oldest secure evidence of settlement is a 1588 letter mentioning Jens Opekop \"paa Guldholmen\" (Bohusläns museum rapport 2012:39).",
+   "firstRecordedSrc": 2,
    "phases": [
     {
      "from": 1747,
      "to": 1809,
      "kind": "herring-boom",
-     "note": "Bohusläns museum record: salting works, cannery and sailmaker arrived during the great herring periods of the 1700s and 1800s. Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "note": "Bohusläns museum: \"Som en följd av 1700-talets stora sillperiod upplevde fiskeläget en mycket kraftig bebyggelseexpansion\", about a hundred houses by 1800. Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "medium",
      "src": [
-      0,
-      1
+      2,
+      3
      ]
     },
     {
      "from": 1877,
      "to": 1906,
      "kind": "herring-boom",
-     "note": "As above (second period). Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
+     "note": "Bohusläns museum: building \"åter ta fart på 1870-talet då nästa stora sillperiod inträffade\". Years are the regional herring period (Bohusläns museum: 1747-1809 and 1877-1906).",
      "confidence": "medium",
      "src": [
-      0,
-      1
+      2,
+      3
      ]
     },
     {
-     "from": 1910,
+     "from": 1919,
      "to": null,
      "kind": "decline",
-     "note": "Read from the numbers (811 in 1910 down to 98 in 2023), not stated as such by a page.",
-     "confidence": "low",
+     "note": "Länsstyrelsen: after the First World War fishing paid less, people moved, many houses became summer homes, the school and the cannery closed. The page gives no year; 1919 is the year after the war ended.",
+     "confidence": "medium",
      "src": [
-      2
+      4
      ]
     }
    ],
@@ -1165,7 +1165,7 @@
      "year": 1810,
      "value": 357,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1173,7 +1173,7 @@
      "year": 1820,
      "value": 246,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1181,7 +1181,7 @@
      "year": 1830,
      "value": 293,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1189,7 +1189,7 @@
      "year": 1840,
      "value": 341,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1197,7 +1197,7 @@
      "year": 1850,
      "value": 391,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1205,7 +1205,7 @@
      "year": 1860,
      "value": 464,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1213,7 +1213,7 @@
      "year": 1870,
      "value": 485,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1221,7 +1221,7 @@
      "year": 1880,
      "value": 539,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1229,7 +1229,7 @@
      "year": 1890,
      "value": 685,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1237,7 +1237,7 @@
      "year": 1900,
      "value": 724,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1245,7 +1245,7 @@
      "year": 1910,
      "value": 811,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1253,7 +1253,7 @@
      "year": 1920,
      "value": 796,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1261,7 +1261,7 @@
      "year": 1930,
      "value": 692,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1269,7 +1269,7 @@
      "year": 1940,
      "value": 524,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1277,7 +1277,7 @@
      "year": 1950,
      "value": 466,
      "counts": "parish (Gullholmens församling, includes Härmanö)",
-     "src": 2,
+     "src": 5,
      "licence": "ddb-restricted",
      "note": "upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run \"några tiotal högre\" than the built-up area"
     },
@@ -1285,35 +1285,91 @@
      "year": 1960,
      "value": 313,
      "counts": "tätort (SCB)",
-     "src": 3
+     "src": 6
     },
     {
      "year": 1965,
      "value": 232,
      "counts": "tätort (SCB)",
-     "src": 3
+     "src": 6
     },
     {
      "year": 2023,
      "value": 98,
      "counts": "småort (SCB, via sv.wikipedia)",
-     "src": 2
+     "src": 5
     }
    ],
    "parish": {
     "name": "Gullholmens socken",
-    "mapping": "the pre-1960 rows are the parish, which also holds Härmanö; Gullholmen is its main village",
-    "src": 2
+    "mapping": "the pre-1960 rows are the parish, which also holds Härmanö; Gullholmen is its main village. Härmanö has its own entry: do not add the two",
+    "src": 5
    },
    "sources": [
     "https://digitaltmuseum.org/011014337355/gullholmen",
+    "https://vastkuststiftelsen.se/wp-content/uploads/2025/07/harmano_naturreservat_karta_folder.pdf",
+    "https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2012-39.pdf",
     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://www.lansstyrelsen.se/vastra-gotaland/besok-och-upptack/naturreservat/harmano.html",
     "https://sv.wikipedia.org/wiki/Gullholmen",
     "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
+   "confidence": "medium",
+   "notes": [
+    "A kronoholme (state-owned, free to build on) until 1999. Counts from the museum report: 24 resident strandsittare in 1610, about 39 households in 1645, 20 fishing families in the late 1600s, about 100 houses around 1800. Church: chapel parish permitted 1798, church finished autumn 1799. Municipalsamhälle 29 January 1886 (sv.wikipedia)."
+   ]
+  },
+  {
+   "name": "Härmanö",
+   "lat": 58.16015,
+   "lon": 11.37571,
+   "osm": "relation/5463706",
+   "firstRecorded": 1673,
+   "firstRecordedNote": "Figure 5 of Bohusläns museum rapport 2012:39: Felterus's map of 1673 \"visande Gullholmen och Stora och Lilla Hermanö\". The earlier mentions (the saga date 1253, a royal letter of 1565, a customs officer in 1572, the 1587 toll accounts) are of Hermanösund, the sound, whose location is disputed, so they are not taken as a first record of the island.",
+   "firstRecordedSrc": 2,
+   "phases": [
+    {
+     "from": 1900,
+     "to": 1950,
+     "kind": "canning/industry",
+     "note": "Feldspar quarried at Höpallen and Stenvik \"under 1900-talets första hälft\" (half-century only; the folder says the same).",
+     "confidence": "low",
+     "src": [
+      1,
+      0
+     ]
+    }
+   ],
+   "population": [
+    {
+     "year": 2000,
+     "value": 138,
+     "counts": "island residents on Härmanö (118 of them in the built-up area)",
+     "src": 3,
+     "note": "sv.wikipedia: \"Av befolkningen år 2000 var det 20 som bodde på ön Gullholmen och 138 på Härmanö, varav 118 i tätbebyggelsen\" (read verbatim). 138 + 20 = 158, the Gullholmen parish figure for 2000"
+    },
+    {
+     "year": 2012,
+     "value": 92,
+     "counts": "permanent residents on Härmanö",
+     "src": 3,
+     "note": "sv.wikipedia: \"2012 fanns som fastboende endast 10 personer på Gullholmen och 92 på Härmanö\" (read verbatim)"
+    }
+   ],
+   "parish": {
+    "name": "Gullholmens socken",
+    "mapping": "the island lies in this parish; counts are island residents. The Gullholmen parish rows (to 2000) already include Härmanö, so the two are not additive",
+    "src": 1
+   },
+   "sources": [
+    "https://vastkuststiftelsen.se/wp-content/uploads/2025/07/harmano_naturreservat_karta_folder.pdf",
+    "https://sv.wikipedia.org/wiki/H%C3%A4rman%C3%B6",
+    "https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2012-39.pdf",
+    "https://sv.wikipedia.org/wiki/Gullholmen"
+   ],
    "confidence": "low",
    "notes": [
-    "First mention \"under senare delen av 1500-talet\" (no year)."
+    "Farm settlement on the east side \"åtminstone sedan 1500-talet\", combined with home fishing and freight sailing; the farm Härm is the oldest (Västkuststiftelsen folder). About ten house platforms from the 1500s and 1600s excavated at Skållehus. Laga skifte 1831 divided the farms in five. Nature reserve 1967. No herring, decline or resort years are stated for Härmanö itself."
    ]
   },
   {
@@ -1398,7 +1454,7 @@
    ],
    "confidence": "low",
    "notes": [
-    "The 1900 table says 515 but the text 568 for the municipalsamhälle; the labelled 568 is used."
+    "The 1900 table says 515 but the text 568 for the municipalsamhälle; the labelled 568 is used. Chapel parish formed 19 November 1795, church taken into use 1796 (Svenska kyrkan). Olof Knape (later Strömstierna) was born here in 1664."
    ]
   },
   {
@@ -2101,7 +2157,7 @@
    ],
    "confidence": "low",
    "notes": [
-    "\"Med anor tillbaka till 1500-talet\": century only."
+    "\"Med anor tillbaka till 1500-talet\": century only. A medieval cog (built 1345-1365) was recovered off Mollösund in 1981. The first church was probably built in the herring period 1556-1588 (Svenska kyrkan); the current church was consecrated 26 June 1866."
    ]
   },
   {
@@ -2280,6 +2336,16 @@
       0,
       1
      ]
+    },
+    {
+     "from": 1905,
+     "to": null,
+     "kind": "canning/industry",
+     "note": "A large fire in 1905 destroyed much of the village; the shipyard, a cannery and a stonemason's yard started at the same time. No end year stated.",
+     "confidence": "medium",
+     "src": [
+      2
+     ]
     }
    ],
    "population": [
@@ -2323,55 +2389,55 @@
      "year": 1960,
      "value": 229,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 1965,
      "value": 209,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 1970,
      "value": 200,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 1980,
      "value": 198,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 1990,
      "value": 245,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 1995,
      "value": 256,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 2000,
      "value": 225,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 2005,
      "value": 225,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 2010,
      "value": 214,
      "counts": "tätort (SCB)",
-     "src": 2
+     "src": 3
     },
     {
      "year": 2015,
@@ -2394,11 +2460,12 @@
    "sources": [
     "https://sv.wikipedia.org/wiki/H%C3%A4lleviksstrand",
     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
+    "https://www.vastsverige.com/orust/produkter/halleviksstrand/",
     "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
    ],
    "confidence": "low",
    "notes": [
-    "Resort (\"vid 1800-talets slut\") and shipyard (early 1900s): no years."
+    "Warm-bath houses and guesthouses for summer guests (a late-1800s wording, no year). Church built 1904 (a paraphrase, not confirmed verbatim)."
    ]
   },
   {
@@ -3855,7 +3922,7 @@
   }
  ],
  "unsourced": [
-  "firstRecorded year: Kungshamn, Hunnebostrand, Fiskebäckskil, Grundsund, Gullholmen, Åstol, Mollösund, Kyrkesund, Gottskär, Hönö, Öckerö, Donsö, Styrsö, Rörö (pages give a century or nothing)",
+  "firstRecorded year: Kungshamn, Hunnebostrand, Fiskebäckskil, Grundsund, Åstol, Mollösund, Kyrkesund, Gottskär, Hönö, Öckerö, Donsö, Styrsö, Rörö (pages give a century or nothing)",
   "place-specific herring years for: Smögen, Åstol, Fiskebäckskil, Lysekil, Vrångö, Öckerö, Donsö, Gottskär, Göteborg, Strömstad, Fjällbacka, Havstenssund",
   "canning / fish-industry years: Smögen, Lysekil, Fiskebäckskil, Grundsund, Käringön, Mollösund, Skärhamn (shipyards), Hönö, Öckerö, Donsö, Styrsö",
   "granite quarrying years: Smögen, Kungshamn (only \"1800-talets slut\")",

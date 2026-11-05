@@ -110,19 +110,19 @@ gets the same trees. A fully forested disc of radius 250 m holds about 1,964 tre
 
 ## Settlements and population (`games/windward/data/settlements-history.json`, built by `tools/make-settlements.mjs`)
 
-29 villages and towns. Nothing comes from memory: a year or count is recorded only if a fetched page
+30 villages, islands and towns (pass 4 added Härmanö). Nothing comes from memory: a year or count is recorded only if a fetched page
 or table states it, and every entry carries its source URLs. Each entry's `confidence` is its weakest
 dated fact (high = museum / heritage / municipal document states the years; medium = sv.wikipedia or a
 tourism site, or a museum source for the place plus a museum source for the period's years; low = a
 decade or century, borrowed regional years on a weak statement, or a reading of the numbers).
 
 **Date sources used:** Bohusläns museum (regional herring periods 1747–1809 and 1877–1906, the
-Marstrand bath era from 1822, saltery records), Kungälvs kommun *Kulturmiljöunderlag 2014*
+Marstrand bath era from 1822, saltery records, rapport 2012:39 on Gullholmen's harbour), Länsstyrelsen Västra Götaland and Västkuststiftelsen (Härmanö and Gullholmen), Svenska kyrkan church histories (Käringön, Gullholmen, Mollösund), Kungälvs kommun *Kulturmiljöunderlag 2014*
 (Marstrand), Bohusläns museum records on digitaltmuseum.org (Grundsund, Gullholmen), Göteborgs Stad
 heritage document 2021 (Styrsö), vastsverige.com (regional tourism pages: Lysekil bath era from 1846,
 Smögen 1594 and 1900, Strömstad, Käringön), sv.wikipedia (most first-record years). Reached but
 yielding nothing usable: bebyggelseregistret.raa.se, kmr.raa.se, sotenas.se, orust.se, tjorn.se,
-kungsbacka.se, Länsstyrelsen pages. Result: **Marstrand is the only entry with high-confidence facts**;
+kungsbacka.se, Länsstyrelsen pages. Result: **Marstrand and Gullholmen have high-confidence facts** (Gullholmen's first record, 1588, and its 1673 map come from Bohusläns museum rapport 2012:39, read in full as text; Härmanö's first record, 1673, from the same report);
 the regional herring periods are now high (Bohusläns museum states them), but most place-specific
 years remain medium or low. The file's `unsourced` list names what is still missing.
 
@@ -148,6 +148,18 @@ småort, municipalsamhälle, parish, island residents).
 off as Arvidsvik), Smögen + Kungshamn + Väjern one tätort from 2020 (shown on Kungshamn, so Smögen is
 counted inside it from then), Hönö + Öckerö merged 2018 (2020 uses island residents instead),
 Styrsö + Donsö merged 2020 (same), Kyrkesund 76 → 547 (2015), Gottskär 774 → 3,420 (1990–1995).
+
+## Story material (`games/windward/data/history-start-area.md`)
+
+Narrative layer for west Orust (Käringön, Måseskär, Gullholmen, Härmanö, Hälleviksstrand, Mollösund and the
+"Kråkesund" gap): 56 items (dated events, people, wrecks, cairns, legends), each with a source link and a confidence,
+plus a **Not found** list per place. Format checked by `src/history-start-area.test.js`. Sources and how they
+were checked: Bohusläns museum rapport 2012:39 and the Västkuststiftelsen Härmanö folder were downloaded and
+every quoted sentence was found in the PDF text; Svenska kyrkan, sv.wikipedia, DigitaltMuseum and vastsverige.com
+pages were re-read by a second reader, with the "as relayed" items marked. Not found, even after targeted
+searches: any vårdkase (signal-fire) site on Orust, any Bronze Age cairn record (fornsok.se was not reachable),
+pre-1900 named wrecks, and a place called "Kråkesund" (the nearest real name is probably Kråksundsgap, from a
+search summary only; TODO(felix) confirm).
 
 ## Rebuild
 

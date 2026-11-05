@@ -42,6 +42,8 @@ solved, facet rule, lab slider, URL overrides).
   settlements-history.json + year slider in coast-lab.html; not merged.
 - Windward real coast pass 3 (same branch): map north to Koster (6.8 MB), population houses by year
   (SCB CC0 + sourced rows), better settlement sources; not merged.
+- Windward real coast pass 4 (same branch): west-Orust story file (data/history-start-area.md), Härmanö added,
+  houses merge into "+n" piles when zoomed out; not merged.
 
 ## Next
 

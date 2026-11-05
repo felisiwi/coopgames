@@ -136,4 +136,16 @@ check('the population rules differ for a village with and without counts at the 
   assert.equal(stateAt(by['Marstrand'], 1850).kind, 'resort');
 });
 
+check('Härmanö is in the data, with its own counts that are not added to Gullholmen\'s parish rows', () => {
+  const by = Object.fromEntries(data.settlements.map((s) => [s.name, s]));
+  const h = by['Härmanö'], g = by['Gullholmen'];
+  assert.ok(h, 'Härmanö missing');
+  assert.equal(h.firstRecorded, 1673);
+  assert.ok(h.population.length >= 2 && h.population.every((o) => /Härmanö/.test(o.counts)));
+  assert.match(h.parish.mapping, /not additive/);
+  assert.match(g.parish.mapping, /do not add/);
+  assert.equal(g.firstRecorded, 1588);                                                        // Bohusläns museum rapport 2012:39
+  assert.deepEqual(h.population.map((o) => [o.year, o.value]), [[2000, 138], [2012, 92]]);   // as relayed from sv.wikipedia; the notes say Gullholmen island had 20 and 10
+});
+
 console.log(`\n${passed} passed`);

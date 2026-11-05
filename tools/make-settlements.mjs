@@ -31,6 +31,10 @@ const U = {
   stromstadTour: 'https://www.vastsverige.com/stromstad/artikel/historia/',
   goteborgDoc: 'https://www5.goteborg.se/prod/fastighetskontoret/etjanst/planobygg.nsf/vyFiler/Br%C3%A4nn%C3%B6%20-%20Handel%20och%20bost%C3%A4der-Plan%20ut%C3%B6kat%20f%C3%B6rfarande%20-%20granskning-Kulturmilj%C3%B6/$File/11.%20Kultur.pdf',
   kyrkesundMuseum: 'https://www.bohuslansmuseum.se/rapport/trankokeriet-kalhuvudet/',
+  museumGullholmen: 'https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2012-39.pdf',   // Bohusläns museum rapport 2012:39 (read as text)
+  lansstyrelsenHarmano: 'https://www.lansstyrelsen.se/vastra-gotaland/besok-och-upptack/naturreservat/harmano.html',
+  harmanoFolder: 'https://vastkuststiftelsen.se/wp-content/uploads/2025/07/harmano_naturreservat_karta_folder.pdf',        // read as text
+  hallevikTour: 'https://www.vastsverige.com/orust/produkter/halleviksstrand/',
 };
 const RANK = { low: 0, medium: 1, high: 2 };
 const DDB = 'ddb-restricted';   // upstream is Tabellverket / the Demographic Data Base (Umea): terms forbid bulk copying and commercial use
@@ -117,14 +121,25 @@ const settlements = [
     sources: [U.grundsundMuseum],
   }),
   entry('Gullholmen', {
-    phases: [H1('medium', 'Bohusläns museum record: salting works, cannery and sailmaker arrived during the great herring periods of the 1700s and 1800s. ' + REG, [U.gullholmenMuseum, U.museumHerring]),
-      H2('medium', 'As above (second period). ' + REG, [U.gullholmenMuseum, U.museumHerring]),
-      { from: 1910, to: null, kind: 'decline', conf: 'low', note: 'Read from the numbers (811 in 1910 down to 98 in 2023), not stated as such by a page.', src: [W('Gullholmen')] }],
+    first: { year: 1588, conf: 'high', note: 'The oldest secure evidence of settlement is a 1588 letter mentioning Jens Opekop "paa Guldholmen" (Bohusläns museum rapport 2012:39).', src: U.museumGullholmen },
+    phases: [H1('medium', 'Bohusläns museum: "Som en följd av 1700-talets stora sillperiod upplevde fiskeläget en mycket kraftig bebyggelseexpansion", about a hundred houses by 1800. ' + REG, [U.museumGullholmen, U.museumHerring]),
+      H2('medium', 'Bohusläns museum: building "åter ta fart på 1870-talet då nästa stora sillperiod inträffade". ' + REG, [U.museumGullholmen, U.museumHerring]),
+      { from: 1919, to: null, kind: 'decline', conf: 'medium', note: 'Länsstyrelsen: after the First World War fishing paid less, people moved, many houses became summer homes, the school and the cannery closed. The page gives no year; 1919 is the year after the war ended.', src: [U.lansstyrelsenHarmano] }],
     pop: [...rows([[1810, 357], [1820, 246], [1830, 293], [1840, 341], [1850, 391], [1860, 464], [1870, 485], [1880, 539], [1890, 685], [1900, 724], [1910, 811], [1920, 796], [1930, 692], [1940, 524], [1950, 466]],
       'parish (Gullholmens församling, includes Härmanö)', W('Gullholmen'), { licence: DDB, note: 'upstream: Folkmängdsdatabasen (Demographic Data Base, Umeå); the page says the parish figures run "några tiotal högre" than the built-up area' }),
       ...scbRows('1421TB110'), ...smaort('Gullholmen', [[2023, 98]])],
-    parish: { name: 'Gullholmens socken', mapping: 'the pre-1960 rows are the parish, which also holds Härmanö; Gullholmen is its main village', src: W('Gullholmen') },
-    notes: ['First mention "under senare delen av 1500-talet" (no year).'],
+    parish: { name: 'Gullholmens socken', mapping: 'the pre-1960 rows are the parish, which also holds Härmanö; Gullholmen is its main village. Härmanö has its own entry: do not add the two', src: W('Gullholmen') },
+    sources: [U.gullholmenMuseum, U.harmanoFolder],
+    notes: ['A kronoholme (state-owned, free to build on) until 1999. Counts from the museum report: 24 resident strandsittare in 1610, about 39 households in 1645, 20 fishing families in the late 1600s, about 100 houses around 1800. Church: chapel parish permitted 1798, church finished autumn 1799. Municipalsamhälle 29 January 1886 (sv.wikipedia).'],
+  }),
+  entry('Härmanö', {
+    first: { year: 1673, conf: 'high', note: 'Figure 5 of Bohusläns museum rapport 2012:39: Felterus\'s map of 1673 "visande Gullholmen och Stora och Lilla Hermanö". The earlier mentions (the saga date 1253, a royal letter of 1565, a customs officer in 1572, the 1587 toll accounts) are of Hermanösund, the sound, whose location is disputed, so they are not taken as a first record of the island.', src: U.museumGullholmen },
+    phases: [{ from: 1900, to: 1950, kind: 'canning/industry', conf: 'low', note: 'Feldspar quarried at Höpallen and Stenvik "under 1900-talets första hälft" (half-century only; the folder says the same).', src: [W('Härmanö'), U.harmanoFolder] }],
+    pop: [...rows([[2000, 138]], 'island residents on Härmanö (118 of them in the built-up area)', W('Gullholmen'), { note: 'sv.wikipedia: "Av befolkningen år 2000 var det 20 som bodde på ön Gullholmen och 138 på Härmanö, varav 118 i tätbebyggelsen" (read verbatim). 138 + 20 = 158, the Gullholmen parish figure for 2000' }),
+      ...rows([[2012, 92]], 'permanent residents on Härmanö', W('Gullholmen'), { note: 'sv.wikipedia: "2012 fanns som fastboende endast 10 personer på Gullholmen och 92 på Härmanö" (read verbatim)' })],
+    parish: { name: 'Gullholmens socken', mapping: 'the island lies in this parish; counts are island residents. The Gullholmen parish rows (to 2000) already include Härmanö, so the two are not additive', src: W('Härmanö') },
+    sources: [U.harmanoFolder],
+    notes: ['Farm settlement on the east side "åtminstone sedan 1500-talet", combined with home fishing and freight sailing; the farm Härm is the oldest (Västkuststiftelsen folder). About ten house platforms from the 1500s and 1600s excavated at Skållehus. Laga skifte 1831 divided the farms in five. Nature reserve 1967. No herring, decline or resort years are stated for Härmanö itself.'],
   }),
   entry('Käringön', {
     first: { year: 1659, conf: 'medium', note: '"Käringön skrevs 1659 Kierlingøon"', src: W('Käringön') },
@@ -133,7 +148,7 @@ const settlements = [
       ...rows([[1925, 548], [1944, 336]], 'as printed (unlabelled)', W('Käringön'), { note: 'upstream: Nordisk Familjebok; När, var, hur? 1945' }),
       ...scbRows('1421TB111'), ...island2020('Käringön', 80), ...smaort('Käringön', [[2023, 73]])],
     parish: { name: 'Käringöns socken', mapping: 'Käringön is the kyrkby of this one-island parish', src: W('Käringön') },
-    notes: ['The 1900 table says 515 but the text 568 for the municipalsamhälle; the labelled 568 is used.'],
+    notes: ['The 1900 table says 515 but the text 568 for the municipalsamhälle; the labelled 568 is used. Chapel parish formed 19 November 1795, church taken into use 1796 (Svenska kyrkan). Olof Knape (later Strömstierna) was born here in 1664.'],
   }),
   entry('Åstol', {
     phases: [{ from: 1970, to: 1979, kind: 'decline', conf: 'low', note: '"Fiskenäringen upphörde på 1970-talet." Decade only.', src: [W('Åstol')] }],
@@ -164,7 +179,7 @@ const settlements = [
     pop: [...rows([[1750, 190], [1760, 207], [1769, 249], [1780, 351], [1790, 385], [1795, 432], [1805, 430], [1810, 388], [1820, 380], [1830, 393], [1840, 381], [1850, 482], [1860, 575], [1870, 618], [1880, 708], [1890, 891]],
       'parish as printed (the page does not say what each row counts)', W('Mollösund'), { licence: DDB, note: 'upstream: Tabellverket and Folkmängdsdatabasen (Demographic Data Base, Umeå)' }),
       ...rows([[1900, 903], [1910, 965], [1920, 959], [1930, 782], [1940, 580], [1950, 500]], 'as printed', W('Mollösund'), { note: 'upstream: SCB Folkräkningen' }), ...scbRows('1421TB105')],
-    parish: { name: 'Mollösunds socken', mapping: 'Mollösund is the kyrkby of this parish; the pre-1960 rows are the parish', src: W('Mollösund') }, notes: ['"Med anor tillbaka till 1500-talet": century only.'],
+    parish: { name: 'Mollösunds socken', mapping: 'Mollösund is the kyrkby of this parish; the pre-1960 rows are the parish', src: W('Mollösund') }, notes: ['"Med anor tillbaka till 1500-talet": century only. A medieval cog (built 1345-1365) was recovered off Mollösund in 1981. The first church was probably built in the herring period 1556-1588 (Svenska kyrkan); the current church was consecrated 26 June 1866.'],
   }),
   entry('Marstrand', {
     first: { year: 1293, conf: 'medium', note: '"Namnet Marstrand finns belagt från 1293"', src: W('Marstrand') },
@@ -178,9 +193,10 @@ const settlements = [
   }),
   entry('Hälleviksstrand', {
     first: { year: 1617, conf: 'medium', note: '"nämns i skriftliga källor första gången 1617"', src: W('Hälleviksstrand') },
-    phases: [H1('low', 'Place page: herring fishing and salteries grew "under 1700-talets stora sillperiod". ' + REG, [W('Hälleviksstrand'), U.museumHerring])],
+    phases: [H1('low', 'Place page: herring fishing and salteries grew "under 1700-talets stora sillperiod". ' + REG, [W('Hälleviksstrand'), U.museumHerring]),
+      { from: 1905, to: null, kind: 'canning/industry', conf: 'medium', note: 'A large fire in 1905 destroyed much of the village; the shipyard, a cannery and a stonemason\'s yard started at the same time. No end year stated.', src: [U.hallevikTour] }],
     pop: [...rows([[1900, 438], [1910, 503], [1920, 484], [1930, 415], [1940, 346], [1950, 277]], 'folkräkning (as printed)', W('Hälleviksstrand')), ...scbRows('1421TB103'), ...smaort('Hälleviksstrand', [[2015, 187], [2023, 181]])],
-    parish: { name: 'Morlanda socken', mapping: 'the village lies in this parish; counts are for the locality', src: W('Hälleviksstrand') }, notes: ['Resort ("vid 1800-talets slut") and shipyard (early 1900s): no years.'],
+    parish: { name: 'Morlanda socken', mapping: 'the village lies in this parish; counts are for the locality', src: W('Hälleviksstrand') }, notes: ['Warm-bath houses and guesthouses for summer guests (a late-1800s wording, no year). Church built 1904 (a paraphrase, not confirmed verbatim).'],
   }),
   entry('Kyrkesund', {
     phases: [H1('medium', 'A trankokeri (train-oil works) was built on Kålhuvudet in 1780 (place page). ' + REG, [W('Kyrkesund'), U.museumHerring]),
@@ -289,7 +305,7 @@ const out = {
   },
   settlements,
   unsourced: [
-    'firstRecorded year: Kungshamn, Hunnebostrand, Fiskebäckskil, Grundsund, Gullholmen, Åstol, Mollösund, Kyrkesund, Gottskär, Hönö, Öckerö, Donsö, Styrsö, Rörö (pages give a century or nothing)',
+    'firstRecorded year: Kungshamn, Hunnebostrand, Fiskebäckskil, Grundsund, Åstol, Mollösund, Kyrkesund, Gottskär, Hönö, Öckerö, Donsö, Styrsö, Rörö (pages give a century or nothing)',
     'place-specific herring years for: Smögen, Åstol, Fiskebäckskil, Lysekil, Vrångö, Öckerö, Donsö, Gottskär, Göteborg, Strömstad, Fjällbacka, Havstenssund',
     'canning / fish-industry years: Smögen, Lysekil, Fiskebäckskil, Grundsund, Käringön, Mollösund, Skärhamn (shipyards), Hönö, Öckerö, Donsö, Styrsö',
     'granite quarrying years: Smögen, Kungshamn (only "1800-talets slut")',

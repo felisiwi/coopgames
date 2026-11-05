@@ -48,6 +48,7 @@ let boat = { i: 0, j: 0 };                      // plane pixel coords: stays put
 const imgs = { terrain: new Map(), cover: new Map() };
 const treesFns = new Map();
 let treeCache = { key: '', list: [] };
+let lastPlaced = [];                              // houses drawn in the last frame (for browser tests)
 
 // ---------------------------------------------------------------- years (URL: ?from=&to=)
 const qs = new URLSearchParams(location.search);
@@ -59,7 +60,27 @@ if (yFrom > yTo) [yFrom, yTo] = [yTo, yFrom];
 const stateAt = (st, y) => stateAtYear(st, y, YEAR_MAX);
 const popAt = (st, y) => populationAt(st, y, { useDdb });
 // Houses are oversized on purpose, but on a small map (phone, zoomed out) they would bury each other: scale them with zoom.
-const houseScale = () => clamp(Math.sqrt(zoom / 0.055), 0.45, 1.5);
+const cssZoom = () => zoom / dpr();                                    // zoom in CSS px per game metre (zoom itself counts device px)
+const houseScale = () => clamp(Math.sqrt(cssZoom() / 0.055), 0.45, 1.5);
+// Below this zoom (px per game metre) houses that would overlap are merged into the biggest one ("+n" badge); zoom in and they separate.
+const CLUSTER_BELOW_ZOOM = 0.25;                  // CSS px per game metre
+function houseLayout(f) {
+  const items = [];
+  for (const s of settlements) {
+    const st = stateAt(s, yTo); if (!st) continue;
+    const [sx, sy] = toScreen(...lonLatToWorld(s.lon, s.lat)), pop = popAt(s, yTo);
+    items.push({ s, st, pop, sx, sy, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
+  }
+  items.sort((a, b) => b.w - a.w);                                   // big houses first: they host the small ones they would cover
+  const pad = 6 * f, placed = [];
+  for (const it of items) {
+    const box = [it.sx - it.w / 2 - pad, it.sy - it.w * 0.39 - pad, it.sx + it.w / 2 + pad, it.sy + it.w * 0.39 + pad];
+    const host = cssZoom() < CLUSTER_BELOW_ZOOM ? placed.find((p) => box[0] < p.box[2] && box[2] > p.box[0] && box[1] < p.box[3] && box[3] > p.box[1]) : null;
+    if (host) host.members.push(it); else placed.push({ ...it, box, members: [] });
+  }
+  return { items, placed };
+}
+const clusterText = (p) => `${p.members.length} more here: ${p.members.map((m) => m.s.name).join(', ')}`;
 const fmtPop = (n) => n.toLocaleString('en-US');
 function shade(hex, amt) {                      // amt -1..1 : darker .. lighter
   const n = parseInt(hex.slice(1), 16), mix = amt < 0 ? 0 : 255, k = Math.abs(amt);
@@ -184,33 +205,47 @@ function draw() {
   // labels share one collision list: settlements first, then lighthouses, then other places
   ctx.font = `${12 * f}px system-ui, sans-serif`; ctx.textBaseline = 'middle';
   const taken = [];
-  const label = (text, sx, sy, dx = 10) => {
-    const tw = ctx.measureText(text).width, box = [sx + (dx - 2) * f, sy - 8 * f, tw + 4 * f, 16 * f];
-    if (taken.some((b) => box[0] < b[0] + b[2] && box[0] + box[2] > b[0] && box[1] < b[1] + b[3] && box[1] + box[3] > b[1])) return;
-    taken.push(box);
-    ctx.lineWidth = 3 * f; ctx.strokeStyle = '#000c'; ctx.strokeText(text, sx + dx * f, sy);
-    ctx.fillStyle = '#fff'; ctx.fillText(text, sx + dx * f, sy);
+  const hits = (box) => taken.some((b) => box[0] < b[0] + b[2] && box[0] + box[2] > b[0] && box[1] < b[1] + b[3] && box[1] + box[3] > b[1]);
+  // A label goes to the right of its marker; if that collides or runs off screen it tries the left, then below, then above;
+  // if nothing is clear it is skipped. hh = half the marker's height (device px) for the below/above tries.
+  const label = (text, sx, sy, dx = 10, hh = 8 * f) => {
+    const tw = ctx.measureText(text).width, bw = tw + 4 * f, bh = 16 * f, tries = [];
+    const add = (align, tx, ty, box) => tries.push({ align, tx, ty, box, fits: box[0] >= 0 && box[0] + box[2] <= canvas.width, clear: !hits(box) });
+    add('start', sx + dx * f, sy, [sx + (dx - 2) * f, sy - bh / 2, bw, bh]);
+    add('end', sx - dx * f, sy, [sx - (dx - 2) * f - bw, sy - bh / 2, bw, bh]);
+    add('center', sx, sy + hh + 3 * f + bh / 2, [sx - bw / 2, sy + hh + 3 * f, bw, bh]);
+    add('center', sx, sy - hh - 3 * f - bh / 2, [sx - bw / 2, sy - hh - 3 * f - bh, bw, bh]);
+    const pick = tries.find((t) => t.fits && t.clear) || tries.find((t) => t.clear);
+    if (!pick) return;
+    taken.push(pick.box);
+    ctx.textAlign = pick.align;
+    ctx.lineWidth = 3 * f; ctx.strokeStyle = '#000c'; ctx.strokeText(text, pick.tx, pick.ty);
+    ctx.fillStyle = '#fff'; ctx.fillText(text, pick.tx, pick.ty);
+    ctx.textAlign = 'start';
   };
   const onScreen = (sx, sy) => sx > -60 && sy > -20 && sx < canvas.width + 60 && sy < canvas.height + 20;
-  let counted = 0, estimated = 0;
+  let counted = 0, estimated = 0, merged = 0;
   if (layers.settle) {
-    const items = [];
-    for (const s of settlements) {
-      const st = stateAt(s, yTo); if (!st) continue;
-      const [sx, sy] = toScreen(...lonLatToWorld(s.lon, s.lat)); if (!onScreen(sx, sy)) continue;
-      const pop = popAt(s, yTo);
-      items.push({ s, st, pop, sx, sy, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
-    }
-    items.sort((a, b) => b.w - a.w);                                   // big houses first, so small ones sit on top and stay visible
-    for (const { s, st, pop, sx, sy, w } of items) {
+    const { items, placed } = houseLayout(f);
+    for (const it of items) { if (it.pop) counted++; else estimated++; }
+    for (const p of placed) {
+      const { s, st, pop, sx, sy, w } = p;
+      if (!onScreen(sx, sy)) continue;
       if (s.firstRecorded != null && s.firstRecorded >= yFrom && s.firstRecorded <= yTo) {          // first recorded inside the window
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * f; ctx.beginPath(); ctx.rect(sx - w / 2 - 4 * f, sy - w * 0.39 - 4 * f, w + 8 * f, w * 0.78 + 8 * f); ctx.stroke();
       }
+      if (p.members.length) {                                                                         // a pile: n smaller places hide behind this house
+        merged += p.members.length;
+        ctx.fillStyle = '#7d8a93'; ctx.strokeStyle = '#000b'; ctx.lineWidth = 1.5 * f;
+        for (const k of p.members.length > 1 ? [2, 1] : [1]) { ctx.beginPath(); ctx.rect(sx - w / 2 + 3 * f * k, sy - w * 0.39 - 3 * f * k, w, w * 0.78); ctx.fill(); ctx.stroke(); }
+      }
       drawHouse(sx, sy, w, KIND[st.kind].color, !pop, f);
-      if (pop) counted++; else estimated++;
     }
-    for (const { s, pop, sx, sy, w } of items) label(pop ? `${s.name} ${fmtPop(pop.value)}` : s.name, sx, sy, w / (2 * f) + 6);   // labels last, biggest places first
-  }
+    for (const p of placed) { const k = p.members.length > 1 ? 6 * f : p.members.length ? 3 * f : 0; taken.push([p.sx - p.w / 2, p.sy - p.w * 0.39 - k, p.w + k, p.w * 0.78 + k]); }   // labels keep clear of every house and its pile
+    for (const p of placed) label((p.pop ? `${p.s.name} ${fmtPop(p.pop.value)}` : p.s.name) + (p.members.length ? ` +${p.members.length}` : ''), p.sx, p.sy, p.w / (2 * f) + 6 + (p.members.length > 1 ? 4 : p.members.length ? 1 : 0), p.w * 0.39 + (p.members.length ? 6 * f : 0));   // labels last, biggest places first
+    lastPlaced = placed.map((p) => ({ name: p.s.name, box: [p.sx - p.w / 2, p.sy - p.w * 0.39, p.sx + p.w / 2, p.sy + p.w * 0.39], members: p.members.map((m) => m.s.name) }));
+  } else lastPlaced = [];
+  document.body.dataset.drawn = `${lastPlaced.length},${merged}`;                                    // houses drawn, places merged into others
   document.body.dataset.houses = `${counted},${estimated}`;                                         // counted,estimated (for browser tests)
   if (lighthouses && layers.light) {
     for (const l of lighthouses) {
@@ -267,19 +302,26 @@ function zoomAt(factor, sx, sy) {
 }
 
 // ---------------------------------------------------------------- info line (hover / tap)
+function clusterAt(sx, sy) {                          // a merged house under the pointer, or null
+  if (!layers.settle) return null;
+  const f = dpr(), near = 16 * f;
+  for (const p of houseLayout(f).placed) {
+    if (p.members.length && Math.abs(p.sx - sx) <= Math.max(p.w / 2 + 4 * f, near) && Math.abs(p.sy - sy) <= Math.max(p.w * 0.39 + 4 * f, near)) return p;
+  }
+  return null;
+}
 function infoAt(sx, sy) {
   const f = dpr(), near = 16 * f, hits = [];                          // candidates near the pointer; the closest wins
-  if (layers.settle) for (const s of settlements) {
-    const st = stateAt(s, yTo); if (!st) continue;
-    const [px, py] = toScreen(...lonLatToWorld(s.lon, s.lat)), pop = popAt(s, yTo);
-    const w = (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f;
+  if (layers.settle) for (const p of houseLayout(f).placed) {
+    const { s, st, pop, sx: px, sy: py, w } = p;
     if (Math.abs(px - sx) <= Math.max(w / 2 + 4 * f, near) && Math.abs(py - sy) <= Math.max(w * 0.39 + 4 * f, near)) {
       const ph = st.phase ? `${KIND[st.kind].label} ${st.phase.from}–${st.phase.to ?? 'ongoing'}` : 'no sourced phase at this year';
       const pp = !pop ? 'population: no count, house size estimated from the phase (outline)'
         : pop.mode === 'counted' ? `population ${fmtPop(pop.value)} (${pop.counts}, ${pop.year})`
         : pop.mode === 'interpolated' ? `population about ${fmtPop(pop.value)} (between ${pop.from.year} and ${pop.to.year} counts)`
         : `population ${fmtPop(pop.value)} (${pop.counts}, nearest count ${pop.year})`;
-      hits.push({ d: Math.hypot(px - sx, py - sy), text: `${s.name} · first recorded ${s.firstRecorded ?? 'not sourced'} · ${ph} · ${pp} · confidence ${s.confidence}` });
+      hits.push({ d: Math.hypot(px - sx, py - sy), cluster: p.members.length ? p : null,
+        text: `${s.name} · first recorded ${s.firstRecorded ?? 'not sourced'} · ${ph} · ${pp} · confidence ${s.confidence}` + (p.members.length ? ` · ${clusterText(p)} (tap to zoom in)` : '') });
     }
   }
   if (lighthouses && layers.light) for (const l of lighthouses) {
@@ -332,7 +374,10 @@ const endPointer = (e) => {
   const wasTap = gesture && gesture.moved < 6 * (gesture.type === 'boat' ? dpr() : 1);
   pointers.delete(e.pointerId);
   if (pointers.size < 2) pinch = null;
-  if (wasTap) $('status').textContent = infoAt(...evtScreen(e));         // tap = show info (phones have no hover)
+  if (wasTap) {                                                            // tap = show info (phones have no hover); tap on a "+n" house zooms in
+    const [tx, ty] = evtScreen(e), c = clusterAt(tx, ty);
+    if (c) { $('status').textContent = infoAt(tx, ty); zoomAt(2.6, c.sx, c.sy); } else $('status').textContent = infoAt(tx, ty);
+  }
   if (!pointers.size) { gesture = null; canvas.classList.remove('drag'); }
 };
 canvas.addEventListener('pointerup', endPointer);
@@ -489,7 +534,7 @@ try {
   canvas.width = Math.round(canvas.clientWidth * dpr()); canvas.height = Math.round(canvas.clientHeight * dpr());
   layoutSlider(); setScale(DEFAULT_SCALE); fit();
   // read-only hook for browser tests and debugging: what does the info line say at a coordinate?
-  window.__coastLab = { infoAtLonLat: (lon, lat) => infoAt(...toScreen(...lonLatToWorld(lon, lat))), scale: () => S, houses: () => document.body.dataset.houses };
+  window.__coastLab = { drawnHouses: () => lastPlaced, zoom: () => zoom, cssZoom: () => cssZoom(), infoAtLonLat: (lon, lat) => infoAt(...toScreen(...lonLatToWorld(lon, lat))), scale: () => S, houses: () => document.body.dataset.houses };
   document.body.dataset.ready = '1';
 } catch (err) {
   $('loading').textContent = 'Could not load coast data: ' + err.message;
