@@ -177,7 +177,8 @@ multiplayer, and what it talks to.
 ### 13. Saving
 - The whole world state (markets, clock, players) is plain data that can be
   saved and loaded. If saving is hard, a system is holding state in the
-  wrong place.
+  wrong place. *Updated 2026-11-05: state is per era; see "Data model: the
+  world remembers".*
 
 ## How we build it (the game-developer approach)
 
@@ -207,7 +208,7 @@ Each stage is small, playable and tested before the next.
    rumbles then fades, "not yet", until the story exists). Items on deck;
    small things kept on the device.
 2. **Co-op visiting:** a room with no save; smart ping; the pair net.
-3. **3a, saving, chart, story start at a port:** the first real save;
+3. **3a, saving, chart, story start at a port:** the first real save (with per-era world state);
    granddad's chart (the west Orust section); device-kept things move into the
    save; the story is offered at a port.
 4. **3b, storm, jump, time-lapse, sea chest:** the can't-escape storm, the
@@ -324,7 +325,9 @@ mystical.
 - **The opening era locks after the first jump.** Much later you return to
   it, when you have almost forgotten it, and the lighthouses carry meaning
   then, for example their real flash patterns as a code or a way home.
-  **Open: what that meaning is.** Under review with Q30: eras no longer unlock in order.
+  **Stays locked (SET, Q36 a)** until a later, spaced unlock: the "almost
+  forgotten" return. Today's coast is always open. What the lights mean is in
+  "Reasons to return, sea marks and flash patterns".
 
 Opening-year options (kept for the record; about 1905 chosen):
 
@@ -343,12 +346,18 @@ Opening-year options (kept for the record; about 1905 chosen):
   still exists. Fog makes lighthouses essential, which is a feature.
 - **Heritage touch points** (standing stones, cairns, etc.) as clues,
   points, treasures. Rock carvings are a much later release.
-- **Treasure across time (SET, Q16 a):** something is lost or buried during
-  the opening (for example the storm takes granddad's sea chest) and found
-  after the first jump; the player understands later. That can lift you
-  from poor fisher into the free-port heyday and smuggling. What is inside
-  the chest is not set.
-- **The story unlocks eras; once unlocked you jump freely.**
+- **Treasure across time (SET, Q16 a; contents Q37 b + d):** something is
+  lost during the opening (the storm takes granddad's sea chest) and found
+  after the first jump; the player understands later. The chest holds
+  granddad's letters or log, plus one anachronistic object (a lamp part)
+  whose purpose you learn later. The earlier idea that it lifts you from poor
+  into the free-port heyday is not part of these contents; revisit if wanted.
+  How it is found is open.
+- **Eras do not unlock in order (SET, Q30 and Q34 b).** Unlocks are spaced
+  across the timeline so moving back and forth in time is engaging and
+  earlier eras stay relevant. They come as **cause-and-effect pairs**: every
+  unlock opens two eras linked by a cause (a harbour claimed in 1706, its ruin
+  in 1820). Once unlocked, you jump freely.
 - **Era tastes are very small at first** but clearly different in look and
   feel, to tease.
 - **Time is shown by what exists** (lighthouses, villages, boats), with a
@@ -396,20 +405,12 @@ Design this explicitly; it touches almost every system.
 - **What a visitor brings (SET, Q14 a):** you bring your own stuff (boat,
   hold, contracts) and your earnings go home to your own save. A trade cap
   can come later if visiting breaks an economy.
-- **Visiting with mismatched progress or era (OPEN, Q15):** leaning towards
-  showing the host's era filtered to what the visitor has unlocked (d), or
-  the host's world with anything the visitor hasn't unlocked hidden in mist
-  (a), if there is a simple smart filter. Not locked. Later decisions that
-  would favour it: (1) the stage order (Q17 a) means visiting ships before
-  any era is unlocked, so there is no mismatch until the chart, storm and
-  jump stage; decide then. (2) Chart sections and discoveries are per-save
-  sets of ids (Q9, Q18 c), which makes "unlocked by this visitor" a simple
-  yes/no per item and favours the mist filter. (3) Sweep lists and era
-  content keyed by era and place make filtering a data lookup, not code.
-  (4) Q14 a means the visitor's stuff is already their own, which works
-  with either. Come back when the story stage is designed. Also decide
-  then: if a visitor lingers in the host's fog (Q24 a), whose story do the
-  flashes commit?
+- **Visiting with different unlocks (SET, Q39: b first, then a):** build the
+  simpler version first. You can only visit eras you have both unlocked (b);
+  it needs no per-item unlock keys and no mist rendering. Later, option a:
+  mist on whatever the visitor has not unlocked, and net-haul items from
+  locked eras arrive as a "mysterious find". Still open: if a visitor
+  lingers in the host's fog (Q24 a), whose story do the flashes commit?
 - **No early currency (SET, Q23 c):** barter and favours. Things the pair
   net sweeps up (barrels, flotsam) become gifts and trade goods for chart
   sections. No throwaway early economy; the real one is the trade stage.
@@ -436,6 +437,51 @@ Design this explicitly; it touches almost every system.
   `felix/windward-real-coast`, settlement phases per year, sourced, 1700-2025)
   and `lighthouse-lab.html` (branch `felix/windward-lighthouses`, towers by
   built year, 1740-2025). Boats and palette are not year-driven yet.
+
+## Data model: the world remembers (SET, Felix 2026-11-05)
+
+**Each era keeps its own persistent world state in the save.** No goods cross
+a jump (Q9); the world remembers. A harbour claimed in 1706 is yours there, a
+ruin in 1820 and a heritage site in 1905.
+
+Save sketch (not final):
+
+- **Player:** identity, boat, and what travels: knowledge (chart sections,
+  discoveries, history cards).
+- **Per-era state, keyed by era id from `epochs.json`:** what you claimed,
+  built and lit in that era, plus that era's boat, deck items and hold (these
+  stay behind when you jump).
+- **Unlocks:** which eras are open, and the cause-and-effect pair each
+  unlock belongs to (see "The frame").
+- **Story flags:** the chest, the storm, and so on.
+- Keying by era id lets a later era ship as a later release without touching
+  the others.
+- Visitors see the host's state; every player's own world stays their own
+  (Q11).
+- **Open (round 9):** do we store only the player's actions per era and
+  derive how the world looks later from era rules, or store per-era
+  snapshots?
+
+## Reasons to return, sea marks and flash patterns (SET, Felix 2026-11-05)
+
+- **Things you leave behind (Q35 a):** the per-era state above. A claim made
+  early shows up changed in later eras.
+- **Sea marks as anchors (Q35 e):** a crossing is anchored by whatever sea
+  mark that era has. Lighthouses barely exist before 1840 (`epochs.json`
+  lists only Carlsten, 1782), so earlier eras use stone cairns (*kummel*),
+  daymarks, beacon fires (*vårdkasar*) and church towers; lighthouses from
+  1840. The marks becoming more official over time is itself a way to show
+  time passing. `TODO(felix): a sourced timeline of which sea marks exist in
+  each era; it is not in the data yet.`
+- **Flash patterns (Q38 a):** a flash pattern identifies which light you are
+  seeing in fog, read together with your chart because patterns repeat (for
+  example "two flashes every 6 s" is shared by Eggskär, Mollösund, Hättan,
+  Sandviksholmen and Kråksundsgap Södra in `lighthouses.js`). They also matter
+  when sailing at night: at night, lights are how you navigate. A way-home
+  sequence of patterns (Q38 b) is a possible later addition.
+- **Not chosen:** knowledge keys, season and material needs, and people
+  across eras (Q35 b-d). Knowledge keys already follow from "knowledge
+  travels" (Q9); revisit the others if the pairs need them.
 
 ## Terms (new, Felix 2026-11-05)
 
@@ -501,8 +547,7 @@ comes), late summer (Honour and Life), autumn (Last silver), late autumn
 shores, The silver comes and Honour and Life, plus Today and the about-1905
 opening. Everything else is a taste or a time-lapse. Note that Last silver
 (1795-1809) is a taste even though it sits inside epoch III. The data's
-`release: "first (proposed)"` on epoch III does not match this; the data is
-not edited here (see Gaps).
+`firstRelease` field matches this (fixed 2026-11-05).
 
 ## The flow (SET, Felix 2026-11-05; replaces the earlier opening order)
 
@@ -646,7 +691,7 @@ yet grilled), **INFERRED** (my reading, confirm).
 | 15 | Signature co-op move | **SET** (timing open) | The pair net, sweeping different things by era and place (fish is one use). May arrive with the visiting stage. Early co-op = smart ping + pair net. |
 | 16 | Port arrival | **SET** | Sensory reward + a small gift (a fish) + the story offered quietly. Fallback: a simple port menu. No long dialogue UI. |
 | 17 | What a visitor brings | **SET** | Your own stuff comes along; earnings go home. A trade cap later if needed. |
-| 18 | Visiting with mismatched progress | **OPEN** | Leaning d or a with a mist filter. Not locked; decide when the story stage is designed. |
+| 18 | Visiting with different unlocks | **SET** (b first, then a) | Visit only eras both have unlocked first; later mist on what the visitor hasn't unlocked, with net-haul items from locked eras arriving as a mysterious find. Open: whose story the fog flashes commit while visiting. |
 | 19 | Treasure causality | **SET** | Something is lost during the opening (the storm takes granddad's sea chest) and found after the first jump. |
 | 20 | Stage order | **SET** | Lure, then co-op visiting, then chart/storm/jump, then trade. |
 | 21 | Chart shape | **SET** | Fixed sections first (inherited or bought), exploring reveals detail on top. |
@@ -664,7 +709,12 @@ yet grilled), **INFERRED** (my reading, confirm).
 | 33 | The flow | **SET** | Start casual on Today's coast, a time warp to ~1905 (the opening: granddad's chart, lighthouses), the first jump lands at the end of New border (~1700), and the 1706 ordinance soon lets you claim islands and build. |
 | 34 | Opening year | **SET** | About 1905, the end of Light and Stone. |
 | 35 | Pair-net haul split | **SET** | Split evenly; each half goes to each player's own save (Q29). |
-| 36 | Unlocking eras | **SET** (principle), design **OPEN** | Eras do not unlock in order. Unlocks are spaced across the timeline so moving back and forth in time is engaging and earlier eras stay relevant. Spacing and reasons to return are open (round 8). |
+| 36 | Unlocking eras | **SET** | Eras do not unlock in order; unlocks are cause-and-effect pairs spaced across the timeline (Q30, Q34 b). |
+| 37 | Per-era world state | **SET** | Each era keeps its own persistent state in the save; no goods cross, the world remembers (a 1706 claim is a ruin in 1820 and heritage in 1905). Keyed by era id. |
+| 38 | Reasons to return | **SET** (a + e) | Things you leave behind, and sea marks as anchors (kummel, daymarks, vårdkasar, church towers; lighthouses from 1840). Marks getting more official shows time passing. |
+| 39 | The opening stays locked | **SET** | The ~1905 opening stays locked until a later spaced unlock. Today's coast is always open. |
+| 40 | The sea chest | **SET** (contents) | Granddad's letters or log plus one anachronistic object (a lamp part) whose purpose you learn later. How it is found is open. |
+| 41 | Flash patterns | **SET** (a) | Identify which light you see in fog, read with the chart because patterns repeat; they also matter at night. A way-home sequence is a possible later addition. |
 
 ## Gaps (to grill)
 
@@ -672,13 +722,11 @@ Recorded 2026-11-05; resolved ones move into the log above.
 
 - **Pair-net odd items:** an even split leaves odd items; which half gets
   the extra one?
-- **Visiting with mismatched progress (Q15, OPEN):** decide when the story
-  stage is designed; notes above.
 - **Saving:** a world needs an owner and a save for visiting to mean
   "a friend's world". Before the story (stages 1-2) a visit is a room with
   no save; the first real save is needed at stage 3.
-- **The sea chest:** what is in it, how the player finds it after the jump,
-  and how "understands later" lands.
+- **How the sea chest is found (round 9)** after the jump, and how
+  "understands later" lands.
 - **Stage 5 rewrite:** T0-T8 is the trade phase and still assumes one era;
   rewrite it around the works slice (Q31 c).
 - **Chart sections:** how many, what each reveals, who authors them, and
@@ -691,20 +739,19 @@ Recorded 2026-11-05; resolved ones move into the log above.
   taste of the hold?
 - **Shared contracts and market effects:** a separate protocol between
   worlds, later.
-- **Opening year:** held with Q1.
-- **The returned-to opening:** what do the flash patterns unlock?
 - **Coverage:** the settlements data has Käringön, Gullholmen and
   Hälleviksstrand but not Härmanö. The start area needs the deeper history
   layer anyway.
 - **Unmerged inputs:** lights (`felix/windward-lighthouses`) and the real
   coast and settlements (`felix/windward-real-coast`) are not on `main`.
-- **Unlock design (round 8):** spacing across the timeline and the reasons
-  to return (Q30).
-- **Parked items re-opened (round 8):** the sea chest, the flash patterns,
-  and Q15 under non-ordered unlocks.
-- **`epochs.json` release field:** it marks epoch III as the first release
-  (proposed), while Q1 builds parts of II, III and IV and leaves out Last
-  silver. Data not edited here.
+- **Stored or derived (round 9):** per-era state kept as the player's
+  actions with later looks derived from era rules, or as snapshots?
+- **The first cause-and-effect pair (round 9):** which authored pair ships
+  first.
+- **Sea marks timeline:** a sourced list of what sea marks exist in each era.
+- **Night:** a day/night model, since lights are how you navigate at night;
+  when it ships and how it works with the seasons.
+- **Fog flashes while visiting:** whose story do they commit?
 - **Lights cross-check:** the lit years in `epochs.json` against the sourced
   built years in `lighthouses.js` (branch `felix/windward-lighthouses`).
 - **Source check for the epoch draft:** every date and figure (1706
