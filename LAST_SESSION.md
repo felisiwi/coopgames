@@ -1,11 +1,12 @@
 # Last session
 
-**Describes `d574f6a` — branch `felix/windward-look`, 2026-11-05, not merged.**
-Windward L1 (code `bf928f6`) ported the Look Lab look; look pass 2 (`d574f6a`)
-repaints it as a Skagen-painter palette and adds the `?tune=1` panel (sliders,
-Before/Skagen, values mirrored into the URL). Islands were dark because of
-light (three.js r155+ gives intensity/pi), so the fill went 0.45 -> 2.4.
-Felix judges on his phone: `/games/windward/?seed=1&tune=1` on the branch preview.
+**Describes `86cdda0` — branch `felix/windward-look`,
+2026-11-05, not merged.** L1 (`bf928f6`) ported the Look Lab look; pass 2 made it
+a Skagen palette with `?tune=1`; pass 3 (Felix approved Skagen): it is now the
+default (values in `src/config.js`; Before is only a preset) and small inland
+ponds no longer render solid white (depth bake, see DESIGN.md "Look pass 3").
+Before/after renders: `games/windward/ref/look-skagen/`.
+Preview: `/games/windward/?seed=1` (add `&tune=1` for the panel).
 `shared/ART.md` is its own PR: #5 (`felix/art-split-style`, not merged).
 
 Where things are (why/deviations: `games/windward/DESIGN.md` "L1 port status"):
@@ -21,13 +22,14 @@ page errors, so the shaders compile; a real phone GPU is unchecked.
 
 ## Today's sessions
 
-- Windward L1: Look Lab port; look pass 2: Skagen, lights, `?tune=1` (this one).
+- Windward L1 Look Lab port; look pass 2 Skagen + `?tune=1`; pass 3: Skagen
+  default, pond fix, kept renders (this one).
 
 ## Next
 
-1. Felix: pick a look with `?tune=1`, send the link back; bake it into
-   `LOOK_*` and the lighting keys in `src/config.js`. Also tunable there:
-   `SLOPE_CALIBRATION`, `HAZE_*`, `WATER_LIGHT_ELEVATION_DEG`.
+1. Fine-tune with `?tune=1` if wanted: bake a pick into `LOOK_*` and the
+   lighting keys in `src/config.js`. Also tunable there: `SLOPE_CALIBRATION`,
+   `HAZE_*`, `WATER_LIGHT_ELEVATION_DEG`.
 2. Merge `felix/windward-look` then PR #5 (a trial merge into `main` at
    f3f1546 is clean). Remove the `../coopgames-windward-look` and
    `../coopgames-art-split` worktrees only with Felix's OK.
