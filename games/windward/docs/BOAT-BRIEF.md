@@ -11,7 +11,8 @@ Lambert, Skagen palette (shared/ART.md). Keep src/boat.js's API: createBoatMesh(
   old boat.
 - **Sails: classic white** (modern start). Traditional rig for a koster: gaff or sprit
   main plus a jib; pick what reads best from above and still swings as one boom.
-- **Name "Svalan"** ("the Swallow") painted on the stern.
+- **Name "Svalan"** ("the Swallow"): the boat's name in the story only. Felix removed the name
+  board from the model (2026-11-05: "looks off").
 
 ## After the jump to ~1700: a small eka with a spritsail
 - A small **clinker eka** (open wooden boat), ~4–5 m real, one **spritsail**. Poor and
