@@ -39,7 +39,7 @@ input[type=range]{width:100%;margin:6px 0 14px;height:28px}
 <div class="track" id="ep"></div>
 <div class="eras" id="er"></div>
 <div class="pins" id="pins"></div>
-<input type="range" id="s" min="0" max="1000" value="560" step="1" aria-label="Year">
+<input type="range" id="s" min="0" max="1000" value="430" step="1" aria-label="Year">
 <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><div class="yr" id="y"></div><div class="k" id="ept"></div></div>
 <div class="card">
 <div class="v" id="en" style="font-size:17px"></div>
@@ -54,7 +54,7 @@ input[type=range]{width:100%;margin:6px 0 14px;height:28px}
 </div>
 </main>
 <script type="application/json" id="data">{
- "_note": "Windward epochs/eras DRAFT (2026-11-05, mission control with Felix). Single source for the epoch timeline and, later, the coast lab and game. Dates marked approx are approximate; 'verify' items were not source-checked yet.",
+ "_note": "Windward epochs/eras DRAFT (2026-11-05, mission control with Felix). Single source for the epoch timeline and, later, the coast lab and game. Dates marked approx are approximate; 'verify' items were not source-checked yet. 2026-11-05 rev 2: Herring and Light split into New Crown / The Silver Sea / Light and Stone (Felix).",
  "herringPeriods": [
   {
    "from": 1556,
@@ -131,29 +131,45 @@ input[type=range]{width:100%;margin:6px 0 14px;height:28px}
    "name": "I · Kings and raiders",
    "from": 800,
    "to": 1657,
-   "weight": 14,
+   "weight": 12,
    "kind": "med"
   },
   {
-   "id": "herring-light",
-   "name": "II · Herring and Light",
+   "id": "new-crown",
+   "name": "II · New Crown",
    "from": 1658,
-   "to": 1906,
-   "weight": 46,
+   "to": 1746,
+   "weight": 12,
+   "kind": "quiet"
+  },
+  {
+   "id": "silver-sea",
+   "name": "III · The Silver Sea",
+   "from": 1747,
+   "to": 1809,
+   "weight": 18,
    "kind": "boom",
-   "release": "first"
+   "release": "first (proposed)"
+  },
+  {
+   "id": "light-stone",
+   "name": "IV · Light and Stone",
+   "from": 1810,
+   "to": 1906,
+   "weight": 18,
+   "kind": "light"
   },
   {
    "id": "engines",
-   "name": "III · Engines and wars",
+   "name": "V · Engines and wars",
    "from": 1907,
    "to": 1949,
-   "weight": 16,
+   "weight": 14,
    "kind": "war"
   },
   {
    "id": "summer",
-   "name": "IV · Summer guests",
+   "name": "VI · Summer guests",
    "from": 1950,
    "to": 1999,
    "weight": 13,
@@ -164,7 +180,7 @@ input[type=range]{width:100%;margin:6px 0 14px;height:28px}
    "name": "Today · the lure",
    "from": 2000,
    "to": 2026,
-   "weight": 11,
+   "weight": 13,
    "kind": "light"
   }
  ],
@@ -465,8 +481,8 @@ input[type=range]{width:100%;margin:6px 0 14px;height:28px}
    "from": 1950,
    "to": 1979,
    "kind": "sum",
-   "tone": "Light, social · summer",
-   "summary": "Holiday homes, leisure boats, bridges to the islands.",
+   "tone": "Friendly, cute · summer — with a feud",
+   "summary": "Holiday homes, leisure boats, bridges to the islands, and the friendly west-coast–east-coast feud begins: rich Stockholmers buying up fishermen's cottages.",
    "events": [
     [
      1960,
