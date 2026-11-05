@@ -33,8 +33,8 @@ check('the axis is by weight, not to scale: the 63-year Silver Sea is wider than
   assert.ok(w('silver-sea') > w('kings'));
   assert.ok(axis.toPos(1809) - axis.toPos(1747) > axis.toPos(1657) - axis.toPos(800));
 });
-check('markers sit where the brief says', () => {
-  assert.deepEqual(data.markers.map((m) => [m.year, m.label]), [[1745, 'first jump lands'], [1905, 'you start']]);
+check('markers follow Felix\'s flow (casual today, time warp to 1905, first jump ~1700)', () => {
+  assert.deepEqual(data.markers.map((m) => [m.year, m.label]), [[1700, 'first jump lands'], [1905, 'time warp lands'], [2015, 'you start (casual)']]);
 });
 check('epoch, era, herring and lighthouse lookups', () => {
   assert.equal(epochAt(data.epochs, 1750).id, 'silver-sea');
