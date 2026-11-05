@@ -42,6 +42,22 @@ check('every lat/lon is inside Bohuslän / Göteborg', () => {
   }
 });
 
+check('light characteristics: lit towers have a full pattern, dark ones say why', () => {
+  for (const l of LIGHTHOUSES) {
+    assert.equal(typeof l.lit, 'boolean', `${l.name} lit`);
+    if (l.light) {
+      assert.ok(l.light.pattern.length > 3, `${l.name} pattern`);
+      assert.ok(Number.isInteger(l.light.count) && l.light.count >= 1, `${l.name} count`);
+      assert.ok(l.light.period > 0, `${l.name} period`);
+      assert.ok(['flash', 'occulting', 'on-off'].includes(l.light.kind), `${l.name} kind`);
+    }
+    if (l.lit) assert.ok(l.light, `${l.name} is lit but has no characteristic`);
+    if (!l.light) assert.ok(l.lightNote, `${l.name} has no light and no note`);
+  }
+  const hallo = LIGHTHOUSES.find((l) => l.name === 'Hållö');
+  assert.deepEqual([hallo.light.count, hallo.light.period], [1, 12]); // "white flash every 12 s"
+});
+
 const heights = new Map();
 console.log('name | built | game height | triangles');
 for (const entry of LIGHTHOUSES) {

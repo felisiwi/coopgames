@@ -33,15 +33,14 @@ const ENTRIES = [
     check: 'height unknown (8 m guessed); which parts are red vs white' },
   { name: 'Hållö', built: 1842, station: null, realHeight: 20, area: 'Smögen',
     lat: dm(58, 20.155), lon: dm(11, 13.040),
-    description: 'White stone tower (raised 1868) with a pink-red iron top and a dark green domed lantern.',
-    check: 'LIGHTHOUSES.md says red top and black lantern; kept the earlier pink-red / dark green' },
+    description: 'White rubblestone tower (raised 1868) with a conical red cast-iron watch room and a black lantern.' },
   { name: 'Nordkoster', built: 1849, station: null, realHeight: 7, area: 'Koster',
     lat: dm(58, 54.146), lon: dm(11, 0.304),
     description: 'Two small round white masonry towers with grey lanterns.' },
   { name: 'Måseskär', built: 1865, station: null, realHeight: 27, area: 'Käringön',
     lat: dm(58, 5.646), lon: dm(11, 19.822),
-    description: 'Tall red cast-iron skeleton tower: four splayed legs, X bracing, red upper section with a white band, green-domed lantern.',
-    check: 'LIGHTHOUSES.md says red/white checker lattice; model has one white band' },
+    description: 'Tall red-and-white checkerboard cast-iron skeleton tower with a central cylinder, gallery and green-domed lantern.',
+    check: 'lantern dome colour (green, from the first brief)' },
   { name: 'Pater Noster', built: 1868, station: null, realHeight: 32, area: 'Marstrand',
     lat: dm(57, 53.760), lon: dm(11, 27.951),
     description: 'The tallest on the coast: all-red cast-iron lattice tower, heavily cross-braced, green dome.' },
@@ -90,8 +89,8 @@ const ENTRIES = [
     description: 'Short white cylinder with a gallery rail and a red conical roof.' },
   { name: 'Väcker', built: 1939, station: null, realHeight: 14, area: 'Havstenssund',
     lat: dm(58, 42.819), lon: dm(11, 9.718),
-    description: 'Grey masonry base, white tower, black band at the top, gallery, red roof.',
-    check: 'LIGHTHOUSES.md has no grey base; kept it from the first brief' },
+    description: 'White round tower with a black band at the top, white lantern and a red roof.',
+    check: 'ibiblio says it stands on an unpainted conical stone base; left off per LIGHTHOUSES.md' },
   { name: 'Ramskär', built: 1939, station: 1917, realHeight: 19, area: 'Havstenssund',
     lat: dm(58, 45.486), lon: dm(10, 59.560),
     description: 'Slim round tower: white base, one broad black band, white top, white lantern.' },
@@ -99,7 +98,7 @@ const ENTRIES = [
     lat: 58.2709628, lon: 11.3504693,
     description: 'White round tower with one black band.',
     check: 'band position, lantern and roof colours' },
-  { name: 'Kråksundsgap Södra', built: 1954, station: null, realHeight: 13, area: 'Orust',
+  { name: 'Kråksundsgap Södra', built: 1954, station: 1941, realHeight: 13, area: 'Orust',
     lat: 58.1005563, lon: 11.4404817,
     description: 'All-white round tower.',
     check: 'lantern and roof colours' },
@@ -127,8 +126,53 @@ const ENTRIES = [
     check: 'round vs square, lantern and roof colours' },
 ];
 
+
+// Light characteristics exactly as the Lighthouse Directory (ibiblio) gives them
+// for THIS tower. null = it gives none (dark towers); nothing here is invented.
+// count x flashes per `period` seconds; flashSeconds when it states a length;
+// kind: 'flash' | 'occulting' (light on, short eclipses) | 'on-off'.
+const WRG = 'white, red or green by direction';
+const flash = (pattern, count, period, extra = {}) => ({ pattern, colour: WRG, kind: 'flash', count, period, ...extra });
+const LIGHTS = {
+  'Carlsten': { active: false, light: { pattern: 'flashes 25 s long, the optic turning once every 5 min', colour: null, kind: 'flash', count: 1, period: 300, flashSeconds: 25 },
+    note: 'Dark since 1868. The world\'s first flashing light.' },
+  'Böttö': { active: false, light: null, note: 'Dark since 1964. The directory gives no characteristic for this tower.' },
+  'Hållö': { active: true, light: { pattern: 'white flash every 12 s', colour: 'white', kind: 'flash', count: 1, period: 12 } },
+  'Nordkoster': { active: true, light: { pattern: 'four long (2 s) white flashes every 30 s', colour: 'white', kind: 'flash', count: 4, period: 30, flashSeconds: 2 },
+    note: 'Syd tower; reactivated 2001 (dark 1891–2001).' },
+  'Måseskär': { active: false, light: null,
+    note: 'Dark since 1978, lit for 12 minutes at midnight each New Year\'s Eve. The station\'s current light (the 1978 fibreglass tower) shows three long (1.5 s) flashes every 30 s.' },
+  'Pater Noster': { active: true, light: { pattern: 'one long white flash every 15 s', colour: 'white', kind: 'flash', count: 1, period: 15 },
+    note: 'Reactivated 2007 (dark 1977–2007).' },
+  'Islandsberg': { active: false, light: null, note: 'Dark since 1938; the light showed through an upper-storey window.' },
+  'Vinga': { active: true, light: { pattern: 'two white flashes, 7.5 s apart, every 30 s', colour: 'white', kind: 'flash', count: 2, period: 30, gap: 7.5 } },
+  'Stångehuvud': { active: false, light: null, note: 'Dark since the 1990s.' },
+  'Ursholmen': { active: true, light: flash('two long flashes every 15 s', 2, 15), note: 'Syd tower. The north twin has been dark since 1931.' },
+  'Eggskär': { active: true, light: flash('two flashes every 6 s', 2, 6) },
+  'Tistlarna': { active: true, light: { pattern: 'two long (2 s) flashes every 15 s', colour: 'white or red by direction', kind: 'flash', count: 2, period: 15, flashSeconds: 2 } },
+  'Mollösund': { active: true, light: flash('two flashes every 6 s', 2, 6) },
+  'Stora Pölsan': { active: true, light: { pattern: '2 s on, 6 s off', colour: WRG, kind: 'on-off', count: 1, period: 8, flashSeconds: 2 } },
+  'Valö': { active: true, light: flash('one long flash every 8 s', 1, 8) },
+  'Mjölskär': { active: true, light: flash('flash every 3 s', 1, 3) },
+  'Hättan': { active: true, light: flash('two flashes every 6 s', 2, 6) },
+  'Sandviksholmen': { active: true, light: flash('two flashes every 6 s', 2, 6) },
+  'Väcker': { active: true, light: flash('four flashes every 12 s', 4, 12) },
+  'Ramskär': { active: true, light: flash('three flashes every 9 s', 3, 9) },
+  'Gäven': { active: true, light: flash('three flashes every 9 s', 3, 9) },
+  'Kråksundsgap Södra': { active: true, light: flash('two flashes every 6 s', 2, 6) },
+  'Väderöbod': { active: true, light: flash('one long flash every 8 s', 1, 8) },
+  'Trubaduren': { active: true, light: flash('three very long (3 s) flashes every 30 s', 3, 30, { flashSeconds: 3 }) },
+  'Lindholmen': { active: true, light: { pattern: 'Västra: red, 4 s on, 4 s off; Mellersta: white, 4 s on, 4 s off', colour: 'red (Västra), white (Mellersta)', kind: 'on-off', count: 1, period: 8, flashSeconds: 4 } },
+  'Brandskärsflak': { active: true, light: { pattern: 'occulting twice every 8 s', colour: WRG, kind: 'occulting', count: 2, period: 8 } },
+  'Dynabrott': { active: true, light: { pattern: 'occulting once every 8 s', colour: WRG, kind: 'occulting', count: 1, period: 8 } },
+  'Hätteberget': { active: true, light: flash('two long (1.5 s) flashes every 12 s', 2, 12, { flashSeconds: 1.5 }) },
+  'Södra Syster': { active: true, light: flash('two flashes every 6 s', 2, 6), note: 'The directory says the lantern has been removed (prefabricated light).' },
+};
+
 // Oldest on the left. Array.sort is stable, so same-year towers keep list order.
-export const LIGHTHOUSES = ENTRIES.slice().sort((a, b) => a.built - b.built);
+export const LIGHTHOUSES = ENTRIES
+  .map((e) => ({ ...e, lit: LIGHTS[e.name].active, light: LIGHTS[e.name].light, lightNote: LIGHTS[e.name].note ?? null }))
+  .sort((a, b) => a.built - b.built);
 
 export const gameHeight = (entry) => 6 + 0.5 * entry.realHeight;
 
@@ -137,7 +181,6 @@ export const GLASS = 0xffe9a0; // warm pale yellow, ready to glow
 const RED = 0xc8321f;
 const IRON_RED = 0xb4301f;
 const DARK_RED = 0x8a2415;
-const PINK_RED = 0xd9594a;
 const ORANGE_RED = 0xdb5a2b;
 const WHITE = 0xf5f0e3;
 const BLACK = 0x26262b;
@@ -274,21 +317,28 @@ function strut(g, a, b, t, color) {
 
 // Four splayed legs + X cross-bracing on each face, per panel (+ optional
 // horizontal ties at panel boundaries).
-function skeleton(g, { y1, wBot, wTop, panels, color, leg, brace, ties = [] }) {
+function skeleton(g, { y1, wBot, wTop, panels, color, leg, brace, ties = [], colorOf = null }) {
   const sx = [1, -1, -1, 1];
   const sz = [1, 1, -1, -1];
   const half = (y) => wBot + ((wTop - wBot) * y) / y1;
   const corner = (k, y) => [sx[k] * half(y), y, sz[k] * half(y)];
   // the lattice starts 0.12 m up so slanted rod ends don't dip below y=0
   const y0 = 0.12;
-  for (let k = 0; k < 4; k++) strut(g, corner(k, y0), corner(k, y1), leg, color);
+  // colorOf(k, p) (optional) colours leg k / face k in panel p: used for a checkerboard.
+  for (let k = 0; k < 4; k++) {
+    if (!colorOf) { strut(g, corner(k, y0), corner(k, y1), leg, color); continue; }
+    for (let p = 0; p < panels; p++) {
+      strut(g, corner(k, Math.max(y0, (y1 * p) / panels)), corner(k, (y1 * (p + 1)) / panels), leg, colorOf(k, p));
+    }
+  }
   for (let p = 0; p < panels; p++) {
     const ya = Math.max(y0, (y1 * p) / panels);
     const yb = (y1 * (p + 1)) / panels;
     for (let k = 0; k < 4; k++) {
       const k2 = (k + 1) % 4;
-      strut(g, corner(k, ya), corner(k2, yb), brace, color);
-      strut(g, corner(k2, ya), corner(k, yb), brace, color);
+      const c = colorOf ? colorOf(k, p) : color;
+      strut(g, corner(k, ya), corner(k2, yb), brace, c);
+      strut(g, corner(k2, ya), corner(k, yb), brace, c);
     }
   }
   for (const p of ties) {
@@ -411,7 +461,7 @@ const BUILDERS = {
     houseLight(g, { H, w: 5.2, d: 8, wallFrac: 0.5, wall: WHITE, roofColor: RED, lr: 0.85, lh: 1.2, frame: RED, domeColor: RED });
   },
 
-  // White stone tower, pink-red iron top, dark green dome.
+  // White rubblestone tower, conical red cast-iron watch room, black lantern.
   'Hållö'(g, H) {
     const top = H - stackHeight(0.9, 1.3, 'dome');
     const plinth = 0.6;
@@ -419,12 +469,12 @@ const BUILDERS = {
     const white = rest * 0.78;
     frustum(g, 2.9, 2.7, plinth, 0, GREY, 7);
     const t = taperStack(g, 2.4, 1.8, plinth, [{ h: white, color: WHITE }], 7);
-    frustum(g, 1.8, 1.75, rest - white, t.top, PINK_RED, 7);
+    frustum(g, 1.8, 1.35, rest - white, t.top, RED, 7); // the conical watch room
     box(g, 0.9, 1.5, 0.5, plinth, DOOR, 0, apothem(2.4, 7));
     box(g, 0.35, 0.7, 0.3, white * 0.4, DARK, 0, apothem(t.radiusAt(white * 0.4 + 0.9), 7));
     box(g, 0.35, 0.7, 0.3, white * 0.8, DARK, 0, apothem(t.radiusAt(white * 0.8 + 0.9), 7));
-    gallery(g, 2.5, top, PINK_RED);
-    lantern(g, top + 0.25, 0.9, 1.3, { frame: PINK_RED, roof: 'dome', roofColor: DARK_GREEN });
+    gallery(g, 2.2, top, RED);
+    lantern(g, top + 0.25, 0.9, 1.3, { frame: BLACK, roof: 'dome', roofColor: BLACK });
   },
 
   // Two small round white masonry towers, grey lanterns.
@@ -434,16 +484,19 @@ const BUILDERS = {
     roundTower(sub(g, 3.8), { ...base, H: 6 + 0.5 * 5, rBot: 2.1, rTop: 1.7, windows: [0.5], glassName: 'lantern-glass-twin' });
   },
 
-  // Red iron skeleton: splayed legs, X bracing, red upper section with a white band.
+  // Red-and-white checkerboard cast-iron skeleton: alternate red/white per panel and face.
   'Måseskär'(g, H) {
     const top = H - stackHeight(0.9, 1.3, 'dome');
     const y1 = top - 3;
-    skeleton(g, { y1, wBot: 3.6, wTop: 1.5, panels: 4, color: IRON_RED, leg: 0.22, brace: 0.11, ties: [2] });
+    skeleton(g, {
+      y1, wBot: 3.6, wTop: 1.5, panels: 4, color: IRON_RED, leg: 0.22, brace: 0.14,
+      colorOf: (k, p) => ((k + p) % 2 ? WHITE : IRON_RED),
+    });
     frustum(g, 0.6, 0.6, y1, 0, IRON_RED, 6);
     frustum(g, 2.0, 2.0, 1, y1, IRON_RED, 6);
     frustum(g, 2.0, 2.0, 1, y1 + 1, WHITE, 6);
     frustum(g, 2.0, 2.0, 1, y1 + 2, IRON_RED, 6);
-    gallery(g, 2.7, top, IRON_RED);
+    gallery(g, 2.7, top, IRON_RED, { posts: 4 });
     lantern(g, top + 0.25, 0.9, 1.3, { frame: IRON_RED, roof: 'dome', roofColor: GREEN });
   },
 
@@ -557,16 +610,12 @@ const BUILDERS = {
     });
   },
 
-  // Grey masonry cone, white tower, black band at the top, red roof.
+  // White round tower, black band at the top, white lantern, red roof. (No stone base: see LIGHTHOUSES.md.)
   'Väcker'(g, H) {
-    const top = H - stackHeight(0.85, 1.3, 'cone');
-    const grey = top * 0.32;
-    const black = top * 0.12;
-    taperStack(g, 3.3, 2.2, 0, [{ h: grey, color: GREY }], 7);
-    box(g, 0.9, 1.6, 0.5, 0, DOOR, 0, apothem(3.3, 7) - 0.2);
-    taperStack(g, 2.2, 1.6, grey, [{ h: top - grey - black, color: WHITE }, { h: black, color: BLACK }], 7);
-    gallery(g, 2.4, top, WHITE);
-    lantern(g, top + 0.25, 0.85, 1.3, { frame: WHITE, roof: 'cone', roofColor: RED });
+    roundTower(g, {
+      H, rBot: 2.3, rTop: 1.7, bands: [{ f: 0.88, color: WHITE }, { f: 0.12, color: BLACK }],
+      roof: 'cone', roofColor: RED, windows: [0.4],
+    });
   },
 
   // Slim round tower: white base, one broad black band, white top, white lantern.

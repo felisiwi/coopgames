@@ -49,6 +49,14 @@ The game scales distances to about 1:8, so towers don't have to be at real heigh
 
 Skipped: dozens of 3–6 m harbour lanterns and fiberglass cabinets. Use one generic small-light model for all of them.
 
+## Looks confirmed against ibiblio (2026-11-05, timeline update)
+
+- Hållö: white rubblestone tower, **conical red cast-iron watch room**, **black lantern**. Light: white flash every 12 s.
+- Måseskär: **red and white checkerboard** cast-iron skeleton with central cylinder. Dark since 1978 (lit 12 min at midnight each New Year's Eve).
+- Väcker: white tower, black band at the top, white lantern, red roof. **ibiblio also says it stands on a round conical stone base, unpainted.** The model has no base because Felix asked for "no grey base"; to restore it, add a grey `taperStack` under the tower in `src/lighthouses.js`.
+- Also from ibiblio, not yet modelled: Mjölskär and Södra Syster stand on unpainted/black round stone bases; Södra Syster's lantern has been removed; Valö's green band is directly under the gallery; Sandviksholmen and Mollösund have octagonal lanterns.
+- Light characteristics are in `src/lighthouses.js` (`light`, `lit`, `lightNote`), copied from ibiblio only. Dark towers have `light: null`.
+
 ## Note for the trading game (GAME-DESIGN.md)
 
 Bohuslän's great herring period was roughly 1747–1809. Of everything above, only Carlsten's light (1782) existed then.

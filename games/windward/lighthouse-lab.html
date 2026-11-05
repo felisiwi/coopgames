@@ -58,6 +58,12 @@
     background: #ffcc66; border: 3px solid #0a1a2a; box-shadow: 0 0 0 1px rgba(255,204,102,0.6);
   }
   #presets { display: flex; flex-wrap: wrap; }
+  /* Big year counter over the scene. */
+  #yearBig {
+    position: fixed; top: 6px; left: 50%; transform: translateX(-50%); pointer-events: none;
+    font: 700 84px/1 system-ui, sans-serif; letter-spacing: 0.02em; color: #ffcc66;
+    text-shadow: 0 2px 14px rgba(10, 26, 42, 0.85); font-variant-numeric: tabular-nums;
+  }
 
   /* Phone: the panel becomes a short strip along the bottom so the scene shows;
      presets and towers are sideways-scrolling rows of chips. Desktop unchanged. */
@@ -83,12 +89,14 @@
     #list small { display: inline; margin-left: 4px; }
     #info { margin-top: 6px; font-size: 11px; max-height: 3.2em; overflow: hidden; }
     .label { font-size: 10px; }
+    #yearBig { font-size: 56px; top: 4px; }
   }
 </style>
 </head>
 <body>
 <canvas id="scene"></canvas>
 <div id="labels"></div>
+<div id="yearBig"></div>
 <div id="panel">
   <h1>Windward — lighthouse lab</h1>
   <p>Oldest on the left. Drag to orbit, wheel or pinch to zoom, click a name to fly to it.</p>
@@ -101,6 +109,7 @@
     </div>
     <div id="presets"></div>
   </div>
+  <button id="play" type="button">▶ Play</button>
   <button id="gameCam" type="button">Game camera</button>
   <button id="frameAll" type="button">Frame all</button>
   <button id="boatBtn" type="button" class="on">Boat</button>
@@ -192,7 +201,7 @@ LIGHTHOUSES.forEach((info, i) => {
   chip.addEventListener('click', () => focusOn(i));
   listEl.appendChild(chip);
 
-  towers.push({ info, holder, label, chip, height, x: 0, visible: true, lw: 0, lh: 0 });
+  towers.push({ info, holder, lh, label, chip, height, x: 0, visible: false, born: -1e9, lw: 0, lh_: 0 });
 });
 
 // A game boat for scale, parked next to the first visible tower.
@@ -211,6 +220,7 @@ const MAX_RADIUS = 1800;
 let azimuth = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180;
 let polar = (62 * Math.PI) / 180;
 let radius = 150;
+let radiusGoal = 150; // the camera eases toward this, so re-framing glides
 let fov = 45;
 let gameCam = false;
 const target = new THREE.Vector3(0, 6, 0);
@@ -223,11 +233,11 @@ function setGameCam(on) {
   if (on) {
     polar = GAME_POLAR;
     fov = CONFIG.FIXED_CAMERA_FOV_DEG;
-    radius = CONFIG.FIXED_CAMERA_DISTANCE;
+    radius = radiusGoal = CONFIG.FIXED_CAMERA_DISTANCE;
     azimuth = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180;
   } else {
     fov = 45;
-    radius = Math.min(radius, 90);
+    radius = radiusGoal = Math.min(radius, 90);
   }
 }
 function focusOn(i) {
@@ -235,21 +245,25 @@ function focusOn(i) {
   if (!t.visible) return;
   const e = t.info;
   goal.set(t.x, t.height * 0.45, 0);
-  if (!gameCam) radius = 48;
+  if (!gameCam) radiusGoal = 48;
   towers.forEach((o) => o.chip.classList.toggle('on', o === t));
   const est = e.heightEstimated ? ' (guess)' : '';
   const stn = e.station ? ` (station ${e.station})` : '';
-  infoEl.innerHTML = `<b>${e.name}</b> — built ${e.built}${stn} · ${e.area} · real ${e.realHeight} m${est}, game ${gameHeight(e)} m · ${e.lat.toFixed(4)}°N ${e.lon.toFixed(4)}°E · ${e.description}`
+  const light = e.light
+    ? `<b>Light:</b> ${e.light.pattern}${e.light.colour ? ` (${e.light.colour})` : ''}${e.lit ? '' : ' — dark now'}`
+    : '<b>Light:</b> dark';
+  infoEl.innerHTML = `<b>${e.name}</b> — built ${e.built}${stn} · ${e.area} · real ${e.realHeight} m${est}, game ${gameHeight(e)} m · ${e.lat.toFixed(4)}°N ${e.lon.toFixed(4)}°E · ${e.description} ${light}`
+    + (e.lightNote ? ` ${e.lightNote}` : '')
     + (e.check ? ` <b>Needs photo check:</b> ${e.check}` : '');
 }
 // Fit whatever is visible. Free camera: turn to face the row. The desktop side
 // panel covers the left of the screen, so fit into the part that stays clear.
-function frameAll() {
+function frameAll({ keepAngle = false } = {}) {
   const vis = towers.filter((t) => t.visible);
   towers.forEach((o) => o.chip.classList.remove('on'));
   infoEl.textContent = '';
   if (!vis.length) return;
-  if (!gameCam) azimuth = 0; // row runs along x: look straight at it
+  if (!gameCam && !keepAngle) azimuth = 0; // row runs along x: look straight at it
   const xs = vis.map((t) => t.x);
   const minX = Math.min(...xs) - 13;
   const maxX = Math.max(...xs) + 13;
@@ -258,9 +272,9 @@ function frameAll() {
   const clearAspect = Math.max(0.3, (window.innerWidth - side) / window.innerHeight);
   const tanHalf = Math.tan((fov * Math.PI) / 360);
   const halfW = ((maxX - minX) / 2) * Math.abs(Math.cos(azimuth)) + 13 * Math.abs(Math.sin(azimuth));
-  radius = clampRadius(Math.max(70, (halfW / (tanHalf * clearAspect)) * 1.08 + 25));
+  radiusGoal = clampRadius(Math.max(70, (halfW / (tanHalf * clearAspect)) * 1.08 + 25));
   // slide the centre left so the row sits in the clear part of the screen
-  const worldPerPx = (2 * radius * tanHalf) / window.innerHeight;
+  const worldPerPx = (2 * radiusGoal * tanHalf) / window.innerHeight;
   goal.set((minX + maxX) / 2 - (Math.cos(azimuth) * side * worldPerPx) / 2, 8, (Math.sin(azimuth) * side * worldPerPx) / 2);
 }
 document.getElementById('gameCam').addEventListener('click', () => { setGameCam(!gameCam); frameAll(); });
@@ -283,7 +297,7 @@ canvas.addEventListener('pointermove', (e) => {
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (pointers.size >= 2) {
     const d = spread();
-    if (pinchDist > 0) radius = clampRadius(radius * (pinchDist / d));
+    if (pinchDist > 0) radius = radiusGoal = clampRadius(radiusGoal * (pinchDist / d));
     pinchDist = d;
     return;
   }
@@ -303,13 +317,13 @@ canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
-  radius = clampRadius(radius * (1 + e.deltaY * 0.001));
+  radius = radiusGoal = clampRadius(radiusGoal * (1 + e.deltaY * 0.001));
 }, { passive: false });
 
 function resize() {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   camera.aspect = window.innerWidth / window.innerHeight;
-  for (const t of towers) { t.lw = t.label.offsetWidth; t.lh = t.label.offsetHeight; }
+  for (const t of towers) { t.lw = t.label.offsetWidth; t.lh_ = t.label.offsetHeight; }
 }
 window.addEventListener('resize', resize);
 resize();
@@ -337,7 +351,28 @@ const presetButtons = PRESETS.map((p) => {
 
 let rangeFrom = YEAR_MIN;
 let rangeTo = YEAR_MAX;
-function setRange(from, to, { frame = true } = {}) {
+
+// Keep the range in the URL so a link reproduces it. Throttled (~400 ms, with a
+// trailing write) because Safari throws after 100 replaceState calls per 30 s.
+let lastUrlWrite = 0;
+let urlTimer = null;
+function syncUrl(force = false) {
+  const now = performance.now();
+  if (!force && now - lastUrlWrite < 400) {
+    if (!urlTimer) urlTimer = setTimeout(() => { urlTimer = null; syncUrl(true); }, 400);
+    return;
+  }
+  lastUrlWrite = now;
+  try {
+    const url = new URL(location.href);
+    if (rangeFrom === YEAR_MIN && rangeTo === YEAR_MAX) { url.searchParams.delete('from'); url.searchParams.delete('to'); }
+    else { url.searchParams.set('from', rangeFrom); url.searchParams.set('to', rangeTo); }
+    history.replaceState(null, '', url);
+  } catch (err) { /* file:// or sandboxed: no URL sync, the slider still works */ }
+}
+
+const yearBig = document.getElementById('yearBig');
+function setRange(from, to, { frame = true, keepAngle = false, animate = true } = {}) {
   rangeFrom = Math.max(YEAR_MIN, Math.min(from, to));
   rangeTo = Math.min(YEAR_MAX, Math.max(from, to));
   fromEl.value = rangeFrom;
@@ -349,49 +384,93 @@ function setRange(from, to, { frame = true } = {}) {
   fillEl.style.left = `${((rangeFrom - YEAR_MIN) / span) * 100}%`;
   fillEl.style.right = `${((YEAR_MAX - rangeTo) / span) * 100}%`;
   yearText.textContent = `${rangeFrom} – ${rangeTo}`;
+  yearBig.textContent = rangeTo;
   presetButtons.forEach((b, i) => b.classList.toggle('on', PRESETS[i].from === rangeFrom && PRESETS[i].to === rangeTo));
+  syncUrl();
 
-  // Keep the range in the URL so a link reproduces it.
-  try {
-    const url = new URL(location.href);
-    if (rangeFrom === YEAR_MIN && rangeTo === YEAR_MAX) { url.searchParams.delete('from'); url.searchParams.delete('to'); }
-    else { url.searchParams.set('from', rangeFrom); url.searchParams.set('to', rangeTo); }
-    history.replaceState(null, '', url);
-  } catch (err) { /* file:// or sandboxed: no URL sync, the slider still works */ }
-
-  layout();
-  if (frame) frameAll();
+  const changed = layout(animate);
+  // While playing, only re-frame when a tower actually appeared.
+  if (frame && (changed || !playing)) frameAll({ keepAngle });
 }
-// Show only towers built inside the range; re-pack them evenly, oldest on the left.
-function layout() {
+// Show only towers built inside the range. The row is left-aligned (oldest at x=0)
+// so a tower never moves when LATER ones appear; the camera does the framing.
+// Returns true when the set of visible towers changed.
+function layout(animate) {
+  const now = performance.now();
   const vis = towers.filter((t) => t.info.built >= rangeFrom && t.info.built <= rangeTo);
+  let changed = false;
   towers.forEach((t) => {
-    t.visible = vis.includes(t);
-    t.holder.visible = t.visible;
-    t.chip.style.display = t.visible ? '' : 'none';
-    if (!t.visible) t.label.style.display = 'none';
+    const show = vis.includes(t);
+    if (show !== t.visible) changed = true;
+    if (show && !t.visible) t.born = animate ? now : -1e9; // starts its rise
+    t.visible = show;
+    t.holder.visible = show;
+    t.chip.style.display = show ? '' : 'none';
+    if (!show) t.label.style.display = 'none';
   });
   vis.forEach((t, i) => {
-    t.x = (i - (vis.length - 1) / 2) * SPACING;
+    t.x = i * SPACING;
     t.holder.position.set(t.x, 0, 0);
   });
   const first = vis[0];
   boat.position.set((first ? first.x : 0) - 12, 0, 10);
+  return changed;
 }
-fromEl.addEventListener('input', () => setRange(+fromEl.value, rangeTo));
-toEl.addEventListener('input', () => setRange(rangeFrom, +toEl.value));
+
+// --- Play: sweep the END year from the start year to 2025 over ~20 s ----------
+const SWEEP_SECONDS = 20;
+const RISE_MS = 600;
+const playBtn = document.getElementById('play');
+let playing = false;
+let yearF = YEAR_MAX;
+let lastTick = 0;
+function startPlay() {
+  if (rangeTo >= YEAR_MAX) { // finished (or full view): start over from the start year
+    yearF = rangeFrom;
+    setRange(rangeFrom, rangeFrom, { frame: false, animate: false });
+  } else {
+    yearF = rangeTo;
+  }
+  playing = true;
+  lastTick = performance.now();
+  playBtn.textContent = '⏸ Pause';
+  playBtn.classList.add('on');
+}
+function pausePlay() {
+  if (playing) {
+    playing = false;
+    playBtn.textContent = '▶ Play';
+    playBtn.classList.remove('on');
+  }
+  syncUrl(true);
+}
+playBtn.addEventListener('click', () => (playing ? pausePlay() : startPlay()));
+// Dragging a handle or picking a preset takes over from Play (that is the scrub).
+fromEl.addEventListener('input', () => { pausePlay(); setRange(+fromEl.value, rangeTo); });
+toEl.addEventListener('input', () => { pausePlay(); setRange(rangeFrom, +toEl.value); });
+presetButtons.forEach((b, i) => b.addEventListener('click', () => pausePlay()));
 
 const q = new URLSearchParams(location.search);
 if (q.get('game') === '1') setGameCam(true);
 const qFrom = parseInt(q.get('from'), 10);
 const qTo = parseInt(q.get('to'), 10);
-setRange(Number.isFinite(qFrom) ? qFrom : YEAR_MIN, Number.isFinite(qTo) ? qTo : YEAR_MAX);
+setRange(Number.isFinite(qFrom) ? qFrom : YEAR_MIN, Number.isFinite(qTo) ? qTo : YEAR_MAX, { animate: false });
 const startIdx = towers.findIndex((t) => t.info.name === q.get('focus'));
 if (startIdx >= 0) focusOn(startIdx);
 target.copy(goal);
+radius = radiusGoal;
+if (q.get('play') === '1') startPlay();
 
 const v = new THREE.Vector3();
-function frame() {
+function frame(now) {
+  if (playing) {
+    yearF = Math.min(YEAR_MAX, yearF + ((now - lastTick) / 1000) * ((YEAR_MAX - YEAR_MIN) / SWEEP_SECONDS));
+    lastTick = now;
+    const y = Math.floor(yearF);
+    if (y !== rangeTo) setRange(rangeFrom, y, { keepAngle: true });
+    if (yearF >= YEAR_MAX) pausePlay();
+  }
+  radius += (radiusGoal - radius) * 0.12;
   target.lerp(goal, 0.12);
   camera.fov = fov;
   camera.updateProjectionMatrix();
@@ -409,12 +488,17 @@ function frame() {
   const placed = [];
   for (const t of towers) {
     if (!t.visible) continue;
-    v.set(t.x, t.height + 1.5, 0).project(camera);
+    // rise from the rock: scale-y ease-out over RISE_MS; the label fades in with it
+    const p = Math.min(1, Math.max(0, (now - t.born) / RISE_MS));
+    const e = 1 - (1 - p) ** 3;
+    t.lh.scale.y = Math.max(e, 0.001);
+    t.label.style.opacity = e;
+    v.set(t.x, t.height * e + 1.5, 0).project(camera);
     const px = ((v.x + 1) / 2) * window.innerWidth;
     const py = ((1 - v.y) / 2) * window.innerHeight;
     let on = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1;
     if (on) {
-      const r = { l: px - t.lw / 2 - 3, r: px + t.lw / 2 + 3, t: py - t.lh - 3, b: py + 3 };
+      const r = { l: px - t.lw / 2 - 3, r: px + t.lw / 2 + 3, t: py - t.lh_ - 3, b: py + 3 };
       on = !placed.some((q) => r.l < q.r && r.r > q.l && r.t < q.b && r.b > q.t);
       if (on) placed.push(r);
     }
@@ -426,6 +510,7 @@ function frame() {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+window.__labTowers = towers; // test hook: the headless check samples each tower's rise
 window.__labReady = true;
 </script>
 </body>
