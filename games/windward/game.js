@@ -90,7 +90,14 @@ export default function start({ canvas, net, seed, role }) {
 
   const isFixedCamera = CONFIG.CAMERA_MODE === 'fixed';
   const cameraFov = isFixedCamera ? CONFIG.FIXED_CAMERA_FOV_DEG : CONFIG.CHASE_CAMERA_FOV_DEG;
-  const camera = new THREE.PerspectiveCamera(cameraFov, 1, 0.1, 2000);
+  // Near plane: CONFIG.CAMERA_NEAR for the fixed camera (see config.js); the
+  // legacy chase cam sits ~12 m away, so it keeps 0.1. ?near=<m> overrides
+  // (A/B test of the shoreline flicker: ?near=0.1 = old behaviour).
+  const nearParam = parseFloat(new URLSearchParams(window.location.search).get('near'));
+  const cameraNear = Number.isFinite(nearParam)
+    ? Math.min(20, Math.max(0.01, nearParam))
+    : (isFixedCamera ? CONFIG.CAMERA_NEAR : 0.1);
+  const camera = new THREE.PerspectiveCamera(cameraFov, 1, cameraNear, 2000);
 
   // Golden-hour lighting (2026-09-16 pass, shared/ART.md): warm low sun,
   // cool-tinted HemisphereLight fill so shadowed faces read blue against
