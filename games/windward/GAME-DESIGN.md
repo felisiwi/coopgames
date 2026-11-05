@@ -1108,3 +1108,9 @@ ages).
   areas that lifts where you've sailed, minimap, edge tags for nearby harbours, pinch zoom,
   names revealed on discovery. Lab: claude.ai artifact "Windward Map Lab" (settings to
   compare minimap shape/rotation, tag modes, label modes, reveal radius).
+- **Descriptive names before discovery (Felix):** big areas have general names; specific
+  places (islands, skerries, harbours, villages) show a descriptive name until you've been
+  close ("Goose Isle", "the shallow sound", "the Hood"). Once discovered, the real name
+  appears, with the description kept underneath ("Grundsund · the shallow sound").
+  Descriptions are written as lore, partly from what the Swedish names mean; they are not
+  etymology claims.
