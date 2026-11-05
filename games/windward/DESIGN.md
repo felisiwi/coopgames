@@ -2,7 +2,14 @@
 
 ## Reference labs
 
-Frozen decision tools, kept exactly as they were when Felix decided (`ref/`): `look-lab.html` (decided the Bohuslän look: split style, smooth toon water, granite palette), `control-lab.html` (decided the phone controls), `lighthouse-timeline.html` + `lighthouses-kit.js` (decided the 29 west-coast towers: looks, game heights 6 + 0.5 x real, built-year order; kit snapshot at fe4d1ec), `lighthouse-timeline-play.html` + `lighthouses-kit-play.js` (the ▶ Play time-lapse Felix loved, 2026-11-05: real looks, flash patterns, towers rising year by year; snapshot at d88e385). Change the live labs, not these.
+Frozen decision tools in `ref/`, kept exactly as they were when Felix decided. Look, don't edit; change the live labs instead.
+
+- `look-lab.html`: decided the Bohuslän look (split style, smooth toon water, granite palette).
+- `look-skagen/`: before/after renders of the Skagen palette Felix approved (2026-11-05).
+- `control-lab.html`: decided the phone controls.
+- `lighthouse-timeline.html` + `lighthouses-kit.js`: decided the 29 west-coast towers (looks, game heights 6 + 0.5 x real, built-year order; kit snapshot at fe4d1ec).
+- `lighthouse-timeline-play.html` + `lighthouses-kit-play.js`: the ▶ Play time-lapse Felix loved (2026-11-05: real looks, flash patterns, towers rising year by year; snapshot at d88e385).
+- `epoch-timeline.html`: the epoch band and era strip with the year slider (epochs drawn by weight, not to scale; data snapshot embedded). The live version is the top of `coast-lab.html`, fed by `data/epochs.json`.
 
 Decisions from a `/grill-me` session (2026-09-11), Batch 0 of Stage W0. Scope: boat
 feel (sail speed, tacking, trim, camera) and the wind sync mechanism — no islands,
@@ -444,11 +451,3 @@ verdicts so far:
 Gust telegraphing (W3, per cadence decision above). Islands, claiming, scoring —
 not this stage (see AGENTS.md's Windward concept). Sail trim automation,
 if it turns out manual trim isn't fun in practice — Felix's call after playing it.
-
-## Reference labs
-
-Frozen design references in `ref/`. Look, don't edit.
-
-- `ref/epoch-timeline.html` — the epoch band and era strip (epochs drawn by weight, not to scale; markers for "first jump lands" 1745 and "you start" 1905). The live version is the top of `coast-lab.html`, fed by `data/epochs.json`.
-
-(If `felix/windward-lighthouses` has its own "Reference labs" section near the top, fold the two together on merge.)

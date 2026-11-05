@@ -27,10 +27,9 @@ Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobb
 
 - Windward: phone controls, new boat, wave-wobble fix, 3m facets (earlier merge).
 - Look: L1 port → Skagen palette (pass 2) → Skagen default + pond fix (pass 3).
-- Lighthouses: 12 → 29 towers, real looks, year slider, Play, flash patterns.
+- Lighthouses: 12 → 29 towers, real looks, year slider, Play, flash patterns; game design /grill-me rounds 1–11 confirmed.
 - Real coast: R0 → passes 2–5 (Gottskär, Koster, population, west-Orust history,
   combined map + timeline, epochs fact-check).
-- Game design: /grill-me rounds 1–11, shared understanding confirmed.
 
 ## Next
 
