@@ -60,6 +60,10 @@ games/<name>/
   index.html    solo dev entry (see below) — expected, not enforced
   src/          your code, organized however you like
   assets/       your game's own art/audio, if not shared (see below)
+  design-checks.md  this game's own checks for the design-audit skill
+  AUDIT.md      design-audit reports, newest first (written by the skill)
+  CHANGELOG.md  one line per visual change, with its photo-spot images
+  changelog/    <date>-<slug>-spot<N>.png before/after screenshots
 ```
 
 No build step, no framework, no bundler for games. Plain ES modules, relative
@@ -139,6 +143,25 @@ including session start/end and the handoff: `docs/COLLABORATION.md`.
   and the hub load `game.js` from different URLs (see the asset-path rule
   above) — a game that works standalone can still 404 or throw under the
   hub. Launch it from the hub picker at least once before sign-off.
+- **Run the design audit** (`.claude/skills/design-audit/SKILL.md`) and fill
+  in `design-checks.md` first — see `docs/SKILLS.md`.
+
+## Photo spots and the visual changelog
+
+Any change that alters how a game looks gets a before/after from the same
+fixed view, so "improved lighting" becomes two pictures you can compare.
+
+- Define 1–3 photo spots (a seed plus a fixed camera position) in your
+  game's `CONFIG`, reachable from the solo entry as `?spot=N`. A spot
+  turns off anything that varies between runs (fog, input, random seed).
+  (No game has photo spots yet — Windward will be the first.)
+- Before and after a visual change, open each spot and screenshot it (the
+  human does this; no capture tooling is installed — adding Playwright
+  would be the repo's first npm dependency and needs Felix's explicit yes).
+- Save as `games/<id>/changelog/<date>-<slug>-spot<N>-before.png` / `-after.png`
+  and add one line to `games/<id>/CHANGELOG.md`:
+  `- YYYY-MM-DD <slug>: <what changed> (spots 1-3)`.
+- Visual changes only, not every commit.
 
 ## Tool economy
 
