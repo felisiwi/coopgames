@@ -1131,3 +1131,7 @@ Read via Chrome from his shared list (23 places). West-coast entries, north to s
 sweet spots and as harbour candidates; geocode the named ones from OSM by exact name, use the
 three pinned coordinates as given. Note: Rammen sits by Marstrand (near Rammholmen), outside
 the current Grundsund region, consistent with the coast agent's finding.
+- **Smörasken** (from Felix's Skippo link, harbour id 127978): a lagoon harbour in Häröns
+  naturreservat on Härön by Kyrkesund (Tjörn), approx. 58.0017 N, 11.475 E (map centre on the
+  page; may be off by a little). Outside the current Grundsund region (south edge 58.085 N);
+  place it when the map grows south.
