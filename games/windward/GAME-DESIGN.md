@@ -200,6 +200,11 @@ multiplayer, and what it talks to.
 
 Each stage is small, playable and tested before the next.
 
+**Stage order (SET, Q17 a, 2026-11-05):** 1 the lure (free sailing, small
+interactions, port arrival), 2 co-op visiting (smart ping, pair net), 3 chart,
+storm and first jump, 4 trade. The T0-T8 table below is the trade phase (4)
+and predates this order; it is due a rewrite.
+
 | Stage | What you can do | New systems |
 |---|---|---|
 | T0 | Play a few trips in a spreadsheet; agree prices and sizes | none (numbers only) |
@@ -226,7 +231,8 @@ Before any story, the first thing is just sailing.
   clear that sailing is fun in itself and that ports do things. Don't go
   deep on port mechanics yet; make the early hook clear.
 - **"The game" (story, chart) starts when you choose it**, for example from a
-  port. Nothing forces the story on you.
+  port. A second way in is the fog and thunder (see "Fog"); whether that
+  is an offer or a hijack is open.
 - This is the no-save lure: 5 minutes must already feel rewarding.
 - **Pre-story sailing is today's coast (SET, Q10):** the current free-sail
   mode, with its real present-day lights.
@@ -239,6 +245,24 @@ Before any story, the first thing is just sailing.
   a table). No long dialogue UI. Fallback if real interactions are too much
   for now: a simple port menu (start the story / later: sell catch /
   leave).
+
+## Fog: the universal "not yet" (new, Felix 2026-11-05)
+
+One visual language for "not yet / beyond".
+
+- **Today's coast has no hard map edge.** Sail too far and fog rolls in
+  gradually, with no clear line. You can keep navigating in it, but it is
+  hard to see.
+- **Stay in the fog long enough and thunder starts:** another way the story
+  can begin, alongside choosing it at a port.
+- **The same mist hides what a visitor hasn't unlocked** during visits
+  (Q15, open).
+- **The lightning-flash fog is the era crossing.** Ordinary weather fog still
+  exists (see "The frame"). Fog makes lighthouses essential.
+- **Open (round 5):** what happens if a free-sailing player drifts in by
+  accident and whether it scares off lure players; whether thunder is an
+  offer or a hijack; how players tell ordinary, edge and crossing fog apart;
+  where the fog begins on a finite map.
 
 ## The opening: where the story starts (new, Felix 2026-11-05)
 
@@ -258,6 +282,8 @@ mystical.
   part of an expandable mini-map with markers on sweet spots (Felix's
   favourite places). Deeper in you explore it yourself or buy further chart
   sections from people you meet.
+  **(SET, Q18 c)** Build fixed chart sections first (inherited or bought),
+  with exploring revealing detail on top.
 - **Teaching sailing and navigation:** lighthouses, cairns and village fires
   are the tutorial. No pop-up lessons; the coast teaches.
 - **The storm:** after the first chart and some chill sailing, a storm rolls
@@ -285,9 +311,11 @@ Opening-year options (no pick):
   still exists. Fog makes lighthouses essential, which is a feature.
 - **Heritage touch points** (standing stones, cairns, etc.) as clues,
   points, treasures. Rock carvings are a much later release.
-- **Treasure across time:** treasure buried in a rich later era (by you,
-  unknowingly) is dug up in the poor early era. That lifts you from poor
-  fisher into the free-port heyday and smuggling. *Idea, not set.*
+- **Treasure across time (SET, Q16 a):** something is lost or buried during
+  the opening (for example the storm takes granddad's sea chest) and found
+  after the first jump; the player understands later. That can lift you
+  from poor fisher into the free-port heyday and smuggling. What is inside
+  the chest is not set.
 - **The story unlocks eras; once unlocked you jump freely.**
 - **Era tastes are very small at first** but clearly different in look and
   feel, to tease.
@@ -325,16 +353,35 @@ Design this explicitly; it touches almost every system.
   Players and multiplayer (12), and the "two friends crash a market" idea,
   until that later protocol exists. Inside a world, its owner is still the
   authority.
-- **The pair net (SET as the signature co-op move):** a net strung between
-  both boats to scoop a school of fish; an easy, fun way to boost resources.
-  It may arrive with the "visit each other's worlds" stage if it's a lot of
-  work.
-- **Cheap first co-op (OPEN, Q12):** the first co-op play still needs
-  something cheap that makes two players fun before the net exists.
-  Candidates: smart ping (tags what you point at and marks it on both
-  mini-maps), signalling (horn / lantern / flag codes), casual race (ping a
-  lighthouse or buoy as a finish line), found-together finds (already
-  built: both near = found).
+- **The pair net (SET as the signature co-op move):** a rope or net strung
+  between both boats that sweeps up what is in the water, an easy, fun way
+  to boost resources. **What it sweeps varies by era and place**, so the
+  game does not read as a fishing game early: drifting barrels, a loose
+  dinghy or storm flotsam on today's coast; herring in herring eras; dumped
+  contraband in the smuggling era; wreck goods. Fish is one use, not the
+  identity. The sweep lists are data per place and era. It may arrive with
+  the "visit each other's worlds" stage if it's a lot of work.
+- **What a visitor brings (SET, Q14 a):** you bring your own stuff (boat,
+  hold, contracts) and your earnings go home to your own save. A trade cap
+  can come later if visiting breaks an economy.
+- **Visiting with mismatched progress or era (OPEN, Q15):** leaning towards
+  showing the host's era filtered to what the visitor has unlocked (d), or
+  the host's world with anything the visitor hasn't unlocked hidden in mist
+  (a), if there is a simple smart filter. Not locked. Later decisions that
+  would favour it: (1) the stage order (Q17 a) means visiting ships before
+  any era is unlocked, so there is no mismatch until the chart, storm and
+  jump stage; decide then. (2) Chart sections and discoveries are per-save
+  sets of ids (Q9, Q18 c), which makes "unlocked by this visitor" a simple
+  yes/no per item and favours the mist filter. (3) Sweep lists and era
+  content keyed by era and place make filtering a data lookup, not code.
+  (4) Q14 a means the visitor's stuff is already their own, which works
+  with either. Come back when the story stage is designed.
+- **Early co-op (SET, Q12): smart ping + the pair net.** The ping is the
+  first feature beyond "here I am": it tags what you point at (a find, a
+  fish school, a port, a lighthouse) and marks it on both mini-maps.
+  Signalling (horn / lantern / flag codes), a casual race (ping a
+  lighthouse or buoy as a finish line) and found-together finds (already
+  built: both near = found) stay as optional extras.
 
 ## Where the story is told: history layers (SET, Felix 2026-11-05)
 
@@ -417,26 +464,37 @@ Status: **OPEN**, **SET** (Felix said it), **INFERRED** (my reading, confirm).
 | 12 | Start area and history depth | **SET** | West Orust. Broad coast-wide history plus deeper niche history for the start area. |
 | 13 | Pre-story year | **SET** | Today's coast. Choosing the story at a port plays the time-lapse backwards to the opening year. |
 | 14 | Whose world | **SET** | Everyone owns their own world and save. Together = visiting a friend's world; leaving sends you home. Shared contracts and market effects are a later, separate protocol. |
-| 15 | Signature co-op move | **SET** (timing open) | The pair net. May arrive with the visiting stage. A cheaper first co-op feature is still open (Q12). |
+| 15 | Signature co-op move | **SET** (timing open) | The pair net, sweeping different things by era and place (fish is one use). May arrive with the visiting stage. Early co-op = smart ping + pair net. |
 | 16 | Port arrival | **SET** | Sensory reward + a small gift (a fish) + the story offered quietly. Fallback: a simple port menu. No long dialogue UI. |
+| 17 | What a visitor brings | **SET** | Your own stuff comes along; earnings go home. A trade cap later if needed. |
+| 18 | Visiting with mismatched progress | **OPEN** | Leaning d or a with a mist filter. Not locked; decide when the story stage is designed. |
+| 19 | Treasure causality | **SET** | Something is lost during the opening (the storm takes granddad's sea chest) and found after the first jump. |
+| 20 | Stage order | **SET** | Lure, then co-op visiting, then chart/storm/jump, then trade. |
+| 21 | Chart shape | **SET** | Fixed sections first (inherited or bought), exploring reveals detail on top. |
+| 22 | Fog | **SET (rules), details OPEN** | No hard edge on today's coast; fog thickens gradually; thunder after long enough is a second way into the story; the same mist hides unlocked-for-others content; lightning fog is the crossing. |
 
 ## Gaps (to grill)
 
 Recorded 2026-11-05; resolved ones move into the log above.
 
-- **Cheap first co-op feature (Q12):** which of smart ping, signalling,
-  casual race, found-together finds, and when the pair net arrives.
-- **What a visitor brings in and takes home (round 4):** hold, catch,
-  contracts, pair-net haul, when visiting a friend's world.
-- **Visiting with mismatched progress or era (round 4):** the "no blockers
-  between players" rule applied to the visiting model.
-- **Treasure across time (round 4):** when and where is it buried relative to
-  when it is found? What crosses is settled; the causality isn't.
-- **Stage table (round 4):** T0-T8 assumes one era and trade first. Where do
-  the first minutes, port arrival, visiting, pair net, chart, storm and
-  first jump go?
-- **Chart data shape (round 4):** sections, markers, buying sections. Charts
-  are knowledge, so they cross jumps.
+- **Fog details (round 5):** accidental drift, thunder as offer or hijack,
+  telling ordinary / edge / crossing fog apart, where the fog begins.
+- **Money before the trade stage (round 5):** the stage order puts trade
+  last, but chart sections can be bought and the port menu has "sell catch".
+  Where does money come from in stages 1-3?
+- **Pair-net haul split:** earnings go home (Q14 a); how is a shared haul
+  divided between host and visitor?
+- **Visiting with mismatched progress (Q15, OPEN):** decide when the story
+  stage is designed; notes above.
+- **Saving:** a world needs an owner and a save for visiting to mean
+  "a friend's world". Before the story (stages 1-2) a visit is a room with
+  no save; the first real save is needed at stage 3.
+- **The sea chest:** what is in it, how the player finds it after the jump,
+  and how "understands later" lands.
+- **Stage table rewrite:** T0-T8 is now only the trade phase. Size and names
+  for stages 1-3.
+- **Chart sections:** how many, what each reveals, who authors them, and
+  what "buying" costs (see money above).
 - **Backwards time-lapse:** lights have a year-range lab on
   `felix/windward-lighthouses` (its commit message mentions a Play
   timeline, not verified here); boats and palette are not year-driven yet.
