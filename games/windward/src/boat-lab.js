@@ -6,7 +6,7 @@ import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { createWater, createWaveState, stepWaves, seaHeightCPU } from './water.js';
 import { createSky } from './sky.js';
-import { createBoatMesh, KOSTER_RIGS, DECK_ITEMS, parseLabParams, labParamsToSearch } from './boats.js';
+import { createBoatMesh, EKA_SAIL_TONES, ekaSailHex, DECK_ITEMS, parseLabParams, labParamsToSearch } from './boats.js';
 
 const $ = (id) => document.getElementById(id);
 const loading = $('loading');
@@ -57,7 +57,7 @@ function main() {
   function deckFromItems() { return DECK_ITEMS.map((i) => (S.items.includes(i) ? i : null)); }
   function buildBoat() {
     if (boat) { scene.remove(boat.group); boat.group.traverse((o) => o.geometry?.dispose()); }
-    boat = createBoatMesh(S.pennant, { type: S.boat, rig: S.rig, deck: deckFromItems(), night: !!S.night, wear: S.wear });
+    boat = createBoatMesh(S.pennant, { type: S.boat, rig: S.rig, deck: deckFromItems(), night: !!S.night, wear: S.wear, sailTone: S.esail });
     boat.setSailAngle(S.sail * DEG);
     scene.add(boat.group);
   }
@@ -141,9 +141,19 @@ function main() {
   };
   const refreshers = [];
   refreshers.push(chips($('boats'), [['koster', 'Koster “Svalan”'], ['eka', 'Eka (1700)']], (id) => S.boat === id, (id) => { S.boat = id; buildBoat(); refreshPanel(); writeUrl(); }));
+  // The rig buttons are gone (Felix picked gaff + jib); ?rig=sprit-jib or ?rig=gaff still works for reference.
   const rigLabels = { 'gaff-jib': 'Gaff + jib', 'sprit-jib': 'Sprit + jib', gaff: 'Gaff only' };
-  const rigRefresh = chips($('rigs'), KOSTER_RIGS.map((r) => [r, rigLabels[r]]), (id) => S.rig === id, (id) => { S.rig = id; if (S.boat === 'koster') { boat.setRig(id); } refreshPanel(); writeUrl(); });
-  refreshers.push(() => { for (const [, b] of rigRefresh()) b.disabled = S.boat !== 'koster'; });
+  // Eka sail colour: three swatches (terracotta, rust-brown, dark bark-brown), kept in the URL as esail=
+  const toneLabels = { terracotta: 'Terracotta', rust: 'Rust-brown', bark: 'Dark bark' };
+  const toneEls = EKA_SAIL_TONES.map((id) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip';
+    b.innerHTML = `<span class="dot" style="background:#${ekaSailHex(id).toString(16).padStart(6, '0')}"></span>${toneLabels[id]}`;
+    b.addEventListener('click', () => { S.esail = id; boat.setSailTone(id); refreshPanel(); writeUrl(); });
+    $('esails').appendChild(b);
+    return [id, b];
+  });
+  refreshers.push(() => { for (const [id, b] of toneEls) b.classList.toggle('on', S.esail === id); $('esailBox').style.display = S.boat === 'eka' ? '' : 'none'; });
   refreshers.push(chips($('cams'), [['game', 'Game camera'], ['orbit', 'Orbit']], (id) => S.cam === id, (id) => {
     if (id === 'game') { S.cam = 'game'; S.zoom = 1; } else toOrbit();
     refreshPanel(); writeUrl();
@@ -176,7 +186,7 @@ function main() {
     for (const item of DECK_ITEMS) itemBoxes[item].checked = S.items.includes(item);
     colorEl.value = `#${S.pennant.toString(16).padStart(6, '0')}`;
     $('zoom').closest('label').style.display = S.cam === 'game' ? '' : 'none';
-    $('headname').textContent = `Boat Lab: ${S.boat === 'koster' ? `Svalan, ${rigLabels[S.rig]}` : 'eka 1700'}, ${S.night ? 'night' : 'day'}`;
+    $('headname').textContent = `Boat Lab: ${S.boat === 'koster' ? `Svalan${S.rig === 'gaff-jib' ? '' : `, ${rigLabels[S.rig]}`}` : 'eka 1700'}, ${S.night ? 'night' : 'day'}`;
   }
   $('head').addEventListener('click', () => { const open = $('panel').classList.toggle('open'); $('head').setAttribute('aria-expanded', String(open)); });
   $('copy').addEventListener('click', () => {

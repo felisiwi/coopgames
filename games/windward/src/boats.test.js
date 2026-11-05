@@ -1,10 +1,11 @@
 // node games/windward/src/boats.test.js — the two Boat Lab boats keep boat.js's contract (bow +Z, boom to leeward,
 // phone arc), stay cheap, and their options (rig, deck, night, wear, pennant) do what the brief says.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import * as THREE from '../vendor/three/three.module.js';
 import {
   createBoatMesh, BOAT_TYPES, KOSTER_RIGS, DECK_ITEMS, BOAT_DEFAULTS, BOW_LOCAL_DIRECTION, loadBoatModel, hullPoint, specOf,
-  LAB_DEFAULTS, parseLabParams, labParamsToSearch,
+  LAB_DEFAULTS, parseLabParams, labParamsToSearch, waterlineHalfBeam, EKA_SAIL_TONES,
 } from './boats.js';
 import { createBoatMesh as legacyBoat } from './boat.js';
 import { leewardSign, angleOffWind } from './sail.js';
@@ -41,7 +42,9 @@ check('same API as boat.js: createBoatMesh(color, opts) -> { group, setSailAngle
   }
   const d = createBoatMesh(0x66ccff); // the game's call: one argument
   assert.equal(d.type, BOAT_DEFAULTS.type);
-  assert.deepEqual(d.describe().deck, ['crate', 'barrel', null]);
+  assert.deepEqual(d.describe().deck, ['crate', 'barrel', 'chest'], 'all deck items by default (Felix)');
+  assert.equal(d.describe().wear, 0.8, 'wear 0.8 by default (Felix)');
+  assert.equal(d.rig, 'gaff-jib', 'gaff + jib is the koster rig');
   assert.ok(d.group.getObjectByName('boom-end'), 'boom-end marker for tests and the phone arc');
 });
 
@@ -64,7 +67,7 @@ check('the bow faces +Z and the hull sits on the waterline at every heading (gam
     const box = new THREE.Box3().setFromObject(b.group.children[0]); // the hull
     assert.ok(box.min.y < -0.2 && box.max.y > 0.25, `${type}: hull spans the waterline (${box.min.y.toFixed(2)}..${box.max.y.toFixed(2)})`);
     const len = box.max.z - box.min.z;
-    if (type === 'koster') assert.ok(len > 6.5 && len < 8, `koster length ${len.toFixed(2)} m (brief: 7-9 m real, readable at game scale)`);
+    if (type === 'koster') assert.ok(len > 7.5 && len < 9, `koster length ${len.toFixed(2)} m (brief: 7-9 m real)`);
     else assert.ok(len > 4.2 && len < 5.2, `eka length ${len.toFixed(2)} m (brief: 4-5 m)`);
   }
 });
@@ -115,11 +118,11 @@ check('the sail bellies to leeward (away from the swing) and stays finite at eve
   }
 });
 
-check('each boat stays cheap: under 3k triangles with everything switched on, at most 16 meshes', () => {
+check('each boat stays cheap: under 3k triangles with everything switched on, at most 18 meshes', () => {
   for (const [type, rig] of combos) {
     const d = createBoatMesh(0xffcc66, { type, rig, ...FULL }).describe();
     assert.ok(d.triangles < 3000, `${type}/${rig}: ${d.triangles} triangles`);
-    assert.ok(d.meshes <= 16, `${type}/${rig}: ${d.meshes} meshes`);
+    assert.ok(d.meshes <= 18, `${type}/${rig}: ${d.meshes} meshes`);
     console.log(`  ${type}${rig ? '/' + rig : ''}: ${d.triangles} triangles, ${d.meshes} meshes (all options on)`);
   }
 });
@@ -136,16 +139,102 @@ check('the colours read as the brief says: honey hull + white sails; tarred hull
   assert.ok(es.r > es.g && es.g > es.b && es.r - es.b > 0.25 && es.r < 0.8, `eka sail is tanned red-brown (${es.r.toFixed(2)},${es.g.toFixed(2)},${es.b.toFixed(2)})`);
 });
 
-check('clinker planking: strakes overlap (each lower edge sticks out) and the name is on the koster stern only', () => {
+check('clinker planking: each strake overlaps the one below (the lower edge sticks out)', () => {
   const spec = specOf('koster');
   const top = hullPoint(spec, 0.5, 0.4, 1); // inside edge of the next strake
   const lipped = hullPoint(spec, 0.5, 0.4, 1, 1.045);
   assert.ok(lipped[0] > top[0], 'overlap goes outward');
+});
+
+check('no name board: the koster carries no plaque, no text texture, and no canvas text code', () => {
+  for (const type of BOAT_TYPES) for (const rig of type === 'koster' ? KOSTER_RIGS : [undefined]) {
+    const b = createBoatMesh(0xffffff, { type, rig });
+    for (const m of allMeshes(b.group)) {
+      assert.ok(!m.material.map, `${type}/${rig}: ${m.name || 'mesh'} has a texture map`);
+      assert.notEqual(m.name, 'name-plaques');
+    }
+  }
+  const src = readFileSync(new URL('./boats.js', import.meta.url), 'utf8');
+  assert.ok(!/fillText|NAME_ON_STERN|name-plaques|namePlaques/.test(src), 'canvas text code is gone from boats.js');
+});
+
+check('koster is a slim double-ender: ~3:1, sharp stems at BOTH ends, raked, ends higher than the middle', () => {
+  const spec = specOf('koster');
+  const beam = 2 * spec.W;
+  assert.ok(spec.len / beam > 3 && spec.len / beam < 3.6, `length:beam ${(spec.len / beam).toFixed(2)}`);
+  // at the waterline the hull is a knife at each end, and full amidships
+  const mid = waterlineHalfBeam(spec, 0.46);
+  assert.ok(mid > 0.9, `amidships waterline half-beam ${mid.toFixed(2)}`);
+  for (const s of [0.04, 0.96]) assert.ok(waterlineHalfBeam(spec, s) < 0.12, `waterline half-beam at station ${s}: ${waterlineHalfBeam(spec, s).toFixed(3)} (sharp)`);
+  for (const s of [0.1, 0.9]) assert.ok(waterlineHalfBeam(spec, s) < 0.55 * mid, `still slim at station ${s}`);
+  // the plan narrows steadily to a point at both ends (no boxy shoulder): beam at each station never grows toward the tip
+  for (const [from, to] of [[0.46, 0], [0.46, 1]]) {
+    let prev = Infinity;
+    for (let i = 0; i <= 20; i++) { const s = from + ((to - from) * i) / 20; const w = hullPoint(spec, s, 0, 1)[0]; assert.ok(w <= prev + 1e-9, `plan widens toward the tip at s=${s.toFixed(2)}`); prev = w; }
+    assert.ok(hullPoint(spec, to, 0, 1)[0] < 1e-9, 'a point at the tip');
+  }
+  // stems rake: the keel end of each stem sits well inboard of the sheer end (bow and stern both)
+  assert.ok(hullPoint(spec, 1, 0, 1)[2] - hullPoint(spec, 1, 1, 1)[2] > 0.3, 'bow stem rakes');
+  assert.ok(hullPoint(spec, 0, 1, 1)[2] - hullPoint(spec, 0, 0, 1)[2] > 0.3, 'stern stem rakes');
+  // sheer: both ends higher than amidships, slightly
+  const sheerAt = (s) => hullPoint(spec, s, 0, 1)[1];
+  assert.ok(sheerAt(1) - sheerAt(0.5) > 0.4 && sheerAt(0) - sheerAt(0.5) > 0.3, 'ends rise');
+  assert.ok(sheerAt(1) - sheerAt(0.5) < 0.9 && sheerAt(0) - sheerAt(0.5) < 0.9, '...but only slightly');
+});
+
+check('rudder hung on the pointed stern: aft of the stern post, hanging well below the waterline, head above the sheer line', () => {
   const k = createBoatMesh(0xffffff, { type: 'koster' });
-  const plaques = meshByName(k.group, 'name-plaques');
-  assert.ok(plaques && plaques.geometry.attributes.uv, 'name plaques with uv on the koster');
-  for (let i = 0; i < plaques.geometry.attributes.position.count; i++) assert.ok(plaques.geometry.attributes.position.getZ(i) < -1, 'on the stern half');
-  assert.equal(meshByName(createBoatMesh(0xffffff, { type: 'eka' }).group, 'name-plaques'), undefined);
+  const rudder = meshByName(k.group, 'rudder');
+  assert.ok(rudder, 'rudder mesh');
+  k.group.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(rudder);
+  const spec = specOf('koster');
+  assert.ok(box.min.z < spec.z0 - 0.3 && box.max.z > spec.z0, `trails aft of the stern post (z ${box.min.z.toFixed(2)}..${box.max.z.toFixed(2)})`);
+  assert.ok(box.min.y < -0.6 && box.max.y > 0.8, `blade below the water, head above the stern (y ${box.min.y.toFixed(2)}..${box.max.y.toFixed(2)})`);
+  assert.ok(Math.abs(box.min.x + box.max.x) < 1e-6 && box.max.x < 0.15, 'on the centreline, slim');
+  assert.equal(meshByName(createBoatMesh(0xffffff, { type: 'eka' }).group, 'rudder'), undefined, 'the eka steers with an oar: no rudder');
+});
+
+check('the gaff reads at game scale: its own thick, dark spar along the top edge of the main', () => {
+  for (const rig of ['gaff-jib', 'gaff']) {
+    const k = createBoatMesh(0xffffff, { type: 'koster', rig, wear: 0 });
+    const gaff = meshByName(k.group, 'gaff-spar');
+    assert.ok(gaff, `${rig}: gaff spar mesh`);
+    assert.ok(gaff.userData.radius >= 0.09, `${rig}: gaff radius ${gaff.userData.radius} m (>= 9 cm so it is >= 2 px at game scale)`);
+    const sail = k.group.getObjectByName('sail-pivot').children.find((o) => o.isMesh && o.geometry.attributes.position.count === 96);
+    assert.ok(lum(meanColor(gaff)) < 0.7 * lum(meanColor(sail)), `${rig}: the gaff is clearly darker than the sail`);
+    // it lies along the sail's head edge: both ends within 0.25 m of the sail's top corners (H and P)
+    k.group.updateMatrixWorld(true);
+    const gb = new THREE.Box3().setFromObject(gaff), sb = new THREE.Box3().setFromObject(sail);
+    assert.ok(Math.abs(gb.max.y - sb.max.y) < 0.35, `${rig}: gaff top ${gb.max.y.toFixed(2)} vs sail top ${sb.max.y.toFixed(2)}`);
+  }
+  const boom = createBoatMesh(0xffffff, { type: 'koster' });
+  assert.equal(meshByName(boom.group, 'gaff-spar').parent.name, 'sail-pivot', 'the gaff swings with the boom');
+});
+
+check('eka sail: three tones (terracotta, rust-brown, dark bark-brown), each red-brown, getting darker, switchable at runtime', () => {
+  assert.deepEqual(EKA_SAIL_TONES, ['terracotta', 'rust', 'bark']);
+  const sailOf = (b) => b.group.getObjectByName('sail-pivot').children.find((o) => o.isMesh && o.geometry.attributes.position.count === 96);
+  const lums = [];
+  for (const tone of EKA_SAIL_TONES) {
+    const e = createBoatMesh(0xffffff, { type: 'eka', sailTone: tone, wear: 0 });
+    assert.equal(e.sailTone, tone);
+    const c = srgb(meanColor(sailOf(e)));
+    assert.ok(c.r > c.g && c.g >= c.b && c.r - c.b > 0.08, `${tone} is red-brown (${c.r.toFixed(2)},${c.g.toFixed(2)},${c.b.toFixed(2)})`);
+    lums.push(lum(meanColor(sailOf(e))));
+  }
+  assert.ok(lums[0] > lums[1] && lums[1] > lums[2], `darker each step: ${lums.map((l) => l.toFixed(3)).join(' > ')}`);
+  const e = createBoatMesh(0xffffff, { type: 'eka', wear: 0 });
+  e.setSailAngle(0.6);
+  const before = lum(meanColor(sailOf(e)));
+  e.setSailTone('bark');
+  assert.ok(lum(meanColor(sailOf(e))) < before, 'setSailTone repaints the sail');
+  assert.ok(Math.abs(e.group.getObjectByName('sail-pivot').rotation.y - 0.6) < 1e-9, 'the sail angle survives the change');
+  assert.throws(() => e.setSailTone('purple'), /unknown tone/);
+  assert.throws(() => createBoatMesh(0xffffff, { type: 'eka', sailTone: 'purple' }), /unknown eka sail tone/);
+  const k = createBoatMesh(0xffffff, { type: 'koster' });
+  k.setSailTone('bark'); // no-op: the koster's sails stay white
+  assert.ok(lum(meanColor(sailOf(k))) > 0.9);
 });
 
 check('pennant at the masthead in the player colour (and only there); recolourable', () => {
@@ -277,8 +366,13 @@ check('lab URL: every setting round-trips, defaults write nothing, junk is ignor
   assert.deepEqual(parseLabParams(s), { ...v, items: ['chest', 'crate'] });
   const none = parseLabParams(labParamsToSearch('', { ...LAB_DEFAULTS, items: [] }));
   assert.deepEqual(none.items, []);
+  assert.equal(parseLabParams('').heading, 305); assert.equal(parseLabParams('').wear, 0.8); assert.deepEqual(parseLabParams('').items, ['crate', 'barrel', 'chest']);
+  assert.equal(labParamsToSearch('', parseLabParams('?items=crate,barrel,chest&wear=0.8&sail=24&heading=305')), '', 'Felix\'s picks are the defaults');
+  for (const esail of ['rust', 'bark']) assert.equal(parseLabParams(labParamsToSearch('', { ...LAB_DEFAULTS, boat: 'eka', esail })).esail, esail, 'eka sail tone survives the URL');
+  assert.equal(parseLabParams('?esail=pink').esail, 'terracotta');
+  assert.equal(parseLabParams('?rig=sprit-jib').rig, 'sprit-jib', 'the other rigs stay reachable by ?rig=');
   const g = parseLabParams('?boat=ship&rig=x&night=maybe&wear=7&sail=abc&pennant=zzz&items=crate,anchor,crate&zoom=0&cam=weird&heading=-20');
-  assert.equal(g.boat, 'koster'); assert.equal(g.rig, 'gaff-jib'); assert.equal(g.night, 0); assert.equal(g.wear, 1); assert.equal(g.sail, 25);
+  assert.equal(g.boat, 'koster'); assert.equal(g.rig, 'gaff-jib'); assert.equal(g.night, 0); assert.equal(g.wear, 1); assert.equal(g.sail, 24);
   assert.equal(g.pennant, 0xffcc66); assert.deepEqual(g.items, ['crate']); assert.equal(g.zoom, 0.05); assert.equal(g.cam, 'game'); assert.equal(g.heading, 0);
   const game = labParamsToSearch('', { ...LAB_DEFAULTS, cam: 'game', zoom: 0.3, az: 200 });
   assert.equal(new URLSearchParams(game).get('zoom'), '0.3'); assert.equal(new URLSearchParams(game).get('az'), null, 'orbit numbers are dropped in game-camera mode');

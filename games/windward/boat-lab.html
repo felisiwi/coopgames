@@ -28,6 +28,7 @@
   button.chip, #copy { font: inherit; color: var(--text); background: #1c3140; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; min-height: 44px; cursor: pointer; }
   button.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on); font-weight: 600; }
   button.chip[disabled] { opacity: .35; pointer-events: none; }
+  .dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; margin-right: 7px; vertical-align: -3px; border: 1px solid rgba(255,255,255,.45); }
   .tog { display: flex; align-items: center; gap: 10px; min-height: 44px; }
   .tog input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
   .tog span { flex: 1; }
@@ -51,8 +52,8 @@
   <div id="body">
     <h2>Boat</h2>
     <div class="chips" id="boats"></div>
-    <h2>Koster rig</h2>
-    <div class="chips" id="rigs"></div>
+    <div id="esailBox"><h2>Eka sail colour</h2>
+    <div class="chips" id="esails"></div></div>
     <h2>Camera</h2>
     <div class="chips" id="cams"></div>
     <label class="slider"><span class="top"><span>Distance at the game angle</span><output id="zoomOut"></output></span><input id="zoom" type="range" min="0.05" max="2.5" step="0.01"></label>

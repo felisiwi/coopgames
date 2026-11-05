@@ -4,8 +4,9 @@
 //   createBoatMesh(color, { type: 'koster' | 'eka', rig, deck: [...], night: bool, wear: 0..1 })
 //     -> { group, setSailAngle, ...extras }
 //
-//   "koster"  Svalan, granddad's koster: double-ended, varnished honey clinker planks, white sails, name on
-//             the stern quarters. Three rigs to choose from by eye (`rig`): 'gaff-jib' (default), 'sprit-jib', 'gaff'.
+//   "koster"  Svalan, granddad's koster: double-ended, varnished honey clinker planks, white sails.
+//             (The name "Svalan" lives in the story, not on the model.) The rig is gaff + jib; 'sprit-jib' and 'gaff'
+//             stay available behind `rig` (and the lab's ?rig=) for reference.
 //   "eka"     the ~1700 boat: small open clinker boat, tarred dark hull, tanned red-brown spritsail, oars inside.
 //
 // Both: a pennant at the masthead in `color` (the player colour: the sails no longer carry it), three deck slots
@@ -26,8 +27,7 @@ export { BOW_LOCAL_DIRECTION, loadBoatModel } from './boat.js';
 export const BOAT_TYPES = ['koster', 'eka'];
 export const KOSTER_RIGS = ['gaff-jib', 'sprit-jib', 'gaff'];
 export const DECK_ITEMS = ['crate', 'barrel', 'chest']; // slot 0, 1, 2
-export const BOAT_DEFAULTS = { type: 'koster', rig: 'gaff-jib', deck: ['crate', 'barrel', null], night: false, wear: 0.5 };
-export const NAME_ON_STERN = 'Svalan';
+export const BOAT_DEFAULTS = { type: 'koster', rig: 'gaff-jib', deck: ['crate', 'barrel', 'chest'], night: false, wear: 0.8, sailTone: 'terracotta' };
 
 // ---- palette (Skagen: pastel, warm woods against a cool sea) ---------------------------------
 const PAL = {
@@ -44,9 +44,17 @@ const PAL = {
     patch: [0x6e5b4c, 0x8d7456, 0x66554a, 0x95795a, 0x6b594b], floor: 0x66533f,
   },
   crate: 0xdcc79f, crateDark: 0x9a8260, fish: 0xb9cdd6, barrel: 0x9a7248, hoop: 0x55555f, chest: 0x7d5b3f, brass: 0xe0bb62,
-  iron: 0x3f3d44, bulbOn: 0xffd48a, bulbOff: 0x8a7c66, halo: 0xffc46b, board: 0x35566a, letters: 0xf5ecd8, oar: 0xc2a577,
+  iron: 0x3f3d44, bulbOn: 0xffd48a, bulbOff: 0x8a7c66, halo: 0xffc46b, oar: 0xc2a577,
 };
 
+// The eka's tanned (barked) sail: three tones for Felix to pick by eye.
+export const EKA_SAIL_TONES = ['terracotta', 'rust', 'bark'];
+const EKA_SAILS = {
+  terracotta: { sail: 0xa65b3c, sailPatch: [0x8a4a30, 0xc07b50, 0x934f35], sailWeather: 0x9a7a5a },
+  rust: { sail: 0x8c4a2b, sailPatch: [0x713820, 0xa8603a, 0x7b3c23], sailWeather: 0x8a6a4c },
+  bark: { sail: 0x5e3d2b, sailPatch: [0x472b1d, 0x7b563c, 0x503325], sailWeather: 0x6f5a47 },
+};
+export const ekaSailHex = (name) => EKA_SAILS[name].sail;
 const col = (hex) => new THREE.Color(hex);
 const shade = (hex, f) => { const c = col(hex); c.multiplyScalar(f); return c; };
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -127,10 +135,13 @@ const LIP = 1.045; // each strake's lower edge sticks out this much: the clinker
 
 const SPECS = {
   koster: {
-    z0: -3.4, len: 7.0, peak: 0.46, W: 1.18, pStern: 2.1, pBow: 2.3, strakes: 5, lantern: [0, 0.95, -3.0],
-    sheer: (u) => 0.5 + 0.28 * u * u + 0.35 * Math.max(0, u) ** 3 + 0.12 * Math.max(0, -u) ** 2,
-    keel: (u) => -0.5 + 0.55 * Math.abs(u) ** 3.2,
-    mastZ: 0.7,
+    // Double-ended and slim: 8 m by 2.4 m (3.3:1). The plan tapers almost straight to a point at BOTH ends (low exponents),
+    // the stems rake (the keel line ends well inboard of the sheer line) and the forefoot / heel rise out of the water,
+    // so the waterline is a sharp knife at each end, not a blunt box. Sheer: both ends higher than the middle.
+    z0: -4.0, len: 8.0, peak: 0.46, W: 1.2, pStern: 1.5, pBow: 1.65, rake: 0.5, strakes: 5, lantern: [0, 1.3, -3.5],
+    sheer: (u) => 0.5 + 0.3 * u * u + 0.3 * Math.max(0, u) ** 3 + 0.16 * Math.max(0, -u) ** 2,
+    keel: (u) => -0.5 + 0.72 * Math.abs(u) ** 2.6,
+    mastZ: 0.9,
   },
   eka: {
     z0: -2.3, len: 4.8, peak: 0.5, W: 0.62, pStern: 1.7, pBow: 2.4, strakes: 4, lantern: [0, 1.0, 2.0], floorY: 0.1,
@@ -150,13 +161,21 @@ function planOf(spec, s) {
   const v = s < spec.peak ? (s - spec.peak) / spec.peak : (s - spec.peak) / (1 - spec.peak); // -1 stern .. 0 widest .. +1 bow
   const u = 2 * s - 1;
   const w = spec.W * Math.max(0, 1 - Math.abs(v) ** (v < 0 ? spec.pStern : spec.pBow));
-  return { w, sheer: spec.sheer(u), keel: spec.keel(u), z: spec.z0 + s * spec.len };
+  return { w, sheer: spec.sheer(u), keel: spec.keel(u), z: spec.z0 + s * spec.len, u };
 }
 const crossX = (t) => Math.cos((t * Math.PI) / 2) ** 0.55; // half-beam factor from sheer (0) down to the keel (1)
 // A point on the hull skin: station s (0 stern .. 1 bow), depth t (0 sheer .. 1 keel), side +1 / -1.
+// Raked stems: going down from the sheer (t 0) to the keel (t 1) the end of the hull moves inboard by up to spec.rake.
 export function hullPoint(spec, s, t, side, lip = 1) {
   const p = planOf(spec, s);
-  return [side * p.w * crossX(t) * lip, p.sheer - (p.sheer - p.keel) * t, p.z];
+  const rake = (spec.rake || 0) * Math.abs(p.u) ** 2.5 * t;
+  return [side * p.w * crossX(t) * lip, p.sheer - (p.sheer - p.keel) * t, p.z - Math.sign(p.u) * rake];
+}
+// Half-beam of the hull at the waterline (y = 0) at station s: how sharp the ends are where they meet the sea.
+export function waterlineHalfBeam(spec, s) {
+  const p = planOf(spec, s);
+  if (p.keel >= 0) return 0; // keel out of the water here: the hull does not touch the sea at this station
+  return p.w * crossX(clamp01(p.sheer / (p.sheer - p.keel)));
 }
 export const specOf = (type) => SPECS[type];
 const deckY = (spec, z) => planOf(spec, (z - spec.z0) / spec.len).sheer - 0.07;
@@ -248,13 +267,13 @@ function fixturesParts(type) {
   const pal = PAL[type];
   const m = new Mesher({ weatherTint: pal.weather, weatherK: 0.15 });
   if (type === 'koster') {
-    const dy = deckY(spec, -1.35) + 0.07;
-    m.box(0, dy + 0.17, -1.35, 1.06, 0.34, 1.12, pal.coaming); // cuddy coaming
-    m.box(0, dy + 0.37, -1.35, 0.9, 0.05, 0.96, pal.hatch); // hatch lid
+    const dy = deckY(spec, -1.75) + 0.07;
+    m.box(0, dy + 0.17, -1.75, 1.0, 0.34, 1.15, pal.coaming); // cuddy coaming
+    m.box(0, dy + 0.37, -1.75, 0.86, 0.05, 1.0, pal.hatch); // hatch lid
     // stem and stern posts: a stout post at each pointed end
     for (const z of [spec.z0 + 0.12, spec.z0 + spec.len - 0.1]) {
       const p = planOf(spec, (z - spec.z0) / spec.len);
-      m.box(0, p.sheer - 0.08, z, 0.09, 0.34, 0.12, pal.rail);
+      m.box(0, p.sheer - 0.08, z, 0.07, 0.34, 0.1, pal.rail);
     }
   } else {
     const thw = [-1.2, -0.1, 1.15];
@@ -275,7 +294,7 @@ function fixturesParts(type) {
   return m;
 }
 
-// ---- deck items, lantern, name plaque -------------------------------------------------------------
+// ---- deck items, rudder, lantern -------------------------------------------------------------
 function itemMesher(kind, scale) {
   const m = new Mesher();
   if (kind === 'crate') {
@@ -308,11 +327,33 @@ function itemMesher(kind, scale) {
   return { mesher: m, mesh };
 }
 const ITEM_SLOTS = {
-  koster: [[0, 1.8], [0.42, -0.05], [0, -2.5]], // [x, z] on deck
+  koster: [[0, 2.1], [0.4, -0.25], [0, -2.7]], // [x, z] on deck
   eka: [[0, 1.85], [0, 0.55], [0, -1.75]], // on the floorboards
 };
 const ITEM_SCALE = { koster: 1, eka: 0.55 };
 const slotY = (type, z) => (type === 'koster' ? deckY(SPECS.koster, z) + 0.06 : SPECS.eka.floorY);
+
+// The rudder, hung on the pointed stern post. The post rakes (its foot is 0.5 m inboard of the sheer end), so the blade's
+// front edge follows that line, then hangs straight down well below the waterline; the trailing edge slants forward at the
+// bottom. A short tiller stub shows above the stern. Pintles (iron) tie it to the post.
+function rudderParts() {
+  const spec = SPECS.koster;
+  const pal = PAL.koster;
+  const m = new Mesher({ weatherTint: pal.weather, weatherK: 0.1 });
+  const wood = shade(pal.spar, 0.78);
+  const head = planOf(spec, 0).sheer - 0.08;
+  const heel = hullPoint(spec, 0, 1, 1); // the post's foot: [x, y, z]
+  const zs = spec.z0 - 0.02;
+  const poly = [[head, zs], [heel[1], heel[2] - 0.02], [-0.8, heel[2] - 0.02], [-0.8, heel[2] - 0.38], [head - 0.1, zs - 0.3]]; // [y, z]
+  const H = 0.035; // half thickness
+  const at = (pt, x) => [x, pt[0], pt[1]];
+  for (const x of [-H, H]) for (let i = 1; i < poly.length - 1; i++) m.tri(at(poly[0], x), at(poly[i], x), at(poly[i + 1], x), wood);
+  for (let i = 0; i < poly.length; i++) { const a2 = poly[i], b2 = poly[(i + 1) % poly.length]; m.quad(at(a2, -H), at(b2, -H), at(b2, H), at(a2, H), shade(pal.spar, 0.7)); }
+  m.box(0, head + 0.04, zs - 0.08, 0.09, 0.14, 0.22, wood); // rudder head
+  m.box(0, head + 0.14, zs + 0.2, 0.05, 0.05, 0.6, wood); // tiller stub
+  for (const t of [0.15, 0.7]) { const q = hullPoint(spec, 0, t, 0); m.box(0, q[1], q[2] - 0.02, 0.1, 0.07, 0.1, PAL.iron); } // pintles on the post
+  return m;
+}
 
 let glowTexture;
 function getGlowTexture() { // a soft radial falloff, drawn once (browser only; node has no canvas)
@@ -372,78 +413,25 @@ function lanternParts(type) {
   return { group, set };
 }
 
-let nameTexture;
-function getNameTexture() {
-  if (nameTexture !== undefined) return nameTexture;
-  nameTexture = null;
-  if (typeof document !== 'undefined') {
-    const c = document.createElement('canvas');
-    c.width = 512; c.height = 116;
-    const g = c.getContext('2d');
-    if (g) {
-      g.fillStyle = `#${PAL.board.toString(16).padStart(6, '0')}`;
-      g.fillRect(0, 0, c.width, c.height);
-      g.strokeStyle = `#${PAL.brass.toString(16).padStart(6, '0')}`;
-      g.lineWidth = 5;
-      g.strokeRect(8, 8, c.width - 16, c.height - 16);
-      g.fillStyle = `#${PAL.letters.toString(16).padStart(6, '0')}`;
-      g.font = 'italic 700 78px Georgia, "Times New Roman", serif';
-      g.textAlign = 'center';
-      g.textBaseline = 'middle';
-      g.fillText(NAME_ON_STERN, c.width / 2, c.height / 2 + 4);
-      nameTexture = new THREE.CanvasTexture(c);
-      nameTexture.colorSpace = THREE.SRGBColorSpace;
-    }
-  }
-  return nameTexture;
-}
-// Two plaques (one per side) following the hull's skin near the stern, text reading bow-to-stern from outside.
-function namePlaques() {
-  const spec = SPECS.koster;
-  const tex = getNameTexture();
-  const mat = new THREE.MeshLambertMaterial({ map: tex, color: tex ? 0xffffff : PAL.board, side: THREE.DoubleSide, flatShading: true });
-  const pos = [];
-  const uv = [];
-  const NSEG = 4;
-  for (const side of [-1, 1]) {
-    for (let i = 0; i < NSEG; i++) {
-      const s0 = 0.08 + (i / NSEG) * 0.26;
-      const s1 = 0.08 + ((i + 1) / NSEG) * 0.26;
-      const pt = (s, t) => { const p = hullPoint(spec, s, t, side); p[0] += side * 0.03; return p; };
-      const a = pt(s0, 0.07), b = pt(s1, 0.07), c = pt(s1, 0.4), d = pt(s0, 0.4);
-      const u = (k) => (side > 0 ? 1 - k / NSEG : k / NSEG); // +x side: text runs toward -z
-      pos.push(...a, ...b, ...c, ...a, ...c, ...d);
-      uv.push(u(i), 0, u(i + 1), 0, u(i + 1), 1, u(i), 0, u(i + 1), 1, u(i), 1);
-    }
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  g.computeVertexNormals();
-  const mesh = new THREE.Mesh(g, mat);
-  mesh.name = 'name-plaques';
-  mesh.receiveShadow = true;
-  return mesh;
-}
-
 // ---- rigs ----------------------------------------------------------------------------------------
 // Points are [y, z] in the sail pivot's frame (origin = mast step on deck; z negative = aft).
 // T tack, C clew, H head (throat), P peak. spars: [from, to, radius].
 const RIGS = {
   'gaff-jib': {
-    mastZ: 0.7, mastH: 5.0, boomY: 1.05, boomLen: 3.0, jib: true, bowsprit: true,
+    mastZ: 0.9, mastH: 5.0, boomY: 1.05, boomLen: 3.0, jib: true, bowsprit: true,
     T: [1.12, 0], C: [1.1, -3.0], H: [3.1, 0], P: [4.0, -1.68],
-    spars: [[[3.1, 0.02], [4.0, -1.7], 0.045]], bellyMax: 0.42,
+    // The gaff is the point of this rig, so it is thick and dark: it must read as a line along the top of the main at game scale.
+    spars: [[[3.1, 0.02], [4.05, -1.75], 0.1]], sparTone: 0.62, gaffRadius: 0.1, bellyMax: 0.42,
   },
   'sprit-jib': {
-    mastZ: 0.7, mastH: 4.8, boomY: 1.05, boomLen: 3.0, jib: true, bowsprit: true,
+    mastZ: 0.9, mastH: 4.8, boomY: 1.05, boomLen: 3.0, jib: true, bowsprit: true,
     T: [1.12, 0], C: [1.1, -3.0], H: [3.9, 0], P: [4.5, -1.95],
     spars: [[[1.45, 0.05], [4.55, -1.97], 0.062]], follow: true, sparTone: 0.72, bellyMax: 0.42, // the sprit is the rig's signature: a bold, darker diagonal across the sail
   },
   gaff: {
-    mastZ: 1.1, mastH: 5.4, boomY: 1.05, boomLen: 3.7, jib: false, bowsprit: false,
+    mastZ: 1.3, mastH: 5.4, boomY: 1.05, boomLen: 3.7, jib: false, bowsprit: false,
     T: [1.12, 0], C: [1.1, -3.7], H: [3.4, 0], P: [4.45, -2.15],
-    spars: [[[3.4, 0.02], [4.5, -2.17], 0.045]], bellyMax: 0.5,
+    spars: [[[3.4, 0.02], [4.5, -2.2], 0.1]], sparTone: 0.62, gaffRadius: 0.1, bellyMax: 0.5,
   },
   eka: {
     mastZ: 1.05, mastH: 3.9, boomY: 0.68, boomLen: 2.2, jib: false, bowsprit: false,
@@ -561,7 +549,12 @@ export function createBoatMesh(color = 0xffcc66, options = {}) {
   const type = opts.type;
   if (!BOAT_TYPES.includes(type)) throw new TypeError(`createBoatMesh: unknown boat type "${type}" (use ${BOAT_TYPES.join(' | ')})`);
   const spec = SPECS[type];
-  const pal = PAL[type];
+  const pal = { ...PAL[type] }; // per boat: the eka's sail tone can change
+  if (type === 'eka') {
+    if (!EKA_SAIL_TONES.includes(opts.sailTone)) throw new TypeError(`createBoatMesh: unknown eka sail tone "${opts.sailTone}" (use ${EKA_SAIL_TONES.join(' | ')})`);
+    Object.assign(pal, EKA_SAILS[opts.sailTone]);
+  }
+  let sailTone = opts.sailTone;
   let rigName = type === 'eka' ? 'eka' : opts.rig;
   if (type === 'koster' && !KOSTER_RIGS.includes(rigName)) throw new TypeError(`createBoatMesh: unknown koster rig "${rigName}" (use ${KOSTER_RIGS.join(' | ')})`);
   let wear = clamp01(Number.isFinite(opts.wear) ? opts.wear : BOAT_DEFAULTS.wear);
@@ -581,7 +574,7 @@ export function createBoatMesh(color = 0xffcc66, options = {}) {
   const fixtures = fixturesParts(type);
   group.add(fixtures.build(VERTEX_MATERIAL, wear));
   paintables.push(fixtures);
-  if (type === 'koster') group.add(namePlaques());
+  if (type === 'koster') { const rudder = rudderParts(); group.add(rudder.build(VERTEX_MATERIAL, wear)); rudder.mesh.name = 'rudder'; paintables.push(rudder); }
 
   // deck slots with items
   const itemsGroup = new THREE.Group();
@@ -654,12 +647,23 @@ export function createBoatMesh(color = 0xffcc66, options = {}) {
     rigMeshers.push(wood);
     // boom + gaff / sprit swing with the sail, in the pivot
     const swing = new Mesher({ weatherTint: pal.weather, weatherK: 0.1 });
-    swing.tube([0, rig.boomY, 0.05], [0, rig.boomY - 0.01, -rig.boomLen], 0.05, 0.04, 5, pal.spar);
+    swing.tube([0, rig.boomY, 0.05], [0, rig.boomY - 0.01, -rig.boomLen], 0.065, 0.055, 5, shade(pal.spar, 0.8));
     followSpar = null;
+    let gaffMesher = null;
     for (const [a, b, r] of rig.spars) {
       const tone = rig.sparTone ? shade(pal.spar, rig.sparTone) : pal.spar;
       if (rig.follow) { followSpar = makeFollowSpar(a, b, r, tone, pal); pivot.add(followSpar.mesh); rigMeshers.push(followSpar.mesher); followSpar.mesher.paint(wear); }
-      else swing.tube([0, a[0], a[1]], [0, b[0], b[1]], r * 1.2, r * 0.8, 5, tone);
+      else if (rig.gaffRadius) { // the gaff: its own mesh, thick and dark
+        gaffMesher = gaffMesher || new Mesher({ weatherTint: pal.weather, weatherK: 0.1 });
+        gaffMesher.tube([0, a[0], a[1]], [0, b[0], b[1]], r * 1.15, r * 0.85, 6, tone);
+      } else swing.tube([0, a[0], a[1]], [0, b[0], b[1]], r * 1.2, r * 0.8, 5, tone);
+    }
+    if (gaffMesher) {
+      const gaffMesh = gaffMesher.build(VERTEX_MATERIAL, wear);
+      gaffMesh.name = 'gaff-spar';
+      gaffMesh.userData.radius = rig.gaffRadius;
+      pivot.add(gaffMesh);
+      rigMeshers.push(gaffMesher);
     }
     pivot.add(swing.build(VERTEX_MATERIAL, wear));
     rigMeshers.push(swing);
@@ -700,6 +704,13 @@ export function createBoatMesh(color = 0xffcc66, options = {}) {
     pennantPivot.rotation.y = angleRad * 0.6; // the pennant streams downwind with the sail
   }
 
+  function setSailTone(name) {
+    if (type !== 'eka') return; // the koster's sails are white
+    if (!EKA_SAIL_TONES.includes(name)) throw new TypeError(`setSailTone: unknown tone "${name}"`);
+    sailTone = name;
+    Object.assign(pal, EKA_SAILS[name]);
+    setRig(rigName); // rebuild the sail with the new colours (keeps the angle)
+  }
   function setWear(w) {
     wear = clamp01(w);
     for (const m of paintables) m.paint(wear);
@@ -732,17 +743,18 @@ export function createBoatMesh(color = 0xffcc66, options = {}) {
 
   setRig(rigName);
   setWear(wear);
-  return { group, setSailAngle, setNight, setWear, setDeck, setRig, setPennantColor, describe, type, get rig() { return rigName; } };
+  return { group, setSailAngle, setNight, setWear, setDeck, setRig, setSailTone, setPennantColor, describe, type, get rig() { return rigName; }, get sailTone() { return sailTone; } };
 }
 
 // ---- lab URL (boat-lab.html): the settings Felix can send back as a link --------------------------
-export const LAB_DEFAULTS = { boat: 'koster', rig: 'gaff-jib', night: 0, items: ['crate', 'barrel'], wear: 0.5, sail: 25, pennant: 0xffcc66, heading: 120, cam: 'game', zoom: 1, az: 35, el: 28, dist: 14 };
+export const LAB_DEFAULTS = { boat: 'koster', rig: 'gaff-jib', night: 0, items: ['crate', 'barrel', 'chest'], wear: 0.8, sail: 24, pennant: 0xffcc66, heading: 305, esail: 'terracotta', cam: 'game', zoom: 1, az: 35, el: 28, dist: 14 };
 const num = (text, lo, hi) => { if (text == null || text.trim() === '') return undefined; const n = Number(text); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : undefined; };
 export function parseLabParams(search) {
   const q = new URLSearchParams(search);
   const out = { ...LAB_DEFAULTS, items: [...LAB_DEFAULTS.items] };
   if (BOAT_TYPES.includes(q.get('boat'))) out.boat = q.get('boat');
   if (KOSTER_RIGS.includes(q.get('rig'))) out.rig = q.get('rig');
+  if (EKA_SAIL_TONES.includes(q.get('esail'))) out.esail = q.get('esail');
   if (q.get('night') === '1') out.night = 1; else if (q.get('night') === '0') out.night = 0;
   if (q.has('items')) out.items = q.get('items').split(',').filter((i, n, a) => DECK_ITEMS.includes(i) && a.indexOf(i) === n);
   for (const [k, lo, hi] of [['wear', 0, 1], ['sail', -90, 90], ['heading', 0, 360], ['zoom', 0.05, 2.5], ['az', 0, 360], ['el', 4, 88], ['dist', 4, 200]]) { const v = num(q.get(k), lo, hi); if (v !== undefined) out[k] = v; }
