@@ -310,6 +310,37 @@ slower than reaching (tacking still pays), but it never feels stopped.
 Applied to the game 2026-11-05 (`src/sail.js`), locked in by
 `sail.test.js`'s "upwind still sails" check.
 
+## Look direction: Look Lab findings (Felix, 2026-11-05)
+
+Explored in a throwaway prototype (claude.ai artifact "Windward Look Lab",
+three.js r160). Felix found the faceted water "looking like shit" and the
+islands "muted and sad". Settled:
+
+- **Split style.** Objects stay low-poly flat-shaded (boat, houses, pines,
+  props). Islands and water get a smooth, painted treatment instead of
+  facets. This replaces shared/ART.md's "one facet scale for everything"
+  for ground and sea — ART.md needs a PR when this is ported.
+- **Water: smooth toon + shore foam.** Smooth waves with analytic normals,
+  two soft painted light bands, colour by depth (turquoise shallows ->
+  mid blue -> deep blue) from a baked island depth map, foam rings that
+  breathe in towards the shore plus a white edge at the waterline. Wave
+  speeds never depend on wind strength (the wobble bug); wind changes
+  height and the marks below only.
+- **Wind on the water: gust patches + subtle wind lines.** Darker, finely
+  ruffled patches drifting downwind ("cat's paws") with faint thin lines
+  on top; both kept out of the shallows. White crests were rejected.
+- **Islands: "Bohuslän" palette, smooth painted ground.** Pale pink-grey
+  granite dominant (paler domes, darker veins), Summer-meadow green
+  (`#a8e851` / `#74d24b`) only in low, flatter, sheltered hollows, pines
+  only in those green pockets, soft heather tufts, a dark wet band at the
+  waterline, barely any sand. Crisp zone edges: blending green into pink
+  makes brown, which is what read as "sad". All-green islands rejected as
+  "not west coast of Sweden".
+- Golden haze in the distance kept.
+
+The prototype is saved as `ref/look-lab.html` (and the controls one as
+`ref/control-lab.html`) — the reference to port from.
+
 ## Phone controls: Control Lab findings (Felix, 2026-11-04)
 
 Explored in a throwaway prototype (claude.ai artifact "Windward Control

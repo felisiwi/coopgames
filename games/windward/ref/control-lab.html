@@ -1,0 +1,656 @@
+<title>Windward Control Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: a full-screen sea you sail on, one small menu button, and a bottom sheet of
+   takes to compare. Single deliberate look (toy sea), so no light/dark split. */
+:root {
+  --sea: #2f7fd6;
+  --ink: #eaf6ff;
+  --panel: rgba(12, 32, 54, 0.84);
+  --chip: rgba(234, 246, 255, 0.12);
+  --chip-on: #ffcc66;
+  --chip-on-ink: #1c2a38;
+  --font: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--sea); color: var(--ink); font-family: var(--font);
+  overflow: hidden; overscroll-behavior: none; touch-action: none;
+  -webkit-user-select: none; user-select: none;
+}
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#menu-btn {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  left: calc(10px + env(safe-area-inset-left, 0px));
+  z-index: 5; border: 0; border-radius: 999px;
+  background: var(--panel); color: var(--ink); font: 700 13px var(--font);
+  padding: 8px 14px; cursor: pointer;
+}
+#menu-btn:focus-visible, .chip:focus-visible, #close:focus-visible { outline: 2px solid var(--chip-on); outline-offset: 2px; }
+#sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  max-height: 74%; overflow-y: auto; touch-action: pan-y;
+  background: var(--panel); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-radius: 18px 18px 0 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  display: grid; gap: 14px;
+}
+#sheet header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#sheet h1 { font: 800 16px var(--font); margin: 0; text-wrap: balance; }
+#close { border: 0; background: var(--chip); color: var(--ink); font: 700 13px var(--font); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.group { display: grid; gap: 6px; }
+.group h2 { margin: 0; font: 800 11px var(--font); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; background: var(--chip); color: var(--ink); font: 700 13px var(--font); }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); }
+.hint { margin: 0; font-size: 12.5px; line-height: 1.4; opacity: 0.85; max-width: 62ch; }
+#toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 4;
+  background: var(--panel); border-radius: 999px; padding: 7px 14px;
+  font: 700 13px var(--font); transition: opacity 0.6s; pointer-events: none;
+  max-width: calc(100% - 140px); text-align: center;
+}
+@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+</style>
+
+<canvas id="sea"></canvas>
+<button id="menu-btn" type="button" aria-expanded="false" aria-controls="sheet">Takes</button>
+<div id="toast" aria-live="polite"></div>
+
+<section id="sheet" hidden aria-label="Control takes">
+  <header>
+    <h1>Takes on your picks</h1>
+    <button id="close" type="button">Sail</button>
+  </header>
+  <div class="group"><h2>Steering</h2><div class="chips" id="g-steer"></div><p class="hint" id="h-steer"></p></div>
+  <div class="group"><h2>Sheet with your thumb</h2><div class="chips" id="g-sheet"></div><p class="hint" id="h-sheet"></p></div>
+  <div class="group"><h2>Sweet-spot feedback</h2><div class="chips" id="g-feedback"></div><p class="hint" id="h-feedback"></p></div>
+  <div class="group"><h2>Hints</h2><div class="chips" id="g-hints"></div><p class="hint" id="h-hints">The thumb arrow sits under your sheet thumb and points the way to move it. The ghost thumb shows where to put a thumb when the sail is off.</p></div>
+  <p class="hint">Always on: wind streaks, no-go wedge, wake, sail shape, and steering never goes into the no-go zone. Laptop: click the water to aim, drag with the right mouse button to sheet.</p>
+</section>
+
+<script>
+// ---------- takes ----------
+const OPTIONS = {
+  steer: {
+    multi: false,
+    items: {
+      hold: ['Hold to aim', 'Hold a finger on the water where you want to go. While it is down, a second finger sheets.'],
+      line: ['Hold to aim + speed line', 'As before, but the line to your finger is coloured by how fast that heading is (green fast, red no-go), with the speed at your finger.'],
+      waypoint: ['Tap a spot, one thumb', 'Tap the water to set a destination and the boat keeps sailing there on its own. Swipe anywhere with the same thumb to sheet. No second finger needed.'],
+    },
+  },
+  sheet: {
+    multi: false,
+    items: {
+      updown: ['Up / down', 'Drag up to sheet in, down to ease out. Same as before, now with the thumb arrow.'],
+      follow: ['Move it like the dot', 'Your thumb moves the dot on the arc: drag the way you want the dot to go. The arrow shows that way.'],
+      winch: ['Winch', 'Circle your thumb like cranking a winch: clockwise hauls in, anticlockwise lets out.'],
+      rope: ['Pull the rope', 'Your thumb holds the end of the sheet. Pull it away from the boat to haul the sail in; let it back towards the boat to ease out. The rope goes taut as you haul.'],
+      hold: ['Hold to trim', 'Just rest a thumb on the screen and the sail works its way to the sweet spot while you hold.'],
+    },
+  },
+  feedback: {
+    multi: false,
+    items: {
+      arc: ['Arc at the boat', 'The green arc round the boat with the yellow dot, as you liked it.'],
+      warm: ['Arc that warms up', 'The dot changes from red to yellow to green and grows as it gets closer, so you can feel getting warmer.'],
+      thumb: ['Arc under your thumb', 'A copy of the arc appears round your sheet thumb, so you can watch your thumb and the sail at once.'],
+      glow: ['Sail glows', 'No arc. The sail itself turns green when it is set right.'],
+    },
+  },
+  hints: {
+    multi: true,
+    items: {
+      arrow: ['Thumb arrow', ''],
+      ghost: ['Ghost thumb', ''],
+    },
+  },
+};
+const DEFAULTS = { steer: 'line', sheet: 'follow', feedback: 'arc', hints: ['arrow', 'ghost'] };
+const STORE = 'windward-control-lab-v2';
+let choice = structuredClone(DEFAULTS);
+try { const saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (saved) choice = { ...choice, ...saved }; } catch (e) {}
+function save() { try { localStorage.setItem(STORE, JSON.stringify(choice)); } catch (e) {} }
+const has = (group, key) => (OPTIONS[group].multi ? choice[group].includes(key) : choice[group] === key);
+
+function renderChips() {
+  for (const [group, def] of Object.entries(OPTIONS)) {
+    const box = document.getElementById(`g-${group}`);
+    box.innerHTML = '';
+    for (const [key, [label]] of Object.entries(def.items)) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.id = `chip-${group}-${key}`;
+      b.textContent = label; b.setAttribute('aria-pressed', String(has(group, key)));
+      b.addEventListener('click', () => {
+        choice[group] = def.multi ? (has(group, key) ? choice[group].filter((k) => k !== key) : [...choice[group], key]) : key;
+        save(); renderChips();
+      });
+      box.appendChild(b);
+    }
+    const hint = document.getElementById(`h-${group}`);
+    if (hint && !def.multi) hint.textContent = def.items[choice[group]][1];
+  }
+}
+renderChips();
+const sheet = document.getElementById('sheet');
+const menuBtn = document.getElementById('menu-btn');
+function openSheet(open) {
+  sheet.hidden = !open; menuBtn.setAttribute('aria-expanded', String(open));
+  if (!open) toast(`${OPTIONS.steer.items[choice.steer][0]} · ${OPTIONS.sheet.items[choice.sheet][0]} · ${OPTIONS.feedback.items[choice.feedback][0]}`);
+}
+menuBtn.addEventListener('click', () => openSheet(sheet.hidden));
+document.getElementById('close').addEventListener('click', () => openSheet(false));
+const toastEl = document.getElementById('toast');
+let toastTimer = 0;
+function toast(text) { toastEl.textContent = text; toastEl.style.opacity = '1'; clearTimeout(toastTimer); toastTimer = setTimeout(() => (toastEl.style.opacity = '0'), 2600); }
+toast('Tap “Takes” to compare versions');
+
+// ---------- sailing model (same numbers as the game's src/sail.js) ----------
+const DEG = Math.PI / 180;
+const NO_GO = 22.5 * DEG;
+const MAX_SPEED = 14, TURN_RATE = 135 * DEG, TRIM_MAX = 90 * DEG, TRIM_WINDOW = 8 * DEG;
+const wrap = (a) => { a %= 2 * Math.PI; if (a > Math.PI) a -= 2 * Math.PI; if (a < -Math.PI) a += 2 * Math.PI; return a; };
+const smooth = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+// Felix 2026-11-05: close-hauled felt like standing still (30° off = 0.7 kn). Two
+// extra points lift the upwind side so it is slower than reaching but still sailing.
+// The game's src/sail.js still has the old curve: [[22.5,0],[90,0.95],[100,1],[180,0.8]].
+const CURVE = [[22.5, 0], [28, 0.42], [45, 0.68], [90, 0.95], [100, 1], [180, 0.8]];
+function speedFactor(off) {
+  const d = off / DEG;
+  if (d <= CURVE[0][0]) return 0;
+  for (let i = 1; i < CURVE.length; i++) if (d <= CURVE[i][0]) return CURVE[i - 1][1] + (CURVE[i][1] - CURVE[i - 1][1]) * smooth(CURVE[i - 1][0], CURVE[i][0], d);
+  return 0.8;
+}
+const idealTrim = (off) => off / 2;
+function trimMult(trim, ideal) {
+  const d = Math.abs(trim - ideal) / DEG;
+  if (d <= 8) return 1; if (d >= 50) return 0.25;
+  return 1 - ((d - 8) / 42) * 0.75;
+}
+const leeward = (h, windFrom) => (wrap(windFrom - h) >= 0 ? 1 : -1);
+const clampTrim = (t) => Math.min(TRIM_MAX, Math.max(0, t));
+function avoidNoGo(heading) {
+  const rel = wrap(heading - wind.from);
+  return Math.abs(rel) < NO_GO + 4 * DEG ? wrap(wind.from + Math.sign(rel || 1) * (NO_GO + 4 * DEG)) : heading;
+}
+
+// ---------- world ----------
+// Compass angles: 0 = north (screen up), clockwise. World x = east, y = south (metres).
+const wind = { from: 300 * DEG, strength: 0.75, target: null, nextShift: 30 };
+const boat = { x: 0, y: 0, h: wrap(wind.from + Math.PI / 2), speed: 0, trim: 10 * DEG, wake: [] };
+let seedN = 12345;
+const rand = () => ((seedN = (seedN * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+const islands = [];
+for (let i = 0; i < 40; i++) {
+  const r = 10 + rand() * (i < 6 ? 45 : 16);
+  const a = rand() * Math.PI * 2, d = 70 + rand() * 700;
+  const pts = []; for (let k = 0; k < 14; k++) pts.push(r * (0.75 + rand() * 0.45));
+  islands.push({ x: Math.sin(a) * d, y: -Math.cos(a) * d, r, pts, rot: rand() * 6.28 });
+}
+const streaks = [];
+let waypoint = null;   // { x, y } in 'waypoint' steering
+let aimHeading = null; // heading while a finger is held in 'hold'/'line'
+let offSince = 0;      // seconds the sail has been off the sweet spot (ghost hint)
+
+// ---------- view ----------
+const canvas = document.getElementById('sea');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, DPR = 1, scale = 5;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  scale = Math.min(W, H) / 95;
+}
+addEventListener('resize', resize); resize();
+const boatScreen = () => [W / 2, H * 0.55];
+const toScreen = (x, y) => [W / 2 + (x - boat.x) * scale, H * 0.55 + (y - boat.y) * scale];
+const toWorld = (sx, sy) => [boat.x + (sx - W / 2) / scale, boat.y + (sy - H * 0.55) / scale];
+const screenDirToCompass = (dx, dy) => wrap(Math.atan2(dx, -dy));
+
+// Geometry of the sweet-spot arc, all in canvas angles (0 = right, clockwise).
+function arcGeom(off) {
+  const side = leeward(boat.h, wind.from);
+  const aft = boat.h + Math.PI - Math.PI / 2;
+  return { side, aft, cur: aft + side * boat.trim, ideal: aft + side * idealTrim(off) };
+}
+
+// Which way should the THUMB move for the current sheet take? Returns a unit screen
+// vector (or a turn direction for the winch), for a thumb at (tx, ty).
+function thumbDirection(tx, ty, off) {
+  const need = Math.sign(idealTrim(off) - boat.trim); // +1 ease out, -1 sheet in
+  if (Math.abs(idealTrim(off) - boat.trim) <= TRIM_WINDOW || need === 0) return null;
+  const g = arcGeom(off);
+  switch (choice.sheet) {
+    case 'updown': return { x: 0, y: need };
+    case 'follow': { const t = g.cur + g.side * Math.PI / 2; return { x: Math.cos(t) * need, y: Math.sin(t) * need }; }
+    case 'rope': {
+      const [bx, by] = boatScreen(); const dx = tx - bx, dy = ty - by, d = Math.hypot(dx, dy) || 1;
+      return { x: (dx / d) * -need, y: (dy / d) * -need }; // haul in = pull away from the boat
+    }
+    case 'winch': return { turn: need < 0 ? 1 : -1 }; // clockwise hauls in
+    default: return null;
+  }
+}
+
+// ---------- input ----------
+const pointers = new Map(); // id -> { role, x, y, x0, y0, px, py, t0, trim0, ang }
+const isSteerRole = (r) => r === 'steer';
+function steeringDown() { return [...pointers.values()].some((p) => isSteerRole(p.role)); }
+
+function aimAt(x, y) {
+  const [bx, by] = boatScreen();
+  if (Math.hypot(x - bx, y - by) > 14) aimHeading = avoidNoGo(screenDirToCompass(x - bx, y - by));
+}
+function sheetMove(p, off) {
+  const dx = p.x - p.px, dy = p.y - p.py;
+  switch (choice.sheet) {
+    case 'updown': boat.trim = clampTrim(p.trim0 + (p.y - p.y0) * 0.006); break;
+    case 'follow': {
+      const g = arcGeom(off); const t = g.cur + g.side * Math.PI / 2;
+      boat.trim = clampTrim(boat.trim + (dx * Math.cos(t) + dy * Math.sin(t)) * 0.009);
+      break;
+    }
+    case 'rope': {
+      const [bx, by] = boatScreen(); const d = Math.hypot(p.x - bx, p.y - by);
+      if (p.d0 === undefined) p.d0 = d;
+      // Fully let out is reached at the slack ring, well before the boat, however close
+      // the thumb started: the distance left to the ring covers all the remaining slack.
+      const slackR = ropeSlackRadius();
+      if (d < p.d0) {
+        const room = Math.max(24, p.d0 - slackR);
+        boat.trim = clampTrim(p.trim0 + (TRIM_MAX - p.trim0) * Math.min(1, (p.d0 - d) / room));
+      } else {
+        boat.trim = clampTrim(p.trim0 - (d - p.d0) * 0.006); // further from the boat = hauled in
+      }
+      break;
+    }
+    case 'winch': {
+      // (rope slack ring radius lives in ropeSlackRadius below)
+      const r = Math.hypot(p.x - p.x0, p.y - p.y0);
+      if (r < 18) break; // need a little circle before angles mean anything
+      const a = Math.atan2(p.y - p.y0, p.x - p.x0);
+      if (p.ang !== undefined) boat.trim = clampTrim(boat.trim - wrap(a - p.ang) * 0.35); // clockwise (+) hauls in
+      p.ang = a;
+      break;
+    }
+  }
+}
+canvas.addEventListener('pointerdown', (e) => {
+  if (!sheet.hidden) { openSheet(false); return; }
+  canvas.setPointerCapture?.(e.pointerId);
+  const p = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, t0: performance.now(), trim0: boat.trim };
+  if (e.pointerType === 'mouse' && e.button === 2) p.role = 'sheet';
+  else if (choice.steer === 'waypoint') p.role = steeringDown() ? 'sheet' : 'tap';
+  else p.role = steeringDown() ? 'sheet' : 'steer';
+  pointers.set(e.pointerId, p);
+  if (p.role === 'steer') aimAt(p.x, p.y);
+});
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+canvas.addEventListener('pointermove', (e) => {
+  const p = pointers.get(e.pointerId); if (!p) return;
+  p.x = e.clientX; p.y = e.clientY;
+  const off = Math.abs(wrap(boat.h - wind.from));
+  // One-thumb mode: a tap that moves becomes a sheet swipe.
+  if (p.role === 'tap' && Math.hypot(p.x - p.x0, p.y - p.y0) > 14) { p.role = 'sheet'; p.trim0 = boat.trim; p.x0 = p.x; p.y0 = p.y; p.d0 = undefined; }
+  if (p.role === 'steer') aimAt(p.x, p.y);
+  else if (p.role === 'sheet') sheetMove(p, off);
+  p.px = p.x; p.py = p.y;
+});
+function lift(e) {
+  const p = pointers.get(e.pointerId); pointers.delete(e.pointerId);
+  if (!p) return;
+  if (p.role === 'steer') aimHeading = null;
+  if (p.role === 'tap') { const [wx, wy] = toWorld(p.x, p.y); waypoint = { x: wx, y: wy, t: performance.now() / 1000 }; }
+}
+canvas.addEventListener('pointerup', lift);
+canvas.addEventListener('pointercancel', lift);
+
+// ---------- simulation ----------
+function step(dt) {
+  wind.nextShift -= dt;
+  if (wind.nextShift <= 0 && !wind.target) wind.target = { from: wind.from + (Math.random() - 0.5) * 120 * DEG, strength: 0.3 + Math.random() * 0.7, t: 0 };
+  if (wind.target) {
+    wind.target.t += dt / 9;
+    const k = Math.min(1, dt / 9 / Math.max(0.01, 1 - wind.target.t + dt / 9));
+    wind.from += wrap(wind.target.from - wind.from) * k;
+    wind.strength += (wind.target.strength - wind.strength) * k;
+    if (wind.target.t >= 1) { wind.target = null; wind.nextShift = 35 + Math.random() * 25; }
+  }
+
+  let desired = aimHeading;
+  if (choice.steer === 'waypoint' && waypoint) {
+    const dx = waypoint.x - boat.x, dy = waypoint.y - boat.y;
+    if (Math.hypot(dx, dy) < 6) waypoint = null;
+    else desired = avoidNoGo(screenDirToCompass(dx, dy));
+  }
+  if (desired !== null) {
+    const diff = wrap(desired - boat.h);
+    boat.h = wrap(boat.h + Math.sign(diff) * Math.min(Math.abs(diff), TURN_RATE * dt));
+  }
+
+  const off = Math.abs(wrap(boat.h - wind.from));
+  const ideal = idealTrim(off);
+  if (choice.sheet === 'hold' && [...pointers.values()].some((p) => p.role === 'sheet')) {
+    boat.trim += Math.sign(ideal - boat.trim) * Math.min(Math.abs(ideal - boat.trim), 50 * DEG * dt);
+  }
+  offSince = Math.abs(ideal - boat.trim) > TRIM_WINDOW ? offSince + dt : 0;
+
+  const target = MAX_SPEED * wind.strength * speedFactor(off) * trimMult(boat.trim, ideal);
+  boat.speed += (target - boat.speed) * Math.min(1, dt * (target > boat.speed ? 0.6 : 1.2));
+  boat.x += Math.sin(boat.h) * boat.speed * dt;
+  boat.y -= Math.cos(boat.h) * boat.speed * dt;
+
+  boat.wake.unshift({ x: boat.x - Math.sin(boat.h) * 4, y: boat.y + Math.cos(boat.h) * 4, age: 0 });
+  for (const w of boat.wake) w.age += dt;
+  while (boat.wake.length && boat.wake[boat.wake.length - 1].age > 2.5) boat.wake.pop();
+
+  while (streaks.length < 70) {
+    const span = Math.max(W, H) / scale;
+    streaks.push({ x: boat.x + (Math.random() - 0.5) * span * 1.3, y: boat.y + (Math.random() - 0.5) * span * 1.3, life: 0, max: 1.5 + Math.random() * 2 });
+  }
+  const v = 4 + 10 * wind.strength;
+  for (const s of streaks) { s.x += -Math.sin(wind.from) * v * dt; s.y += Math.cos(wind.from) * v * dt; s.life += dt; }
+  for (let i = streaks.length - 1; i >= 0; i--) if (streaks[i].life > streaks[i].max) streaks.splice(i, 1);
+  return { off, ideal };
+}
+
+// ---------- drawing ----------
+const missColor = (miss) => {
+  // 0 = spot on (green) .. 1 = way off (red), through yellow.
+  const f = Math.min(1, Math.max(0, (Math.abs(miss) - TRIM_WINDOW) / (40 * DEG)));
+  const lerp = (a, b, t) => Math.round(a + (b - a) * t);
+  return f < 0.5 ? `rgb(${lerp(120, 255, f * 2)},${lerp(220, 204, f * 2)},${lerp(150, 102, f * 2)})` : `rgb(255,${lerp(204, 110, (f - 0.5) * 2)},${lerp(102, 80, (f - 0.5) * 2)})`;
+};
+
+function drawSea(t) {
+  ctx.fillStyle = '#2f7fd6'; ctx.fillRect(0, 0, W, H);
+  const cell = 14, span = Math.hypot(W, H) / scale / 2 + cell;
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  for (let i = Math.floor((boat.x - span) / cell); i <= Math.ceil((boat.x + span) / cell); i++) {
+    for (let j = Math.floor((boat.y - span) / cell); j <= Math.ceil((boat.y + span) / cell); j++) {
+      const hsh = Math.sin(i * 12.9898 + j * 78.233) * 43758.5453, f = hsh - Math.floor(hsh);
+      if (f > 0.45) continue;
+      const [sx, sy] = toScreen(i * cell + f * cell, j * cell + (1 - f) * cell + Math.sin(t * 1.2 + f * 20) * 0.6);
+      const s = (2.2 + f * 2) * scale * (0.6 + 0.4 * wind.strength);
+      ctx.beginPath(); ctx.moveTo(sx - s, sy); ctx.lineTo(sx, sy - s * 0.35); ctx.lineTo(sx + s, sy); ctx.lineTo(sx, sy + s * 0.35); ctx.fill();
+    }
+  }
+}
+function drawIslands() {
+  for (const is of islands) {
+    const [cx, cy] = toScreen(is.x, is.y), m = is.r * scale * 2;
+    if (cx < -m || cx > W + m || cy < -m || cy > H + m) continue;
+    const ring = (grow, color) => {
+      ctx.fillStyle = color; ctx.beginPath();
+      is.pts.forEach((pr, k) => {
+        const a = is.rot + (k / is.pts.length) * Math.PI * 2;
+        const [sx, sy] = toScreen(is.x + Math.sin(a) * (pr + grow), is.y - Math.cos(a) * (pr + grow));
+        k ? ctx.lineTo(sx, sy) : ctx.moveTo(sx, sy);
+      });
+      ctx.closePath(); ctx.fill();
+    };
+    ring(6, 'rgba(120, 200, 230, 0.35)'); ring(0, '#d9c48a'); ring(-3.5, '#5da84a'); ring(-is.r * 0.55, '#b2a8a0');
+  }
+}
+function drawStreaks() {
+  const vx = -Math.sin(wind.from), vy = Math.cos(wind.from), len = (2 + 6 * wind.strength) * scale;
+  ctx.lineCap = 'round'; ctx.lineWidth = 1.6;
+  for (const s of streaks) {
+    const [sx, sy] = toScreen(s.x, s.y);
+    ctx.strokeStyle = `rgba(234,246,255,${Math.sin((s.life / s.max) * Math.PI) * 0.55})`;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + vx * len, sy + vy * len); ctx.stroke();
+  }
+}
+function drawWake() {
+  const maxAge = 0.4 + 2.1 * Math.min(1, boat.speed / MAX_SPEED);
+  ctx.fillStyle = 'rgba(242,251,255,0.5)';
+  for (const w of boat.wake) {
+    if (w.age > maxAge) continue;
+    const [sx, sy] = toScreen(w.x, w.y);
+    ctx.globalAlpha = 1 - w.age / maxAge;
+    ctx.beginPath(); ctx.arc(sx, sy, (0.6 + w.age * 1.2) * scale * 0.5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+function drawWedge() {
+  const [bx, by] = boatScreen(), R = 16 * scale, base = wind.from - Math.PI / 2;
+  ctx.fillStyle = 'rgba(255, 110, 80, 0.20)';
+  ctx.beginPath(); ctx.moveTo(bx, by); ctx.arc(bx, by, R, base - NO_GO, base + NO_GO); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 140, 110, 0.6)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 5]);
+  for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + Math.cos(base + s * NO_GO) * R, by + Math.sin(base + s * NO_GO) * R); ctx.stroke(); }
+  ctx.setLineDash([]);
+  ctx.save(); ctx.translate(bx + Math.cos(base) * (R + 10), by + Math.sin(base) * (R + 10)); ctx.rotate(base + Math.PI / 2);
+  ctx.fillStyle = '#8fd3ff'; ctx.beginPath(); ctx.moveTo(-7, -4); ctx.lineTo(0, 5); ctx.lineTo(7, -4); ctx.lineTo(0, 0); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// The sweet-spot arc, drawn round any centre (the boat, or the sheet thumb).
+function drawArcAt(cx, cy, R, off, warm) {
+  const g = arcGeom(off), miss = idealTrim(off) - boat.trim;
+  ctx.lineCap = 'round';
+  // the whole range the sail can swing, faint, so you can see where the dot can go
+  ctx.strokeStyle = 'rgba(234,246,255,0.18)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, R, Math.min(g.aft, g.aft + g.side * TRIM_MAX), Math.max(g.aft, g.aft + g.side * TRIM_MAX)); ctx.stroke();
+  ctx.strokeStyle = 'rgba(120, 220, 150, 0.8)'; ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(cx, cy, R, g.ideal - TRIM_WINDOW * 1.3, g.ideal + TRIM_WINDOW * 1.3); ctx.stroke();
+  const inSpot = Math.abs(miss) <= TRIM_WINDOW;
+  ctx.fillStyle = warm ? missColor(miss) : inSpot ? '#78dc96' : '#ffcc66';
+  const size = warm ? 4.5 + 4 * (1 - Math.min(1, Math.abs(miss) / (45 * DEG))) : 5;
+  ctx.beginPath(); ctx.arc(cx + Math.cos(g.cur) * R, cy + Math.sin(g.cur) * R, size, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawBoat(t, off) {
+  const [bx, by] = boatScreen(), L = 8 * scale, B = 3 * scale, ideal = idealTrim(off);
+  ctx.save(); ctx.translate(bx, by); ctx.rotate(boat.h);
+  ctx.fillStyle = '#9c5a32';
+  ctx.beginPath(); ctx.moveTo(0, -L * 0.55); ctx.quadraticCurveTo(B * 0.75, -L * 0.1, B * 0.5, L * 0.45);
+  ctx.lineTo(-B * 0.5, L * 0.45); ctx.quadraticCurveTo(-B * 0.75, -L * 0.1, 0, -L * 0.55); ctx.fill();
+  ctx.fillStyle = '#c98b55'; ctx.fillRect(-B * 0.32, -L * 0.15, B * 0.64, L * 0.5);
+  const side = leeward(boat.h, wind.from), boomA = Math.PI / 2 + side * boat.trim, len = L * 0.58, mx = 0, my = -L * 0.12;
+  const ex = mx + Math.cos(boomA) * len, ey = my + Math.sin(boomA) * len;
+  const tooEased = boat.trim - ideal > TRIM_WINDOW, tooTight = ideal - boat.trim > TRIM_WINDOW;
+  ctx.strokeStyle = '#6b4a2e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(ex, ey); ctx.stroke();
+  const nx = -Math.sin(boomA) * side, ny = Math.cos(boomA) * side;
+  const glow = choice.feedback === 'glow';
+  ctx.fillStyle = glow ? (tooEased || tooTight ? '#ffcc66' : '#78dc96') : tooTight ? '#ffd2b0' : '#ffcc66';
+  ctx.beginPath(); ctx.moveTo(mx, my);
+  if (tooEased && boat.speed > 0.2) {
+    for (let k = 1; k <= 6; k++) {
+      const f = k / 6, wob = Math.sin(t * 28 + k * 2.1) * 0.12 * len * Math.sin(f * Math.PI);
+      ctx.lineTo(mx + (ex - mx) * f + nx * wob, my + (ey - my) * f + ny * wob);
+    }
+  } else {
+    const belly = (tooTight ? 0.07 : 0.22) * len;
+    ctx.quadraticCurveTo((mx + ex) / 2 + nx * belly * 2, (my + ey) / 2 + ny * belly * 2, ex, ey);
+  }
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#4a3220'; ctx.beginPath(); ctx.arc(mx, my, 2.2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// Rope: the sail is fully let out once the thumb reaches this distance from the boat
+// (just outside the sweet-spot arc), so you never have to cover the boat.
+function ropeSlackRadius() { return 15 * scale; }
+
+// Hints float this far above a thumb so the thumb doesn't cover them.
+const THUMB_LIFT = 78;
+
+// A big, soft arrow showing which way to move the thumb. `lifted`: drawn above the
+// thumb, centred on (tx, ty), on a dark disc so it reads over water and islands.
+function drawThumbArrow(tx, ty, dir, pulse, lifted = false) {
+  ctx.save();
+  if (lifted) {
+    ctx.fillStyle = 'rgba(12,32,54,0.55)';
+    ctx.beginPath(); ctx.arc(tx, ty, 34, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 0.65 + 0.35 * pulse;
+  ctx.strokeStyle = '#ffcc66'; ctx.fillStyle = '#ffcc66'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  if (dir.turn) {
+    // curved arrow round the thumb, the way to crank
+    const R = lifted ? 22 : 40, a0 = -Math.PI / 2, a1 = a0 + dir.turn * 1.6;
+    ctx.beginPath(); ctx.arc(tx, ty, R, a0, a1, dir.turn < 0); ctx.stroke();
+    const hx = tx + Math.cos(a1) * R, hy = ty + Math.sin(a1) * R, tang = a1 + dir.turn * Math.PI / 2;
+    ctx.beginPath(); ctx.moveTo(hx + Math.cos(tang) * 11, hy + Math.sin(tang) * 11);
+    ctx.lineTo(hx + Math.cos(tang + 2.4) * 11, hy + Math.sin(tang + 2.4) * 11);
+    ctx.lineTo(hx + Math.cos(tang - 2.4) * 11, hy + Math.sin(tang - 2.4) * 11); ctx.closePath(); ctx.fill();
+  } else {
+    const start = lifted ? -16 : 30, end = lifted ? 14 + pulse * 6 : 30 + 26 + pulse * 10;
+    const sx = tx + dir.x * start, sy = ty + dir.y * start, ex = tx + dir.x * end, ey = ty + dir.y * end;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    const a = Math.atan2(dir.y, dir.x);
+    ctx.beginPath(); ctx.moveTo(ex + Math.cos(a) * 10, ey + Math.sin(a) * 10);
+    ctx.lineTo(ex + Math.cos(a + 2.4) * 12, ey + Math.sin(a + 2.4) * 12);
+    ctx.lineTo(ex + Math.cos(a - 2.4) * 12, ey + Math.sin(a - 2.4) * 12); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawCheck(tx, ty) {
+  ctx.strokeStyle = '#78dc96'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(tx - 9, ty - 34); ctx.lineTo(tx - 2, ty - 27); ctx.lineTo(tx + 11, ty - 42); ctx.stroke();
+}
+
+function drawTouches(t, off) {
+  const pulse = (Math.sin(t * 6) + 1) / 2;
+  const [bx, by] = boatScreen();
+  for (const p of pointers.values()) {
+    if (p.role === 'steer') {
+      const showSpeed = choice.steer === 'line';
+      let color = 'rgba(255,204,102,0.9)', kn = null;
+      if (showSpeed && aimHeading !== null) {
+        const aOff = Math.abs(wrap(aimHeading - wind.from));
+        const sp = MAX_SPEED * wind.strength * speedFactor(aOff);
+        kn = sp * 1.94384;
+        color = sp < 0.5 ? 'rgba(255,110,80,0.95)' : `rgba(${Math.round(255 - 135 * (sp / (MAX_SPEED * wind.strength)))},220,${Math.round(110 + 40 * (sp / (MAX_SPEED * wind.strength)))},0.95)`;
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = showSpeed ? 3 : 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash(showSpeed ? [] : [3, 7]); ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.setLineDash([]);
+      if (kn !== null) {
+        // Above the finger so it isn't hidden under it.
+        const label = `${kn.toFixed(0)} kn`, ly = p.y - THUMB_LIFT;
+        ctx.font = '800 16px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const w = ctx.measureText(label).width + 20;
+        ctx.fillStyle = 'rgba(12,32,54,0.7)'; ctx.beginPath(); ctx.roundRect(p.x - w / 2, ly - 14, w, 28, 14); ctx.fill();
+        ctx.fillStyle = color; ctx.fillText(label, p.x, ly);
+      }
+    } else if (p.role === 'sheet') {
+      ctx.fillStyle = 'rgba(255,240,200,0.25)'; ctx.beginPath(); ctx.arc(p.x, p.y, 24, 0, Math.PI * 2); ctx.fill();
+      if (choice.sheet === 'rope') {
+        // The rope sags when the sail is eased and pulls straight when hauled in.
+        const sag = (boat.trim / TRIM_MAX) * 46;
+        // Faint ring: bring your thumb to here and the sail is all the way out.
+        ctx.strokeStyle = 'rgba(255,240,200,0.22)'; ctx.lineWidth = 2; ctx.setLineDash([3, 6]);
+        ctx.beginPath(); ctx.arc(bx, by, ropeSlackRadius(), 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = 'rgba(255,240,200,0.85)'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo((bx + p.x) / 2, (by + p.y) / 2 + sag, p.x, p.y); ctx.stroke();
+      }
+      if (choice.feedback === 'thumb') drawArcAt(p.x, p.y, 52, off, false);
+      if (choice.sheet === 'hold') {
+        ctx.strokeStyle = '#ffcc66'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 30, t * 4, t * 4 + 4); ctx.stroke();
+      }
+      if (has('hints', 'arrow')) {
+        const dir = thumbDirection(p.x, p.y, off);
+        if (dir && choice.sheet === 'rope') drawRopeHint(p.x, p.y, off, pulse, false);
+        else if (dir) drawThumbArrow(p.x, p.y - THUMB_LIFT, dir, pulse, true);
+        else if (choice.sheet !== 'hold') drawCheck(p.x, p.y - THUMB_LIFT + 38);
+      }
+    }
+  }
+  if (choice.steer === 'waypoint' && waypoint) {
+    const [wx, wy] = toScreen(waypoint.x, waypoint.y);
+    ctx.strokeStyle = 'rgba(255,204,102,0.9)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(wx, wy, 10 + pulse * 3, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([3, 7]); ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(wx, wy); ctx.stroke(); ctx.setLineDash([]);
+  }
+}
+
+// Ghost thumb: when the sail has been off for a moment and no thumb is sheeting,
+// show where a thumb could go and which way it would move.
+// Rope hint: says it in words ("Pull" / "Let out") in a pill above the thumb, with
+// an arrow drawn ON the rope itself, so it is clearly about the rope to the boat
+// rather than a direction on the screen. `ghost`: also draws the rope, dashed.
+function drawRopeHint(tx, ty, off, pulse, ghost) {
+  const need = Math.sign(idealTrim(off) - boat.trim); // +1 let out, -1 pull in
+  const [bx, by] = boatScreen();
+  const dx = tx - bx, dy = ty - by, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
+  if (ghost) {
+    const sag = (boat.trim / TRIM_MAX) * 46;
+    ctx.strokeStyle = 'rgba(255,240,200,0.7)'; ctx.lineWidth = 2; ctx.setLineDash([5, 6]);
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo((bx + tx) / 2, (by + ty) / 2 + sag, tx, ty); ctx.stroke(); ctx.setLineDash([]);
+  }
+  // Chevrons on the rope, a little way from the thumb towards the boat, sliding
+  // the way the rope should move.
+  const out = need < 0 ? 1 : -1; // pull in = the rope moves out towards your thumb
+  ctx.fillStyle = '#ffcc66';
+  for (let k = 0; k < 3; k++) {
+    const along = 46 + k * 18 + ((pulse * 18) * out);
+    const cx = tx - ux * along, cy = ty - uy * along, a = Math.atan2(uy, ux) + (out < 0 ? Math.PI : 0);
+    ctx.globalAlpha = 0.9 - k * 0.22;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * 9, cy + Math.sin(a) * 9);
+    ctx.lineTo(cx + Math.cos(a + 2.5) * 9, cy + Math.sin(a + 2.5) * 9);
+    ctx.lineTo(cx + Math.cos(a) * 2, cy + Math.sin(a) * 2);
+    ctx.lineTo(cx + Math.cos(a - 2.5) * 9, cy + Math.sin(a - 2.5) * 9);
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  const label = need < 0 ? 'Pull' : 'Let out';
+  const ly = ty - THUMB_LIFT;
+  ctx.font = '800 16px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const w = ctx.measureText(label).width + 22;
+  ctx.fillStyle = 'rgba(12,32,54,0.75)'; ctx.beginPath(); ctx.roundRect(tx - w / 2, ly - 15, w, 30, 15); ctx.fill();
+  ctx.fillStyle = '#ffcc66'; ctx.fillText(label, tx, ly);
+}
+
+function drawGhost(t, off) {
+  if (!has('hints', 'ghost') || offSince < 1.2) return;
+  if ([...pointers.values()].some((p) => p.role === 'sheet')) return;
+  // The sheet needs a second thumb, so only suggest it once the first thumb is
+  // steering. (One-thumb mode has no first thumb, so it can show any time.)
+  if (choice.steer !== 'waypoint' && !steeringDown()) return;
+  const gx = W * 0.78, gy = H * 0.74, a = Math.min(1, (offSince - 1.2) * 2) * 0.7;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.strokeStyle = 'rgba(255,240,200,0.8)'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.arc(gx, gy, 22, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+  const label = choice.sheet === 'rope' ? 'hold the rope here' : choice.steer === 'waypoint' ? 'swipe' : choice.sheet === 'hold' ? 'hold' : 'second thumb';
+  ctx.fillStyle = '#eaf6ff'; ctx.font = '700 12px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(label, gx, gy + 28);
+  const dir = thumbDirection(gx, gy, off);
+  if (dir && has('hints', 'arrow')) {
+    if (choice.sheet === 'rope') drawRopeHint(gx, gy, off, (Math.sin(t * 6) + 1) / 2, true);
+    else drawThumbArrow(gx, gy, dir, (Math.sin(t * 6) + 1) / 2);
+  }
+  ctx.restore();
+}
+
+function drawSpeed() {
+  ctx.fillStyle = 'rgba(234,246,255,0.85)'; ctx.font = '800 15px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(`${(boat.speed * 1.94384).toFixed(1)} kn`, W / 2, H - 18);
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const t = now / 1000;
+  const { off } = step(dt);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  drawSea(t); drawStreaks(); drawIslands(); drawWake(); drawWedge();
+  if (choice.feedback === 'arc' || choice.feedback === 'warm') drawArcAt(...boatScreen(), 9 * scale, off, choice.feedback === 'warm');
+  drawBoat(t, off);
+  drawTouches(t, off);
+  drawGhost(t, off);
+  drawSpeed();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>

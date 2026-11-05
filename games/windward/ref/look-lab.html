@@ -1,0 +1,493 @@
+<title>Windward Look Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: one full-screen island scene, a small menu button, a bottom sheet of looks to
+   compare. Deliberate single look (golden-hour sea), so no light/dark split. */
+:root {
+  --ink: #eaf6ff;
+  --panel: rgba(12, 32, 54, 0.84);
+  --chip: rgba(234, 246, 255, 0.12);
+  --chip-on: #ffcc66;
+  --chip-on-ink: #1c2a38;
+  --sky: #9fd0f0;
+  --font: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--sky); color: var(--ink); font-family: var(--font); overflow: hidden; overscroll-behavior: none; touch-action: none; -webkit-user-select: none; user-select: none; }
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+#menu-btn {
+  position: fixed; top: calc(10px + env(safe-area-inset-top, 0px)); left: calc(10px + env(safe-area-inset-left, 0px));
+  z-index: 5; border: 0; border-radius: 999px; background: var(--panel); color: var(--ink);
+  font: 700 13px var(--font); padding: 8px 14px; cursor: pointer;
+}
+#menu-btn:focus-visible, .chip:focus-visible, #close:focus-visible, input:focus-visible { outline: 2px solid var(--chip-on); outline-offset: 2px; }
+#sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; max-height: 70%; overflow-y: auto; touch-action: pan-y;
+  background: var(--panel); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 18px 18px 0 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px calc(14px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px;
+}
+#sheet header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#sheet h1 { font: 800 16px var(--font); margin: 0; text-wrap: balance; }
+#close { border: 0; background: var(--chip); color: var(--ink); font: 700 13px var(--font); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.group { display: grid; gap: 6px; }
+.group h2 { margin: 0; font: 800 11px var(--font); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 0; border-radius: 999px; padding: 7px 12px; cursor: pointer; background: var(--chip); color: var(--ink); font: 700 13px var(--font); }
+.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); }
+.hint { margin: 0; font-size: 12.5px; line-height: 1.4; opacity: 0.85; max-width: 62ch; }
+.row { display: flex; align-items: center; gap: 10px; }
+.row input { flex: 1; min-width: 0; accent-color: #ffcc66; }
+.row span { font: 700 12px var(--font); min-width: 4.5em; }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); top: calc(12px + env(safe-area-inset-top, 0px)); z-index: 4; background: var(--panel); border-radius: 999px; padding: 7px 14px; font: 700 13px var(--font); transition: opacity 0.6s; pointer-events: none; max-width: calc(100% - 140px); text-align: center; }
+#err { position: fixed; inset: auto 16px 16px 16px; z-index: 7; background: var(--panel); border-radius: 12px; padding: 12px; font: 600 13px var(--font); }
+@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+</style>
+
+<canvas id="scene"></canvas>
+<button id="menu-btn" type="button" aria-expanded="false" aria-controls="sheet">Looks</button>
+<div id="toast" aria-live="polite"></div>
+<div id="err" hidden></div>
+
+<section id="sheet" hidden aria-label="Looks to compare">
+  <header><h1>Water and island looks</h1><button id="close" type="button">View</button></header>
+  <div class="group"><h2>Water</h2><div class="chips" id="g-water"></div><p class="hint" id="h-water"></p></div>
+  <div class="group"><h2>Islands</h2><div class="chips" id="g-island"></div><p class="hint" id="h-island"></p></div>
+  <div class="group"><h2>Island colours</h2><div class="chips" id="g-colours"></div><p class="hint" id="h-colours"></p></div>
+  <div class="group"><h2>Wind on the water</h2><div class="chips" id="g-windfx"></div><p class="hint" id="h-windfx"></p></div>
+  <div class="group"><h2>Wind</h2>
+    <div class="row"><input id="wind" type="range" min="0" max="1" step="0.01" value="0.5" aria-label="Wind strength"><span id="wind-label">breezy</span></div>
+    <p class="hint">The sea should show the wind: calm is glassy, windy gets rolling waves and white crests.</p>
+  </div>
+  <div class="group"><h2>Distance</h2><div class="chips" id="g-haze"></div></div>
+  <p class="hint">The boat, cottage and pines stay low-poly in every look: only the water and island ground change. Drag to turn the view.</p>
+</section>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+// ---------- looks ----------
+const OPTIONS = {
+  water: {
+    facets: ['Facets (now)', 'What the game has today: flat triangles, one blue.'],
+    toon: ['Smooth toon', 'Smooth waves, soft painted light bands, colour from shallow turquoise to deep blue.'],
+    foam: ['Toon + foam', 'As smooth toon, plus foam rings breathing round the shore and white crests when it is windy.'],
+    clear: ['Clear shallows', 'Foam, plus see-through shallows where you can make out the sand and rocks under the water.'],
+  },
+  island: {
+    facets: ['Facets (now)', 'What the game has today: big flat triangles.'],
+    smooth: ['Smooth painted', 'Soft rounded ground, colours blending from sand to grass to pink granite.'],
+    toon: ['Toon bands', 'Smooth ground lit in two or three clean bands, like a picture book.'],
+  },
+  colours: {
+    bohuslan: ['Bohuslän', 'West-coast Sweden: smooth pink-grey granite everywhere, green meadow only in sheltered hollows (Summer meadow colours), pines in those pockets, a dark wet band at the waterline, barely any sand.'],
+    storybook: ['Storybook', 'Bright and clear: golden sand, fresh green meadows, warm pink granite, kept in clean separate zones.'],
+    meadow: ['Summer meadow', 'Greener and lusher, with yellow-green grass and pale granite tops.'],
+    sunset: ['Golden hour', 'Warmer: honey sand, olive-gold grass, rosy coral granite, like late afternoon.'],
+    old: ['Muted (before)', 'The first try, for comparison: colours blending into each other.'],
+  },
+  windfx: {
+    both: ['Gusts + lines', 'Gust patches with subtle wind lines on top.'],
+    crests: ['White crests', 'White tops on the highest waves (what you saw).'],
+    paws: ['Gust patches', 'Darker ruffled patches sliding across the sea in the wind direction, like real gusts ("cat\'s paws").'],
+    lines: ['Wind lines', 'Long thin pale lines on the water, drifting with the wind.'],
+    none: ['Waves only', 'No extra marks: only the size and roll of the waves shows the wind.'],
+  },
+  haze: {
+    on: ['Golden haze', ''],
+    off: ['No haze', ''],
+  },
+};
+const STORE = 'windward-look-lab-v2'; // v2: new defaults (Bohuslän, gusts + lines)
+let choice = { water: 'foam', island: 'smooth', colours: 'bohuslan', windfx: 'both', haze: 'on', wind: 0.5 };
+try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s) choice = { ...choice, ...s }; } catch (e) {}
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify(choice)); } catch (e) {} };
+
+function renderChips() {
+  for (const [group, items] of Object.entries(OPTIONS)) {
+    const box = document.getElementById(`g-${group}`);
+    box.innerHTML = '';
+    for (const [key, [label]] of Object.entries(items)) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip'; b.id = `chip-${group}-${key}`; b.textContent = label;
+      b.setAttribute('aria-pressed', String(choice[group] === key));
+      b.addEventListener('click', () => { choice[group] = key; save(); renderChips(); applyLooks(); });
+      box.appendChild(b);
+    }
+    const hint = document.getElementById(`h-${group}`);
+    if (hint && items[choice[group]]) hint.textContent = items[choice[group]][1];
+  }
+}
+const sheet = document.getElementById('sheet');
+const menuBtn = document.getElementById('menu-btn');
+function openSheet(open) {
+  sheet.hidden = !open; menuBtn.setAttribute('aria-expanded', String(open));
+  if (!open) toast(`${OPTIONS.water[choice.water][0]} · ${OPTIONS.island[choice.island][0]}`);
+}
+menuBtn.addEventListener('click', () => openSheet(sheet.hidden));
+document.getElementById('close').addEventListener('click', () => openSheet(false));
+const windInput = document.getElementById('wind');
+const windLabel = document.getElementById('wind-label');
+windInput.value = choice.wind;
+const windWord = (w) => (w < 0.2 ? 'calm' : w < 0.45 ? 'light' : w < 0.7 ? 'breezy' : 'windy');
+windInput.addEventListener('input', () => { choice.wind = Number(windInput.value); windLabel.textContent = windWord(choice.wind); save(); });
+windLabel.textContent = windWord(choice.wind);
+const toastEl = document.getElementById('toast');
+let toastTimer = 0;
+function toast(t) { toastEl.textContent = t; toastEl.style.opacity = '1'; clearTimeout(toastTimer); toastTimer = setTimeout(() => (toastEl.style.opacity = '0'), 2600); }
+
+// ---------- island height (shared by the ground mesh and the water's depth map) ----------
+function hash(x, y) { const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return h - Math.floor(h); }
+function vnoise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+const fbm = (x, y) => vnoise(x, y) * 0.55 + vnoise(x * 2.1, y * 2.1) * 0.3 + vnoise(x * 4.3, y * 4.3) * 0.15;
+// Two granite islands and a skerry, like a bit of the Bohuslän coast.
+const BLOBS = [{ x: 0, z: 0, r: 46, h: 15 }, { x: 70, z: -38, r: 22, h: 8 }, { x: -58, z: 52, r: 10, h: 4 }];
+function heightAt(x, z) {
+  let best = -9;
+  for (const b of BLOBS) {
+    const dx = x - b.x, dz = z - b.z, d = Math.hypot(dx, dz);
+    const a = Math.atan2(dz, dx);
+    const R = b.r * (0.78 + 0.42 * fbm(Math.cos(a) * 1.6 + b.x * 0.01, Math.sin(a) * 1.6 + b.z * 0.01));
+    const t = 1 - (d / R) ** 2;
+    const h = t > 0 ? t * b.h * (0.75 + 0.5 * fbm(x * 0.05, z * 0.05)) + 0.4 : t * 7 + 0.4;
+    best = Math.max(best, h);
+  }
+  return Math.max(-9, best);
+}
+
+// ---------- renderer / scene ----------
+const canvas = document.getElementById('scene');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (e) {
+  const err = document.getElementById('err'); err.hidden = false; err.textContent = 'This browser could not start WebGL, so the scene cannot be shown.';
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+const SKY = new THREE.Color('#9fd0f0');
+scene.background = SKY;
+const HAZE = new THREE.Color('#e9d3a6');
+const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 1200);
+const sunDir = new THREE.Vector3(-0.55, 0.42, 0.72).normalize(); // low golden sun
+const sun = new THREE.DirectionalLight(0xffd9a6, 1.35);
+sun.position.copy(sunDir).multiplyScalar(200);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+Object.assign(sun.shadow.camera, { left: -110, right: 110, top: 110, bottom: -110, near: 10, far: 500 });
+scene.add(sun);
+scene.add(new THREE.HemisphereLight(0xdff0ff, 0x6f8f6a, 0.85));
+
+// ---------- depth map for the water (0 = shore, 1 = 10 m deep) ----------
+const AREA = 360, DM = 256;
+const depthData = new Uint8Array(DM * DM * 4);
+for (let j = 0; j < DM; j++) for (let i = 0; i < DM; i++) {
+  const x = (i / (DM - 1) - 0.5) * AREA, z = (j / (DM - 1) - 0.5) * AREA;
+  const depth = Math.max(0, -heightAt(x, z));
+  const k = (j * DM + i) * 4;
+  depthData[k] = Math.min(255, Math.round((depth / 10) * 255));
+  depthData[k + 3] = 255;
+}
+const depthTex = new THREE.DataTexture(depthData, DM, DM, THREE.RGBAFormat);
+depthTex.magFilter = THREE.LinearFilter; depthTex.minFilter = THREE.LinearFilter; depthTex.needsUpdate = true;
+
+// ---------- water ----------
+// Three wave trains, wind from the west. Speeds never depend on wind strength (that was the
+// game's wobble bug); wind only changes height and foam.
+const WAVES = [
+  { dir: [1, 0.12], k: (2 * Math.PI) / 16, w: 1.1, a: 1.0 },
+  { dir: [0.8, 0.6], k: (2 * Math.PI) / 9, w: 1.6, a: 0.45 },
+  { dir: [0.9, -0.44], k: (2 * Math.PI) / 6, w: 2.1, a: 0.25 },
+];
+WAVES.forEach((w) => { const l = Math.hypot(...w.dir); w.dir = [w.dir[0] / l, w.dir[1] / l]; });
+const ampFor = (wind) => 0.06 + 0.5 * wind;
+function waveHeight(x, z, t, wind) {
+  let h = 0;
+  for (const w of WAVES) h += w.a * Math.sin((w.dir[0] * x + w.dir[1] * z) * w.k + t * w.w);
+  return h * ampFor(wind) / 1.7;
+}
+const glslWaves = WAVES.map((w) => `
+    { vec2 d = vec2(${w.dir[0].toFixed(5)}, ${w.dir[1].toFixed(5)}); float ph = dot(d, p) * ${w.k.toFixed(5)} + uTime * ${w.w.toFixed(3)};
+      h += ${w.a.toFixed(3)} * sin(ph); g += ${w.a.toFixed(3)} * ${w.k.toFixed(5)} * cos(ph) * d; }`).join('');
+
+const WATER_MODES = { facets: 0, toon: 1, foam: 2, clear: 3 };
+const WIND_FX = { crests: 0, paws: 1, lines: 2, none: 3, both: 4 };
+const waterMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime: { value: 0 }, uWind: { value: 0.5 }, uMode: { value: 2 }, uWindFx: { value: 1 }, uDepth: { value: depthTex },
+    uArea: { value: AREA }, uSun: { value: sunDir }, uHaze: { value: 1 }, uHazeColor: { value: HAZE }, uCam: { value: new THREE.Vector3() },
+  },
+  extensions: { derivatives: true },
+  vertexShader: `
+    uniform float uTime; uniform float uWind;
+    varying vec3 vWorld; varying vec2 vGrad;
+    void main() {
+      vec2 p = position.xz; float h = 0.0; vec2 g = vec2(0.0);
+      ${glslWaves}
+      float amp = (0.06 + 0.5 * uWind) / 1.7;
+      vec3 pos = vec3(position.x, h * amp, position.z);
+      vGrad = g * amp;
+      vWorld = pos;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    }`,
+  fragmentShader: `
+    uniform float uTime; uniform float uWind; uniform int uMode; uniform int uWindFx; uniform sampler2D uDepth;
+    float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float vn(vec2 p) { vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(h21(i), h21(i + vec2(1, 0)), u.x), mix(h21(i + vec2(0, 1)), h21(i + vec2(1, 1)), u.x), u.y); }
+    uniform float uArea; uniform vec3 uSun; uniform float uHaze; uniform vec3 uHazeColor; uniform vec3 uCam;
+    varying vec3 vWorld; varying vec2 vGrad;
+    void main() {
+      vec2 uv = vWorld.xz / uArea + 0.5;
+      float depth = texture2D(uDepth, uv).r * 10.0;
+      if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) depth = 10.0;
+      vec3 deep = vec3(0.11, 0.40, 0.72), mid = vec3(0.16, 0.55, 0.80), shallow = vec3(0.36, 0.82, 0.82);
+      vec3 col;
+      if (uMode == 0) {
+        vec3 n = normalize(cross(dFdx(vWorld), dFdy(vWorld)));
+        col = vec3(0.184, 0.498, 0.839) * (0.55 + 0.6 * max(dot(n, uSun), 0.0));
+      } else {
+        vec3 n = normalize(vec3(-vGrad.x, 1.0, -vGrad.y));
+        col = mix(shallow, mid, smoothstep(0.3, 3.5, depth));
+        col = mix(col, deep, smoothstep(3.5, 9.0, depth));
+        float lit = dot(n, uSun);
+        // painted light: two soft bands instead of a smooth gradient
+        float band = smoothstep(0.30, 0.36, lit) * 0.10 + smoothstep(0.52, 0.58, lit) * 0.10;
+        col *= 0.86 + band;
+        if (uMode >= 2) {
+          // shore foam: rings that breathe in towards the land
+          float ringT = depth * 2.4 - uTime * 0.55;
+          float ring = smoothstep(0.80, 0.86, fract(ringT)) * (1.0 - smoothstep(0.0, 1.6, depth));
+          float edge = 1.0 - smoothstep(0.05, 0.35, depth);
+          // wind crests: white tops on the highest waves, only when it blows
+          // (height normalised to -1..1, only the very tops, broken into patches)
+          float hN = vWorld.y / ((0.06 + 0.5 * uWind) + 0.001);
+          float patches = 0.5 + 0.5 * sin(vWorld.x * 0.31 + vWorld.z * 0.23 + uTime * 0.35) * sin(vWorld.z * 0.27 - vWorld.x * 0.11);
+          float crest = smoothstep(0.72, 0.9, hN) * smoothstep(0.4, 0.9, uWind) * smoothstep(0.35, 0.8, patches);
+          if (uWindFx != 0) crest = 0.0;
+          col = mix(col, vec3(0.96, 0.99, 1.0), clamp(max(max(ring * 0.85, edge), crest * 0.6), 0.0, 1.0));
+        }
+        if (uMode == 3) {
+          // clear shallows: sand and rock showing through, with rippling light on the bottom
+          vec3 sand = vec3(0.86, 0.80, 0.58);
+          float caustic = 0.5 + 0.5 * sin(vWorld.x * 0.9 + uTime * 1.3) * sin(vWorld.z * 0.8 - uTime * 1.1);
+          vec3 bottom = sand * (0.85 + 0.25 * caustic);
+          col = mix(bottom, col, smoothstep(0.0, 2.2, depth) * 0.85 + 0.15);
+          float edge = 1.0 - smoothstep(0.05, 0.35, depth);
+          col = mix(col, vec3(0.96, 0.99, 1.0), edge);
+        }
+      }
+      if (uMode != 0) {
+        vec2 wdir = normalize(vec2(1.0, 0.12)); vec2 perp = vec2(-wdir.y, wdir.x);
+        vec2 q = vWorld.xz - wdir * uTime * (3.0 + 9.0 * uWind); // drifts downwind
+        float open = smoothstep(1.2, 3.0, depth);               // keep the shallows clean
+        if (uWindFx == 1 || uWindFx == 4) {
+          // gust patches: darker, finely ruffled areas sliding across the sea
+          float g = vn(q * 0.018) * 0.65 + vn(q * 0.041) * 0.35;
+          float patchy = smoothstep(0.52, 0.68, g) * smoothstep(0.1, 0.6, uWind) * open;
+          float ruffle = 0.5 + 0.5 * sin(dot(q, perp) * 2.3 + vn(q * 0.3) * 4.0);
+          col = mix(col, col * vec3(0.62, 0.74, 0.90), patchy * (0.7 + 0.3 * ruffle));
+        }
+        if (uWindFx == 2 || uWindFx == 4) {
+          // wind lines: long thin pale lines along the wind
+          float across = dot(q, perp) * 0.11 + vn(q * 0.01) * 3.0;
+          float line = smoothstep(0.965, 0.995, sin(across * 6.2831));
+          float seg = smoothstep(0.45, 0.7, vn(vec2(dot(q, wdir) * 0.02, across * 0.6)));
+          col = mix(col, vec3(0.92, 0.97, 1.0), line * seg * smoothstep(0.1, 0.6, uWind) * 0.15 * open); // subtle
+        }
+      }
+      float dist = length(vWorld - uCam);
+      col = mix(col, uHazeColor, uHaze * smoothstep(170.0, 520.0, dist) * 0.85);
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+});
+const water = new THREE.Mesh(new THREE.PlaneGeometry(900, 900, 300, 300).rotateX(-Math.PI / 2), waterMat);
+water.receiveShadow = false;
+scene.add(water);
+
+// ---------- islands ----------
+// Green pockets: sheltered hollows where soil collects. Used for both the meadow
+// colour and where pines grow, so trees stand in the green, not on bare rock.
+function greenPocket(x, z) { return vnoise(x * 0.06 + 3, z * 0.06 - 5) * 0.7 + vnoise(x * 0.15, z * 0.15) * 0.3; }
+const PALETTES = {
+  bohuslan: { style: 'rock', granite: '#f0d3cd', granite2: '#fdeee9', streak: '#ddb6ad', grass: '#a8e851', grass2: '#74d24b', heather: '#c9a0d4', sand: '#fbe9a8', wet: '#9a7f7a' },
+  storybook: { sand: '#ffe08a', grass: '#86e04c', grass2: '#62c946', granite: '#ffb8a8', granite2: '#ffd9cc', crisp: true },
+  meadow: { sand: '#fbe9a8', grass: '#a8e851', grass2: '#74d24b', granite: '#f3d6cc', granite2: '#fff0e8', crisp: true },
+  sunset: { sand: '#ffcf73', grass: '#c6d64a', grass2: '#9cc443', granite: '#ff9c86', granite2: '#ffc2a6', crisp: true },
+  old: { sand: '#dcc78e', grass: '#68ad4f', grass2: '#4e9440', granite: '#d6a7a0', granite2: '#b9918e', crisp: false },
+};
+const tmpA = new THREE.Color();
+function groundColor(h, slope, x, z, out) {
+  const P = PALETTES[choice.colours] ?? PALETTES.storybook;
+  const n = fbm(x * 0.08, z * 0.08);
+  const ss = THREE.MathUtils.smoothstep;
+  if (P.style === 'rock') {
+    // Bohuslän: granite first, green only where it is low, flat-ish and sheltered.
+    const pocket = greenPocket(x, z);
+    out.set(P.granite);
+    out.lerp(tmpA.set(P.granite2), ss(h, 7, 11));            // paler, sun-bleached domes
+    out.lerp(tmpA.set(P.streak), ss(n, 0.62, 0.66) * 0.6);   // darker veins and cracks
+    const green = ss(pocket, 0.43, 0.49) * (1 - ss(slope, 0.4, 0.52)) * ss(h, 0.9, 1.3) * (1 - ss(h, 10, 11));
+    out.lerp(tmpA.set(pocket > 0.64 ? P.grass2 : P.grass), green);
+    out.lerp(tmpA.set(P.heather), ss(vnoise(x * 0.22 + 9, z * 0.22), 0.8, 0.86) * 0.45 * (1 - green) * ss(h, 1.5, 2.0)); // soft heather tufts
+    out.lerp(tmpA.set(P.sand), (1 - ss(h, 0.5, 0.9)) * ss(pocket, 0.56, 0.6)); // the odd small cove
+    out.lerp(tmpA.set(P.wet), 1 - ss(h, 0.35, 0.62));         // dark wet rock right at the water
+    return out;
+  }
+  if (!P.crisp) {
+    out.set(P.sand);
+    out.lerp(tmpA.set(P.grass), ss(h, 0.9, 2.2));
+    out.lerp(tmpA.set(P.grass2), ss(n, 0.45, 0.7) * 0.6);
+    out.lerp(tmpA.set(P.granite), ss(slope, 0.45, 0.75) * ss(h, 1.2, 2.5));
+    out.lerp(tmpA.set(P.granite2), ss(h, 9, 14));
+    return out;
+  }
+  // Crisp zones: narrow transitions so green never smears into pink (pink + green = brown).
+  out.set(P.sand);
+  out.lerp(tmpA.set(n > 0.55 ? P.grass2 : P.grass), ss(h, 1.25, 1.55));
+  // granite on steep faces and only the very tops, so most of the island stays green
+  const rock = ss(slope, 0.72, 0.8) * ss(h, 1.6, 2.0) + ss(h, 13.0, 13.4);
+  out.lerp(tmpA.set(h > 12 ? P.granite2 : P.granite), Math.min(1, rock));
+  return out;
+}
+function buildIsland(cell) {
+  const size = 200, segs = Math.round(size / cell);
+  const g = new THREE.PlaneGeometry(size, size, segs, segs).rotateX(-Math.PI / 2);
+  const pos = g.attributes.position, colors = new Float32Array(pos.count * 3), c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i), h = heightAt(x, z);
+    pos.setY(i, h);
+    const e = 1.0, sx = (heightAt(x + e, z) - heightAt(x - e, z)) / (2 * e), sz = (heightAt(x, z + e) - heightAt(x, z - e)) / (2 * e);
+    groundColor(h, Math.hypot(sx, sz), x, z, c);
+    colors.set([c.r, c.g, c.b], i * 3);
+  }
+  g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  g.computeVertexNormals();
+  return g;
+}
+let islandGeoFacets = buildIsland(4);
+let islandGeoSmooth = buildIsland(1.6);
+let builtColours = choice.colours;
+function rebuildIslandsIfNeeded() {
+  if (builtColours === choice.colours) return;
+  islandGeoFacets.dispose(); islandGeoSmooth.dispose();
+  islandGeoFacets = buildIsland(4); islandGeoSmooth = buildIsland(1.6);
+  builtColours = choice.colours;
+}
+const toonGradient = (() => {
+  const t = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 170, 170, 170, 255, 255, 255, 255, 255]), 3, 1, THREE.RGBAFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true; return t;
+})();
+const islandMats = {
+  facets: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }),
+  smooth: new THREE.MeshLambertMaterial({ vertexColors: true }),
+  toon: new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonGradient }),
+};
+const island = new THREE.Mesh(islandGeoSmooth, islandMats.smooth);
+island.receiveShadow = true; island.castShadow = true;
+scene.add(island);
+
+// ---------- low-poly props (unchanged in every look) ----------
+const flat = (color) => new THREE.MeshLambertMaterial({ color, flatShading: true });
+function onGround(obj, x, z, sink = 0) { obj.position.set(x, heightAt(x, z) - sink, z); obj.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } }); scene.add(obj); return obj; }
+const rand = (() => { let s = 7; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
+for (let i = 0; i < 260; i++) {
+  const a = rand() * Math.PI * 2, r = rand() * 44, x = Math.cos(a) * r, z = Math.sin(a) * r, h = heightAt(x, z);
+  if (h < 1.6 || h > 10 || greenPocket(x, z) < 0.48) continue; // pines only in the green hollows
+  const tree = new THREE.Group(), s = 0.8 + rand() * 0.6;
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25 * s, 0.35 * s, 1.6 * s, 4), flat(0x8a6a4a)); trunk.position.y = 0.8 * s;
+  const crown = new THREE.Mesh(new THREE.ConeGeometry(1.7 * s, 4.6 * s, 5), flat(0x3f8a50)); crown.position.y = 3.6 * s;
+  tree.add(trunk, crown); tree.rotation.y = rand() * 6; onGround(tree, x, z, 0.2);
+}
+function cottage(x, z, rot, wall) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(4, 2.6, 5.4), flat(wall)); body.position.y = 1.3;
+  const roofShape = new THREE.Shape(); roofShape.moveTo(-2.4, 0); roofShape.lineTo(2.4, 0); roofShape.lineTo(0, 1.8); roofShape.closePath();
+  const roof = new THREE.Mesh(new THREE.ExtrudeGeometry(roofShape, { depth: 6, bevelEnabled: false }), flat(0x6b6672)); roof.position.set(0, 2.6, -3);
+  const door = new THREE.Mesh(new THREE.BoxGeometry(1, 1.8, 0.1), flat(0xf4f1e8)); door.position.set(0, 0.9, 2.75);
+  g.add(body, roof, door); g.rotation.y = rot; return onGround(g, x, z, 0.3);
+}
+cottage(30, 18, 0.9, 0xd2432c); cottage(36, 9, 1.3, 0xd2432c); cottage(26, 27, 0.6, 0xe2a53b);
+// a sjöbod at the water's edge
+(() => { const g = new THREE.Group(); const b = new THREE.Mesh(new THREE.BoxGeometry(4, 2.8, 6), flat(0xd2432c)); b.position.y = 1.4; g.add(b); g.position.set(43, 0.2, 21); g.rotation.y = 1.0; scene.add(g); b.castShadow = true; })();
+
+// The boat: same low-poly daysailer as the game, bobbing on the same waves as the water.
+const boat = new THREE.Group();
+(() => {
+  const hullShape = new THREE.Shape();
+  hullShape.moveTo(0, 3); hullShape.quadraticCurveTo(1.25, 0.6, 1.0, -2.9); hullShape.lineTo(-1.0, -2.9); hullShape.quadraticCurveTo(-1.25, 0.6, 0, 3);
+  const hull = new THREE.Mesh(new THREE.ExtrudeGeometry(hullShape, { depth: 0.9, bevelEnabled: false }), flat(0xf4f1e8));
+  hull.rotation.x = Math.PI / 2; hull.position.y = 0.55; // bow to +z, extruded downwards
+  const deck = new THREE.Mesh(new THREE.ShapeGeometry(hullShape), new THREE.MeshLambertMaterial({ color: 0xb58a5a, flatShading: true, side: THREE.DoubleSide })); deck.rotation.x = Math.PI / 2; deck.position.y = 0.56; deck.scale.setScalar(0.93);
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 6.2, 5), flat(0x5e4129)); mast.position.set(0, 3.6, 0.7);
+  const sailGeo = new THREE.BufferGeometry(); sailGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 6.4, 0.7, 0, 1.7, 0.7, 0.9, 1.7, -2.3], 3)); sailGeo.computeVertexNormals();
+  const sail = new THREE.Mesh(sailGeo, new THREE.MeshLambertMaterial({ color: 0xffcc66, flatShading: true, side: THREE.DoubleSide }));
+  boat.add(hull, deck, mast, sail);
+  boat.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+})();
+scene.add(boat);
+
+// ---------- looks ----------
+function applyLooks() {
+  rebuildIslandsIfNeeded();
+  waterMat.uniforms.uWindFx.value = WIND_FX[choice.windfx] ?? 1;
+  waterMat.uniforms.uMode.value = WATER_MODES[choice.water];
+  island.geometry = choice.island === 'facets' ? islandGeoFacets : islandGeoSmooth;
+  island.material = islandMats[choice.island];
+  waterMat.uniforms.uHaze.value = choice.haze === 'on' ? 1 : 0;
+  scene.fog = choice.haze === 'on' ? new THREE.Fog(HAZE, 200, 560) : null;
+}
+renderChips();
+applyLooks();
+
+// ---------- camera: high three-quarter view like the game, drag to turn ----------
+let azimuth = 0.6, dragX = null;
+const target = new THREE.Vector3(20, 0, 30);
+canvas.addEventListener('pointerdown', (e) => { if (!sheet.hidden) { openSheet(false); return; } dragX = e.clientX; canvas.setPointerCapture?.(e.pointerId); });
+canvas.addEventListener('pointermove', (e) => { if (dragX === null) return; azimuth -= (e.clientX - dragX) * 0.006; dragX = e.clientX; });
+const endDrag = () => { dragX = null; };
+canvas.addEventListener('pointerup', endDrag); canvas.addEventListener('pointercancel', endDrag);
+function resize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+toast('Tap “Looks” to compare');
+
+const start = performance.now();
+function frame(now) {
+  const t = (now - start) / 1000;
+  const wind = choice.wind;
+  // boat sails a slow loop round the big island
+  const a = t * 0.04 + 1.2, R = 66;
+  const bx = Math.cos(a) * R, bz = Math.sin(a) * R;
+  const heading = Math.atan2(-Math.sin(a), Math.cos(a)); // along the direction of travel (bow is +z)
+  const e = 1.5;
+  const y = waveHeight(bx, bz, t, wind);
+  boat.position.set(bx, y, bz);
+  boat.rotation.set(0, heading, 0);
+  boat.rotateX(-Math.atan((waveHeight(bx + Math.sin(heading) * e, bz + Math.cos(heading) * e, t, wind) - y) / e));
+  target.lerp(new THREE.Vector3(bx, 0, bz), 0.02);
+  const elev = 52 * Math.PI / 180, dist = Math.min(window.innerWidth, window.innerHeight) < 500 ? 200 : 170;
+  camera.position.set(target.x + Math.sin(azimuth) * Math.cos(elev) * dist, Math.sin(elev) * dist, target.z + Math.cos(azimuth) * Math.cos(elev) * dist);
+  camera.lookAt(target);
+  waterMat.uniforms.uTime.value = t;
+  waterMat.uniforms.uWind.value = wind;
+  waterMat.uniforms.uCam.value.copy(camera.position);
+  sun.target.position.copy(target); sun.position.copy(target).addScaledVector(sunDir, 200); sun.target.updateMatrixWorld();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
