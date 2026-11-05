@@ -1054,3 +1054,10 @@ a start-area fishing village that existed then (Fiskebäckskil or Grundsund). Fe
 **Harbour arrival (stage 1 spec seed):** a bell, maybe a horn, gulls in the background.
 
 **Music:** flexible: fitting, cute, easy background music for now.
+
+**Start: Grundsund (Felix, 2026-11-05).** Start at Grundsund, with Fiskebäckskil and Lysekil
+north and Gullholmen and Härmanö south to explore in the early game.
+
+**Names are discovered.** Islands, skerries and natural harbours have no names on the
+chart/mini-map until you have seen them first; then the name appears (and stays, per Q9:
+knowledge crosses eras).
