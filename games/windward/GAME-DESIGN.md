@@ -259,10 +259,21 @@ One visual language for "not yet / beyond".
   (Q15, open).
 - **The lightning-flash fog is the era crossing.** Ordinary weather fog still
   exists (see "The frame"). Fog makes lighthouses essential.
-- **Open (round 5):** what happens if a free-sailing player drifts in by
-  accident and whether it scares off lure players; whether thunder is an
-  offer or a hijack; how players tell ordinary, edge and crossing fog apart;
-  where the fog begins on a finite map.
+- **Drifting in by accident (SET, Q19 a):** a lighthouse beam or foghorn
+  carries through the fog so you can find your way back. It teaches "fog
+  makes lights essential". No walls, no prompts.
+- **Thunder in free-sail is a warning (SET, Q20 b):** you can sail back out
+  of it; only the lightning-flash fog commits you. The scripted
+  can't-escape storm stays inside the story.
+- **Telling the fogs apart (SET, Q21 c):** same look, different behaviour.
+  Weather fog drifts in and out, edge fog is fixed, only story fog brings
+  thunder and flashes.
+- **Where the fog begins (SET, Q22 c, kept simple):** one fog-start distance
+  per side, generous to the west (open sea), earlier at the north and south
+  ends of the data. Four tunable numbers, no hand-drawn shape.
+- **Open (round 6):** are the edge fog and the story fog one fog at
+  different depths (edge, then thunder, then flashes), or two separate
+  things? Q20 b and Q21 c only fit together in the first reading.
 
 ## The opening: where the story starts (new, Felix 2026-11-05)
 
@@ -376,6 +387,9 @@ Design this explicitly; it touches almost every system.
   content keyed by era and place make filtering a data lookup, not code.
   (4) Q14 a means the visitor's stuff is already their own, which works
   with either. Come back when the story stage is designed.
+- **No early currency (SET, Q23 c):** barter and favours. Things the pair
+  net sweeps up (barrels, flotsam) become gifts and trade goods for chart
+  sections. No throwaway early economy; the real one is the trade stage.
 - **Early co-op (SET, Q12): smart ping + the pair net.** The ping is the
   first feature beyond "here I am": it tags what you point at (a find, a
   fish school, a port, a lighthouse) and marks it on both mini-maps.
@@ -471,19 +485,21 @@ Status: **OPEN**, **SET** (Felix said it), **INFERRED** (my reading, confirm).
 | 19 | Treasure causality | **SET** | Something is lost during the opening (the storm takes granddad's sea chest) and found after the first jump. |
 | 20 | Stage order | **SET** | Lure, then co-op visiting, then chart/storm/jump, then trade. |
 | 21 | Chart shape | **SET** | Fixed sections first (inherited or bought), exploring reveals detail on top. |
-| 22 | Fog | **SET (rules), details OPEN** | No hard edge on today's coast; fog thickens gradually; thunder after long enough is a second way into the story; the same mist hides unlocked-for-others content; lightning fog is the crossing. |
+| 22 | Fog | **SET** (one detail open) | No hard edge on today's coast; fog thickens gradually; a lighthouse beam or foghorn carries through it (no walls, no prompts); thunder in free-sail is a warning, only lightning fog commits; weather fog drifts, edge fog is fixed, story fog brings thunder and flashes; one fog-start distance per side. Open: is the story fog the deepest layer of the edge fog? |
+| 23 | Money before trade | **SET** | Barter and favours. Pair-net finds (barrels, flotsam) are gifts and trade goods for chart sections. No early currency. |
 
 ## Gaps (to grill)
 
 Recorded 2026-11-05; resolved ones move into the log above.
 
-- **Fog details (round 5):** accidental drift, thunder as offer or hijack,
-  telling ordinary / edge / crossing fog apart, where the fog begins.
-- **Money before the trade stage (round 5):** the stage order puts trade
-  last, but chart sections can be bought and the port menu has "sell catch".
-  Where does money come from in stages 1-3?
-- **Pair-net haul split:** earnings go home (Q14 a); how is a shared haul
-  divided between host and visitor?
+- **One fog or two (round 6):** is the story fog the deepest layer of the
+  edge fog (edge, then thunder, then flashes)? See "Fog".
+- **Items before there is a hold (round 6):** barter goods and the port gift
+  need somewhere to live in stages 1-2.
+- **What persists without a save (round 6):** gifts and chart sections earned
+  in stages 1-2, before the story creates a save.
+- **Pair-net haul split (round 6):** earnings go home (Q14 a); how is a
+  shared haul divided between host and visitor?
 - **Visiting with mismatched progress (Q15, OPEN):** decide when the story
   stage is designed; notes above.
 - **Saving:** a world needs an owner and a save for visiting to mean
@@ -493,8 +509,11 @@ Recorded 2026-11-05; resolved ones move into the log above.
   and how "understands later" lands.
 - **Stage table rewrite:** T0-T8 is now only the trade phase. Size and names
   for stages 1-3.
-- **Chart sections:** how many, what each reveals, who authors them, and
-  what "buying" costs (see money above).
+- **Chart sections (round 6):** granularity (how a section is cut), how
+  many, what each reveals, who authors them, and what each barter asks for
+  (Q23 c).
+- **Cutting stages 1-3 (round 6):** which pieces ship in which stage; stage
+  3 (chart, storm, jump, saving, backwards time-lapse, sea chest) is large.
 - **Backwards time-lapse:** lights have a year-range lab on
   `felix/windward-lighthouses` (its commit message mentions a Play
   timeline, not verified here); boats and palette are not year-driven yet.
