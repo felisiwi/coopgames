@@ -2,44 +2,135 @@
 // files). Look direction (DESIGN.md "Look direction"): objects stay low-poly,
 // flat-shaded MeshLambertMaterial, bold storybook colours.
 //
-//   createLighthouse(name) -> THREE.Group, base at y=0, ~12-18 game metres
-//   tall (readable beside the ~6 m boat; NOT real height).
+//   LIGHTHOUSES            all towers, sorted by `built` (oldest first)
+//   createLighthouse(name) -> THREE.Group, base at y=0
+//   gameHeight(entry)      = 6 + 0.5 x realHeight  (NOT real height; the order
+//                            of heights matches real life, the spread is squeezed)
+//
+// Source of truth for years, heights and looks: LIGHTHOUSES.md.
 //
 // Conventions: every part is a flat Lambert mesh. The lantern glass is a warm
-// pale yellow mesh named 'lantern-glass' so a later pass can find it and make
-// it glow. Round towers use 5-8 radial segments. "Front" (door, steps,
-// ladder) is +z.
+// pale yellow mesh named 'lantern-glass' (exactly one per lighthouse) so a
+// later pass can find it and make it glow. A twin's second light is named
+// 'lantern-glass-twin'. Round towers use 5-8 radial segments. "Front" (door,
+// steps) is +z.
 import * as THREE from '../vendor/three/three.module.js';
 
-// 'dm' = degrees + decimal minutes, the way the brief gives coordinates.
+// 'dm' = degrees + decimal minutes, the way the original brief gives coordinates.
 const dm = (deg, min) => deg + min / 60;
 
-export const LIGHTHOUSES = [
-  { name: 'Måseskär', lat: dm(58, 5.646), lon: dm(11, 19.822),
-    description: 'Red iron skeleton tower: four splayed legs, X bracing, red upper section with a white band, green-domed lantern.' },
-  { name: 'Hållö', lat: dm(58, 20.155), lon: dm(11, 13.040),
-    description: 'White masonry tower on Hållö with a pink-red iron upper section and a dark green domed lantern.' },
-  { name: 'Pater Noster', lat: dm(57, 53.760), lon: dm(11, 27.951),
-    description: 'Tall tapering red iron lattice tower, heavily cross-braced, red-and-white top section, green dome.' },
-  { name: 'Vinga', lat: dm(57, 37.924), lon: dm(11, 36.078),
-    description: 'Square beige stone tower with gallery and lantern; a red-orange pyramid daymark beside it.' },
-  { name: 'Valö', lat: dm(57, 33.050), lon: dm(11, 48.150),
+// built = year of the CURRENT tower; station = year the light station opened
+// (only when older and stated in LIGHTHOUSES.md); realHeight in metres.
+// check = what still needs a photo check (shown in the lab).
+const ENTRIES = [
+  { name: 'Carlsten', built: 1782, station: null, realHeight: 20, heightEstimated: true, area: 'Marstrand',
+    lat: 57.8861067, lon: 11.5787068,
+    description: 'Light on top of the round stone tower of Carlsten fortress; the first flashing light in the world. Dark since 1868.',
+    check: 'height unknown (20 m guessed); tower shape and lantern colour' },
+  { name: 'Böttö', built: 1841, station: null, realHeight: 8, heightEstimated: true, area: 'Göteborg',
+    lat: 57.6490957, lon: 11.7198443,
+    description: 'Red lantern on the roof of a red-and-white wooden keeper\'s house. Dark since 1964.',
+    check: 'height unknown (8 m guessed); which parts are red vs white' },
+  { name: 'Hållö', built: 1842, station: null, realHeight: 20, area: 'Smögen',
+    lat: dm(58, 20.155), lon: dm(11, 13.040),
+    description: 'White stone tower (raised 1868) with a pink-red iron top and a dark green domed lantern.',
+    check: 'LIGHTHOUSES.md says red top and black lantern; kept the earlier pink-red / dark green' },
+  { name: 'Nordkoster', built: 1849, station: null, realHeight: 7, area: 'Koster',
+    lat: dm(58, 54.146), lon: dm(11, 0.304),
+    description: 'Two small round white masonry towers with grey lanterns.' },
+  { name: 'Måseskär', built: 1865, station: null, realHeight: 27, area: 'Käringön',
+    lat: dm(58, 5.646), lon: dm(11, 19.822),
+    description: 'Tall red cast-iron skeleton tower: four splayed legs, X bracing, red upper section with a white band, green-domed lantern.',
+    check: 'LIGHTHOUSES.md says red/white checker lattice; model has one white band' },
+  { name: 'Pater Noster', built: 1868, station: null, realHeight: 32, area: 'Marstrand',
+    lat: dm(57, 53.760), lon: dm(11, 27.951),
+    description: 'The tallest on the coast: all-red cast-iron lattice tower, heavily cross-braced, green dome.' },
+  { name: 'Islandsberg', built: 1883, station: null, realHeight: 6, area: 'Lysekil',
+    lat: 58.1976349, lon: 11.4050317,
+    description: 'Wooden keeper\'s house with a lantern on the ridge: white seaward end, red behind. Dark since 1938.',
+    check: 'lantern colours and roof colour' },
+  { name: 'Vinga', built: 1890, station: 1841, realHeight: 29, area: 'Göteborg',
+    lat: dm(57, 37.924), lon: dm(11, 36.078),
+    description: 'Square unpainted grey granite tower with a grey dome; a lower red-orange pyramid daymark beside it.' },
+  { name: 'Stångehuvud', built: 1890, station: null, realHeight: 4, area: 'Lysekil',
+    lat: 58.2711831, lon: 11.4134545,
+    description: 'Small white wooden house with a black A-frame roof and a lantern on the ridge.',
+    check: 'lantern colours' },
+  { name: 'Ursholmen', built: 1891, station: null, realHeight: 13, area: 'Koster',
+    lat: dm(58, 49.950), lon: dm(10, 59.413),
+    description: 'White round tower with a black top band and black lantern; a lower twin tower without a lantern.' },
+  { name: 'Eggskär', built: 1904, station: null, realHeight: 8, area: 'Klädesholmen',
+    lat: 57.9463469, lon: 11.5168439,
+    description: 'White round stone tower.',
+    check: 'lantern and roof colours' },
+  { name: 'Tistlarna', built: 1905, station: null, realHeight: 14, area: 'Göteborg south',
+    lat: 57.5098545, lon: 11.7263241,
+    description: 'Square white masonry tower with black trim, two galleries and a grey metallic dome.' },
+  { name: 'Mollösund', built: 1930, station: null, realHeight: 7, area: 'Orust',
+    lat: 58.0740381, lon: 11.4655996,
+    description: 'White tower with a black base band and a red roof.',
+    check: 'round vs square, lantern colours' },
+  { name: 'Stora Pölsan', built: 1934, station: null, realHeight: 10, area: 'Rörö',
+    lat: 57.7748924, lon: 11.5236489,
+    description: 'Square masonry tower with a black band.',
+    check: 'masonry colour (white assumed), lantern and roof colours' },
+  { name: 'Valö', built: 1935, station: 1885, realHeight: 10, area: 'Göteborg south',
+    lat: dm(57, 33.050), lon: dm(11, 48.150),
     description: 'Small white tower with a teal-green band, white lantern top and steps to the door.' },
-  { name: 'Väderöbod', lat: dm(58, 32.502), lon: dm(11, 1.823),
-    description: 'Tall slender red cylindrical tower, small gallery, red lantern.' },
-  { name: 'Sandviksholmen', lat: dm(58, 33.652), lon: dm(11, 14.555),
+  { name: 'Mjölskär', built: 1936, station: null, realHeight: 14, area: 'Smögen',
+    lat: 58.412849, lon: 11.1973639,
+    description: 'White round tower with a black base band.',
+    check: 'lantern and roof colours' },
+  { name: 'Hättan', built: 1938, station: null, realHeight: 9, area: 'Härmanö',
+    lat: 58.174137, lon: 11.37307,
+    description: 'White round tower with one black band.',
+    check: 'band position, lantern and roof colours' },
+  { name: 'Sandviksholmen', built: 1939, station: null, realHeight: 7, area: 'Hamburgö',
+    lat: dm(58, 33.652), lon: dm(11, 14.555),
     description: 'Short white cylinder with a gallery rail and a red conical roof.' },
-  { name: 'Södra Syster', lat: dm(58, 35.554), lon: dm(11, 9.206),
-    description: 'Black square box base with an outside ladder; white upper section with gallery and lantern.' },
-  { name: 'Väcker', lat: dm(58, 42.819), lon: dm(11, 9.718),
-    description: 'Grey masonry conical base, white tower, black band, gallery, red roof.' },
-  { name: 'Ramskär', lat: dm(58, 45.486), lon: dm(10, 59.560),
-    description: 'Slim round tower: white base, black middle band, white top, white lantern.' },
-  { name: 'Ursholmen', lat: dm(58, 49.950), lon: dm(10, 59.413),
-    description: 'White round tower with a black top band, black lantern room and dome, door at the base.' },
-  { name: 'Nordkoster', lat: dm(58, 54.146), lon: dm(11, 0.304),
-    description: 'Squat white round stone tower, arched wooden door, gallery, verdigris-green domed lantern.' },
+  { name: 'Väcker', built: 1939, station: null, realHeight: 14, area: 'Havstenssund',
+    lat: dm(58, 42.819), lon: dm(11, 9.718),
+    description: 'Grey masonry base, white tower, black band at the top, gallery, red roof.',
+    check: 'LIGHTHOUSES.md has no grey base; kept it from the first brief' },
+  { name: 'Ramskär', built: 1939, station: 1917, realHeight: 19, area: 'Havstenssund',
+    lat: dm(58, 45.486), lon: dm(10, 59.560),
+    description: 'Slim round tower: white base, one broad black band, white top, white lantern.' },
+  { name: 'Gäven', built: 1941, station: 1917, realHeight: 9.5, area: 'Lysekil',
+    lat: 58.2709628, lon: 11.3504693,
+    description: 'White round tower with one black band.',
+    check: 'band position, lantern and roof colours' },
+  { name: 'Kråksundsgap Södra', built: 1954, station: null, realHeight: 13, area: 'Orust',
+    lat: 58.1005563, lon: 11.4404817,
+    description: 'All-white round tower.',
+    check: 'lantern and roof colours' },
+  { name: 'Väderöbod', built: 1964, station: 1867, realHeight: 19, area: 'Fjällbacka',
+    lat: dm(58, 32.502), lon: dm(11, 1.823),
+    description: 'Tall slender round red concrete tower, small gallery, red lantern.' },
+  { name: 'Trubaduren', built: 1965, station: 1929, realHeight: 26, area: 'Off Vinga',
+    lat: 57.594402, lon: 11.633062,
+    description: 'Concrete sea tower: upper half red, lower half black, two galleries and a helipad on top.' },
+  { name: 'Lindholmen', built: 1974, station: null, realHeight: 15, area: 'Skalhamn',
+    lat: 58.32445, lon: 11.376981,
+    description: 'Two red round towers (Västra 15 m, Mellersta 13 m), each carrying a red slatted daymark.' },
+  { name: 'Brandskärsflak', built: 1974, station: null, realHeight: 26, area: 'Off Lysekil',
+    lat: 58.2936243, lon: 11.3290881,
+    description: 'Concrete sea tower: white with a green band, two galleries and a helipad.' },
+  { name: 'Dynabrott', built: 1974, station: null, realHeight: 26, area: 'Off Lysekil',
+    lat: 58.2936243, lon: 11.3290881,
+    description: 'Concrete sea tower: white with a red band, two galleries and a helipad. A few hundred metres from Brandskärsflak.' },
+  { name: 'Hätteberget', built: 1977, station: null, realHeight: 26, area: 'Marstrand',
+    lat: 57.863658, lon: 11.458654,
+    description: 'Concrete sea tower: upper half red, lower half black, two galleries and a helipad on top.' },
+  { name: 'Södra Syster', built: 2020, station: 1951, realHeight: 9, area: 'Fjällbacka',
+    lat: dm(58, 35.554), lon: dm(11, 9.206),
+    description: 'Plain white tower on a black base.',
+    check: 'round vs square, lantern and roof colours' },
 ];
+
+// Oldest on the left. Array.sort is stable, so same-year towers keep list order.
+export const LIGHTHOUSES = ENTRIES.slice().sort((a, b) => a.built - b.built);
+
+export const gameHeight = (entry) => 6 + 0.5 * entry.realHeight;
 
 // --- palette: bold storybook colours -------------------------------------
 export const GLASS = 0xffe9a0; // warm pale yellow, ready to glow
@@ -52,14 +143,17 @@ const WHITE = 0xf5f0e3;
 const BLACK = 0x26262b;
 const SOFT_BLACK = 0x3a3a42;
 const GREY = 0x9a9893;
-const BEIGE = 0xdcc490;
+const GREY_METAL = 0x8c929a;
+const GRANITE = 0xa6a29a;
+const STONE = 0xa59f94;
 const TEAL = 0x2a9d8f;
 const GREEN = 0x2f7a5a;
+const SEA_GREEN = 0x2f9a6a;
 const DARK_GREEN = 0x1f5a45;
-const VERDIGRIS = 0x4aa88c;
 const DOOR = 0x5a3a28;
 const DARK = 0x2f2420;
-const LADDER = 0xc9c6bd;
+const DARK_ROOF = 0x4b3b36;
+const HELIPAD = 0xbab7ae;
 
 // --- tiny toolkit -----------------------------------------------------------
 const matCache = new Map();
@@ -83,6 +177,14 @@ function put(g, geo, color, x = 0, y = 0, z = 0, { name, double = false } = {}) 
   if (name) m.name = name;
   g.add(m);
   return m;
+}
+
+// A sub-group, moved once, so a twin tower can be built with the same code.
+function sub(g, x = 0, z = 0) {
+  const s = new THREE.Group();
+  s.position.set(x, 0, z);
+  g.add(s);
+  return s;
 }
 
 // Cone frustum standing on y (bottom). flat=true turns it so a FLAT FACE (not
@@ -137,21 +239,23 @@ function gallery(g, r, y, color, { posts = 6, rail = 0.7, phase = 0 } = {}) {
   return y + 0.25;
 }
 
+// Height of a lantern room (frame ring + glass + frame ring + roof + finial).
+const roofHeight = (r, roof) => (roof === 'cone' ? r * 1.6 : roof === 'none' ? 0 : r * 1.12);
+const lanternHeight = (r, h, roof) => 0.4 + h + roofHeight(r, roof) + (roof === 'none' ? 0 : 0.5);
+// Gallery floor + lantern: what sits on top of a tower body.
+const stackHeight = (r, h, roof = 'dome') => 0.25 + lanternHeight(r, h, roof);
+
 // Lantern room: frame ring, glass, frame ring, roof, finial. Returns top y.
-function lantern(g, y, r, h, { frame, roof, roofColor, seg = 6 }) {
+function lantern(g, y, r, h, { frame, roof = 'dome', roofColor, seg = 6, glassName = 'lantern-glass' }) {
   const f = r * 1.12;
   frustum(g, f, f, 0.2, y, frame, seg, { flat: false });
-  put(g, new THREE.CylinderGeometry(r, r, h, seg), GLASS, 0, y + 0.2 + h / 2, 0, { name: 'lantern-glass' });
+  put(g, new THREE.CylinderGeometry(r, r, h, seg), GLASS, 0, y + 0.2 + h / 2, 0, { name: glassName });
   frustum(g, f, f, 0.2, y + 0.2 + h, frame, seg, { flat: false });
   const yTop = y + 0.4 + h;
-  let roofH;
-  if (roof === 'cone') {
-    roofH = r * 1.6;
-    cone(g, r * 1.35, roofH, yTop, roofColor, seg);
-  } else {
-    roofH = f;
-    dome(g, f, yTop, roofColor, seg);
-  }
+  if (roof === 'none') return yTop;
+  const roofH = roofHeight(r, roof);
+  if (roof === 'cone') cone(g, r * 1.35, roofH, yTop, roofColor, seg);
+  else dome(g, f, yTop, roofColor, seg);
   cone(g, 0.12, 0.5, yTop + roofH, roofColor, 4);
   return yTop + roofH + 0.5;
 }
@@ -175,9 +279,11 @@ function skeleton(g, { y1, wBot, wTop, panels, color, leg, brace, ties = [] }) {
   const sz = [1, 1, -1, -1];
   const half = (y) => wBot + ((wTop - wBot) * y) / y1;
   const corner = (k, y) => [sx[k] * half(y), y, sz[k] * half(y)];
-  for (let k = 0; k < 4; k++) strut(g, corner(k, 0), corner(k, y1), leg, color);
+  // the lattice starts 0.12 m up so slanted rod ends don't dip below y=0
+  const y0 = 0.12;
+  for (let k = 0; k < 4; k++) strut(g, corner(k, y0), corner(k, y1), leg, color);
   for (let p = 0; p < panels; p++) {
-    const ya = (y1 * p) / panels;
+    const ya = Math.max(y0, (y1 * p) / panels);
     const yb = (y1 * (p + 1)) / panels;
     for (let k = 0; k < 4; k++) {
       const k2 = (k + 1) % 4;
@@ -191,60 +297,235 @@ function skeleton(g, { y1, wBot, wTop, panels, color, leg, brace, ties = [] }) {
   }
 }
 
+// A gable roof: triangular prism, ridge along z, sitting on y=0 of its mesh.
+// 6 triangles (two slopes + two gable ends; the underside is never seen).
+function gableRoof(g, w, d, rh, y, color) {
+  const hw = w / 2;
+  const hd = d / 2;
+  const P = (x, yy, z) => [x, yy, z];
+  const tris = [
+    [P(-hw, 0, hd), P(hw, 0, hd), P(0, rh, hd)], // front gable
+    [P(hw, 0, -hd), P(-hw, 0, -hd), P(0, rh, -hd)], // back gable
+    [P(-hw, 0, -hd), P(-hw, 0, hd), P(0, rh, hd)], // left slope
+    [P(-hw, 0, -hd), P(0, rh, hd), P(0, rh, -hd)],
+    [P(hw, 0, hd), P(hw, 0, -hd), P(0, rh, -hd)], // right slope
+    [P(hw, 0, hd), P(0, rh, -hd), P(0, rh, hd)],
+  ];
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(tris.flat(2), 3));
+  geo.computeVertexNormals();
+  return put(g, geo, color, 0, y, 0);
+}
+
+// --- shared recipes ---------------------------------------------------------
+
+// A round (or, with square:true, four-sided) tower: colour bands stacked in
+// proportion, door, optional window slits, gallery, lantern. H is the TOTAL
+// height of this tower including lantern, so heights follow the data.
+function roundTower(t, o) {
+  const {
+    H, rBot, rTop, bands, seg = 7, square = false, galleryColor = WHITE,
+    lr = 0.85, lh = 1.3, frame = WHITE, roof = 'dome', roofColor = GREY_METAL,
+    door = true, windows = [], glassName, noLantern = false, mid = null, posts = 6,
+  } = o;
+  const segs = square ? 4 : seg;
+  const top = H - (noLantern ? 1.25 : stackHeight(lr, lh, roof));
+  const sum = bands.reduce((s, b) => s + b.f, 0);
+  const st = taperStack(t, rBot, rTop, 0, bands.map((b) => ({ h: (top * b.f) / sum, color: b.color })), segs);
+  if (door) box(t, Math.min(1.1, rBot * 0.45), Math.min(2.2, top * 0.2), 0.4, 0, DOOR, 0, apothem(rBot, segs));
+  for (const f of windows) {
+    box(t, 0.35, 0.7, 0.3, top * f, DARK, 0, apothem(st.radiusAt(top * f + 0.3), segs));
+  }
+  const gal = { posts: square ? 4 : posts, phase: square ? Math.PI / 4 : 0 };
+  const gr = square ? rTop + 0.85 : rTop * 1.4;
+  if (mid) gallery(t, (square ? st.radiusAt(top * mid.f) + 0.85 : st.radiusAt(top * mid.f) * 1.4), top * mid.f, mid.color, gal);
+  gallery(t, gr, top, galleryColor, gal);
+  if (noLantern) {
+    frustum(t, rTop * 0.7, rTop * 0.7, 1.0, top + 0.25, bands[bands.length - 1].color, 6, { flat: false });
+  } else {
+    lantern(t, top + 0.25, lr, lh, { frame, roof, roofColor, glassName });
+  }
+  return { top, radiusAt: st.radiusAt };
+}
+
+// Concrete sea tower with two galleries and a helipad disc on the lantern.
+function seaTower(g, { H, bands }) {
+  const lr = 1.0;
+  const lh = 1.5;
+  const top = H - (0.25 + 0.4 + lh + 0.2);
+  const st = taperStack(g, 2.7, 2.0, 0, bands.map((b) => ({ h: top * b.f, color: b.color })), 8);
+  box(g, 1.1, 2.0, 0.4, 0, DOOR, 0, apothem(2.7, 8));
+  const lowY = top * 0.5;
+  gallery(g, st.radiusAt(lowY) * 1.35, lowY, GREY, { posts: 4 });
+  gallery(g, 2.8, top, GREY, { posts: 6 });
+  const yTop = lantern(g, top + 0.25, lr, lh, { frame: GREY, roof: 'none' });
+  frustum(g, 3.2, 3.2, 0.2, yTop, HELIPAD, 8, { flat: false });
+}
+
+// Keeper's house with the lantern on the ridge.
+function houseLight(g, o) {
+  const { H, w, d, wallFrac, wall, wall2 = null, roofColor, lr, lh, frame, domeColor, lanternZ = 0, doorW = 1.0 } = o;
+  const ridge = H - lanternHeight(lr, lh, 'dome');
+  const wallH = ridge * wallFrac;
+  const roofH = ridge - wallH;
+  if (wall2) {
+    box(g, w, wallH, d / 2, 0, wall, 0, d / 4);
+    box(g, w, wallH, d / 2, 0, wall2, 0, -d / 4);
+  } else {
+    box(g, w, wallH, d, 0, wall);
+  }
+  gableRoof(g, w + 0.6, d + 0.6, roofH, wallH, roofColor);
+  box(g, doorW, Math.min(1.8, wallH * 0.7), 0.3, 0, DOOR, 0, d / 2);
+  const lg = sub(g, 0, lanternZ);
+  lantern(lg, ridge, lr, lh, { frame, roof: 'dome', roofColor: domeColor });
+}
+
+// Rectangular red slatted daymark on the front (+z) of a round tower.
+function slatDaymark(t, { r, y, h, width, color }) {
+  const slats = 4;
+  const slatH = h / (slats * 2 - 1);
+  for (let i = 0; i < slats; i++) box(t, width, slatH, 0.2, y + i * 2 * slatH, color, 0, r + 0.1);
+  for (const x of [-width / 2 + 0.1, width / 2 - 0.1]) box(t, 0.2, h, 0.2, y, color, x, r + 0.1);
+}
+
 // --- the towers -------------------------------------------------------------
+// Each builder gets (group, H): H = the game height this tower must reach.
 const BUILDERS = {
+  // Light on the round stone fortress tower: fat drum, battlements, small lantern.
+  'Carlsten'(g, H) {
+    const lr = 0.9;
+    const lh = 1.2;
+    const top = H - 0.5 - lanternHeight(lr, lh, 'cone');
+    taperStackSimple(g, 5.0, 4.6, top, STONE, 8);
+    box(g, 1.3, 2.2, 0.5, 0, DOOR, 0, apothem(5.0, 8));
+    frustum(g, 5.3, 5.3, 0.5, top, STONE, 8);
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI * 2) / 8 + Math.PI / 8;
+      box(g, 1.3, 1.0, 0.8, top + 0.5, STONE, Math.sin(a) * 4.7, Math.cos(a) * 4.7).rotation.y = a;
+    }
+    lantern(g, top + 0.5, lr, lh, { frame: DARK, roof: 'cone', roofColor: GREY_METAL });
+  },
+
+  // Red lantern on a red-and-white wooden keeper's house.
+  'Böttö'(g, H) {
+    houseLight(g, { H, w: 5.2, d: 8, wallFrac: 0.5, wall: WHITE, roofColor: RED, lr: 0.85, lh: 1.2, frame: RED, domeColor: RED });
+  },
+
+  // White stone tower, pink-red iron top, dark green dome.
+  'Hållö'(g, H) {
+    const top = H - stackHeight(0.9, 1.3, 'dome');
+    const plinth = 0.6;
+    const rest = top - plinth;
+    const white = rest * 0.78;
+    frustum(g, 2.9, 2.7, plinth, 0, GREY, 7);
+    const t = taperStack(g, 2.4, 1.8, plinth, [{ h: white, color: WHITE }], 7);
+    frustum(g, 1.8, 1.75, rest - white, t.top, PINK_RED, 7);
+    box(g, 0.9, 1.5, 0.5, plinth, DOOR, 0, apothem(2.4, 7));
+    box(g, 0.35, 0.7, 0.3, white * 0.4, DARK, 0, apothem(t.radiusAt(white * 0.4 + 0.9), 7));
+    box(g, 0.35, 0.7, 0.3, white * 0.8, DARK, 0, apothem(t.radiusAt(white * 0.8 + 0.9), 7));
+    gallery(g, 2.5, top, PINK_RED);
+    lantern(g, top + 0.25, 0.9, 1.3, { frame: PINK_RED, roof: 'dome', roofColor: DARK_GREEN });
+  },
+
+  // Two small round white masonry towers, grey lanterns.
+  'Nordkoster'(g, H) {
+    const base = { rBot: 2.3, rTop: 1.8, bands: [{ f: 1, color: WHITE }], lr: 0.8, lh: 1.0, frame: GREY_METAL, roof: 'dome', roofColor: GREY_METAL, galleryColor: WHITE };
+    roundTower(sub(g, -3.8), { ...base, H, windows: [0.5] });
+    roundTower(sub(g, 3.8), { ...base, H: 6 + 0.5 * 5, rBot: 2.1, rTop: 1.7, windows: [0.5], glassName: 'lantern-glass-twin' });
+  },
+
   // Red iron skeleton: splayed legs, X bracing, red upper section with a white band.
-  'Måseskär'(g) {
-    skeleton(g, { y1: 9, wBot: 2.9, wTop: 1.3, panels: 3, color: IRON_RED, leg: 0.2, brace: 0.1, ties: [1, 2] });
-    frustum(g, 0.55, 0.55, 9, 0, IRON_RED, 6);
-    frustum(g, 1.8, 1.8, 1, 9, IRON_RED, 6);
-    frustum(g, 1.8, 1.8, 1, 10, WHITE, 6);
-    frustum(g, 1.8, 1.8, 1, 11, IRON_RED, 6);
-    gallery(g, 2.4, 12, IRON_RED);
-    lantern(g, 12.25, 0.9, 1.3, { frame: IRON_RED, roof: 'dome', roofColor: GREEN });
+  'Måseskär'(g, H) {
+    const top = H - stackHeight(0.9, 1.3, 'dome');
+    const y1 = top - 3;
+    skeleton(g, { y1, wBot: 3.6, wTop: 1.5, panels: 4, color: IRON_RED, leg: 0.22, brace: 0.11, ties: [2] });
+    frustum(g, 0.6, 0.6, y1, 0, IRON_RED, 6);
+    frustum(g, 2.0, 2.0, 1, y1, IRON_RED, 6);
+    frustum(g, 2.0, 2.0, 1, y1 + 1, WHITE, 6);
+    frustum(g, 2.0, 2.0, 1, y1 + 2, IRON_RED, 6);
+    gallery(g, 2.7, top, IRON_RED);
+    lantern(g, top + 0.25, 0.9, 1.3, { frame: IRON_RED, roof: 'dome', roofColor: GREEN });
   },
 
-  // White masonry tower, pink-red iron section on top, dark green dome.
-  'Hållö'(g) {
-    frustum(g, 2.9, 2.7, 0.6, 0, GREY, 7);
-    const t = taperStack(g, 2.4, 1.8, 0.6, [{ h: 8.4, color: WHITE }], 7);
-    frustum(g, 1.9, 1.8, 2.2, t.top, PINK_RED, 7);
-    box(g, 0.9, 1.5, 0.5, 0.6, DOOR, 0, apothem(2.4, 7));
-    box(g, 0.35, 0.7, 0.3, 4, DARK, 0, apothem(t.radiusAt(4.3), 7));
-    box(g, 0.35, 0.7, 0.3, 7, DARK, 0, apothem(t.radiusAt(7.3), 7));
-    gallery(g, 2.5, 11.2, PINK_RED);
-    lantern(g, 11.45, 0.9, 1.3, { frame: PINK_RED, roof: 'dome', roofColor: DARK_GREEN });
+  // Tallest on the coast: all-red tapering lattice, heavily braced.
+  'Pater Noster'(g, H) {
+    const top = H - stackHeight(0.9, 1.3, 'dome');
+    const y1 = top - 2;
+    skeleton(g, { y1, wBot: 3.6, wTop: 1.4, panels: 5, color: RED, leg: 0.22, brace: 0.11, ties: [2] });
+    frustum(g, 0.55, 0.55, y1, 0, RED, 6);
+    frustum(g, 1.9, 1.9, 2, y1, RED, 6);
+    gallery(g, 2.6, top, RED, { posts: 4 });
+    lantern(g, top + 0.25, 0.9, 1.3, { frame: RED, roof: 'dome', roofColor: GREEN });
   },
 
-  // Tall tapering red iron lattice, heavily braced; red top with white band.
-  'Pater Noster'(g) {
-    skeleton(g, { y1: 12, wBot: 3.0, wTop: 1.25, panels: 4, color: RED, leg: 0.2, brace: 0.1, ties: [2] });
-    frustum(g, 0.5, 0.5, 12, 0, RED, 6);
-    frustum(g, 1.75, 1.75, 0.7, 12, RED, 6);
-    frustum(g, 1.75, 1.75, 0.6, 12.7, WHITE, 6);
-    frustum(g, 1.75, 1.75, 0.7, 13.3, RED, 6);
-    gallery(g, 2.4, 14, RED, { posts: 4 });
-    lantern(g, 14.25, 0.9, 1.3, { frame: RED, roof: 'dome', roofColor: GREEN });
+  // Wooden keeper's house, white seaward end, red behind; lantern at the seaward end.
+  'Islandsberg'(g, H) {
+    houseLight(g, { H, w: 4.6, d: 8, wallFrac: 0.5, wall: WHITE, wall2: RED, roofColor: DARK_ROOF, lr: 0.75, lh: 1.0, frame: WHITE, domeColor: DARK_ROOF, lanternZ: 1.6 });
   },
 
-  // Square beige stone tower + tall red-orange pyramid daymark beside it.
-  'Vinga'(g) {
-    // Tower built in its own sub-group, then moved once to make room for the daymark.
-    const tower = new THREE.Group();
-    frustum(tower, 2.5, 2.1, 10, 0, BEIGE, 4);
-    box(tower, 0.8, 1.5, 0.4, 0, DOOR, 0, apothem(2.5, 4) + 0.1);
-    gallery(tower, 2.83, 10, BEIGE, { posts: 4, phase: Math.PI / 4 });
-    lantern(tower, 10.25, 0.95, 1.4, { frame: GREY, roof: 'dome', roofColor: SOFT_BLACK });
-    tower.position.x = -2.6;
-    g.add(tower);
-    // daymark: truncated four-sided pyramid
-    frustum(g, 2.6, 0.25, 9, 0, ORANGE_RED, 4, { x: 4.2 }); // Felix: lower than the tower
+  // Square unpainted grey granite tower, grey dome, lower red-orange pyramid daymark.
+  'Vinga'(g, H) {
+    roundTower(sub(g, -3.4), {
+      H, rBot: 3.8, rTop: 3.0, bands: [{ f: 1, color: GRANITE }], square: true, galleryColor: GRANITE,
+      lr: 1.1, lh: 1.5, frame: GREY, roof: 'dome', roofColor: GREY_METAL, windows: [0.3, 0.6],
+    });
+    frustum(g, 3.0, 0.3, H * 0.72, 0, ORANGE_RED, 4, { x: 5.8 }); // lower than the tower
+  },
+
+  // Small white wooden house with a black A-frame roof.
+  'Stångehuvud'(g, H) {
+    houseLight(g, { H, w: 3.6, d: 4.6, wallFrac: 0.28, wall: WHITE, roofColor: BLACK, lr: 0.7, lh: 1.0, frame: WHITE, domeColor: BLACK, doorW: 0.8 });
+  },
+
+  // White round tower, black top band, black lantern room and dome; twin with no lantern.
+  'Ursholmen'(g, H) {
+    roundTower(sub(g, -4.4), {
+      H, rBot: 2.4, rTop: 1.9, bands: [{ f: 0.87, color: WHITE }, { f: 0.13, color: BLACK }],
+      galleryColor: BLACK, lr: 1.0, lh: 1.5, frame: BLACK, roof: 'dome', roofColor: BLACK, windows: [0.45],
+    });
+    roundTower(sub(g, 4.6), {
+      H: 6 + 0.5 * 10, rBot: 2.2, rTop: 1.8, bands: [{ f: 0.87, color: WHITE }, { f: 0.13, color: BLACK }],
+      galleryColor: BLACK, noLantern: true, windows: [0.45],
+    });
+  },
+
+  // White round stone tower.
+  'Eggskär'(g, H) {
+    roundTower(g, { H, rBot: 2.3, rTop: 1.8, bands: [{ f: 1, color: WHITE }], windows: [0.5] });
+  },
+
+  // Square white masonry, black trim, two galleries, grey metallic dome.
+  'Tistlarna'(g, H) {
+    roundTower(g, {
+      H, rBot: 3.2, rTop: 2.7, square: true,
+      bands: [{ f: 0.06, color: BLACK }, { f: 0.88, color: WHITE }, { f: 0.06, color: BLACK }],
+      galleryColor: BLACK, mid: { f: 0.5, color: BLACK }, lr: 0.95, lh: 1.4, frame: BLACK,
+      roof: 'dome', roofColor: GREY_METAL, windows: [0.3, 0.7],
+    });
+  },
+
+  // White tower, black base band, red roof.
+  'Mollösund'(g, H) {
+    roundTower(g, {
+      H, rBot: 2.2, rTop: 1.8, bands: [{ f: 0.22, color: BLACK }, { f: 0.78, color: WHITE }],
+      roof: 'cone', roofColor: RED, windows: [0.55],
+    });
+  },
+
+  // Square masonry tower with a black band.
+  'Stora Pölsan'(g, H) {
+    roundTower(g, {
+      H, rBot: 3.0, rTop: 2.5, square: true,
+      bands: [{ f: 0.4, color: WHITE }, { f: 0.2, color: BLACK }, { f: 0.4, color: WHITE }],
+      windows: [0.2],
+    });
   },
 
   // Small white tower, teal band, white lantern top, steps.
-  'Valö'(g) {
+  'Valö'(g, H) {
+    const top = H - stackHeight(0.85, 1.3, 'dome');
     const t = taperStack(g, 1.9, 1.6, 0, [
-      { h: 3.8, color: WHITE }, { h: 2.0, color: TEAL }, { h: 3.5, color: WHITE },
+      { h: top * 0.41, color: WHITE }, { h: top * 0.22, color: TEAL }, { h: top * 0.37, color: WHITE },
     ], 7);
     const z = apothem(1.9, 7);
     for (let i = 0; i < 3; i++) box(g, 1.6, 0.3 * (i + 1), 0.5, 0, GREY, 0, z + 0.2 + (2 - i) * 0.5);
@@ -253,87 +534,130 @@ const BUILDERS = {
     lantern(g, t.top + 0.25, 0.85, 1.3, { frame: WHITE, roof: 'dome', roofColor: WHITE });
   },
 
-  // Tall slender red cylinder with iron-plate ribs, small gallery, red lantern.
-  'Väderöbod'(g) {
-    frustum(g, 2.0, 1.8, 0.8, 0, GREY, 7);
-    const t = taperStack(g, 1.5, 1.0, 0.8, [{ h: 12, color: RED }], 7);
-    for (const y of [3.8, 6.8, 9.8]) {
-      const r = t.radiusAt(y) + 0.1;
-      frustum(g, r, r, 0.2, y, DARK_RED, 7);
-    }
-    box(g, 0.8, 1.4, 0.4, 0.8, DOOR, 0, apothem(1.5, 7));
-    box(g, 0.3, 0.6, 0.25, 5.5, DARK, 0, apothem(t.radiusAt(5.8), 7));
-    gallery(g, 1.7, t.top, RED);
-    lantern(g, t.top + 0.25, 0.75, 1.2, { frame: RED, roof: 'dome', roofColor: RED });
+  // White round tower, black base band.
+  'Mjölskär'(g, H) {
+    roundTower(g, {
+      H, rBot: 2.4, rTop: 1.9, bands: [{ f: 0.2, color: BLACK }, { f: 0.8, color: WHITE }], windows: [0.5],
+    });
+  },
+
+  // White round tower, one black band.
+  'Hättan'(g, H) {
+    roundTower(g, {
+      H, rBot: 2.1, rTop: 1.7,
+      bands: [{ f: 0.35, color: WHITE }, { f: 0.25, color: BLACK }, { f: 0.4, color: WHITE }],
+    });
   },
 
   // Short white cylinder, gallery rail, red conical roof.
-  'Sandviksholmen'(g) {
-    const t = taperStack(g, 2.3, 2.0, 0, [{ h: 8.6, color: WHITE }], 7);
-    box(g, 0.9, 1.6, 0.4, 0, DOOR, 0, apothem(2.3, 7));
-    box(g, 0.4, 0.7, 0.3, 4.5, DARK, 0, apothem(t.radiusAt(4.8), 7));
-    gallery(g, 2.8, t.top, WHITE);
-    lantern(g, t.top + 0.25, 1.0, 1.3, { frame: WHITE, roof: 'cone', roofColor: RED });
+  'Sandviksholmen'(g, H) {
+    roundTower(g, {
+      H, rBot: 2.3, rTop: 2.0, bands: [{ f: 1, color: WHITE }], lr: 1.0, lh: 1.3,
+      roof: 'cone', roofColor: RED, windows: [0.5],
+    });
   },
 
-  // Black square base with outside ladder, white upper section.
-  'Södra Syster'(g) {
-    box(g, 4.4, 4.5, 4.4, 0, BLACK);
-    frustum(g, 2.3, 2.0, 5.5, 4.5, WHITE, 4);
-    const lz = 2.2 + 0.2;
-    for (const x of [-0.45, 0.45]) box(g, 0.12, 4.5, 0.12, 0, LADDER, x, lz);
-    for (const y of [1.0, 2.2, 3.4]) box(g, 1.0, 0.1, 0.1, y, LADDER, 0, lz);
-    gallery(g, 3.0, 10, WHITE, { posts: 4, phase: Math.PI / 4 });
-    lantern(g, 10.25, 0.9, 1.3, { frame: WHITE, roof: 'dome', roofColor: SOFT_BLACK });
-  },
-
-  // Grey masonry cone, white tower, black band, gallery, red roof.
-  'Väcker'(g) {
-    frustum(g, 3.3, 2.2, 4, 0, GREY, 7);
+  // Grey masonry cone, white tower, black band at the top, red roof.
+  'Väcker'(g, H) {
+    const top = H - stackHeight(0.85, 1.3, 'cone');
+    const grey = top * 0.32;
+    const black = top * 0.12;
+    taperStack(g, 3.3, 2.2, 0, [{ h: grey, color: GREY }], 7);
     box(g, 0.9, 1.6, 0.5, 0, DOOR, 0, apothem(3.3, 7) - 0.2);
-    frustum(g, 2.2, 1.7, 5.5, 4, WHITE, 7);
-    frustum(g, 1.7, 1.6, 1.3, 9.5, BLACK, 7);
-    gallery(g, 2.4, 10.8, WHITE);
-    lantern(g, 11.05, 0.85, 1.3, { frame: WHITE, roof: 'cone', roofColor: RED });
+    taperStack(g, 2.2, 1.6, grey, [{ h: top - grey - black, color: WHITE }, { h: black, color: BLACK }], 7);
+    gallery(g, 2.4, top, WHITE);
+    lantern(g, top + 0.25, 0.85, 1.3, { frame: WHITE, roof: 'cone', roofColor: RED });
   },
 
-  // Slim round tower: white / black / white, white lantern.
-  'Ramskär'(g) {
-    const t = taperStack(g, 1.5, 1.0, 0, [
-      { h: 4.5, color: WHITE }, { h: 3.5, color: BLACK }, { h: 3.0, color: WHITE },
-    ], 7);
-    box(g, 0.7, 1.4, 0.35, 0, DOOR, 0, apothem(1.5, 7));
-    gallery(g, 1.9, t.top, WHITE);
-    lantern(g, t.top + 0.25, 0.8, 1.3, { frame: WHITE, roof: 'dome', roofColor: WHITE });
+  // Slim round tower: white base, one broad black band, white top, white lantern.
+  'Ramskär'(g, H) {
+    roundTower(g, {
+      H, rBot: 1.8, rTop: 1.2,
+      bands: [{ f: 0.4, color: WHITE }, { f: 0.33, color: BLACK }, { f: 0.27, color: WHITE }],
+      lr: 0.8, roof: 'dome', roofColor: WHITE,
+    });
   },
 
-  // White round tower, black top band, black lantern room and dome, door.
-  'Ursholmen'(g) {
-    const t = taperStack(g, 2.5, 2.0, 0, [{ h: 8, color: WHITE }, { h: 1.2, color: BLACK }], 7);
-    box(g, 1.0, 1.8, 0.5, 0, DOOR, 0, apothem(2.5, 7));
-    box(g, 0.35, 0.7, 0.3, 4.5, DARK, 0, apothem(t.radiusAt(4.8), 7));
-    gallery(g, 2.8, t.top, BLACK);
-    lantern(g, t.top + 0.25, 1.0, 1.6, { frame: BLACK, roof: 'dome', roofColor: BLACK });
+  // White round tower with one black band.
+  'Gäven'(g, H) {
+    roundTower(g, {
+      H, rBot: 2.1, rTop: 1.7,
+      bands: [{ f: 0.5, color: WHITE }, { f: 0.25, color: BLACK }, { f: 0.25, color: WHITE }],
+    });
   },
 
-  // Squat white stone tower, arched wooden door, verdigris dome.
-  'Nordkoster'(g) {
-    const t = taperStack(g, 3.3, 2.6, 0, [{ h: 9.3, color: WHITE }], 7);
-    const z = apothem(3.3, 7);
-    box(g, 1.1, 1.7, 0.5, 0, DOOR, 0, z);
-    put(g, new THREE.CylinderGeometry(0.55, 0.55, 0.5, 6).rotateX(Math.PI / 2), DOOR, 0, 1.7, z);
-    box(g, 0.4, 0.8, 0.3, 5.0, DARK, 0, apothem(t.radiusAt(5.4), 7));
-    gallery(g, 3.3, t.top, WHITE, { posts: 7 });
-    lantern(g, t.top + 0.25, 1.2, 1.3, { frame: WHITE, roof: 'dome', roofColor: VERDIGRIS });
+  // All-white round tower.
+  'Kråksundsgap Södra'(g, H) {
+    roundTower(g, { H, rBot: 2.2, rTop: 1.6, bands: [{ f: 1, color: WHITE }], windows: [0.5] });
+  },
+
+  // Tall slender red cylinder with iron-plate ribs, small gallery, red lantern.
+  'Väderöbod'(g, H) {
+    const top = H - stackHeight(0.75, 1.2, 'dome');
+    const plinth = 0.8;
+    const tower = top - plinth;
+    frustum(g, 2.0, 1.8, plinth, 0, GREY, 7);
+    const t = taperStack(g, 1.5, 1.0, plinth, [{ h: tower, color: RED }], 7);
+    for (const f of [0.25, 0.5, 0.75]) {
+      const y = plinth + tower * f;
+      const r = t.radiusAt(y) + 0.1;
+      frustum(g, r, r, 0.2, y, DARK_RED, 7);
+    }
+    box(g, 0.8, 1.4, 0.4, plinth, DOOR, 0, apothem(1.5, 7));
+    gallery(g, 1.7, top, RED);
+    lantern(g, top + 0.25, 0.75, 1.2, { frame: RED, roof: 'dome', roofColor: RED });
+  },
+
+  // Concrete sea tower: red over black, helipad.
+  'Trubaduren'(g, H) {
+    seaTower(g, { H, bands: [{ f: 0.5, color: BLACK }, { f: 0.5, color: RED }] });
+  },
+
+  // Two red round towers, each with a red slatted daymark.
+  'Lindholmen'(g, H) {
+    const red = { rBot: 2.2, rTop: 1.7, bands: [{ f: 1, color: RED }], galleryColor: RED, frame: RED, roof: 'dome', roofColor: RED, posts: 4 };
+    const a = roundTower(sub(g, -4.8), { ...red, H });
+    slatDaymark(g.children[g.children.length - 1], { r: 2.0, y: a.top * 0.35, h: 5, width: 3.2, color: RED });
+    const hb = 6 + 0.5 * 13;
+    const b = roundTower(sub(g, 4.8), { ...red, H: hb, rBot: 2.1, rTop: 1.65, glassName: 'lantern-glass-twin' });
+    slatDaymark(g.children[g.children.length - 1], { r: 1.95, y: b.top * 0.35, h: 4.6, width: 3.0, color: RED });
+  },
+
+  // Concrete sea tower: white with a green band, helipad.
+  'Brandskärsflak'(g, H) {
+    seaTower(g, { H, bands: [{ f: 0.4, color: WHITE }, { f: 0.2, color: SEA_GREEN }, { f: 0.4, color: WHITE }] });
+  },
+
+  // Concrete sea tower: white with a red band, helipad.
+  'Dynabrott'(g, H) {
+    seaTower(g, { H, bands: [{ f: 0.4, color: WHITE }, { f: 0.2, color: RED }, { f: 0.4, color: WHITE }] });
+  },
+
+  // Concrete sea tower: red over black, helipad.
+  'Hätteberget'(g, H) {
+    seaTower(g, { H, bands: [{ f: 0.5, color: BLACK }, { f: 0.5, color: RED }] });
+  },
+
+  // Plain white tower on a black base.
+  'Södra Syster'(g, H) {
+    roundTower(g, {
+      H, rBot: 2.3, rTop: 1.9, bands: [{ f: 0.22, color: BLACK }, { f: 0.78, color: WHITE }], windows: [0.5],
+    });
   },
 };
 
+// One uncoloured-band drum (used by Carlsten).
+function taperStackSimple(g, rBot, rTop, h, color, seg) {
+  return taperStack(g, rBot, rTop, 0, [{ h, color }], seg);
+}
+
 export function createLighthouse(name) {
+  const entry = LIGHTHOUSES.find((l) => l.name === name);
   const build = BUILDERS[name];
-  if (!build) throw new Error(`Unknown lighthouse: ${name}`);
+  if (!entry || !build) throw new Error(`Unknown lighthouse: ${name}`);
   const g = new THREE.Group();
   g.name = name;
-  build(g);
+  build(g, gameHeight(entry));
   g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   return g;
 }

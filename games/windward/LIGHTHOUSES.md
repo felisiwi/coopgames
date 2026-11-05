@@ -43,8 +43,8 @@ The game scales distances to about 1:8, so towers don't have to be at real heigh
 | Kråksundsgap Södra | Orust | 1954 | 13 m | All-white round tower |
 | Trubaduren | Off Vinga | 1965 (station 1929) | 26 m | Red over black, helipad |
 | Lindholmen Västra / Mellersta | Skalhamn | 1974 | 15 m / 13 m | Red round towers, slatted red daymarks |
-| Brandskärsflak | Off Smögen | 1974 | 26 m | White, green band (sea tower) |
-| Dynabrott | Off Smögen | 1974 | 26 m | White, red band (sea tower) |
+| Brandskärsflak | Off Lysekil | 1974 | 26 m | White, green band (sea tower) |
+| Dynabrott | Off Lysekil | 1974 | 26 m | White, red band (sea tower) |
 | Hätteberget | Marstrand | 1977 | 26 m | Red over black, helipad |
 
 Skipped: dozens of 3–6 m harbour lanterns and fiberglass cabinets. Use one generic small-light model for all of them.
@@ -54,3 +54,11 @@ Skipped: dozens of 3–6 m harbour lanterns and fiberglass cabinets. Use one gen
 Bohuslän's great herring period was roughly 1747–1809. Of everything above, only Carlsten's light (1782) existed then.
 - If the game is set in that era, the coast is dark, apart from cairns and daymarks.
 - If it's set around 1880–1900, it fits most of the stone and iron towers. That's also the second herring boom, from 1877.
+
+## Corrections and additions (lighthouse-lab update, 2026-11-05)
+
+- Brandskärsflak and Dynabrott: area changed from "Off Smögen" to "Off Lysekil". The directory places both on the same shoal, about 5 km southeast of Sotenäs and 6 km west of Lysekil, a few hundred metres apart (58.2936 N, 11.3291 E).
+- Coordinates for the 17 added towers are taken from the Google Maps links on the three ibiblio pages.
+- Carlsten and Böttö have no height in the directory. The model uses 20 m and 8 m as placeholders (`heightEstimated` in `src/lighthouses.js`).
+- Game height is `6 + 0.5 x real height`, so the order of heights matches real life but the spread is squeezed.
+- The "Our model" column in the first table is out of date. Heights come from the rule above, and the five ⚠ mismatches are fixed.
