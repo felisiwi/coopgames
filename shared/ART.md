@@ -23,8 +23,8 @@ with `flatShading: true`, not `MeshStandardMaterial`.
 
 One facet scale for everything: every mesh — terrain, water, trees, boats,
 buoys, anything added later — is built so its polygons read at roughly the
-same world-space size on screen. Target facet size **4m**, acceptable range
-**2-6m**. Nothing is subdivided finer because it's small, nothing coarser
+same world-space size on screen. Target facet size **3m** (was 4m until 2026-11-05 — Felix found 4m triangles too big), acceptable range
+**2-5m**. Nothing is subdivided finer because it's small, nothing coarser
 because it's big — a facet-scale mismatch is a bug to fix, not a
 size-appropriate choice.
 
