@@ -69,6 +69,23 @@ export function ropeTrim(trim0, d0, d, slackR) {
   }
   return clamp(trim0 - (d - d0) * 0.006);
 }
+// Where to suggest the sheet thumb: on the far side of the boat from the
+// steering finger, a comfortable rope's length out, kept on screen and clear
+// of the edges. Exported for phone.test.js.
+export function ghostSpot(bx, by, steerX, steerY, W, H) {
+  let dx = bx - steerX;
+  let dy = by - steerY;
+  const len = Math.hypot(dx, dy) || 1;
+  dx /= len;
+  dy /= len;
+  const reach = Math.min(W, H) * 0.34;
+  const margin = 56;
+  return [
+    Math.min(W - margin, Math.max(margin, bx + dx * reach)),
+    Math.min(H - margin - 30, Math.max(margin + 70, by + dy * reach)),
+  ];
+}
+
 // The sail's world angle (heading convention), matching boat.js: the group
 // is rotated by heading and the sail pivot by leewardSign * trim, from aft.
 export function boomAngle(heading, windFrom, trim) {
@@ -434,8 +451,11 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     // off a moment, and no thumb is on the sheet yet.
     const sheeting = [...pointers.values()].some((p) => p.role === 'sheet');
     if (steering() && !sheeting && offSince > 1.2 && need !== 0) {
-      const gx = W * 0.78;
-      const gy = H * 0.74;
+      // Opposite the steering finger, through the boat: the rope hand and the
+      // steering hand never land on each other (Felix 2026-11-05: a fixed spot
+      // sat right under the steering finger when sailing south-east).
+      const steer = [...pointers.values()].find((q) => q.role === 'steer');
+      const [gx, gy] = ghostSpot(bx, by, steer.x, steer.y, W, H);
       ctx.save();
       ctx.globalAlpha = Math.min(1, (offSince - 1.2) * 2) * 0.75;
       ctx.strokeStyle = 'rgba(255,240,200,0.8)';

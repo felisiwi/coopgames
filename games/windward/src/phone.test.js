@@ -2,7 +2,7 @@
 // drawing parts need a real phone; these are the bits that can be silently wrong).
 import assert from 'node:assert/strict';
 import { CONFIG } from './config.js';
-import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi } from './phone.js';
+import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot } from './phone.js';
 import { angleOffWind, leewardSign } from './sail.js';
 
 const DEG = Math.PI / 180;
@@ -54,6 +54,17 @@ check('sail angle: aft at zero trim, swung to leeward with trim (matches boat.js
   assert.ok(Math.abs(wrapPi(boomAngle(heading, from, 0) - (heading + Math.PI))) < 1e-9);
   const swing = wrapPi(boomAngle(heading, from, 40 * DEG) - (heading + Math.PI));
   assert.equal(Math.sign(swing), leewardSign(heading, from));
+});
+
+check('ghost thumb sits opposite the steering finger, on screen, and well away from it', () => {
+  const W = 400, H = 800, bx = 200, by = 440;
+  for (const [sx, sy] of [[360, 700], [40, 700], [360, 200], [40, 200], [200, 760], [380, 440]]) {
+    const [gx, gy] = ghostSpot(bx, by, sx, sy, W, H);
+    assert.ok(gx >= 0 && gx <= W && gy >= 0 && gy <= H, 'on screen');
+    assert.ok(Math.hypot(gx - sx, gy - sy) > 180, `too close to the steering finger at ${sx},${sy}`);
+    // on the other side of the boat from the finger
+    assert.ok((gx - bx) * (sx - bx) + (gy - by) * (sy - by) < 0, `same side as the finger at ${sx},${sy}`);
+  }
 });
 
 console.log(`\n${passed} passed`);
