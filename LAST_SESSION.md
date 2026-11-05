@@ -1,26 +1,22 @@
 # Last session
 
-**2026-11-05: big merge to `main`** (mission control, for Felix). Merged:
-PR #3 design-audit, PR #4 3m facets, PR #5 ART.md split style (facet target
-kept at 3m), `felix/windward-look` (Skagen look default, `?tune=1`, pond fix),
-`felix/windward-lighthouses` (29 towers, Play time-lapse, flash patterns),
-`felix/windward-real-coast` (Gottskär–Koster coast data, villages, population,
-history, coast-lab = map + timeline), `felix/game-design` (GAME-DESIGN.md
-confirmed: "Shared understanding (CONFIRMED)" wins over older sections) and
-`felix/epoch-timeline` (`data/epochs.json`, ref/epoch-timeline.html).
-The real coast is still lab-only; the game uses procedural islands.
+**2026-11-05: real-coast trial** (branch `felix/windward-coast-trial`, on `origin/main` e1812c7,
+NOT merged). Spike behind `?coast=real&debug=1`: west Orust window (1000 x 1224 m at 1:10) in the
+real game, with a perf overlay. Results + recommendation: `games/windward/docs/COAST-TRIAL.md`.
+Felix reads the overlay on a real phone next. Earlier today: big merge to `main` (look, lighthouses,
+real-coast data, game design confirmed, epochs); the game on `main` still uses procedural islands.
 
 Where things are:
 - Design: `games/windward/GAME-DESIGN.md`; look and labs: `DESIGN.md` ("Reference labs")
 - Look: `src/water.js`, `src/depthmap.js`, `src/island-look.js`, `src/config.js`
 - Lighthouses: `src/lighthouses.js`, `lighthouse-lab.html`, `LIGHTHOUSES.md`
 - Coast + history: `coast-lab.html`, `assets/coast/` (SOURCES.md), `data/`
-  (epochs.json + epochs-factcheck.md, settlements-history.json,
-  history-start-area.md)
+- Trial: `src/coast-world.js` (window, terrain, trees, villages), `src/debug-overlay.js`
 
 Open (TODO(felix)): `sun.shadow.normalBias = 0.25` is a guess; real phone GPU
 unchecked; ddb-restricted population rows need CEDAR OK before commercial use;
-NMD CC0 wording to confirm; title wording ("Honour and Life") unverified.
+NMD CC0 wording to confirm; title wording ("Honour and Life") unverified;
+Käringön harbour-mouth spawn is approximate; trial vertical scale 0.5 is a guess.
 Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobby`.
 
 ## Today's sessions
@@ -28,13 +24,11 @@ Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobb
 - Windward: phone controls, new boat, wave-wobble fix, 3m facets (earlier merge).
 - Look: L1 port → Skagen palette (pass 2) → Skagen default + pond fix (pass 3).
 - Lighthouses: 12 → 29 towers, real looks, year slider, Play, flash patterns; game design /grill-me rounds 1–11 confirmed.
-- Real coast: R0 → passes 2–5 (Gottskär, Koster, population, west-Orust history,
-  combined map + timeline, epochs fact-check).
+- Real coast: R0 → passes 2–5 (Gottskär, Koster, population, west-Orust history, combined map + timeline).
+- Real-coast trial: west Orust in the game behind a flag, measured (see COAST-TRIAL.md).
 
 ## Next
 
-1. Real-coast trial in the game (west Orust window behind a flag; phone perf).
-2. Stage 1 lure: port/house arrival + deck items, small life, blue-hour sky and
-   day-night, edge fog + thunder warning (GAME-DESIGN.md "Build first").
-3. Worktrees on Felix's laptop can be removed now: coopgames-windward-look,
-   coopgames-lighthouses, coopgames-windward-real-coast, coopgames-art-split.
+1. Felix: open the branch preview on a phone with `?coast=real&debug=1`, read the overlay.
+2. Decide: stage 1 on the real coast (needs window-cropped data, skerries, collision) or procedural.
+3. Stage 1 lure: port/house arrival + deck items, small life, blue-hour sky, edge fog + thunder.

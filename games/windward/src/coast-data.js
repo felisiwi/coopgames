@@ -35,13 +35,16 @@ export async function decodePngBytes(bytes) {
 // baseUrl: folder holding the coast files, with trailing slash. fetchBytes/fetchJson injectable for tests.
 // The map is one flat "plane" cut into tiles (north, south); every lookup takes plane pixel
 // coordinates (i, j) and finds the tile that holds them.
-export async function loadCoast(baseUrl, io = {}) {
+// `only` (optional, e.g. ['north']): load just those raster tiles and skip skerries/routes/trees —
+// the real-coast trial needs one tile (~2.9 MB) instead of all three (~10 MB). Default: everything.
+export async function loadCoast(baseUrl, io = {}, only = null) {
   const getJson = io.json || (async (u) => (await fetch(u)).json());
   const getBytes = io.bytes || (async (u) => new Uint8Array(await (await fetch(u)).arrayBuffer()));
   const meta = await getJson(baseUrl + 'meta.json');
+  const none = async () => ({});
   const [places, skerries, routes, trees, tiles] = await Promise.all([
-    getJson(baseUrl + 'places.json'), getJson(baseUrl + 'skerries.json'), getJson(baseUrl + 'routes.json'), getJson(baseUrl + 'trees.json'),
-    Promise.all(meta.tiles.map(async (t) => {
+    getJson(baseUrl + 'places.json'), only ? none() : getJson(baseUrl + 'skerries.json'), only ? none() : getJson(baseUrl + 'routes.json'), only ? none() : getJson(baseUrl + 'trees.json'),
+    Promise.all(meta.tiles.filter((t) => !only || only.includes(t.id)).map(async (t) => {
       const [land, depth, classes] = await Promise.all([t.files.landHeight, t.files.depth, t.files.classes].map((f) => getBytes(baseUrl + f).then(decodePngBytes)));
       return { id: t.id, x0: t.x0, y0: t.y0, width: t.width, height: t.height, land: land.data, depth: depth.data, classes: classes.data };
     })),

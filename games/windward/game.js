@@ -30,6 +30,7 @@ import { createWake } from './src/wake.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
 import { createInputState } from '../../shared/input.js';
+import { createDebugOverlay } from './src/debug-overlay.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
 // `seaHeightCPU` (src/water.js) is the JS mirror of the water shader's vertex
@@ -67,7 +68,25 @@ function approachSpeed(current, target, dt) {
   return current + step;
 }
 
-export default function start({ canvas, net, seed, role }) {
+// Entry point. Without ?coast=real this is exactly the old synchronous start. With it
+// (real-coast trial, a spike) the game waits for the coast data first, then builds the same world
+// from it; src/coast-world.js is only downloaded in that case. Net messages that arrive during the
+// load are missed (fine for the solo spike; a real build would register onMessage first).
+export default function start(args) {
+  const q = new URLSearchParams(window.location.search);
+  if (q.get('coast') !== 'real') return startGame(args, null);
+  const note = document.createElement('div');
+  note.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#eaf6ff;font:14px monospace;pointer-events:none;z-index:5';
+  note.textContent = 'loading the real coast…';
+  document.body.appendChild(note);
+  const num = (k) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
+  return import('./src/coast-world.js')
+    .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
+    .then((coast) => { note.remove(); window.__coastReport = coast.report; startGame(args, coast); })
+    .catch((err) => { note.textContent = `real coast failed: ${err && err.message}`; console.error(err); window.__coastError = String(err && err.stack || err); });
+}
+
+function startGame({ canvas, net, seed, role }, coast) {
   // ?tune=1 (look pass 2): a link can carry look values (src/look-presets.js);
   // apply them over config.js BEFORE anything is built. Without tune=1 nothing
   // here runs and the panel never exists.
@@ -77,6 +96,8 @@ export default function start({ canvas, net, seed, role }) {
     refreshPalette();
   }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  // ?debug=1: performance overlay (src/debug-overlay.js). Not created otherwise.
+  const debugOverlay = new URLSearchParams(window.location.search).get('debug') === '1' ? createDebugOverlay(renderer) : null;
   // Phones: cap render resolution (a 3x screen is 9x the pixels for little
   // visible gain on flat shapes).
   const isPhone = wantsPhoneControls();
@@ -150,8 +171,8 @@ export default function start({ canvas, net, seed, role }) {
 
   // Islands first: the sea is coloured by the depth under it, baked once from
   // every island's height field. Same seed -> same map on both peers.
-  const scatteredIslands = scatterIslands(seed);
-  const depthMap = bakeDepthMap(scatteredIslands);
+  const scatteredIslands = coast ? [] : scatterIslands(seed); // real coast: the islands are the coast
+  const depthMap = coast ? coast.depthMap : bakeDepthMap(scatteredIslands);
   console.log(
     `depth-map: ${depthMap.nx}x${depthMap.nz} texels @ ${depthMap.texel}m (${((depthMap.nx * depthMap.nz) / 1e6).toFixed(2)}M), ` +
       `${depthMap.evals} height evals, baked in ${depthMap.bakeMs.toFixed(0)} ms`,
@@ -194,7 +215,7 @@ export default function start({ canvas, net, seed, role }) {
     });
   }
 
-  scene.add(createScatter(seed));
+  if (!coast) scene.add(createScatter(seed));
   // (scatteredIslands is built above, before the water.)
   // Debug: confirm placement/reachability at a glance without hunting for
   // specks in the rendered scene (Felix, 2026-09-16 — "I need to know
@@ -218,7 +239,7 @@ export default function start({ canvas, net, seed, role }) {
   // problem the first two placement designs actually had (a few close pairs
   // pull the mean down while most of the world stays empty) — config.js's
   // Island scattering comment has the measurement.
-  {
+  if (!coast) {
     const view = cameraViewWidth();
     const { histogram, median, totalWindows } = windowOccupancy(scatteredIslands, CONFIG.ISLAND_SCATTER_AREA, view);
     console.log(
@@ -232,6 +253,8 @@ export default function start({ canvas, net, seed, role }) {
     islandGroups.push(group);
     scene.add(group);
   }
+
+  if (coast) scene.add(coast.group); // terrain, trees near the boat, villages, lighthouses
 
   // Stage 2: discoverables — seeded, identical on both peers, so only
   // "found" events cross the wire. Found only when BOTH boats are near
@@ -293,6 +316,10 @@ export default function start({ canvas, net, seed, role }) {
   // previously fixed east/west, sheeted in, and ~1 in 8 seeds started
   // stuck in the no-go zone.
   const self = { ...spawnPose(seed, role), speed: 0 };
+  if (coast && coast.spawn) { // just outside Käringön harbour; the guest starts a boat-width beside the host
+    self.x = coast.spawn.x + (role === 'host' ? 0 : CONFIG.BOAT_SPAWN_OFFSET * 2);
+    self.z = coast.spawn.z;
+  }
   const other = { x: null, z: null, heading: 0, speed: 0 };
   let otherLastPosAtS = null; // for partnerState() (src/partner.js)
   let partnerLeftAtS = null; // when the "friend left" notice started
@@ -432,6 +459,12 @@ export default function start({ canvas, net, seed, role }) {
   resize();
 
   const hud = createHud(canvas);
+  if (coast && debugOverlay) {
+    const r = coast.report;
+    const t = r.timings;
+    debugOverlay.set('coast', `coast       load+decode ${t.loadDecodeMs.toFixed(0)} ms, field ${t.fieldMs.toFixed(0)}, depth map ${t.depthMs.toFixed(0)}, terrain ${t.terrainMs.toFixed(0)}, props ${t.propsMs.toFixed(0)}; total ${t.buildMs.toFixed(0)} ms`);
+    debugOverlay.set('coast2', `            ${(r.bytesDownloadedByLoader / 1048576).toFixed(2)} MB coast data; terrain ${r.terrain.triangles.toLocaleString('en')} tris; ${r.buildings} houses; window ${r.window.metres.join(' x ')} m`);
+  }
 
   // Phone controls (src/phone.js): hold to aim, second-thumb sheet, arc,
   // wind at the boat. The corner HUD and keyboard legend are hidden there.
@@ -487,6 +520,13 @@ export default function start({ canvas, net, seed, role }) {
     self.speed = approachSpeed(self.speed, targetSpeed, dt);
     self.x += Math.sin(self.heading) * self.speed * dt;
     self.z += Math.cos(self.heading) * self.speed * dt;
+    if (coast) {
+      coast.clamp(self); // the window has an edge; hold the boat just inside it
+      if (coast.trees.update(self.x, self.z)) {
+        const s = coast.trees.stats;
+        debugOverlay?.set('trees', `trees       ${s.trees} near boat (query ${s.queryMs.toFixed(1)} ms, rebuild #${s.rebuilds})`);
+      }
+    }
 
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
@@ -585,6 +625,7 @@ export default function start({ canvas, net, seed, role }) {
     });
 
     renderer.render(scene, camera);
+    debugOverlay?.frame(now);
     phone?.draw(nowS, {
       partner: partnerPos,
       pings,
