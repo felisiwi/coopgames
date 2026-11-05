@@ -310,12 +310,21 @@
    "sources": [
     "https://sv.wikipedia.org/wiki/Kungshamn",
     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
-    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
+    "https://en.wikipedia.org/wiki/Kungshamn"
    ],
    "confidence": "low",
    "notes": [
     "Name appears on a sea chart \"från tidigt 1600-tal\" (no year). A 1933 sale to Bröderne Ameln was not confirmed on the page and is left out."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1800,
+    "precision": "century",
+    "atLeast": false,
+    "basis": "A more permanent village was established during the 19th century",
+    "source": "https://en.wikipedia.org/wiki/Kungshamn",
+    "note": "English source; no Swedish phrase reachable"
+   }
   },
   {
    "name": "Hunnebostrand",
@@ -442,7 +451,15 @@
    "confidence": "medium",
    "notes": [
     "\"Kustsamhälle med anor från 1200-talet\" (century only)."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1863,
+    "precision": "decade",
+    "atLeast": true,
+    "basis": "Det första stenbrottet anlades av Carl Strömman på Skalbergen ovanför Hunnebostrand 1863.",
+    "source": "https://sv.wikipedia.org/wiki/Hunnebostrand",
+    "note": "village existed by the first quarry (1863); origin unstated"
+   }
   },
   {
    "name": "Lysekil",
@@ -872,7 +889,15 @@
    "confidence": "low",
    "notes": [
     "Fishing village \"sedan 1500-talet\" (century only). Kristineberg marine station 1877 is not herring or industry, left out."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1500,
+    "precision": "century",
+    "atLeast": false,
+    "basis": "Samhället har sedan 1500-talet vuxit fram som fiskeläge",
+    "source": "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskil",
+    "note": "quote read from the page by Felix (screenshot 2026-11-05); the page itself was unreachable from the build tools"
+   }
   },
   {
    "name": "Grundsund",
@@ -1116,7 +1141,15 @@
    "confidence": "low",
    "notes": [
     "Church built 1798-99 and the scattered settlements took the name Grundsund (museum record); 1920 \"ett av länets största fiskelägen\". Single events, not phases."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1600,
+    "precision": "century",
+    "atLeast": true,
+    "basis": "har anor åtminstone från 1600-talet som fiskeläge",
+    "source": "https://sv.wikipedia.org/wiki/Grundsund",
+    "note": "quote read from the page by Felix (screenshot 2026-11-05); the page itself was unreachable from the build tools"
+   }
   },
   {
    "name": "Gullholmen",
@@ -1576,7 +1609,15 @@
    "confidence": "low",
    "notes": [
     "No first mention or place-specific herring years found. A search snippet puts settlement in the mid-1700s; no year, not used."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1886,
+    "precision": "decade",
+    "atLeast": true,
+    "basis": "I denna inrättades för orten 29 januari 1886 Tjörnekalvs municipalsamhälle",
+    "source": "https://sv.wikipedia.org/wiki/%C3%85stol",
+    "note": "a fishing place; existed by 1886, origin unstated"
+   }
   },
   {
    "name": "Klädesholmen",
@@ -2153,12 +2194,21 @@
    "sources": [
     "https://sv.wikipedia.org/wiki/Moll%C3%B6sund",
     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
-    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
+    "https://www.vastsverige.com/orust/produkter/mollosund/"
    ],
    "confidence": "low",
    "notes": [
     "\"Med anor tillbaka till 1500-talet\": century only. A medieval cog (built 1345-1365) was recovered off Mollösund in 1981. The first church was probably built in the herring period 1556-1588 (Svenska kyrkan); the current church was consecrated 26 June 1866."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1500,
+    "precision": "century",
+    "atLeast": false,
+    "basis": "Sillfisket började i Mollösund redan på 1500-talet",
+    "source": "https://www.vastsverige.com/orust/produkter/mollosund/",
+    "note": "en.wikipedia agrees: \"Records of permanent settlements date back to the early 16th century.\""
+   }
   },
   {
    "name": "Marstrand",
@@ -2574,12 +2624,21 @@
     "https://sv.wikipedia.org/wiki/Kyrkesund",
     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
     "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
-    "https://www.bohuslansmuseum.se/rapport/trankokeriet-kalhuvudet/"
+    "https://www.bohuslansmuseum.se/rapport/trankokeriet-kalhuvudet/",
+    "https://www.vastsverige.com/tjorn/produkter/haron-och-kyrkesund/"
    ],
    "confidence": "low",
    "notes": [
     "The page's 1900 figure (515) equals Käringön's and is left out as a possible copy error."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1575,
+    "precision": "half-century",
+    "atLeast": false,
+    "basis": "människor bosatte sig på ön redan i slutet av 1500-talet",
+    "source": "https://www.vastsverige.com/tjorn/produkter/haron-och-kyrkesund/",
+    "note": "said of Härön, the island Kyrkesund stands on; the village itself \"växte fram under sillperioderna på 1700- och 1800-talet\""
+   }
   },
   {
    "name": "Gottskär",
@@ -2633,7 +2692,15 @@
    "confidence": "medium",
    "notes": [
     "The page says it was a köpstad \"till 1539\": an end of status, not a first mention."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1500,
+    "precision": "century",
+    "atLeast": true,
+    "basis": "Gottskär ... var till 1539 en köpstad. Namnet var då Gåsekil (Gaasekill)",
+    "source": "https://sv.wikipedia.org/wiki/Gottsk%C3%A4r",
+    "note": "a medieval market town (Gåsekil) until 1539"
+   }
   },
   {
    "name": "Vrångö",
@@ -2851,7 +2918,15 @@
    "confidence": "low",
    "notes": [
     "Fishing motorised 1903, ice store 1915, Hönökakan 1904: single events, not phases."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1800,
+    "precision": "century",
+    "atLeast": true,
+    "basis": "Fram till mitten av 1800-talet var bebyggelsen på ön koncentrerad till fyra byar: Hult, Heden, Röd och Gårda.",
+    "source": "https://sv.wikipedia.org/wiki/H%C3%B6n%C3%B6",
+    "note": "four farming villages before the mid-1800s; earlier origin unstated"
+   }
   },
   {
    "name": "Öckerö",
@@ -2944,12 +3019,21 @@
    "sources": [
     "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
     "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6%20(%C3%B6)",
-    "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6_(%C3%B6)"
+    "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6_(%C3%B6)",
+    "https://www.vastsverige.com/visitockero/centrum-for-fiske/"
    ],
    "confidence": "low",
    "notes": [
     "New church 1906: a single event."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1500,
+    "precision": "century",
+    "atLeast": true,
+    "basis": "Öckerö gamla kyrka från medeltiden",
+    "source": "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6_(%C3%B6)",
+    "note": "a medieval church implies a settled island in the Middle Ages"
+   }
   },
   {
    "name": "Donsö",
@@ -3047,12 +3131,22 @@
    },
    "sources": [
     "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
-    "https://sv.wikipedia.org/wiki/Dons%C3%B6"
+    "https://sv.wikipedia.org/wiki/Dons%C3%B6",
+    "https://www.vastsverige.com/straxutanforgoteborg/donso/"
    ],
    "confidence": "low",
    "notes": [
     "Name written \"Dunsø\" in the 1200s: century only."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1200,
+    "precision": "century",
+    "atLeast": true,
+    "kind": "name",
+    "basis": "Namnet Donsö skrevs Dunsø på 1200-talet i Valdemar Sejrs jordebok",
+    "source": "https://sv.wikipedia.org/wiki/Dons%C3%B6",
+    "note": "the island name is recorded in the 1200s; the village itself may be younger"
+   }
   },
   {
    "name": "Styrsö",
@@ -3175,12 +3269,22 @@
     "https://www5.goteborg.se/prod/fastighetskontoret/etjanst/planobygg.nsf/vyFiler/Br%C3%A4nn%C3%B6%20-%20Handel%20och%20bost%C3%A4der-Plan%20ut%C3%B6kat%20f%C3%B6rfarande%20-%20granskning-Kulturmilj%C3%B6/$File/11.%20Kultur.pdf",
     "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/sladholmarna-trankokeri-och-tomtningar/",
     "https://sv.wikipedia.org/wiki/Styrs%C3%B6",
-    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN"
+    "https://api.scb.se/OV0104/v1/doris/sv/ssd/MI/MI0810/MI0810A/LandarealTatortN",
+    "https://www.svenskakyrkan.se/vastra-frolunda-pastorat/styrso/byggnader"
    ],
    "confidence": "low",
    "notes": [
     "Name from the 1200s: century only."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1200,
+    "precision": "century",
+    "atLeast": true,
+    "kind": "name",
+    "basis": "Namnet Styrsö är tidigast belagt i Valdemar Sejrs jordebok från 1200-talet och skrevs ”Styrisø”",
+    "source": "https://sv.wikipedia.org/wiki/Styrs%C3%B6",
+    "note": "name recorded in the 1200s; ~45 prehistoric remains on the island; church 1752"
+   }
   },
   {
    "name": "Rörö",
@@ -3310,7 +3414,16 @@
    "confidence": "medium",
    "notes": [
     "Sea-rescue station 1917: a single event."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1200,
+    "precision": "century",
+    "atLeast": false,
+    "kind": "legend",
+    "basis": "Det sägs att den forne kungen över Viken ... Håkon Håkonsson ... etablerade flera samhällen på Öckeröarna, däribland en bosättning på Rörö.",
+    "source": "https://sv.wikipedia.org/wiki/R%C3%B6r%C3%B6",
+    "note": "legend ('det sägs'); Haakon IV reigned 1217–1263. Herring works on Rammen 1747–1808 are documented."
+   }
   },
   {
    "name": "Göteborg",

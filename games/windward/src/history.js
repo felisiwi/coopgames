@@ -18,9 +18,29 @@ export function phaseAt(s, y, yearMax = YEAR_MAX) {
   return best;
 }
 
-// null before the first record; otherwise { kind, phase } (kind 'hamlet' = plain settled, a display default).
+// Origin year used for showing a village: the exact first record, else the approximate one
+// (firstRecordedApprox, e.g. "sedan 1500-talet" -> 1500), else null = unknown (drawn at every year).
+export function originYear(s) {
+  if (s.firstRecorded != null) return s.firstRecorded;
+  return s.firstRecordedApprox?.year ?? null;
+}
+
+// Human label for an approximate origin: "~1500s", "by ~1600s", "~late 1500s", "by 1752", "by ~1900".
+export function approxLabel(a) {
+  if (!a) return null;
+  const c = Math.floor(a.year / 100) * 100;
+  let core;
+  if (a.precision === 'century') core = `~${c}s`;
+  else if (a.precision === 'half-century') core = a.year % 100 >= 50 && a.year % 100 !== 0 ? `~late ${c}s` : `~${a.year}`;
+  else core = `${a.year}`;
+  const label = a.atLeast ? `by ${core}` : core;
+  return a.kind === 'legend' ? `${label} (legend)` : a.kind === 'name' ? `${label} (name)` : label;
+}
+
+// null before the origin; otherwise { kind, phase } (kind 'hamlet' = plain settled, a display default).
 export function stateAt(s, y, yearMax = YEAR_MAX) {
-  if (s.firstRecorded != null && y < s.firstRecorded) return null;
+  const o = originYear(s);
+  if (o != null && y < o) return null;
   const ph = phaseAt(s, y, yearMax);
   return { kind: ph ? ph.kind : 'hamlet', phase: ph };
 }
