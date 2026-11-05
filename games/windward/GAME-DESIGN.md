@@ -1077,3 +1077,16 @@ an era's clock do while you're away (advance by your time away, or by story)?; w
 changes in play (look, voice, what people expect of you, abilities such as weather sense)?;
 age bounds; how it fits "same character reimagined per era"; content cost (people at several
 ages).
+
+**Ageing: Felix's answers (2026-11-05, leaning, not final):**
+- What ages you: **story beats, mostly the forward jumps** (mission control's recommendation,
+  accepted). Going back in time keeps your age. Never ages you by accident.
+- An era's clock while you're away: **moves on in steps** (recommendation, accepted): each
+  return advances that era a set amount (e.g. 5–10 years), capped by the era's span, so each
+  step is a designable world state (fits Q40: derived from rules + your actions).
+- What age changes: **all four**: looks and voice; how people treat you; skills (young =
+  quick and nimble, older = reads weather, sea and people better); what you can do (some
+  things open only at an age: own land, captain a ship, marry).
+- Who ages with you: **core people plus anyone you've met**. Strangers you never met are
+  era-locals. Content grows with who you actually know; met villagers can age by rules
+  (look variants), core people are authored at several ages.
