@@ -4,13 +4,14 @@
 import { loadCoast, tripEstimate, recommendScale, fmtDuration } from './coast-data.js';
 import { makeTreesNear, classSamplerFromCoast, DEFAULT_RADIUS } from './trees-near.js';
 import { stateAt as stateAtYear, populationAt, houseWidth } from './history.js';
+import { buildAxis, describeYear, KIND_COLOURS } from './epochs.js';
 
 const SCALES = [6, 8, 10];
 const DEFAULT_SCALE = 10;                       // Felix: 1:10 is the default
-const YEAR_MIN = 1700, YEAR_MAX = 2025;
+const YEAR_MIN = 800, YEAR_MAX = 2025;           // the slider runs from 800; data/epochs.json supplies the epochs
 const MIN_SKERRY_GM = 2.5;                      // smallest islet drawn, in GAME metres
 const TARGET_S = 20 * 60;
-const PEEK_PX = 214;                            // collapsed bottom-sheet height on phones (matches --peek in the CSS)
+let peekPx = 214;                               // collapsed bottom-sheet height on phones; measured from the sheet header (see syncPeek)
 const PRESETS = [
   { label: 'Herring boom 1747–1809', from: 1747, to: 1809 },
   { label: '1880–1900', from: 1880, to: 1900 },
@@ -50,10 +51,26 @@ const treesFns = new Map();
 let treeCache = { key: '', list: [] };
 let lastPlaced = [];                              // houses drawn in the last frame (for browser tests)
 
-// ---------------------------------------------------------------- years (URL: ?from=&to=)
+// ---------------------------------------------------------------- epochs: data/epochs.json is the single source (nothing copied)
+async function loadEpochs() {
+  try {
+    const r = await fetch(new URL('../data/epochs.json', import.meta.url));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } catch (err) {                                   // fall back to one plain epoch so the slider still works
+    console.warn('epochs.json not loaded:', err.message);
+    const all = { id: 'all', name: '800 to today', from: YEAR_MIN, to: 2026, weight: 100, kind: 'quiet', vibe: '', season: '' };
+    return { epochs: [all], eras: [{ ...all, summary: '', events: [] }], herringPeriods: [], lighthouseBuilt: [], markers: [], marstrandStatus: [] };
+  }
+}
+const EPOCH_DATA = await loadEpochs();
+const axis = buildAxis(EPOCH_DATA.epochs);
+
+// ---------------------------------------------------------------- years (URL: ?from=&to= or ?year=)
 const qs = new URLSearchParams(location.search);
 const qnum = (k) => { const v = parseInt(qs.get(k), 10); return Number.isFinite(v) ? clamp(v, YEAR_MIN, YEAR_MAX) : null; };
-let yFrom = qnum('from') ?? qnum('to') ?? 2025, yTo = qnum('to') ?? qnum('from') ?? 2025;
+const qYear = qnum('year');                       // ?year=1787 is the same as ?from=1787&to=1787 (from/to win if both are given)
+let yFrom = qnum('from') ?? qnum('to') ?? qYear ?? 2025, yTo = qnum('to') ?? qnum('from') ?? qYear ?? 2025;
 if (yFrom > yTo) [yFrom, yTo] = [yTo, yFrom];
 
 // ---------------------------------------------------------------- settlements: phase and population at a year (src/history.js)
@@ -69,7 +86,7 @@ function houseLayout(f) {
   for (const s of settlements) {
     const st = stateAt(s, yTo); if (!st) continue;
     const [sx, sy] = toScreen(...lonLatToWorld(s.lon, s.lat)), pop = popAt(s, yTo);
-    items.push({ s, st, pop, sx, sy, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
+    items.push({ s, st, pop, sx, sy, unknown: s.firstRecorded == null, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
   }
   items.sort((a, b) => b.w - a.w);                                   // big houses first: they host the small ones they would cover
   const pad = 6 * f, placed = [];
@@ -114,7 +131,7 @@ const tileImage = (tile) => { const m = imgs[mode]; if (!m.has(tile.id)) m.set(t
 
 // ---------------------------------------------------------------- view maths. World = game metres, origin = plane's north-west corner.
 const gm = () => C.mpp / S;                                         // game metres per raster pixel
-const insetPx = () => (isMobile() ? PEEK_PX * dpr() : 0);          // phone: the collapsed bottom sheet covers this much
+const insetPx = () => (isMobile() ? peekPx * dpr() : 0);          // phone: the collapsed bottom sheet covers this much
 const topPx = () => (isMobile() ? 56 * dpr() : 0);                 // phone: the zoom/scale buttons cover this much
 const centreY = () => (topPx() + canvas.height - insetPx()) / 2;
 const toScreen = (gx, gy) => [(gx - cx) * zoom + canvas.width / 2, (gy - cy) * zoom + centreY()];
@@ -240,10 +257,16 @@ function draw() {
         for (const k of p.members.length > 1 ? [2, 1] : [1]) { ctx.beginPath(); ctx.rect(sx - w / 2 + 3 * f * k, sy - w * 0.39 - 3 * f * k, w, w * 0.78); ctx.fill(); ctx.stroke(); }
       }
       drawHouse(sx, sy, w, KIND[st.kind].color, !pop, f);
+      if (p.unknown) {                                                                                 // "?" = origin date unknown: drawn at every year, not hidden
+        const qx = sx - w / 2, qy = sy - w * 0.39;
+        ctx.fillStyle = '#14232f'; ctx.strokeStyle = '#e6eef2'; ctx.lineWidth = 1.5 * f; ctx.beginPath(); ctx.arc(qx, qy, 7.5 * f, 0, 6.283); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e6eef2'; ctx.font = `bold ${10 * f}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', qx, qy + 0.5 * f);
+        ctx.textAlign = 'start'; ctx.font = `${12 * f}px system-ui, sans-serif`;
+      }
     }
     for (const p of placed) { const k = p.members.length > 1 ? 6 * f : p.members.length ? 3 * f : 0; taken.push([p.sx - p.w / 2, p.sy - p.w * 0.39 - k, p.w + k, p.w * 0.78 + k]); }   // labels keep clear of every house and its pile
     for (const p of placed) label((p.pop ? `${p.s.name} ${fmtPop(p.pop.value)}` : p.s.name) + (p.members.length ? ` +${p.members.length}` : ''), p.sx, p.sy, p.w / (2 * f) + 6 + (p.members.length > 1 ? 4 : p.members.length ? 1 : 0), p.w * 0.39 + (p.members.length ? 6 * f : 0));   // labels last, biggest places first
-    lastPlaced = placed.map((p) => ({ name: p.s.name, box: [p.sx - p.w / 2, p.sy - p.w * 0.39, p.sx + p.w / 2, p.sy + p.w * 0.39], members: p.members.map((m) => m.s.name) }));
+    lastPlaced = placed.map((p) => ({ name: p.s.name, unknown: p.unknown, box: [p.sx - p.w / 2, p.sy - p.w * 0.39, p.sx + p.w / 2, p.sy + p.w * 0.39], members: p.members.map((m) => m.s.name) }));
   } else lastPlaced = [];
   document.body.dataset.drawn = `${lastPlaced.length},${merged}`;                                    // houses drawn, places merged into others
   document.body.dataset.houses = `${counted},${estimated}`;                                         // counted,estimated (for browser tests)
@@ -321,7 +344,7 @@ function infoAt(sx, sy) {
         : pop.mode === 'interpolated' ? `population about ${fmtPop(pop.value)} (between ${pop.from.year} and ${pop.to.year} counts)`
         : `population ${fmtPop(pop.value)} (${pop.counts}, nearest count ${pop.year})`;
       hits.push({ d: Math.hypot(px - sx, py - sy), cluster: p.members.length ? p : null,
-        text: `${s.name} · first recorded ${s.firstRecorded ?? 'not sourced'} · ${ph} · ${pp} · confidence ${s.confidence}` + (p.members.length ? ` · ${clusterText(p)} (tap to zoom in)` : '') });
+        text: `${s.name} · ${s.firstRecorded != null ? 'first recorded ' + s.firstRecorded : 'first record: date unknown (not found in the sources; shown at every year)'} · ${ph} · ${pp} · confidence ${s.confidence}` + (p.members.length ? ` · ${clusterText(p)} (tap to zoom in)` : '') });
     }
   }
   if (lighthouses && layers.light) for (const l of lighthouses) {
@@ -388,18 +411,39 @@ $('zout').onclick = () => zoomAt(1 / 1.5, canvas.width / 2, centreY());
 $('zfit').onclick = fit;
 $('zboat').onclick = goBoat;
 $('grab').onclick = () => $('sheet').classList.toggle('open');
+function buildLegend() {
+  const chips = Object.entries(KIND).map(([, k]) => `<span class="nw"><span class="lgChip" style="background:${k.color}"></span>${k.label.replace(' (no phase sourced)', '')}</span>`).join(' ');
+  $('lgBody').innerHTML =
+    `<div class="lgRow"><span class="lgLine" style="border-top:3px dashed ${ROUTE_COL[0]}"></span>Marstrand → Smögen</div>`
+    + `<div class="lgRow"><span class="lgLine" style="border-top:3px dashed ${ROUTE_COL[1]}"></span>Gottskär → Marstrand</div>`
+    + `<div style="margin-top:4px">Roof colour = phase:<br>${chips}</div>`
+    + `<div class="lgRow"><span class="lgHouse" style="background:#e8e1d0"></span>solid = counted population</div>`
+    + `<div class="lgRow"><span class="lgHouse dashed"></span>dashed = estimated, no count</div>`
+    + `<div class="lgRow">stack "+n" = places merged; zoom in</div>`
+    + `<div class="lgRow"><b style="border:1.5px solid #e6eef2;border-radius:50%;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;font-size:9px">?</b>date unknown (shown always)</div>`
+    + `<div class="lgRow"><span style="color:#ffd24a">▲</span>lighthouse</div>`
+    + `<div class="lgRow"><span class="lgHouse" style="background:none;border:2px solid #fff"></span>white frame = first recorded in the window</div>`;
+}
+buildLegend();
+if (isMobile()) { $('legendBox').classList.add('shut'); $('lgToggle').textContent = 'Legend ▸'; $('lgToggle').setAttribute('aria-expanded', 'false'); }   // on a phone the open legend would hide half the map: start as a chip
+$('lgToggle').onclick = () => { const shut = $('legendBox').classList.toggle('shut'); $('lgToggle').setAttribute('aria-expanded', String(!shut)); $('lgToggle').textContent = shut ? 'Legend ▸' : 'Legend ▾'; };
+// The phone sheet's collapsed height is whatever its header needs (band + strip + slider...); measure it instead of hard-coding it.
+function syncPeek() { peekPx = Math.round($('years').offsetHeight + 12); document.documentElement.style.setProperty('--peek', peekPx + 'px'); draw(); }
+new ResizeObserver(syncPeek).observe($('years'));
 new ResizeObserver(() => draw()).observe($('stage'));
 
 // ---------------------------------------------------------------- year slider (two thumbs)
 const track = $('yrTrack');
-const frac = (y) => (y - YEAR_MIN) / (YEAR_MAX - YEAR_MIN);
+const frac = (y) => axis.toPos(y) / 100;                                 // the SAME axis as the epoch band and era strip
 function layoutSlider() {
   $('yrFrom').style.left = frac(yFrom) * 100 + '%'; $('yrTo').style.left = frac(yTo) * 100 + '%';
   $('yrFill').style.left = frac(yFrom) * 100 + '%'; $('yrFill').style.width = (frac(yTo) - frac(yFrom)) * 100 + '%';
   $('yrText').textContent = yFrom === yTo ? String(yTo) : `${yFrom} – ${yTo}`;
-  $('yrHint').textContent = yFrom === yTo ? 'one year: drag to scrub, tap the rail to open a window' : 'white ring = new in the window';
+  const d = describeYear(EPOCH_DATA, yTo);
+  $('yrHint').textContent = `${d.era.name} · ${d.epoch.season}`;        // era and season at the end year
+  highlightTimeline(d); renderInfo(d);
   for (const [id, v] of [['yrFrom', yFrom], ['yrTo', yTo]]) $(id).setAttribute('aria-valuenow', v);
-  $('yrTo').style.zIndex = yFrom >= YEAR_MAX - 20 ? 1 : 2;
+  $('yrTo').style.zIndex = yFrom >= YEAR_MAX - 60 ? 1 : 2;
   document.querySelectorAll('#presets button').forEach((b) => b.classList.toggle('on', +b.dataset.from === yFrom && +b.dataset.to === yTo));
   document.body.dataset.from = yFrom; document.body.dataset.to = yTo;
 }
@@ -409,7 +453,7 @@ function syncUrl() {
 }
 function setYears(a, b) { yFrom = clamp(Math.min(a, b), YEAR_MIN, YEAR_MAX); yTo = clamp(Math.max(a, b), YEAR_MIN, YEAR_MAX); layoutSlider(); syncUrl(); panelsYear(); draw(); }
 function setThumb(which, y) { y = clamp(y, YEAR_MIN, YEAR_MAX); if (which === 'from') setYears(Math.min(y, yTo), yTo); else setYears(yFrom, Math.max(y, yFrom)); }
-const yearFromEvent = (e) => { const r = track.getBoundingClientRect(); return Math.round(YEAR_MIN + clamp((e.clientX - r.left) / r.width, 0, 1) * (YEAR_MAX - YEAR_MIN)); };
+const yearFromEvent = (e) => { const r = track.getBoundingClientRect(); return clamp(axis.toYear(clamp((e.clientX - r.left) / r.width, 0, 1) * 100), YEAR_MIN, YEAR_MAX); };
 let yDrag = null;
 track.addEventListener('pointerdown', (e) => {
   track.setPointerCapture(e.pointerId); const y = yearFromEvent(e);
@@ -431,12 +475,70 @@ for (const [id, which] of [['yrFrom', 'from'], ['yrTo', 'to']]) {
     const cur = which === 'from' ? yFrom : yTo;
     const step = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -10, PageUp: 10 }[e.key];
     let y = step ? cur + step : e.key === 'Home' ? YEAR_MIN : e.key === 'End' ? YEAR_MAX : null;
-    if (y === null) return; e.preventDefault(); setThumb(which, y);
+    if (y === null) return; e.preventDefault();
+    if (yFrom === yTo) { y = clamp(y, YEAR_MIN, YEAR_MAX); setYears(y, y); }                  // overlapped handles: the keyboard scrubs the single year, like a drag on them
+    else setThumb(which, y);
   });
 }
 $('presets').innerHTML = PRESETS.map((p) => `<button data-from="${p.from}" data-to="${p.to}">${p.label}</button>`).join('');
 $('presets').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setYears(+b.dataset.from, +b.dataset.to); });
-$('yrTicks').innerHTML = [1700, 1800, 1900, 2025].map((y) => `<span style="left:${frac(y) * 100}%">${y}</span>`).join('');
+$('yrTicks').innerHTML = axis.epochs.map((e) => `<span style="left:${axis.toPos(e.from)}%">${e.from}</span>`).join('');   // one tick per epoch start
+
+// ---- epoch band, era strip, pins (built from epochs.json; the slider shares their axis)
+const epochShort = (e) => e.name.split(' · ')[0];                          // "I", "II", ... "Today"
+const midYear = (from, to) => axis.toYear((axis.toPos(from) + axis.toPos(to)) / 2);
+function buildTimeline() {
+  const band = $('epBand'), strip = $('eraStrip'), pins = $('pins');
+  band.innerHTML = ''; strip.innerHTML = ''; pins.innerHTML = '';
+  for (const e of axis.epochs) {
+    const b = document.createElement('button'), c = KIND_COLOURS[e.kind] || KIND_COLOURS.quiet;
+    b.className = 'seg'; b.type = 'button'; b.dataset.epoch = e.id; b.title = e.name; b.setAttribute('aria-label', `${e.name}, ${e.from} to ${e.to}`);
+    b.style.cssText = `left:${(e.x / axis.total) * 100}%;width:calc(${(e.weight / axis.total) * 100}% - 3px);background:${c[0]};color:${c[1]};border:0.5px solid ${c[2]}`;
+    b.textContent = epochShort(e); if (b.textContent.length > 3) b.style.fontSize = '10px';          // "Today" must fit its narrow block
+    b.onclick = () => { const y = midYear(e.from, e.to); setYears(y, y); };          // tap = jump to the middle of the epoch
+    band.appendChild(b);
+  }
+  for (const r of EPOCH_DATA.eras) {
+    const b = document.createElement('button'), l = axis.toPos(r.from), w = axis.toPos(r.to) - l;
+    b.className = 'es'; b.type = 'button'; b.dataset.era = r.name; b.title = `${r.name} ${r.from}–${r.to}`; b.setAttribute('aria-label', `${r.name}, ${r.from} to ${r.to}`);
+    b.style.cssText = `left:${l}%;width:calc(${w}% - 2px);background:${(KIND_COLOURS[r.kind] || KIND_COLOURS.quiet)[2]}`;
+    b.onclick = () => { const y = midYear(r.from, r.to); setYears(y, y); };
+    strip.appendChild(b);
+  }
+  for (const m of EPOCH_DATA.markers || []) {
+    const b = document.createElement('button');
+    b.className = 'pin'; b.type = 'button'; b.style.left = axis.toPos(m.year) + '%'; b.textContent = '▲ ' + m.label; b.title = `${m.label}: ${m.year}`;
+    b.onclick = () => setYears(m.year, m.year);
+    pins.appendChild(b);
+  }
+}
+function highlightTimeline(d) {
+  document.querySelectorAll('#epBand .seg').forEach((b) => { b.style.opacity = b.dataset.epoch === d.epoch.id ? 1 : 0.45; });
+  document.querySelectorAll('#eraStrip .es').forEach((b) => { const on = b.dataset.era === d.era.name; b.style.opacity = on ? 1 : 0.35; b.style.transform = on ? 'scaleY(1.4)' : 'none'; });
+}
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const srcLinks = (urls) => (urls || []).map((u, i) => `<a class="src" href="${esc(u)}" target="_blank" rel="noopener">src${urls.length > 1 ? i + 1 : ''}</a>`).join('');
+function renderInfo(d) {
+  const { era, epoch } = d, h = d.herring, lh = d.lighthouses, m = d.marstrand;
+  $('infoHead').textContent = yFrom === yTo ? `The year ${yTo}` : `The end year ${yTo} (window ${yFrom}–${yTo})`;
+  $('infoCard').innerHTML =
+    `<div class="name">${esc(era.name)}</div>`
+    + `<div class="when">${era.from}–${era.to} · epoch ${esc(epoch.name)}${era.verify ? ' · <span class="flag">not yet source-checked</span>' : ''}</div>`
+    + `<div class="summary">${esc(era.summary)} ${srcLinks(era.sources)}</div>`
+    + (era.flavour ? `<div class="summary" style="color:var(--dim);font-style:italic">Game flavour, not history: ${esc(era.flavour)}</div>` : '')
+    + (era.designNote ? `<div class="summary" style="color:var(--dim);font-size:12px">${esc(era.designNote)}</div>` : '')
+    + `<div class="stats">`
+    + `<div><div class="k">Tone</div><div class="v">${esc(era.vibe)}</div></div>`
+    + `<div><div class="k">Season</div><div class="v">${esc(era.season)}</div></div>`
+    + `<div><div class="k">Epoch feel</div><div class="v">${esc(epoch.vibe)} · ${esc(epoch.season)}</div></div>`
+    + `<div><div class="k">Herring</div><div class="v">${h ? `Boom (${h.approx ? '~' : ''}${h.from}–${h.to})` : 'Absent'}</div></div>`
+    + `<div><div class="k">Lighthouses standing</div><div class="v">${lh.n} of ${lh.of}</div></div>`
+    + `<div><div class="k">Marstrand</div><div class="v">${m ? esc(m.label) : '–'}${m ? ' ' + srcLinks([].concat(m.source || [])) : ''}</div></div>`
+    + `</div>`
+    + `<div>${d.events.length ? d.events.map((e) => `<div class="ev${e.on ? ' on' : ''}"><b>${e.year}</b>${esc(e.text)}${e.source ? srcLinks([e.source]) : ''}</div>`).join('') : '<div class="ev">No key events listed yet for this era.</div>'}</div>`;
+  document.body.dataset.era = era.name; document.body.dataset.epoch = epoch.id;
+}
+buildTimeline();
 
 // ---------------------------------------------------------------- side panel
 $('scales').innerHTML = SCALES.map((s) => `<button data-s="${s}">1:${s}</button>`).join('');
@@ -481,15 +583,13 @@ function panelsTrees() {
   document.body.dataset.trees = n;
 }
 function panelsYear() {
-  $('legend').innerHTML = 'House = settlement, seen from above. Roof colour = phase: '
-    + Object.values(KIND).map((k) => `<span style="color:${k.color}">${k.glyph}</span> ${k.label}`).join(' &nbsp; ')
-    + '<br>Size = population at the end year (log scale). <b>Solid</b> = a counted population; <b>dashed outline</b> = no count, size set by phase (estimated). White frame = first recorded within the selected years. Several phases at one year: the latest-starting wins.';
+  $('legend').innerHTML = 'The legend is on the map. Several phases at one year: the latest-starting wins. Villages appear from their first record; those with no known origin date are drawn at every year with a "?".';
   const rows = settlements.map((s) => ({ s, st: stateAt(s, yTo) })).filter((r) => r.st);
   $('setlist').innerHTML = '<tr><th>name</th><th>first</th><th>pop.</th><th>phase</th><th>conf.</th><th>src</th></tr>' + rows.map(({ s, st }) => {
     const pop = popAt(s, yTo);
     const ph = st.phase ? `${KIND[st.kind].glyph} ${KIND[st.kind].label} ${st.phase.from}–${st.phase.to ?? '…'}` : '–';
     const src = s.sources.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">${i + 1}</a>`).join(' ');
-    return `<tr><td>${s.name}</td><td>${s.firstRecorded ?? '?'}</td><td>${pop ? fmtPop(pop.value) + (pop.mode === 'counted' ? '' : '~') : 'est.'}</td><td style="text-align:left">${ph}</td><td>${s.confidence}</td><td>${src}</td></tr>`;
+    return `<tr><td>${s.name}</td><td>${s.firstRecorded ?? 'unknown'}</td><td>${pop ? fmtPop(pop.value) + (pop.mode === 'counted' ? '' : '~') : 'est.'}</td><td style="text-align:left">${ph}</td><td>${s.confidence}</td><td>${src}</td></tr>`;
   }).join('');
   $('setdetails').hidden = !settlements.length;
 }

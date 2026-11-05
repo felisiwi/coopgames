@@ -1,5 +1,14 @@
 # Last session
 
+**2026-11-05 — Windward real coast: map + timeline in one lab (branch
+felix/windward-real-coast).** `coast-lab.html` now has the epoch band, era
+strip and pins above the year slider (range 800-2025, `?from=&to=` and
+`?year=` work), an info panel for the end year, a legend, and "date
+unknown" markers. All text comes from `data/epochs.json`; the fact-check of
+every flagged entry is in `data/epochs-factcheck.md` (unflagged entries not
+re-checked). This file is over its 40-line cap from earlier entries; trim
+on merge.
+
 **2026-11-04 — Design audits (PR #3, branch felix/design-audit, not
 merged).** New `design-audit` skill (6 hub-wide checks + per-game
 `design-checks.md`, AUDIT.md reports), Archipelago serendipity map

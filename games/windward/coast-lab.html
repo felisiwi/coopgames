@@ -44,7 +44,8 @@
   #grab { display: none; width: 100%; height: 26px; padding: 0; border: 0; background: none; min-height: 26px; }
   #grab::before { content: ""; display: block; width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto; }
   .yrhead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
-  .yrhead b { font-size: 20px; letter-spacing: .01em; } .yrhead span { color: var(--dim); font-size: 12px; }
+  .yrhead { gap: 10px; }
+  .yrhead b { font-size: 20px; letter-spacing: .01em; flex: none; } .yrhead span { color: var(--dim); font-size: 12px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }   /* one line always: a wrapping hint made the slider jump while scrubbing */
   #yrTrack { position: relative; height: 44px; margin: 0 18px; touch-action: none; cursor: pointer; }
   #yrRail { position: absolute; left: 0; right: 0; top: 20px; height: 4px; background: var(--line); border-radius: 2px; }
   #yrFill { position: absolute; top: 20px; height: 4px; background: var(--accent); border-radius: 2px; }
@@ -56,7 +57,42 @@
   #presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   #presets button { min-height: 40px; font-size: 13px; flex: 1 1 auto; }
 
+  /* ---- epoch band + era strip + pins: same axis as the slider (same side margins) ---- */
+  .epband { position: relative; height: 34px; margin: 4px 18px 5px; }
+  .seg { position: absolute; top: 0; height: 34px; border: 0; padding: 0; border-radius: 5px; font: 600 11px/1 system-ui, sans-serif; letter-spacing: -.01em; display: flex; align-items: center; justify-content: center; overflow: hidden; white-space: nowrap; cursor: pointer; transition: opacity .2s; min-height: 0; }
+  .erastrip { position: relative; height: 16px; margin: 0 18px 8px; }
+  .es { position: absolute; top: 0; height: 16px; border: 0; padding: 0; border-radius: 3px; cursor: pointer; transition: opacity .2s, transform .2s; min-height: 0; }
+  .es::after { content: ""; position: absolute; left: 0; right: 0; top: -2px; bottom: -12px; }        /* taller touch target than the 16 px bar */
+  .pins { position: relative; height: 16px; margin: 0 18px; font-size: 11px; color: var(--dim); }
+  .pin { position: absolute; transform: translateX(-50%); white-space: nowrap; background: none; border: 0; padding: 0 2px; min-height: 0; color: var(--dim); font-size: 11px; cursor: pointer; }
+  .pin:hover { color: var(--text); }
+  .card { background: #0f1c26; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .card .name { font-size: 15px; font-weight: 600; }
+  .card .when { color: var(--dim); font-size: 12px; margin-top: 1px; }
+  .card .summary { margin: 8px 0; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin: 8px 0; }
+  .stats .k { font-size: 11px; color: var(--dim); } .stats .v { font-size: 13px; font-weight: 600; }
+  .ev { font-size: 13px; color: var(--dim); padding: 2px 0; } .ev.on { color: var(--text); } .ev b { font-weight: 600; margin-right: 6px; }
+  .ev a, .card a.src { font-size: 11px; margin-left: 4px; }
+  .flag { color: var(--warn); }
+  /* ---- legend box near the map ---- */
+  #legendBox { position: absolute; right: 10px; bottom: 10px; z-index: 4; width: 214px; background: #0b141bef; border: 1px solid var(--line); border-radius: 10px; padding: 6px 9px 7px; font-size: 11px; line-height: 1.35; color: var(--text); }
+  #legendBox button { background: none; border: 0; padding: 0; min-height: 0; font: 700 11px system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); cursor: pointer; width: 100%; text-align: left; }
+  #legendBox.shut .lgBody { display: none; }
+  .lgRow { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+  .nw { white-space: nowrap; }
+  #legendBox.shut { width: auto; padding: 5px 10px; }
+  .lgLine { display: inline-block; width: 26px; height: 0; flex: none; }
+  .lgHouse { display: inline-block; width: 14px; height: 11px; flex: none; border: 1.5px solid #000b; }
+  .lgHouse.dashed { background: none; border: 1.5px dashed #e8e1d0; }
+  .lgChip { display: inline-block; width: 9px; height: 9px; border: 1px solid #0008; vertical-align: -1px; margin: 0 2px 0 6px; }
   @media (max-width: 700px) {
+    #legendBox { left: 10px; right: auto; bottom: calc(var(--peek) + 6px); width: 190px; font-size: 10.5px; }
+    .epband { height: 38px; } .seg { height: 38px; font-size: 12px; }
+    .erastrip { height: 22px; } .es { height: 22px; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    aside { padding-left: 10px; padding-right: 10px; }
+    .epband, .erastrip, .pins, #yrTrack, #yrTicks { margin-left: 14px; margin-right: 14px; }      /* more room for the epoch blocks: thumb-sized */
     #app { grid-template-columns: 1fr; }
     aside {
       position: fixed; left: 0; right: 0; bottom: 0; height: 66vh; z-index: 10; border-left: 0; border-top: 1px solid var(--line);
@@ -68,7 +104,7 @@
     #years { padding-top: 0; }
     #status { max-width: calc(100% - 24px); top: auto; bottom: calc(var(--peek) + 64px + env(safe-area-inset-bottom)); }
     #tools { flex-direction: row; right: 10px; top: 10px; }
-    #presets button { min-height: 44px; }
+    #presets button { min-height: 44px; font-size: 12px; padding: 4px 6px; }
   }
 </style>
 </head>
@@ -81,23 +117,30 @@
       <div class="btnrow" id="scales"></div>
       <div class="btnrow"><button id="zin" aria-label="zoom in">+</button><button id="zout" aria-label="zoom out">−</button><button id="zfit">fit</button><button id="zboat">boat</button></div>
     </div>
+    <div id="legendBox"><button id="lgToggle" aria-expanded="true">Legend ▾</button><div class="lgBody" id="lgBody"></div></div>
     <div id="loading">Loading real coast data (about 7 MB)…</div>
   </div>
   <aside id="sheet">
     <div id="years">
       <button id="grab" aria-label="expand or collapse the panel"></button>
       <div class="yrhead"><b id="yrText">2025</b><span id="yrHint">drag the two handles</span></div>
+      <div class="epband" id="epBand" role="group" aria-label="Epochs (drawn by weight, not to scale); tap to jump"></div>
+      <div class="erastrip" id="eraStrip" role="group" aria-label="Eras; tap to jump"></div>
+      <div class="pins" id="pins"></div>
       <div id="yrTrack">
         <div id="yrRail"></div><div id="yrFill"></div>
-        <div id="yrFrom" class="thumb" role="slider" tabindex="0" aria-label="From year" aria-valuemin="1700" aria-valuemax="2025"></div>
-        <div id="yrTo" class="thumb" role="slider" tabindex="0" aria-label="To year" aria-valuemin="1700" aria-valuemax="2025"></div>
+        <div id="yrFrom" class="thumb" role="slider" tabindex="0" aria-label="From year" aria-valuemin="800" aria-valuemax="2025"></div>
+        <div id="yrTo" class="thumb" role="slider" tabindex="0" aria-label="To year" aria-valuemin="800" aria-valuemax="2025"></div>
       </div>
       <div id="yrTicks"></div>
       <div id="presets"></div>
     </div>
 
+    <h2 id="infoHead">The year</h2>
+    <div class="card" id="infoCard" aria-live="polite"></div>
+
     <h1>Windward Coast Lab</h1>
-    <p class="sub">Real Bohuslän, Koster to Gottskär. Preview only: not wired into the game.</p>
+    <p class="sub">Real Bohuslän, Koster to Gottskär, year 800 to today. Map and timeline are one tool: the slider, the epoch band and the era strip share an axis. Preview only: not wired into the game.</p>
 
     <h2>Trees near the boat</h2>
     <div id="treecount" class="note" style="margin-top:0"></div>
