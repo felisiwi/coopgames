@@ -31,6 +31,9 @@ import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
 import { createInputState } from '../../shared/input.js';
 import { createDebugOverlay } from './src/debug-overlay.js';
+import { stepAlongShore, shallowFactor, SHORE_BRAKE } from './src/shore.js';
+import { createNameBook } from './src/names.js';
+import { createNameLabels } from './src/name-labels.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
 // `seaHeightCPU` (src/water.js) is the JS mirror of the water shader's vertex
@@ -68,22 +71,32 @@ function approachSpeed(current, target, dt) {
   return current + step;
 }
 
-// Entry point. Without ?coast=real this is exactly the old synchronous start. With it
-// (real-coast trial, a spike) the game waits for the coast data first, then builds the same world
-// from it; src/coast-world.js is only downloaded in that case. Net messages that arrive during the
-// load are missed (fine for the solo spike; a real build would register onMessage first).
+// Entry point. The real Bohuslän coast is the default world (stage 1a); ?coast=proc keeps the old procedural
+// islands (a plain synchronous start, as before). The real coast has to load its data first, so the game starts
+// a moment later; src/coast-world.js is only downloaded in that case. Messages from the other player that arrive
+// during the load are queued and replayed to the game, so nothing is dropped (the net contract has no way to
+// unsubscribe, so one listener stays attached and forwards).
 export default function start(args) {
   const q = new URLSearchParams(window.location.search);
-  if (q.get('coast') !== 'real') return startGame(args, null);
+  if (q.get('coast') === 'proc') return startGame(args, null);
   const note = document.createElement('div');
   note.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#eaf6ff;font:14px monospace;pointer-events:none;z-index:5';
-  note.textContent = 'loading the real coast…';
+  note.textContent = 'loading the coast…';
   document.body.appendChild(note);
+  const queue = [];
+  let live = null;
+  args.net.onMessage((msg) => (live ? live(msg) : queue.push(msg)));
+  const net = {
+    send: (msg) => args.net.send(msg),
+    onMessage: (fn) => { live = fn; for (const m of queue.splice(0)) fn(m); },
+    peerId: args.net.peerId,
+    isHost: args.net.isHost,
+  };
   const num = (k) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
   return import('./src/coast-world.js')
     .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
-    .then((coast) => { note.remove(); window.__coastReport = coast.report; startGame(args, coast); })
-    .catch((err) => { note.textContent = `real coast failed: ${err && err.message}`; console.error(err); window.__coastError = String(err && err.stack || err); });
+    .then((coast) => { note.remove(); window.__coastReport = coast.report; startGame({ ...args, net }, coast); })
+    .catch((err) => { note.textContent = `the coast failed to load: ${err && err.message}`; console.error(err); window.__coastError = String((err && err.stack) || err); });
 }
 
 function startGame({ canvas, net, seed, role }, coast) {
@@ -316,9 +329,19 @@ function startGame({ canvas, net, seed, role }, coast) {
   // previously fixed east/west, sheeted in, and ~1 in 8 seeds started
   // stuck in the no-go zone.
   const self = { ...spawnPose(seed, role), speed: 0 };
-  if (coast && coast.spawn) { // just outside Käringön harbour; the guest starts a boat-width beside the host
+  if (coast && coast.spawn) { // just outside Grundsund's harbour; the guest starts a boat-width beside the host
     self.x = coast.spawn.x + (role === 'host' ? 0 : CONFIG.BOAT_SPAWN_OFFSET * 2);
     self.z = coast.spawn.z;
+  }
+  // Names are discovered (src/names.js): shown once when the boat is near, remembered on this device.
+  const nameBook = coast ? createNameBook(coast.names) : null;
+  const nameLabels = coast ? createNameLabels() : null;
+  const namesLine = () => `names       ${nameBook.count()} / ${nameBook.total} discovered`;
+  if (coast && debugOverlay) {
+    debugOverlay.set('names', namesLine());
+    window.__names = nameBook; // headless checks
+    window.__self = self;
+    window.__coastHeight = coast.heightAt;
   }
   const other = { x: null, z: null, heading: 0, speed: 0 };
   let otherLastPosAtS = null; // for partnerState() (src/partner.js)
@@ -463,7 +486,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     const r = coast.report;
     const t = r.timings;
     debugOverlay.set('coast', `coast       load+decode ${t.loadDecodeMs.toFixed(0)} ms, field ${t.fieldMs.toFixed(0)}, depth map ${t.depthMs.toFixed(0)}, terrain ${t.terrainMs.toFixed(0)}, props ${t.propsMs.toFixed(0)}; total ${t.buildMs.toFixed(0)} ms`);
-    debugOverlay.set('coast2', `            ${(r.bytesDownloadedByLoader / 1048576).toFixed(2)} MB coast data; terrain ${r.terrain.triangles.toLocaleString('en')} tris; ${r.buildings} houses; window ${r.window.metres.join(' x ')} m`);
+    debugOverlay.set('coast2', `            ${(r.bytesDownloadedByLoader / 1048576).toFixed(2)} MB coast data; terrain ${(r.terrain.fullTriangles / 1000).toFixed(0)}k full + ${(r.terrain.coarseTriangles / 1000).toFixed(0)}k coarse tris in ${r.terrain.chunks} chunks; ${r.buildings} houses, ${r.skerries} skerries; region ${r.window.metres.join(' x ')} m`);
   }
 
   // Phone controls (src/phone.js): hold to aim, second-thumb sheet, arc,
@@ -518,14 +541,26 @@ function startGame({ canvas, net, seed, role }, coast) {
 
     const targetSpeed = boatSpeed(self.heading, wind.dir, wind.strength, self.trim);
     self.speed = approachSpeed(self.speed, targetSpeed, dt);
-    self.x += Math.sin(self.heading) * self.speed * dt;
-    self.z += Math.cos(self.heading) * self.speed * dt;
     if (coast) {
-      coast.clamp(self); // the window has an edge; hold the boat just inside it
-      if (coast.trees.update(self.x, self.z)) {
+      // Real coast: very shallow water slows the boat a little; the shore is solid but gentle: the boat slides along
+      // it and a head-on approach brakes softly (src/shore.js). No damage, no bounce.
+      const v = self.speed * shallowFactor(coast.heightAt, self.x, self.z);
+      const mv = stepAlongShore(coast.heightAt, self.x, self.z, Math.sin(self.heading) * v * dt, Math.cos(self.heading) * v * dt);
+      self.x = mv.x;
+      self.z = mv.z;
+      if (mv.contact > 0) self.speed = Math.max(0, self.speed - mv.contact * SHORE_BRAKE * dt);
+      coast.clamp(self); // the region has an edge; hold the boat just inside it
+      if (coast.update(self.x, self.z)) {
         const s = coast.trees.stats;
-        debugOverlay?.set('trees', `trees       ${s.trees} near boat (query ${s.queryMs.toFixed(1)} ms, rebuild #${s.rebuilds})`);
+        const t = coast.terrain.stats;
+        debugOverlay?.set('trees', `trees       ${s.trees} near boat (query ${s.queryMs.toFixed(1)} ms) | chunks ${t.shownFull} full + ${t.shownCoarse} coarse of ${t.chunks}`);
       }
+      const discovered = nameBook.update(self.x, self.z);
+      for (const e of discovered) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS);
+      if (discovered.length) debugOverlay?.set('names', namesLine());
+    } else {
+      self.x += Math.sin(self.heading) * self.speed * dt;
+      self.z += Math.cos(self.heading) * self.speed * dt;
     }
 
     selfBoat.group.position.set(self.x, 0, self.z);
@@ -624,6 +659,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       pingBearing: friendPing ? bearingTo(friendPing.x, friendPing.z) : null,
     });
 
+    nameLabels?.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS);
     renderer.render(scene, camera);
     debugOverlay?.frame(now);
     phone?.draw(nowS, {

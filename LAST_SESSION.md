@@ -1,10 +1,10 @@
 # Last session
 
-**2026-11-05: real-coast trial** (branch `felix/windward-coast-trial`, on `origin/main` e1812c7,
-NOT merged). Spike behind `?coast=real&debug=1`: Käringön-to-Grundsund window (1118 x 1838 m at 1:10) in the
-real game, with a perf overlay. Results + recommendation: `games/windward/docs/COAST-TRIAL.md`.
-Felix reads the overlay on a real phone next. Earlier today: big merge to `main` (look, lighthouses,
-real-coast data, game design confirmed, epochs); the game on `main` still uses procedural islands.
+**2026-11-05: stage 1a, real-coast foundation** (branch `felix/windward-coast-trial`, origin/main merged in,
+NOT merged to main). The real coast is the DEFAULT; `?coast=proc` = old islands. Region 58.085-58.30 N,
+11.25-11.50 E, start at Grundsund harbour, shore collision, 315 skerries, discovered names (localStorage),
+`?debug=1` overlay. Numbers + what is left: `games/windward/docs/COAST-TRIAL.md` ("Stage 1a").
+`main` still uses procedural islands until Felix merges.
 
 Where things are:
 - Design: `games/windward/GAME-DESIGN.md`; look and labs: `DESIGN.md` ("Reference labs")
@@ -25,10 +25,10 @@ Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobb
 - Look: L1 port → Skagen palette (pass 2) → Skagen default + pond fix (pass 3).
 - Lighthouses: 12 → 29 towers, real looks, year slider, Play, flash patterns; game design /grill-me rounds 1–11 confirmed.
 - Real coast: R0 → passes 2–5 (Gottskär, Koster, population, west-Orust history, combined map + timeline).
-- Real-coast trial: west Orust in the game behind a flag, measured (see COAST-TRIAL.md).
+- Real-coast trial (Pixel: 60 fps at 634k tris) → stage 1a: default coast, collision, skerries, names (COAST-TRIAL.md).
 
 ## Next
 
-1. Felix: open the branch preview on a phone with `?coast=real&debug=1`, read the overlay.
-2. Decide: stage 1 on the real coast (needs window-cropped data, skerries, collision) or procedural.
-3. Stage 1 lure: port/house arrival + deck items, small life, blue-hour sky, edge fog + thunder.
+1. Felix: phone check of the preview (`?debug=1`): fps, collision feel, names; judge height x0.5 / smoothing.
+2. Confirm the 7 unplaced harbours (candidates in `assets/coast/names.json`).
+3. Stage 1b lure: port arrival, small life, blue-hour sky, edge fog + thunder, names map.

@@ -2,7 +2,8 @@
 
 Branch `felix/windward-coast-trial`, 2026-11-05. A spike, not the final build: it answers
 "can the real Bohuslän coast run in the game on a phone?" with numbers. Everything is behind
-`?coast=real`; without the flag the game is the procedural one, unchanged.
+`?coast=real`; without the flag the game is the procedural one, unchanged. **(Superseded by stage 1a at the bottom: the real
+coast is now the default and `?coast=proc` is the old islands.)**
 
 **Try it:** `…/games/windward/index.html?coast=real&debug=1` (add `&seed=1`). `debug=1` draws the
 overlay (first frame, fps, draw calls, triangles, heap, download). Extra knobs: `&cstep=2` (half-resolution
@@ -83,3 +84,83 @@ Marstrand → Smögen (68.6 km): 16 min at 1:10, 20 min at 1:8 (GAME-DESIGN.md's
 - Houses are the game's existing size (about 10 m wide), large against 2 m terrain cells.
 - Net messages arriving during the async load are dropped (fine solo; register `onMessage` first in a real build).
 - Real-phone GPU is unmeasured. Felix's overlay read is the real test.
+
+---
+
+# Stage 1a: real-coast foundation (2026-11-05, evening)
+
+Felix's Pixel result on the trial (dpr 3): 60 fps avg, worst 59.5, at the full 634,784-triangle mesh, first frame
+1.1 s, 3.27 MB. So the real coast is now the base: **default for windward; `?coast=proc` keeps the old islands.**
+
+**Region:** 58.085–58.30 N, 11.25–11.50 E = 1470 x 2394 m in game (735 x 1197 cells), one fixed window, still
+the single `north` raster tile. Grundsund is the start; Lysekil and Fiskebäckskil north, Gullholmen, Härmanö,
+Käringön and Måseskär south. Chosen over streaming because it is simpler now and the structure scales (below).
+
+**Terrain in chunks.** The mesh is cut into 44 chunks of 128 cells (256 m), each built at full and half
+resolution; every frame the chunks near the boat show the full mesh (< 320 m), the next ring the coarse one (< 950 m),
+the rest nothing (the haze hides them). Three.js frustum-culls each chunk, so the GPU only draws what is in view.
+A whole-coast version streams chunks (cropped data, see "Whole coast" above) instead of building them all at load.
+Known limit: a hairline crack can show where full and coarse chunks meet (far from the boat, under the haze).
+
+**Triangles per frame** (iPhone 13 emulation, includes the shadow pass; software GL, so only the counts matter):
+| spot | default zoom | zoomed out | draw calls (max) |
+|---|---|---|---|
+| Fiskebäckskil (busiest) | 328k | 330k | 100 |
+| Grundsund (start) | 292k | 308k | 68 |
+| Gullholmen | 248k | 272k | 108 |
+| Lysekil | 229k | 257k | 145 |
+| Härmanö | 207k | 230k | 103 |
+| Storön / Gåsö | 203k | 203k | 40 |
+| Käringön | 192k | 194k | **219** |
+| Måseskär | 153k | 153k | 94 |
+
+Worst is **330k triangles**, about half of the 634k the Pixel held at 60 fps. Draw calls peak at 219 (Käringön
+zoomed out: 15 houses per village, several meshes each), above the trial's 154: worth merging village buildings
+if a phone shows it. Region load: 0.5 s build on desktop; download 5.37 MB (3.01 MB coast data).
+
+**Spawn:** Grundsund's real harbour from OSM, `Grundsunds hamn` (marina node 58.21600 N, 11.41577 E; the village
+origin was 300 m away). The boat starts 48 m outside it, in open water >= 3 m deep and >= 30 m from land.
+
+**Collision** (`src/shore.js`, uses the height field; no damage, no bounce). The hull is probed at 8 points, 2.5 m
+out. A move into the shore is bent: the part pointing into land is removed, so the boat slides along it, and a
+head-on approach brakes at 14 m/s^2 (stronger than the sails' 6) so it stops softly. Water shallower than 3 m slows
+the boat down to 60%. Measured on the real field: 800,000 random steps near the coast with **0 ended inside land**;
+on 16 straight coasts: head-on stops about 1 m short of the water's edge; a 10-20 degree graze keeps 76-83% of its
+way along the shore, 30 degrees 44%, 45-60 degrees about 40% (it crawls along). Driven in the real game in iPhone
+emulation, the hull never entered land and the boat came to rest at the shore.
+
+**Skerries:** 315 of `skerries.json`'s 5537 fall in open water inside the region (the rest are already land in the
+raster or outside). Each is stamped into the height field as a low granite hump (peak 1.3 m, bare rock), drawn
+3x its 1:10 size with a 3 m minimum radius (at true 1:10 a 22 x 37 m rock is 2 x 4 m, smaller than the boat).
+Because it is the same field, the rock gets mesh, shore foam and collision with no extra code.
+Orientation is not in the data, so each is rotated by a hash of its position.
+
+**Names are discovered** (`src/names.js`, `src/name-labels.js`). 278 names in the region: 254 skerries, 9 islands,
+8 natural harbours, 7 villages. A name shows once, when the boat comes within 220 m (island), 150 m (village),
+110 m (harbour, skerry), as an italic label with its kind ("Skarvesäter / natural harbour") that follows the place for
+5 s and fades; at most 3 at once, 0.8 s apart, villages > harbours > islands > skerries. Remembered in `localStorage`
+(`windward.names.v1`, try/catch, device-only; clearing site data forgets). Verified in a browser: found, saved,
+not shown again after a reload.
+
+**Felix's harbours** (exact OSM name inside the region, otherwise not placed):
+- Placed (8): Bredholmen, Skarvesäter, Usholmen, Porsholmen, Jonsborg, Assholmen, Vasholmarna, Kråkesundsgap
+  (midpoint of OSM's two Kråkesundsgap lights, Södra and Norra: OSM has the gap only as those lights).
+- Unplaced (7): **Rammen** (OSM has it at 58.349 N, outside the region), **Altarholmen** (58.016) and **Skaboholmen**
+  (58.037), both south of the region; **Testholmarna-Usholmen** (OSM has Lilla/Stora Testholmen, 4 km from Usholmen,
+  not one place), **DammholmeSkären** (only Dammholmen), **Västra Danholmen** (only Danholmen, Danholme skär/unge:
+  no "Västra"), **Smörasken** (no OSM match). The candidates are in `names.json` for Felix to confirm; none was guessed.
+
+**Overlay bug fixed:** "worst ever 193686 ms" was a hidden tab / locked phone counted as one frame. The frame
+arithmetic is now `createFrameStats()` with `interrupt()` on `visibilitychange`, `pagehide`, `pageshow`, `resume`,
+and frames while the document is hidden are ignored. Test reproduces the 193 s gap with and without the fix.
+
+**Also changed:** peer messages that arrive while the coast loads are queued and replayed (the async load is now
+the default path); all 6 lighthouses inside the region are placed (Måseskär, Hättan, Islandsberg, Stångehuvud,
+Gäven, Kråksundsgap Södra); 7 villages with 15 buildings each.
+
+**Left for the lure:** port arrival (bell, horn, gulls; the harbour is where the boat starts but nothing happens
+there yet), small life (gulls, eiders, seals, one drifting boat), the blue-hour sky and lit lighthouses, real edge
+fog + the thunder warning (today the region edge just sinks into deep sea and the boat is held 30 m inside), a map
+that lists discovered names, the natural harbours' shelter-by-wind rule, the 7 unplaced harbours, skerries beyond
+the region and other-player collision. Look items for Felix: `?cvex=` (height scale, 0.5), `?csmooth=` (2 passes;
+slopes show faint faceting from the 1 m height steps, a third pass softens it), skerry size (`SKERRY_SCALE`).

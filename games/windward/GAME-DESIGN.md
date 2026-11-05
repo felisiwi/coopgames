@@ -1037,7 +1037,7 @@ Altarholmen, Skaboholmen, Smörasken, Assholmen, Jonsborg, Vasholmarna. These ar
 harbour/anchorage data: real places, real photos, and a shelter-by-wind-direction rule
 (fits Q46: skip the night only in harbour). The same page has his day-by-day wind log
 (e.g. "Monday: Smörasken. Morning S5, Midday NNE3, Evening N5, Night N5"), a good reference
-for believable wind patterns. TODO: geocode the harbours (OSM names) into places data.
+for believable wind patterns. Geocoded 2026-11-05 by exact OSM name: 8 placed, 7 unplaced, see `assets/coast/names.json` and `docs/COAST-TRIAL.md` (stage 1a); Felix to confirm the unplaced ones.
 
 **Small life (fitting each era, nothing modern in early eras):** gulls (also on buoys and
 sea marks), eiders, harbour seals, buoys/marks of the era. Cheap to build, makes the world

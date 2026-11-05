@@ -57,6 +57,7 @@ re-runs offline.
 | `koster-`, `north-`, `south-classes.png` | 0.46 + 0.71 + 0.49 MB | 8-bit grey: 0 water, 1 bare_rock, 2 heath, 3 meadow, 4 scrub, 5 forest, 6 village |
 | `skerries.json` | 137 KB | 5537 closed coastline rings under 25 m wide: `[lon, lat, width m, length m]` |
 | `places.json` | 7 KB | 38 places with lat/lon and the OSM object used |
+| `names.json` | 41 KB | OSM (ODbL, © OpenStreetMap contributors), written by `tools/fetch-names.mjs` (Overpass): 293 named islands/islets/archipelagos in the game region (58.085–58.30 N, 11.25–11.50 E); Felix's 15 natural harbours matched by **exact OSM name** inside the region (8 placed, 7 listed as `unplaced` with the reason and near-name candidates, never guessed); and the start position, OSM marina node `Grundsunds hamn` |
 | `routes.json` | 2 KB | Marstrand → Smögen and Gottskär → Marstrand polylines and lengths |
 | `trees.json` | 1 KB | tree density rule and totals per scale |
 | `meta.json` | 3 KB | extent, tiles, projection, encodings, class percentages |

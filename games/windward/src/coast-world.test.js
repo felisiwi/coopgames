@@ -5,7 +5,8 @@
 // water, and villages land on dry ground inside the window only.
 import assert from 'node:assert/strict';
 import { DEEP_M } from './depthmap.js';
-import { buildCoastWorld, findOpenWater, placeCoastVillages, LAND_LIFT_M, EDGE_FADE_M } from './coast-world.js';
+import { buildCoastWorld, findOpenWater, placeCoastVillages, createCoastTerrain, LAND_LIFT_M, EDGE_FADE_M, SKERRY_TOP_M, LOD0_R_M, LOD1_R_M } from './coast-world.js';
+import { isBlocked } from './shore.js';
 
 let passed = 0;
 function check(name, fn) {
@@ -89,6 +90,36 @@ check('villages are placed on dry ground inside the window, and ignored outside 
     assert.ok(world.inside(b.x, b.z), 'house inside the window');
     assert.ok(b.y >= 0 && world.heightAt(b.x, b.z) >= 0.5, 'house on land');
   }
+});
+
+check('skerries become solid low granite: collidable, bare rock, and skipped on land or in the edge fade', () => {
+  // a rock in open water 30 px east of the island, one on the island itself, one in the edge fade zone
+  const rocks = [[C + R + 30, C, 22, 37], [C, C, 22, 37], [24, 24, 22, 37]];
+  const w = buildCoastWorld(coast, { scale: 10, window: WIN, vex: 0.5, smooth: 0, skerries: rocks });
+  assert.equal(w.skerryCount, 1, 'only the open-water rock is stamped');
+  const rx = (C + R + 30 + 0.5) * w.pxM;
+  const rz = (C + 0.5) * w.pxM;
+  const top = w.heightAt(rx, rz);
+  assert.ok(top > 0.4 && top <= SKERRY_TOP_M + 0.01, `low: peak ${top}`);
+  assert.ok(isBlocked(w.heightAt, rx, rz), 'the boat cannot sail onto it');
+  assert.ok(!isBlocked(w.heightAt, rx + 20, rz), 'but 20 m away is open water');
+  assert.equal(w.classNameAt(rx, rz), 'bare_rock', 'painted granite; bare_rock has tree density 0, so no trees grow on it');
+  assert.ok(w.depthMap.depth[Math.floor(rz / w.pxM - w.j0) * w.nx + Math.floor(rx / w.pxM - w.i0)] === 0, 'the water shader sees it as land');
+});
+
+check('terrain is built in chunks and shown by distance: full near, coarse further, nothing far', () => {
+  const t = createCoastTerrain(world, 1);
+  assert.ok(t.stats.chunks >= 1);
+  t.update(cx, cz);
+  assert.ok(t.stats.shownFull >= 1, 'the chunk under the boat is drawn at full detail');
+  t.update(cx + LOD1_R_M + 5000, cz);
+  assert.equal(t.stats.shownFull + t.stats.shownCoarse, 0, 'far chunks are not drawn');
+  t.update(cx - LOD0_R_M * 3, cz);
+  assert.ok(t.stats.shownFull + t.stats.shownCoarse >= 0);
+  let tris = 0;
+  t.group.traverse((o) => { if (o.isMesh) tris += o.userData.triangles; });
+  assert.equal(tris, t.stats.fullTriangles + t.stats.coarseTriangles);
+  assert.ok(t.stats.coarseTriangles < t.stats.fullTriangles, 'the coarse level is cheaper');
 });
 
 console.log(`${passed} checks passed`);

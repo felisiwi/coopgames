@@ -22,11 +22,12 @@ import { DEEP_M, depthAndShoreFromSigned } from './depthmap.js';
 import { makeTreesNear } from './trees-near.js';
 import { createBuilding } from './props.js';
 import { createLighthouse, LIGHTHOUSES } from './lighthouses.js';
+import { buildNameList } from './names.js';
 
 export const COAST_SCALE = 10; // 1:10
-// West Orust: Käringön, Gullholmen, Härmanö, Hälleviksstrand, Måseskär, Hättan all fall inside.
-// ~11 km east-west, ~18 km north-south at real size: Käringön/Måseskär in the south up to Grundsund, Gåsö, Storön in the north.
-export const COAST_WINDOW = { w: 11.27, e: 11.46, s: 58.085, n: 58.25 };
+// Region (Felix, stage 1a): Grundsund is the start; north to Fiskebäckskil and Lysekil, south to Gullholmen,
+// Härmanö, Käringön and Måseskär. ~15 x 24 km real = 1468 x 2394 m in game. All inside the `north` raster tile.
+export const COAST_WINDOW = { w: 11.25, e: 11.50, s: 58.085, n: 58.30 };
 export const COAST_TILES = ['north']; // the one raster tile that holds the window
 // Game metres of height per real metre of height. 1:10 uniform would be 0.1 (3 m hills: flat next
 // to the procedural islands, whose peaks are 85 m on a 145 m radius). TODO(felix): confirm by eye.
@@ -36,6 +37,16 @@ export const LAND_LIFT_M = 0.4; // land is lifted this far so the shoreline sits
 export const EDGE_FADE_M = 80; // within this of the window edge, land sinks and sea deepens: no cliff at the edge
 export const EDGE_CLAMP_M = 30; // the boat is held this far inside the window
 export const CULL_BELOW_M = -0.7; // quads wholly below this are under the opaque sea (island.js's rule)
+// Skerries (skerries.json: [lon, lat, width_m, length_m] of tiny OSM rings). At true 1:10 a 22 x 37 m rock is
+// 2 x 4 m in game, smaller than the boat, so they are drawn bigger. TODO(felix): tune by eye.
+export const SKERRY_SCALE = 3; // size exaggeration on top of 1:10
+export const SKERRY_MIN_R_M = 3; // smallest rock radius in game metres
+export const SKERRY_TOP_M = 1.3; // low granite: peak height above the sea
+// Terrain chunks: the mesh is cut into CHUNK_CELLS-square pieces, each built at two detail levels, so the
+// GPU is only asked to draw what is near and in view. This is the unit a whole-coast version would stream.
+export const CHUNK_CELLS = 128;
+export const LOD0_R_M = 320; // chunks closer than this to the boat use the full mesh
+export const LOD1_R_M = 950; // up to here the half-resolution mesh; beyond, nothing (the haze hides it)
 const TREE_RADIUS_M = 250;
 const TREE_REBUILD_M = 30; // re-ask treesNear() when the boat moved this far
 const TREE_CAP = 3500;
@@ -58,7 +69,7 @@ const now = () => (typeof performance !== 'undefined' ? performance.now() : Date
 // ---- 1. the data layer: pure, no GPU ---------------------------------------------------------
 
 // coast: the object loadCoast() returns (tests pass a synthetic one).
-export function buildCoastWorld(coast, { scale = COAST_SCALE, window: win = COAST_WINDOW, vex = COAST_VEX, smooth = COAST_SMOOTH } = {}) {
+export function buildCoastWorld(coast, { scale = COAST_SCALE, window: win = COAST_WINDOW, vex = COAST_VEX, smooth = COAST_SMOOTH, skerries = [] } = {}) {
   const t0 = now();
   const pxM = coast.mpp / scale;
   const [pw, pn] = coast.toPx(win.w, win.n);
@@ -96,6 +107,41 @@ export function buildCoastWorld(coast, { scale = COAST_SCALE, window: win = COAS
         H[k] = (4 * src[k] + 2 * (src[k - 1] + src[k + 1] + src[k - nx] + src[k + nx]) + src[k - nx - 1] + src[k - nx + 1] + src[k + nx - 1] + src[k + nx + 1]) / 16;
       }
     }
+  }
+  // Skerries: low granite humps stamped into the field AFTER the blur (the blur would flatten them). A hump
+  // falls from -1.0 m at its rim to +SKERRY_TOP_M, so it rises out of a shallow ring; the same field drives the
+  // mesh, the shore foam in the water shader and the collision. Axis is unknown in the data: rotated by a hash.
+  let skerryCount = 0;
+  const margin = EDGE_FADE_M / pxM;
+  for (const [lon, lat, wM, lM] of skerries) {
+    const [px, py] = coast.toPx(lon, lat);
+    const ca = px - i0;
+    const cb = py - j0;
+    if (ca < margin || cb < margin || ca > nx - margin || cb > nz - margin) continue;
+    if (H[Math.floor(cb) * nx + Math.floor(ca)] > 0.2) continue; // already land in the raster
+    const rx = Math.max(SKERRY_MIN_R_M, (wM / scale / 2) * SKERRY_SCALE) / pxM;
+    const rz = Math.max(SKERRY_MIN_R_M, (lM / scale / 2) * SKERRY_SCALE) / pxM;
+    const ang = ((Math.imul(Math.round(lon * 1e5), 0x9e3779b1) ^ Math.imul(Math.round(lat * 1e5), 0x85ebca6b)) >>> 0) / 4294967296 * Math.PI;
+    const cs = Math.cos(ang);
+    const sn = Math.sin(ang);
+    const reach = Math.ceil(Math.max(rx, rz)) + 1;
+    for (let b = Math.floor(cb) - reach; b <= Math.floor(cb) + reach; b++) {
+      for (let a = Math.floor(ca) - reach; a <= Math.floor(ca) + reach; a++) {
+        const du = a + 0.5 - ca;
+        const dv = b + 0.5 - cb;
+        const u = (du * cs + dv * sn) / rx;
+        const v = (-du * sn + dv * cs) / rz;
+        const r2 = u * u + v * v;
+        if (r2 >= 1) continue;
+        const k = b * nx + a;
+        const hp = -1.0 + (SKERRY_TOP_M + 1.0) * (1 - r2);
+        if (hp > H[k]) {
+          H[k] = hp;
+          if (hp > 0.3) CL[k] = 1; // bare_rock: granite
+        }
+      }
+    }
+    skerryCount++;
   }
   const fieldMs = now() - t0;
 
@@ -161,6 +207,7 @@ export function buildCoastWorld(coast, { scale = COAST_SCALE, window: win = COAS
   return {
     pxM, i0, j0, nx, nz, H, CL, names, x0, z0, bounds, heightAt, classNameAt, toGame, depthMap, look,
     landPct: (100 * hs.length) / ((Math.ceil(nx / 2) - 1) * (Math.ceil(nz / 2) - 1)),
+    skerryCount,
     timings: { fieldMs, depthMs: depthMap.bakeMs },
     inside: (x, z, margin = 0) => x >= bounds.minX + margin && x <= bounds.maxX - margin && z >= bounds.minZ + margin && z <= bounds.maxZ - margin,
   };
@@ -204,7 +251,7 @@ function nearestLand(world, x, z, maxR = 120, minH = 1.0) {
   return null;
 }
 
-// ---- 2. terrain mesh -------------------------------------------------------------------------
+// ---- 2. terrain mesh, in chunks with two levels of detail ------------------------------------
 
 const CLASS_PAINT = { // class name -> [colour source, weight]; bare_rock keeps the granite base
   heath: ['heather', 0.6],
@@ -222,52 +269,55 @@ function refreshClassPaint() {
   _paint.forest = (_paint.forest || new THREE.Color()).copy(PALETTE.grass2).lerp(_c.set(CONFIG.LOOK_PINE), 0.55); // dark conifer floor
 }
 
-// step: raster pixels per mesh cell (1 = 2 m cells at 1:10). ?cstep= in the URL.
-export function createCoastTerrain(world, step = 1) {
-  refreshClassPaint();
+// One mesh over the cell rectangle [a0..a1] x [b0..b1] (inclusive), one vertex every `step` cells. Normals and
+// colours depend only on position, so neighbouring chunks agree along their shared border. null = nothing to draw.
+function buildTerrainMesh(world, step, a0, b0, a1, b1, material) {
   const { nx, nz, H, CL, names, pxM, x0, z0, look } = world;
-  const ni = Math.floor((nx - 1) / step) + 1;
-  const nj = Math.floor((nz - 1) / step) + 1;
-  const hAt = (p, q) => H[Math.min(nz - 1, q * step) * nx + Math.min(nx - 1, p * step)];
+  const ni = Math.floor((a1 - a0) / step) + 1;
+  const nj = Math.floor((b1 - b0) / step) + 1;
+  if (ni < 2 || nj < 2) return null;
+  const cell = (a, b) => Math.min(nz - 1, Math.max(0, b)) * nx + Math.min(nx - 1, Math.max(0, a));
+  const hAt = (p, q) => H[cell(a0 + p * step, b0 + q * step)];
 
   const keep = new Int32Array(ni * nj).fill(-1);
   const quads = [];
   let kept = 0;
   for (let q = 0; q < nj - 1; q++) {
     for (let p = 0; p < ni - 1; p++) {
-      const a = hAt(p, q), b = hAt(p + 1, q), c = hAt(p, q + 1), d = hAt(p + 1, q + 1);
-      if (Math.max(a, b, c, d) <= CULL_BELOW_M) continue;
+      if (Math.max(hAt(p, q), hAt(p + 1, q), hAt(p, q + 1), hAt(p + 1, q + 1)) <= CULL_BELOW_M) continue;
       quads.push(p, q);
       for (const k of [q * ni + p, q * ni + p + 1, (q + 1) * ni + p, (q + 1) * ni + p + 1]) if (keep[k] < 0) keep[k] = kept++;
     }
   }
+  if (kept === 0) return null;
   const positions = new Float32Array(kept * 3);
   const normals = new Float32Array(kept * 3);
   const colors = new Float32Array(kept * 3);
-  const slopes = new Float32Array(kept);
-  const cell = pxM * step;
+  const d2 = 2 * step * pxM;
   for (let q = 0; q < nj; q++) {
     for (let p = 0; p < ni; p++) {
       const slot = keep[q * ni + p];
       if (slot < 0) continue;
-      const h = hAt(p, q);
-      const x = x0 + (p * step + 0.5) * pxM;
-      const z = z0 + (q * step + 0.5) * pxM;
-      const dhdx = (hAt(Math.min(ni - 1, p + 1), q) - hAt(Math.max(0, p - 1), q)) / (cell * (p > 0 && p < ni - 1 ? 2 : 1));
-      const dhdz = (hAt(p, Math.min(nj - 1, q + 1)) - hAt(p, Math.max(0, q - 1))) / (cell * (q > 0 && q < nj - 1 ? 2 : 1));
+      const a = a0 + p * step;
+      const b = b0 + q * step;
+      const h = H[cell(a, b)];
+      const x = x0 + (a + 0.5) * pxM;
+      const z = z0 + (b + 0.5) * pxM;
+      const dhdx = (H[cell(a + step, b)] - H[cell(a - step, b)]) / d2;
+      const dhdz = (H[cell(a, b + step)] - H[cell(a, b - step)]) / d2;
       const inv = 1 / Math.sqrt(dhdx * dhdx + 1 + dhdz * dhdz);
       positions.set([x, h, z], slot * 3);
       normals.set([-dhdx * inv, inv, -dhdz * inv], slot * 3);
-      slopes[slot] = Math.hypot(dhdx, dhdz);
-      groundColor(h, slopes[slot], x, z, look, _c); // granite / pale domes / veins / wet band, as on the islands
-      const paint = CLASS_PAINT[names[CL[Math.min(nz - 1, q * step) * nx + Math.min(nx - 1, p * step)]]];
+      groundColor(h, Math.hypot(dhdx, dhdz), x, z, look, _c); // granite / pale domes / veins / wet band, as on the islands
+      const paint = CLASS_PAINT[names[CL[cell(a, b)]]];
       if (paint) _c.lerp(_paint[paint[0]], paint[1] * smoothstep(0.5, 1.0, h)); // land cover, fading out at the waterline
       colors.set([_c.r, _c.g, _c.b], slot * 3);
     }
   }
   const indices = new Uint32Array((quads.length / 2) * 6);
   for (let n = 0, w = 0; n < quads.length; n += 2) {
-    const p = quads[n], q = quads[n + 1];
+    const p = quads[n];
+    const q = quads[n + 1];
     const a = keep[q * ni + p], b = keep[q * ni + p + 1], c = keep[(q + 1) * ni + p], d = keep[(q + 1) * ni + p + 1];
     indices[w++] = a; indices[w++] = c; indices[w++] = b;
     indices[w++] = b; indices[w++] = c; indices[w++] = d;
@@ -278,13 +328,56 @@ export function createCoastTerrain(world, step = 1) {
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   geometry.setIndex(new THREE.BufferAttribute(indices, 1));
   geometry.computeBoundingSphere();
-  const material = new THREE.MeshLambertMaterial({ vertexColors: true });
-  material.color.setScalar(CONFIG.LOOK_ISLAND_BRIGHTNESS);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
+  mesh.visible = false; // update() decides
   mesh.userData = { vertices: kept, triangles: indices.length / 3 };
   return mesh;
+}
+
+// step: raster cells per vertex at full detail (1 = 2 m at 1:10; ?cstep=). Each chunk is also built at 2 x step.
+// update(x, z) (every frame) shows the full mesh for chunks near the boat, the coarse one further out, nothing beyond.
+export function createCoastTerrain(world, step = 1) {
+  refreshClassPaint();
+  const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  material.color.setScalar(CONFIG.LOOK_ISLAND_BRIGHTNESS);
+  const { nx, nz, pxM, x0, z0 } = world;
+  const group = new THREE.Group();
+  const chunks = [];
+  const stats = { chunks: 0, fullTriangles: 0, coarseTriangles: 0, fullVertices: 0, coarseVertices: 0, shownFull: 0, shownCoarse: 0 };
+  for (let b0 = 0; b0 < nz - 1; b0 += CHUNK_CELLS) {
+    for (let a0 = 0; a0 < nx - 1; a0 += CHUNK_CELLS) {
+      const a1 = Math.min(a0 + CHUNK_CELLS, nx - 1);
+      const b1 = Math.min(b0 + CHUNK_CELLS, nz - 1);
+      const full = buildTerrainMesh(world, step, a0, b0, a1, b1, material);
+      if (!full) continue;
+      const coarse = buildTerrainMesh(world, step * 2, a0, b0, a1, b1, material);
+      group.add(full);
+      if (coarse) group.add(coarse);
+      chunks.push({ full, coarse, minX: x0 + a0 * pxM, maxX: x0 + (a1 + 1) * pxM, minZ: z0 + b0 * pxM, maxZ: z0 + (b1 + 1) * pxM });
+      stats.fullTriangles += full.userData.triangles;
+      stats.fullVertices += full.userData.vertices;
+      if (coarse) { stats.coarseTriangles += coarse.userData.triangles; stats.coarseVertices += coarse.userData.vertices; }
+    }
+  }
+  stats.chunks = chunks.length;
+  function update(x, z) {
+    let f = 0;
+    let c = 0;
+    for (const ch of chunks) {
+      const d = Math.hypot(Math.max(ch.minX - x, 0, x - ch.maxX), Math.max(ch.minZ - z, 0, z - ch.maxZ)); // distance to the chunk's box
+      const near = d < LOD0_R_M;
+      const mid = !near && d < LOD1_R_M;
+      ch.full.visible = near || (mid && !ch.coarse);
+      if (ch.coarse) ch.coarse.visible = mid;
+      f += ch.full.visible ? 1 : 0;
+      c += ch.coarse && ch.coarse.visible ? 1 : 0;
+    }
+    stats.shownFull = f;
+    stats.shownCoarse = c;
+  }
+  return { group, update, stats, material };
 }
 
 // ---- 3. trees near the boat ------------------------------------------------------------------
@@ -424,8 +517,8 @@ export function placeCoastLighthouses(world, names) {
 
 // ---- 5. everything together ------------------------------------------------------------------
 
-// Loads the coast raster tile(s), builds the world and the scene objects, times each phase.
-// opts: { vex, step, seed }.
+// Loads the coast raster tile(s) and the data around them, builds the world and the scene objects, times each phase.
+// opts: { vex, step, smooth, seed, at: [lon, lat] }.
 export async function loadRealCoast(opts = {}) {
   const T = { start: now() };
   const coastUrl = new URL('../assets/coast/', import.meta.url).href;
@@ -435,10 +528,12 @@ export async function loadRealCoast(opts = {}) {
     json: async (u) => { const t = await (await fetch(u)).text(); bytes += t.length; return JSON.parse(t); },
     bytes: async (u) => { const b = new Uint8Array(await (await fetch(u)).arrayBuffer()); bytes += b.length; return b; },
   };
-  const [coast, settlementsJson] = await Promise.all([loadCoast(coastUrl, io, COAST_TILES), io.json(dataUrl)]);
+  const [coast, settlementsJson, skerryJson, namesJson] = await Promise.all([
+    loadCoast(coastUrl, io, COAST_TILES), io.json(dataUrl), io.json(coastUrl + 'skerries.json'), io.json(coastUrl + 'names.json'),
+  ]);
   T.loadDecodeMs = now() - T.start;
 
-  const world = buildCoastWorld(coast, { vex: opts.vex ?? COAST_VEX, smooth: opts.smooth ?? COAST_SMOOTH });
+  const world = buildCoastWorld(coast, { vex: opts.vex ?? COAST_VEX, smooth: opts.smooth ?? COAST_SMOOTH, skerries: skerryJson.skerries });
   const t1 = now();
   const terrain = createCoastTerrain(world, opts.step ?? 1);
   T.terrainMs = now() - t1;
@@ -446,32 +541,40 @@ export async function loadRealCoast(opts = {}) {
   const t2 = now();
   const trees = createCoastTrees(world, opts.seed ?? 1);
   const { buildings, villages } = placeCoastVillages(world, settlementsJson.settlements);
-  const lights = placeCoastLighthouses(world, ['Måseskär', 'Hättan']);
+  const lightNames = LIGHTHOUSES.filter((l) => { const [x, z] = world.toGame(l.lon, l.lat); return world.inside(x, z, EDGE_FADE_M); }).map((l) => l.name);
+  const lights = placeCoastLighthouses(world, lightNames);
   const props = new THREE.Group();
   for (const b of buildings) props.add(createBuilding(b));
   for (const l of lights) if (l.group) props.add(l.group);
   T.propsMs = now() - t2;
 
-  // Käringön village origin (places.json); ?cat=lon,lat starts the boat at the open water nearest another point.
-  const [kx, kz] = world.toGame(...(opts.at || [11.36359, 58.10985]));
-  const spawn = findOpenWater(world, kx, kz);
-  const group = new THREE.Group();
-  group.add(terrain, trees.group, props);
+  // The start: open water just outside Grundsund's harbour, from the OSM marina node (assets/coast/names.json).
+  // ?cat=lon,lat starts at the open water nearest another point (testing).
+  const [sx, sz] = world.toGame(...(opts.at || [namesJson.spawn.lon, namesJson.spawn.lat]));
+  const spawn = findOpenWater(world, sx, sz);
+  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M) });
 
+  const group = new THREE.Group();
+  group.add(terrain.group, trees.group, props);
   const clamp = (self) => {
     const m = EDGE_CLAMP_M;
     self.x = Math.min(world.bounds.maxX - m, Math.max(world.bounds.minX + m, self.x));
     self.z = Math.min(world.bounds.maxZ - m, Math.max(world.bounds.minZ + m, self.z));
   };
+  // Per frame: which terrain chunks to show, and the trees around the boat. Returns true when the trees were rebuilt.
+  const update = (x, z) => { terrain.update(x, z); return trees.update(x, z); };
+  update(spawn ? spawn.x : sx, spawn ? spawn.z : sz);
   T.buildMs = now() - T.start;
   return {
-    world, group, depthMap: world.depthMap, spawn, trees, clamp, terrain,
+    world, group, depthMap: world.depthMap, spawn, trees, terrain, clamp, update, names,
+    heightAt: world.heightAt,
     report: {
       bytesDownloadedByLoader: bytes, timings: { ...T, ...world.timings },
       window: { cells: [world.nx, world.nz], metres: [Math.round(world.nx * world.pxM), Math.round(world.nz * world.pxM)], landPct: +world.landPct.toFixed(1) },
-      terrain: terrain.userData, buildings: buildings.length, villages,
+      terrain: terrain.stats, buildings: buildings.length, villages, skerries: world.skerryCount,
       lighthouses: lights.map((l) => ({ name: l.name, movedM: l.movedM, error: l.error })),
-      spawn, look: world.look,
+      names: { total: names.length, byKind: names.reduce((o, n) => ((o[n.kind] = (o[n.kind] || 0) + 1), o), {}), unplacedHarbours: namesJson.unplaced.map((u) => u.name) },
+      spawn, spawnFrom: namesJson.spawn, look: world.look,
     },
   };
 }
