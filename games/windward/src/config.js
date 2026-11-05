@@ -129,6 +129,17 @@ export const CONFIG = {
   GLOW_DISTANCE: 340, // world units from the camera, along the sun's direction
   GLOW_OPACITY: 0.65,
 
+  // Golden distance haze (Look Lab, 2026-11-05). Distances are multiples of
+  // the camera-to-boat distance so the haze looks the same at every zoom
+  // (the lab's 200-560 m fog was set for a ~170 m camera distance). Meshes
+  // use scene.fog; the water shader mixes the same colour itself.
+  HAZE_COLOR: 0xe9d3a6,
+  HAZE_MESH_NEAR_MUL: 1.18, // lab: fog 200..560 at camera distance ~170
+  HAZE_MESH_FAR_MUL: 3.3,
+  HAZE_WATER_NEAR_MUL: 1.0, // lab: water haze 170..520
+  HAZE_WATER_FAR_MUL: 3.06,
+  HAZE_WATER_STRENGTH: 0.85, // how much of the haze colour the far sea reaches
+
   // Water tuning (WAVE_AMP, WAVE_LEN, WAVE_SPEED, SEG, SIZE, WATER_COLOR)
   // lives in src/water.js — self-contained so the JS boat-bob mirror and
   // the GLSL displacement can't drift apart (see that file).
@@ -193,7 +204,11 @@ export const CONFIG = {
   // a 150m landmark at ~11m; see that file's header). 4m keeps seed 1's
   // whole scattered field (~97 islands) under a 200k total-vertex budget
   // (171,248 measured) — index.html's ?cell= overrides for A/B'ing.
-  ISLAND_GRID_CELL_SIZE: 3, // metres per terrain facet; was 4 — Felix 2026-11-05 found 4m triangles too big (shared/ART.md facet rule updated to 3m)
+  // 2026-11-05 (Look Lab port): terrain is smooth now, so this is sampling
+  // resolution, not facet size — fine enough for a crisp ~1 m wet-rock band
+  // at the waterline. src/island.js culls underwater cells nobody can see,
+  // which keeps the vertex count near the old 3 m mesh. Was 3 (4 before).
+  ISLAND_GRID_CELL_SIZE: 1.5, // metres per terrain grid cell
 
   // Vertex-colour thresholds (slope from a finite-difference gradient, like
   // BOAT_TILT_GRADIENT_EPS above).
@@ -204,7 +219,7 @@ export const CONFIG = {
   ISLAND_TREE_MIN_HEIGHT: 4.4, // 1-6m, no trees on the beach fringe below this
   ISLAND_TREE_MAX_HEIGHT: 34, // 20-40m, no trees above this (bare granite near the peak)
   ISLAND_TREE_MAX_SLOPE_DEG: 37, // 20-40deg, no trees on slopes steeper than this
-  ISLAND_TREE_ATTEMPTS: 800, // candidate points tried; how many actually land in the valid height/slope band (and so get planted) varies with the terrain, not just this number
+  ISLAND_TREE_ATTEMPTS: 2750, // candidate points tried (~1 per 25 m² of the island's bounding square at the base radius, the Look Lab's density); only the ~8% that land in a green pocket get planted (src/island-look.js's greenAmount), so this is far above the planted count
   ISLAND_TREE_SCALE_MIN: 0.7, // 0.5-1.5, per-tree random scale range, for a handmade/uneven look
   ISLAND_TREE_SCALE_MAX: 1.5,
 

@@ -23,6 +23,7 @@ import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
 import { createIsland } from './src/island.js';
 import { scatterIslands, cameraViewWidth, gridPitch, windowOccupancy } from './src/island-scatter.js';
+import { bakeDepthMap } from './src/depthmap.js';
 import { createWake } from './src/wake.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
@@ -110,6 +111,11 @@ export default function start({ canvas, net, seed, role }) {
   sun.shadow.camera.bottom = -150;
   sun.shadow.radius = 4; // blur, for "soft"
   sun.shadow.bias = CONFIG.SUN_SHADOW_BIAS; // reduce acne at the low elevation
+  // Smooth terrain normals (Look Lab port) at a 10 degree sun make self-shadow
+  // stripes ("acne") likelier than flat facets did; a small offset along the
+  // normal removes them. TODO(felix): confirm on a phone — raise if stripes
+  // show on the granite, lower if shadows detach from the houses.
+  sun.shadow.normalBias = 0.25;
   scene.add(sun);
   scene.add(sun.target); // target must be in the scene graph for its matrixWorld to update
 
@@ -123,8 +129,22 @@ export default function start({ canvas, net, seed, role }) {
     sun.target.position.copy(boatPosition);
   }
 
-  const water = createWater();
+  // Islands first: the sea is coloured by the depth under it, baked once from
+  // every island's height field. Same seed -> same map on both peers.
+  const scatteredIslands = scatterIslands(seed);
+  const depthMap = bakeDepthMap(scatteredIslands);
+  console.log(
+    `depth-map: ${depthMap.nx}x${depthMap.nz} texels @ ${depthMap.texel}m (${((depthMap.nx * depthMap.nz) / 1e6).toFixed(2)}M), ` +
+      `${depthMap.evals} height evals, baked in ${depthMap.bakeMs.toFixed(0)} ms`,
+  );
+
+  const water = createWater(depthMap);
   scene.add(water.mesh);
+
+  // Golden distance haze: fog for the meshes (the sea mixes the same colour
+  // in its own shader). near/far follow the camera-to-boat distance each
+  // frame, so the haze reads the same at every zoom.
+  scene.fog = new THREE.Fog(CONFIG.HAZE_COLOR, 1e6, 2e6);
 
   // Debug wireframe (I3b, 2026-09-16, index.html's ?wire=1, shared/ART.md's
   // one-facet-scale rule) — a 4m GridHelper as a screen ruler, boat-centred
@@ -156,7 +176,7 @@ export default function start({ canvas, net, seed, role }) {
   }
 
   scene.add(createScatter(seed));
-  const scatteredIslands = scatterIslands(seed);
+  // (scatteredIslands is built above, before the water.)
   // Debug: confirm placement/reachability at a glance without hunting for
   // specks in the rendered scene (Felix, 2026-09-16 — "I need to know
   // whether they're being placed where I can reach them, not whether
@@ -487,7 +507,7 @@ export default function start({ canvas, net, seed, role }) {
       otherWake.update(dt, otherBoat.group.position, other.heading, other.speed);
     }
 
-    water.update(waves, wind, selfBoat.group.position);
+    water.update(waves, wind, selfBoat.group.position, dt, camera.position);
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {
@@ -502,6 +522,10 @@ export default function start({ canvas, net, seed, role }) {
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }
+    // Haze distances track the camera (after it moved, before it renders).
+    const camToBoat = camera.position.distanceTo(selfBoat.group.position);
+    scene.fog.near = camToBoat * CONFIG.HAZE_MESH_NEAR_MUL;
+    scene.fog.far = camToBoat * CONFIG.HAZE_MESH_FAR_MUL;
     sky.update(camera);
     sunGlow.update(camera);
     if (!phone) setLegendVisible(hud, !(hasSteered && hasTrimmed));

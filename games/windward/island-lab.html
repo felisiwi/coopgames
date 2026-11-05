@@ -148,7 +148,7 @@ const NUMERIC_FIELDS = [
   { group: 'Terrain height', key: 'ISLAND_PEAK_SHAPE', label: 'Peak sharpness (low = broad dome)', min: 0.4, max: 1.0, step: 0.01 },
   { group: 'Terrain height', key: 'ISLAND_HEIGHT_NOISE_FREQ', label: 'Terrain bump scale (high = smaller bumps)', min: 0.008, max: 0.03, step: 0.001, unit: '/m' },
   { group: 'Terrain height', key: 'ISLAND_HEIGHT_NOISE_AMPLITUDE', label: 'Terrain bumpiness amount', min: 3, max: 15, step: 0.5, unit: 'm' },
-  { group: 'Terrain height', key: 'ISLAND_GRID_CELL_SIZE', label: 'Facet chunkiness (mesh cell size)', min: 4, max: 10, step: 0.5, unit: 'm' },
+  { group: 'Terrain height', key: 'ISLAND_GRID_CELL_SIZE', label: 'Terrain mesh cell size (smooth ground — lower = finer)', min: 1, max: 10, step: 0.5, unit: 'm' },
 
   { group: 'Vegetation & rock', key: 'ISLAND_SAND_MAX_HEIGHT', label: 'Sand / grass fringe height', min: 1, max: 5, step: 0.1, unit: 'm' },
   { group: 'Vegetation & rock', key: 'ISLAND_GRASS_MAX_HEIGHT', label: 'Grass upper height limit', min: 15, max: 30, step: 1, unit: 'm' },
@@ -156,7 +156,7 @@ const NUMERIC_FIELDS = [
   { group: 'Vegetation & rock', key: 'ISLAND_TREE_MIN_HEIGHT', label: 'Tree lower height limit', min: 1, max: 6, step: 0.1, unit: 'm' },
   { group: 'Vegetation & rock', key: 'ISLAND_TREE_MAX_HEIGHT', label: 'Tree upper height limit', min: 20, max: 40, step: 1, unit: 'm' },
   { group: 'Vegetation & rock', key: 'ISLAND_TREE_MAX_SLOPE_DEG', label: 'Tree max slope', min: 20, max: 40, step: 1, unit: '°' },
-  { group: 'Vegetation & rock', key: 'ISLAND_TREE_ATTEMPTS', label: 'Tree density (planting attempts)', min: 100, max: 800, step: 10, derived: true },
+  { group: 'Vegetation & rock', key: 'ISLAND_TREE_ATTEMPTS', label: 'Tree density (planting attempts; only those landing in a green pocket plant)', min: 100, max: 9000, step: 50, derived: true },
   { group: 'Vegetation & rock', key: 'ISLAND_TREE_SCALE_MIN', label: 'Tree size — min', min: 0.5, max: 1.5, step: 0.05 },
   { group: 'Vegetation & rock', key: 'ISLAND_TREE_SCALE_MAX', label: 'Tree size — max', min: 0.5, max: 1.5, step: 0.05 },
 
@@ -641,9 +641,11 @@ function frame(now) {
 
   const elapsedSeconds = (now - start) / 1000;
   if (!labWaves) labWaves = createWaveState(wind.dir);
-  stepWaves(labWaves, labLastS === null ? 0 : Math.min(0.1, elapsedSeconds - labLastS), wind, target.x, target.z);
+  const labDt = labLastS === null ? 0 : Math.min(0.1, elapsedSeconds - labLastS);
+  stepWaves(labWaves, labDt, wind, target.x, target.z);
   labLastS = elapsedSeconds;
-  water.update(labWaves, wind, { x: target.x, z: target.z });
+  // No depth map in the lab (no scattered islands to bake): the whole sea reads as deep, no haze.
+  water.update(labWaves, wind, { x: target.x, z: target.z }, labDt);
 
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
