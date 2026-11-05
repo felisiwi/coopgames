@@ -99,6 +99,8 @@ multiplayer, and what it talks to.
   natural reason to split up or plan together.
 - **Authority:** host. Clients send "I want to sell 5 herring"; the host
   checks, applies, and broadcasts the new prices.
+  *Superseded in part (2026-11-05): each player owns their own world; see
+  "Playing together". Within a world, the owner is the authority.*
 - **Tested in node:** price curves, recovery, no negative stock, no money
   from nothing (buy then sell straight back must lose money).
 
@@ -159,7 +161,9 @@ multiplayer, and what it talks to.
 
 ### 12. Players and multiplayer
 - **Today:** 2 players, host and guest over PeerJS; the host owns wind,
-  finds and (later) markets.
+  finds and (later) markets. *Superseded in part (2026-11-05): own world and
+  own save per player, playing together = visiting; see "Playing
+  together".*
 - **Design for N players from now on:** every per-player thing (boat,
   cargo, money, reputation) lives in a map keyed by player id, never in a
   single "other" variable (`game.js` has one today; refactor before
@@ -224,6 +228,17 @@ Before any story, the first thing is just sailing.
 - **"The game" (story, chart) starts when you choose it**, for example from a
   port. Nothing forces the story on you.
 - This is the no-save lure: 5 minutes must already feel rewarding.
+- **Pre-story sailing is today's coast (SET, Q10):** the current free-sail
+  mode, with its real present-day lights.
+- **Choosing the story at a port plays the first time-lapse backwards** to the
+  opening year: lights sink, years roll back. (The opening year itself is
+  held with Q1.)
+- **Arriving at a port or house (SET, Q13):** a sensory reward (bell,
+  chimney smoke, gulls scatter, someone waves), someone tosses you a small
+  gift (a fish), and the story is offered quietly (a lit doorway, a chart on
+  a table). No long dialogue UI. Fallback if real interactions are too much
+  for now: a simple port menu (start the story / later: sell catch /
+  leave).
 
 ## The opening: where the story starts (new, Felix 2026-11-05)
 
@@ -301,9 +316,25 @@ Design this explicitly; it touches almost every system.
 - **Purses are separate (SET).** The drop-in/drop-out flow must define what
   happens to shared contracts, cargo and co-op bonuses when someone leaves
   mid-trip. Open, see Gaps.
-- **Technical tension:** today the host owns wind, finds and (later) markets,
-  and a host leaving ends the room. "Not just the host" needs a decision on
-  authority. Open, see Gaps.
+- **Whose world (SET, Q11):** everyone owns their own world and save.
+  Playing together = visiting a friend's world; leaving sends you home. No
+  one can be stranded when the other leaves, because nobody depends on
+  another player's world. Shared contracts and market effects are a separate
+  protocol, designed later.
+- **What this supersedes:** the "host owns markets" wording in Markets (3) and
+  Players and multiplayer (12), and the "two friends crash a market" idea,
+  until that later protocol exists. Inside a world, its owner is still the
+  authority.
+- **The pair net (SET as the signature co-op move):** a net strung between
+  both boats to scoop a school of fish; an easy, fun way to boost resources.
+  It may arrive with the "visit each other's worlds" stage if it's a lot of
+  work.
+- **Cheap first co-op (OPEN, Q12):** the first co-op play still needs
+  something cheap that makes two players fun before the net exists.
+  Candidates: smart ping (tags what you point at and marks it on both
+  mini-maps), signalling (horn / lantern / flag codes), casual race (ping a
+  lighthouse or buoy as a finish line), found-together finds (already
+  built: both near = found).
 
 ## Where the story is told: history layers (SET, Felix 2026-11-05)
 
@@ -384,32 +415,38 @@ Status: **OPEN**, **SET** (Felix said it), **INFERRED** (my reading, confirm).
 | 10 | Solo vs co-op | **SET** | No up-front choice. Anyone joins before the story; start the story solo or together; either player can drop in or out; story never blocks the other player. See "Playing together". |
 | 11 | Light patterns in data | **SET, built, not merged** | Sourced characteristics (Lighthouse Directory) in `src/lighthouses.js` on branch `felix/windward-lighthouses` (commit `d02dcbf`). That worktree also has uncommitted edits. The meaning at the return is still open. |
 | 12 | Start area and history depth | **SET** | West Orust. Broad coast-wide history plus deeper niche history for the start area. |
+| 13 | Pre-story year | **SET** | Today's coast. Choosing the story at a port plays the time-lapse backwards to the opening year. |
+| 14 | Whose world | **SET** | Everyone owns their own world and save. Together = visiting a friend's world; leaving sends you home. Shared contracts and market effects are a later, separate protocol. |
+| 15 | Signature co-op move | **SET** (timing open) | The pair net. May arrive with the visiting stage. A cheaper first co-op feature is still open (Q12). |
+| 16 | Port arrival | **SET** | Sensory reward + a small gift (a fish) + the story offered quietly. Fallback: a simple port menu. No long dialogue UI. |
 
 ## Gaps (to grill)
 
 Recorded 2026-11-05; resolved ones move into the log above.
 
-- **Pre-story sailing: which year?** The free sailing before the story needs
-  a look and a set of lights. Is it the opening year, today's coast, or
-  something else? (It sets what the lure looks like.)
-- **Drop-in/out authority:** if the host owns wind, finds and markets, what
-  happens when the host leaves? Options include host migration, a
-  per-player view with no shared world state, or a lightweight server.
-- **Leaving mid-trip:** what happens to shared contracts, cargo and co-op
-  bonuses when one player leaves? (Purses are separate, SET.)
-- **Story without blockers:** the rule is set; the mechanism isn't. Do story
-  beats ever need both players, and if one is further ahead, who sees what?
-- **The "aha, better together" moment:** what small purpose does sailing
-  together have before the story?
-- **The early port/house trigger:** what happens when you sail into a port
-  or up to a house? Small, early, not deep.
-- **Treasure across time:** what exactly is recorded when you bury it, and
-  when does it become findable? What crosses is settled; this mechanic isn't.
+- **Cheap first co-op feature (Q12):** which of smart ping, signalling,
+  casual race, found-together finds, and when the pair net arrives.
+- **What a visitor brings in and takes home (round 4):** hold, catch,
+  contracts, pair-net haul, when visiting a friend's world.
+- **Visiting with mismatched progress or era (round 4):** the "no blockers
+  between players" rule applied to the visiting model.
+- **Treasure across time (round 4):** when and where is it buried relative to
+  when it is found? What crosses is settled; the causality isn't.
+- **Stage table (round 4):** T0-T8 assumes one era and trade first. Where do
+  the first minutes, port arrival, visiting, pair net, chart, storm and
+  first jump go?
+- **Chart data shape (round 4):** sections, markers, buying sections. Charts
+  are knowledge, so they cross jumps.
+- **Backwards time-lapse:** lights have a year-range lab on
+  `felix/windward-lighthouses` (its commit message mentions a Play
+  timeline, not verified here); boats and palette are not year-driven yet.
+- **Where a gifted fish goes:** the port gift happens before the story, so
+  before there is a hold or an inventory. A visual-only prop, or a first
+  taste of the hold?
+- **Shared contracts and market effects:** a separate protocol between
+  worlds, later.
+- **Opening year:** held with Q1.
 - **The returned-to opening:** what do the flash patterns unlock?
-- **Stage table (T0-T8)** assumes one era and trade first. Where do the
-  first minutes, the chart, the storm and the first jump go?
-- **Mini-map and chart sections:** data shape, and how "buy a chart
-  section" fits the markets.
 - **Coverage:** the settlements data has Käringön, Gullholmen and
   Hälleviksstrand but not Härmanö. The start area needs the deeper history
   layer anyway.
