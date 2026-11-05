@@ -50,6 +50,13 @@ export const CONFIG = {
   // Straight-line camera-to-boat distance. At 30deg vertical FOV / 16:9 this
   // puts ~120m across the screen at the boat's position (120 / (2*tan(hFOV/2))).
   FIXED_CAMERA_DISTANCE: 125,
+  // Near clip plane (2026-11-05): depth precision. With near 0.1 the depth
+  // buffer resolved only ~1 cm (24-bit) to ~0.25-1.5 m (16-bit phones) at the
+  // 62-310 m viewing distance, so shores (land and water nearly parallel at
+  // sea level) z-fought and flickered. The fixed camera is always >= ~62 m
+  // from the boat (ZOOM_MIN 0.5 x 125); nearest boat/prop geometry stays
+  // > ~45 m away. Override for A/B with ?near=<m> (0.01..20).
+  CAMERA_NEAR: 5,
   FIXED_CAMERA_DAMPING_RATE: 3, // 1/s, dt-based exponential smoothing
 
   ZOOM_MIN: 0.5, // closer than default
