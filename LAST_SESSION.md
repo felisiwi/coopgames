@@ -36,6 +36,8 @@ solved, facet rule, lab slider, URL overrides).
   (this session).
 - Will It Fit? stage 1 signed off (Kenny, 2026-09-13) — 43/43 headless,
   not hub-launched; see its README.
+- Windward R0 (felix/windward-real-coast): real Bohuslän coast, vegetation classes and
+  coast-lab.html, preview only; see games/windward/assets/coast/SOURCES.md.
 
 ## Next
 
