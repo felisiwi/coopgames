@@ -495,6 +495,8 @@ export function createPhoneControls({ canvas, camera, onPing }) {
   return {
     apply,
     draw,
+    // Drop every finger the controls are tracking (a pinch-to-zoom began: those two fingers are zooming, not steering).
+    interrupt() { pointers.clear(); aimHeading = null; },
     destroy() {
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
