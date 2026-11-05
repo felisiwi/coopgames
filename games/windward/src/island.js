@@ -164,6 +164,7 @@ function createTerrainMesh(heightAt, params, look) {
   const positions = new Float32Array(kept * 3);
   const normals = new Float32Array(kept * 3);
   const colors = new Float32Array(kept * 3);
+  const slopes = new Float32Array(kept); // kept so recolorTerrain() can repaint without the height field
   const heightOr = (k, fallback) => (H[k] === UNSET ? fallback : H[k]);
   for (let j = 0; j < n; j++) {
     for (let i = 0; i < n; i++) {
@@ -186,7 +187,8 @@ function createTerrainMesh(heightAt, params, look) {
       normals[slot * 3] = -dhdx * inv;
       normals[slot * 3 + 1] = inv;
       normals[slot * 3 + 2] = -dhdz * inv;
-      groundColor(h, Math.hypot(dhdx, dhdz), x, z, look, _color);
+      slopes[slot] = Math.hypot(dhdx, dhdz);
+      groundColor(h, slopes[slot], x, z, look, _color);
       colors[slot * 3] = _color.r;
       colors[slot * 3 + 1] = _color.g;
       colors[slot * 3 + 2] = _color.b;
@@ -211,12 +213,15 @@ function createTerrainMesh(heightAt, params, look) {
   geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+  geometry.userData.slopes = slopes;
+  geometry.userData.look = look;
   geometry.computeBoundingSphere();
   geometry.computeBoundingBox();
 
   // Smooth shading from the vertex normals above (no flatShading). Lambert,
   // not Standard: still no specular highlights (shared/ART.md).
   const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  material.color.setScalar(CONFIG.LOOK_ISLAND_BRIGHTNESS);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -250,8 +255,10 @@ function createTrees(seed, heightAt, params, look) {
 
   const trunkGeometry = new THREE.CylinderGeometry(0.15, 0.2, TRUNK_HEIGHT, TRUNK_RADIAL_SEGMENTS);
   const canopyGeometry = new THREE.ConeGeometry(1.1, CANOPY_HEIGHT, CANOPY_RADIAL_SEGMENTS);
-  const trunkMaterial = new THREE.MeshLambertMaterial({ color: params.ISLAND_COLOR_TRUNK, flatShading: true });
-  const canopyMaterial = new THREE.MeshLambertMaterial({ color: params.ISLAND_COLOR_PINE, flatShading: true });
+  const trunkMaterial = new THREE.MeshLambertMaterial({ flatShading: true });
+  const canopyMaterial = new THREE.MeshLambertMaterial({ flatShading: true });
+  trunkMaterial.color.set(CONFIG.LOOK_TRUNK).multiplyScalar(CONFIG.LOOK_ISLAND_BRIGHTNESS);
+  canopyMaterial.color.set(CONFIG.LOOK_PINE).multiplyScalar(CONFIG.LOOK_ISLAND_BRIGHTNESS);
 
   const attempts = params.ISLAND_TREE_ATTEMPTS;
   const trunks = new THREE.InstancedMesh(trunkGeometry, trunkMaterial, attempts);
@@ -304,4 +311,29 @@ export function createIsland(seed, params = CONFIG) {
   group.add(createTerrainMesh(heightAt, params, look));
   group.add(createTrees(seed, heightAt, params, look));
   return { group, heightAt, look };
+}
+
+// ---- live look changes (the ?tune=1 panel) ---------------------------------
+// Repaints a terrain mesh's vertex colours after the palette changed
+// (refreshPalette() in island-look.js). Heights come from the vertex
+// positions, slopes from the copy stored at build time.
+export function recolorTerrain(mesh) {
+  const geo = mesh.geometry;
+  const pos = geo.getAttribute('position');
+  const col = geo.getAttribute('color');
+  const { slopes, look } = geo.userData;
+  for (let i = 0; i < pos.count; i++) {
+    groundColor(pos.getY(i), slopes[i], pos.getX(i), pos.getZ(i), look, _color);
+    col.setXYZ(i, _color.r, _color.g, _color.b);
+  }
+  col.needsUpdate = true;
+}
+
+// Brightness and pine colours for one island group from createIsland().
+export function applyIslandLook(group) {
+  const b = CONFIG.LOOK_ISLAND_BRIGHTNESS;
+  group.children[0].material.color.setScalar(b);
+  const [trunks, canopies] = group.children[1].children;
+  trunks.material.color.set(CONFIG.LOOK_TRUNK).multiplyScalar(b);
+  canopies.material.color.set(CONFIG.LOOK_PINE).multiplyScalar(b);
 }

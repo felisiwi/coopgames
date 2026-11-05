@@ -369,6 +369,30 @@ Things that are NOT a literal copy of the lab, and why:
 - `island-lab.html`'s colour and height-threshold sliders no longer drive the
   ground colour (the palette is in `island-look.js`).
 
+### Look pass 2: Skagen palette (2026-11-05)
+
+Felix's verdict on L1: shallows too turquoise, foam a bit strong in light wind,
+islands too dark. Target mood: Skagenmålarna, "den blå time" — pastel, dreamy,
+slightly cold, high-key, silvery sea. The paint is `LOOK_*` in `src/config.js`.
+
+- **"Too dark" was the lights, not the paint.** three.js r155+ no longer
+  multiplies light by pi, so a diffuse surface gets `intensity / pi` of its
+  colour: the old fill (0.45) lit the ground at 14%. The fill is now 2.4 and
+  cool (`#dfe6ee` sky, lilac `#a79fbd` ground), the sun softer (2.4, pale
+  `#fff1e0`, elevation 18 instead of 10). Flat tops receive 0.81 of their
+  colour (was 0.13), slopes facing away 0.55 (was 0.06); lit/shaded stays ~1.5
+  so shadows read (`look-presets.test.js` checks this).
+- **Foam scales with wind** (`foamStrength`, `LOOK_FOAM_WIND_AMOUNT`) off a
+  low-passed wind (`stepFoamWind`, 3 s), never off time.
+- **`?tune=1`** shows a collapsed "Tune" panel (`src/tune.js`): 7 sliders and
+  Before / Skagen buttons; the address bar always holds the current values
+  (`src/look-presets.js`), so Felix can send a link back. Without `tune=1`
+  the panel is never loaded and URL look values are ignored. Pines are in the
+  panel's brightness/colour too; the shore foam colour and sea colours are
+  presets-only (edit `config.js`).
+- Known: small inland ponds go solid white (all of the pond is within the foam
+  edge of its shore). Present since L1, not changed here.
+
 ## Phone controls: Control Lab findings (Felix, 2026-11-04)
 
 Explored in a throwaway prototype (claude.ai artifact "Windward Control

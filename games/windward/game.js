@@ -21,7 +21,9 @@ import { wantsPhoneControls, createPhoneControls } from './src/phone.js';
 import { createWater, seaHeightCPU, createWaveState, stepWaves, SIZE as WATER_SIZE } from './src/water.js';
 import { createWindArrow } from './src/windArrow.js';
 import { createScatter } from './src/scatter.js';
-import { createIsland } from './src/island.js';
+import { createIsland, recolorTerrain, applyIslandLook } from './src/island.js';
+import { refreshPalette } from './src/island-look.js';
+import { applyValues, parseLookParams } from './src/look-presets.js';
 import { scatterIslands, cameraViewWidth, gridPitch, windowOccupancy } from './src/island-scatter.js';
 import { bakeDepthMap } from './src/depthmap.js';
 import { createWake } from './src/wake.js';
@@ -66,6 +68,14 @@ function approachSpeed(current, target, dt) {
 }
 
 export default function start({ canvas, net, seed, role }) {
+  // ?tune=1 (look pass 2): a link can carry look values (src/look-presets.js);
+  // apply them over config.js BEFORE anything is built. Without tune=1 nothing
+  // here runs and the panel never exists.
+  const tuning = new URLSearchParams(window.location.search).get('tune') === '1';
+  if (tuning) {
+    applyValues(CONFIG, parseLookParams(window.location.search));
+    refreshPalette();
+  }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   // Phones: cap render resolution (a 3x screen is 9x the pixels for little
   // visible gain on flat shapes).
@@ -87,19 +97,21 @@ export default function start({ canvas, net, seed, role }) {
   // golden lit ones. Low elevation (CONFIG.LIGHT_ELEVATION_DEG) so the
   // sea's flat-shaded facets actually vary in brightness and shadows run
   // long — a near-overhead light barely shades small facet tilts.
-  scene.add(new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY));
+  const hemi = new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY);
+  scene.add(hemi);
   const sun = new THREE.DirectionalLight(CONFIG.SUN_COLOR, CONFIG.SUN_INTENSITY);
-  const lightAz = (CONFIG.LIGHT_AZIMUTH_DEG * Math.PI) / 180;
-  const lightEl = (CONFIG.LIGHT_ELEVATION_DEG * Math.PI) / 180;
-  // Same azimuth/elevation as before, kept as a constant offset (not an
-  // absolute position) so updateSunPosition() below can re-anchor it to the
-  // boat every frame instead of the light staying fixed near world origin
-  // while the boat sails away from it.
-  const sunOffset = new THREE.Vector3(
-    Math.sin(lightAz) * Math.cos(lightEl),
-    Math.sin(lightEl),
-    Math.cos(lightAz) * Math.cos(lightEl),
-  ).multiplyScalar(20);
+  // The sun is kept as a constant offset (not an absolute position) so
+  // updateSunPosition() below can re-anchor it to the boat every frame.
+  // Recomputed by setSunOffset() when the tuning panel changes the elevation.
+  const sunOffset = new THREE.Vector3();
+  function setSunOffset() {
+    const lightAz = (CONFIG.LIGHT_AZIMUTH_DEG * Math.PI) / 180;
+    const lightEl = (CONFIG.LIGHT_ELEVATION_DEG * Math.PI) / 180;
+    sunOffset
+      .set(Math.sin(lightAz) * Math.cos(lightEl), Math.sin(lightEl), Math.cos(lightAz) * Math.cos(lightEl))
+      .multiplyScalar(20);
+  }
+  setSunOffset();
 
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -207,8 +219,11 @@ export default function start({ canvas, net, seed, role }) {
         `windows(${view.toFixed(0)}m, n=${totalWindows}): 0=${histogram.pct0.toFixed(1)}% 1=${histogram.pct1.toFixed(1)}% 2=${histogram.pct2.toFixed(1)}% 3+=${histogram.pct3plus.toFixed(1)}% median=${median}`,
     );
   }
+  const islandGroups = [];
   for (const island of scatteredIslands) {
-    scene.add(createIsland(island.seed, island.params).group);
+    const { group } = createIsland(island.seed, island.params);
+    islandGroups.push(group);
+    scene.add(group);
   }
 
   // Stage 2: discoverables — seeded, identical on both peers, so only
@@ -227,6 +242,30 @@ export default function start({ canvas, net, seed, role }) {
   // Settlements: scenery cottages and boathouses, seeded like the finds and
   // kept clear of them (src/settlements.js).
   for (const b of placeSettlements(scatteredIslands, seed, discoverables)) scene.add(createBuilding(b));
+
+  // Applies CONFIG's look values to everything already built. Water, sky,
+  // glow and fog read CONFIG every frame; the rest is pushed here. Repainting
+  // ~300k ground vertices is the slow part, so it waits 200 ms after the last
+  // change (dragging a slider stays smooth on a phone).
+  const GROUND_PAINT = /^LOOK_(GRANITE|MEADOW|HEATHER|SAND|WET)/;
+  let repaintTimer = 0;
+  function applyLook(key) {
+    hemi.color.set(CONFIG.HEMI_SKY_COLOR);
+    hemi.groundColor.set(CONFIG.HEMI_GROUND_COLOR);
+    hemi.intensity = CONFIG.HEMI_INTENSITY;
+    sun.color.set(CONFIG.SUN_COLOR);
+    sun.intensity = CONFIG.SUN_INTENSITY;
+    setSunOffset();
+    for (const g of islandGroups) applyIslandLook(g);
+    if (key === '*' || GROUND_PAINT.test(key)) {
+      clearTimeout(repaintTimer);
+      repaintTimer = setTimeout(() => {
+        refreshPalette();
+        for (const g of islandGroups) recolorTerrain(g.children[0]);
+      }, 200);
+    }
+  }
+  if (tuning) import('./src/tune.js').then((m) => m.createTunePanel({ CONFIG, apply: applyLook }));
 
   const windArrow = createWindArrow();
   scene.add(windArrow.object);
@@ -524,6 +563,7 @@ export default function start({ canvas, net, seed, role }) {
     }
     // Haze distances track the camera (after it moved, before it renders).
     const camToBoat = camera.position.distanceTo(selfBoat.group.position);
+    scene.fog.color.set(CONFIG.HAZE_COLOR);
     scene.fog.near = camToBoat * CONFIG.HAZE_MESH_NEAR_MUL;
     scene.fog.far = camToBoat * CONFIG.HAZE_MESH_FAR_MUL;
     sky.update(camera);

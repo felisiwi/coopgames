@@ -39,6 +39,11 @@ if you need it.
   now 1.5 m of *sampling* resolution (unseen underwater cells are culled), and
   the water tile's `SEG` only has to resolve the shortest wave (3.6 m bound in
   `water.test.js`). The `shared/ART.md` update is its own PR (#5, not merged).
+- **Tuning the look on a phone:** add `?tune=1` to the solo entry
+  (`/games/windward/?seed=1&tune=1`). Sliders, Before / Skagen presets, and the
+  address bar always holds the current values (see DESIGN.md "Look pass 2").
+  Never shown without `tune=1`. To bake a pick in, copy its values into the
+  `LOOK_*` / lighting keys in `src/config.js`.
 - Island depth is baked once at start (`src/depthmap.js`, ~1.5 m texels, logged
   as `depth-map: ...` in the console) and also feeds the water colour and
   foam. Same seed gives the same map on both peers.

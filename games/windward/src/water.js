@@ -225,6 +225,45 @@ export function stepMarks(state, dt, wind, refX, refZ) {
   state.dir = wind.dir;
 }
 
+// --- foam strength follows the wind, smoothly --------------------------------
+// Look pass 2: the shore foam is a little weaker when the wind is light. The
+// wind strength itself already eases between targets (wind.js), but a guest
+// applies it in steps, so the foam reads a further low-passed copy, advanced
+// by dt like every other moving thing here (never a function of absolute time).
+export const FOAM_MIN = 0.45; // foam strength in a dead calm at FOAM_WIND_AMOUNT = 1
+export const FOAM_WIND_SMOOTH_S = 3; // seconds for the filtered wind to close ~63% of a change
+export function createFoamWind(strength = 0.5) {
+  return { value: strength };
+}
+export function stepFoamWind(state, dt, strength) {
+  state.value += (strength - state.value) * (1 - Math.exp(-dt / FOAM_WIND_SMOOTH_S));
+}
+function smooth01(e0, e1, x) {
+  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+  return t * t * (3 - 2 * t);
+}
+// 1 = full foam. `amount` 0 = foam ignores the wind, 1 = foam fades to FOAM_MIN in a calm.
+export function foamStrength(filteredWind, amount) {
+  const windy = FOAM_MIN + (1 - FOAM_MIN) * smooth01(0.1, 0.8, filteredWind);
+  return 1 + (windy - 1) * amount;
+}
+
+// Shallow colour with the saturation slider applied (0 = grey, 1 = as painted).
+export function shallowSrgb(hex, saturation, out = [0, 0, 0]) {
+  const r = ((hex >> 16) & 255) / 255;
+  const g = ((hex >> 8) & 255) / 255;
+  const b = (hex & 255) / 255;
+  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  out[0] = Math.min(1, Math.max(0, luma + (r - luma) * saturation));
+  out[1] = Math.min(1, Math.max(0, luma + (g - luma) * saturation));
+  out[2] = Math.min(1, Math.max(0, luma + (b - luma) * saturation));
+  return out;
+}
+const _sh = [0, 0, 0];
+function setSrgb(vec3, hex) {
+  vec3.set(((hex >> 16) & 255) / 255, ((hex >> 8) & 255) / 255, (hex & 255) / 255);
+}
+
 // --- shaders -----------------------------------------------------------------
 // The sun used for the painted light bands: the game's sun AZIMUTH but the Look
 // Lab's ELEVATION. The lab's two bands (thresholds 0.30 / 0.52 on dot(n, sun))
@@ -278,6 +317,12 @@ uniform vec3 uCam;
 uniform vec3 uHazeColor;
 uniform vec2 uHazeRange;
 uniform float uHazeStrength;
+uniform vec3 uDeep;
+uniform vec3 uMid;
+uniform vec3 uShallow;
+uniform vec3 uFoam;
+uniform float uSeaBright;
+uniform float uFoamK;
 varying vec3 vWorld;
 varying vec2 vGrad;
 
@@ -302,21 +347,21 @@ void main() {
   float depth = ds.r;
   float shore = ds.g;
 
-  vec3 deep = vec3(0.11, 0.40, 0.72);
-  vec3 mid = vec3(0.16, 0.55, 0.80);
-  vec3 shallow = vec3(0.36, 0.82, 0.82);
+  vec3 deep = uDeep;
+  vec3 mid = uMid;
+  vec3 shallow = uShallow;
   vec3 n = normalize(vec3(-vGrad.x, 1.0, -vGrad.y));
   vec3 col = mix(shallow, mid, smoothstep(0.3, 3.5, depth));
   col = mix(col, deep, smoothstep(3.5, 9.0, depth));
   // painted light: two soft bands instead of a smooth gradient
   float lit = dot(n, uSun);
   float band = smoothstep(0.30, 0.36, lit) * 0.10 + smoothstep(0.52, 0.58, lit) * 0.10;
-  col *= 0.86 + band;
+  col *= (0.86 + band) * uSeaBright;
 
   // shore foam: rings drifting off the land, plus a white edge at the waterline
   float ring = smoothstep(0.80, 0.86, fract(shore * 2.4 - uRingPhase)) * (1.0 - smoothstep(0.0, 1.6, shore));
   float edge = 1.0 - smoothstep(0.05, 0.35, shore);
-  col = mix(col, vec3(0.96, 0.99, 1.0), clamp(max(ring * 0.85, edge), 0.0, 1.0));
+  col = mix(col, uFoam, clamp(max(ring * 0.85, edge), 0.0, 1.0) * uFoamK);
 
   // wind marks, in the wind frame (x along the wind, y across it); kept out of the shallows
   vec2 wdir = vec2(-sin(uWindDir), -cos(uWindDir));
@@ -378,6 +423,12 @@ export function createWater(depthMap = null) {
     uHazeColor: { value: new THREE.Vector3(_hazeSrgb.r, _hazeSrgb.g, _hazeSrgb.b) },
     uHazeRange: { value: new THREE.Vector2(1e6, 2e6) },
     uHazeStrength: { value: 0 },
+    uDeep: { value: new THREE.Vector3() },
+    uMid: { value: new THREE.Vector3() },
+    uShallow: { value: new THREE.Vector3() },
+    uFoam: { value: new THREE.Vector3() },
+    uSeaBright: { value: 1 },
+    uFoamK: { value: 1 },
   };
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader: WATER_VERTEX_GLSL, fragmentShader: WATER_FRAGMENT_GLSL });
 
@@ -386,6 +437,7 @@ export function createWater(depthMap = null) {
 
   const spacing = SIZE / SEG;
   let marks = null;
+  let foamWind = null;
 
   // waveState: from createWaveState/stepWaves, shared with the boat bob.
   // `dt` advances the wind marks and foam; `cameraPosition` (optional) sets
@@ -398,6 +450,19 @@ export function createWater(depthMap = null) {
 
     if (!marks) marks = createMarkState(wind.dir);
     stepMarks(marks, dt, wind, boatPosition.x, boatPosition.z);
+
+    // Paint, read live from CONFIG so the ?tune=1 panel can change it.
+    setSrgb(uniforms.uDeep.value, CONFIG.LOOK_SEA_DEEP);
+    setSrgb(uniforms.uMid.value, CONFIG.LOOK_SEA_MID);
+    shallowSrgb(CONFIG.LOOK_SEA_SHALLOW, CONFIG.LOOK_SHALLOW_SAT, _sh);
+    uniforms.uShallow.value.set(_sh[0], _sh[1], _sh[2]);
+    setSrgb(uniforms.uFoam.value, CONFIG.LOOK_FOAM);
+    uniforms.uSeaBright.value = CONFIG.LOOK_SEA_BRIGHTNESS;
+    if (!foamWind) foamWind = createFoamWind(wind.strength);
+    stepFoamWind(foamWind, dt, wind.strength);
+    uniforms.uFoamK.value = foamStrength(foamWind.value, CONFIG.LOOK_FOAM_WIND_AMOUNT);
+    new THREE.Color(CONFIG.HAZE_COLOR).getRGB(_hazeSrgb, THREE.SRGBColorSpace);
+    uniforms.uHazeColor.value.set(_hazeSrgb.r, _hazeSrgb.g, _hazeSrgb.b);
 
     uniforms.uPhases.value.fromArray(waveState.phases);
     uniforms.uWindDir.value = wind.dir;

@@ -14,18 +14,38 @@
 // Here the lattice hash is integer maths (Math.imul), so a phone and a laptop
 // agree exactly on where pines stand.
 import * as THREE from '../vendor/three/three.module.js';
+import { CONFIG } from './config.js';
 
-// Colours straight from the lab's PALETTES.bohuslan.
+// The paint. Live THREE.Color objects, rebuilt from CONFIG's LOOK_* values by
+// refreshPalette() (called at load, and by the ?tune=1 panel after a change).
+// Look pass 2 replaced the lab's saturated colours with the Skagen palette; the
+// rules below are unchanged. Names keep the lab's: granite2 = pale domes,
+// streak = veins, grass/grass2 = meadow.
 export const PALETTE = {
-  granite: '#f0d3cd',
-  granite2: '#fdeee9', // paler, sun-bleached domes
-  streak: '#ddb6ad', // darker veins and cracks
-  grass: '#a8e851', // Summer meadow
-  grass2: '#74d24b',
-  heather: '#c9a0d4',
-  sand: '#fbe9a8',
-  wet: '#9a7f7a', // dark wet rock right at the water
+  granite: new THREE.Color(),
+  granite2: new THREE.Color(),
+  streak: new THREE.Color(),
+  grass: new THREE.Color(),
+  grass2: new THREE.Color(),
+  heather: new THREE.Color(),
+  sand: new THREE.Color(),
+  wet: new THREE.Color(),
 };
+const _cool = new THREE.Color();
+export function refreshPalette() {
+  const c = CONFIG;
+  // Tints: 0 = as painted. Granite is pulled up to halfway toward its lilac
+  // shadow colour; meadow up to fully toward the cooler sage.
+  PALETTE.granite.set(c.LOOK_GRANITE).lerp(_cool.set(c.LOOK_GRANITE_SHADOW), c.LOOK_GRANITE_TINT * 0.5);
+  PALETTE.granite2.set(c.LOOK_GRANITE_PALE).lerp(_cool.set(c.LOOK_GRANITE_SHADOW), c.LOOK_GRANITE_TINT * 0.5);
+  PALETTE.streak.set(c.LOOK_GRANITE_SHADOW);
+  PALETTE.grass.set(c.LOOK_MEADOW).lerp(_cool.set(c.LOOK_MEADOW_COOL), c.LOOK_MEADOW_TINT);
+  PALETTE.grass2.set(c.LOOK_MEADOW_2).lerp(_cool.set(c.LOOK_MEADOW_COOL), c.LOOK_MEADOW_TINT);
+  PALETTE.heather.set(c.LOOK_HEATHER);
+  PALETTE.sand.set(c.LOOK_SAND);
+  PALETTE.wet.set(c.LOOK_WET);
+}
+refreshPalette();
 
 // The lab's thresholds were tuned on an island whose land heights have a 90th
 // percentile of ~13 m and whose median slope is ~0.51 (measured on the lab's
@@ -113,9 +133,7 @@ export function greenAmount(h, slope, x, z, look) {
   return greenFromPocket(greenPocket(x, z), h, slope, look);
 }
 
-// Colours parsed once (THREE.Color.set('#hex') runs a regex — far too slow
-// to repeat per vertex, hundreds of thousands of times).
-const C = Object.fromEntries(Object.entries(PALETTE).map(([k, v]) => [k, new THREE.Color(v)]));
+const C = PALETTE; // read live, so a refreshPalette() shows on the next groundColor() call
 
 // Writes the ground colour for one spot into `out` (a THREE.Color). Same
 // layering as the lab's rock branch; a layer whose weight is 0 is skipped.
