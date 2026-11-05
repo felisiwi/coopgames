@@ -3,8 +3,8 @@
 // carries on if storage is blocked), and the real names.json accounts for all 15 of Felix's harbours.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { buildNameList, createNameBook, NAME_RADIUS_M, STORAGE_KEY } from './names.js';
-import { labelScreenPos, createLabelQueue } from './name-labels.js';
+import { buildNameList, createNameBook, displayName, NAME_RADIUS_M, SIGHT_EXTRA_M, SAME_PLACE_M, STORAGE_KEY } from './names.js';
+import { layoutLabels, createLabelQueue, keepDistance, labelScore, LABEL_MAX_SHOWN, LABEL_MAX_SHOWN_NARROW } from './name-labels.js';
 
 let passed = 0;
 function check(name, fn) {
@@ -82,10 +82,81 @@ check('buildNameList keeps only places inside the region and gives each kind its
   assert.equal(list[2].id, 'village:Vik');
 });
 
-check('labels clamp inside the screen so an off-screen island still shows its name', () => {
-  assert.deepEqual(labelScreenPos(0, 0, 400, 800), { x: 200, y: 400 });
-  const p = labelScreenPos(5, -5, 400, 800);
-  assert.ok(p.x <= 360 && p.y >= 0 && p.y <= 720, JSON.stringify(p));
+const W = 390;
+const H = 844;
+const rect = (p, it) => ({ x: p.x - it.w / 2, y: p.y - it.h / 2, w: it.w, h: it.h });
+const hits = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+
+check('a label is clamped inside the screen by its OWN size (a wide name no longer starts at x = -10)', () => {
+  const it = { id: 'a', x: -30, y: 300, w: 100, h: 36 };
+  const p = layoutLabels([it], W, H).get('a');
+  assert.ok(p.x - it.w / 2 >= 0 && !p.hidden, JSON.stringify(p));
+  const q = layoutLabels([{ ...it, x: 999, y: 9999 }], W, H).get('a');
+  assert.ok(q.x + 50 <= W && q.y + 18 <= H);
+});
+
+check('two names wanting the same spot: the first (nearest) keeps it, the other stacks beside, not on top', () => {
+  const items = [{ id: 'near', x: 200, y: 60, w: 110, h: 36 }, { id: 'far', x: 204, y: 62, w: 120, h: 36 }];
+  const out = layoutLabels(items, W, H);
+  assert.deepEqual([out.get('near').x, out.get('near').y], [200, 60], 'the nearest is untouched');
+  assert.equal(out.get('far').hidden, false);
+  assert.ok(!hits(rect(out.get('near'), items[0]), rect(out.get('far'), items[1])), 'no overlap');
+});
+
+check('names keep clear of the compass and HUD (Gåsö under the compass at 390 x 844)', () => {
+  const compass = { x: 286, y: 80, w: 96, h: 96 };
+  const gaso = { id: 'gaso', x: 314, y: 100, w: 104, h: 36 };
+  const p = layoutLabels([gaso], W, H, [compass]).get('gaso');
+  assert.equal(p.hidden, false, 'still shown, moved clear');
+  assert.ok(!hits(rect(p, gaso), compass), `clear of the compass: ${JSON.stringify(p)}`);
+  const bottom = layoutLabels([{ id: 'b', x: 195, y: 830, w: 100, h: 36 }], W, H, [{ x: 0, y: 800, w: W, h: 44 }]).get('b');
+  assert.ok(!bottom.hidden && bottom.y + 18 <= 800, 'and above the bottom strip');
+});
+
+check('a crowd collapses: at most 6 shown, the rest hidden, nothing overlaps (random 3-12 places, 300 trials)', () => {
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const compass = [{ x: 286, y: 80, w: 96, h: 96 }, { x: 243, y: 184, w: 139, h: 82 }];
+  for (let t = 0; t < 300; t++) {
+    const n = 3 + Math.floor(rnd() * 10);
+    const items = Array.from({ length: n }, (_, i) => ({ id: `i${i}`, x: rnd() * 500 - 50, y: rnd() * 1000 - 80, w: 70 + rnd() * 90, h: 36 }));
+    const out = layoutLabels(items, W, H, compass);
+    const shown = items.filter((it) => !out.get(it.id).hidden);
+    assert.ok(shown.length >= 1 && shown.length <= LABEL_MAX_SHOWN, `${shown.length} shown`);
+    for (const it of shown) {
+      const r = rect(out.get(it.id), it);
+      assert.ok(r.x >= 0 && r.y >= 0 && r.x + r.w <= W && r.y + r.h <= H, 'inside the screen');
+      for (const c of compass) assert.ok(!hits(r, c), 'clear of the HUD');
+      for (const o of shown) if (o !== it) assert.ok(!hits(r, rect(out.get(o.id), o)), 'no two overlap');
+    }
+  }
+});
+
+check('a narrow screen shows fewer names; an island or described place beats a nearer bare skerry', () => {
+  const items = Array.from({ length: 9 }, (_, i) => ({ id: `i${i}`, x: 200, y: 400 + i * 4, w: 100, h: 36 }));
+  const out = layoutLabels(items, W, H, [], { maxShown: LABEL_MAX_SHOWN_NARROW });
+  assert.equal(items.filter((it) => !out.get(it.id).hidden).length, LABEL_MAX_SHOWN_NARROW);
+  assert.ok(LABEL_MAX_SHOWN_NARROW < LABEL_MAX_SHOWN);
+  const gaso = { kind: 'island', desc: 'Goose Isle' };
+  assert.ok(labelScore(gaso, 200) < labelScore({ kind: 'skerry', desc: null }, 120), 'Gåsö at 200 m ranks ahead of a bare skerry at 120 m');
+  assert.ok(labelScore({ kind: 'skerry', desc: null }, 100) < labelScore({ kind: 'skerry', desc: null }, 150), 'otherwise nearest first');
+});
+
+check('a name stays while you are near its place: keep distance is its reach plus 140 m', () => {
+  assert.equal(keepDistance({ radius: NAME_RADIUS_M.island }), 360);
+  assert.equal(keepDistance({ radius: NAME_RADIUS_M.skerry }), 250);
+  assert.equal(keepDistance({ radius: NAME_RADIUS_M.skerry }, false), 170, 'an off-screen edge tag is kept for a shorter distance');
+  assert.ok(keepDistance({ radius: NAME_RADIUS_M.skerry }, false) > 100, 'but longer than the screen shows: a phone sees ~20 m to each side');
+  assert.ok(keepDistance({ radius: NAME_RADIUS_M.village }) > NAME_RADIUS_M.village, 'longer than the reach it was named at, so it does not vanish the moment it appears');
+});
+
+check('the label queue can drop a place\'s pending announcement (a sighting replaced by the real name)', () => {
+  const q = createLabelQueue();
+  q.push({ entry: { id: 'x', name: 'x', kind: 'village' }, hint: true }, 0);
+  q.push({ entry: { id: 'y', name: 'y', kind: 'village' } }, 0);
+  q.remove((p) => p.item.entry.id === 'x');
+  assert.equal(q.size, 1);
+  assert.equal(q.pop(0, 0).entry.id, 'y');
 });
 
 check('label queue: at most 3 at once, staggered, villages and harbours before skerries, stale ones dropped', () => {
@@ -100,6 +171,70 @@ check('label queue: at most 3 at once, staggered, villages and harbours before s
   assert.equal(q.pop(3, 2).entry.name, 's1', 'then skerries, in the order found');
   assert.equal(q.pop(20, 0), null, 'everything left was stale (waited > 8 s) and is dropped');
   assert.equal(q.size, 0);
+});
+
+// ---- stage 1b: descriptive names before discovery -------------------------------------------------------------
+const described = [
+  { id: 'h', name: 'Hättan', kind: 'skerry', x: 0, z: 0, radius: NAME_RADIUS_M.skerry, desc: 'the Hood' },
+  { id: 'p', name: 'Plain', kind: 'skerry', x: 1000, z: 0, radius: NAME_RADIUS_M.skerry, desc: null },
+];
+
+check('a place shows its description until discovered, then the real name with the description underneath', () => {
+  assert.deepEqual(displayName(described[0], false), { title: 'the Hood', sub: null });
+  assert.deepEqual(displayName(described[0], true), { title: 'Hättan', sub: 'the Hood' });
+});
+
+check('a skerry without a description stays unnamed until discovered', () => {
+  assert.deepEqual(displayName(described[1], false), { title: null, sub: null });
+  const book = createNameBook(described, memoryStorage());
+  assert.deepEqual(book.sight(1000, 0), [], 'nothing to show for it from afar');
+  assert.deepEqual(book.update(1000, 0).map((e) => e.name), ['Plain'], 'but it is still discovered');
+});
+
+check('a described place is sighted before it is named, once, and not again after discovery', () => {
+  const book = createNameBook(described, memoryStorage());
+  const reach = NAME_RADIUS_M.skerry + SIGHT_EXTRA_M;
+  assert.deepEqual(book.sight(reach + 5, 0), [], 'too far');
+  assert.deepEqual(book.sight(reach - 5, 0).map((e) => e.name), ['Hättan'], 'sighted before the name is in reach');
+  assert.equal(book.isKnown('h'), false, 'sighted is not discovered');
+  assert.deepEqual(book.update(reach - 5, 0), [], 'still too far to be named');
+  assert.deepEqual(book.sight(reach - 20, 0), [], 'sighted only once');
+  assert.deepEqual(book.update(50, 0).map((e) => e.name), ['Hättan'], 'named when close');
+  const other = createNameBook(described, memoryStorage());
+  other.update(0, 0);
+  assert.deepEqual(other.sight(0, 0), [], 'a place already discovered is never sighted');
+});
+
+check('buildNameList attaches descriptions by name and merges extra harbours', () => {
+  const list = buildNameList({
+    names: { islands: [{ osm: 'relation/1', name: 'Hättan', kind: 'skerry', lon: 1, lat: 1 }], harbours: [] },
+    villages: [],
+    toGame: (lon, lat) => [lon * 10, lat * 10],
+    inside: () => true,
+    placeNames: { descriptions: { Hättan: 'the Hood' }, extraHarbours: [{ name: 'Dammholmen', lon: 5, lat: 5 }] },
+  });
+  assert.equal(list.find((e) => e.name === 'Hättan').desc, 'the Hood');
+  const dam = list.find((e) => e.name === 'Dammholmen');
+  assert.deepEqual([dam.kind, dam.id, dam.desc], ['harbour', 'harbour:Dammholmen', null]);
+});
+
+check('the same name close together is one place, the more important kind wins; far apart stays two', () => {
+  const base = { names: { islands: [], harbours: [] }, toGame: (lon, lat) => [lon, lat], inside: () => true };
+  const list = buildNameList({
+    ...base,
+    names: { islands: [{ osm: 'r/1', name: 'Käringön', kind: 'skerry', lon: 10, lat: 0 }, { osm: 'r/2', name: 'Käringön', kind: 'skerry', lon: 900, lat: 0 }], harbours: [] },
+    villages: [{ name: 'Käringön', lon: 10 + SAME_PLACE_M / 2, lat: 0 }],
+  });
+  assert.deepEqual(list.map((e) => `${e.kind}@${e.x}`), ['skerry@900', `village@${10 + SAME_PLACE_M / 2}`], 'the near skerry is the village; the far one is another place');
+});
+
+check('label queue: a sighting ranks half a step ahead of its own kind, so a described skerry is not buried behind bare ones', () => {
+  const q = createLabelQueue();
+  q.push({ entry: { name: 'skerry-hint', kind: 'skerry' }, hint: true }, 0);
+  q.push({ entry: { name: 'skerry', kind: 'skerry' } }, 0);
+  q.push({ entry: { name: 'village-hint', kind: 'village' }, hint: true }, 0);
+  q.push({ entry: { name: 'island', kind: 'island' } }, 0);
+  assert.deepEqual([0, 1, 2, 3].map((i) => q.pop(i, 0).entry.name), ['village-hint', 'island', 'skerry-hint', 'skerry']);
 });
 
 check('names.json accounts for all 15 of Felix\'s harbours, and the spawn is Grundsunds hamn', () => {

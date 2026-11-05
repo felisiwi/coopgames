@@ -34,6 +34,11 @@ import { createDebugOverlay } from './src/debug-overlay.js';
 import { stepAlongShore, shallowFactor, SHORE_BRAKE } from './src/shore.js';
 import { createNameBook } from './src/names.js';
 import { createNameLabels } from './src/name-labels.js';
+import { createArrivals, giftFor } from './src/arrival.js';
+import { createDeck } from './src/deck.js';
+import { createAudio } from './src/audio.js';
+import { createLife } from './src/life.js';
+import { createHarbourMoment } from './src/harbour-moment.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
 // `seaHeightCPU` (src/water.js) is the JS mirror of the water shader's vertex
@@ -336,13 +341,38 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Names are discovered (src/names.js): shown once when the boat is near, remembered on this device.
   const nameBook = coast ? createNameBook(coast.names) : null;
   const nameLabels = coast ? createNameLabels() : null;
+  // Names already known from an earlier session show again when you are near them (no announcement).
+  if (coast) for (const e of coast.names) if (nameBook.isKnown(e.id)) nameLabels.track(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8);
   const namesLine = () => `names       ${nameBook.count()} / ${nameBook.total} discovered`;
   if (coast && debugOverlay) {
     debugOverlay.set('names', namesLine());
     window.__names = nameBook; // headless checks
     window.__self = self;
+    window.__labels = nameLabels;
     window.__coastHeight = coast.heightAt;
   }
+  // Stage 1b, the lure: arriving slowly in a harbour (a bell, a wave, a fish on deck), small life on the water.
+  // Sound starts only after the first tap (browser rule, src/audio.js). Real coast only.
+  // ?lure=0 switches the harbour moment and the animals off (to compare frame rate on a phone).
+  const lureOn = !!coast && new URLSearchParams(window.location.search).get('lure') !== '0';
+  const audio = lureOn ? createAudio() : null;
+  audio?.armOnFirstGesture();
+  const arrivals = lureOn ? createArrivals(coast.names) : null;
+  const deck = lureOn ? createDeck() : null;
+  const moment = lureOn ? createHarbourMoment({ THREE, scene, boatGroup: selfBoat.group, heightAt: coast.heightAt, deck, audio }) : null;
+  const life = lureOn
+    ? createLife({
+      THREE, scene, heightAt: coast.heightAt, places: coast.names, lights: coast.lights,
+      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength), // (waves / wind are set up below)
+      inside: (x, z) => coast.world.inside(x, z, 100),
+      onCry: () => audio.gull(0, 0.5),
+    })
+    : null;
+  if (coast && debugOverlay) window.__wind = () => wind;
+  if (coast && debugOverlay) window.__lureOn = lureOn;
+  if (lureOn && debugOverlay) window.__lure = { arrivals, deck, moment, life, audio, names: coast.names }; // headless checks
+  // The HUD counter on the real coast: places you have named (there are no "finds" to count).
+  const progressText = () => (coast ? `places named ${nameBook.count()}` : `found ${found.size}/${discoverables.length}`);
   const other = { x: null, z: null, heading: 0, speed: 0 };
   let otherLastPosAtS = null; // for partnerState() (src/partner.js)
   let partnerLeftAtS = null; // when the "friend left" notice started
@@ -482,6 +512,9 @@ function startGame({ canvas, net, seed, role }, coast) {
   resize();
 
   const hud = createHud(canvas);
+  // The HUD boxes that are on screen (compass, wind text, trim bar, notice, key legend): names keep clear of them.
+  const hudRects = () => [hud.rose, hud.text, hud.bar, hud.notice, hud.legend].filter((el) => el && el.style.display !== 'none')
+    .map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0).map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height }));
   if (coast && debugOverlay) {
     const r = coast.report;
     const t = r.timings;
@@ -557,7 +590,10 @@ function startGame({ canvas, net, seed, role }, coast) {
       }
       const discovered = nameBook.update(self.x, self.z);
       for (const e of discovered) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS);
+      // Approaching a described place that is not yet named: its descriptive name ("the Hood") first.
+      for (const e of nameBook.sight(self.x, self.z)) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS, true);
       if (discovered.length) debugOverlay?.set('names', namesLine());
+      if (lureOn) for (const place of arrivals.update(self.x, self.z, self.speed, nowS)) moment.trigger(place, giftFor(place), self, nowS);
     } else {
       self.x += Math.sin(self.heading) * self.speed * dt;
       self.z += Math.cos(self.heading) * self.speed * dt;
@@ -570,6 +606,10 @@ function startGame({ canvas, net, seed, role }, coast) {
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
     updateSunPosition(selfBoat.group.position);
+    if (lureOn) {
+      moment.update(dt, nowS);
+      life.update(self, dt, nowS);
+    }
 
     // Stage 1: a partner who stops sending 'pos' has left (src/partner.js).
     // Remove their boat rather than leave it frozen; a new 'pos' recreates
@@ -654,18 +694,18 @@ function startGame({ canvas, net, seed, role }, coast) {
     const bearingTo = (x, z) => Math.atan2(x - self.x, z - self.z);
     const friendPing = [...pings].reverse().find((p) => p.fromFriend);
     updateHud(hud, wind, self.trim, idealTrimRad(angleOffWind(self.heading, wind.dir)), self.heading, self.speed, {
-      foundText: `found ${found.size}/${discoverables.length}`,
+      foundText: progressText(),
       partnerBearing: partnerPos ? bearingTo(partnerPos.x, partnerPos.z) : null,
       pingBearing: friendPing ? bearingTo(friendPing.x, friendPing.z) : null,
     });
 
-    nameLabels?.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS);
+    nameLabels?.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS, self, hudRects);
     renderer.render(scene, camera);
     debugOverlay?.frame(now);
     phone?.draw(nowS, {
       partner: partnerPos,
       pings,
-      foundText: `found ${found.size}/${discoverables.length}`,
+      foundText: progressText(),
     });
     requestAnimationFrame(frame);
   }
