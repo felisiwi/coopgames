@@ -133,7 +133,7 @@ LIGHTHOUSES.forEach((info, i) => {
 });
 
 // A game boat for scale, parked next to the first tower.
-const boat = createBoatMesh(0xf5f0e3);
+const boat = createBoatMesh(0xf5f0e3).group; // createBoatMesh returns { group, setSailAngle }
 boat.position.set(towers[0].x - 11, 0, towers[0].z + 9);
 boat.rotation.y = 0.6;
 scene.add(boat);
