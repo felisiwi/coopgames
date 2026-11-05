@@ -1139,3 +1139,10 @@ the current Grundsund region, consistent with the coast agent's finding.
 **Boats:** see docs/BOAT-BRIEF.md: today = granddad's koster "Svalan" (varnished, white
 sails); ~1700 = a small tarred eka with a tanned spritsail and oars; masthead pennant in the
 player's colour; visible deck items, night lantern, worn and mended.
+
+**Terrain look (Felix, 2026-11-05, from terrain-lab):** crisp zones with soft edges
+(`crisp=1 soft=0.82`), granite only on the steepest ground (`rock=1 slope=55`, the slider max),
+grain on, no terraces, no edge lines. Link:
+terrain-lab.html?at=Käringön&crisp=1&soft=0.82&rock=1&slope=55&step=3.5&grain=1.
+Port in stage 1c via attachTerrainStyle() (branch felix/windward-terrain-style). Follow-up:
+trees should obey the same slope rule (no trees on painted granite).
