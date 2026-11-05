@@ -3,7 +3,7 @@
 // that shows treesNear(). Preview only; not wired into the game.
 import { loadCoast, tripEstimate, recommendScale, fmtDuration } from './coast-data.js';
 import { makeTreesNear, classSamplerFromCoast, DEFAULT_RADIUS } from './trees-near.js';
-import { stateAt as stateAtYear, populationAt, houseWidth } from './history.js';
+import { stateAt as stateAtYear, populationAt, houseWidth, originYear, approxLabel } from './history.js';
 import { buildAxis, describeYear, KIND_COLOURS } from './epochs.js';
 
 const SCALES = [6, 8, 10];
@@ -86,7 +86,7 @@ function houseLayout(f) {
   for (const s of settlements) {
     const st = stateAt(s, yTo); if (!st) continue;
     const [sx, sy] = toScreen(...lonLatToWorld(s.lon, s.lat)), pop = popAt(s, yTo);
-    items.push({ s, st, pop, sx, sy, unknown: s.firstRecorded == null, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
+    items.push({ s, st, pop, sx, sy, unknown: originYear(s) == null, approx: s.firstRecorded == null && s.firstRecordedApprox != null, w: (pop ? houseWidth(pop.value) : PHASE_W[st.kind]) * houseScale() * f });
   }
   items.sort((a, b) => b.w - a.w);                                   // big houses first: they host the small ones they would cover
   const pad = 6 * f, placed = [];
@@ -248,7 +248,7 @@ function draw() {
     for (const p of placed) {
       const { s, st, pop, sx, sy, w } = p;
       if (!onScreen(sx, sy)) continue;
-      if (s.firstRecorded != null && s.firstRecorded >= yFrom && s.firstRecorded <= yTo) {          // first recorded inside the window
+      if (originYear(s) != null && originYear(s) >= yFrom && originYear(s) <= yTo) {          // first recorded (exact or approx) inside the window
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * f; ctx.beginPath(); ctx.rect(sx - w / 2 - 4 * f, sy - w * 0.39 - 4 * f, w + 8 * f, w * 0.78 + 8 * f); ctx.stroke();
       }
       if (p.members.length) {                                                                         // a pile: n smaller places hide behind this house
@@ -257,16 +257,16 @@ function draw() {
         for (const k of p.members.length > 1 ? [2, 1] : [1]) { ctx.beginPath(); ctx.rect(sx - w / 2 + 3 * f * k, sy - w * 0.39 - 3 * f * k, w, w * 0.78); ctx.fill(); ctx.stroke(); }
       }
       drawHouse(sx, sy, w, KIND[st.kind].color, !pop, f);
-      if (p.unknown) {                                                                                 // "?" = origin date unknown: drawn at every year, not hidden
+      if (p.unknown || p.approx) {                                                                     // "?" = origin unknown (drawn at every year); "~" = approximate origin (century etc.)
         const qx = sx - w / 2, qy = sy - w * 0.39;
-        ctx.fillStyle = '#14232f'; ctx.strokeStyle = '#e6eef2'; ctx.lineWidth = 1.5 * f; ctx.beginPath(); ctx.arc(qx, qy, 7.5 * f, 0, 6.283); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#e6eef2'; ctx.font = `bold ${10 * f}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', qx, qy + 0.5 * f);
+        ctx.fillStyle = p.approx ? '#3a2f14' : '#14232f'; ctx.strokeStyle = p.approx ? '#f2d37a' : '#e6eef2'; ctx.lineWidth = 1.5 * f; ctx.beginPath(); ctx.arc(qx, qy, 7.5 * f, 0, 6.283); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = p.approx ? '#f2d37a' : '#e6eef2'; ctx.font = `bold ${10 * f}px system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.approx ? '~' : '?', qx, qy + 0.5 * f);
         ctx.textAlign = 'start'; ctx.font = `${12 * f}px system-ui, sans-serif`;
       }
     }
     for (const p of placed) { const k = p.members.length > 1 ? 6 * f : p.members.length ? 3 * f : 0; taken.push([p.sx - p.w / 2, p.sy - p.w * 0.39 - k, p.w + k, p.w * 0.78 + k]); }   // labels keep clear of every house and its pile
     for (const p of placed) label((p.pop ? `${p.s.name} ${fmtPop(p.pop.value)}` : p.s.name) + (p.members.length ? ` +${p.members.length}` : ''), p.sx, p.sy, p.w / (2 * f) + 6 + (p.members.length > 1 ? 4 : p.members.length ? 1 : 0), p.w * 0.39 + (p.members.length ? 6 * f : 0));   // labels last, biggest places first
-    lastPlaced = placed.map((p) => ({ name: p.s.name, unknown: p.unknown, box: [p.sx - p.w / 2, p.sy - p.w * 0.39, p.sx + p.w / 2, p.sy + p.w * 0.39], members: p.members.map((m) => m.s.name) }));
+    lastPlaced = placed.map((p) => ({ name: p.s.name, unknown: p.unknown, approx: p.approx, box: [p.sx - p.w / 2, p.sy - p.w * 0.39, p.sx + p.w / 2, p.sy + p.w * 0.39], members: p.members.map((m) => m.s.name) }));
   } else lastPlaced = [];
   document.body.dataset.drawn = `${lastPlaced.length},${merged}`;                                    // houses drawn, places merged into others
   document.body.dataset.houses = `${counted},${estimated}`;                                         // counted,estimated (for browser tests)
@@ -344,7 +344,7 @@ function infoAt(sx, sy) {
         : pop.mode === 'interpolated' ? `population about ${fmtPop(pop.value)} (between ${pop.from.year} and ${pop.to.year} counts)`
         : `population ${fmtPop(pop.value)} (${pop.counts}, nearest count ${pop.year})`;
       hits.push({ d: Math.hypot(px - sx, py - sy), cluster: p.members.length ? p : null,
-        text: `${s.name} · ${s.firstRecorded != null ? 'first recorded ' + s.firstRecorded : 'first record: date unknown (not found in the sources; shown at every year)'} · ${ph} · ${pp} · confidence ${s.confidence}` + (p.members.length ? ` · ${clusterText(p)} (tap to zoom in)` : '') });
+        text: `${s.name} · ${s.firstRecorded != null ? 'first recorded ' + s.firstRecorded : s.firstRecordedApprox ? 'origin ' + approxLabel(s.firstRecordedApprox) + ' (approximate: “' + s.firstRecordedApprox.basis + '”)' : 'first record: date unknown (not found in the sources; shown at every year)'} · ${ph} · ${pp} · confidence ${s.confidence}` + (p.members.length ? ` · ${clusterText(p)} (tap to zoom in)` : '') });
     }
   }
   if (lighthouses && layers.light) for (const l of lighthouses) {
@@ -421,6 +421,7 @@ function buildLegend() {
     + `<div class="lgRow"><span class="lgHouse dashed"></span>dashed = estimated, no count</div>`
     + `<div class="lgRow">stack "+n" = places merged; zoom in</div>`
     + `<div class="lgRow"><b style="border:1.5px solid #e6eef2;border-radius:50%;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;font-size:9px">?</b>date unknown (shown always)</div>`
+    + `<div class="lgRow"><b style="border:1.5px solid #f2d37a;color:#f2d37a;border-radius:50%;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;font-size:9px">~</b>approximate origin (e.g. ~1500s)</div>`
     + `<div class="lgRow"><span style="color:#ffd24a">▲</span>lighthouse</div>`
     + `<div class="lgRow"><span class="lgHouse" style="background:none;border:2px solid #fff"></span>white frame = first recorded in the window</div>`;
 }
@@ -583,13 +584,13 @@ function panelsTrees() {
   document.body.dataset.trees = n;
 }
 function panelsYear() {
-  $('legend').innerHTML = 'The legend is on the map. Several phases at one year: the latest-starting wins. Villages appear from their first record; those with no known origin date are drawn at every year with a "?".';
+  $('legend').innerHTML = 'The legend is on the map. Several phases at one year: the latest-starting wins. Villages appear from their first record; those known only roughly (a century, "at least by") appear from that approximate year with a "~"; those with no known origin date are drawn at every year with a "?".';
   const rows = settlements.map((s) => ({ s, st: stateAt(s, yTo) })).filter((r) => r.st);
   $('setlist').innerHTML = '<tr><th>name</th><th>first</th><th>pop.</th><th>phase</th><th>conf.</th><th>src</th></tr>' + rows.map(({ s, st }) => {
     const pop = popAt(s, yTo);
     const ph = st.phase ? `${KIND[st.kind].glyph} ${KIND[st.kind].label} ${st.phase.from}–${st.phase.to ?? '…'}` : '–';
     const src = s.sources.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">${i + 1}</a>`).join(' ');
-    return `<tr><td>${s.name}</td><td>${s.firstRecorded ?? 'unknown'}</td><td>${pop ? fmtPop(pop.value) + (pop.mode === 'counted' ? '' : '~') : 'est.'}</td><td style="text-align:left">${ph}</td><td>${s.confidence}</td><td>${src}</td></tr>`;
+    return `<tr><td>${s.name}</td><td>${s.firstRecorded ?? (s.firstRecordedApprox ? approxLabel(s.firstRecordedApprox) : 'unknown')}</td><td>${pop ? fmtPop(pop.value) + (pop.mode === 'counted' ? '' : '~') : 'est.'}</td><td style="text-align:left">${ph}</td><td>${s.confidence}</td><td>${src}</td></tr>`;
   }).join('');
   $('setdetails').hidden = !settlements.length;
 }

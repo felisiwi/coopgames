@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { phaseAt, stateAt, populationAt, houseWidth, KINDS, YEAR_MAX, GAP_MAX, NEAR_MAX } from './history.js';
+import { phaseAt, stateAt, populationAt, houseWidth, KINDS, YEAR_MAX, GAP_MAX, NEAR_MAX, originYear, approxLabel } from './history.js';
 
 let passed = 0;
 const check = (name, fn) => { fn(); passed += 1; console.log(`ok - ${name}`); };
@@ -146,6 +146,36 @@ check('Härmanö is in the data, with its own counts that are not added to Gullh
   assert.match(g.parish.mapping, /do not add/);
   assert.equal(g.firstRecorded, 1588);                                                        // Bohusläns museum rapport 2012:39
   assert.deepEqual(h.population.map((o) => [o.year, o.value]), [[2000, 138], [2012, 92]]);   // as relayed from sv.wikipedia; the notes say Gullholmen island had 20 and 10
+});
+
+check('approximate origins: shown from the approx year, exact first record wins, labels read naturally', () => {
+  const a = { firstRecorded: null, firstRecordedApprox: { year: 1600, precision: 'century', atLeast: true }, phases: [] };
+  assert.equal(originYear(a), 1600);
+  assert.equal(stateAt(a, 1599), null);
+  assert.equal(stateAt(a, 1650).kind, 'hamlet');
+  assert.equal(originYear({ firstRecorded: 1594, firstRecordedApprox: { year: 1500 } }), 1594);
+  assert.equal(originYear({ firstRecorded: null }), null);
+  assert.equal(approxLabel({ year: 1500, precision: 'century', atLeast: false }), '~1500s');
+  assert.equal(approxLabel({ year: 1600, precision: 'century', atLeast: true }), 'by ~1600s');
+  assert.equal(approxLabel({ year: 1575, precision: 'half-century', atLeast: false }), '~late 1500s');
+  assert.equal(approxLabel({ year: 1900, precision: 'half-century', atLeast: true }), 'by ~1900');
+  assert.equal(approxLabel({ year: 1752, precision: 'decade', atLeast: true }), 'by 1752');
+});
+check('every approximate origin is well-formed, sourced and quoted', () => {
+  let n = 0;
+  for (const s of data.settlements) {
+    const a = s.firstRecordedApprox; if (!a) continue; n++;
+    assert.equal(s.firstRecorded, null, `${s.name}: approx only where no exact first record`);
+    assert.ok(Number.isInteger(a.year) && a.year > 1000 && a.year < 2025, `${s.name}: year`);
+    assert.ok(['century', 'half-century', 'decade'].includes(a.precision), `${s.name}: precision`);
+    assert.equal(typeof a.atLeast, 'boolean', `${s.name}: atLeast`);
+    assert.ok(a.basis && a.basis.length > 10, `${s.name}: basis quote`);
+    assert.ok(/^https:\/\//.test(a.source) && s.sources.includes(a.source), `${s.name}: source listed`);
+  }
+  assert.ok(n >= 9, `approx origins: ${n}`);
+  const g = data.settlements.find((s) => s.name === 'Grundsund'), f = data.settlements.find((s) => s.name === 'Fiskebäckskil');
+  assert.equal(approxLabel(g.firstRecordedApprox), 'by ~1600s');
+  assert.equal(approxLabel(f.firstRecordedApprox), '~1500s');
 });
 
 console.log(`\n${passed} passed`);
