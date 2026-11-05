@@ -77,7 +77,9 @@
    "from": 800,
    "to": 1657,
    "weight": 12,
-   "kind": "med"
+   "kind": "med",
+   "vibe": "Mythic, raw",
+   "season": "Summer"
   },
   {
    "id": "new-crown",
@@ -85,7 +87,9 @@
    "from": 1658,
    "to": 1746,
    "weight": 12,
-   "kind": "quiet"
+   "kind": "quiet",
+   "vibe": "Poor, unsettled, hopeful",
+   "season": "Spring/summer"
   },
   {
    "id": "silver-sea",
@@ -94,7 +98,9 @@
    "to": 1809,
    "weight": 18,
    "kind": "boom",
-   "release": "first (proposed)"
+   "release": "first (proposed)",
+   "vibe": "Rich, rowdy, greedy",
+   "season": "Winter"
   },
   {
    "id": "light-stone",
@@ -102,7 +108,9 @@
    "from": 1810,
    "to": 1906,
    "weight": 18,
-   "kind": "light"
+   "kind": "light",
+   "vibe": "Loss, then hope, then bustle",
+   "season": "Winter → spring → winter"
   },
   {
    "id": "engines",
@@ -110,7 +118,9 @@
    "from": 1907,
    "to": 1949,
    "weight": 14,
-   "kind": "war"
+   "kind": "war",
+   "vibe": "Sly, tense",
+   "season": "Autumn/winter"
   },
   {
    "id": "summer",
@@ -118,7 +128,9 @@
    "from": 1950,
    "to": 1999,
    "weight": 13,
-   "kind": "sum"
+   "kind": "sum",
+   "vibe": "Friendly, cute, with a feud",
+   "season": "Summer"
   },
   {
    "id": "today",
@@ -126,7 +138,9 @@
    "from": 2000,
    "to": 2026,
    "weight": 13,
-   "kind": "light"
+   "kind": "light",
+   "vibe": "Easy, pretty",
+   "season": "Summer"
   }
  ],
  "eras": [
@@ -135,17 +149,17 @@
    "from": 800,
    "to": 1050,
    "kind": "med",
-   "tone": "Viking age · raw, open sea",
    "summary": "Bohuslän is part of Norway. Longships, chieftains, rock carvings already ancient.",
    "verify": true,
-   "events": []
+   "events": [],
+   "vibe": "Raw, mythic, open sea",
+   "season": "Summer"
   },
   {
    "name": "Fortress and fish",
    "from": 1051,
    "to": 1555,
    "kind": "med",
-   "tone": "Medieval · summer",
    "summary": "Towns and fortresses rise on a Norwegian coast; fishing villages are first recorded.",
    "events": [
     [
@@ -156,14 +170,15 @@
      1308,
      "Bohus fortress begun (verify)"
     ]
-   ]
+   ],
+   "vibe": "Old, slow, stony",
+   "season": "Summer"
   },
   {
    "name": "Border wars",
    "from": 1556,
    "to": 1657,
    "kind": "boom",
-   "tone": "Contested · winter fishing",
    "summary": "A herring period, then war between Sweden and Denmark-Norway over the coast.",
    "verify": true,
    "events": [
@@ -179,14 +194,15 @@
      1617,
      "Hälleviksstrand first recorded"
     ]
-   ]
+   ],
+   "vibe": "Contested, wary",
+   "season": "Winter fishing"
   },
   {
    "name": "New border",
    "from": 1658,
    "to": 1705,
    "kind": "quiet",
-   "tone": "Unsettled · summer",
    "summary": "Bohuslän becomes Swedish. Carlsten fortress rises over Marstrand.",
    "events": [
     [
@@ -205,14 +221,15 @@
      1660,
      "~ Short herring period (to ~1680)"
     ]
-   ]
+   ],
+   "vibe": "Unsettled",
+   "season": "Summer"
   },
   {
    "name": "Crown shores",
    "from": 1706,
    "to": 1746,
    "kind": "quiet",
-   "tone": "Poor, hopeful · spring/summer",
    "summary": "A new law lets subjects build fishing huts on crown land. Göteborg trades with China.",
    "events": [
     [
@@ -231,14 +248,15 @@
      1745,
      "Götheborg sinks at the harbour mouth"
     ]
-   ]
+   ],
+   "vibe": "Poor, hopeful",
+   "season": "Spring/summer"
   },
   {
    "name": "The silver comes",
    "from": 1747,
    "to": 1774,
    "kind": "boom",
-   "tone": "Rising, busy · winter",
    "summary": "The herring returns. Salteries and the first train-oil works.",
    "events": [
     [
@@ -253,14 +271,15 @@
      1766,
      "Exported oil made toll-free"
     ]
-   ]
+   ],
+   "vibe": "Rising, busy",
+   "season": "Winter"
   },
   {
    "name": "Honour and Life",
    "from": 1775,
    "to": 1794,
    "kind": "boom",
-   "tone": "Rich, rowdy · winter",
    "summary": "Marstrand is a free port: smugglers, refugees, foreign ships. Oil lights European streets.",
    "events": [
     [
@@ -287,14 +306,15 @@
      1794,
      "Free port closes"
     ]
-   ]
+   ],
+   "vibe": "Rich, rowdy, mischievous",
+   "season": "Winter, summer trading"
   },
   {
    "name": "Last silver",
    "from": 1795,
    "to": 1809,
    "kind": "boom",
-   "tone": "Anxious · late autumn",
    "summary": "Works shed workers, wars rage in Europe, and the herring thins out.",
    "events": [
     [
@@ -305,14 +325,15 @@
      1808,
      "Last herring season (1808–09)"
     ]
-   ]
+   ],
+   "vibe": "Anxious, stormy",
+   "season": "Late autumn"
   },
   {
    "name": "Empty harbours",
    "from": 1810,
    "to": 1839,
    "kind": "quiet",
-   "tone": "Loss · winter",
    "summary": "Ruined works and a desolate coast. Lasse-Maja sits in Carlsten.",
    "events": [
     [
@@ -323,14 +344,15 @@
      1839,
      "Lasse-Maja pardoned"
     ]
-   ]
+   ],
+   "vibe": "Loss, melancholy",
+   "season": "Winter"
   },
   {
    "name": "Lights go up",
    "from": 1840,
    "to": 1876,
    "kind": "light",
-   "tone": "Hope · spring",
    "summary": "The great lighthouses are lit one by one. Steamers appear.",
    "events": [
     [
@@ -349,14 +371,15 @@
      1868,
      "Pater Noster lit"
     ]
-   ]
+   ],
+   "vibe": "Hope, safer seas",
+   "season": "Spring"
   },
   {
    "name": "The second silver",
    "from": 1877,
    "to": 1906,
    "kind": "boom",
-   "tone": "Industrial bustle · winter",
    "summary": "Herring under the lights. Canneries, fish guano, granite quarries.",
    "events": [
     [
@@ -375,24 +398,26 @@
      1905,
      "You start here"
     ]
-   ]
+   ],
+   "vibe": "Industrial bustle",
+   "season": "Winter"
   },
   {
    "name": "Motor and canning",
    "from": 1907,
    "to": 1916,
    "kind": "war",
-   "tone": "Change · all seasons",
    "summary": "Engines arrive in fishing boats; canneries and emigration.",
    "verify": true,
-   "events": []
+   "events": [],
+   "vibe": "Change, engines",
+   "season": "Spring"
   },
   {
    "name": "Spirits at sea",
    "from": 1917,
    "to": 1938,
    "kind": "war",
-   "tone": "Sly, night runs · autumn",
    "summary": "Prohibition in Norway and rationing in Sweden: liquor smuggling along the coast.",
    "verify": true,
    "events": [
@@ -404,14 +429,15 @@
      1930,
      "Mollösund light"
     ]
-   ]
+   ],
+   "vibe": "Sly, night runs",
+   "season": "Autumn nights"
   },
   {
    "name": "Mines and neutrality",
    "from": 1939,
    "to": 1949,
    "kind": "war",
-   "tone": "Tense · winter",
    "summary": "War in Europe. Mines in the Skagerrak, a neutral coast, boats from occupied Norway.",
    "verify": true,
    "events": [
@@ -419,14 +445,15 @@
      1939,
      "Väcker and Ramskär lit"
     ]
-   ]
+   ],
+   "vibe": "Tense, watchful",
+   "season": "Winter"
   },
   {
    "name": "Summer guests",
    "from": 1950,
    "to": 1979,
    "kind": "sum",
-   "tone": "Friendly, cute · summer — with a feud",
    "summary": "Holiday homes, leisure boats, bridges to the islands, and the friendly west-coast–east-coast feud begins: rich Stockholmers buying up fishermen's cottages.",
    "events": [
     [
@@ -437,31 +464,35 @@
      1963,
      "Brief herring return (to 1965)"
     ]
-   ]
+   ],
+   "vibe": "Friendly, cute, with a feud",
+   "season": "Summer"
   },
   {
    "name": "Leisure sailing",
    "from": 1980,
    "to": 1999,
    "kind": "sum",
-   "tone": "Easy · summer",
    "summary": "Marinas and boatbuilding; the coast becomes a sailing playground.",
    "verify": true,
-   "events": []
+   "events": [],
+   "vibe": "Easy, playful",
+   "season": "Summer"
   },
   {
    "name": "Summer coast",
    "from": 2000,
    "to": 2026,
    "kind": "light",
-   "tone": "Free sail · summer",
    "summary": "The lure: just sail, no save, the meeting place between times.",
    "events": [
     [
      2020,
      "New Södra Syster tower"
     ]
-   ]
+   ],
+   "vibe": "Free sail, pretty",
+   "season": "Summer"
   }
  ]
 }
