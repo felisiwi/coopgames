@@ -5,14 +5,14 @@
 export const STORAGE_KEY = 'windward.names.v1';
 // "Within a sensible distance", game metres. The camera sees roughly +-150 m around the boat, and an
 // island's label point is its centre, so islands get the widest reach. TODO(felix): tune by feel.
-export const NAME_RADIUS_M = { island: 220, skerry: 110, harbour: 110, village: 150 };
+export const NAME_RADIUS_M = { island: 220, skerry: 110, harbour: 110, village: 150, light: 220 }; // a lighthouse is seen from afar, like an island
 // A place with a description is "sighted" this much further out than it is named: its descriptive name
 // ("the Hood") shows first, the real name only once the boat is close. Game metres.
 export const SIGHT_EXTRA_M = 120;
 // Two entries with the same name closer than this are one place (a village on an islet of the same name,
 // a harbour that is also a skerry): the more important kind wins. Game metres (1:10, so 60 m = 600 m real).
 export const SAME_PLACE_M = 60;
-const KIND_RANK = { village: 0, harbour: 1, island: 2, skerry: 3 };
+const KIND_RANK = { village: 0, harbour: 1, light: 1.5, island: 2, skerry: 3 };
 
 // localStorage can be missing or throw (private mode, blocked site data): then names just are not remembered.
 export function deviceStorage() {
@@ -31,7 +31,9 @@ export function deviceStorage() {
 // placeNames (optional): data/place-names.json, { descriptions: { name: 'the Hood' }, extraHarbours: [{ name, lat, lon }] }.
 // Every entry gets `desc`: the descriptive name shown before discovery (null when there is none).
 // A harbour that is also an OSM island/islet, or a village on a same-named skerry, appears once (SAME_PLACE_M).
-export function buildNameList({ names, villages, toGame, inside, placeNames = {} }) {
+// lights (optional, stage 1c): [{ name, lat, lon }] (src/lighthouses.js LIGHTHOUSES): a lighthouse is a place too (id "light:<name>"),
+// and wins over a same-named skerry on its rock, so it is one entry with the lighthouse's own kind.
+export function buildNameList({ names, villages, toGame, inside, placeNames = {}, lights = [] }) {
   const descriptions = placeNames.descriptions || {};
   const all = [];
   const add = (id, name, kind, lon, lat) => {
@@ -43,6 +45,7 @@ export function buildNameList({ names, villages, toGame, inside, placeNames = {}
   for (const h of names.harbours) add(`harbour:${h.name}`, h.name, 'harbour', h.lon, h.lat);
   for (const h of placeNames.extraHarbours || []) add(`harbour:${h.name}`, h.name, 'harbour', h.lon, h.lat);
   for (const v of villages) add(`village:${v.name}`, v.name, 'village', v.lon, v.lat);
+  for (const l of lights) add(`light:${l.name}`, l.name, 'light', l.lon, l.lat);
   // Most important kind first; a lesser entry of the same name close to a kept one is dropped.
   const kept = [];
   for (const e of [...all].sort((a, b) => (KIND_RANK[a.kind] ?? 9) - (KIND_RANK[b.kind] ?? 9))) {

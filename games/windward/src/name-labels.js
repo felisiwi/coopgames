@@ -20,7 +20,7 @@ export const LABEL_MAX_SHOWN_NARROW = 4;
 export const NARROW_PX = 600;
 // Which names win a crowded edge: the nearest, but a village, harbour, island or described place counts as this many
 // metres nearer than a bare skerry (so Gåsö at 200 m beats an unnamed-by-description skerry at 120 m).
-export const IMPORTANCE_BONUS_M = { village: 140, harbour: 100, island: 100, skerry: 0 };
+export const IMPORTANCE_BONUS_M = { village: 140, harbour: 100, light: 120, island: 100, skerry: 0 };
 export const DESCRIBED_BONUS_M = 60;
 export const labelScore = (entry, dist) => dist - (IMPORTANCE_BONUS_M[entry.kind] ?? 0) - (entry.desc ? DESCRIBED_BONUS_M : 0);
 export const EDGE_KEEP_EXTRA_M = 60; // an edge tag (place off-screen) is kept for this long instead
@@ -66,7 +66,7 @@ export function layoutLabels(items, W, H, reserved = [], { margin = 8, gap = 6, 
 export const LABEL_MAX_ACTIVE = 3;
 export const LABEL_GAP_S = 0.8;
 export const LABEL_STALE_S = 8;
-const PRIORITY = { village: 0, harbour: 1, island: 2, skerry: 3 };
+const PRIORITY = { village: 0, harbour: 1, light: 1.5, island: 2, skerry: 3 };
 export function createLabelQueue({ max = LABEL_MAX_ACTIVE, gapS = LABEL_GAP_S, staleS = LABEL_STALE_S } = {}) {
   let pending = [];
   let lastAt = -Infinity;
@@ -91,7 +91,7 @@ export function createLabelQueue({ max = LABEL_MAX_ACTIVE, gapS = LABEL_GAP_S, s
   };
 }
 
-const KIND_NOTE = { island: 'island', skerry: 'skerry', harbour: 'natural harbour', village: '' };
+const KIND_NOTE = { island: 'island', skerry: 'skerry', harbour: 'natural harbour', village: '', light: 'lighthouse' };
 const BOTTOM_STRIP_PX = 44; // the phone's speed / places line
 
 export function createNameLabels(container = document.body) {
@@ -99,6 +99,7 @@ export function createNameLabels(container = document.body) {
   const queue = createLabelQueue();
   const v = new THREE.Vector3();
   let lastNowS = null;
+  let hidden = false; // the chart is up: it draws its own names
   let reservedAt = -Infinity;
   let reservedRects = [];
 
@@ -119,6 +120,7 @@ export function createNameLabels(container = document.body) {
       el.appendChild(s);
     }
     container.appendChild(el);
+    el.style.visibility = hidden ? 'hidden' : 'visible';
     l.el = el;
     l.w = el.offsetWidth;
     l.h = el.offsetHeight;
@@ -147,6 +149,12 @@ export function createNameLabels(container = document.body) {
     },
     // A place already known from an earlier session: no announcement, but its name is shown when you are near it.
     track(entry, wy) { register(entry, wy, false); },
+    // Hide / show every name (the chart covers the view). Cheap: only does work when it changes.
+    setHidden(h) {
+      if (h === hidden) return;
+      hidden = h;
+      for (const l of labels.values()) if (l.el) l.el.style.visibility = h ? 'hidden' : 'visible';
+    },
     // Call every frame after the camera moved. boat: { x, z }; reserved(): [{ x, y, w, h }] HUD boxes (asked ~2x a second).
     update(camera, width, height, nowS, boat, reserved = () => []) {
       const dt = lastNowS === null ? 0 : Math.min(0.25, nowS - lastNowS);

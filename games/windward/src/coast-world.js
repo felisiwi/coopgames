@@ -560,7 +560,7 @@ export async function loadRealCoast(opts = {}) {
   // ?cat=lon,lat starts at the open water nearest another point (testing).
   const [sx, sz] = world.toGame(...(opts.at || [namesJson.spawn.lon, namesJson.spawn.lat]));
   const spawn = findOpenWater(world, sx, sz);
-  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames });
+  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames, lights: LIGHTHOUSES });
 
   const group = new THREE.Group();
   group.add(terrain.group, trees.group, props);
@@ -575,6 +575,7 @@ export async function loadRealCoast(opts = {}) {
   T.buildMs = now() - T.start;
   return {
     world, group, depthMap: world.depthMap, spawn, trees, terrain, terrainStyle, clamp, update, names,
+    findOpenWater: (x, z, o) => findOpenWater(world, x, z, o), // for the debug jump to a lighthouse
     lights: lights.filter((l) => l.group).map((l) => ({ name: l.name, x: l.group.position.x, y: l.group.position.y, z: l.group.position.z })), // where gulls may perch (stage 1b)
     heightAt: world.heightAt,
     report: {
