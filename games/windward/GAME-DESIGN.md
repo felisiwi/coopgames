@@ -1114,3 +1114,20 @@ ages).
   appears, with the description kept underneath ("Grundsund · the shallow sound").
   Descriptions are written as lore, partly from what the Swedish names mean; they are not
   etymology claims.
+
+## Felix's favourite places: Google Maps list "Segling" (2026-11-05)
+
+Read via Chrome from his shared list (23 places). West-coast entries, north to south:
+- Alvöns naturreservat (Hunnebostrand), Hunnebostrand, Smögens Gästhem (Smögen)
+- Lysekil
+- **Vrakevik**: his own pin at 58.238711 N, 11.385059 E (the name is his note)
+- Vasholmarna (island), Skarvesäter (island), Grundsunds fiskehamn & gästhamn
+- Gullholmens Gästhamn, Käringön, Altarholmen (island)
+- **Kråksundsgap, Kråkholmen**: his pin at 58.104431 N, 11.439134 E
+- Tornholmen (island), Åstols Café, Skärhamns gästhamn, Klädesholmens Gästhamn
+- Nordön, Rammen (island), **Skinnbroken, Rammholmen**: his pin at 57.859606 N, 11.561551 E
+- Bussholmen (island), Marstrands Gästhamn
+(Two pins are not on the west coast and are ignored.) Use these as granddad's chart marks /
+sweet spots and as harbour candidates; geocode the named ones from OSM by exact name, use the
+three pinned coordinates as given. Note: Rammen sits by Marstrand (near Rammholmen), outside
+the current Grundsund region, consistent with the coast agent's finding.
