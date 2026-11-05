@@ -1,5 +1,9 @@
 # Windward — W0 design
 
+## Reference labs
+
+Frozen decision tools, kept exactly as they were when Felix decided (`ref/`): `look-lab.html` (decided the Bohuslän look: split style, smooth toon water, granite palette), `control-lab.html` (decided the phone controls), `lighthouse-timeline.html` + `lighthouses-kit.js` (decided the 29 west-coast towers: looks, game heights 6 + 0.5 x real, built-year order; kit snapshot at fe4d1ec), `lighthouse-timeline-play.html` + `lighthouses-kit-play.js` (the ▶ Play time-lapse Felix loved, 2026-11-05: real looks, flash patterns, towers rising year by year; snapshot at d88e385). Change the live labs, not these.
+
 Decisions from a `/grill-me` session (2026-09-11), Batch 0 of Stage W0. Scope: boat
 feel (sail speed, tacking, trim, camera) and the wind sync mechanism — no islands,
 no scoring, no claiming yet (see AGENTS.md's Windward concept note).
