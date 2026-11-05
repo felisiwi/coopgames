@@ -1020,3 +1020,44 @@ Recorded 2026-11-05; resolved ones move into the log above.
   https://sv.wikipedia.org/wiki/Frihamnen_Marstrand and
   https://runeberg.org/sfubon/7/0075.html and
   https://archive.org/stream/arkivkopia.se-runeberg-htjomluft/htjomluft_djvu.txt
+
+## Felix's inputs (2026-11-05, evening): start area, life, people, harbour arrival
+
+**Start area.** Felix's chart photos (Figma "Labs", page Westcoast) show two dense clusters
+of red dots (places he remembers): (1) the skerries around Storön / Gåsö / Kalvön west of
+Grundsund and Fiskebäckskil, and (2) Härmanö / Gullholmen / Kråkesund / Käringön. Start
+anywhere close to these. Both were early fishing islands (Fiskebäckskil ~1500s, Grundsund
+by ~1600s, Käringön 1659), so there is plenty to explore even in early eras. Blue dots were
+planned overnight stops, nothing special.
+
+**Felix's natural harbours** (Figma frames with his own photos, Aug 2026, each labelled with
+the wind directions it suits): Rammen, Bredholmen, Skarvesäter, Usholmen,
+Testholmarna-Usholmen, DammholmeSkären, Porsholmen, Västra Danholmen, Kråkesundsgap,
+Altarholmen, Skaboholmen, Smörasken, Assholmen, Jonsborg, Vasholmarna. These are the first
+harbour/anchorage data: real places, real photos, and a shelter-by-wind-direction rule
+(fits Q46: skip the night only in harbour). The same page has his day-by-day wind log
+(e.g. "Monday: Smörasken. Morning S5, Midday NNE3, Evening N5, Night N5"), a good reference
+for believable wind patterns. TODO: geocode the harbours (OSM names) into places data.
+
+**Small life (fitting each era, nothing modern in early eras):** gulls (also on buoys and
+sea marks), eiders, harbour seals, buoys/marks of the era. Cheap to build, makes the world
+feel alive.
+
+**Granddad.** Very loved. Loved sailing and exploring. Knew the old ways, and knew a lot of
+people from his younger days. (His letters are found after the first jump, Q42 d.)
+
+**First friend after the jump.** Lives around 1700 (end of New border): a young adult then,
+born ~1675–1685, old enough to remember stories of Norwegian/Danish times, and about to live
+through the Great Northern War (1700–1721; Tordenskjold takes Marstrand 1719). Proposal: from
+a start-area fishing village that existed then (Fiskebäckskil or Grundsund). Felix to shape.
+
+**Harbour arrival (stage 1 spec seed):** a bell, maybe a horn, gulls in the background.
+
+**Music:** flexible: fitting, cute, easy background music for now.
+
+**Start: Grundsund (Felix, 2026-11-05).** Start at Grundsund, with Fiskebäckskil and Lysekil
+north and Gullholmen and Härmanö south to explore in the early game.
+
+**Names are discovered.** Islands, skerries and natural harbours have no names on the
+chart/mini-map until you have seen them first; then the name appears (and stays, per Q9:
+knowledge crosses eras).
