@@ -498,8 +498,9 @@ Save sketch (not final):
     coast summer nights are a short blue twilight (*ljusa nätter*), the Skagen
     "blue hour" look, so summer nights are short and pretty rather than dark.
     Real darkness lives in autumn and winter eras, the 1905 opening, winter
-    chapters, and fog and storm events. `TODO(felix): the blue-hour look is
-    not recorded in DESIGN.md; point at where it was chosen.`
+    chapters, and fog and storm events. The look is recorded
+    on branch `felix/windward-look` (`DESIGN.md`, "Look pass 3") and in PR #5
+    (`ART.md`), both unmerged; it lands on main at the next merge.
   - **Skipping (Q46 b):** skip the night only in a harbour or moored;
     harbours become shelter.
   - **Navigation (Q47 c):** both, mildly: a moonlit dim, landmarks fade,
@@ -622,16 +623,20 @@ build framework. `TODO(felix): confirm.`
   build never fails on content.
 - **Explicit scene casts (SET):** a `cast: [ids]` line under each scene
   heading, validated, never name matching.
-- **One date format and one parser (SET):** the real year plus the era's
-  season, for example "Late summer 1787". Sorting uses the year. The season
-  comes from the era (Q32, `epochs.json`), but chapters inside an era can be
-  winter, so what the parser does then is open (Q56).
+- **One date format and one parser (SET, Q56 a):** displayed as the real
+  year plus a season, for example "Late summer 1787". **The year is the
+  data; the season is derived** from the era (Q32, `epochs.json`), so it is
+  never stored. A **chapter** inside an era (for example a winter chapter)
+  may override the season with an explicit field. This adds a **chapter
+  concept to the model**: an optional sub-span of an era with its own
+  season. `epochs.json` has no chapters yet; adding them is a data task.
 - **Places are files with ids (SET),** built from the real-coast data
   (settlements, lighthouses, harbours). A character's `place` is a place id,
   never free text. Reuse the ids already in `settlements-history.json`
   (phases, with a confidence key) and `lighthouses.js` (29 lights, sourced
   built years and light patterns). `TODO(felix): confirm the id scheme those
-  files use; I have not located any harbour data yet.`
+  files use.` Harbour data does not exist yet; it goes to the map agent's
+  next pass.
 - **One event spine (SET):** a single events table, `date | place_id | who
   (ids) | kind | text | source`, fed by era events (`epochs.json`),
   settlement phases, lighthouse years, story scenes and the player's saved
@@ -640,23 +645,42 @@ build framework. `TODO(felix): confirm.`
   light, scene, player.
 - **Echoes across eras (SET):** each era-version of a person is its own
   character file with an era id, linked by a shared **thread id** (same
-  soul, different century). Only the player sees the overlaps. Bonds can
-  span eras. Because echoes never overlap in life, the "never crossed"
-  computation must not apply to them. Bond level is open (Q55).
+  soul, different century). Only the player sees the overlaps. **Temperament is shared per
+  thread (Q54 a):** one base per thread; each era-version may shift up to one
+  step (+/-1) per axis. **Bonds (SET, Q55 a, for now):** a bond file joins
+  two era-versions in the same era; echoes are linked only by the thread id.
+  Thread-level bond files are a later addition if needed. Because echoes
+  never overlap in life, the "never crossed" computation must not apply to
+  them.
 - **Sourced history vs invented story (SET):** the RoT game/lore split
   becomes history/story. Real people (Lasse-Maja, merchants) carry sources,
   with the same high/medium/low confidence key as the settlements data;
   invented people are marked invented. Prose is prefixed `**(history)**` or
   `**(story)**`.
-- **Temperament (PROPOSAL):** five shared axes scored for everyone, so two
-  cards compare at a glance. Proposed: Sea-Land, Thrift-Spend, Law-Smuggle,
-  Kin-Stranger, Caution-Daring. (RoT used Duty-Freedom, Faith-Doubt,
-  Lords-Kin, Caution-Daring, Silence-Speech.) Open (Q51-Q54).
+- **Temperament (SET, Q51-Q54):** five shared axes scored for everyone, so
+  two cards compare at a glance.
+  - **Axes (Q51):** Old ways-New ways, Rules-Free, Thrift-Spend,
+    Kin-Stranger, Caution-Daring. (RoT used Duty-Freedom, Faith-Doubt,
+    Lords-Kin, Caution-Daring, Silence-Speech.) Old-New is scored relative
+    to the person's own era, so comparing it across eras is not the point.
+  - **Scale (Q53 a):** 1-5, as RoT; 3 is the midpoint.
+  - **What it does (Q52 a, then b):** first display only (cards and
+    side-by-side comparison). Then small behaviours, for example how a
+    harbourmaster treats contraband, how alert a lookout is, how a village
+    welcomes you. **Temperament is visible once you have met someone**, so
+    behaviour follows something the player can read; there is no hidden
+    number behind it (consistent with Q48).
+  - **Honesty rule:** temperament scores on real historical people are
+    interpretation, so they are marked **story, not history**.
 
 Character file sketch (PROPOSAL): `id`, `name`, `thread`, `era`, `role`,
 `place` (place id), `born`, `died`, `status`, `basis` (history | invented),
-`sources`, `traits`, `tags`, `summary`, and the body sections. Format is open
-(Q57).
+`sources`, `traits`, `tags`, `summary`, and the body sections. **Format (SET,
+Q57 c):** Markdown with YAML frontmatter for characters, bonds and places
+(prose-heavy); JSON for events and epochs (tables of rows, like the existing
+`epochs.json`). Needs two validators. `traits` holds the five scores, for
+example `[Old-New 2, Rules-Free 4, Thrift-Spend 2, Kin-Stranger 3,
+Caution-Daring 4]`.
 
 ## Core loop: build a works (SET as a minimal first slice, Q31 c)
 
@@ -816,8 +840,8 @@ yet grilled), **INFERRED** (my reading, confirm).
 | 43 | Pair build order | **SET** | d first (hut 1706 to saltery, both in release one), then a (claim, ruin, heritage), b (beacon fire to lighthouse), c (smuggler's cache to Spirits at sea) (Q41). |
 | 44 | Day and night | **SET** | A full cycle, season sets day length; a trade-off (easier to slip past, harder to navigate). Summer nights are a short blue twilight; real darkness in autumn/winter eras, the 1905 opening, winter chapters, fog and storms. Skip only in harbour or moored; moonlit dim with fading landmarks while lights stay bright; customs boats and lookouts when Honour and Life is built; village beacons lit at known spots plus your own; the lure has the same cycle with a brief blue hour (Q43-Q50). |
 | 45 | Fog while visiting | **SET** (for now) | No crossing while visiting; edge fog is just fog. Later: host proposes, visitor consents, they cross together, if cheap (Q44 c). |
-| 46 | Characters, places, events | **SET** (list), details **OPEN** | File per character and per bond (sorted pair ids), ids never guessed, derived facts never stored, gaps reported, one date format and parser, places as files, one event spine including the player's saved actions, echoes linked by a thread id, history vs story, explicit scene casts. Reference doc committed. |
-| 47 | Temperament axes | **OPEN** | Proposal: Sea-Land, Thrift-Spend, Law-Smuggle, Kin-Stranger, Caution-Daring, shared by everyone. Round 11. |
+| 46 | Characters, places, events | **SET** | File per character and per bond (sorted pair ids), ids never guessed, derived facts never stored, gaps reported, places as files, one event spine incl. the player's saved actions, history vs story, explicit scene casts. Date: year is the data, season derived from the era, chapters may override, shown as "Late summer 1787" (Q56 a). Echoes by thread id with a shared base temperament and +/-1 shift per era-version (Q54 a); bonds within an era only for now (Q55 a). Markdown + YAML for characters, bonds and places; JSON for events and epochs (Q57 c). Reference doc committed. |
+| 47 | Temperament | **SET** | Axes: Old ways-New ways, Rules-Free, Thrift-Spend, Kin-Stranger, Caution-Daring; 1-5; display only first, then small behaviours, visible once you have met someone, no hidden number (Q51-Q53). Scores on real people are marked story, not history. |
 
 ## Gaps (to grill)
 
@@ -850,12 +874,14 @@ Recorded 2026-11-05; resolved ones move into the log above.
 - **Derivation rules per pair:** the first one needed is pair d (hut to
   saltery).
 - **Sea marks timeline:** a sourced list of what sea marks exist in each era.
-- **Characters round (round 11):** temperament axes, what they do, their
-  scale, whether echoes share them, bond level, date precision, file format
-  (Q51-Q57).
+- **Chapters in the data:** `epochs.json` needs the chapter concept (an
+  optional sub-span of an era with its own season), Q56 a.
+- **Two validators:** one for Markdown + YAML files, one for the JSON tables
+  (Q57 c); id scheme of the existing settlements and lighthouses data still
+  to confirm.
 - **Customs boats and lookouts:** their design, when Honour and Life is built.
-- **Blue hour:** where the look was chosen; add it to `DESIGN.md`.
-- **Harbour data:** none located yet; places need it.
+- **Harbour data:** does not exist yet; it goes to the map agent's next
+  pass. Places need it.
 - **Host-proposed crossing:** the later idea in Q44, only if cheap.
 - **Lights cross-check:** the lit years in `epochs.json` against the sourced
   built years in `lighthouses.js` (branch `felix/windward-lighthouses`).
