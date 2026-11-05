@@ -98,6 +98,11 @@ export const CONFIG = {
   SETTLEMENT_FIND_CLEARANCE: 10, // keep houses this far from a find's prop
   SETTLEMENT_MAX_SLOPE_DEG: 20, // steeper ground than this gets no house
 
+  // Phone controls (src/phone.js), on touch screens or ?touch=1.
+  PHONE_SHEET: 'rope', // 'rope' (pull away to haul in) or 'dot' (move the dot along the arc); ?sheet= overrides
+  PHONE_MAX_PIXEL_RATIO: 1.5,
+  PHONE_STREAKS: 60, // wind streaks drawn on the water round the boat
+
   // --- Lighting & sky (golden-hour pass, 2026-09-16, shared/ART.md) ---
   // Single tuning point so island-lab.html can expose these as sliders,
   // same reason the ISLAND_* fields below live here instead of in
