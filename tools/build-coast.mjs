@@ -34,7 +34,12 @@ fs.mkdirSync(OUT, { recursive: true });
 fs.mkdirSync(CACHE, { recursive: true });
 
 // ---------------------------------------------------------------- config
-const BBOX = { s: 57.85, n: 58.45, w: 11.0, e: 11.8 };
+// One plane for the whole box (so distance fields have no seams), cropped into two tiles on output.
+const BBOX = { s: 57.33, n: 58.45, w: 11.0, e: 12.1 };
+const TILE_DEFS = [
+  { id: 'north', s: 57.85, n: 58.45, w: 11.0, e: 11.8 },   // Smogen .. Marstrand (pass 1 area)
+  { id: 'south', s: 57.33, n: 57.85, w: 11.5, e: 12.1 },   // Goteborg archipelago .. Gottskar
+];
 const MPP = 20;                      // real metres per raster pixel
 const SKERRY_MAX_W = 25;             // closed coastline rings narrower than this (m) go to skerries.json
 const DEPTH_MAX_M = 90, DEPTH_BASE_M = 0.5, DEPTH_PER_M = 0.04; // depth = base + 0.04 * distance-to-shore, capped
@@ -61,19 +66,27 @@ async function download(url, file) {
   if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`);
   await pipeline(Readable.fromWeb(r.body), fs.createWriteStream(file));
 }
+const OVERPASS_ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://overpass.private.coffee/api/interpreter'];
 async function overpass(query, file) {
   if (fs.existsSync(file) && fs.statSync(file).size > 0) return JSON.parse(fs.readFileSync(file, 'utf8'));
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    log('  Overpass request', path.basename(file), 'attempt', attempt);
-    const r = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST', headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(query),
-    });
-    if (r.ok) { const txt = await r.text(); fs.writeFileSync(file, txt); return JSON.parse(txt); }
-    if (![429, 502, 503, 504].includes(r.status)) throw new Error('Overpass HTTP ' + r.status);
-    await new Promise((res) => setTimeout(res, 20000));
+  for (let attempt = 1; attempt <= 8; attempt++) {
+    const endpoint = OVERPASS_ENDPOINTS[(attempt - 1) % OVERPASS_ENDPOINTS.length];
+    log('  Overpass request', path.basename(file), 'attempt', attempt, new URL(endpoint).host);
+    try {
+      const r = await fetch(endpoint, {
+        method: 'POST', headers: { 'User-Agent': UA, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(query), signal: AbortSignal.timeout(300000),
+      });
+      if (r.ok) { const txt = await r.text(); fs.writeFileSync(file, txt); return JSON.parse(txt); }
+      if (r.status < 500 && r.status !== 429) throw new Error('Overpass HTTP ' + r.status);
+      log('    HTTP', r.status, '- will retry');
+    } catch (e) {
+      if (/^Overpass HTTP/.test(e.message)) throw e;
+      log('    network error:', e.cause?.code || e.message, '- will retry');
+    }
+    await new Promise((res) => setTimeout(res, 30000 * Math.min(attempt, 4)));
   }
-  throw new Error('Overpass gave up');
+  throw new Error('Overpass gave up after 8 attempts');
 }
 
 // ---------------------------------------------------------------- places
@@ -84,12 +97,15 @@ const WANT = [
   ['Kyrkesund', 'village'], ['Klädesholmen', 'village'], ['Åstol', 'village'], ['Skärhamn', 'village'],
   ['Marstrand', 'village'], ['Carlstens fästning', 'fortress', ['Carlstens Fästning', 'Carlstens fästning']],
   ['Kornö', 'island', ['Kornö', 'Stora Kornö']], ['Gåsö', 'island'], ['Storön', 'island'], ['Härmanö', 'island'], ['Härön', 'island'],
+  // pass 2: south of Marstrand, plus Kungshamn
+  ['Gottskär', 'village'], ['Vrångö', 'village'], ['Hönö', 'village'], ['Öckerö', 'village'], ['Donsö', 'village'], ['Styrsö', 'village'],
+  ['Rörö', 'village'], ['Göteborg', 'village'], ['Kungshamn', 'village'],
 ];
 function placeScore(kind, tags) {
   const p = tags.place;
   if (kind === 'lighthouse') return tags.man_made === 'lighthouse' ? 0 : (tags['seamark:type'] || '').startsWith('light') ? 1 : (p === 'island' || p === 'islet') ? 3 : 99; // island fallback: the lighthouse is not always its own named object
   if (kind === 'fortress') return ['castle', 'fort'].includes(tags.historic) ? 0 : tags.historic || tags.tourism ? 2 : 5;
-  if (kind === 'village') return ['town', 'village', 'hamlet', 'suburb', 'locality', 'neighbourhood', 'isolated_dwelling'].includes(p) ? 0 : p === 'island' || p === 'islet' ? 1 : 99;
+  if (kind === 'village') return ['city', 'town', 'village', 'hamlet', 'suburb', 'locality', 'neighbourhood', 'isolated_dwelling'].includes(p) ? 0 : p === 'island' || p === 'islet' ? 1 : 99;
   if (kind === 'island') return p === 'island' ? 0 : p === 'islet' ? 1 : 99;
   return 99;
 }
@@ -153,16 +169,34 @@ function edt(src, W, H) {
 log('Windward coast build');
 const plane = makePlane(BBOX, MPP);
 const { W, H } = plane;
-log(`  raster ${W} x ${H} px at ${MPP} m/px  (${((W * MPP) / 1000).toFixed(1)} x ${((H * MPP) / 1000).toFixed(1)} km real)`);
+log(`  plane ${W} x ${H} px at ${MPP} m/px  (${((W * MPP) / 1000).toFixed(1)} x ${((H * MPP) / 1000).toFixed(1)} km real)`);
+// tile pixel rects on the plane; the south tile starts exactly where the north one ends
+const tiles = TILE_DEFS.map((t) => ({
+  id: t.id,
+  x0: Math.floor(((t.w - BBOX.w) * plane.mLon) / MPP), x1: Math.min(W, Math.ceil(((t.e - BBOX.w) * plane.mLon) / MPP)),
+  y0: Math.floor(((BBOX.n - t.n) * M_PER_DEG_LAT) / MPP), y1: Math.min(H, Math.ceil(((BBOX.n - t.s) * M_PER_DEG_LAT) / MPP)),
+}));
+tiles[1].y0 = tiles[0].y1;
+const tileOf = new Uint8Array(W * H);                 // 0 = not in any tile, 1 = north, 2 = south
+tiles.forEach((t, k) => { for (let j = t.y0; j < t.y1; j++) tileOf.fill(k + 1, j * W + t.x0, j * W + t.x1); });
+for (const t of tiles) log(`  tile ${t.id}: x ${t.x0}..${t.x1}, y ${t.y0}..${t.y1}  (${t.x1 - t.x0} x ${t.y1 - t.y0})`);
 
 // ---- 1. downloads
 log('1. sources');
-const coastJson = await overpass(`[out:json][timeout:240];way["natural"="coastline"](${BBOX.s},${BBOX.w},${BBOX.n},${BBOX.e});out geom;`, path.join(CACHE, 'coastlines.json'));
-await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N58_00_E011_00_DEM/Copernicus_DSM_COG_10_N58_00_E011_00_DEM.tif', path.join(CACHE, 'dem-N58.tif'));
-await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N57_00_E011_00_DEM/Copernicus_DSM_COG_10_N57_00_E011_00_DEM.tif', path.join(CACHE, 'dem-N57.tif'));
+const coastQuery = (s, w, n, e) => `[out:json][timeout:240];way["natural"="coastline"](${s},${w},${n},${e});out geom;`;
+const coastParts = [
+  await overpass(coastQuery(57.85, 11.0, 58.45, 11.8), path.join(CACHE, 'coastlines.json')),        // north tile (pass 1 file)
+  await overpass(coastQuery(57.85, 11.8, 58.45, 12.1), path.join(CACHE, 'coastlines-east.json')),   // strip east of it: keeps distance fields honest at the tile edge
+  await overpass(coastQuery(57.33, 11.0, 57.85, 12.1), path.join(CACHE, 'coastlines-south.json')),  // pass 2: south extension
+];
+const coastJson = { elements: [...new Map(coastParts.flatMap((j) => j.elements).map((e) => [e.id, e])).values()] }; // de-duplicated by OSM way id
+await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N58_00_E011_00_DEM/Copernicus_DSM_COG_10_N58_00_E011_00_DEM.tif', path.join(CACHE, 'dem-N58E011.tif'));
+await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N57_00_E011_00_DEM/Copernicus_DSM_COG_10_N57_00_E011_00_DEM.tif', path.join(CACHE, 'dem-N57E011.tif'));
+await download('https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N57_00_E012_00_DEM/Copernicus_DSM_COG_10_N57_00_E012_00_DEM.tif', path.join(CACHE, 'dem-N57E012.tif'));
 await download('https://geodata.naturvardsverket.se/nedladdning/marktacke/NMD2018/bas_lan_ogen/O_lan_nmd2018bas_ogeneraliserad_v1_1.zip', path.join(CACHE, 'nmd-O.zip'));
-const nmdTif = path.join(CACHE, 'nmd-O.tif');
-if (!fs.existsSync(nmdTif)) extractFromZip(path.join(CACHE, 'nmd-O.zip'), '.tif', nmdTif);
+await download('https://geodata.naturvardsverket.se/nedladdning/marktacke/NMD2018/bas_lan_ogen/N_lan_nmd2018bas_ogeneraliserad_v1_1.zip', path.join(CACHE, 'nmd-N.zip'));
+const NMD_COUNTIES = ['O', 'N'];                     // O = Vastra Gotaland, N = Halland (Gottskar is in Kungsbacka)
+for (const c of NMD_COUNTIES) if (!fs.existsSync(path.join(CACHE, `nmd-${c}.tif`))) extractFromZip(path.join(CACHE, `nmd-${c}.zip`), '.tif', path.join(CACHE, `nmd-${c}.tif`));
 const { places, notFound } = await fetchPlaces();
 lap(`coastline ways: ${coastJson.elements.length}, places found: ${places.length}, not found: ${notFound.length}`);
 
@@ -213,7 +247,7 @@ for (const w of ways) {
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
   for (let i = 0; i < w.n; i++) { const x = w.px[2 * i], y = w.px[2 * i + 1]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-  if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
+  if (cx < 0 || cy < 0 || cx >= W || cy >= H || !tileOf[Math.floor(cy) * W + Math.floor(cx)]) continue;
   const dx = (x1 - x0) * MPP, dy = (y1 - y0) * MPP, width = Math.min(dx, dy), len = Math.max(dx, dy);
   let any = false;
   for (let j = Math.max(0, Math.floor(y0)); j <= Math.min(H - 1, Math.floor(y1)) && !any; j++)
@@ -224,8 +258,8 @@ for (const w of ways) {
     skerries.push([+lon.toFixed(5), +lat.toFixed(5), Math.max(1, Math.round(width)), Math.max(1, Math.round(len))]);
   }
 }
-let landPx = 0; for (let i = 0; i < land.length; i++) landPx += land[i];
-lap(`land ${(100 * landPx / land.length).toFixed(1)} % of box; skerries (<${SKERRY_MAX_W} m wide): ${skerries.length}; vanished islets re-burned as 1 px: ${burnedCount}`);
+let landPx = 0, tilePx = 0; for (let i = 0; i < land.length; i++) if (tileOf[i]) { tilePx++; landPx += land[i]; }
+lap(`land ${(100 * landPx / tilePx).toFixed(1)} % of tile area; skerries (<${SKERRY_MAX_W} m wide): ${skerries.length}; vanished islets re-burned as 1 px: ${burnedCount}`);
 
 // ---- 4. distance fields
 log('3. distance fields');
@@ -238,14 +272,15 @@ lap('done');
 // ---- 5. heights from Copernicus GLO-30
 log('4. heights');
 const dem = {};
-for (const [tag, topLat] of [['N58', 59], ['N57', 58]]) {
-  const t = openTiff(path.join(CACHE, `dem-${tag}.tif`));
-  dem[tag] = { w: t.width, h: t.height, top: topLat, data: t.readWindow(0, 0, t.width, t.height).data };
+for (const key of ['N57E011', 'N57E012', 'N58E011']) {
+  const t = openTiff(path.join(CACHE, `dem-${key}.tif`));
+  dem[key] = { w: t.width, h: t.height, lat0: +key.slice(1, 3), lon0: +key.slice(4, 7), data: t.readWindow(0, 0, t.width, t.height).data };
   t.close();
 }
 function demAt(lon, lat) {
-  const tile = lat >= 58 ? dem.N58 : dem.N57;
-  const u = (lon - 11) / (1.5 / 3600) - 0.5, v = (tile.top - lat) / (1 / 3600) - 0.5;
+  const tile = dem[`N${Math.floor(lat)}E${String(Math.floor(lon)).padStart(3, '0')}`];   // tiles are named like N57E011
+  if (!tile) return 0;
+  const u = (lon - tile.lon0) * tile.w - 0.5, v = (tile.lat0 + 1 - lat) * tile.h - 0.5;
   const u0 = Math.max(0, Math.min(tile.w - 2, Math.floor(u))), v0 = Math.max(0, Math.min(tile.h - 2, Math.floor(v)));
   const fu = Math.max(0, Math.min(1, u - u0)), fv = Math.max(0, Math.min(1, v - v0));
   const a = tile.data, i = v0 * tile.w + u0;
@@ -254,7 +289,7 @@ function demAt(lon, lat) {
 const hgt = new Float32Array(W * H);          // metres, land only
 for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
   const p = j * W + i;
-  if (!land[p]) continue;
+  if (!land[p] || !tileOf[p]) continue;
   if (burned[p]) { hgt[p] = 0.5; continue; }
   const [lon, lat] = plane.toLonLat(i + 0.5, j + 0.5);
   hgt[p] = Math.max(0.3, demAt(lon, lat));
@@ -264,20 +299,26 @@ lap(`max height ${maxH.toFixed(0)} m`);
 
 // ---- 6. land cover from NMD
 log('5. land cover (NMD)');
-const nmd = openTiff(nmdTif);
-const NMD_E0 = nmd.tiepoint[3], NMD_N0 = nmd.tiepoint[4], NMD_RES = nmd.pixelScale[0];
 let eMin = Infinity, eMax = -Infinity, nMin = Infinity, nMax = -Infinity;
-for (const [fx, fy] of [[0, 0], [W, 0], [0, H], [W, H], [W / 2, 0], [W / 2, H]]) {
-  const [lon, lat] = plane.toLonLat(fx, fy); const { E, N } = lonLatToSweref(lon, lat);
+for (let u = 0; u <= 4; u++) for (let v = 0; v <= 4; v++) {
+  const [lon, lat] = plane.toLonLat((W * u) / 4, (H * v) / 4); const { E, N } = lonLatToSweref(lon, lat);
   eMin = Math.min(eMin, E); eMax = Math.max(eMax, E); nMin = Math.min(nMin, N); nMax = Math.max(nMax, N);
 }
-const win = nmd.readWindow(Math.floor((eMin - NMD_E0) / NMD_RES) - 20, Math.floor((NMD_N0 - nMax) / NMD_RES) - 20,
-  Math.ceil((eMax - NMD_E0) / NMD_RES) + 20, Math.ceil((NMD_N0 - nMin) / NMD_RES) + 20);
-nmd.close();
-lap(`NMD window ${win.w} x ${win.h}`);
+const nmdLayers = [];
+for (const c of NMD_COUNTIES) {                      // first layer with a value wins (county borders)
+  const t = openTiff(path.join(CACHE, `nmd-${c}.tif`));
+  const E0 = t.tiepoint[3], N0 = t.tiepoint[4], res = t.pixelScale[0];
+  const win = t.readWindow(Math.floor((eMin - E0) / res) - 20, Math.floor((N0 - nMax) / res) - 20, Math.ceil((eMax - E0) / res) + 20, Math.ceil((N0 - nMin) / res) + 20);
+  t.close();
+  if (win.w > 0 && win.h > 0) { nmdLayers.push({ E0, N0, res, win }); lap(`NMD ${c} window ${win.w} x ${win.h}`); }
+}
 const nmdAt = (E, N) => {
-  const c = Math.floor((E - NMD_E0) / NMD_RES) - win.x0, r = Math.floor((NMD_N0 - N) / NMD_RES) - win.y0;
-  return c < 0 || r < 0 || c >= win.w || r >= win.h ? 0 : win.data[r * win.w + c];
+  for (const { E0, N0, res, win } of nmdLayers) {
+    const c = Math.floor((E - E0) / res) - win.x0, r = Math.floor((N0 - N) / res) - win.y0;
+    if (c < 0 || r < 0 || c >= win.w || r >= win.h) continue;
+    const v = win.data[r * win.w + c]; if (v) return v;
+  }
+  return 0;
 };
 const nmdPriority = (c) => (c === 51 || c === 52 ? 9 : c >= 111 ? 8 : c === 3 ? 6 : c === 42 ? 5 : c === 41 ? 4 : c === 2 ? 3 : c === 53 ? 2 : 1);
 
@@ -291,7 +332,7 @@ const cls = new Uint8Array(W * H);
 const nmdRawHist = {};
 for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) {
   const p = j * W + i;
-  if (!land[p]) continue;
+  if (!land[p] || !tileOf[p]) continue;
   if (burned[p]) { cls[p] = ROCK; continue; }
   const [lon, lat] = plane.toLonLat(i + 0.5, j + 0.5);
   const { E, N } = lonLatToSweref(lon, lat);
@@ -329,7 +370,7 @@ for (let pass = 0; pass < 8; pass++) {
   if (!left) break;
 }
 for (let p = 0; p < cls.length; p++) if (cls[p] === UNRESOLVED) cls[p] = ROCK;
-const classPx = new Array(7).fill(0); for (let p = 0; p < cls.length; p++) if (land[p]) classPx[cls[p]]++;
+const classPx = new Array(7).fill(0); for (let p = 0; p < cls.length; p++) if (land[p] && tileOf[p]) classPx[cls[p]]++;
 let landTotal = classPx.reduce((a, b) => a + b, 0);
 const classPct = {}, classKm2 = {};
 CLASSES.slice(1).forEach((n, i) => { classPct[n] = +(100 * classPx[i + 1] / landTotal).toFixed(1); classKm2[n] = +((classPx[i + 1] * MPP * MPP) / 1e6).toFixed(1); });
@@ -338,81 +379,92 @@ lap('land classes: ' + JSON.stringify(classPct));
 // ---- 7. write rasters
 log('6. rasters');
 const landH = new Uint16Array(W * H);
-for (let p = 0; p < landH.length; p++) if (land[p]) landH[p] = Math.min(65535, Math.round(hgt[p] * 10) + 1);
+for (let p = 0; p < landH.length; p++) if (land[p]) landH[p] = Math.min(65535, Math.round(hgt[p] * 2) * 5 + 1);   // 0.5 m steps (stored as decimetres): far finer than a 30 m model deserves, and it halves the file
 const depthDm = new Uint16Array(W * H);
-for (let p = 0; p < depthDm.length; p++) if (!land[p]) depthDm[p] = Math.round(Math.min(DEPTH_MAX_M, DEPTH_BASE_M + DEPTH_PER_M * shoreM(d2Land[p])) * 10);
+for (let p = 0; p < depthDm.length; p++) if (!land[p]) depthDm[p] = Math.round(Math.min(DEPTH_MAX_M, DEPTH_BASE_M + DEPTH_PER_M * shoreM(d2Land[p])) * 2) * 5;   // 0.5 m steps
 const classOut = new Uint8Array(W * H); for (let p = 0; p < classOut.length; p++) classOut[p] = land[p] ? cls[p] : 0;
 const files = {};
 function writeOut(name, buf) { fs.writeFileSync(path.join(OUT, name), buf); files[name] = buf.length; }
-writeOut('land-height.png', encodePng({ width: W, height: H, bitDepth: 16, data: landH }));
-writeOut('depth.png', encodePng({ width: W, height: H, bitDepth: 16, data: depthDm }));
-writeOut('classes.png', encodePng({ width: W, height: H, bitDepth: 8, data: classOut }));
+const crop = (arr, t) => { const w = t.x1 - t.x0, out = new arr.constructor(w * (t.y1 - t.y0)); for (let j = t.y0; j < t.y1; j++) out.set(arr.subarray(j * W + t.x0, j * W + t.x1), (j - t.y0) * w); return out; };
+for (const t of tiles) {
+  const w = t.x1 - t.x0, h = t.y1 - t.y0;
+  t.files = { landHeight: `${t.id}-land-height.png`, depth: `${t.id}-depth.png`, classes: `${t.id}-classes.png` };
+  writeOut(t.files.landHeight, encodePng({ width: w, height: h, bitDepth: 16, data: crop(landH, t) }));
+  writeOut(t.files.depth, encodePng({ width: w, height: h, bitDepth: 16, data: crop(depthDm, t) }));
+  writeOut(t.files.classes, encodePng({ width: w, height: h, bitDepth: 8, data: crop(classOut, t) }));
+}
 lap('PNGs written');
 
 // ---- 8. places + skerries
 writeOut('places.json', Buffer.from(JSON.stringify({ generated: new Date().toISOString().slice(0, 10), notFound, places }, null, 1)));
 writeOut('skerries.json', Buffer.from(JSON.stringify({ note: '[lon, lat, width_m, length_m] of closed OSM coastline rings narrower than ' + SKERRY_MAX_W + ' m', skerries })));
 
-// ---- 9. route Marstrand -> Smogen (clearance-weighted Dijkstra on 100 m cells, then line-of-sight smoothing)
-log('7. route');
+// ---- 9. routes (clearance-weighted Dijkstra on 100 m cells, then line-of-sight smoothing)
+log('7. routes');
 const CELL = 5, CW = Math.ceil(W / CELL), CH = Math.ceil(H / CELL);
 const clearM = (i, j) => (i < 0 || j < 0 || i >= W || j >= H || land[j * W + i] ? 0 : shoreM(d2Land[j * W + i]));
 const cellClear = new Float32Array(CW * CH);
 for (let cy = 0; cy < CH; cy++) for (let cx = 0; cx < CW; cx++) cellClear[cy * CW + cx] = clearM(cx * CELL + 2, cy * CELL + 2);
 const MIN_CLEAR = 100, LOS_CLEAR = 90, PREFER_CLEAR = 400;
-const pMars = places.find((p) => p.name === 'Marstrand'), pSmog = places.find((p) => p.name === 'Smögen');
-let route = null;
-if (pMars && pSmog) {
-  const snap = (p) => {
-    const [fx, fy] = plane.toPx(p.lon, p.lat); const cx0 = Math.floor(fx / CELL), cy0 = Math.floor(fy / CELL);
-    let best = -1, bd = Infinity;
-    for (let cy = Math.max(0, cy0 - 40); cy < Math.min(CH, cy0 + 40); cy++) for (let cx = Math.max(0, cx0 - 40); cx < Math.min(CW, cx0 + 40); cx++) {
-      if (cellClear[cy * CW + cx] < MIN_CLEAR) continue;
-      const d = (cx - fx / CELL) ** 2 + (cy - fy / CELL) ** 2; if (d < bd) { bd = d; best = cy * CW + cx; }
+// inner=true: stay among the islands (open water > OPEN_FROM m from land is expensive and never cut across)
+const OPEN_FROM = 300, OPEN_SPAN = 500, MAX_LOS_CLEAR = 1000;
+const ROUTES = [
+  { id: 'marstrand-smogen', from: 'Marstrand', to: 'Smögen' },
+  { id: 'gottskar-marstrand', from: 'Gottskär', to: 'Marstrand' },
+];
+function snapToWater(p) {
+  const [fx, fy] = plane.toPx(p.lon, p.lat); const cx0 = Math.floor(fx / CELL), cy0 = Math.floor(fy / CELL);
+  let best = -1, bd = Infinity;
+  for (let cy = Math.max(0, cy0 - 50); cy < Math.min(CH, cy0 + 50); cy++) for (let cx = Math.max(0, cx0 - 50); cx < Math.min(CW, cx0 + 50); cx++) {
+    if (cellClear[cy * CW + cx] < MIN_CLEAR) continue;
+    const d = (cx - fx / CELL) ** 2 + (cy - fy / CELL) ** 2; if (d < bd) { bd = d; best = cy * CW + cx; }
+  }
+  return { cell: best, distM: Math.sqrt(bd) * CELL * MPP };
+}
+function findRoute(a, b, inner) {
+  const dist = new Float64Array(CW * CH).fill(Infinity), from = new Int32Array(CW * CH).fill(-1);
+  const heap = [[0, a.cell]];
+  const push = (k, v) => { heap.push([k, v]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+  const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { let l = 2 * i + 1, r = l + 1, m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
+  dist[a.cell] = 0;
+  while (heap.length) {
+    const [dcur, cur] = pop(); if (dcur > dist[cur]) continue; if (cur === b.cell) break;
+    const cx = cur % CW, cy = (cur / CW) | 0;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      if (!dx && !dy) continue; const nx = cx + dx, ny = cy + dy; if (nx < 0 || ny < 0 || nx >= CW || ny >= CH) continue;
+      const n = ny * CW + nx, c = cellClear[n]; if (c < MIN_CLEAR) continue;
+      const open = inner ? 6 * Math.min(1, Math.max(0, (c - OPEN_FROM) / OPEN_SPAN)) : 0;
+      const step = Math.hypot(dx, dy) * (1 + 4 * Math.max(0, (PREFER_CLEAR - c) / PREFER_CLEAR) + open);
+      if (dcur + step < dist[n]) { dist[n] = dcur + step; from[n] = cur; push(dist[n], n); }
     }
-    return { cell: best, distM: Math.sqrt(bd) * CELL * MPP };
-  };
-  const a = snap(pMars), b = snap(pSmog);
-  // inner=true: stay among the islands (open water > OPEN_FROM m from land is expensive and never cut across)
-  const OPEN_FROM = 300, OPEN_SPAN = 500, MAX_LOS_CLEAR = 1000;
-  const findRoute = (inner) => {
-    const dist = new Float64Array(CW * CH).fill(Infinity), from = new Int32Array(CW * CH).fill(-1);
-    const heap = [[0, a.cell]];
-    const push = (k, v) => { heap.push([k, v]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
-    const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let i = 0; for (;;) { let l = 2 * i + 1, r = l + 1, m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
-    dist[a.cell] = 0;
-    while (heap.length) {
-      const [dcur, cur] = pop(); if (dcur > dist[cur]) continue; if (cur === b.cell) break;
-      const cx = cur % CW, cy = (cur / CW) | 0;
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-        if (!dx && !dy) continue; const nx = cx + dx, ny = cy + dy; if (nx < 0 || ny < 0 || nx >= CW || ny >= CH) continue;
-        const n = ny * CW + nx, c = cellClear[n]; if (c < MIN_CLEAR) continue;
-        const open = inner ? 6 * Math.min(1, Math.max(0, (c - OPEN_FROM) / OPEN_SPAN)) : 0;
-        const step = Math.hypot(dx, dy) * (1 + 4 * Math.max(0, (PREFER_CLEAR - c) / PREFER_CLEAR) + open);
-        if (dcur + step < dist[n]) { dist[n] = dcur + step; from[n] = cur; push(dist[n], n); }
-      }
-    }
-    if (!Number.isFinite(dist[b.cell])) return null;
-    const cells = []; for (let c = b.cell; c !== -1; c = from[c]) cells.push(c); cells.reverse();
-    const pts = cells.map((c) => [(c % CW) * CELL + 2.5, ((c / CW) | 0) * CELL + 2.5]);
-    const los = (p, q) => { const n = Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) * 2); for (let s = 0; s <= n; s++) { const cl = clearM(Math.floor(p[0] + (q[0] - p[0]) * s / n), Math.floor(p[1] + (q[1] - p[1]) * s / n)); if (cl < LOS_CLEAR || (inner && cl > MAX_LOS_CLEAR)) return false; } return true; };
-    const sm = [pts[0]]; let i = 0;
-    while (i < pts.length - 1) { let j = pts.length - 1; while (j > i + 1 && !los(pts[i], pts[j])) j--; sm.push(pts[j]); i = j; }
-    let len = 0; for (let k = 1; k < sm.length; k++) len += Math.hypot(sm[k][0] - sm[k - 1][0], sm[k][1] - sm[k - 1][1]) * MPP;
-    return { len, sm };
-  };
-  const inner = findRoute(true), offshore = findRoute(false);
-  if (inner) {
-    route = {
-      note: 'Marstrand -> Smogen among the islands: Dijkstra on 100 m cells, >=' + MIN_CLEAR + ' m clearance, extra cost for open water more than ' + OPEN_FROM + ' m from land, then straightened only where a line keeps ' + LOS_CLEAR + '..' + MAX_LOS_CLEAR + ' m from land',
-      length_m: Math.round(inner.len), offshoreLength_m: offshore ? Math.round(offshore.len) : null,
-      startSnap_m: Math.round(a.distM), endSnap_m: Math.round(b.distM),
-      points: inner.sm.map(([x, y]) => plane.toLonLat(x, y).map((v) => +v.toFixed(5))),
-    };
-    writeOut('route.json', Buffer.from(JSON.stringify(route)));
-    lap(`inner route ${(inner.len / 1000).toFixed(1)} km real, ${inner.sm.length} points; offshore alternative ${offshore ? (offshore.len / 1000).toFixed(1) : '-'} km (ends snapped ${Math.round(a.distM)} m / ${Math.round(b.distM)} m from the town points)`);
-  } else log('  WARNING: no route found');
-} else log('  WARNING: Marstrand or Smögen missing from places; route skipped');
+  }
+  if (!Number.isFinite(dist[b.cell])) return null;
+  const cells = []; for (let c = b.cell; c !== -1; c = from[c]) cells.push(c); cells.reverse();
+  const pts = cells.map((c) => [(c % CW) * CELL + 2.5, ((c / CW) | 0) * CELL + 2.5]);
+  const los = (p, q) => { const n = Math.ceil(Math.hypot(q[0] - p[0], q[1] - p[1]) * 2); for (let s = 0; s <= n; s++) { const cl = clearM(Math.floor(p[0] + (q[0] - p[0]) * s / n), Math.floor(p[1] + (q[1] - p[1]) * s / n)); if (cl < LOS_CLEAR || (inner && cl > MAX_LOS_CLEAR)) return false; } return true; };
+  const sm = [pts[0]]; let i = 0;
+  while (i < pts.length - 1) { let j = pts.length - 1; while (j > i + 1 && !los(pts[i], pts[j])) j--; sm.push(pts[j]); i = j; }
+  let len = 0; for (let k = 1; k < sm.length; k++) len += Math.hypot(sm[k][0] - sm[k - 1][0], sm[k][1] - sm[k - 1][1]) * MPP;
+  return { len, sm };
+}
+const routes = [];
+for (const r of ROUTES) {
+  const pf = places.find((p) => p.name === r.from), pt = places.find((p) => p.name === r.to);
+  if (!pf || !pt) { log(`  WARNING: ${r.id}: place missing, skipped`); continue; }
+  const a = snapToWater(pf), b = snapToWater(pt);
+  if (a.cell < 0 || b.cell < 0) { log(`  WARNING: ${r.id}: no open water within 5 km of an end`); continue; }
+  const inner = findRoute(a, b, true), offshore = findRoute(a, b, false);
+  if (!inner) { log(`  WARNING: ${r.id}: no route found`); continue; }
+  routes.push({
+    id: r.id, from: r.from, to: r.to,
+    note: 'Among the islands: Dijkstra on 100 m cells, >=' + MIN_CLEAR + ' m clearance, extra cost for open water more than ' + OPEN_FROM + ' m from land, straightened only where a line keeps ' + LOS_CLEAR + '..' + MAX_LOS_CLEAR + ' m from land',
+    length_m: Math.round(inner.len), offshoreLength_m: offshore ? Math.round(offshore.len) : null,
+    startSnap_m: Math.round(a.distM), endSnap_m: Math.round(b.distM),
+    points: inner.sm.map(([x, y]) => plane.toLonLat(x, y).map((v) => +v.toFixed(5))),
+  });
+  lap(`${r.id}: ${(inner.len / 1000).toFixed(1)} km real, offshore alternative ${offshore ? (offshore.len / 1000).toFixed(1) : '-'} km (ends snapped ${Math.round(a.distM)} m / ${Math.round(b.distM)} m)`);
+}
+writeOut('routes.json', Buffer.from(JSON.stringify({ routes })));
 
 // ---- 10. tree rule + totals
 log('8. trees');
@@ -433,14 +485,15 @@ for (const S of SCALES) lap(`1:${S}: ${trees.totals['1:' + S].total} trees map-w
 const meta = {
   generated: new Date().toISOString().slice(0, 10),
   bbox: BBOX, metersPerPixelReal: MPP, width: W, height: H,
+  tiles: tiles.map((t) => ({ id: t.id, x0: t.x0, y0: t.y0, width: t.x1 - t.x0, height: t.y1 - t.y0, files: t.files })),
   projection: {
     kind: 'equirectangular around box centre', latCentre: plane.latC, metersPerDegLat: M_PER_DEG_LAT, metersPerDegLon: plane.mLon,
     pixelToLonLat: 'lon = bbox.w + x*mpp/metersPerDegLon ; lat = bbox.n - y*mpp/metersPerDegLat   (x,y = pixel coords, y down)',
   },
   rasters: {
-    'land-height.png': '16-bit grey. 0 = water. Land = round(height_m*10)+1 (decimetres + 1). Copernicus GLO-30 is a surface model (tree tops count).',
-    'depth.png': `16-bit grey, decimetres. 0 = land. Placeholder model: min(${DEPTH_MAX_M}, ${DEPTH_BASE_M} + ${DEPTH_PER_M} * metres-to-shore). NOT sea-chart data.`,
-    'classes.png': '8-bit grey, 0 = water, 1..6 = land classes below',
+    '<tile>-land-height.png': '16-bit grey. 0 = water. Land = round(height_m*10)+1 (decimetres + 1), stored in 0.5 m steps. Copernicus GLO-30 is a surface model (tree tops count).',
+    '<tile>-depth.png': `16-bit grey, decimetres in 0.5 m steps. 0 = land. Placeholder model: min(${DEPTH_MAX_M}, ${DEPTH_BASE_M} + ${DEPTH_PER_M} * metres-to-shore). NOT sea-chart data.`,
+    '<tile>-classes.png': '8-bit grey, 0 = water, 1..6 = land classes below. Tiles sit on one shared plane: pixel (x,y) of a tile is plane pixel (x0+x, y0+y)',
   },
   classes: CLASSES.map((name, value) => ({ value, name })),
   classPercentOfLand: classPct, classKm2, landKm2: +((landTotal * MPP * MPP) / 1e6).toFixed(1),

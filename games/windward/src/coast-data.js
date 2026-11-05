@@ -33,25 +33,34 @@ export async function decodePngBytes(bytes) {
 }
 
 // baseUrl: folder holding the coast files, with trailing slash. fetchBytes/fetchJson injectable for tests.
+// The map is one flat "plane" cut into tiles (north, south); every lookup takes plane pixel
+// coordinates (i, j) and finds the tile that holds them.
 export async function loadCoast(baseUrl, io = {}) {
   const getJson = io.json || (async (u) => (await fetch(u)).json());
   const getBytes = io.bytes || (async (u) => new Uint8Array(await (await fetch(u)).arrayBuffer()));
-  const [meta, places, skerries, route, trees, landH, depth, classes] = await Promise.all([
-    getJson(baseUrl + 'meta.json'), getJson(baseUrl + 'places.json'), getJson(baseUrl + 'skerries.json'),
-    getJson(baseUrl + 'route.json'), getJson(baseUrl + 'trees.json'),
-    getBytes(baseUrl + 'land-height.png').then(decodePngBytes), getBytes(baseUrl + 'depth.png').then(decodePngBytes),
-    getBytes(baseUrl + 'classes.png').then(decodePngBytes),
+  const meta = await getJson(baseUrl + 'meta.json');
+  const [places, skerries, routes, trees, tiles] = await Promise.all([
+    getJson(baseUrl + 'places.json'), getJson(baseUrl + 'skerries.json'), getJson(baseUrl + 'routes.json'), getJson(baseUrl + 'trees.json'),
+    Promise.all(meta.tiles.map(async (t) => {
+      const [land, depth, classes] = await Promise.all([t.files.landHeight, t.files.depth, t.files.classes].map((f) => getBytes(baseUrl + f).then(decodePngBytes)));
+      return { id: t.id, x0: t.x0, y0: t.y0, width: t.width, height: t.height, land: land.data, depth: depth.data, classes: classes.data };
+    })),
   ]);
   const { bbox, width, height, metersPerPixelReal: mpp } = meta;
   const mLat = meta.projection.metersPerDegLat, mLon = meta.projection.metersPerDegLon;
+  const tileAt = (i, j) => { for (const t of tiles) if (i >= t.x0 && j >= t.y0 && i < t.x0 + t.width && j < t.y0 + t.height) return t; return null; };
+  const idx = (t, i, j) => (j - t.y0) * t.width + (i - t.x0);
   return {
-    meta, places: places.places, notFound: places.notFound, skerries: skerries.skerries, route, trees,
-    width, height, mpp, land: landH.data, depth: depth.data, classes: classes.data,
-    // lon/lat -> raster pixel coords (fractional; y down)
+    meta, places: places.places, notFound: places.notFound, skerries: skerries.skerries, routes: routes.routes, trees,
+    tiles, width, height, mpp,
+    // lon/lat -> plane pixel coords (fractional; y down)
     toPx: (lon, lat) => [((lon - bbox.w) * mLon) / mpp, ((bbox.n - lat) * mLat) / mpp],
-    isLand: (i, j) => landH.data[j * width + i] > 0,
-    heightM: (i, j) => Math.max(0, (landH.data[j * width + i] - 1) / 10),
-    depthM: (i, j) => depth.data[j * width + i] / 10,
+    // everything below: 0 / null outside the tiles
+    classAt: (i, j) => { const t = tileAt(i, j); return t ? t.classes[idx(t, i, j)] : 0; },     // 0 = water, 1..6 land class
+    isLand: (i, j) => { const t = tileAt(i, j); return !!t && t.land[idx(t, i, j)] > 0; },
+    heightM: (i, j) => { const t = tileAt(i, j); return t ? Math.max(0, (t.land[idx(t, i, j)] - 1) / 10) : 0; },
+    depthM: (i, j) => { const t = tileAt(i, j); return t ? t.depth[idx(t, i, j)] / 10 : null; },
+    inTile: (i, j) => !!tileAt(i, j),
   };
 }
 

@@ -221,6 +221,96 @@
    "osmName": "Härön",
    "candidates": 1,
    "inside": true
+  },
+  {
+   "name": "Gottskär",
+   "kind": "village",
+   "lat": 57.38939,
+   "lon": 12.02067,
+   "osm": "node/762203868",
+   "osmName": "Gottskär",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Vrångö",
+   "kind": "village",
+   "lat": 57.57262,
+   "lon": 11.78125,
+   "osm": "node/2235056015",
+   "osmName": "Vrångö",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Hönö",
+   "kind": "village",
+   "lat": 57.69145,
+   "lon": 11.64649,
+   "osm": "node/2235001640",
+   "osmName": "Hönö",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Öckerö",
+   "kind": "village",
+   "lat": 57.70925,
+   "lon": 11.65641,
+   "osm": "node/61103335",
+   "osmName": "Öckerö",
+   "candidates": 3,
+   "inside": true
+  },
+  {
+   "name": "Donsö",
+   "kind": "village",
+   "lat": 57.59947,
+   "lon": 11.80296,
+   "osm": "node/2235001612",
+   "osmName": "Donsö",
+   "candidates": 2,
+   "inside": true
+  },
+  {
+   "name": "Styrsö",
+   "kind": "village",
+   "lat": 57.61452,
+   "lon": 11.78046,
+   "osm": "node/2235056018",
+   "osmName": "Styrsö",
+   "candidates": 3,
+   "inside": true
+  },
+  {
+   "name": "Rörö",
+   "kind": "village",
+   "lat": 57.7812,
+   "lon": 11.61231,
+   "osm": "relation/5463652",
+   "osmName": "Rörö",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Göteborg",
+   "kind": "village",
+   "lat": 57.70723,
+   "lon": 11.96702,
+   "osm": "node/25930131",
+   "osmName": "Göteborg",
+   "candidates": 1,
+   "inside": true
+  },
+  {
+   "name": "Kungshamn",
+   "kind": "village",
+   "lat": 58.36082,
+   "lon": 11.25114,
+   "osm": "node/29689990",
+   "osmName": "Kungshamn",
+   "candidates": 1,
+   "inside": true
   }
  ]
 }

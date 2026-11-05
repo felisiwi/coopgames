@@ -1,25 +1,51 @@
 {
  "generated": "2026-11-05",
  "bbox": {
-  "s": 57.85,
+  "s": 57.33,
   "n": 58.45,
   "w": 11,
-  "e": 11.8
+  "e": 12.1
  },
  "metersPerPixelReal": 20,
- "width": 2348,
- "height": 3336,
+ "width": 3251,
+ "height": 6227,
+ "tiles": [
+  {
+   "id": "north",
+   "x0": 0,
+   "y0": 0,
+   "width": 2365,
+   "height": 3336,
+   "files": {
+    "landHeight": "north-land-height.png",
+    "depth": "north-depth.png",
+    "classes": "north-classes.png"
+   }
+  },
+  {
+   "id": "south",
+   "x0": 1477,
+   "y0": 3336,
+   "width": 1774,
+   "height": 2891,
+   "files": {
+    "landHeight": "south-land-height.png",
+    "depth": "south-depth.png",
+    "classes": "south-classes.png"
+   }
+  }
+ ],
  "projection": {
   "kind": "equirectangular around box centre",
-  "latCentre": 58.150000000000006,
+  "latCentre": 57.89,
   "metersPerDegLat": 111195,
-  "metersPerDegLon": 58677.2974975095,
+  "metersPerDegLon": 59105.304404365204,
   "pixelToLonLat": "lon = bbox.w + x*mpp/metersPerDegLon ; lat = bbox.n - y*mpp/metersPerDegLat   (x,y = pixel coords, y down)"
  },
  "rasters": {
-  "land-height.png": "16-bit grey. 0 = water. Land = round(height_m*10)+1 (decimetres + 1). Copernicus GLO-30 is a surface model (tree tops count).",
-  "depth.png": "16-bit grey, decimetres. 0 = land. Placeholder model: min(90, 0.5 + 0.04 * metres-to-shore). NOT sea-chart data.",
-  "classes.png": "8-bit grey, 0 = water, 1..6 = land classes below"
+  "<tile>-land-height.png": "16-bit grey. 0 = water. Land = round(height_m*10)+1 (decimetres + 1), stored in 0.5 m steps. Copernicus GLO-30 is a surface model (tree tops count).",
+  "<tile>-depth.png": "16-bit grey, decimetres in 0.5 m steps. 0 = land. Placeholder model: min(90, 0.5 + 0.04 * metres-to-shore). NOT sea-chart data.",
+  "<tile>-classes.png": "8-bit grey, 0 = water, 1..6 = land classes below. Tiles sit on one shared plane: pixel (x,y) of a tile is plane pixel (x0+x, y0+y)"
  },
  "classes": [
   {
@@ -52,48 +78,48 @@
   }
  ],
  "classPercentOfLand": {
-  "bare_rock": 8.9,
-  "heath": 18.8,
-  "meadow": 20.3,
-  "scrub": 5.3,
-  "forest": 45,
-  "village": 1.7
+  "bare_rock": 8.1,
+  "heath": 17.4,
+  "meadow": 20.8,
+  "scrub": 3.8,
+  "forest": 44.3,
+  "village": 5.6
  },
  "classKm2": {
-  "bare_rock": 100.3,
-  "heath": 211.4,
-  "meadow": 228.1,
-  "scrub": 59.3,
-  "forest": 506.2,
-  "village": 19.2
+  "bare_rock": 157.4,
+  "heath": 339.8,
+  "meadow": 405.5,
+  "scrub": 74.5,
+  "forest": 865.8,
+  "village": 110
  },
- "landKm2": 1124.4,
+ "landKm2": 1953,
  "nmdRawCodeHistogram": {
-  "2": 31787,
-  "3": 397004,
-  "41": 241021,
-  "42": 603668,
-  "51": 21679,
-  "52": 21549,
-  "53": 96086,
-  "61": 19849,
-  "62": 8463,
-  "111": 422695,
-  "112": 108840,
-  "113": 121996,
-  "114": 176368,
-  "115": 127508,
-  "116": 111270,
-  "117": 178505,
-  "118": 99662,
-  "121": 3605,
-  "122": 1070,
-  "123": 1588,
-  "124": 4174,
-  "125": 10721,
-  "126": 14,
-  "127": 22,
-  "128": 1188
+  "2": 68037,
+  "3": 589542,
+  "41": 364703,
+  "42": 1057154,
+  "51": 115221,
+  "52": 119722,
+  "53": 217388,
+  "61": 68693,
+  "62": 24612,
+  "111": 662672,
+  "112": 127557,
+  "113": 161769,
+  "114": 314352,
+  "115": 258831,
+  "116": 236946,
+  "117": 316841,
+  "118": 129456,
+  "121": 8541,
+  "122": 1140,
+  "123": 1939,
+  "124": 8376,
+  "125": 25857,
+  "126": 50,
+  "127": 49,
+  "128": 1353
  },
  "rules": {
   "SHORE_SCRUB_M": 60,
@@ -101,6 +127,6 @@
   "MEADOW_MAX_H": 25,
   "MEADOW_MIN_INLAND_M": 100
  },
- "skerryCount": 1735,
- "vanishedIsletsBurned": 763
+ "skerryCount": 3724,
+ "vanishedIsletsBurned": 1737
 }

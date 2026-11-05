@@ -38,6 +38,8 @@ solved, facet rule, lab slider, URL overrides).
   not hub-launched; see its README.
 - Windward R0 (felix/windward-real-coast): real Bohuslän coast, vegetation classes and
   coast-lab.html, preview only; see games/windward/assets/coast/SOURCES.md.
+- Windward real coast pass 2 (same branch): map south to Gottskär (two tiles, 5.9 MB), treesNear(),
+  settlements-history.json + year slider in coast-lab.html; not merged.
 
 ## Next
 

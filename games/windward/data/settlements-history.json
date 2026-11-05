@@ -1,0 +1,708 @@
+{
+ "about": "Fishing villages and towns on the Coast Lab map, with SOURCED phases for the lab's year slider (1700-2025). Written by hand from fetched pages; nothing here comes from memory.",
+ "generated": "2026-11-05",
+ "kinds": [
+  "hamlet",
+  "herring-boom",
+  "decline",
+  "canning/industry",
+  "resort"
+ ],
+ "confidenceKey": {
+  "high": "a museum, heritage-agency or municipality page states the year",
+  "medium": "sv.wikipedia or a tourism page states the year",
+  "low": "a decade or century only, years borrowed from the regional period, population-table reading, or the page flags its own claim as unsourced. An entry carries its weakest fact."
+ },
+ "phaseRule": "At a given year the phase that covers it is shown; if several cover it, the one with the latest \"from\" wins. \"to\": null means no end year is stated (shown through 2025). A place is hidden before firstRecorded; with firstRecorded null it is drawn at every year as an outlined marker. Years with no phase show as plain \"settled\" (a display default, not data).",
+ "herringPeriods": {
+  "note": "Regional periods for all of Bohuslän; per-place phases above copy these years only where a source about that place says it took part.",
+  "list": [
+   {
+    "from": 1747,
+    "to": 1809,
+    "label": "the great herring period",
+    "sources": [
+     "https://sv.wikipedia.org/wiki/Sillperiod",
+     "https://www.herripedia.com/bohuslan/"
+    ],
+    "variants": [
+     "1747-1808: vastsverige.com Uddevalla page, sv.wikipedia Marstrand, Rörö"
+    ]
+   },
+   {
+    "from": 1877,
+    "to": 1906,
+    "label": "the later herring period",
+    "sources": [
+     "https://sv.wikipedia.org/wiki/Sillperiod",
+     "https://www.herripedia.com/bohuslan/"
+    ],
+    "variants": [
+     "1877-1900: sv.wikipedia Klädesholmen",
+     "1878-1898: vastsverige.com Uddevalla page, sv.wikipedia Marstrand"
+    ]
+   }
+  ]
+ },
+ "settlements": [
+  {
+   "name": "Smögen",
+   "lat": 58.35364,
+   "lon": 11.22612,
+   "osm": "node/30903121",
+   "firstRecorded": 1594,
+   "firstRecordedNote": "\"Första gången Smögen nämndes i litteraturen var 1594\" (vastsverige.com)",
+   "phases": [
+    {
+     "from": 1900,
+     "to": null,
+     "kind": "resort",
+     "note": "Hotell Smögens Hafvsbad completed 1900; summer guests came for seaweed baths. End of the resort phase not stated.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://www.vastsverige.com/sotenas/artiklar/smogen/",
+    "https://sv.wikipedia.org/wiki/Sm%C3%B6gen"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "Granite quarrying \"tog fart under 1800-talets slut\" (century only, left out)."
+   ]
+  },
+  {
+   "name": "Kungshamn",
+   "lat": 58.36082,
+   "lon": 11.25114,
+   "osm": "node/29689990",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Place page: the great herring period of the 1700s gave permanent settlement. Years are the regional period.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    },
+    {
+     "from": 1943,
+     "to": null,
+     "kind": "canning/industry",
+     "note": "Abba's whole production moved to Rösholmen in 1943 (Munkens cannery was there earlier, year not stated); moved to Hagaberg, Kungshamn, in the early 1970s.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Kungshamn",
+    "https://sv.wikipedia.org/wiki/Sillperiod"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Name appears on a sea chart \"från tidigt 1600-tal\" (no year). A 1933 sale to Bröderne Ameln was NOT confirmed on the page and is left out."
+   ]
+  },
+  {
+   "name": "Lysekil",
+   "lat": 58.27717,
+   "lon": 11.4431,
+   "osm": "node/26580816",
+   "firstRecorded": 1578,
+   "firstRecordedNote": "Name form \"Lusekijll\" 1578 (page sentence paraphrased by the fetch tool). The 1317 form \"Lysa\" refers to the church village.",
+   "phases": [
+    {
+     "from": 1770,
+     "to": 1820,
+     "kind": "decline",
+     "note": "Population peaked at 536 in 1770 and fell to 391 in 1820.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    },
+    {
+     "from": 1850,
+     "to": 1899,
+     "kind": "resort",
+     "note": "\"Under 1800-talets senare hälft utvecklades Lysekil till en badort.\" Second half of the 1800s only; no exact years.",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Lysekil"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Herring periods 1566-1587 and 1666-1675 are before the slider starts. Town rights 1 April 1903 are administrative, left out."
+   ]
+  },
+  {
+   "name": "Fiskebäckskil",
+   "lat": 58.24565,
+   "lon": 11.45663,
+   "osm": "node/845945773",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskil"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Fishing village \"sedan 1500-talet\", large freight fleet in the 1800s: centuries only, no years."
+   ]
+  },
+  {
+   "name": "Grundsund",
+   "lat": 58.21336,
+   "lon": 11.41924,
+   "osm": "node/3845368597",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Place page: growth in \"de stora sillperioderna\". Years are the regional period.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    },
+    {
+     "from": 1877,
+     "to": 1906,
+     "kind": "herring-boom",
+     "note": "Place page: growth in \"de stora sillperioderna\". Years are the regional period.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Grundsund",
+    "https://sv.wikipedia.org/wiki/Sillperiod"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Fishing village \"åtminstone från 1600-talet\" (century only)."
+   ]
+  },
+  {
+   "name": "Gullholmen",
+   "lat": 58.17993,
+   "lon": 11.40585,
+   "osm": "node/1485582105",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Place page: salting works, cannery and sailmaker arrived during the great herring periods of the 1700s and 1800s. Years are the regional period.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    },
+    {
+     "from": 1877,
+     "to": 1906,
+     "kind": "herring-boom",
+     "note": "As above (second period).",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    },
+    {
+     "from": 1910,
+     "to": null,
+     "kind": "decline",
+     "note": "Population table: 811 in 1910, 466 in 1950, 85 in 2015. \"Decline\" is read from the numbers, not stated by the page.",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Gullholmen",
+    "https://sv.wikipedia.org/wiki/Sillperiod"
+   ],
+   "confidence": "low",
+   "notes": [
+    "First mention \"under senare delen av 1500-talet\" (no year)."
+   ]
+  },
+  {
+   "name": "Käringön",
+   "lat": 58.10985,
+   "lon": 11.36359,
+   "osm": "node/2235056035",
+   "firstRecorded": 1659,
+   "firstRecordedNote": "\"Käringön skrevs 1659 Kierlingøon\" (sv.wikipedia)",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/K%C3%A4ring%C3%B6n"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "No herring years for the place; population fell from 614 (1909) to 83 (2015) but no collapse year is stated."
+   ]
+  },
+  {
+   "name": "Åstol",
+   "lat": 57.92297,
+   "lon": 11.58531,
+   "osm": "node/2235056032",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1970,
+     "to": 1979,
+     "kind": "decline",
+     "note": "\"Fiskenäringen upphörde på 1970-talet.\" Decade only.",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/%C3%85stol"
+   ],
+   "confidence": "low",
+   "notes": [
+    "No first mention, herring or resort years on the page."
+   ]
+  },
+  {
+   "name": "Klädesholmen",
+   "lat": 57.9467,
+   "lon": 11.54179,
+   "osm": "node/809925834",
+   "firstRecorded": 1594,
+   "firstRecordedNote": "\"På holländska kartor från 1594 kallades ön Cleefsholmen\"",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "\"under den stora sillperioden 1747–1809\" (place page).",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    },
+    {
+     "from": 1808,
+     "to": 1830,
+     "kind": "decline",
+     "note": "\"Under 1808 försvann sillen.\" Population just over 400 by 1830 (end year not re-checked).",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    },
+    {
+     "from": 1877,
+     "to": 1900,
+     "kind": "herring-boom",
+     "note": "\"sillen kom in till kusten på nytt 1877–1900\" (place page).",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    },
+    {
+     "from": 1950,
+     "to": 1969,
+     "kind": "canning/industry",
+     "note": "\"omkring 1950 fanns det 25 konservfabriker\"; since 1970 only herring pickling. Snapshot years, not start and end dates.",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Kl%C3%A4desholmen"
+   ],
+   "confidence": "low",
+   "notes": []
+  },
+  {
+   "name": "Skärhamn",
+   "lat": 57.99092,
+   "lon": 11.54979,
+   "osm": "node/29690590",
+   "firstRecorded": 1724,
+   "firstRecordedNote": "Name first appears in the Orust and Tjörn district court, 8 October 1724.",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Place page: herring handling with train-oil works and salteries \"under 1700-talet\". Years are the regional period.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Sk%C3%A4rhamn",
+    "https://sv.wikipedia.org/wiki/Sillperiod"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Shipyard years not on the page."
+   ]
+  },
+  {
+   "name": "Mollösund",
+   "lat": 58.07331,
+   "lon": 11.4755,
+   "osm": "node/245778489",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Place page: \"Med sillens återkomst på 1750-talet blomstrade samhället åter\". Years are the regional period.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    },
+    {
+     "from": 1970,
+     "to": 1979,
+     "kind": "decline",
+     "note": "Herring fishing \"inte upphörde helt förrän på 1970-talet\". Decade only.",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Moll%C3%B6sund",
+    "https://sv.wikipedia.org/wiki/Sillperiod"
+   ],
+   "confidence": "low",
+   "notes": [
+    "\"Roots back to the 1500s\": no year."
+   ]
+  },
+  {
+   "name": "Marstrand",
+   "lat": 57.88676,
+   "lon": 11.5888,
+   "osm": "node/130148772",
+   "firstRecorded": 1293,
+   "firstRecordedNote": "\"Namnet Marstrand finns belagt från 1293\"",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1808,
+     "kind": "herring-boom",
+     "note": "Place page: the herring period that began in 1747 ended in 1808.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    },
+    {
+     "from": 1878,
+     "to": 1898,
+     "kind": "herring-boom",
+     "note": "Place page lists 1878-1898, flagged \"källa behövs\" (citation needed) on the page itself.",
+     "confidence": "low",
+     "src": [
+      0
+     ]
+    },
+    {
+     "from": 1822,
+     "to": null,
+     "kind": "resort",
+     "note": "The first \"badhus\" was created in 1822; one of the country's early spa resorts. End year not stated.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Marstrand"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Free port 15 Aug 1775 to 15 May 1794: not tied to herring on the page, so not a phase."
+   ]
+  },
+  {
+   "name": "Hälleviksstrand",
+   "lat": 58.12329,
+   "lon": 11.4454,
+   "osm": "node/245778450",
+   "firstRecorded": 1617,
+   "firstRecordedNote": "\"nämns i skriftliga källor första gången 1617\"",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "Place page: herring fishing and salteries grew \"under 1700-talets stora sillperiod\". Years are the regional period.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/H%C3%A4lleviksstrand",
+    "https://sv.wikipedia.org/wiki/Sillperiod"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Resort (\"vid 1800-talets slut\") and shipyard (early 1900s): no exact years."
+   ]
+  },
+  {
+   "name": "Kyrkesund",
+   "lat": 58.01579,
+   "lon": 11.51494,
+   "osm": "node/809920467",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1809,
+     "kind": "herring-boom",
+     "note": "A trankokeri (train-oil works) was built on Kålhuvudet in 1780 (place page). Years are the regional period.",
+     "confidence": "medium",
+     "src": [
+      0,
+      1
+     ]
+    },
+    {
+     "from": 1877,
+     "to": 1906,
+     "kind": "herring-boom",
+     "note": "Place page: the last herring period ended in 1906. Start year is the regional one.",
+     "confidence": "low",
+     "src": [
+      0,
+      1
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Kyrkesund",
+    "https://sv.wikipedia.org/wiki/Sillperiod"
+   ],
+   "confidence": "low",
+   "notes": []
+  },
+  {
+   "name": "Gottskär",
+   "lat": 57.38939,
+   "lon": 12.02067,
+   "osm": "node/762203868",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1881,
+     "to": null,
+     "kind": "resort",
+     "note": "1881 inn rights taken over by Gottskära Badhus AB; first hot-bath house 1882; regular steamboat from Kungsbacka 1883. End not stated.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Gottsk%C3%A4r"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "The page says it was a köpstad \"till 1539\": an end of status, not a first mention. No herring on the page."
+   ]
+  },
+  {
+   "name": "Vrångö",
+   "lat": 57.57262,
+   "lon": 11.78125,
+   "osm": "node/2235056015",
+   "firstRecorded": 1254,
+   "firstRecordedNote": "Named \"Wranghø\" in King Valdemar's land register, 1254.",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Vr%C3%A5ng%C3%B6"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "No herring, industry or resort years on the page."
+   ]
+  },
+  {
+   "name": "Hönö",
+   "lat": 57.69145,
+   "lon": 11.64649,
+   "osm": "node/2235001640",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/H%C3%B6n%C3%B6"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Fishing motorised 1903, ice store 1915 (vastsverige.com, Öckerö kommun): single events, not phases. 123 fishing boats in 1945 (a snapshot)."
+   ]
+  },
+  {
+   "name": "Öckerö",
+   "lat": 57.70925,
+   "lon": 11.65641,
+   "osm": "node/61103335",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6%20(%C3%B6)"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Propeller factory 1960 (vastsverige.com): a single event, not a phase."
+   ]
+  },
+  {
+   "name": "Donsö",
+   "lat": 57.59947,
+   "lon": 11.80296,
+   "osm": "node/2235001612",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Dons%C3%B6"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Name written \"Dunsø\" in the 1200s: century only."
+   ]
+  },
+  {
+   "name": "Styrsö",
+   "lat": 57.61452,
+   "lon": 11.78046,
+   "osm": "node/2235056018",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/Styrs%C3%B6"
+   ],
+   "confidence": "low",
+   "notes": [
+    "Name from the 1200s: century only. Styrsö Hafsbad restaurant opened 1902, but the page does not call the island a resort."
+   ]
+  },
+  {
+   "name": "Rörö",
+   "lat": 57.7812,
+   "lon": 11.61231,
+   "osm": "relation/5463652",
+   "firstRecorded": null,
+   "firstRecordedNote": "no year found in the sources read",
+   "phases": [
+    {
+     "from": 1747,
+     "to": 1808,
+     "kind": "herring-boom",
+     "note": "A salting works and train-oil works stood on the islet Rammen east of Rörö during the great herring period, 1747-1808 (place page).",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    },
+    {
+     "from": 1808,
+     "to": 1824,
+     "kind": "decline",
+     "note": "By 1824 the whole installation on Rammen had been dismantled.",
+     "confidence": "medium",
+     "src": [
+      0
+     ]
+    }
+   ],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/R%C3%B6r%C3%B6"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "Sea-rescue station 1917: a single event."
+   ]
+  },
+  {
+   "name": "Göteborg",
+   "lat": 57.70723,
+   "lon": 11.96702,
+   "osm": "node/25930131",
+   "firstRecorded": 1621,
+   "firstRecordedNote": "\"fick sina stadsprivilegier 1621\" (town charter).",
+   "phases": [],
+   "sources": [
+    "https://sv.wikipedia.org/wiki/G%C3%B6teborg"
+   ],
+   "confidence": "medium",
+   "notes": [
+    "A fetched page that states Göteborg's own role in the herring trade was not found; claims seen only in search snippets are left out."
+   ]
+  }
+ ],
+ "unsourced": [
+  "firstRecorded year: Kungshamn, Fiskebäckskil, Grundsund, Gullholmen, Åstol, Mollösund, Kyrkesund, Gottskär, Hönö, Öckerö, Donsö, Styrsö, Rörö (the pages give only a century or nothing)",
+  "place-specific herring years for: Smögen, Käringön, Åstol, Fiskebäckskil, Lysekil, Vrångö, Hönö, Öckerö, Donsö, Styrsö, Gottskär, Göteborg",
+  "canning / fish-industry years: Smögen, Lysekil (Luckey cannery 1893 seen only in a search snippet), Fiskebäckskil, Grundsund, Käringön, Mollösund, Skärhamn (shipyards), Hönö, Öckerö, Donsö, Styrsö",
+  "Smögen and Kungshamn granite-quarrying years (only \"1800-talets slut\" / early 1800s)",
+  "resort years: Smögen end year, Marstrand end year, Gottskär end year, Hälleviksstrand (\"1800-talets slut\"), Lysekil exact years",
+  "Bohusläns museum, Riksantikvarieämbetet and municipality pages were not reached; every phase rests on sv.wikipedia or vastsverige.com"
+ ],
+ "licenceNote": "Text of sv.wikipedia is CC BY-SA 4.0; this file stores facts (dates) and the page URL as the source. Lantmäteriet Historiska kartor was NOT used (its licence for the service could not be confirmed; the English page only says it has withdrawn copyright claims for the maps)."
+}
