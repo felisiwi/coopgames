@@ -200,10 +200,20 @@ multiplayer, and what it talks to.
 
 Each stage is small, playable and tested before the next.
 
-**Stage order (SET, Q17 a, 2026-11-05):** 1 the lure (free sailing, small
-interactions, port arrival), 2 co-op visiting (smart ping, pair net), 3 chart,
-storm and first jump, 4 trade. The T0-T8 table below is the trade phase (4)
-and predates this order; it is due a rewrite.
+**Stage order (SET, Q17 a and Q28, 2026-11-05):**
+
+1. **The lure:** free sailing, small interactions, port arrival, and fog (the
+   quiet edge, the lighthouse beam or foghorn, and a thunder warning that
+   rumbles then fades, "not yet", until the story exists). Items on deck;
+   small things kept on the device.
+2. **Co-op visiting:** a room with no save; smart ping; the pair net.
+3. **3a, saving, chart, story start at a port:** the first real save;
+   granddad's chart (the west Orust section); device-kept things move into the
+   save; the story is offered at a port.
+4. **3b, storm, jump, time-lapse, sea chest:** the can't-escape storm, the
+   first jump, the backwards time-lapse, the lost sea chest.
+5. **Trade:** the T0-T8 table below. It predates this order and still assumes
+   one era; it is due a rewrite once the era is chosen (Q1).
 
 | Stage | What you can do | New systems |
 |---|---|---|
@@ -245,6 +255,12 @@ Before any story, the first thing is just sailing.
   a table). No long dialogue UI. Fallback if real interactions are too much
   for now: a simple port menu (start the story / later: sell catch /
   leave).
+- **Items on deck (SET, Q25 a):** three or four visible items on the boat
+  (the port gift, barrels and flotsam from the pair net). It grows into the
+  hold later.
+- **What persists before the story (SET, Q26 b):** small things are kept on
+  this device and moved into the save when the story starts. Device-only: a
+  phone and a laptop don't share it, and clearing site data loses it.
 
 ## Fog: the universal "not yet" (new, Felix 2026-11-05)
 
@@ -271,9 +287,10 @@ One visual language for "not yet / beyond".
 - **Where the fog begins (SET, Q22 c, kept simple):** one fog-start distance
   per side, generous to the west (open sea), earlier at the north and south
   ends of the data. Four tunable numbers, no hand-drawn shape.
-- **Open (round 6):** are the edge fog and the story fog one fog at
-  different depths (edge, then thunder, then flashes), or two separate
-  things? Q20 b and Q21 c only fit together in the first reading.
+- **One fog, three depths (SET, Q24 a):** a quiet edge, thunder if you
+  linger (a warning, you can sail out), flashes deeper (the commit). It is
+  fine that the story can start at any data edge. Before the story exists
+  (Q28 a), thunder rumbles then fades: "not yet".
 
 ## The opening: where the story starts (new, Felix 2026-11-05)
 
@@ -294,7 +311,9 @@ mystical.
   favourite places). Deeper in you explore it yourself or buy further chart
   sections from people you meet.
   **(SET, Q18 c)** Build fixed chart sections first (inherited or bought),
-  with exploring revealing detail on top.
+  with exploring revealing detail on top. **(SET, Q27 a)** Sections are cut
+  by place (for example west Orust = granddad's chart), each with its own
+  history and sweet spots; lighthouses are markers inside sections.
 - **Teaching sailing and navigation:** lighthouses, cairns and village fires
   are the tutorial. No pop-up lessons; the coast teaches.
 - **The storm:** after the first chart and some chill sailing, a storm rolls
@@ -386,7 +405,9 @@ Design this explicitly; it touches almost every system.
   yes/no per item and favours the mist filter. (3) Sweep lists and era
   content keyed by era and place make filtering a data lookup, not code.
   (4) Q14 a means the visitor's stuff is already their own, which works
-  with either. Come back when the story stage is designed.
+  with either. Come back when the story stage is designed. Also decide
+  then: if a visitor lingers in the host's fog (Q24 a), whose story do the
+  flashes commit?
 - **No early currency (SET, Q23 c):** barter and favours. Things the pair
   net sweeps up (barrels, flotsam) become gifts and trade goods for chart
   sections. No throwaway early economy; the real one is the trade stage.
@@ -485,20 +506,18 @@ Status: **OPEN**, **SET** (Felix said it), **INFERRED** (my reading, confirm).
 | 19 | Treasure causality | **SET** | Something is lost during the opening (the storm takes granddad's sea chest) and found after the first jump. |
 | 20 | Stage order | **SET** | Lure, then co-op visiting, then chart/storm/jump, then trade. |
 | 21 | Chart shape | **SET** | Fixed sections first (inherited or bought), exploring reveals detail on top. |
-| 22 | Fog | **SET** (one detail open) | No hard edge on today's coast; fog thickens gradually; a lighthouse beam or foghorn carries through it (no walls, no prompts); thunder in free-sail is a warning, only lightning fog commits; weather fog drifts, edge fog is fixed, story fog brings thunder and flashes; one fog-start distance per side. Open: is the story fog the deepest layer of the edge fog? |
+| 22 | Fog | **SET** | No hard edge on today's coast; fog thickens gradually; a lighthouse beam or foghorn carries through it (no walls, no prompts); thunder in free-sail is a warning, only lightning fog commits; weather fog drifts, edge fog is fixed, story fog brings thunder and flashes; one fog-start distance per side; one fog at three depths (quiet edge, thunder warning, commit flashes), and the story can start at any data edge. |
 | 23 | Money before trade | **SET** | Barter and favours. Pair-net finds (barrels, flotsam) are gifts and trade goods for chart sections. No early currency. |
+| 24 | Items before the hold | **SET** | Three or four visible items on deck; grows into the hold later. |
+| 25 | What persists before the story | **SET** | Small things kept on this device, moved into the save when the story starts. Device-only. |
+| 26 | Chart sections cut | **SET** | By place (west Orust = granddad's chart), each with its own history and sweet spots; lighthouses are markers inside sections. |
+| 27 | Stage cut | **SET** | Fog, beams and the thunder warning ship with the lure. Stage 3 splits into 3a (saving, chart, story start at a port) and 3b (storm, jump, time-lapse, sea chest). |
 
 ## Gaps (to grill)
 
 Recorded 2026-11-05; resolved ones move into the log above.
 
-- **One fog or two (round 6):** is the story fog the deepest layer of the
-  edge fog (edge, then thunder, then flashes)? See "Fog".
-- **Items before there is a hold (round 6):** barter goods and the port gift
-  need somewhere to live in stages 1-2.
-- **What persists without a save (round 6):** gifts and chart sections earned
-  in stages 1-2, before the story creates a save.
-- **Pair-net haul split (round 6):** earnings go home (Q14 a); how is a
+- **Pair-net haul split (round 7):** earnings go home (Q14 a); how is a
   shared haul divided between host and visitor?
 - **Visiting with mismatched progress (Q15, OPEN):** decide when the story
   stage is designed; notes above.
@@ -507,13 +526,10 @@ Recorded 2026-11-05; resolved ones move into the log above.
   no save; the first real save is needed at stage 3.
 - **The sea chest:** what is in it, how the player finds it after the jump,
   and how "understands later" lands.
-- **Stage table rewrite:** T0-T8 is now only the trade phase. Size and names
-  for stages 1-3.
-- **Chart sections (round 6):** granularity (how a section is cut), how
-  many, what each reveals, who authors them, and what each barter asks for
-  (Q23 c).
-- **Cutting stages 1-3 (round 6):** which pieces ship in which stage; stage
-  3 (chart, storm, jump, saving, backwards time-lapse, sea chest) is large.
+- **Stage 5 rewrite:** T0-T8 is the trade phase and still assumes one era;
+  rewrite it once the era is chosen (Q1).
+- **Chart sections:** how many, what each reveals, who authors them, and
+  what each barter asks for (Q23 c). Cut by place (Q27 a).
 - **Backwards time-lapse:** lights have a year-range lab on
   `felix/windward-lighthouses` (its commit message mentions a Play
   timeline, not verified here); boats and palette are not year-driven yet.
