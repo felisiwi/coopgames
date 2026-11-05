@@ -102,7 +102,6 @@
    "to": 1809,
    "weight": 18,
    "kind": "boom",
-   "release": "first (proposed)",
    "vibe": "Rich, rowdy, greedy",
    "season": "Summer → late summer → autumn"
   },
@@ -504,5 +503,18 @@
   }
  ],
  "seasonArc": "Felix 2026-11-05: seasons run as one year across the timeline — autumn to winter (Kings and raiders), spring (New Crown) to summer and autumn (Silver Sea), late autumn and winter (Light and Stone), a long cold spring (Engines and wars), then summer (Summer guests, Today). Season = mood of the era; the historical herring fishery was a winter fishery (see GAME-DESIGN.md).",
- "flow": "Felix 2026-11-05: start casual on Today's coast → time warp to ~1905 (end of IV) → first jump to the end of New border (~1700), so soon after warming up the 1706 crown-land ordinance lets you claim and build. Eras unlock spaced out across the timeline, not in order, so moving back and forth stays engaging."
+ "flow": "Felix 2026-11-05: start casual on Today's coast → time warp to ~1905 (end of IV) → first jump to the end of New border (~1700), so soon after warming up the 1706 crown-land ordinance lets you claim and build. Eras unlock spaced out across the timeline, not in order, so moving back and forth stays engaging.",
+ "firstRelease": {
+  "note": "Q1 (Felix 2026-11-05): built for real first",
+  "eras": [
+   "New border (end, ~1700)",
+   "Crown shores",
+   "The silver comes",
+   "Honour and Life"
+  ],
+  "plus": [
+   "Today's coast",
+   "~1905 opening"
+  ]
+ }
 }
