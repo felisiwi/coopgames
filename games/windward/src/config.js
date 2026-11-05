@@ -193,7 +193,7 @@ export const CONFIG = {
   // a 150m landmark at ~11m; see that file's header). 4m keeps seed 1's
   // whole scattered field (~97 islands) under a 200k total-vertex budget
   // (171,248 measured) — index.html's ?cell= overrides for A/B'ing.
-  ISLAND_GRID_CELL_SIZE: 4, // 4-10m, mesh cell size — bigger = chunkier flat-shaded facets ("handmade"), smaller = smoother but less stylised
+  ISLAND_GRID_CELL_SIZE: 3, // metres per terrain facet; was 4 — Felix 2026-11-05 found 4m triangles too big (shared/ART.md facet rule updated to 3m)
 
   // Vertex-colour thresholds (slope from a finite-difference gradient, like
   // BOAT_TILT_GRADIENT_EPS above).

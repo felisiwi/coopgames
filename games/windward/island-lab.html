@@ -124,7 +124,7 @@ import * as THREE from './vendor/three/three.module.js';
 import { CONFIG } from './src/config.js';
 import { createIsland } from './src/island.js';
 import { buildIslandParams } from './src/island-scatter.js';
-import { createWater } from './src/water.js';
+import { createWater, createWaveState, stepWaves } from './src/water.js';
 import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
 import { ISLAND_PRESETS } from './src/island-presets.js';
@@ -535,6 +535,8 @@ function syncLighting() {
 }
 
 const water = createWater();
+let labWaves = null; // created on the first frame, once the lab's wind exists
+let labLastS = null;
 scene.add(water.mesh);
 const wind = { dir: 0, strength: 0.5 }; // fixed moderate chop, just for "what I'll get" context
 
@@ -638,7 +640,10 @@ function frame(now) {
   sunGlow.update(camera);
 
   const elapsedSeconds = (now - start) / 1000;
-  water.update(elapsedSeconds, wind, { x: target.x, z: target.z });
+  if (!labWaves) labWaves = createWaveState(wind.dir);
+  stepWaves(labWaves, labLastS === null ? 0 : Math.min(0.1, elapsedSeconds - labLastS), wind, target.x, target.z);
+  labLastS = elapsedSeconds;
+  water.update(labWaves, wind, { x: target.x, z: target.z });
 
   renderer.render(scene, camera);
   requestAnimationFrame(frame);

@@ -39,7 +39,9 @@ export const WAVE_SPEED = 1.2; // rad/s, dominant component's phase speed
 // the largest SEG (== smallest facet) that still clears that bound —
 // SIZE/223 = 3.587m, the closest this tile can get to 4m while staying
 // readable. (Was SEG=256 / 3.125m.)
-export const SEG = 223; // plane subdivisions per side
+// 2026-11-05: facet target lowered 4m -> 3m (Felix: triangles too big).
+// SIZE/267 = 2.996m, under the 3.6m aliasing bound with room to spare.
+export const SEG = 267; // plane subdivisions per side
 export const SIZE = 800; // metres per side — boat-centred moving tile (see createWater); sized so its edge never enters the fixed camera's frustum at any zoom/aspect, not to cover "the whole world"
 export const WATER_COLOR = 0x2f7fd6;
 
@@ -56,24 +58,51 @@ const WAVE_COMPONENTS = [
 
 const DEG = Math.PI / 180;
 
+const TWO_PI = Math.PI * 2;
+const freqOf = (c) => (2 * Math.PI) / (WAVE_LEN * c.wavelengthMul);
+export const waveSpeedScale = (windStrength) => WAVE_SPEED * (0.4 + 0.6 * windStrength);
+
+// Wave phases (2026-11-05 fix for "the boat and waves wobble very fast once
+// the wind increases"). Each component used to be sin(d*freq + t*speed(wind))
+// with t = seconds since start: when wind strength changed, the phase jumped
+// by t * d(speed) — at 10 minutes in, a normal 10 s gust made the sea at the
+// boat cycle ~5 times a second. Turning the wind rotated the whole pattern
+// about the world origin, so 400 m out it swept past at ~3 cycles/s.
+//
+// Now each component keeps an accumulated phase: it advances by speed*dt
+// every frame (a speed change only changes how fast it advances), and when
+// the wind turns, the phase is corrected so the sea AT THE BOAT doesn't jump
+// (the pattern pivots about the boat, not the origin). Phases are wrapped to
+// [0, 2pi) so they never lose float32 precision in the shader.
+export function createWaveState(windDirRad) {
+  return { phases: WAVE_COMPONENTS.map((c) => c.phase), dir: windDirRad };
+}
+export function stepWaves(state, dt, wind, refX, refZ) {
+  const speedScale = waveSpeedScale(wind.strength);
+  WAVE_COMPONENTS.forEach((c, i) => {
+    const freq = freqOf(c);
+    const off = c.angleOffsetDeg * DEG;
+    const before = refX * Math.sin(state.dir + off) + refZ * Math.cos(state.dir + off);
+    const after = refX * Math.sin(wind.dir + off) + refZ * Math.cos(wind.dir + off);
+    let p = state.phases[i] + speedScale * c.speedMul * dt - (after - before) * freq;
+    p %= TWO_PI;
+    if (p < 0) p += TWO_PI;
+    state.phases[i] = p;
+  });
+  state.dir = wind.dir;
+}
+
 // JS mirror of the injected GLSL seaHeight (below), for CPU-side boat bob
-// (game.js). `windDirRad` is the world-space wind blows-to angle, `x`/`z`
-// are world coordinates — no local/world remap needed now that the plane's
-// rotation is baked into its geometry (see createWater) instead of the mesh
-// transform, unlike the W0.5/W0.6 shader this replaces.
-export function seaHeightCPU(x, z, t, windDirRad, windStrength) {
+// (game.js). `phases` is a wave state's phases (see stepWaves); `windDirRad`
+// the wind angle; `x`/`z` world coordinates.
+export function seaHeightCPU(x, z, phases, windDirRad, windStrength) {
   const amp = WAVE_AMP * (0.3 + 0.7 * windStrength);
-  const speedScale = WAVE_SPEED * (0.4 + 0.6 * windStrength);
   let h = 0;
-  for (const c of WAVE_COMPONENTS) {
+  WAVE_COMPONENTS.forEach((c, i) => {
     const angle = windDirRad + c.angleOffsetDeg * DEG;
-    const dx = Math.sin(angle);
-    const dz = Math.cos(angle);
-    const d = x * dx + z * dz;
-    const freq = (2 * Math.PI) / (WAVE_LEN * c.wavelengthMul);
-    const speed = speedScale * c.speedMul;
-    h += amp * c.weight * Math.sin(d * freq + t * speed + c.phase);
-  }
+    const d = x * Math.sin(angle) + z * Math.cos(angle);
+    h += amp * c.weight * Math.sin(d * freqOf(c) + phases[i]);
+  });
   return h;
 }
 
@@ -84,22 +113,22 @@ export function glslFloat(n) {
   return Number.isInteger(n) ? `${n}.0` : `${n}`;
 }
 
-const componentTerms = WAVE_COMPONENTS.map((c) => {
+const PHASE_LANES = ['x', 'y', 'z', 'w'];
+const componentTerms = WAVE_COMPONENTS.map((c, i) => {
   const freq = (2 * Math.PI) / (WAVE_LEN * c.wavelengthMul);
   const angleRad = c.angleOffsetDeg * DEG;
   return `  {
     float angle = windDir + ${glslFloat(angleRad)};
     float d = x * sin(angle) + z * cos(angle);
-    h += amp * ${glslFloat(c.weight)} * sin(d * ${glslFloat(freq)} + t * (speedScale * ${glslFloat(c.speedMul)}) + ${glslFloat(c.phase)});
+    h += amp * ${glslFloat(c.weight)} * sin(d * ${glslFloat(freq)} + phases.${PHASE_LANES[i]});
   }`;
 }).join('\n');
 
 // Exported only for water.test.js, to assert the GLSL literally embeds the
 // same WAVE_COMPONENTS-derived terms as seaHeightCPU() above.
 export const SEA_HEIGHT_GLSL = `
-float seaHeight(float x, float z, float t, float windDir, float windStrength) {
+float seaHeight(float x, float z, vec4 phases, float windDir, float windStrength) {
   float amp = ${glslFloat(WAVE_AMP)} * (0.3 + 0.7 * windStrength);
-  float speedScale = ${glslFloat(WAVE_SPEED)} * (0.4 + 0.6 * windStrength);
   float h = 0.0;
 ${componentTerms}
   return h;
@@ -121,7 +150,7 @@ export function createWater() {
   });
 
   material.onBeforeCompile = (shader) => {
-    shader.uniforms.uTime = { value: 0 };
+    shader.uniforms.uPhases = { value: new THREE.Vector4() };
     shader.uniforms.uWindDir = { value: 0 };
     shader.uniforms.uWindStrength = { value: 0.5 };
     // World-space (x, z) of the plane mesh's current position. The plane
@@ -134,7 +163,7 @@ export function createWater() {
     material.userData.shader = shader;
 
     shader.vertexShader = `
-      uniform float uTime;
+      uniform vec4 uPhases;
       uniform float uWindDir;
       uniform float uWindStrength;
       uniform vec2 uPlaneOffset;
@@ -142,7 +171,7 @@ export function createWater() {
     ` + shader.vertexShader.replace(
       '#include <begin_vertex>',
       `#include <begin_vertex>
-      transformed.y = seaHeight(transformed.x + uPlaneOffset.x, transformed.z + uPlaneOffset.y, uTime, uWindDir, uWindStrength);`,
+      transformed.y = seaHeight(transformed.x + uPlaneOffset.x, transformed.z + uPlaneOffset.y, uPhases, uWindDir, uWindStrength);`,
     );
   };
 
@@ -151,14 +180,15 @@ export function createWater() {
 
   const spacing = SIZE / SEG;
 
-  function update(elapsedSeconds, wind, boatPosition) {
+  // waveState: from createWaveState/stepWaves, shared with the boat bob.
+  function update(waveState, wind, boatPosition) {
     const snappedX = Math.round(boatPosition.x / spacing) * spacing;
     const snappedZ = Math.round(boatPosition.z / spacing) * spacing;
     mesh.position.set(snappedX, 0, snappedZ);
 
     const shader = material.userData.shader;
     if (!shader) return; // first compile happens on the first render call
-    shader.uniforms.uTime.value = elapsedSeconds;
+    shader.uniforms.uPhases.value.fromArray(waveState.phases);
     shader.uniforms.uWindDir.value = wind.dir;
     shader.uniforms.uWindStrength.value = wind.strength;
     shader.uniforms.uPlaneOffset.value.set(snappedX, snappedZ);
