@@ -1090,3 +1090,21 @@ ages).
 - Who ages with you: **core people plus anyone you've met**. Strangers you never met are
   era-locals. Content grows with who you actually know; met villagers can age by rules
   (look variants), core people are authored at several ages.
+
+## Chart naming (Felix, 2026-11-05, Map Lab)
+
+- **Islands, skerries and villages keep their real names in every era.** If a documented older
+  spelling exists, early eras show it (e.g. Gottskär as Gåttskiähl, late 1600s). A completely
+  different name only where history really had one. Lighthouse rocks before their light
+  existed are plain skerries under their real name.
+- **Style: real old names first**, made readable for English players; lore names where none fit.
+- **Chart sections (granddad's chart):** The Border Skerries (Koster & Strömstad) ·
+  The Cliffy Coast (Fjällbacka & Hamburgsund) · The Granite Fjord (Smögen & Lysekil, at the
+  mouth of Gullmarsfjorden) · **The Shallow Sounds** (Grundsund & west Orust, start; Grundsund
+  means "shallow sound") · The Crown's Fortress (Tjörn & Marstrand; strict, military,
+  Carlsten) · The Göta River Mouth (Göteborg skerries) · Goose Inlet (Onsala & Gottskär;
+  from Gottskär's medieval name Gåsekil). Modern area names show as subtitles.
+- **Map UI direction (Map Lab):** big chart in sections (tap to zoom in), fog over unexplored
+  areas that lifts where you've sailed, minimap, edge tags for nearby harbours, pinch zoom,
+  names revealed on discovery. Lab: claude.ai artifact "Windward Map Lab" (settings to
+  compare minimap shape/rotation, tag modes, label modes, reveal radius).
