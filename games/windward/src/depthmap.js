@@ -156,7 +156,14 @@ export function bakeDepthMap(islands, opts = {}) {
           // Right at the surface, or a steep face in shallow water. A long
           // steady ramp (the abyss slope) interpolates exactly, so it is skipped.
           exact = sMin < REFINE_NEAR_SURFACE_M || (sMin < REFINE_STEEP_BELOW_M && sMax - sMin > REFINE_STEEP_M);
-        } else exact = false; // all land
+        } else {
+          // All four corners are land. A pond can still sit inside the cell
+          // (look pass 3: ~4% of enclosed water was baked as land, so its
+          // shore distance was 0 and the foam edge painted it solid white).
+          // Low ground is therefore evaluated exactly too; only ground well
+          // above the sea is interpolated.
+          exact = -sMax < INLAND_ABOVE_M;
+        }
         if (sMax <= 0 && -sMax >= INLAND_ABOVE_M && -sMin >= INLAND_ABOVE_M) {
           for (let tz = tz0; tz < tz0 + BLOCK; tz++) {
             const row = tz * nx;

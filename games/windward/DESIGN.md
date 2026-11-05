@@ -390,8 +390,21 @@ slightly cold, high-key, silvery sea. The paint is `LOOK_*` in `src/config.js`.
   the panel is never loaded and URL look values are ignored. Pines are in the
   panel's brightness/colour too; the shore foam colour and sea colours are
   presets-only (edit `config.js`).
-- Known: small inland ponds go solid white (all of the pond is within the foam
-  edge of its shore). Present since L1, not changed here.
+
+### Look pass 3: Skagen is the default; ponds fixed (2026-11-05)
+
+Felix approved the Skagen light. The `LOOK_*` and lighting values in
+`src/config.js` ARE Skagen (a bare URL shows it); "Before" survives only as a
+preset in `src/look-presets.js`, reachable with `?tune=1`. Before/after renders
+are kept in `ref/look-skagen/`.
+
+- **Ponds rendered solid white.** The depth bake interpolated any coarse cell
+  whose four corners were land, so a pond *inside* such a cell was baked as
+  land: shore distance 0 everywhere, so the foam edge covered it. Low ground
+  (a corner under 4 m high) is now evaluated exactly. Measured on seed 1: 144
+  pond points over 0.3 m deep were baked as land, now 0 (8 of 19,941 shallow
+  edge slivers remain). Bake time is unchanged (~160-190 ms). Guarded by a
+  test in `depthmap.test.js` that fails with the old rule.
 
 ## Phone controls: Control Lab findings (Felix, 2026-11-04)
 

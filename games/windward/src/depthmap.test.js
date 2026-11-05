@@ -240,4 +240,36 @@ check('an empty island list bakes a valid all-deep map', () => {
   assert.equal(depthAt(empty, 0, 0), DEEP_M);
 });
 
+check('ponds inside islands are not baked as land (they rendered solid white: shore distance 0 everywhere)', () => {
+  // Combined field of every island (an island's sea can be a neighbour's land where footprints overlap).
+  const H = (x, z) => {
+    let b = -Infinity;
+    for (const g of fields) if (Math.hypot(x - g.p.ISLAND_CENTER_X, z - g.p.ISLAND_CENTER_Z) < g.p.ISLAND_RADIUS + g.p.ISLAND_COAST_NOISE_AMPLITUDE + 60) b = Math.max(b, g.hf(x, z));
+    return b;
+  };
+  let sea = 0;
+  let asLand = 0;
+  let deepAsLand = 0;
+  for (const g of fields) {
+    const R = g.p.ISLAND_RADIUS + g.p.ISLAND_COAST_NOISE_AMPLITUDE;
+    for (let x = g.p.ISLAND_CENTER_X - R; x < g.p.ISLAND_CENTER_X + R; x += 1.5) {
+      for (let z = g.p.ISLAND_CENTER_Z - R; z < g.p.ISLAND_CENTER_Z + R; z += 1.5) {
+        const h = H(x, z);
+        if (h >= -0.05) continue;
+        // enclosed water: land within 25 m on at least 3 of 4 sides (a pond, a lagoon, a narrow bay)
+        const ring = [[25, 0], [-25, 0], [0, 25], [0, -25]].filter(([dx, dz]) => H(x + dx, z + dz) >= 0).length;
+        if (ring < 3) continue;
+        sea++;
+        if (depthAt(map, x, z) < 0.02) {
+          asLand++;
+          if (-h >= 0.3) deepAsLand++;
+        }
+      }
+    }
+  }
+  assert.ok(sea > 5000, `only ${sea} pond samples`);
+  assert.equal(deepAsLand, 0, `${deepAsLand} pond points 0.3 m+ deep were baked as land`);
+  assert.ok(asLand / sea < 0.002, `${asLand}/${sea} pond points baked as land`);
+});
+
 console.log(`\n${passed}/${passed} assertions passed`);
