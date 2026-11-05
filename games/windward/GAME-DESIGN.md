@@ -1146,3 +1146,18 @@ grain on, no terraces, no edge lines. Link:
 terrain-lab.html?at=Käringön&crisp=1&soft=0.82&rock=1&slope=55&step=3.5&grain=1.
 Port in stage 1c via attachTerrainStyle() (branch felix/windward-terrain-style). Follow-up:
 trees should obey the same slope rule (no trees on painted granite).
+
+## Felix's 1c ideas (2026-11-05, late)
+- **Lighthouses on Today's coast:** before the first jump, the chart and minimap show the
+  lighthouses and you can go and look at them ("they look cute and are a core part of the game").
+  Mission control's suggestion: Today is the modern, casual coast, so the lights are already on
+  every modern chart; the mystery belongs to the past eras. Tap a lighthouse on the chart, and
+  the camera flies there for a look (a "visit" view) while the boat stays where it is; sailing
+  there is still how you go. Decide with Felix whether the boat can also jump.
+- **Zoom out further:** zoom out more than today, so you see more around you. It isn't
+  infinite: zooming out past a limit turns smoothly into the chart.
+- **Minimap for short hops:** it should make it easy to sail short distances (e.g. just
+  outside a harbour) without feeling lost.
+- **Leading marks in and out of harbours, time-appropriate:** Today = the real buoyage
+  (lateral red/green, cardinals, lit beacons). Old eras = cairns (kummel), painted rock
+  marks, spar marks and leading lines, the marks the "sea marks before 1840" idea already uses.
