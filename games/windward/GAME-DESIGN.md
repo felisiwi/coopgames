@@ -213,7 +213,7 @@ Each stage is small, playable and tested before the next.
 4. **3b, storm, jump, time-lapse, sea chest:** the can't-escape storm, the
    first jump, the backwards time-lapse, the lost sea chest.
 5. **Trade:** the T0-T8 table below. It predates this order and still assumes
-   one era; it is due a rewrite once the era is chosen (Q1).
+   one era; it is due a rewrite around the works slice (Q31 c).
 
 | Stage | What you can do | New systems |
 |---|---|---|
@@ -247,8 +247,8 @@ Before any story, the first thing is just sailing.
 - **Pre-story sailing is today's coast (SET, Q10):** the current free-sail
   mode, with its real present-day lights.
 - **Choosing the story at a port plays the first time-lapse backwards** to the
-  opening year: lights sink, years roll back. (The opening year itself is
-  held with Q1.)
+  opening year: lights sink, years roll back. (The opening year is
+  about 1905, SET; see "The flow".)
 - **Arriving at a port or house (SET, Q13):** a sensory reward (bell,
   chimney smoke, gulls scatter, someone waves), someone tosses you a small
   gift (a fish), and the story is offered quietly (a lit doorway, a chart on
@@ -298,11 +298,12 @@ When you choose the story, you start in a short slice of a later but still
 retro era: before 1950, maybe older. No GPS. It should feel retro and
 mystical.
 
-- **Opening year (open, option to weigh):** about 1905. Måseskär, Pater
-  Noster and Hållö stand nearby; small lights, cairns (*kummel*) and village
-  signal fires (*vårdkasar*) mark the coast; sail is still dominant.
-  `TODO(felix): confirm year; check each light's built year in lighthouse-lab
-  data before relying on "stand nearby in 1905".`
+- **Opening year (SET, about 1905, the end of Light and Stone).** Måseskär,
+  Pater Noster and Hållö stand nearby; small lights, cairns (*kummel*) and
+  village signal fires (*vårdkasar*) mark the coast; sail is still dominant.
+  `TODO(felix): check each light's built year in the lighthouse data against
+  epochs.json (it lists Hållö 1842, Måseskär 1865, Pater Noster 1868, Eggskär
+  1904).`
 - **Start location:** the densest cluster of Felix's favourite places, west
   Orust around Käringön / Härmanö / Gullholmen / Hälleviksstrand.
   `TODO(felix): confirm.`
@@ -318,13 +319,14 @@ mystical.
   are the tutorial. No pop-up lessons; the coast teaches.
 - **The storm:** after the first chart and some chill sailing, a storm rolls
   in that you cannot escape wherever you are: thunder, the mysterious fog
-  with flashes, then the first era jump. Destination open (see below).
+  with flashes, then the first era jump. It lands at the end of New border,
+  about 1700 (SET, see "The flow").
 - **The opening era locks after the first jump.** Much later you return to
   it, when you have almost forgotten it, and the lighthouses carry meaning
   then, for example their real flash patterns as a code or a way home.
-  **Open: what that meaning is.**
+  **Open: what that meaning is.** Under review with Q30: eras no longer unlock in order.
 
-Opening-year options (no pick):
+Opening-year options (kept for the record; about 1905 chosen):
 
 | Option | For | Against |
 |---|---|---|
@@ -411,6 +413,8 @@ Design this explicitly; it touches almost every system.
 - **No early currency (SET, Q23 c):** barter and favours. Things the pair
   net sweeps up (barrels, flotsam) become gifts and trade goods for chart
   sections. No throwaway early economy; the real one is the trade stage.
+- **Pair-net haul split (SET, Q29):** split evenly; each half goes to each
+  player's own save. Odd items: see Gaps.
 - **Early co-op (SET, Q12): smart ping + the pair net.** The ping is the
   first feature beyond "here I am": it tags what you point at (a find, a
   fish school, a port, a lighthouse) and marks it on both mini-maps.
@@ -438,44 +442,81 @@ Design this explicitly; it touches almost every system.
 - **Epoch:** a long span (about 100+ years), roughly one release.
 - **Era:** a chapter inside an epoch (10-40 years) with its own tone,
   season, history and rules.
-- **Today's coast:** a separate setting, the summer free-sail lure. Not part
-  of any epoch.
+- **Today's coast:** the summer free-sail lure. The timeline lists it as the
+  seventh slot, but it is a separate setting, not a story epoch.
 
-## Draft epoch: "Herring and Light", 1706-1906 (DRAFT, Felix 2026-11-05)
+## Epochs and eras (SET structure, Felix 2026-11-05)
 
-Status: Felix's draft, not yet grilled. Every historical claim below is his
-research as he gave it. `TODO(felix): confirm each against a cited source
-before it ships` (the settlements data uses a confidence key for this). The
-span is 200 years, longer than the "about one release" guide, so which eras
-ship first is Q1.
+**Source of truth: `games/windward/data/epochs.json`** (merged from branch
+`felix/epoch-timeline`), with the frozen viewer `ref/epoch-timeline.html`. If
+this section and the data disagree, the data wins and this section gets
+fixed. Anything the data marks `approx` or `verify` is not source-checked
+yet. `TODO(felix): confirm against a cited source before it ships.`
 
-1. **Crown shores, 1706-1746.** Poor, quiet, hopeful; spring/summer. A 1706
-   ordinance lets Swedish subjects build huts and processing sheds on crown
-   land and fishing harbour sites; East India Company ships from 1731;
-   Götheborg sinks 1745.
-2. **The silver comes, 1747-1774.** The herring return; salteries; train-oil
-   boiling from about 1760.
-3. **Honour and Life, 1775-1794.** Marstrand free port (religious freedom,
-   toll-free imports, refuge for those whose crimes didn't touch "honour and
-   life"); smuggling; oil exported to Europe (reportedly lit Paris streets).
-   Permits from 1780; the 1783 inspection condemned 120 of 328 works, a
-   stricter phase once players know the era.
-4. **Last silver, 1795-1809.** Workers sacked by 1798, the Napoleonic wars,
-   herring gone 1808-09.
-5. **Empty harbours, 1810-1839.** Ruins and desolation; a time of loss in the
-   story. Lasse-Maja at Carlsten 1813-1839.
-6. **Lights go up, 1840-1876.** The great lighthouses lit; steamers.
-7. **The second silver, 1877-1906.** The herring return; canning, fish
-   guano, granite.
+Seven slots on the timeline (six story epochs plus the lure) and 17 eras.
+Every epoch and every era has a **vibe** and a **season**. This replaces the
+earlier draft epoch "Herring and Light" (1706-1906), which was split into
+New Crown, The Silver Sea and Light and Stone.
 
-**The loop across the epoch:** the opening (about 1905) is the end of the
-epoch; the storm throws you to about 1745; playing forward eventually brings
-you back to 1905 with all the lights lit. That is the "return to the first
-era" payoff. This replaces the earlier "start earlier / end later" candidate
-windows below (for example Tordenskjold's war, 1700-1720, no longer has its
-own era).
+| Epoch | Years | Vibe | Season |
+|---|---|---|---|
+| I Kings and raiders | 800-1657 | Mythic, raw | Autumn to winter |
+| II New Crown | 1658-1746 | Poor, unsettled, hopeful | Spring to summer |
+| III The Silver Sea | 1747-1809 | Rich, rowdy, greedy | Summer, late summer, autumn |
+| IV Light and Stone | 1810-1906 | Loss, then hope, then bustle | Late autumn, winter, late winter |
+| V Engines and wars | 1907-1949 | Sly, tense | A long, cold spring |
+| VI Summer guests | 1950-1999 | Friendly, cute, with a feud | Summer |
+| Today (the lure) | 2000-2026 | Easy, pretty | Summer |
 
-## Core loop idea: build a works (DRAFT, Felix 2026-11-05)
+Eras (vibe; season):
+
+- **I:** Norse coast 800-1050 (raw, mythic, open sea; autumn). Fortress and
+  fish 1051-1555 (old, slow, stony; late autumn). Border wars 1556-1657
+  (contested, wary; winter).
+- **II:** New border 1658-1705 (unsettled; spring). Crown shores 1706-1746
+  (poor, hopeful; summer).
+- **III:** The silver comes 1747-1774 (rising, busy; summer). Honour and Life
+  1775-1794 (rich, rowdy, mischievous; late summer). Last silver 1795-1809
+  (anxious, stormy; autumn).
+- **IV:** Empty harbours 1810-1839 (loss, melancholy; late autumn, last
+  leaves falling). Lights go up 1840-1876 (hope, safer seas; crisp winter).
+  The second silver 1877-1906 (industrial bustle; late winter to early
+  spring).
+- **V:** Motor and canning 1907-1916 (change, engines; long, cold spring).
+  Spirits at sea 1917-1938 (sly, night runs). Mines and neutrality 1939-1949
+  (tense, watchful).
+- **VI:** Summer guests 1950-1979 (friendly, cute, with a feud; summer):
+  holiday homes, leisure boats, bridges to the islands, and the friendly
+  west-coast-east-coast feud begins, with rich Stockholmers buying up
+  fishermen's cottages. Leisure sailing 1980-1999 (easy, playful; summer).
+- **Today:** Summer coast 2000-2026 (free sail, pretty; summer), the lure.
+
+**Seasons run as one full year across the timeline (SET):** autumn to winter
+(I Kings and raiders), spring (New border), summer (Crown shores, The silver
+comes), late summer (Honour and Life), autumn (Last silver), late autumn
+(Empty harbours), crisp winter (Lights go up), late winter to early spring
+(The second silver), a long, cold spring (epoch V), summer (VI and Today).
+
+**Built for real first (SET, Q1):** the end of New border (about 1700), Crown
+shores, The silver comes and Honour and Life, plus Today and the about-1905
+opening. Everything else is a taste or a time-lapse. Note that Last silver
+(1795-1809) is a taste even though it sits inside epoch III. The data's
+`release: "first (proposed)"` on epoch III does not match this; the data is
+not edited here (see Gaps).
+
+## The flow (SET, Felix 2026-11-05; replaces the earlier opening order)
+
+1. **You start casual on Today's coast** (the lure; the data marks it 2015).
+2. **A time warp takes you to about 1905**, the end of Light and Stone: the
+   opening, granddad's chart, the lighthouses.
+3. **The first jump lands at the end of New border (about 1700).** You warm up
+   poor, and soon after the 1706 crown-land ordinance lets you claim islands
+   and build. That is how eras are introduced naturally.
+
+The timeline markers in the data are "you start (casual)" 2015, "time warp
+lands" 1905 and "first jump lands" 1700.
+
+## Core loop: build a works (SET as a minimal first slice, Q31 c)
 
 - **The idea:** find a sheltered harbour, get the rights (crown land under
   1706, a lease elsewhere, a governor's permit from 1780), and build a
@@ -487,18 +528,24 @@ own era).
   Empires. Small workers are optional.
 - **Trade around it:** French and foreign oil ships offer trade, and a little
   smuggling. Rules tighten later in the era (permits, inspections).
-- **Open:** how this relates to the older trade and production systems (3 and
-  4 above) and to stage 5. See the grill.
+- **First slice (SET, Q31 c):** one loop, built minimal: sail to a harbour,
+  get rights, build a small works, carry oil by sea, sell to a foreign ship.
+  The older markets and production systems (3 and 4 above) and the T0-T8
+  table get reshaped around this slice; rewrite them later.
 
-## Seasons (DRAFT, Felix 2026-11-05)
+## Seasons (SET, Q32)
 
-Eras or chapters can be winter. The great herring fishery was a winter
+**Season = the era's mood, fixed per era**, following the year arc in the
+epochs section. Winter fishing can appear as chapters inside an era. The great herring fishery was a winter
 fishery: short days, storms, ice in inner fjords, open boats, seine nets.
 Winter should feel very different from the summer lure.
 
-## Title idea (OPEN, wording unverified)
+## Working title (SET as working, Q33)
 
-"Windward: Honour and Life", from the free-port asylum rule. **Checked
+Working title: **"Windward: Honour and Life"**. It hints that it is not just
+sailing, it is living: adventurous and explorative. It is our own phrase;
+**do not present it as a historical quote** unless Olán or Holmberg confirm
+the wording. Keep checking. It came from the free-port asylum rule. **Checked
 2026-11-05, wording not confirmed:**
 - English Wikipedia ("Marstrand Free Port", section Criminals): "As long as
   their crime concerned no matters of 'honour and life', they were afforded
@@ -515,14 +562,21 @@ Winter should feel very different from the summer lure.
   quote of the regulation.
 - Not found: any Swedish "honour and life" phrase (ära, heder, liv) in
   anything read. Olán (1917), *Marstrands historia, krigsminnen och
-  badortslif*, could not be read online (only a catalogue stub). Still to try:
-  Libris or archive.org for Olán, and Holmberg (1867), which the English
-  Marstrand article cites for the 1775 decree.
+  badortslif*, could not be read online (only a catalogue stub).
+- Third check (2026-11-05): archive.org has neither Olán (1917) nor Holmberg
+  (1867); Libris returned "Access Denied". archive.org did give a
+  nineteenth-century text on the charter itself, Hartelius, *Om luft och bad
+  m.m. vid Marstrand* (1862): "Föga, eller åtminstone mindre långvarig,
+  vederqvickelse erfor Marstrand af Gustaf den III:s nådegåfva i författningen
+  1775, som gjorde den till en frihamn." (OCR reads "4775".) It says nothing
+  on refuge or crime, and only about 60% of that book was read verbatim.
+  Still to try: a Swedish library for Olán (1917) and Holmberg (1867), or a
+  digitised text of the 1775 privilegium itself.
 - The title idea also collides with the draft epoch: "Honour and Life" is
   already the name of era 3 (1775-1794), while the epoch is "Herring and
   Light".
 
-## Earlier era candidates (kept for the record; the epoch draft above now structures Q1)
+## Earlier era candidates (kept for the record; superseded by the epochs section above)
 
 All dates are Felix's candidate windows. Historical facts beyond them are
 `TODO(felix): confirm` against the lab data, which cites its sources.
@@ -565,8 +619,8 @@ All dates are Felix's candidate windows. Historical facts beyond them are
    Against: no mystery; the least "jump" feeling.
    Buffer: n/a.
 
-First-jump destination (open): the poor era around 1745 (Götheborg sinks),
-or another exciting era first. No pick until Q1 is settled.
+First-jump destination: SET, about 1700, the end of New border (see "The
+flow"). The older 1745 idea is dropped.
 
 ## Decisions log
 
@@ -575,7 +629,7 @@ yet grilled), **INFERRED** (my reading, confirm).
 
 | # | Decision | Status | What we have |
 |---|---|---|---|
-| 1 | Era | **OPEN** | Held until Felix has seen the year-slider labs. Now structured as the draft epoch "Herring and Light" (seven eras, 1706-1906) plus today's coast; which eras are built first is the question. No pick. |
+| 1 | Era | **SET** | Seven epoch slots and 17 eras, single source `data/epochs.json`. Built for real first: the end of New border (~1700), Crown shores, The silver comes, Honour and Life, plus Today and the ~1905 opening. The rest are tastes or time-lapses. |
 | 2 | Shared fortune or separate | **SET** | Separate purses (Q7). Must work with the drop-in/drop-out flow: what happens to shared contracts, cargo and bonuses when someone leaves mid-trip is open. |
 | 3 | Provisions | **SET** | One combined "stores" meter, planned but not at the start. It must matter enough to make you sail into ports. |
 | 4 | Session shape | **SET** | No-save mode is the lure: jump in, sail, pretty. The real game is saves + friends + story + history + trading. 5 minutes must still feel rewarding; longer play goes deeper. Phone = short trips, laptop = bigger missions. |
@@ -603,17 +657,21 @@ yet grilled), **INFERRED** (my reading, confirm).
 | 26 | Chart sections cut | **SET** | By place (west Orust = granddad's chart), each with its own history and sweet spots; lighthouses are markers inside sections. |
 | 27 | Stage cut | **SET** | Fog, beams and the thunder warning ship with the lure. Stage 3 splits into 3a (saving, chart, story start at a port) and 3b (storm, jump, time-lapse, sea chest). |
 | 28 | Terms | **SET** | Epoch (about 100+ years, roughly one release) and era (10-40 years, own tone, season, history, rules). |
-| 29 | Draft epoch | **DRAFT** | "Herring and Light" 1706-1906, seven eras; the opening is its end and playing forward returns you there. Historical claims unverified. |
-| 30 | Core loop: build a works | **DRAFT** | Get rights to a harbour, build a saltery or oil works, herring to oil multiplies value, sell to foreign ships; rules tighten later. Relationship to trade is open. |
-| 31 | Seasons | **DRAFT** | The herring fishery was a winter fishery; winter should feel very different from the summer lure. Model open. |
-| 32 | Title | **OPEN** | "Windward: Honour and Life". The phrase's Swedish wording is not confirmed; it is also the name of era 3. |
+| 29 | Epochs and eras | **SET** (data unverified in places) | I Kings and raiders, II New Crown, III The Silver Sea, IV Light and Stone, V Engines and wars, VI Summer guests, Today (the lure). Vibe and season per era; one year of seasons across the timeline. `epochs.json` wins over this doc. |
+| 30 | Core loop: build a works | **SET** (minimal slice) | Sail to a harbour, get rights, build a small works, carry oil by sea, sell to a foreign ship (Q31 c). |
+| 31 | Seasons | **SET** | Season = the era's mood, fixed per era, following the year arc. Winter fishing can appear as chapters inside an era (Q32). |
+| 32 | Title | **SET as working title** | "Windward: Honour and Life". Our own phrase, not a historical quote unless Olán or Holmberg confirm the wording; keep checking. Also the name of era "Honour and Life". |
+| 33 | The flow | **SET** | Start casual on Today's coast, a time warp to ~1905 (the opening: granddad's chart, lighthouses), the first jump lands at the end of New border (~1700), and the 1706 ordinance soon lets you claim islands and build. |
+| 34 | Opening year | **SET** | About 1905, the end of Light and Stone. |
+| 35 | Pair-net haul split | **SET** | Split evenly; each half goes to each player's own save (Q29). |
+| 36 | Unlocking eras | **SET** (principle), design **OPEN** | Eras do not unlock in order. Unlocks are spaced across the timeline so moving back and forth in time is engaging and earlier eras stay relevant. Spacing and reasons to return are open (round 8). |
 
 ## Gaps (to grill)
 
 Recorded 2026-11-05; resolved ones move into the log above.
 
-- **Pair-net haul split (round 7):** earnings go home (Q14 a); how is a
-  shared haul divided between host and visitor?
+- **Pair-net odd items:** an even split leaves odd items; which half gets
+  the extra one?
 - **Visiting with mismatched progress (Q15, OPEN):** decide when the story
   stage is designed; notes above.
 - **Saving:** a world needs an owner and a save for visiting to mean
@@ -622,7 +680,7 @@ Recorded 2026-11-05; resolved ones move into the log above.
 - **The sea chest:** what is in it, how the player finds it after the jump,
   and how "understands later" lands.
 - **Stage 5 rewrite:** T0-T8 is the trade phase and still assumes one era;
-  rewrite it once the era is chosen (Q1).
+  rewrite it around the works slice (Q31 c).
 - **Chart sections:** how many, what each reveals, who authors them, and
   what each barter asks for (Q23 c). Cut by place (Q27 a).
 - **Backwards time-lapse:** lights have a year-range lab on
@@ -640,9 +698,15 @@ Recorded 2026-11-05; resolved ones move into the log above.
   layer anyway.
 - **Unmerged inputs:** lights (`felix/windward-lighthouses`) and the real
   coast and settlements (`felix/windward-real-coast`) are not on `main`.
-- **Epoch grill (round 7):** which eras are built first (Q1), how eras
-  unlock, whether the works or route trade is the heart of stage 5, the
-  season model, and what the title names.
+- **Unlock design (round 8):** spacing across the timeline and the reasons
+  to return (Q30).
+- **Parked items re-opened (round 8):** the sea chest, the flash patterns,
+  and Q15 under non-ordered unlocks.
+- **`epochs.json` release field:** it marks epoch III as the first release
+  (proposed), while Q1 builds parts of II, III and IV and leaves out Last
+  silver. Data not edited here.
+- **Lights cross-check:** the lit years in `epochs.json` against the sourced
+  built years in `lighthouses.js` (branch `felix/windward-lighthouses`).
 - **Source check for the epoch draft:** every date and figure (1706
   ordinance, 1780 permits, 1783 inspection, the riksdaler ratio) needs a
   cited source.
@@ -659,4 +723,5 @@ Recorded 2026-11-05; resolved ones move into the log above.
 - Marstrand free port asylum wording (checked 2026-11-05, unconfirmed):
   https://en.wikipedia.org/wiki/Marstrand_Free_Port and
   https://sv.wikipedia.org/wiki/Frihamnen_Marstrand and
-  https://runeberg.org/sfubon/7/0075.html
+  https://runeberg.org/sfubon/7/0075.html and
+  https://archive.org/stream/arkivkopia.se-runeberg-htjomluft/htjomluft_djvu.txt
