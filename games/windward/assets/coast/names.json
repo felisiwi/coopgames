@@ -1,0 +1,2272 @@
+{
+ "generated": "2026-11-05",
+ "source": "OpenStreetMap contributors, ODbL 1.0, via Overpass API (tools/fetch-names.mjs)",
+ "region": {
+  "s": 58.085,
+  "w": 11.25,
+  "n": 58.3,
+  "e": 11.5
+ },
+ "spawn": {
+  "name": "Grundsunds hamn",
+  "lat": 58.216,
+  "lon": 11.41577,
+  "osm": "node/4279916839",
+  "note": "OSM leisure=marina (guest harbour). The boat starts in open water just outside it."
+ },
+ "harbours": [
+  {
+   "name": "Bredholmen",
+   "lat": 58.24468,
+   "lon": 11.36574,
+   "osm": [
+    "relation/10250251"
+   ],
+   "how": "exact OSM name match"
+  },
+  {
+   "name": "Skarvesäter",
+   "lat": 58.23965,
+   "lon": 11.36713,
+   "osm": [
+    "relation/10250263"
+   ],
+   "how": "exact OSM name match"
+  },
+  {
+   "name": "Usholmen",
+   "lat": 58.20116,
+   "lon": 11.4401,
+   "osm": [
+    "node/3496985854"
+   ],
+   "how": "exact OSM name match"
+  },
+  {
+   "name": "Porsholmen",
+   "lat": 58.22777,
+   "lon": 11.39847,
+   "osm": [
+    "relation/10250155"
+   ],
+   "how": "exact OSM name match"
+  },
+  {
+   "name": "Kråkesundsgap",
+   "lat": 58.10179,
+   "lon": 11.44111,
+   "osm": [
+    "node/1531131314",
+    "node/1531131658"
+   ],
+   "how": "midpoint of the two OSM lights Kråkesundsgap Södra and Norra"
+  },
+  {
+   "name": "Assholmen",
+   "lat": 58.14559,
+   "lon": 11.40071,
+   "osm": [
+    "relation/10237567"
+   ],
+   "how": "exact OSM name match"
+  },
+  {
+   "name": "Jonsborg",
+   "lat": 58.19593,
+   "lon": 11.42289,
+   "osm": [
+    "relation/10094569"
+   ],
+   "how": "exact OSM name match"
+  },
+  {
+   "name": "Vasholmarna",
+   "lat": 58.21673,
+   "lon": 11.37445,
+   "osm": [
+    "relation/10250185"
+   ],
+   "how": "exact OSM name match"
+  }
+ ],
+ "unplaced": [
+  {
+   "name": "Rammen",
+   "reason": "exact match exists but outside the region",
+   "candidates": [
+    {
+     "name": "Rammen",
+     "lat": 58.34867,
+     "lon": 11.28591,
+     "osm": "relation/10238125",
+     "inRegion": false
+    },
+    {
+     "name": "Långe Rammen",
+     "lat": 58.34479,
+     "lon": 11.28296,
+     "osm": "relation/10238128",
+     "inRegion": false
+    }
+   ]
+  },
+  {
+   "name": "Testholmarna-Usholmen",
+   "reason": "no exact OSM name; near-name candidates only (not guessed)",
+   "candidates": [
+    {
+     "name": "Testholmen",
+     "lat": 58.00762,
+     "lon": 11.50017,
+     "osm": "relation/10238920",
+     "inRegion": false
+    },
+    {
+     "name": "Lilla Testholmen",
+     "lat": 58.22542,
+     "lon": 11.37618,
+     "osm": "relation/10250249",
+     "inRegion": true
+    },
+    {
+     "name": "Stora Testholmen",
+     "lat": 58.22764,
+     "lon": 11.37489,
+     "osm": "relation/10250250",
+     "inRegion": true
+    },
+    {
+     "name": "Testholmen",
+     "lat": 58.31717,
+     "lon": 11.37716,
+     "osm": "relation/11382997",
+     "inRegion": false
+    }
+   ]
+  },
+  {
+   "name": "DammholmeSkären",
+   "reason": "no exact OSM name; near-name candidates only (not guessed)",
+   "candidates": [
+    {
+     "name": "Dammholmen",
+     "lat": 58.23486,
+     "lon": 11.37083,
+     "osm": "relation/10250299",
+     "inRegion": true
+    }
+   ]
+  },
+  {
+   "name": "Västra Danholmen",
+   "reason": "no exact OSM name; near-name candidates only (not guessed)",
+   "candidates": [
+    {
+     "name": "Danholmen",
+     "lat": 58.10913,
+     "lon": 11.42811,
+     "osm": "relation/10238702",
+     "inRegion": true
+    },
+    {
+     "name": "Danholme unge",
+     "lat": 58.11054,
+     "lon": 11.421,
+     "osm": "relation/11620932",
+     "inRegion": true
+    },
+    {
+     "name": "Danholme skär",
+     "lat": 58.10706,
+     "lon": 11.41892,
+     "osm": "relation/11620933",
+     "inRegion": true
+    }
+   ]
+  },
+  {
+   "name": "Altarholmen",
+   "reason": "exact match exists but outside the region",
+   "candidates": [
+    {
+     "name": "Altarholmen",
+     "lat": 58.01598,
+     "lon": 11.45029,
+     "osm": "relation/10238814",
+     "inRegion": false
+    }
+   ]
+  },
+  {
+   "name": "Skaboholmen",
+   "reason": "exact match exists but outside the region",
+   "candidates": [
+    {
+     "name": "Skaboholmen",
+     "lat": 58.03692,
+     "lon": 11.4942,
+     "osm": "relation/10238748",
+     "inRegion": false
+    }
+   ]
+  },
+  {
+   "name": "Smörasken",
+   "reason": "no OSM match found",
+   "candidates": []
+  }
+ ],
+ "islands": [
+  {
+   "name": "Alkholmsskäret",
+   "kind": "skerry",
+   "lat": 58.23897,
+   "lon": 11.36343,
+   "osm": "relation/10250262"
+  },
+  {
+   "name": "Anderholmarna",
+   "kind": "skerry",
+   "lat": 58.13105,
+   "lon": 11.38097,
+   "osm": "relation/10238545"
+  },
+  {
+   "name": "Anderholmarna",
+   "kind": "skerry",
+   "lat": 58.13087,
+   "lon": 11.3858,
+   "osm": "relation/10238669"
+  },
+  {
+   "name": "Anders holme",
+   "kind": "skerry",
+   "lat": 58.21464,
+   "lon": 11.47336,
+   "osm": "relation/13306320"
+  },
+  {
+   "name": "Ankerskär",
+   "kind": "skerry",
+   "lat": 58.25014,
+   "lon": 11.46094,
+   "osm": "relation/11034861"
+  },
+  {
+   "name": "Bakaren",
+   "kind": "skerry",
+   "lat": 58.19866,
+   "lon": 11.42073,
+   "osm": "relation/10237777"
+  },
+  {
+   "name": "Barrlind",
+   "kind": "skerry",
+   "lat": 58.19917,
+   "lon": 11.45307,
+   "osm": "relation/10237407"
+  },
+  {
+   "name": "Barrlinde unge",
+   "kind": "skerry",
+   "lat": 58.19704,
+   "lon": 11.45006,
+   "osm": "relation/10237788"
+  },
+  {
+   "name": "Berggylteskär",
+   "kind": "skerry",
+   "lat": 58.29733,
+   "lon": 11.28377,
+   "osm": "relation/10242521"
+  },
+  {
+   "name": "Berggytteskär",
+   "kind": "skerry",
+   "lat": 58.27138,
+   "lon": 11.37382,
+   "osm": "relation/10237855"
+  },
+  {
+   "name": "Bjärkholmen",
+   "kind": "skerry",
+   "lat": 58.22326,
+   "lon": 11.48044,
+   "osm": "relation/11354554"
+  },
+  {
+   "name": "Bjönnisskär",
+   "kind": "skerry",
+   "lat": 58.14,
+   "lon": 11.39987,
+   "osm": "relation/10237564"
+  },
+  {
+   "name": "Blåbergsholm",
+   "kind": "skerry",
+   "lat": 58.25329,
+   "lon": 11.44261,
+   "osm": "relation/10250506"
+  },
+  {
+   "name": "Blåbergsholm",
+   "kind": "skerry",
+   "lat": 58.25107,
+   "lon": 11.44089,
+   "osm": "relation/10250507"
+  },
+  {
+   "name": "Bockholmsskär",
+   "kind": "skerry",
+   "lat": 58.29984,
+   "lon": 11.41737,
+   "osm": "relation/11035089"
+  },
+  {
+   "name": "Bondebrotten",
+   "kind": "skerry",
+   "lat": 58.29871,
+   "lon": 11.28468,
+   "osm": "relation/10242520"
+  },
+  {
+   "name": "Bonden",
+   "kind": "skerry",
+   "lat": 58.08506,
+   "lon": 11.34021,
+   "osm": "relation/10239120"
+  },
+  {
+   "name": "Bonden",
+   "kind": "skerry",
+   "lat": 58.20869,
+   "lon": 11.31269,
+   "osm": "relation/10250201"
+  },
+  {
+   "name": "Brandskär",
+   "kind": "skerry",
+   "lat": 58.29689,
+   "lon": 11.33659,
+   "osm": "relation/10237871"
+  },
+  {
+   "name": "Bråtö",
+   "kind": "island",
+   "lat": 58.09708,
+   "lon": 11.45333,
+   "osm": "relation/10238706"
+  },
+  {
+   "name": "Buholmen",
+   "kind": "skerry",
+   "lat": 58.24868,
+   "lon": 11.39331,
+   "osm": "relation/10237893"
+  },
+  {
+   "name": "Buskären",
+   "kind": "skerry",
+   "lat": 58.10217,
+   "lon": 11.36937,
+   "osm": "relation/16111058"
+  },
+  {
+   "name": "Bytebåden",
+   "kind": "skerry",
+   "lat": 58.11333,
+   "lon": 11.35736,
+   "osm": "relation/11021067"
+  },
+  {
+   "name": "Båglerorna",
+   "kind": "skerry",
+   "lat": 58.19594,
+   "lon": 11.42019,
+   "osm": "relation/13306335"
+  },
+  {
+   "name": "Bökeviks skär",
+   "kind": "skerry",
+   "lat": 58.24914,
+   "lon": 11.45409,
+   "osm": "relation/10250491"
+  },
+  {
+   "name": "Bönan",
+   "kind": "skerry",
+   "lat": 58.20808,
+   "lon": 11.40914,
+   "osm": "relation/11322395"
+  },
+  {
+   "name": "Dammholmen",
+   "kind": "skerry",
+   "lat": 58.23486,
+   "lon": 11.37083,
+   "osm": "relation/10250299"
+  },
+  {
+   "name": "Danholme skär",
+   "kind": "skerry",
+   "lat": 58.10706,
+   "lon": 11.41892,
+   "osm": "relation/11620933"
+  },
+  {
+   "name": "Danholme unge",
+   "kind": "skerry",
+   "lat": 58.11054,
+   "lon": 11.421,
+   "osm": "relation/11620932"
+  },
+  {
+   "name": "Danholmen",
+   "kind": "skerry",
+   "lat": 58.10913,
+   "lon": 11.42811,
+   "osm": "relation/10238702"
+  },
+  {
+   "name": "De gula skären",
+   "kind": "skerry",
+   "lat": 58.23017,
+   "lon": 11.37274,
+   "osm": "relation/16123570"
+  },
+  {
+   "name": "Dynan",
+   "kind": "skerry",
+   "lat": 58.2203,
+   "lon": 11.35908,
+   "osm": "relation/10250247"
+  },
+  {
+   "name": "Fiskelideskär",
+   "kind": "skerry",
+   "lat": 58.21019,
+   "lon": 11.36325,
+   "osm": "relation/10250194"
+  },
+  {
+   "name": "Flackeviksholmarna",
+   "kind": "skerry",
+   "lat": 58.13002,
+   "lon": 11.41985,
+   "osm": "relation/10238591"
+  },
+  {
+   "name": "Flatholmen",
+   "kind": "skerry",
+   "lat": 58.25986,
+   "lon": 11.40648,
+   "osm": "relation/10237896"
+  },
+  {
+   "name": "Fockeskär",
+   "kind": "skerry",
+   "lat": 58.29713,
+   "lon": 11.42136,
+   "osm": "relation/11035092"
+  },
+  {
+   "name": "Fockeskär",
+   "kind": "skerry",
+   "lat": 58.29763,
+   "lon": 11.42046,
+   "osm": "relation/11035093"
+  },
+  {
+   "name": "Fredagsholmen",
+   "kind": "skerry",
+   "lat": 58.18828,
+   "lon": 11.42408,
+   "osm": "relation/10237443"
+  },
+  {
+   "name": "Fredagsholmen",
+   "kind": "skerry",
+   "lat": 58.11639,
+   "lon": 11.44648,
+   "osm": "relation/10249797"
+  },
+  {
+   "name": "Fågelskär",
+   "kind": "skerry",
+   "lat": 58.10692,
+   "lon": 11.34465,
+   "osm": "relation/10239117"
+  },
+  {
+   "name": "Galgholmen",
+   "kind": "skerry",
+   "lat": 58.19041,
+   "lon": 11.43472,
+   "osm": "relation/10237600"
+  },
+  {
+   "name": "Grytebenen",
+   "kind": "skerry",
+   "lat": 58.25061,
+   "lon": 11.35872,
+   "osm": "relation/10250166"
+  },
+  {
+   "name": "Gråben",
+   "kind": "skerry",
+   "lat": 58.27106,
+   "lon": 11.49364,
+   "osm": "relation/11034870"
+  },
+  {
+   "name": "Gråsejen",
+   "kind": "skerry",
+   "lat": 58.18733,
+   "lon": 11.39815,
+   "osm": "relation/11020206"
+  },
+  {
+   "name": "Gråskären",
+   "kind": "skerry",
+   "lat": 58.25145,
+   "lon": 11.42025,
+   "osm": "relation/10250370"
+  },
+  {
+   "name": "Gräsholmarna",
+   "kind": "skerry",
+   "lat": 58.1887,
+   "lon": 11.37856,
+   "osm": "relation/16111055"
+  },
+  {
+   "name": "Grönlandsskär",
+   "kind": "skerry",
+   "lat": 58.24115,
+   "lon": 11.36091,
+   "osm": "relation/10250441"
+  },
+  {
+   "name": "Grötholmen",
+   "kind": "skerry",
+   "lat": 58.20337,
+   "lon": 11.46487,
+   "osm": "relation/10237365"
+  },
+  {
+   "name": "Grötö",
+   "kind": "skerry",
+   "lat": 58.21859,
+   "lon": 11.40016,
+   "osm": "relation/10237463"
+  },
+  {
+   "name": "Gula skären",
+   "kind": "skerry",
+   "lat": 58.25429,
+   "lon": 11.36242,
+   "osm": "relation/10250162"
+  },
+  {
+   "name": "Gullholmen",
+   "kind": "skerry",
+   "lat": 58.18012,
+   "lon": 11.40581,
+   "osm": "relation/10094555"
+  },
+  {
+   "name": "Gulskär",
+   "kind": "skerry",
+   "lat": 58.10275,
+   "lon": 11.4597,
+   "osm": "relation/10238691"
+  },
+  {
+   "name": "Gulskär",
+   "kind": "skerry",
+   "lat": 58.29044,
+   "lon": 11.34507,
+   "osm": "relation/11354338"
+  },
+  {
+   "name": "Gulskären",
+   "kind": "skerry",
+   "lat": 58.28032,
+   "lon": 11.39175,
+   "osm": "relation/10237901"
+  },
+  {
+   "name": "Gunnarsskär",
+   "kind": "skerry",
+   "lat": 58.28277,
+   "lon": 11.3537,
+   "osm": "relation/10237912"
+  },
+  {
+   "name": "Gållungen",
+   "kind": "skerry",
+   "lat": 58.13788,
+   "lon": 11.37057,
+   "osm": "relation/11020207"
+  },
+  {
+   "name": "Gåseskär",
+   "kind": "skerry",
+   "lat": 58.10392,
+   "lon": 11.45946,
+   "osm": "relation/10238692"
+  },
+  {
+   "name": "Gåsö",
+   "kind": "island",
+   "lat": 58.23589,
+   "lon": 11.40587,
+   "osm": "relation/10604591"
+  },
+  {
+   "name": "Gälgårdsskär",
+   "kind": "skerry",
+   "lat": 58.11524,
+   "lon": 11.42188,
+   "osm": "relation/10238583"
+  },
+  {
+   "name": "Gäven",
+   "kind": "skerry",
+   "lat": 58.27077,
+   "lon": 11.35029,
+   "osm": "relation/10237857"
+  },
+  {
+   "name": "Hinneskär",
+   "kind": "skerry",
+   "lat": 58.09094,
+   "lon": 11.33186,
+   "osm": "relation/10239121"
+  },
+  {
+   "name": "Holmen grå",
+   "kind": "skerry",
+   "lat": 58.10761,
+   "lon": 11.45661,
+   "osm": "relation/10238693"
+  },
+  {
+   "name": "Humlesäcken",
+   "kind": "skerry",
+   "lat": 58.26707,
+   "lon": 11.41314,
+   "osm": "relation/10237904"
+  },
+  {
+   "name": "Huvholmen",
+   "kind": "skerry",
+   "lat": 58.12134,
+   "lon": 11.43002,
+   "osm": "relation/10249712"
+  },
+  {
+   "name": "Håkansskär",
+   "kind": "skerry",
+   "lat": 58.09734,
+   "lon": 11.33243,
+   "osm": "relation/10239125"
+  },
+  {
+   "name": "Hällsholmen",
+   "kind": "skerry",
+   "lat": 58.24628,
+   "lon": 11.49898,
+   "osm": "relation/11031621"
+  },
+  {
+   "name": "Härmanö",
+   "kind": "island",
+   "lat": 58.16015,
+   "lon": 11.37571,
+   "osm": "relation/5463706"
+  },
+  {
+   "name": "Härme Rissholm",
+   "kind": "skerry",
+   "lat": 58.15247,
+   "lon": 11.39252,
+   "osm": "relation/10237572"
+  },
+  {
+   "name": "Hästebåden",
+   "kind": "skerry",
+   "lat": 58.11489,
+   "lon": 11.38988,
+   "osm": "relation/10249727"
+  },
+  {
+   "name": "Hättan",
+   "kind": "skerry",
+   "lat": 58.17403,
+   "lon": 11.37314,
+   "osm": "relation/10250543"
+  },
+  {
+   "name": "Högeland",
+   "kind": "skerry",
+   "lat": 58.2216,
+   "lon": 11.37991,
+   "osm": "relation/10250243"
+  },
+  {
+   "name": "Högholmen",
+   "kind": "skerry",
+   "lat": 58.18547,
+   "lon": 11.41223,
+   "osm": "relation/10237441"
+  },
+  {
+   "name": "Högholmen",
+   "kind": "skerry",
+   "lat": 58.11048,
+   "lon": 11.456,
+   "osm": "relation/10249700"
+  },
+  {
+   "name": "Inre Borgmästaren",
+   "kind": "skerry",
+   "lat": 58.28826,
+   "lon": 11.34538,
+   "osm": "relation/11354203"
+  },
+  {
+   "name": "Inre Byxeskär",
+   "kind": "skerry",
+   "lat": 58.26099,
+   "lon": 11.38655,
+   "osm": "relation/10250374"
+  },
+  {
+   "name": "Jensholmen",
+   "kind": "skerry",
+   "lat": 58.10791,
+   "lon": 11.4641,
+   "osm": "relation/10239334"
+  },
+  {
+   "name": "Jon",
+   "kind": "skerry",
+   "lat": 58.11791,
+   "lon": 11.36792,
+   "osm": "relation/10238543"
+  },
+  {
+   "name": "Jon",
+   "kind": "skerry",
+   "lat": 58.2117,
+   "lon": 11.37294,
+   "osm": "relation/10250189"
+  },
+  {
+   "name": "Jonsholmen",
+   "kind": "skerry",
+   "lat": 58.19983,
+   "lon": 11.43518,
+   "osm": "relation/10237444"
+  },
+  {
+   "name": "Juten",
+   "kind": "skerry",
+   "lat": 58.19179,
+   "lon": 11.43599,
+   "osm": "relation/10237782"
+  },
+  {
+   "name": "Juten",
+   "kind": "skerry",
+   "lat": 58.09172,
+   "lon": 11.43353,
+   "osm": "relation/10238697"
+  },
+  {
+   "name": "Jämningarna",
+   "kind": "skerry",
+   "lat": 58.26827,
+   "lon": 11.39032,
+   "osm": "relation/10237897"
+  },
+  {
+   "name": "Jämningarna",
+   "kind": "skerry",
+   "lat": 58.26546,
+   "lon": 11.39119,
+   "osm": "relation/10237902"
+  },
+  {
+   "name": "Järnskär",
+   "kind": "skerry",
+   "lat": 58.13223,
+   "lon": 11.40145,
+   "osm": "relation/10238632"
+  },
+  {
+   "name": "Järnskär",
+   "kind": "skerry",
+   "lat": 58.18359,
+   "lon": 11.35028,
+   "osm": "relation/10250535"
+  },
+  {
+   "name": "Kalmarholmen",
+   "kind": "skerry",
+   "lat": 58.12303,
+   "lon": 11.36924,
+   "osm": "relation/10238553"
+  },
+  {
+   "name": "Kamperholmen",
+   "kind": "skerry",
+   "lat": 58.18812,
+   "lon": 11.43246,
+   "osm": "relation/10237601"
+  },
+  {
+   "name": "Karisskär",
+   "kind": "skerry",
+   "lat": 58.15885,
+   "lon": 11.40857,
+   "osm": "way/397502678"
+  },
+  {
+   "name": "Karisskär",
+   "kind": "skerry",
+   "lat": 58.17966,
+   "lon": 11.41727,
+   "osm": "relation/10237586"
+  },
+  {
+   "name": "Karisskär",
+   "kind": "skerry",
+   "lat": 58.11731,
+   "lon": 11.36987,
+   "osm": "relation/10238542"
+  },
+  {
+   "name": "Kasten",
+   "kind": "skerry",
+   "lat": 58.19736,
+   "lon": 11.43665,
+   "osm": "relation/10237445"
+  },
+  {
+   "name": "Katten",
+   "kind": "skerry",
+   "lat": 58.21581,
+   "lon": 11.47928,
+   "osm": "relation/13306325"
+  },
+  {
+   "name": "Kattepannan",
+   "kind": "skerry",
+   "lat": 58.12172,
+   "lon": 11.43708,
+   "osm": "relation/10249692"
+  },
+  {
+   "name": "Kisteskär",
+   "kind": "skerry",
+   "lat": 58.22132,
+   "lon": 11.36974,
+   "osm": "relation/10250248"
+  },
+  {
+   "name": "Klåveskär",
+   "kind": "skerry",
+   "lat": 58.28634,
+   "lon": 11.36352,
+   "osm": "relation/10237866"
+  },
+  {
+   "name": "Klåveskär",
+   "kind": "skerry",
+   "lat": 58.29795,
+   "lon": 11.33985,
+   "osm": "relation/11383039"
+  },
+  {
+   "name": "Klåvholmen",
+   "kind": "skerry",
+   "lat": 58.209,
+   "lon": 11.37489,
+   "osm": "relation/10250188"
+  },
+  {
+   "name": "Knapp",
+   "kind": "skerry",
+   "lat": 58.17652,
+   "lon": 11.3508,
+   "osm": "relation/10250544"
+  },
+  {
+   "name": "Knapparna",
+   "kind": "skerry",
+   "lat": 58.13798,
+   "lon": 11.35444,
+   "osm": "relation/10239199"
+  },
+  {
+   "name": "Knapparna",
+   "kind": "skerry",
+   "lat": 58.13814,
+   "lon": 11.35542,
+   "osm": "relation/10239200"
+  },
+  {
+   "name": "Knapparna",
+   "kind": "skerry",
+   "lat": 58.13845,
+   "lon": 11.35458,
+   "osm": "relation/10239201"
+  },
+  {
+   "name": "Knapparna",
+   "kind": "skerry",
+   "lat": 58.13695,
+   "lon": 11.35585,
+   "osm": "relation/10239210"
+  },
+  {
+   "name": "Kniparen",
+   "kind": "skerry",
+   "lat": 58.19439,
+   "lon": 11.45459,
+   "osm": "relation/10237406"
+  },
+  {
+   "name": "Koljeskär",
+   "kind": "skerry",
+   "lat": 58.11335,
+   "lon": 11.41666,
+   "osm": "relation/10238590"
+  },
+  {
+   "name": "Kollholmen",
+   "kind": "skerry",
+   "lat": 58.14947,
+   "lon": 11.40187,
+   "osm": "relation/10237568"
+  },
+  {
+   "name": "Kollskär",
+   "kind": "skerry",
+   "lat": 58.27911,
+   "lon": 11.35798,
+   "osm": "relation/11354339"
+  },
+  {
+   "name": "Koppholmen",
+   "kind": "skerry",
+   "lat": 58.0851,
+   "lon": 11.42595,
+   "osm": "relation/10239363"
+  },
+  {
+   "name": "Kornö kalv",
+   "kind": "skerry",
+   "lat": 58.28839,
+   "lon": 11.38327,
+   "osm": "relation/10237852"
+  },
+  {
+   "name": "Korsholmen",
+   "kind": "skerry",
+   "lat": 58.11436,
+   "lon": 11.34577,
+   "osm": "relation/10239187"
+  },
+  {
+   "name": "Korsviksskär",
+   "kind": "skerry",
+   "lat": 58.29651,
+   "lon": 11.36774,
+   "osm": "relation/10237843"
+  },
+  {
+   "name": "Koskär",
+   "kind": "skerry",
+   "lat": 58.14079,
+   "lon": 11.40358,
+   "osm": "relation/10237559"
+  },
+  {
+   "name": "Kramkistan",
+   "kind": "skerry",
+   "lat": 58.26938,
+   "lon": 11.41536,
+   "osm": "relation/10237905"
+  },
+  {
+   "name": "Krejerskär",
+   "kind": "skerry",
+   "lat": 58.21082,
+   "lon": 11.35822,
+   "osm": "relation/10250198"
+  },
+  {
+   "name": "Kråkan",
+   "kind": "skerry",
+   "lat": 58.09802,
+   "lon": 11.32694,
+   "osm": "relation/10239122"
+  },
+  {
+   "name": "Kråkholmen",
+   "kind": "skerry",
+   "lat": 58.10482,
+   "lon": 11.43773,
+   "osm": "relation/10238703"
+  },
+  {
+   "name": "Kubbungen",
+   "kind": "skerry",
+   "lat": 58.24824,
+   "lon": 11.39805,
+   "osm": "relation/10250353"
+  },
+  {
+   "name": "Kulan",
+   "kind": "skerry",
+   "lat": 58.2537,
+   "lon": 11.35999,
+   "osm": "relation/10250163"
+  },
+  {
+   "name": "Käftarna",
+   "kind": "skerry",
+   "lat": 58.10586,
+   "lon": 11.3575,
+   "osm": "relation/16111057"
+  },
+  {
+   "name": "Käfteskäret",
+   "kind": "skerry",
+   "lat": 58.10791,
+   "lon": 11.35457,
+   "osm": "relation/10239170"
+  },
+  {
+   "name": "Käringön",
+   "kind": "skerry",
+   "lat": 58.11223,
+   "lon": 11.37082,
+   "osm": "way/309046742"
+  },
+  {
+   "name": "Käringön",
+   "kind": "skerry",
+   "lat": 58.10872,
+   "lon": 11.36481,
+   "osm": "relation/10239114"
+  },
+  {
+   "name": "Körholmen",
+   "kind": "skerry",
+   "lat": 58.21485,
+   "lon": 11.39063,
+   "osm": "relation/10237461"
+  },
+  {
+   "name": "Lavön",
+   "kind": "island",
+   "lat": 58.16796,
+   "lon": 11.42865,
+   "osm": "relation/7455712"
+  },
+  {
+   "name": "Ledskär",
+   "kind": "skerry",
+   "lat": 58.16299,
+   "lon": 11.39869,
+   "osm": "relation/10237573"
+  },
+  {
+   "name": "Lilla Bockholmen",
+   "kind": "skerry",
+   "lat": 58.096,
+   "lon": 11.46521,
+   "osm": "relation/10238705"
+  },
+  {
+   "name": "Lilla Fiskeskär",
+   "kind": "skerry",
+   "lat": 58.11749,
+   "lon": 11.36237,
+   "osm": "relation/10238538"
+  },
+  {
+   "name": "Lilla Grönskär",
+   "kind": "skerry",
+   "lat": 58.19092,
+   "lon": 11.43958,
+   "osm": "relation/10237783"
+  },
+  {
+   "name": "Lilla Harpö",
+   "kind": "skerry",
+   "lat": 58.25154,
+   "lon": 11.35801,
+   "osm": "relation/10250167"
+  },
+  {
+   "name": "Lilla Karholmen",
+   "kind": "skerry",
+   "lat": 58.11195,
+   "lon": 11.44211,
+   "osm": "relation/10249702"
+  },
+  {
+   "name": "Lilla Kvarnholmen",
+   "kind": "skerry",
+   "lat": 58.23941,
+   "lon": 11.37074,
+   "osm": "relation/10250261"
+  },
+  {
+   "name": "Lilla Kvarnholmen",
+   "kind": "skerry",
+   "lat": 58.24142,
+   "lon": 11.39227,
+   "osm": "relation/10250346"
+  },
+  {
+   "name": "Lilla Kyrkeskär",
+   "kind": "skerry",
+   "lat": 58.18503,
+   "lon": 11.44176,
+   "osm": "relation/10237780"
+  },
+  {
+   "name": "Lilla Oxskär",
+   "kind": "skerry",
+   "lat": 58.12217,
+   "lon": 11.37162,
+   "osm": "relation/10238554"
+  },
+  {
+   "name": "Lilla Risholmen",
+   "kind": "skerry",
+   "lat": 58.17986,
+   "lon": 11.41496,
+   "osm": "relation/10237588"
+  },
+  {
+   "name": "Lilla Ryttaren",
+   "kind": "skerry",
+   "lat": 58.11809,
+   "lon": 11.44201,
+   "osm": "relation/10249704"
+  },
+  {
+   "name": "Lilla Skabbholmen",
+   "kind": "skerry",
+   "lat": 58.23419,
+   "lon": 11.48952,
+   "osm": "relation/11354548"
+  },
+  {
+   "name": "Lilla Skeppholmen",
+   "kind": "skerry",
+   "lat": 58.27676,
+   "lon": 11.4134,
+   "osm": "relation/10237910"
+  },
+  {
+   "name": "Lilla Testholmen",
+   "kind": "skerry",
+   "lat": 58.22542,
+   "lon": 11.37618,
+   "osm": "relation/10250249"
+  },
+  {
+   "name": "Lilla Vasholmen",
+   "kind": "skerry",
+   "lat": 58.21438,
+   "lon": 11.37588,
+   "osm": "relation/10250187"
+  },
+  {
+   "name": "Lillebonden",
+   "kind": "skerry",
+   "lat": 58.29988,
+   "lon": 11.29282,
+   "osm": "relation/10242519"
+  },
+  {
+   "name": "Lindholmen",
+   "kind": "skerry",
+   "lat": 58.26695,
+   "lon": 11.4949,
+   "osm": "relation/11021110"
+  },
+  {
+   "name": "Lortholmarna",
+   "kind": "skerry",
+   "lat": 58.18323,
+   "lon": 11.42154,
+   "osm": "relation/10237437"
+  },
+  {
+   "name": "Lyngholmen",
+   "kind": "skerry",
+   "lat": 58.11765,
+   "lon": 11.43359,
+   "osm": "relation/10249711"
+  },
+  {
+   "name": "Låge",
+   "kind": "skerry",
+   "lat": 58.18359,
+   "lon": 11.35502,
+   "osm": "relation/10250534"
+  },
+  {
+   "name": "Långgap",
+   "kind": "skerry",
+   "lat": 58.25481,
+   "lon": 11.44783,
+   "osm": "relation/10250498"
+  },
+  {
+   "name": "Långgaps både",
+   "kind": "skerry",
+   "lat": 58.25451,
+   "lon": 11.44335,
+   "osm": "relation/10250495"
+  },
+  {
+   "name": "Långholmen",
+   "kind": "skerry",
+   "lat": 58.22717,
+   "lon": 11.40183,
+   "osm": "relation/10250154"
+  },
+  {
+   "name": "Långö",
+   "kind": "skerry",
+   "lat": 58.25275,
+   "lon": 11.37815,
+   "osm": "relation/10237891"
+  },
+  {
+   "name": "Makrilleskär",
+   "kind": "skerry",
+   "lat": 58.29505,
+   "lon": 11.42866,
+   "osm": "relation/16111030"
+  },
+  {
+   "name": "Makrillskären",
+   "kind": "skerry",
+   "lat": 58.29505,
+   "lon": 11.42866,
+   "osm": "relation/14906426"
+  },
+  {
+   "name": "Malö",
+   "kind": "island",
+   "lat": 58.20024,
+   "lon": 11.47865,
+   "osm": "relation/5214486"
+  },
+  {
+   "name": "Mansholmen",
+   "kind": "skerry",
+   "lat": 58.25119,
+   "lon": 11.45944,
+   "osm": "relation/11034862"
+  },
+  {
+   "name": "Marstrand",
+   "kind": "skerry",
+   "lat": 58.22683,
+   "lon": 11.39477,
+   "osm": "relation/10250151"
+  },
+  {
+   "name": "Marstrand",
+   "kind": "skerry",
+   "lat": 58.19284,
+   "lon": 11.41319,
+   "osm": "relation/10250555"
+  },
+  {
+   "name": "Mellom Borgmästaren",
+   "kind": "skerry",
+   "lat": 58.28614,
+   "lon": 11.34194,
+   "osm": "relation/11354291"
+  },
+  {
+   "name": "Mickelsskär",
+   "kind": "skerry",
+   "lat": 58.24477,
+   "lon": 11.38033,
+   "osm": "relation/10250157"
+  },
+  {
+   "name": "Mittskär",
+   "kind": "skerry",
+   "lat": 58.20897,
+   "lon": 11.34279,
+   "osm": "relation/10250199"
+  },
+  {
+   "name": "Mittskär",
+   "kind": "skerry",
+   "lat": 58.21017,
+   "lon": 11.34308,
+   "osm": "relation/10250200"
+  },
+  {
+   "name": "Musholmen",
+   "kind": "skerry",
+   "lat": 58.08736,
+   "lon": 11.44287,
+   "osm": "relation/10238695"
+  },
+  {
+   "name": "Månseskär",
+   "kind": "skerry",
+   "lat": 58.12809,
+   "lon": 11.4091,
+   "osm": "relation/10238677"
+  },
+  {
+   "name": "Måseskär",
+   "kind": "skerry",
+   "lat": 58.09363,
+   "lon": 11.33052,
+   "osm": "relation/10239124"
+  },
+  {
+   "name": "Måvholmen",
+   "kind": "skerry",
+   "lat": 58.13881,
+   "lon": 11.40484,
+   "osm": "relation/10237561"
+  },
+  {
+   "name": "Märreskär",
+   "kind": "skerry",
+   "lat": 58.12176,
+   "lon": 11.42244,
+   "osm": "relation/10238599"
+  },
+  {
+   "name": "Nabbingsskär",
+   "kind": "skerry",
+   "lat": 58.11177,
+   "lon": 11.46373,
+   "osm": "relation/10249696"
+  },
+  {
+   "name": "Namnlösen",
+   "kind": "skerry",
+   "lat": 58.24296,
+   "lon": 11.37119,
+   "osm": "relation/10250259"
+  },
+  {
+   "name": "Nordklubban",
+   "kind": "skerry",
+   "lat": 58.22589,
+   "lon": 11.39466,
+   "osm": "relation/10250152"
+  },
+  {
+   "name": "Norra Usholmen",
+   "kind": "skerry",
+   "lat": 58.25393,
+   "lon": 11.40402,
+   "osm": "relation/10237894"
+  },
+  {
+   "name": "Osloholmen",
+   "kind": "skerry",
+   "lat": 58.11051,
+   "lon": 11.34522,
+   "osm": "relation/10239110"
+  },
+  {
+   "name": "Oxskär",
+   "kind": "skerry",
+   "lat": 58.1187,
+   "lon": 11.37418,
+   "osm": "relation/10238555"
+  },
+  {
+   "name": "Pilgrimmen",
+   "kind": "skerry",
+   "lat": 58.16647,
+   "lon": 11.40473,
+   "osm": "relation/10239136"
+  },
+  {
+   "name": "Pipeskäret",
+   "kind": "skerry",
+   "lat": 58.09232,
+   "lon": 11.44536,
+   "osm": "relation/10239307"
+  },
+  {
+   "name": "Pittleholmen",
+   "kind": "skerry",
+   "lat": 58.24463,
+   "lon": 11.41093,
+   "osm": "relation/10250142"
+  },
+  {
+   "name": "Prickarna",
+   "kind": "skerry",
+   "lat": 58.10152,
+   "lon": 11.34364,
+   "osm": "relation/16111034"
+  },
+  {
+   "name": "Rissholmen",
+   "kind": "skerry",
+   "lat": 58.15264,
+   "lon": 11.41326,
+   "osm": "relation/10239127"
+  },
+  {
+   "name": "Roholmen",
+   "kind": "skerry",
+   "lat": 58.15398,
+   "lon": 11.41337,
+   "osm": "relation/10239126"
+  },
+  {
+   "name": "Roland",
+   "kind": "skerry",
+   "lat": 58.10234,
+   "lon": 11.46311,
+   "osm": "relation/10238690"
+  },
+  {
+   "name": "Roparen",
+   "kind": "skerry",
+   "lat": 58.1411,
+   "lon": 11.377,
+   "osm": "relation/10239217"
+  },
+  {
+   "name": "Ryssjeskär",
+   "kind": "skerry",
+   "lat": 58.12484,
+   "lon": 11.4004,
+   "osm": "relation/10238679"
+  },
+  {
+   "name": "Råttholmen",
+   "kind": "skerry",
+   "lat": 58.25082,
+   "lon": 11.448,
+   "osm": "relation/10250494"
+  },
+  {
+   "name": "Råön",
+   "kind": "skerry",
+   "lat": 58.15632,
+   "lon": 11.40566,
+   "osm": "relation/10239137"
+  },
+  {
+   "name": "Rödbergsskär",
+   "kind": "skerry",
+   "lat": 58.25755,
+   "lon": 11.46289,
+   "osm": "relation/11034859"
+  },
+  {
+   "name": "Rödskär",
+   "kind": "skerry",
+   "lat": 58.14726,
+   "lon": 11.41614,
+   "osm": "relation/10239129"
+  },
+  {
+   "name": "Rödskär",
+   "kind": "skerry",
+   "lat": 58.25288,
+   "lon": 11.41632,
+   "osm": "relation/10250372"
+  },
+  {
+   "name": "Röra",
+   "kind": "skerry",
+   "lat": 58.20385,
+   "lon": 11.37097,
+   "osm": "relation/10250171"
+  },
+  {
+   "name": "Rörholmen",
+   "kind": "skerry",
+   "lat": 58.13831,
+   "lon": 11.38933,
+   "osm": "relation/10237565"
+  },
+  {
+   "name": "Rörholmen",
+   "kind": "skerry",
+   "lat": 58.16889,
+   "lon": 11.39856,
+   "osm": "relation/10237583"
+  },
+  {
+   "name": "Rörholmen",
+   "kind": "skerry",
+   "lat": 58.12764,
+   "lon": 11.41297,
+   "osm": "relation/10238680"
+  },
+  {
+   "name": "Saltö",
+   "kind": "skerry",
+   "lat": 58.29762,
+   "lon": 11.40768,
+   "osm": "relation/10237830"
+  },
+  {
+   "name": "Saltö",
+   "kind": "island",
+   "lat": 58.1189,
+   "lon": 11.41207,
+   "osm": "relation/10238681"
+  },
+  {
+   "name": "Seskär",
+   "kind": "skerry",
+   "lat": 58.21057,
+   "lon": 11.38361,
+   "osm": "relation/10250182"
+  },
+  {
+   "name": "Silleskär",
+   "kind": "skerry",
+   "lat": 58.18568,
+   "lon": 11.40011,
+   "osm": "relation/11020202"
+  },
+  {
+   "name": "Sju bröderna",
+   "kind": "skerry",
+   "lat": 58.11427,
+   "lon": 11.41733,
+   "osm": "relation/11620931"
+  },
+  {
+   "name": "Skaftö",
+   "kind": "island",
+   "lat": 58.25085,
+   "lon": 11.48257,
+   "osm": "relation/4849413"
+  },
+  {
+   "name": "Skaftölandet",
+   "kind": "island",
+   "lat": 58.22334,
+   "lon": 11.44235,
+   "osm": "relation/4851623"
+  },
+  {
+   "name": "Skave gren",
+   "kind": "skerry",
+   "lat": 58.10737,
+   "lon": 11.41377,
+   "osm": "relation/11620934"
+  },
+  {
+   "name": "Skedde",
+   "kind": "skerry",
+   "lat": 58.15097,
+   "lon": 11.39801,
+   "osm": "relation/10237570"
+  },
+  {
+   "name": "Skepparns holme",
+   "kind": "skerry",
+   "lat": 58.1129,
+   "lon": 11.36744,
+   "osm": "relation/10239177"
+  },
+  {
+   "name": "Skeppholmen",
+   "kind": "skerry",
+   "lat": 58.15968,
+   "lon": 11.39277,
+   "osm": "relation/10239131"
+  },
+  {
+   "name": "Skogskär",
+   "kind": "skerry",
+   "lat": 58.28993,
+   "lon": 11.40755,
+   "osm": "relation/10237842"
+  },
+  {
+   "name": "Skottaren",
+   "kind": "skerry",
+   "lat": 58.17757,
+   "lon": 11.40495,
+   "osm": "way/4143769"
+  },
+  {
+   "name": "Skräddaren",
+   "kind": "skerry",
+   "lat": 58.22568,
+   "lon": 11.40039,
+   "osm": "relation/10250153"
+  },
+  {
+   "name": "Skuteskär",
+   "kind": "skerry",
+   "lat": 58.10189,
+   "lon": 11.45652,
+   "osm": "relation/10239332"
+  },
+  {
+   "name": "Skällholmen",
+   "kind": "skerry",
+   "lat": 58.2489,
+   "lon": 11.38028,
+   "osm": "relation/10237892"
+  },
+  {
+   "name": "Skällholmen",
+   "kind": "skerry",
+   "lat": 58.27365,
+   "lon": 11.40808,
+   "osm": "relation/10237906"
+  },
+  {
+   "name": "Slaktarn",
+   "kind": "skerry",
+   "lat": 58.25938,
+   "lon": 11.47279,
+   "osm": "relation/11034854"
+  },
+  {
+   "name": "Slipestenen",
+   "kind": "skerry",
+   "lat": 58.1431,
+   "lon": 11.38232,
+   "osm": "relation/10238657"
+  },
+  {
+   "name": "Släggö",
+   "kind": "skerry",
+   "lat": 58.26756,
+   "lon": 11.4356,
+   "osm": "relation/11034873"
+  },
+  {
+   "name": "Smedjeflut",
+   "kind": "skerry",
+   "lat": 58.25659,
+   "lon": 11.36479,
+   "osm": "relation/10250158"
+  },
+  {
+   "name": "Smedjeflut",
+   "kind": "skerry",
+   "lat": 58.25671,
+   "lon": 11.36387,
+   "osm": "relation/10250159"
+  },
+  {
+   "name": "Smörstacken",
+   "kind": "skerry",
+   "lat": 58.20042,
+   "lon": 11.45852,
+   "osm": "relation/10237408"
+  },
+  {
+   "name": "Sokär",
+   "kind": "skerry",
+   "lat": 58.12084,
+   "lon": 11.4369,
+   "osm": "relation/10249707"
+  },
+  {
+   "name": "Sollidsskär",
+   "kind": "skerry",
+   "lat": 58.11565,
+   "lon": 11.46157,
+   "osm": "relation/10249698"
+  },
+  {
+   "name": "Spätteskären",
+   "kind": "skerry",
+   "lat": 58.25825,
+   "lon": 11.41961,
+   "osm": "relation/16123569"
+  },
+  {
+   "name": "Stenskär",
+   "kind": "skerry",
+   "lat": 58.14288,
+   "lon": 11.39493,
+   "osm": "relation/10237566"
+  },
+  {
+   "name": "Stenskär",
+   "kind": "skerry",
+   "lat": 58.21233,
+   "lon": 11.37115,
+   "osm": "relation/10250190"
+  },
+  {
+   "name": "Stolpeskär",
+   "kind": "skerry",
+   "lat": 58.15441,
+   "lon": 11.39366,
+   "osm": "relation/10237571"
+  },
+  {
+   "name": "Stora Bockholmen",
+   "kind": "skerry",
+   "lat": 58.09553,
+   "lon": 11.47135,
+   "osm": "relation/10238704"
+  },
+  {
+   "name": "Stora Grönskär",
+   "kind": "skerry",
+   "lat": 58.19113,
+   "lon": 11.44096,
+   "osm": "relation/10237784"
+  },
+  {
+   "name": "Stora Harpö",
+   "kind": "skerry",
+   "lat": 58.24915,
+   "lon": 11.35607,
+   "osm": "relation/10250169"
+  },
+  {
+   "name": "Stora Karholmen",
+   "kind": "skerry",
+   "lat": 58.11312,
+   "lon": 11.44615,
+   "osm": "relation/10249703"
+  },
+  {
+   "name": "Stora Kedholmen",
+   "kind": "skerry",
+   "lat": 58.20563,
+   "lon": 11.48808,
+   "osm": "relation/10237342"
+  },
+  {
+   "name": "Stora Kornö",
+   "kind": "island",
+   "lat": 58.29776,
+   "lon": 11.37783,
+   "osm": "relation/10094463"
+  },
+  {
+   "name": "Stora Kvarnholmen",
+   "kind": "skerry",
+   "lat": 58.24029,
+   "lon": 11.37247,
+   "osm": "relation/10250260"
+  },
+  {
+   "name": "Stora Kyrkeskär",
+   "kind": "skerry",
+   "lat": 58.18745,
+   "lon": 11.44629,
+   "osm": "relation/10237785"
+  },
+  {
+   "name": "Stora Risholmen",
+   "kind": "skerry",
+   "lat": 58.18352,
+   "lon": 11.41692,
+   "osm": "relation/10237442"
+  },
+  {
+   "name": "Stora Ryttaren",
+   "kind": "skerry",
+   "lat": 58.11728,
+   "lon": 11.44075,
+   "osm": "relation/10249705"
+  },
+  {
+   "name": "Stora Skabbholmen",
+   "kind": "skerry",
+   "lat": 58.23324,
+   "lon": 11.48389,
+   "osm": "relation/11354549"
+  },
+  {
+   "name": "Stora Skeppholmen",
+   "kind": "skerry",
+   "lat": 58.27933,
+   "lon": 11.41423,
+   "osm": "relation/10237911"
+  },
+  {
+   "name": "Stora Testholmen",
+   "kind": "skerry",
+   "lat": 58.22764,
+   "lon": 11.37489,
+   "osm": "relation/10250250"
+  },
+  {
+   "name": "Storön",
+   "kind": "island",
+   "lat": 58.23793,
+   "lon": 11.38678,
+   "osm": "relation/10604590"
+  },
+  {
+   "name": "Strömholmen",
+   "kind": "skerry",
+   "lat": 58.20944,
+   "lon": 11.47854,
+   "osm": "relation/10237341"
+  },
+  {
+   "name": "Strömholmen",
+   "kind": "skerry",
+   "lat": 58.16851,
+   "lon": 11.4023,
+   "osm": "relation/10237582"
+  },
+  {
+   "name": "Stångholmen",
+   "kind": "skerry",
+   "lat": 58.26662,
+   "lon": 11.42047,
+   "osm": "relation/10237903"
+  },
+  {
+   "name": "Svallerskären",
+   "kind": "skerry",
+   "lat": 58.12341,
+   "lon": 11.34962,
+   "osm": "relation/16111056"
+  },
+  {
+   "name": "Svanholmen",
+   "kind": "skerry",
+   "lat": 58.12504,
+   "lon": 11.41723,
+   "osm": "relation/10238682"
+  },
+  {
+   "name": "Svarteskär",
+   "kind": "skerry",
+   "lat": 58.12415,
+   "lon": 11.36999,
+   "osm": "relation/10238552"
+  },
+  {
+   "name": "Svarteskär",
+   "kind": "skerry",
+   "lat": 58.1846,
+   "lon": 11.4034,
+   "osm": "relation/11021066"
+  },
+  {
+   "name": "Svarteskären",
+   "kind": "skerry",
+   "lat": 58.10175,
+   "lon": 11.43063,
+   "osm": "relation/10238694"
+  },
+  {
+   "name": "Svarteskären",
+   "kind": "skerry",
+   "lat": 58.12621,
+   "lon": 11.39557,
+   "osm": "relation/14906518"
+  },
+  {
+   "name": "Svartskär",
+   "kind": "skerry",
+   "lat": 58.27889,
+   "lon": 11.40455,
+   "osm": "relation/10237909"
+  },
+  {
+   "name": "Svartskär",
+   "kind": "skerry",
+   "lat": 58.21167,
+   "lon": 11.39057,
+   "osm": "relation/10250178"
+  },
+  {
+   "name": "Svartskär",
+   "kind": "skerry",
+   "lat": 58.28808,
+   "lon": 11.33989,
+   "osm": "relation/11354204"
+  },
+  {
+   "name": "Svenningeskär",
+   "kind": "skerry",
+   "lat": 58.22949,
+   "lon": 11.40982,
+   "osm": "relation/10250436"
+  },
+  {
+   "name": "Sydklubban",
+   "kind": "skerry",
+   "lat": 58.22459,
+   "lon": 11.3956,
+   "osm": "relation/10250149"
+  },
+  {
+   "name": "Säingarna",
+   "kind": "skerry",
+   "lat": 58.20424,
+   "lon": 11.39551,
+   "osm": "relation/16123571"
+  },
+  {
+   "name": "Sälsön",
+   "kind": "skerry",
+   "lat": 58.08792,
+   "lon": 11.43289,
+   "osm": "relation/10238700"
+  },
+  {
+   "name": "Södra Usholmen",
+   "kind": "skerry",
+   "lat": 58.22863,
+   "lon": 11.38261,
+   "osm": "relation/10250364"
+  },
+  {
+   "name": "Tallskär",
+   "kind": "skerry",
+   "lat": 58.10953,
+   "lon": 11.45106,
+   "osm": "relation/10239335"
+  },
+  {
+   "name": "Tenholme skär",
+   "kind": "skerry",
+   "lat": 58.11707,
+   "lon": 11.42195,
+   "osm": "relation/10238584"
+  },
+  {
+   "name": "Tenholmen",
+   "kind": "skerry",
+   "lat": 58.11842,
+   "lon": 11.42474,
+   "osm": "relation/10249719"
+  },
+  {
+   "name": "Tistholmen",
+   "kind": "skerry",
+   "lat": 58.13282,
+   "lon": 11.36685,
+   "osm": "relation/10238547"
+  },
+  {
+   "name": "Tjuvsundsskäret",
+   "kind": "skerry",
+   "lat": 58.26267,
+   "lon": 11.4911,
+   "osm": "relation/11354520"
+  },
+  {
+   "name": "Tornö",
+   "kind": "skerry",
+   "lat": 58.11773,
+   "lon": 11.3533,
+   "osm": "relation/10238557"
+  },
+  {
+   "name": "Torrö",
+   "kind": "skerry",
+   "lat": 58.1361,
+   "lon": 11.40731,
+   "osm": "relation/10238646"
+  },
+  {
+   "name": "Torrö",
+   "kind": "skerry",
+   "lat": 58.13663,
+   "lon": 11.40671,
+   "osm": "relation/10238647"
+  },
+  {
+   "name": "Tors både",
+   "kind": "skerry",
+   "lat": 58.10967,
+   "lon": 11.41649,
+   "osm": "relation/10249725"
+  },
+  {
+   "name": "Toskär",
+   "kind": "skerry",
+   "lat": 58.17367,
+   "lon": 11.4544,
+   "osm": "relation/10589677"
+  },
+  {
+   "name": "Tova",
+   "kind": "skerry",
+   "lat": 58.26779,
+   "lon": 11.45324,
+   "osm": "relation/11034768"
+  },
+  {
+   "name": "Trankokeskär",
+   "kind": "skerry",
+   "lat": 58.20347,
+   "lon": 11.49424,
+   "osm": "relation/10237455"
+  },
+  {
+   "name": "Travleskär",
+   "kind": "skerry",
+   "lat": 58.12049,
+   "lon": 11.42397,
+   "osm": "relation/10249716"
+  },
+  {
+   "name": "Tremark",
+   "kind": "skerry",
+   "lat": 58.1333,
+   "lon": 11.38345,
+   "osm": "relation/10238629"
+  },
+  {
+   "name": "Trillingarna",
+   "kind": "skerry",
+   "lat": 58.27191,
+   "lon": 11.33754,
+   "osm": "relation/16123568"
+  },
+  {
+   "name": "Trindholmen",
+   "kind": "skerry",
+   "lat": 58.11301,
+   "lon": 11.45976,
+   "osm": "relation/10249699"
+  },
+  {
+   "name": "Tvestärten",
+   "kind": "skerry",
+   "lat": 58.17472,
+   "lon": 11.40693,
+   "osm": "relation/10237584"
+  },
+  {
+   "name": "Tvistärten",
+   "kind": "skerry",
+   "lat": 58.08943,
+   "lon": 11.45255,
+   "osm": "relation/10238696"
+  },
+  {
+   "name": "Tågskären",
+   "kind": "skerry",
+   "lat": 58.12831,
+   "lon": 11.40265,
+   "osm": "relation/10238678"
+  },
+  {
+   "name": "Tåkeskär",
+   "kind": "skerry",
+   "lat": 58.12338,
+   "lon": 11.40008,
+   "osm": "relation/10249726"
+  },
+  {
+   "name": "Tån",
+   "kind": "skerry",
+   "lat": 58.29716,
+   "lon": 11.32946,
+   "osm": "relation/10237869"
+  },
+  {
+   "name": "Tärneskär",
+   "kind": "skerry",
+   "lat": 58.20478,
+   "lon": 11.4925,
+   "osm": "relation/10211341"
+  },
+  {
+   "name": "Ulkeskär",
+   "kind": "skerry",
+   "lat": 58.11541,
+   "lon": 11.41802,
+   "osm": "relation/10238585"
+  },
+  {
+   "name": "Vadskären",
+   "kind": "skerry",
+   "lat": 58.2165,
+   "lon": 11.48186,
+   "osm": "relation/13306322"
+  },
+  {
+   "name": "Valboholmen",
+   "kind": "skerry",
+   "lat": 58.28863,
+   "lon": 11.43003,
+   "osm": "relation/11035097"
+  },
+  {
+   "name": "Valen",
+   "kind": "skerry",
+   "lat": 58.10832,
+   "lon": 11.35162,
+   "osm": "relation/10239166"
+  },
+  {
+   "name": "Vallerö",
+   "kind": "skerry",
+   "lat": 58.12541,
+   "lon": 11.35602,
+   "osm": "relation/10238558"
+  },
+  {
+   "name": "Vannholmen",
+   "kind": "skerry",
+   "lat": 58.09425,
+   "lon": 11.43951,
+   "osm": "relation/10238699"
+  },
+  {
+   "name": "Vannholmen",
+   "kind": "skerry",
+   "lat": 58.11966,
+   "lon": 11.4352,
+   "osm": "relation/10249709"
+  },
+  {
+   "name": "Vedholmen",
+   "kind": "skerry",
+   "lat": 58.11107,
+   "lon": 11.35023,
+   "osm": "relation/10239111"
+  },
+  {
+   "name": "Viggholmarna",
+   "kind": "skerry",
+   "lat": 58.13032,
+   "lon": 11.41516,
+   "osm": "relation/10238672"
+  },
+  {
+   "name": "Vrakskären",
+   "kind": "skerry",
+   "lat": 58.24245,
+   "lon": 11.35831,
+   "osm": "relation/16111054"
+  },
+  {
+   "name": "Väggen",
+   "kind": "skerry",
+   "lat": 58.11375,
+   "lon": 11.42182,
+   "osm": "relation/10238581"
+  },
+  {
+   "name": "Vällarna",
+   "kind": "skerry",
+   "lat": 58.22885,
+   "lon": 11.4845,
+   "osm": "relation/16111035"
+  },
+  {
+   "name": "Västingskär",
+   "kind": "skerry",
+   "lat": 58.29017,
+   "lon": 11.32916,
+   "osm": "relation/11354201"
+  },
+  {
+   "name": "Yttre Borgmästaren",
+   "kind": "skerry",
+   "lat": 58.28361,
+   "lon": 11.33967,
+   "osm": "relation/11354202"
+  },
+  {
+   "name": "Yttre Byxeskär",
+   "kind": "skerry",
+   "lat": 58.25993,
+   "lon": 11.38192,
+   "osm": "relation/10237853"
+  },
+  {
+   "name": "Åkers holme",
+   "kind": "skerry",
+   "lat": 58.19407,
+   "lon": 11.435,
+   "osm": "relation/10237776"
+  },
+  {
+   "name": "Ålekråkeskär",
+   "kind": "skerry",
+   "lat": 58.1638,
+   "lon": 11.40907,
+   "osm": "relation/10239135"
+  },
+  {
+   "name": "Ålekråkeskär",
+   "kind": "skerry",
+   "lat": 58.29383,
+   "lon": 11.34848,
+   "osm": "relation/16111029"
+  },
+  {
+   "name": "Årholmen",
+   "kind": "skerry",
+   "lat": 58.1341,
+   "lon": 11.35744,
+   "osm": "relation/10238546"
+  },
+  {
+   "name": "Ällskär",
+   "kind": "skerry",
+   "lat": 58.22363,
+   "lon": 11.34774,
+   "osm": "relation/10250306"
+  },
+  {
+   "name": "Ängeslholmarna",
+   "kind": "skerry",
+   "lat": 58.22114,
+   "lon": 11.37692,
+   "osm": "relation/10250246"
+  },
+  {
+   "name": "Ärtan",
+   "kind": "skerry",
+   "lat": 58.20796,
+   "lon": 11.40936,
+   "osm": "relation/11322396"
+  },
+  {
+   "name": "Ösö",
+   "kind": "skerry",
+   "lat": 58.2119,
+   "lon": 11.41496,
+   "osm": "relation/5496027"
+  },
+  {
+   "name": "Ösö holme",
+   "kind": "skerry",
+   "lat": 58.21551,
+   "lon": 11.40954,
+   "osm": "relation/10250170"
+  }
+ ]
+}

@@ -196,6 +196,14 @@ export function bakeDepthMap(islands, opts = {}) {
     }
   }
 
+  const { depth, shore } = depthAndShoreFromSigned(sgn, nx, nz, texel);
+  return { x0, z0, texel, nx, nz, depth, shore, bakeMs: now() - t0, evals };
+}
+
+// The second half of the bake, split out (real-coast trial) so a map built from the real
+// coast raster gets the same shore-distance / foam data as the procedural islands.
+// `sgn`: nx*nz signed metres, positive = sea depth, <= 0 = land (capped +-DEEP_M).
+export function depthAndShoreFromSigned(sgn, nx, nz, texel) {
   const depth = new Float32Array(nx * nz);
   for (let i = 0; i < depth.length; i++) depth[i] = sgn[i] > 0 ? sgn[i] : 0;
 
@@ -239,7 +247,7 @@ export function bakeDepthMap(islands, opts = {}) {
     shore[i] = sgn[i] <= 0 ? 0 : best[i] >= reachTexels * reachTexels ? DEEP_M : SHORE_SLOPE * Math.sqrt(best[i]) * texel;
   }
 
-  return { x0, z0, texel, nx, nz, depth, shore, bakeMs: now() - t0, evals };
+  return { depth, shore };
 }
 
 // Bilinear lookup of a baked map at world (x, z) — the CPU twin of the
