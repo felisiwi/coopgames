@@ -451,7 +451,15 @@
    "confidence": "medium",
    "notes": [
     "\"Kustsamhälle med anor från 1200-talet\" (century only)."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1863,
+    "precision": "decade",
+    "atLeast": true,
+    "basis": "Det första stenbrottet anlades av Carl Strömman på Skalbergen ovanför Hunnebostrand 1863.",
+    "source": "https://sv.wikipedia.org/wiki/Hunnebostrand",
+    "note": "village existed by the first quarry (1863); origin unstated"
+   }
   },
   {
    "name": "Lysekil",
@@ -1601,7 +1609,15 @@
    "confidence": "low",
    "notes": [
     "No first mention or place-specific herring years found. A search snippet puts settlement in the mid-1700s; no year, not used."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1886,
+    "precision": "decade",
+    "atLeast": true,
+    "basis": "I denna inrättades för orten 29 januari 1886 Tjörnekalvs municipalsamhälle",
+    "source": "https://sv.wikipedia.org/wiki/%C3%85stol",
+    "note": "a fishing place; existed by 1886, origin unstated"
+   }
   },
   {
    "name": "Klädesholmen",
@@ -2676,7 +2692,15 @@
    "confidence": "medium",
    "notes": [
     "The page says it was a köpstad \"till 1539\": an end of status, not a first mention."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1500,
+    "precision": "century",
+    "atLeast": true,
+    "basis": "Gottskär ... var till 1539 en köpstad. Namnet var då Gåsekil (Gaasekill)",
+    "source": "https://sv.wikipedia.org/wiki/Gottsk%C3%A4r",
+    "note": "a medieval market town (Gåsekil) until 1539"
+   }
   },
   {
    "name": "Vrångö",
@@ -2896,12 +2920,12 @@
     "Fishing motorised 1903, ice store 1915, Hönökakan 1904: single events, not phases."
    ],
    "firstRecordedApprox": {
-    "year": 1900,
-    "precision": "half-century",
+    "year": 1800,
+    "precision": "century",
     "atLeast": true,
-    "basis": "Vid sekelskiftet 1800 -1900 skapades centrumbildningar på de flesta öar.",
-    "source": "https://www.vastsverige.com/visitockero/centrum-for-fiske/",
-    "note": "village centres formed by ~1900; earlier settlement unstated"
+    "basis": "Fram till mitten av 1800-talet var bebyggelsen på ön koncentrerad till fyra byar: Hult, Heden, Röd och Gårda.",
+    "source": "https://sv.wikipedia.org/wiki/H%C3%B6n%C3%B6",
+    "note": "four farming villages before the mid-1800s; earlier origin unstated"
    }
   },
   {
@@ -3003,12 +3027,12 @@
     "New church 1906: a single event."
    ],
    "firstRecordedApprox": {
-    "year": 1900,
-    "precision": "half-century",
+    "year": 1500,
+    "precision": "century",
     "atLeast": true,
-    "basis": "Vid sekelskiftet 1800 -1900 skapades centrumbildningar på de flesta öar.",
-    "source": "https://www.vastsverige.com/visitockero/centrum-for-fiske/",
-    "note": "village centres formed by ~1900; earlier settlement unstated"
+    "basis": "Öckerö gamla kyrka från medeltiden",
+    "source": "https://sv.wikipedia.org/wiki/%C3%96cker%C3%B6_(%C3%B6)",
+    "note": "a medieval church implies a settled island in the Middle Ages"
    }
   },
   {
@@ -3115,12 +3139,13 @@
     "Name written \"Dunsø\" in the 1200s: century only."
    ],
    "firstRecordedApprox": {
-    "year": 1900,
-    "precision": "half-century",
+    "year": 1200,
+    "precision": "century",
     "atLeast": true,
-    "basis": "Det gamla fiskesamhället har kvar förra sekelskiftets pittoreska trähusbebyggelse",
-    "source": "https://www.vastsverige.com/straxutanforgoteborg/donso/",
-    "note": "the fishing village existed by the turn of the century; earlier origin unstated"
+    "kind": "name",
+    "basis": "Namnet Donsö skrevs Dunsø på 1200-talet i Valdemar Sejrs jordebok",
+    "source": "https://sv.wikipedia.org/wiki/Dons%C3%B6",
+    "note": "the island name is recorded in the 1200s; the village itself may be younger"
    }
   },
   {
@@ -3252,12 +3277,13 @@
     "Name from the 1200s: century only."
    ],
    "firstRecordedApprox": {
-    "year": 1752,
-    "precision": "decade",
+    "year": 1200,
+    "precision": "century",
     "atLeast": true,
-    "basis": "På Styrsö ligger församlingens huvudkyrka, byggd 1752.",
-    "source": "https://www.svenskakyrkan.se/vastra-frolunda-pastorat/styrso/byggnader",
-    "note": "a parish church implies a settled island by then; origin is earlier but unstated"
+    "kind": "name",
+    "basis": "Namnet Styrsö är tidigast belagt i Valdemar Sejrs jordebok från 1200-talet och skrevs ”Styrisø”",
+    "source": "https://sv.wikipedia.org/wiki/Styrs%C3%B6",
+    "note": "name recorded in the 1200s; ~45 prehistoric remains on the island; church 1752"
    }
   },
   {
@@ -3388,7 +3414,16 @@
    "confidence": "medium",
    "notes": [
     "Sea-rescue station 1917: a single event."
-   ]
+   ],
+   "firstRecordedApprox": {
+    "year": 1200,
+    "precision": "century",
+    "atLeast": false,
+    "kind": "legend",
+    "basis": "Det sägs att den forne kungen över Viken ... Håkon Håkonsson ... etablerade flera samhällen på Öckeröarna, däribland en bosättning på Rörö.",
+    "source": "https://sv.wikipedia.org/wiki/R%C3%B6r%C3%B6",
+    "note": "legend ('det sägs'); Haakon IV reigned 1217–1263. Herring works on Rammen 1747–1808 are documented."
+   }
   },
   {
    "name": "Göteborg",

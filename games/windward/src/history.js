@@ -33,7 +33,8 @@ export function approxLabel(a) {
   if (a.precision === 'century') core = `~${c}s`;
   else if (a.precision === 'half-century') core = a.year % 100 >= 50 && a.year % 100 !== 0 ? `~late ${c}s` : `~${a.year}`;
   else core = `${a.year}`;
-  return a.atLeast ? `by ${core}` : core;
+  const label = a.atLeast ? `by ${core}` : core;
+  return a.kind === 'legend' ? `${label} (legend)` : a.kind === 'name' ? `${label} (name)` : label;
 }
 
 // null before the origin; otherwise { kind, phase } (kind 'hamlet' = plain settled, a display default).
