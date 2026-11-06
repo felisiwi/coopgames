@@ -45,6 +45,9 @@ import { createLanternFx, colourHex } from './src/lantern.js';
 import { createLighthouseTask, towerLit, GRANDMA_ID, REWARD_DELAY_S, hasSeenStart, markStartSeen, resetStart } from './src/lighthouse-task.js';
 import { createHarbourWater } from './src/harbour-water.js';
 import { createTaskUi } from './src/task-ui.js';
+import { createWakeScene } from './src/wake-scene.js';
+import { STORY_1950 } from './src/story-1950.js';
+import { createOpening, shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro } from './src/opening.js';
 import { lightGlyph } from './src/light-glyph.js';
 import { createLightLog, logRows } from './src/light-log.js';
 import { createChapter1 } from './src/chapter1.js';
@@ -362,7 +365,9 @@ function startGame({ canvas, net, seed, role }, coast) {
 
   // Boats (src/boats.js, docs/boat-lab/README.md): today = Svalan, granddad's koster (gaff + jib, deck items, wear 0.8: the
   // defaults). The player colour is the masthead pennant only. ?boat=eka = the ~1700 eka (rust sail) until the jump exists.
-  const boatType = new URLSearchParams(window.location.search).get('boat') === 'eka' ? 'eka' : 'koster';
+  // In 1950 you sail the family's borrowed eka while Svalan is repaired (stage 1e); ?boat=koster|eka overrides (testing).
+  const boatParam = new URLSearchParams(window.location.search).get('boat');
+  const boatType = boatParam === 'eka' || boatParam === 'koster' ? boatParam : coast && coast.era === '1950' ? 'eka' : 'koster';
   // Chapter 1 (stage 1d, batch B): granddad's sea chest is NOT on Svalan's deck until grandma gives it; the light log lists the lights you have heard.
   // Progress is saved per ERA (src/era-storage.js): the 1950 game and the Today game keep separate saves; Today's keys are unchanged.
   const store = eraStorage(coast ? coast.era : 'today');
@@ -373,6 +378,9 @@ function startGame({ canvas, net, seed, role }, coast) {
   const boatOptions = boatType === 'eka' ? { type: 'eka', sailTone: 'rust' } : { type: 'koster', ...(coast ? { deck: deckFor() } : {}) };
   const selfBoat = createBoatMesh(selfColor, boatOptions);
   scene.add(selfBoat.group);
+  // The beach where you wake in 1950: Svalan thrown up wrecked, the boatbuilder's son and Britta (src/wake-scene.js). Already hauled onto her cradle if the intro has been seen.
+  const wakeScene = coast && coast.wake ? createWakeScene({ plan: coast.wake, heightAt: coast.heightAt }) : null;
+  if (wakeScene) { scene.add(wakeScene.group); if (hasSeenIntro(store) && new URLSearchParams(window.location.search).get('opening') !== '1') wakeScene.settle(); }
   const selfWake = createWake();
   scene.add(selfWake.group);
   let otherBoat = null; // created lazily on the peer's first 'pos' (drop-in play)
@@ -596,7 +604,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Stage 1d, the first task: the storm put the five lighthouses nearest the start out. Sail to each (close and slow: the boat moors, the camera
   // circles, the light comes back on, the fog lifts), then report to grandma in Fiskebäckskil. Progress is saved on the device (?lights=reset forgets it).
   const task = coast ? createLighthouseTask({ lights: coast.names.filter((e) => e.kind === 'light'), spawn: coast.spawn || { x: self.x, z: self.z }, storage: store }) : null;
-  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(store); }
+  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(store); resetIntro(store); }
   const lightList = coast ? coast.lightList : LIGHTHOUSES; // the era's lights (1950: seven; Today: the game's own list)
   const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
   const gd = coast ? coast.granddad : null; // granddad's chart: { favourites, strange }
@@ -628,6 +636,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   // The start card (once, saved; Set sail or Skip both count) and the end card. The Task button on the chart reopens the start card with the progress.
   const taskUi = task ? createTaskUi({
     parent: document.body,
+    copy: coast.era === '1950' ? STORY_1950 : undefined, // Britta's card and the waking cards in 1950; Today keeps the old storm card
     onSetSail: () => { markStartSeen(store); if (chartCtl && chartCtl.state.t > 0.5) chartCtl.toggleChart(); }, // from the chart: back to the boat
     onSkip: () => markStartSeen(store),
     onReport: () => { if (grandma) chartCtl?.setTarget(grandma); }, // the card after the fifth light: its button sets Navigate to Fiskebäckskil
@@ -690,7 +699,15 @@ function startGame({ canvas, net, seed, role }, coast) {
   chartCtl?.setLogAvailable(lightLog.count > 0);
   if (task && chartCtl && grandma && task.phase === 'report') chartCtl.setTarget(grandma); // reloaded with all five lit: the goal is still grandma
   // First time (and no progress yet): the storm card. Everything behind it keeps running, but the card takes every touch.
-  if (task && taskUi && !hasSeenStart(store) && task.phase === 'lights' && task.restoredCount === 0) taskUi.showStart();
+  // The first minutes (1950): the opening scene (once), the waking cards, then Britta's card. Anywhere else, the old storm card, once.
+  const qIntro = new URLSearchParams(window.location.search).get('opening');
+  if (task && taskUi && task.phase === 'lights' && task.restoredCount === 0) {
+    if (coast.era === '1950' && (qIntro === '1' || !hasSeenIntro(store))) {
+      const wakeCards = () => taskUi.showWake({ onDone: () => { wakeScene?.haul(); markIntroSeen(store); taskUi.showStart(); } }); // "he takes her for repair"
+      if (shouldShowOpening({ era: coast.era, seen: hasSeenOpening(store), param: qIntro })) createOpening({ onDone: () => { markOpeningSeen(store); wakeCards(); } });
+      else wakeCards();
+    } else if (!hasSeenStart(store)) taskUi.showStart();
+  }
   if (task && debugOverlay) window.__task = { task, lanternFx, taskUi, grandma, harbourWater, chapter, lightLog, gdMarks, strangeEntry, get towerFx() { return towerFx; }, startStrange: () => startStrange(), selfBoat, CONFIG, get strange() { return strange; } };
   if (chartCtl && debugOverlay) window.__chart = chartCtl;
   if (phone && debugOverlay) window.__phoneCtl = phone;
@@ -784,6 +801,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       self.z = mv.z;
       if (mv.contact > 0) self.speed = Math.max(0, self.speed - mv.contact * SHORE_BRAKE * dt);
       coast.clamp(self); // the region has an edge; hold the boat just inside it
+      wakeScene?.update(dt, nowS);
       if (coast.update(ctlView ? ctlView.focus.x : self.x, ctlView ? ctlView.focus.z : self.z, dt, nowS, seaAtCPU)) { // terrain and trees follow the view
         const s = coast.trees.stats;
         const t = coast.terrain.stats;

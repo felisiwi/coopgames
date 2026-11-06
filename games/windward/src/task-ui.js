@@ -40,9 +40,11 @@ export const REPORT_CARD = {
   button: 'Navigate to Fiskebäckskil',
 };
 
-// opts: { parent, onSetSail(), onSkip(), onReport(), onGrandma(), onStrange() }. Returns { showStart({ progress }), showReport(), showGrandma(), showStrange(),
-// showLog(rows), hide(), get visible }.
-export function createTaskUi({ parent = document.body, onSetSail = () => {}, onSkip = () => {}, onReport = () => {}, onGrandma = () => {}, onStrange = () => {} } = {}) {
+// opts: { parent, onSetSail(), onSkip(), onReport(), onGrandma(), onStrange(), copy }. copy (optional, src/story-1950.js STORY_1950): { start: the start card's text,
+// wake: [cards shown before it] }; without it the Today game's START_CARD is used. Returns { showStart({ progress }), showWake({ onDone }), showReport(), showGrandma(),
+// showStrange(), showLog(rows), hide(), get visible }.
+export function createTaskUi({ parent = document.body, onSetSail = () => {}, onSkip = () => {}, onReport = () => {}, onGrandma = () => {}, onStrange = () => {}, copy = {} } = {}) {
+  const startCard = copy.start || START_CARD;
   const veil = el('div', 'position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(10,20,30,0.62);padding:24px'); // a plain dim, no backdrop blur: a blur over a live WebGL canvas is re-done every frame, and the card does not need it
   veil.setAttribute('data-no-zoom', '');
   const card = el('div', `max-width:340px;width:100%;background:${HUD_BG};border:${LINE};border-radius:16px;padding:22px 20px 18px;color:${TEXT};text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4)`);
@@ -52,7 +54,7 @@ export function createTaskUi({ parent = document.body, onSetSail = () => {}, onS
   const btn = el('button', `font:600 15px system-ui,sans-serif;color:#1f2a33;background:${GOLD};border:0;border-radius:10px;padding:11px 20px;cursor:pointer;touch-action:manipulation`);
   btn.type = 'button';
   const progress = el('div', `font:600 12px system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:${GOLD};opacity:.85;margin:-6px 0 14px;display:none`);
-  const skipBtn = el('button', `display:none;margin:12px auto 0;font:500 13px system-ui,sans-serif;color:${TEXT};opacity:.7;background:transparent;border:0;padding:6px 12px;cursor:pointer;touch-action:manipulation;text-decoration:underline`, START_CARD.skip);
+  const skipBtn = el('button', `display:none;margin:12px auto 0;font:500 13px system-ui,sans-serif;color:${TEXT};opacity:.7;background:transparent;border:0;padding:6px 12px;cursor:pointer;touch-action:manipulation;text-decoration:underline`, startCard.skip);
   skipBtn.type = 'button';
   card.append(title, body, progress, btn, skipBtn);
   veil.appendChild(card);
@@ -66,8 +68,9 @@ export function createTaskUi({ parent = document.body, onSetSail = () => {}, onS
     card.style.borderColor = on ? 'rgba(242,196,109,0.35)' : 'rgba(234,246,255,0.2)';
   };
   let mode = 'end';
-  btn.addEventListener('click', () => { hide(); setDusk(false); ({ start: onSetSail, report: onReport, grandma: onGrandma, strange: onStrange }[mode] || (() => {}))(); });
-  skipBtn.addEventListener('click', () => { hide(); onSkip(); });
+  let wake = null; // the waking cards in progress: { next(), skip() }
+  btn.addEventListener('click', () => { hide(); setDusk(false); ({ start: onSetSail, report: onReport, grandma: onGrandma, strange: onStrange, wake: () => wake && wake.next() }[mode] || (() => {}))(); });
+  skipBtn.addEventListener('click', () => { hide(); if (mode === 'wake' && wake) { wake.skip(); return; } onSkip(); });
   return {
     get visible() { return visible; },
     hide,
@@ -75,14 +78,35 @@ export function createTaskUi({ parent = document.body, onSetSail = () => {}, onS
     showStart({ progress: line = '' } = {}) {
       mode = 'start';
       setDusk(false); title.style.cssText = TITLE_CSS;
-      title.textContent = START_CARD.title;
-      body.replaceChildren(...START_CARD.lines.map((t) => el('div', 'margin:6px 0', t)));
+      title.textContent = startCard.title;
+      body.replaceChildren(...startCard.lines.map((t) => el('div', 'margin:6px 0', t)));
       progress.textContent = line;
       progress.style.display = line ? 'block' : 'none';
-      btn.textContent = START_CARD.go;
+      btn.textContent = startCard.go;
+      skipBtn.textContent = startCard.skip;
       skipBtn.style.display = 'block';
       visible = true;
       veil.style.display = 'flex';
+    },
+    // The waking cards (copy.wake), one after another; Skip jumps past them. onDone() is called after the last one (or Skip): game.js then shows the start card.
+    showWake({ onDone = () => {} } = {}) {
+      const cards = copy.wake || [];
+      if (!cards.length) { onDone(); return; }
+      let i = 0;
+      const render = () => {
+        mode = 'wake';
+        setDusk(false); title.style.cssText = TITLE_CSS;
+        title.textContent = cards[i].title;
+        body.replaceChildren(...cards[i].lines.map((t) => el('div', 'margin:6px 0', t)));
+        progress.style.display = 'none';
+        btn.textContent = cards[i].button || 'Next';
+        skipBtn.textContent = startCard.skip;
+        skipBtn.style.display = 'block';
+        visible = true;
+        veil.style.display = 'flex';
+      };
+      wake = { next: () => { i += 1; if (i < cards.length) render(); else { wake = null; onDone(); } }, skip: () => { wake = null; onDone(); } };
+      render();
     },
     showReport() {
       mode = 'report';

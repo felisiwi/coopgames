@@ -61,7 +61,8 @@ await check('1950 has every field the game reads, and the same window as Today (
   assert.equal(c1950.era, '1950');
   assert.equal(c1950.world.nx, oracle.world.nx); assert.equal(c1950.world.nz, oracle.world.nz);
   assert.equal(c1950.granddad, null, 'granddad\'s chest chart does not exist yet in 1950');
-  assert.ok(c1950.spawn && Math.hypot(c1950.spawn.x - oracle.spawn.x, c1950.spawn.z - oracle.spawn.z) < 200, 'the start is still by Grundsund');
+  assert.ok(c1950.spawn && Math.hypot(c1950.spawn.x - oracle.spawn.x, c1950.spawn.z - oracle.spawn.z) < 450, 'the start is still by Grundsund (the wake beach is searched for within 400 m of the old start)');
+  assert.deepEqual([c1950.spawn.x, c1950.spawn.z], [c1950.wake.spawn.x, c1950.wake.spawn.z], '1950 starts where the wake plan says');
   const t = c1950.report.timings;
   for (const k of ['loadDecodeMs', 'fieldMs', 'depthMs', 'terrainMs', 'propsMs', 'buildMs']) assert.ok(Number.isFinite(t[k]), `report.timings.${k}`);
   assert.ok(Number.isFinite(c1950.report.terrain.fullTriangles) && Number.isFinite(c1950.report.bytesDownloadedByLoader));

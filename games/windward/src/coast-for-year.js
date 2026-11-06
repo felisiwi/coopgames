@@ -15,7 +15,8 @@
 //   - granddad: only Today has the chest chart; 1950 is before him.
 // The boats are not built here (ownBoats:false): the busy coast (src/busy-coast.js, driven by data/busy-eras.json) is the one source of traffic.
 import { loadRealCoast, findOpenWater, EDGE_FADE_M } from './coast-world.js';
-import { loadWorldFiles, buildWorldForSpec } from './world-year-build.js';
+import { loadWorldFiles, buildWorldForSpec, shoreSpot } from './world-year-build.js';
+import { planWake } from './wake-plan.js';
 import { eraRowFor, worldAtYear } from './world-year.js';
 import { buildNameList } from './names.js';
 import { LIGHTHOUSES } from './lighthouses.js';
@@ -59,12 +60,15 @@ async function buildEraCoast(year, row, years, io, bytes, base, opts) {
   const lights = e.lights.map((l) => ({ name: l.name, id: l.id, x: l.x, y: l.y, z: l.z, group: l.group, fx: l.fx, entry: l.entry, info: l.info, movedM: l.movedM }));
 
   const [sx, sz] = world.toGame(...(opts.at || [files.names.spawn.lon, files.names.spawn.lat]));
-  const spawn = opts.at ? findOpenWater(world, sx, sz) : e.spawn;
+  // 1950 starts on a beach on Skaftö (src/wake-plan.js): Svalan thrown up on the shore, the player in open water just off it. ?cat= (a testing start) skips it.
+  const avoid = []; e.props.children.forEach((o) => { if (/^(house|boathouse|canning-factory|keeper-house)$/.test(o.name)) avoid.push({ x: o.position.x, z: o.position.z }); });
+  const wake = spec.era === '1950' && !opts.at && e.spawn ? planWake({ world, near: e.spawn, avoid, helpers: { shoreSpot, findOpenWater: (w, x, z, o) => findOpenWater(w, x, z, o) }, seed: opts.seed ?? 1 }) : null;
+  const spawn = wake ? wake.spawn : opts.at ? findOpenWater(world, sx, sz) : e.spawn;
   const buildMs = now() - T0;
   const hard = e.shoalList.filter((s) => s.look.blocks).length; // the same rule as the shoal index (src/sea-truth.js)
 
   return {
-    era: spec.era, year, spec, world, group: e.group, depthMap: world.depthMap, spawn, trees: e.trees, terrain: e.terrain, terrainStyle: e.style, clamp: e.clamp, names,
+    era: spec.era, year, spec, wake, world, group: e.group, depthMap: world.depthMap, spawn, trees: e.trees, terrain: e.terrain, terrainStyle: e.style, clamp: e.clamp, names,
     summerHouses: [], granddad: null, lights, lightList: e.lightEntries || [], lightsNotDrawn: e.lightsNotDrawn, labels: e.labels,
     findOpenWater: (x, z, o) => findOpenWater(world, x, z, o),
     heightAt: world.heightAt, sailHeightAt: e.sailHeightAt, shoalSlowAt: e.shoalSlowAt,
