@@ -40,6 +40,8 @@ import { createArrivals, giftFor } from './src/arrival.js';
 import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
 import { createLife } from './src/life.js';
+import { createShoalLayer } from './src/shoal-look.js';
+import { createSeamarkLayer } from './src/seamark-layer.js';
 import { createHarbourMoment } from './src/harbour-moment.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
@@ -275,6 +277,12 @@ function startGame({ canvas, net, seed, role }, coast) {
   }
 
   if (coast) scene.add(coast.group); // terrain, trees near the boat, villages, lighthouses
+  // Stage 1d: the water tells the truth: the real shoals (surf rings on solid rocks, faint dark water on submerged ones) and the real
+  // sea-marks (OpenStreetMap, ODbL). Invented harbour-mouth marks look exactly like real ones; only ?debug=1 rings them.
+  const shoalLayer = coast ? createShoalLayer(coast.sea.shoalList) : null;
+  if (shoalLayer) scene.add(shoalLayer.group);
+  const seamarkLayer = coast ? createSeamarkLayer({ marks: coast.sea.marks, toGame: coast.world.toGame, heightAt: coast.heightAt, debug: new URLSearchParams(window.location.search).get('debug') === '1' }) : null;
+  if (seamarkLayer) scene.add(seamarkLayer.group);
 
   // Stage 2: discoverables — seeded, identical on both peers, so only
   // "found" events cross the wire. Found only when BOTH boats are near
@@ -357,6 +365,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     window.__self = self;
     window.__labels = nameLabels;
     window.__coastStyle = coast.terrainStyle;
+    window.__sea = { coast, seamarks: seamarkLayer, shoals: shoalLayer }; // stage 1d headless checks
     window.__coastHeight = coast.heightAt;
   }
   // Stage 1b, the lure: arriving slowly in a harbour (a bell, a wave, a fish on deck), small life on the water.
@@ -374,6 +383,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       seaY: (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength), // (waves / wind are set up below)
       inside: (x, z) => coast.world.inside(x, z, 100),
       onCry: () => audio.gull(0, 0.5),
+      marks: seamarkLayer ? seamarkLayer.perchMarks() : null, // gulls perch on the REAL marks; no decorative buoys
     })
     : null;
   if (coast && debugOverlay) window.__wind = () => wind;
@@ -539,7 +549,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
   const chartCtl = coast
     ? createChartController({
-      canvas, coast, nameBook, getMarks: () => (life ? life.marks : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
+      canvas, coast, nameBook, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
       onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
       // "Navigate here": the target's edge tag (src/name-labels.js); null clears it
       onTarget: (entry, titleFn) => nameLabels.setTarget(entry, entry ? Math.max(0, coast.heightAt(entry.x, entry.z)) + 8 : 0, titleFn),
@@ -607,8 +617,9 @@ function startGame({ canvas, net, seed, role }, coast) {
     if (coast) {
       // Real coast: very shallow water slows the boat a little; the shore is solid but gentle: the boat slides along
       // it and a head-on approach brakes softly (src/shore.js). No damage, no bounce.
-      const v = self.speed * shallowFactor(coast.heightAt, self.x, self.z);
-      const mv = stepAlongShore(coast.heightAt, self.x, self.z, Math.sin(self.heading) * v * dt, Math.cos(self.heading) * v * dt);
+      // the sailing height is the coast plus solid shoals (hard rocks are land to the hull); submerged ones slow the boat a little
+      const v = self.speed * shallowFactor(coast.sailHeightAt, self.x, self.z) * coast.shoalSlowAt(self.x, self.z);
+      const mv = stepAlongShore(coast.sailHeightAt, self.x, self.z, Math.sin(self.heading) * v * dt, Math.cos(self.heading) * v * dt);
       self.x = mv.x;
       self.z = mv.z;
       if (mv.contact > 0) self.speed = Math.max(0, self.speed - mv.contact * SHORE_BRAKE * dt);
@@ -707,6 +718,8 @@ function startGame({ canvas, net, seed, role }, coast) {
     const lookAt = ctlView ? ctlView.focus : self;
     viewTarget.set(lookAt.x, ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z);
     water.update(waves, wind, viewTarget, dt, camera.position);
+    shoalLayer?.update(nowS);
+    seamarkLayer?.update(nowS, viewTarget, (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength)); // buoys ride the real waves
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {

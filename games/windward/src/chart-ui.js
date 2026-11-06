@@ -1,4 +1,4 @@
-// The chart and minimap controls (stage 1c): the minimap (top left, round, north up; tap it to open the chart, a small badge says so),
+// The chart and minimap controls (stage 1c): the minimap (top left, round, north up; tap it to open the chart),
 // a Boat button that shows only while the chart is up, zoom +/- (bottom left, away from the rope), the lighthouse visit card and a toast. Plain DOM in
 // the same quiet style as the HUD. No logic lives here: game.js passes callbacks.
 const HUD_BG = 'rgba(20,34,48,0.78)';
@@ -38,13 +38,8 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   const row = el('div', 'display:flex;gap:8px;pointer-events:auto');
   const chartBtn = button('Boat', 'Back to the boat view', 'display:none'); // only while the chart is up
   row.append(chartBtn);
-  // The minimap is the way into the chart: a tap opens it (or visits a lighthouse under the finger). A small expand badge on its edge
-  // says it is tappable; it takes no touches itself, so the tap goes to the map.
-  const miniWrap = el('div', 'position:relative;line-height:0');
-  const badge = el('div', `position:absolute;right:-5px;bottom:-5px;width:24px;height:24px;border-radius:8px;background:${HUD_BG};border:${LINE};display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.92`);
-  badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="${TEXT}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 1.5h3v3M10.5 1.5L7 5M4.5 10.5h-3v-3M1.5 10.5L5 7"/></svg>`;
-  miniWrap.append(mini, badge);
-  top.append(miniWrap, caption, row);
+  // The minimap is the way into the chart: a tap opens it (or visits a lighthouse under the finger). No badge: tapping it and zooming out are enough.
+  top.append(mini, caption, row);
   parent.appendChild(top);
 
   const zoomCol = el('div', `position:fixed;z-index:7;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(64px + ${SAFE_BOTTOM});display:flex;flex-direction:column;gap:8px`);
@@ -52,6 +47,10 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   const zout = button('−', 'Zoom out', 'width:42px;height:42px;padding:0;font-size:20px;line-height:1');
   zoomCol.append(zin, zout);
   parent.appendChild(zoomCol);
+
+  // OpenStreetMap credit (ODbL): the marks and shoals in the 3D view are OSM data. Tiny, above the speed line; the chart draws its own.
+  const credit = el('div', `position:fixed;z-index:6;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(44px + ${SAFE_BOTTOM});font:9px/1.2 system-ui,sans-serif;color:rgba(234,243,248,0.6);text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none`, '© OpenStreetMap contributors');
+  parent.appendChild(credit);
 
   const card = el('div', `position:fixed;z-index:8;left:50%;transform:translateX(-50%);bottom:calc(64px + ${SAFE_BOTTOM});display:none;min-width:220px;max-width:min(92vw,360px);background:${HUD_BG};border:${LINE};border-radius:14px;padding:12px 14px;color:${TEXT};font:${UI_FONT};text-align:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)`);
   const cardTitle = el('div', 'font:italic 600 19px Georgia,"Times New Roman",serif;margin-bottom:2px');
@@ -107,8 +106,9 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
     setChartMode(on) {
       chartCanvas.style.pointerEvents = on ? 'auto' : 'none';
       chartBtn.style.display = on ? 'inline-block' : 'none';
+      credit.style.display = on ? 'none' : 'block';
     },
     // the minimap is hidden (the chart is up): its caption goes with it
-    setMiniHidden(h) { caption.style.visibility = h ? 'hidden' : 'visible'; badge.style.visibility = h ? 'hidden' : 'visible'; },
+    setMiniHidden(h) { caption.style.visibility = h ? 'hidden' : 'visible'; },
   };
 }

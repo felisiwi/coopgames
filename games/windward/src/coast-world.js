@@ -22,6 +22,9 @@ import { DEEP_M, depthAndShoreFromSigned } from './depthmap.js';
 import { makeTreesNear } from './trees-near.js';
 import { createBuilding } from './props.js';
 import { createLighthouse, LIGHTHOUSES } from './lighthouses.js';
+import { applyPasses } from './passes.js';
+import { buildShoalList } from './shoal-look.js';
+import { createShoalIndex, makeSailHeight, GAME_PASS_TIERS } from './sea-truth.js';
 import { buildNameList } from './names.js';
 import { attachTerrainStyle, STYLE_GAME } from './terrain-style.js';
 
@@ -532,12 +535,21 @@ export async function loadRealCoast(opts = {}) {
     json: async (u) => { const t = await (await fetch(u)).text(); bytes += t.length; return JSON.parse(t); },
     bytes: async (u) => { const b = new Uint8Array(await (await fetch(u)).arrayBuffer()); bytes += b.length; return b; },
   };
-  const [coast, settlementsJson, skerryJson, namesJson, placeNames] = await Promise.all([
+  const [coast, settlementsJson, skerryJson, namesJson, placeNames, passesJson, shoalsJson, seamarksJson] = await Promise.all([
     loadCoast(coastUrl, io, COAST_TILES), io.json(dataUrl), io.json(coastUrl + 'skerries.json'), io.json(coastUrl + 'names.json'), io.json(placeNamesUrl),
+    io.json(coastUrl + 'passes.json'), io.json(coastUrl + 'shoals.json'), io.json(coastUrl + 'seamarks.json'), // stage 1d: the water tells the truth
   ]);
   T.loadDecodeMs = now() - T.start;
 
   const world = buildCoastWorld(coast, { vex: opts.vex ?? COAST_VEX, smooth: opts.smooth ?? COAST_SMOOTH, skerries: skerryJson.skerries });
+  // Stage 1d: carve the real passes the 1:10 raster closes (docs/passes/README.md), BEFORE the terrain is built so its meshes and the
+  // collision both see the carved coast. The ship tier, plus any 'harbour' tier rows (the harbour approaches) as soon as they exist.
+  const tp = now();
+  const passReport = applyPasses(world, passesJson, { tiers: opts.passTiers ?? GAME_PASS_TIERS });
+  T.passesMs = now() - tp;
+  const shoalList = buildShoalList(shoalsJson.shoals, world.toGame);
+  const shoalIndex = createShoalIndex(shoalList);
+  const sailHeightAt = makeSailHeight(world.heightAt, shoalIndex); // the coast plus solid shoals: what the boat collides with
   const t1 = now();
   const terrain = createCoastTerrain(world, opts.step ?? 1);
   T.terrainMs = now() - t1;
@@ -578,7 +590,11 @@ export async function loadRealCoast(opts = {}) {
     findOpenWater: (x, z, o) => findOpenWater(world, x, z, o), // for the debug jump to a lighthouse
     lights: lights.filter((l) => l.group).map((l) => ({ name: l.name, x: l.group.position.x, y: l.group.position.y, z: l.group.position.z })), // where gulls may perch (stage 1b)
     heightAt: world.heightAt,
+    sailHeightAt, shoalSlowAt: shoalIndex.slowAt, // stage 1d: hard shoals are solid, soft ones slow the boat
+    sea: { shoalList, shoalIndex, marks: seamarksJson.marks, lines: seamarksJson.lines, harbours: seamarksJson.harbours, credit: seamarksJson.credit, licence: seamarksJson.licence },
     report: {
+      passes: { carved: passReport.carved.map((c) => c.id), changedCells: passReport.changedCells },
+      shoals: { hard: shoalIndex.hardCount, soft: shoalIndex.softCount }, marks: seamarksJson.marks.length,
       bytesDownloadedByLoader: bytes, timings: { ...T, ...world.timings },
       window: { cells: [world.nx, world.nz], metres: [Math.round(world.nx * world.pxM), Math.round(world.nz * world.pxM)], landPct: +world.landPct.toFixed(1) },
       terrain: terrain.stats, buildings: buildings.length, villages, skerries: world.skerryCount,

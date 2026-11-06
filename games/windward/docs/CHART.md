@@ -21,7 +21,7 @@ shader's rule). Boats: `src/boats.js`; today = Svalan (koster, gaff + jib, deck 
   the new zoom without growing the 142k-triangle wave tile.
 - Minimap (`src/minimap.js`): about 320 m across, built from the game's own height field a few rows per frame: depth in four blues, awash rock hatched,
   low rock vs land, coast line, buoys, harbours (square = village, ring = natural harbour), lighthouses. Fixed look (Felix's pick): round and north up, no settings button
-  and nothing saved. Tap a lighthouse on it to visit; tap anywhere else on it to open the chart (a small expand badge on its edge says so). There is no Chart button; a Boat button shows only while the chart is up (pinch-in and the +/- buttons also go back).
+  and nothing saved. Tap a lighthouse on it to visit; tap anywhere else on it to open the chart. There is no Chart button; a Boat button shows only while the chart is up (pinch-in and the +/- buttons also go back).
 
 **Batch 3, the chart.**
 - Chart (`src/chart.js`): the Map Lab's two pictures (`assets/chart/`, extracted from `ref/map-lab.html`, geography in `chart.json`), the 7 sections

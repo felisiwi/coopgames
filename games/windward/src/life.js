@@ -153,7 +153,9 @@ export function ellipsoid(THREE, sx, sy, sz, x = 0, y = 0, z = 0) {
 }
 
 // opts: { THREE, scene, heightAt, seaY(x, z), places (name list), lights: [{x, y, z}], inside(x, z), onCry() }
-export function createLife({ THREE, scene, heightAt, seaY, places, lights = [], inside = () => true, onCry = () => {} }) {
+// marks (stage 1d, optional): the REAL sea-mark positions [{ x, z, kind }]. Given, no decorative buoys are invented or drawn (the water tells
+// the truth): gulls perch on the real marks instead.
+export function createLife({ THREE, scene, heightAt, seaY, places, lights = [], inside = () => true, onCry = () => {}, marks: realMarks = null }) {
   const dummy = new THREE.Object3D();
   const color = new THREE.Color();
   const lambert = () => new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true, side: THREE.DoubleSide });
@@ -173,13 +175,13 @@ export function createLife({ THREE, scene, heightAt, seaY, places, lights = [], 
   };
 
   // -- sea marks (buoys): fixed, found once at load; gulls perch on them
-  const marks = placeMarks(places, heightAt, inside);
+  const marks = realMarks ?? placeMarks(places, heightAt, inside);
   const markGeo = new THREE.ConeGeometry(0.45, 1.5, 6);
   markGeo.translate(0, 0.45, 0);
   const markMesh = instanced(markGeo, Math.max(1, marks.length));
   const MARK_COLORS = { red: 0xb5524a, green: 0x4f8f6a, yellow: 0xd6b04c };
   marks.forEach((m, i) => markMesh.setColorAt(i, color.set(MARK_COLORS[m.kind])));
-  markMesh.count = marks.length;
+  markMesh.count = realMarks ? 0 : marks.length; // real marks are drawn by src/seamark-layer.js, not here
   const perches = perchSpots(marks, lights);
 
   // -- gulls: a V-shaped wing pair; flapping = scaling Y (the wingtips rise and fall)
@@ -297,7 +299,7 @@ export function createLife({ THREE, scene, heightAt, seaY, places, lights = [], 
       if (cellTick-- <= 0) { cellTick = 20; updateCells(bx, bz); } // ~3 times a second
 
       // marks float
-      for (let i = 0; i < marks.length; i++) put(markMesh, i, marks[i].x, seaY(marks[i].x, marks[i].z) + 0.15, marks[i].z, 0, 1, 1, 1, Math.sin(nowS * 1.3 + i) * 0.06);
+      if (!realMarks) for (let i = 0; i < marks.length; i++) put(markMesh, i, marks[i].x, seaY(marks[i].x, marks[i].z) + 0.15, marks[i].z, 0, 1, 1, 1, Math.sin(nowS * 1.3 + i) * 0.06);
       markMesh.instanceMatrix.needsUpdate = true;
 
       // gulls

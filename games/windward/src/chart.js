@@ -18,6 +18,8 @@ export const FOG_ALPHA = 0.93;
 export const FOG_UP = 4; // fog picture pixels per cell side
 export const LABEL_MIN_SCALE = 0.2; // px per metre: names appear from here (zoomed in); sections names below SECTION_MAX_SCALE
 export const SECTION_MAX_SCALE = 0.35;
+export const SEA_MIN_SCALE = 0.22; // px per metre: sea-marks, shoals and leading lines appear from here (zoomed in)
+export const OSM_CREDIT = '© OpenStreetMap contributors (ODbL)';
 
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
@@ -93,9 +95,11 @@ export function placeLabels(items, W, H) {
 }
 
 // ---- the canvas part -----------------------------------------------------------------------------------------------
+// sea (stage 1d, optional): { marks: [{ x, z, kind (seamark-layer markKind), invented }], shoals: [{ x, z, look }], lines: [[[x, z], ...]] }: drawn
+// where the fog has lifted, from SEA_MIN_SCALE; invented marks only when showInvented (?debug=1), with a dashed magenta ring.
 // opts: { canvas, cfg (chart.json), toGame, entries (name list), isKnown(id), explored, seen(entry) (src/seen.js; defaults to the label point's fog), lights: [{ id, name, x, z, inWindow, entry }],
 //         baseUrl (folder of the pictures), makeCanvas, loadImage }
-export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, seen = (e) => explored.isExplored(e.x, e.z), lights, baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
+export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, seen = (e) => explored.isExplored(e.x, e.z), lights, sea = null, showInvented = false, baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
   const ctx = canvas.getContext('2d');
   const detailRect = boundsRect(toGame, cfg.detail);
   const overRect = boundsRect(toGame, cfg.overview);
@@ -212,6 +216,51 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, s
           ctx.font = '15px "IM Fell English SC", Georgia, serif';
         }
         ctx.globalAlpha = 1;
+      }
+      // the sea: real marks, shoals and leading lines (OpenStreetMap), only where the fog has lifted
+      const seaA = sea ? smooth(SEA_MIN_SCALE * 0.8, SEA_MIN_SCALE * 1.25, s) : 0;
+      if (seaA > 0.02) {
+        ctx.save();
+        ctx.globalAlpha = seaA;
+        ctx.setLineDash([5, 4]); ctx.strokeStyle = 'rgba(61,50,38,0.5)'; ctx.lineWidth = 1.2;
+        for (const line of sea.lines) { // a leading line: a dashed alignment, from its first point
+          if (!explored.isExplored(line[0][0], line[0][1])) continue;
+          ctx.beginPath();
+          line.forEach((p, i) => { const [x, y] = worldToScreen(view, W, H, p[0], p[1]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        for (const sh of sea.shoals) {
+          const [x, y] = worldToScreen(view, W, H, sh.x, sh.z);
+          if (x < -8 || y < -8 || x > W + 8 || y > H + 8 || !explored.isExplored(sh.x, sh.z)) continue;
+          if (sh.look.look === 'foam') { // a rock awash or dry: the chart's cross, with a pale halo
+            ctx.strokeStyle = 'rgba(239,227,200,0.9)'; ctx.lineWidth = 3.2; ctx.beginPath(); ctx.moveTo(x - 3, y); ctx.lineTo(x + 3, y); ctx.moveTo(x, y - 3); ctx.lineTo(x, y + 3); ctx.stroke();
+            ctx.strokeStyle = INK; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x - 3, y); ctx.lineTo(x + 3, y); ctx.moveTo(x, y - 3); ctx.lineTo(x, y + 3); ctx.stroke();
+          } else { // under the water: a faint dotted ring
+            ctx.strokeStyle = 'rgba(61,50,38,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([1.5, 2]); ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+          }
+        }
+        const FILL = { red: '#c2493d', green: '#4f9a6a', yellow: '#e0b84c', black: '#2d3640', light: '#f2c46d' };
+        for (const m of sea.marks) {
+          if (m.invented && !showInvented) continue; // the chart tells invented marks apart; the game never does (only with ?debug=1)
+          const [x, y] = worldToScreen(view, W, H, m.x, m.z);
+          if (x < -8 || y < -8 || x > W + 8 || y > H + 8 || !explored.isExplored(m.x, m.z)) continue;
+          ctx.fillStyle = FILL[m.kind.colour] || '#888'; ctx.strokeStyle = 'rgba(239,227,200,0.9)'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          if (m.kind.shape === 'can') ctx.rect(x - 2.8, y - 2.8, 5.6, 5.6);
+          else if (m.kind.shape === 'cone') { ctx.moveTo(x, y - 3.6); ctx.lineTo(x + 3.2, y + 2.6); ctx.lineTo(x - 3.2, y + 2.6); ctx.closePath(); }
+          else if (m.kind.shape === 'cardinal') { ctx.moveTo(x, y - 4); ctx.lineTo(x + 3.2, y); ctx.lineTo(x, y + 4); ctx.lineTo(x - 3.2, y); ctx.closePath(); }
+          else if (m.kind.shape === 'special') { ctx.moveTo(x - 3, y - 3); ctx.lineTo(x + 3, y + 3); ctx.moveTo(x + 3, y - 3); ctx.lineTo(x - 3, y + 3); }
+          else ctx.arc(x, y, m.kind.shape === 'light' ? 2.2 : 3, 0, Math.PI * 2);
+          if (m.kind.shape === 'special') { ctx.strokeStyle = '#c99a2a'; ctx.lineWidth = 2; ctx.stroke(); } else { ctx.fill(); ctx.stroke(); }
+          if (m.invented) { ctx.strokeStyle = '#ff3fb8'; ctx.lineWidth = 1.2; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+        }
+        ctx.restore();
+        ctx.save(); // the credit, wherever the data shows
+        ctx.font = '10px "IM Fell English", Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(61,50,38,0.55)';
+        ctx.globalAlpha = seaA;
+        ctx.fillText(OSM_CREDIT, W / 2, H - 8);
+        ctx.restore();
       }
       const labelA = smooth(LABEL_MIN_SCALE * 0.7, LABEL_MIN_SCALE * 1.3, s);
       const drawn = [];

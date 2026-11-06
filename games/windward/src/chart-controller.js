@@ -13,6 +13,7 @@ import { ZOOM_MIN, ZOOM_CHART_START, ZOOM_CHART_FULL, ZOOM_STEP, chartBlend, cha
 import { attachZoomInput } from './zoom-input.js';
 import { deviceStorage } from './names.js';
 import { createSeen } from './seen.js';
+import { markKind } from './seamark-layer.js';
 import { createNavTarget } from './nav-target.js';
 
 export const VISIT_ZOOM = 0.8; // close enough to look at the lighthouse
@@ -53,6 +54,15 @@ export function placeInfo(entry) {
 
 // onTarget(entry | null, titleFn): the sail target changed (game.js shows its edge tag). onVisit(entry): a lighthouse visit began
 // (game.js shows that lighthouse's name label, so its description is up while you look at it).
+// What the chart draws of the sea (stage 1d): real marks, the shoals, the leading lines, in game metres.
+export function chartSea(sea, toGame) {
+  return {
+    marks: sea.marks.map((spec) => { const [x, z] = toGame(spec.lon, spec.lat); return { x, z, kind: markKind(spec), invented: !!spec.invented, type: spec.type }; }),
+    shoals: sea.shoalList,
+    lines: sea.lines.map((l) => l.points.map(([lon, lat]) => toGame(lon, lat))),
+  };
+}
+
 export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const lights = chartLights(coast.names, toGame);
@@ -93,7 +103,8 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     setTimeout(() => state.chart && state.chart.ensureLoaded(), 2500); // fetch the pictures soon after load, so a quick zoom-out is never held up
     state.chart = createChart({
       canvas: ui.chartCanvas, cfg, toGame, entries: lightList.concat(coast.names.filter((e) => e.kind !== 'light')), isKnown: (id) => nameBook.isKnown(id),
-      explored: state.explored, seen: (e) => seen.isSeen(e), baseUrl: assetsBase,
+      explored: state.explored, seen: (e) => seen.isSeen(e), baseUrl: assetsBase, showInvented: debug,
+      sea: coast.sea ? chartSea(coast.sea, toGame) : null,
     });
   }).catch((err) => { console.warn('chart data failed to load', err); });
 

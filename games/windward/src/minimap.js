@@ -89,7 +89,7 @@ export function createMinimap({ canvas, heightAt, places = [], lights = [], mark
   const raster = { cx: NaN, cz: NaN, ready: false };
   let job = null; // { cx, cz, row }
   const harbours = places.filter((p) => p.kind === 'village' || p.kind === 'harbour');
-  const COLORS = { red: '#c2493d', green: '#4f9a6a', yellow: '#e0b84c' };
+  const COLORS = { red: '#c2493d', green: '#4f9a6a', yellow: '#e0b84c', black: '#2d3640' }; // sea-marks: laterals, specials; cardinals and dangers black
 
   function advance(boat) {
     if (!job && (!raster.ready || Math.hypot(boat.x - raster.cx, boat.z - raster.cz) > MINI.rebuildM)) job = { cx: boat.x, cz: boat.z, row: 0 };
