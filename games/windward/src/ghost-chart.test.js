@@ -2,8 +2,9 @@
 // you have sailed, never any text / marks / harbours, the game's saved chart read but never written, the demo chart, and the ink picture.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { shoreSegments, worldShore, exploredBounds, readOnlyStorage, demoExplored, fullExplored, inkRaster, createGhostChart, drawGhostChart, fitView, INK_EXPLORED_KEY, SHEET } from './ghost-chart.js';
+import { shoreSegments, worldShore, exploredBounds, revealedLabels, drawNames, readOnlyStorage, demoExplored, fullExplored, inkRaster, createGhostChart, drawGhostChart, fitView, INK_EXPLORED_KEY, SHEET } from './ghost-chart.js';
 import { createExplored, EXPLORED_KEY } from './explored.js';
+import { createSeen } from './seen.js';
 
 let passed = 0;
 function check(name, fn) { fn(); passed += 1; console.log(`ok - ${name}`); }
@@ -20,12 +21,12 @@ const RECT = { x0: 0, z0: 0, x1: 200, z1: 200 };
 const todayW = makeWorld(40), eraW = makeWorld(36); // the sea stands higher: the 1700 island is smaller
 // a recording 2D context: counts what is drawn
 const stub = () => {
-  const calls = { stroke: 0, fill: 0, fillText: 0, strokeText: 0, drawImage: 0, lineTo: 0, fillRect: 0, strokes: [], fills: [] };
+  const calls = { strokeTexts: [], fillTexts: [], fonts: [], stroke: 0, fill: 0, fillText: 0, strokeText: 0, drawImage: 0, lineTo: 0, fillRect: 0, strokes: [], fills: [] };
   const ctx = {
     set fillStyle(v) { calls.fillStyle = v; }, set strokeStyle(v) { calls.strokeStyle = v; }, set lineWidth(v) {}, set lineCap(v) {}, set lineJoin(v) {}, set imageSmoothingEnabled(v) {},
     fillRect() { calls.fillRect++; }, beginPath() {}, moveTo() {}, lineTo() { calls.lineTo++; }, closePath() {}, save() {}, restore() {}, translate() {}, rotate(a) { calls.rotated = a; },
     stroke() { calls.stroke++; calls.strokes.push(calls.strokeStyle); }, fill() { calls.fill++; }, drawImage() { calls.drawImage++; },
-    fillText() { calls.fillText++; }, strokeText() { calls.strokeText++; },
+    fillText(t) { calls.fillText++; calls.fillTexts.push(t); }, strokeText() { calls.strokeText++; }, set font(v) { calls.fonts.push(v); }, set textAlign(v) {}, set textBaseline(v) {},
   };
   return { ctx, calls };
 };
@@ -84,7 +85,7 @@ check('drawGhostChart: nothing explored = a blank sheet, no lines (a chart you h
   const model = createGhostChart({ today: { world: todayW }, era: { world: eraW }, todayExplored: createExplored(RECT, { storage: null }), inkExplored: createExplored(RECT, { storage: null }) });
   const { ctx, calls } = stub();
   const s = drawGhostChart(ctx, 400, 400, fitView(RECT, 400, 400), model, null, null);
-  assert.deepEqual(s, { pencil: 0, pencilInked: 0, ink: 0 });
+  assert.deepEqual(s, { pencil: 0, pencilInked: 0, ink: 0, names: 0 });
   assert.equal(calls.fillStyle, SHEET); assert.equal(calls.fillRect, 1);
   assert.equal(calls.lineTo, 0);
 });
@@ -120,8 +121,48 @@ check('no names, marks or harbours: drawing never writes text and only strokes l
   assert.equal(calls.fill, 1, 'the only filled shape is the boat');
   assert.equal(calls.drawImage, 1, 'the ink picture');
   assert.equal(calls.rotated, -1, 'the boat points the way it heads');
-  const src = readFileSync(new URL('./ghost-chart.js', import.meta.url), 'utf8');
-  assert.ok(!/fillText|strokeText|\.names|harbour|seamark|lighthouse/i.test(src.replace(/\/\/.*$/gm, '')), 'the module has no text, name, harbour or mark code');
+  // text exists in exactly one function (drawNames); the pencil and ink code has none, and nothing about harbours, marks or lights
+  const src = readFileSync(new URL('./ghost-chart.js', import.meta.url), 'utf8').replace(/\/\/.*$/gm, '');
+  const outsideNames = src.replace(/export function drawNames[\s\S]*?\n}\n/, '');
+  assert.ok(!/fillText|strokeText/.test(outsideNames), 'no text outside drawNames');
+  assert.ok(!/harbour|seamark|lighthouse/i.test(src), 'no harbour, mark or light code at all');
+});
+
+check('old names: a documented name appears once the ink covers land within 150 m of its label point (the game\'s seen rule); never an undocumented one', () => {
+  const ink = createExplored(RECT, { storage: null });
+  const seen = createSeen({ explored: ink, heightAt: eraW.heightAt });
+  const labels = [
+    { id: 'a', x: 100, z: 100, text: 'Hermanö', year: 1673, uncertain: true },   // on the island
+    { id: 'b', x: 100, z: 20, text: 'Guldholmen', year: 1588, uncertain: false }, // out at sea, 76 m from the island's shore (36 m radius): land within 150 m
+    { id: 'c', x: 100, z: 100, text: null, year: null, uncertain: true },        // no documented form
+    { id: 'd', x: 190, z: 190, text: 'Kierlingøon', year: 1659, uncertain: false }, // the far corner: 127 m from the island's middle, so its shore is within 150 m
+    { id: 'e', x: -400, z: -400, text: 'Molanda', year: 1388, uncertain: true },   // far outside the inked area
+  ];
+  assert.deepEqual(revealedLabels(labels, seen).map((l) => l.id), [], 'nothing inked: no name');
+  ink.reveal(20, 20, 30); // a patch of sea in the far corner of the sheet, no land
+  assert.deepEqual(revealedLabels(labels, seen).map((l) => l.id), [], 'ink over open sea reveals no name: there must be revealed LAND within reach');
+  ink.reveal(100, 100, 40); // the island
+  const got = revealedLabels(labels, seen).map((l) => l.id);
+  assert.ok(got.includes('a') && got.includes('b'), 'island inked: the island name and the one within 150 m both return');
+  assert.ok(!got.includes('c'), 'no documented name, no name, however much is inked');
+  assert.ok(got.includes('d'), 'the rule is land within 150 m, not the label point itself: the far corner counts');
+  assert.ok(!got.includes('e'), 'a place with no inked land within 150 m stays unnamed');
+  seen.setExplored(createExplored(RECT, { storage: null }));
+  assert.deepEqual(revealedLabels(labels, seen), [], 'after a reset the names go again');
+});
+
+check('drawNames writes exactly the names given, italic where uncertain; the chart passes them through and counts them', () => {
+  const { ctx, calls } = stub();
+  const model = createGhostChart({ today: { world: todayW }, era: { world: eraW }, todayExplored: fullExplored(RECT), inkExplored: fullExplored(RECT) });
+  const names = [{ x: 100, z: 100, text: 'Hermanö', uncertain: true }, { x: 50, z: 50, text: 'Guldholmen', uncertain: false }];
+  const s = drawGhostChart(ctx, 390, 844, fitView(RECT, 390, 844), model, null, null, names);
+  assert.equal(s.names, 2);
+  assert.deepEqual(calls.fillTexts, ['Hermanö', 'Guldholmen']);
+  assert.equal(calls.strokeText, 2, 'a paper halo under each');
+  assert.ok(calls.fonts[0].startsWith('italic') && !calls.fonts[1].startsWith('italic'));
+  const none = stub();
+  assert.equal(drawNames(none.ctx, fitView(RECT, 390, 844), 390, 844, []), 0);
+  assert.equal(none.calls.fillText, 0);
 });
 
 check('inkRaster: tint only where explored, land vs sea from the 1700 world, soft edge', () => {

@@ -6,7 +6,7 @@ import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { createWater, createWaveState, stepWaves } from './water.js';
 import { createSky } from './sky.js';
-import { ASSETS, LAB_DEFAULTS, LAB_ORDER, FOCUS, COMPARE_GAP, createAsset, createCompare, defaultVariant, parseLabParams, labParamsToSearch, STRIPES, HOUSE_COLOURS } from './era-assets.js';
+import { ASSETS, LAB_DEFAULTS, LAB_ORDER, FOCUS, COMPARE_GAP, createAsset, createCompare, defaultVariant, parseLabParams, labParamsToSearch, STRIPES, HOUSE_COLOURS, HOUSE_1950_COLOURS, SNIPA_COLOURS, FISHBOAT_COLOURS } from './era-assets.js';
 
 const $ = (id) => document.getElementById(id);
 const loading = $('loading');
@@ -20,8 +20,9 @@ const NIGHT = {
 const DAY = Object.fromEntries(Object.keys(NIGHT).map((k) => [k, CONFIG[k]]));
 const LABELS = { navy: 'Navy', coral: 'Coral', sage: 'Sage', sand: 'Sand', cream: 'Cream', sky: 'Sky blue', rose: 'Falu rose', a: 'A · turf', b: 'B · tile + shed', c: 'C · long, chimney', d: 'D · sail brailed' };
 const EKA_LABELS = { a: 'A · tarred, rust sail', b: 'B · grey, linen sail', c: 'C · ochre, patched, nets', d: 'D · sail brailed up' };
-const VARIANT_TITLE = { sailboat: 'Stripe colour', motorboat: 'Stripe colour', summerhouse: 'Paint', cottage: 'Cottage', eka: 'Eka' };
-const SWATCH = { ...Object.fromEntries(Object.entries(STRIPES).map(([k, v]) => [k, v])), ...Object.fromEntries(Object.entries(HOUSE_COLOURS).map(([k, v]) => [k, v])) };
+const FIFTIES_LABELS = new Proxy({ falu: 'Falu red', white: 'White', ochre: 'Ochre', dark: 'Dark hull', green: 'Green', blue: 'Blue', red: 'English red', black: 'Black', spar: 'Pole' }, { get: (t, k) => t[k] ?? (/^[a-z]+-(cone|can|spar)$/.test(String(k)) ? String(k).replace('-', ' ').replace(/^./, (c) => c.toUpperCase()) : undefined) });
+const VARIANT_TITLE = { sailboat: 'Stripe colour', motorboat: 'Stripe colour', summerhouse: 'Paint', cottage: 'Cottage', eka: 'Eka', snipa1950: 'Hull colour', fishboat1950: 'Hull colour', house1950: 'Wall colour', keeper: 'Walls', buoy1950: 'Mark' };
+const SWATCH = { ...Object.fromEntries(Object.entries(STRIPES).map(([k, v]) => [k, v])), ...Object.fromEntries(Object.entries(HOUSE_COLOURS).map(([k, v]) => [k, v])), ...HOUSE_1950_COLOURS, ...SNIPA_COLOURS, ...FISHBOAT_COLOURS };
 const hex6 = (n) => `#${n.toString(16).padStart(6, '0')}`;
 
 function main() {
@@ -139,6 +140,7 @@ function main() {
   const refreshers = [];
   const pickAsset = (id) => { S.asset = id; S.v = defaultVariant(id); S.rot = LAB_DEFAULTS.rot; S.zoom = 1; build(); applyLight(); refreshPanel(); writeUrl(); };
   refreshers.push(chipsIn($('todays'), LAB_ORDER.filter((id) => ASSETS[id]?.era === 'today').map((id) => [id, ASSETS[id].label]), (id) => S.asset === id, pickAsset));
+  refreshers.push(chipsIn($('fifties'), LAB_ORDER.filter((id) => ASSETS[id]?.era === '1950').map((id) => [id, ASSETS[id].label]), (id) => S.asset === id, pickAsset));
   refreshers.push(chipsIn($('olds'), LAB_ORDER.filter((id) => ASSETS[id]?.era === '1700').map((id) => [id, ASSETS[id].label]), (id) => S.asset === id, pickAsset));
   refreshers.push(chipsIn($('compare'), [['compare', 'Today vs 1700']], (id) => S.asset === id, pickAsset));
   refreshers.push(chipsIn($('focus'), [['both', 'Both'], ['today', 'Today'], ['1700', '1700']], (id) => S.focus === id, (id) => { S.focus = id; refreshPanel(); writeUrl(); }));
@@ -155,7 +157,7 @@ function main() {
     $('variantBox').hidden = list.length === 0;
     if (!list.length) return () => {};
     $('variantLabel').textContent = VARIANT_TITLE[S.asset] ?? 'Variant';
-    return chipsIn(host, list.map((v) => [v, S.asset === 'eka' ? EKA_LABELS[v] : (LABELS[v] ?? v), SWATCH[v]]), (id) => S.v === id, (id) => { S.v = id; build(); applyLight(); refreshPanel(); writeUrl(); });
+    return chipsIn(host, list.map((v) => [v, S.asset === 'eka' ? EKA_LABELS[v] : (LABELS[v] ?? FIFTIES_LABELS[v] ?? v), SWATCH[v]]), (id) => S.v === id, (id) => { S.v = id; build(); applyLight(); refreshPanel(); writeUrl(); });
   }
   let variantRefresh = () => {};
   function rebuildToggles() {

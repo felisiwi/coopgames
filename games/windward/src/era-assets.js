@@ -28,6 +28,7 @@ const C = {
 };
 const GLASS = {
   today: { day: 0xa9c0d0, lit: 0xffd9a0, off: 0x38425c },
+  y1950: { day: 0x8f9fa2, lit: 0xffcf88, off: 0x353b4f }, // old panes: warm paraffin / early electric light
   y1700: { day: 0x5a5148, lit: 0xf0b25c, off: 0x2e2a2c },
 };
 
@@ -648,6 +649,191 @@ export function addHarbour1700(S, G) {
 }
 
 // ======================================================================================================
+//  1950  (the game's home base: Epoch VI, "Summer guests"; data/world-1950.json, docs/WORLD-1950.md)
+// ======================================================================================================
+// Wooden boats with small inboard engines, painted timber houses, keepers at the lights, a fish-canning factory, the 1950s ferry.
+// Colours and shapes follow docs/WORLD-1950.md "Looks for the kit"; anything that section marks "not documented" is a designer's
+// choice and says so below. No plastic: fibreglass boats come in the late 1960s.
+export const F50 = {
+  falu: 0xa4513f, faluDark: 0x8a4234, english: 0x8f4a3a, frameGreen: 0x6f8f7a, slate: 0x6f6e7c, white: 0xf0ebdf, ochre: 0xd8b565, grey: 0xb9b2a3, green: 0x6f8f7a, blue: 0x6a86a4, black: 0x34353a,
+  hullWhite: 0xeae6da, hullCream: 0xe3d8bc, bottom: 0x8a4b44, tarRoof: 0x5b4b46, tile: 0x9a5a48, brick: 0x9a5a48, brickPale: 0xd9c9a0,
+  deck: 0xc7b48f, engine: 0x4f5a52, exhaust: 0x3b3c40, wood: 0xc99a5e, cotton: 0xeee3c8, cottonShade: 0xdfd2b3,
+};
+const wallWindowsX = (S, G, halfW, y0, zs, w, h, lit = true, offLit = 3) => { // windows on both side walls of a box that runs along z
+  for (const side of [1, -1]) {
+    S.at({ p: [side * halfW, y0, 0], ry: (side * Math.PI) / 2 }, () => {
+      zs.forEach((lz, i) => { const x = side > 0 ? -lz : lz; ((lit && i % offLit !== offLit - 1) ? G.on : G.off).quad([x - w / 2, 0, 0.03], [x + w / 2, 0, 0.03], [x + w / 2, h, 0.03], [x - w / 2, h, 0.03], null); });
+    });
+  }
+};
+
+// A wooden snipa (open working boat) with a small inboard engine: a low engine box, a little wheel shelter, a thin exhaust. ~6.6 m.
+export const SNIPA_COLOURS = { white: F50.hullWhite, green: 0x7fa08a, blue: 0x7f9bb8 };
+export function addSnipa1950(S, G, { variant = 'white', L = 6.6, lit = true } = {}) {
+  const hull = SNIPA_COLOURS[variant] ?? F50.hullWhite;
+  const st = hullStations({ L, B: L * 0.32, n: 8, sheer0: 0.55, riseBow: 0.3, riseStern: 0.14, keelD: 0.42, peak: 0.45, pBow: 1.5, pStern: 1.6, sternW0: 0.08 }); // pointed bow, pointed and slightly rounded stern (S50)
+  loft(S, st, { bands: [[0.14, F50.hullWhite], [0.3, hull], [0.46, shade(hull, 0.94)], [0.62, hull], [1, F50.bottom]], open: true, floorY: 0.14, floor: F50.deck, pf: 0.5 });
+  S.box(0, 0.3, L * 0.1, st[3].w * 1.5, 0.04, 0.28, F50.wood); S.box(0, 0.3, -L * 0.28, st[3].w * 1.4, 0.04, 0.28, F50.wood); // thwarts
+  S.box(0, 0.4, L * 0.02, 0.8, 0.46, 0.7, F50.engine); // the engine box
+  S.tube([0.2, 0.6, L * 0.02 - 0.2], [0.34, 1.5, L * 0.02 - 0.55], 0.04, 0.035, 4, F50.exhaust); // exhaust
+  S.box(0, 0.62, -L * 0.1, 1.0, 0.7, 0.9, hull); // wheel shelter
+  S.box(0, 1.0, -L * 0.1, 1.1, 0.05, 1.0, F50.white);
+  (lit ? G.on : G.off).quad([-0.4, 0.7, -L * 0.1 + 0.46], [0.4, 0.7, -L * 0.1 + 0.46], [0.4, 0.97, -L * 0.1 + 0.46], [-0.4, 0.97, -L * 0.1 + 0.46], null);
+  S.tube([0, 0.2, L / 2 - 0.5], [0, 1.4, L / 2 - 0.4], 0.04, 0.03, 4, F50.wood); // a short stem staff with the flag
+  S.tri([0, 1.4, L / 2 - 0.4], [0, 1.15, L / 2 - 0.4], [-0.5, 1.28, L / 2 - 0.55], 0xe8c04f);
+}
+
+// A wooden fishing boat (kosterbåt type) with a wheelhouse aft and a mast forward, ~11.5 m. Looks: designer's choice within the era's
+// wooden-boat picture (docs/WORLD-1950.md); the hull colours are the part that varies.
+export const FISHBOAT_COLOURS = { white: 0xeae6da, dark: 0x2f3b3a, green: 0x5f7f6c }; // white = the documented one (linseed-oil paint above the waterline, a red stripe, a red bottom: S48/S49); the others are designer's choice
+export function addFishingBoat1950(S, G, { variant = 'white', L = 11.5, lit = true } = {}) {
+  const hull = FISHBOAT_COLOURS[variant] ?? FISHBOAT_COLOURS.white;
+  const st = hullStations({ L, B: L * 0.31, n: 10, sheer0: 0.95, riseBow: 0.85, riseStern: 0.25, keelD: 0.85, peak: 0.55, pBow: 1.2, pStern: 1.6, sternW0: 0.28 });
+  loft(S, st, { bands: [[0.12, F50.hullWhite], [0.5, hull], [0.58, F50.falu], [1, F50.bottom]], deck: F50.deck, pf: 0.5 }); // the red stripe at the waterline, the red bottom
+  const dy = (z) => atZ(st, z, 'sheer');
+  const wz = -L * 0.2, base = dy(wz);
+  S.box(0, base + 0.95, wz, 2.1, 1.9, 2.3, F50.white); // wheelhouse
+  S.box(0, base + 1.98, wz, 2.4, 0.1, 2.6, F50.black);
+  S.at({ p: [0, base, wz + 1.16] }, () => { for (const x of [-0.6, 0.6]) (lit ? G.on : G.off).quad([x - 0.4, 1.0, 0.03], [x + 0.4, 1.0, 0.03], [x + 0.4, 1.7, 0.03], [x - 0.4, 1.7, 0.03], null); });
+  wallWindowsX(S, G, 1.06, base, [wz - 0.4, wz + 0.4], 0.55, 0.7, lit, 5);
+  S.tube([0.5, base + 1.9, wz - 1.5], [0.5, base + 3.6, wz - 1.6], 0.14, 0.12, 6, F50.exhaust); // the funnel
+  S.tube([0.5, base + 3.3, wz - 1.58], [0.5, base + 3.45, wz - 1.59], 0.16, 0.16, 6, F50.falu); // its red band
+  const mz = L * 0.22;
+  S.tube([0, base, mz], [0, base + 7.2, mz], 0.12, 0.07, 6, F50.wood); // mast
+  S.tube([0, base + 2.6, mz - 0.05], [0, base + 2.6, mz - 3.2], 0.06, 0.05, 5, F50.wood); // boom
+  sail3(S, [0, base + 2.7, mz - 0.08], [0, base + 6.4, mz - 0.08], [0, base + 2.7, mz - 3.0], 0.3, 0xa7714b); // a small tanned steadying sail
+  S.box(0, base + 0.25, L * 0.02, 1.5, 0.5, 1.8, F50.grey); // hatch coaming
+  for (const [x, z] of [[-1.0, wz - 2.6], [1.0, wz - 2.7], [-0.3, wz - 3.0]]) S.drum(x, base, z, 0.28, 0.5, 6, 0xe48f55); // orange floats
+}
+
+// A wooden sailing boat of the time (a folkbåt-like keelboat), cotton sails, varnished mast and boom. ~8 m.
+export function addSailboat1950(S, G, { L = 8, sailsUp = true, hull = F50.hullWhite, lit = true } = {}) {
+  const st = hullStations({ L, B: L * 0.28, n: 9, sheer0: 0.65, riseBow: 0.32, riseStern: 0.1, keelD: 0.95, peak: 0.45, pBow: 1.4, pStern: 1.7, sternW0: 0.3 });
+  loft(S, st, { bands: [[0.16, F50.hullWhite], [0.55, hull], [1, F50.bottom]], deck: F50.deck, pf: 0.55 });
+  const dy = (z) => atZ(st, z, 'sheer');
+  const cz = L * 0.06, base = dy(cz);
+  S.box(0, base + 0.2, cz, L * 0.2, 0.4, L * 0.28, F50.hullWhite); // low doghouse
+  wallWindowsX(S, G, L * 0.1, base + 0.1, [cz - 0.3, cz + 0.3], 0.4, 0.2, lit, 4);
+  S.box(0, base + 0.02, -L * 0.28, L * 0.18, 0.03, 1.2, F50.deck); // cockpit
+  const mz = L * 0.14, top = base + L * 1.1;
+  S.tube([0, base, mz], [0, top, mz], 0.06, 0.035, 5, F50.wood);
+  const boomY = base + 1.0, boomLen = L * 0.34;
+  S.at({ p: [0, 0, mz], ry: 0.28 }, () => {
+    S.tube([0, boomY, -0.04], [0, boomY - 0.02, -boomLen], 0.045, 0.04, 4, F50.wood);
+    if (sailsUp) quadSail(S, [0, boomY + 0.05, -0.06], [0, top - 0.5, -0.06], [0, top - 0.5, -0.06], [0, boomY + 0.05, -boomLen], 0.34, F50.cotton, 2, 3, (i, j) => ((i + j) % 2 ? F50.cottonShade : F50.cotton)); // panelled cotton
+  });
+  if (sailsUp) sail3(S, [0, base + 0.35, L / 2 - 0.25], [0, top - 1.0, mz + 0.05], [0.08, base + 0.8, mz - 1.3], 0.26, F50.cottonShade);
+}
+
+// The Lysekil-Fiskebackskil ferry of the 1950s. See docs/WORLD-1950.md for what is and is not documented about its name and look; the
+// shape here is a small wooden / steel passenger boat of the type (deckhouse forward, open aft deck, a funnel), a designer's choice.
+export function addFerry1950(S, G, { L = 17, lit = true } = {}) {
+  const B = 4.6;
+  const st = hullStations({ L, B, n: 9, sheer0: 1.25, riseBow: 0.5, riseStern: 0.12, keelD: 0.8, tipKeel: 0.15, kp: 5, peak: 0.45, pBow: 1.5, pStern: 2.2, sternW0: 0.7 });
+  loft(S, st, { bands: [[0.38, F50.hullWhite], [0.5, F50.black], [1, F50.bottom]], deck: F50.deck, pf: 0.3 });
+  const y0 = 1.25;
+  const [z0, z1] = [-2.4, 4.4];
+  S.box(0, y0 + 1.05, (z0 + z1) / 2, 3.5, 2.1, z1 - z0, F50.white); // saloon
+  S.box(0, y0 + 2.15, (z0 + z1) / 2, 3.8, 0.1, z1 - z0 + 0.5, F50.grey);
+  wallWindowsX(S, G, 1.76, y0 + 0.7, [-1.4, -0.4, 0.6, 1.6, 2.6, 3.6], 0.7, 0.9, lit, 5);
+  S.at({ p: [0, y0, z1 + 0.01] }, () => { for (const x of [-0.9, 0.9]) (lit ? G.on : G.off).quad([x - 0.5, 0.7, 0.03], [x + 0.5, 0.7, 0.03], [x + 0.5, 1.6, 0.03], [x - 0.5, 1.6, 0.03], null); });
+  S.box(0, y0 + 2.9, 2.6, 2.2, 1.3, 1.9, F50.white); // wheelhouse
+  S.box(0, y0 + 3.6, 2.6, 2.5, 0.08, 2.2, F50.black);
+  S.at({ p: [0, y0 + 2.2, 3.56] }, () => { for (const x of [-0.6, 0, 0.6]) (lit ? G.on : G.off).quad([x - 0.25, 0.3, 0.03], [x + 0.25, 0.3, 0.03], [x + 0.25, 1.0, 0.03], [x - 0.25, 1.0, 0.03], null); });
+  S.tube([0, y0 + 2.2, 0.0], [0, y0 + 4.6, -0.1], 0.36, 0.3, 8, F50.black); // the funnel
+  S.tube([0, y0 + 4.05, -0.07], [0, y0 + 4.3, -0.08], 0.38, 0.38, 8, F50.falu); // a coloured band
+  S.tube([0, y0 + 3.6, 3.0], [0, y0 + 5.4, 3.0], 0.05, 0.03, 4, F50.wood); // mast with a flag
+  S.tri([0, y0 + 5.4, 3.0], [0, y0 + 5.0, 3.0], [-0.7, y0 + 5.2, 2.8], 0xe8c04f);
+  // the open aft deck: benches along both sides and an awning on poles
+  for (const side of [1, -1]) { S.box(side * 1.5, y0 + 0.25, -4.8, 0.4, 0.5, 4.2, F50.wood); for (const z of [-6.4, -3.2]) S.tube([side * 1.55, y0, z], [side * 1.55, y0 + 2.1, z], 0.05, 0.05, 4, F50.wood); }
+  S.box(0, y0 + 2.12, -4.8, 3.6, 0.06, 4.6, 0xd8d0b8);
+}
+
+// ---- houses and the village, 1950 --------------------------------------------------------------------------------
+export const HOUSE_1950_COLOURS = { red: F50.english, white: F50.white, ochre: F50.ochre }; // 'English red', white, ochre (docs/WORLD-1950.md E: the municipal advice, not a 1950 survey: uncertain)
+// A fishing-village house: one and a half storeys, painted timber, white corner boards and window frames, a dark roof (tar paper or tile),
+// a brick chimney. Wall colours falu red / white / ochre per docs/WORLD-1950.md; ~5 x 7 m.
+export function addHouse1950(S, G, { colour = 'red', lit = true, seed = 3 } = {}) {
+  const wall = HOUSE_1950_COLOURS[colour] ?? F50.english;
+  const w = 5, d = 7, h = 3, rh = 1.7;
+  shell(S, { w, d, h, rh, eave: 0.4, gableOv: 0.3, wall, roof: F50.tile, roofB: shade(F50.tile, 0.92), bands: 0, found: C.stone, foundD: 1.2 }); // red clay tile
+  const trim = F50.white, frame = F50.frameGreen; // white corner boards, green window frames
+  for (const [x, z] of [[w / 2, d / 2], [w / 2, -d / 2], [-w / 2, d / 2], [-w / 2, -d / 2]]) S.box(x, h / 2, z, 0.14, h, 0.14, trim);
+  S.box(0.6, h + rh * 0.6, -d * 0.25, 0.5, rh + 0.8, 0.5, F50.brick);
+  S.at({ p: [0, 0, d / 2] }, () => {
+    S.quad([-0.5, 0, 0.03], [0.5, 0, 0.03], [0.5, 2.1, 0.03], [-0.5, 2.1, 0.03], F50.white);
+    S.quad([-0.42, 0.05, 0.04], [0.42, 0.05, 0.04], [0.42, 2.05, 0.04], [-0.42, 2.05, 0.04], shade(F50.faluDark, 0.9));
+    windowAt(S, G, -1.6, 1.4, 0.8, 1.1, { lit, frame }); windowAt(S, G, 1.6, 1.4, 0.8, 1.1, { lit: lit && seed % 2 === 0, frame });
+    windowAt(S, G, 0, h + 0.6, 0.7, 0.7, { lit, frame, mull: false });
+  });
+  for (const side of [1, -1]) S.at({ p: [side * w / 2, 0, 0], ry: (side * Math.PI) / 2 }, () => { windowAt(S, G, -1.8, 1.4, 0.8, 1.1, { lit: false, frame }); windowAt(S, G, 1.8, 1.4, 0.8, 1.1, { lit: lit && side > 0, frame }); });
+}
+// The sea-shed (sjöbod) of the 1950 village: falu red, white-trimmed double doors in the sea-facing gable, a short timber landing.
+export const SJOBOD_COLOURS = { red: F50.falu, ochre: F50.ochre, wood: 0x9b958a }; // red (or ochre or bare wood), gable to the water, in rows (S40/S41)
+export function addSjobod1950(S, G, { colour = 'red', lit = false } = {}) {
+  shell(S, { w: 4.4, d: 7, h: 2.6, rh: 1.4, eave: 0.3, gableOv: 0.35, wall: SJOBOD_COLOURS[colour] ?? F50.falu, roof: F50.tarRoof, roofB: shade(F50.tarRoof, 0.92), bands: 0, found: C.stone, foundD: 1.2 });
+  S.at({ p: [0, 0, 3.5] }, () => {
+    S.quad([-1.2, 0, 0.03], [1.2, 0, 0.03], [1.2, 2.1, 0.03], [-1.2, 2.1, 0.03], F50.white);
+    S.quad([-1.1, 0.05, 0.04], [-0.02, 0.05, 0.04], [-0.02, 2.05, 0.04], [-1.1, 2.05, 0.04], shade(F50.faluDark, 0.85));
+    S.quad([0.02, 0.05, 0.04], [1.1, 0.05, 0.04], [1.1, 2.05, 0.04], [0.02, 2.05, 0.04], shade(F50.faluDark, 0.85));
+    windowAt(S, G, 0, 2.5, 0.5, 0.35, { lit, frame: F50.white, mull: false });
+  });
+  S.box(0, 0.35, 5.6, 2.2, 0.14, 3.6, C.wood); for (const x of [-0.9, 0.9]) for (const z of [4.1, 5.6, 7.1]) S.tube([x, -0.7, z], [x, 0.3, z], 0.08, 0.08, 4, C.woodDark);
+}
+// The keeper's house at a manned lighthouse: a one-and-a-half-storey painted timber house with a store beside it, a flagstaff, a landing.
+// Colours per light (docs/WORLD-1950.md: Islandsberg white seaward end / red behind; Pater Noster red; most others white); window light at dusk.
+export function addKeeperHouse(S, G, { wall = 'red', lit = true } = {}) {
+  const col = { white: F50.white, red: F50.falu }[wall] ?? F50.falu;
+  S.at({ ry: 0 }, () => {
+    shell(S, { w: 5.6, d: 8.4, h: 2.9, rh: 1.8, eave: 0.4, gableOv: 0.3, wall: col, roof: F50.slate, roofB: shade(F50.slate, 0.92), bands: 0, found: C.stone, foundD: 1.4 }); // slate roofs from about 1900 (S02)
+    S.box(0.6, 3.9, -2.2, 0.5, 2.0, 0.5, F50.brick);
+    S.box(-6.4, 1.6, -3.0, 2.4, 3.2, 2.4, F50.brick); S.box(-6.4, 3.3, -3.0, 2.7, 0.2, 2.7, F50.tarRoof); // the brick siren (fog signal) house, Måseskär 1885
+    S.at({ p: [0, 0, 4.2] }, () => { windowAt(S, G, -1.3, 1.4, 0.9, 1.2, { lit, frame: F50.white }); windowAt(S, G, 1.3, 1.4, 0.9, 1.2, { lit, frame: F50.white }); windowAt(S, G, 0, 3.3, 0.7, 0.7, { lit, frame: F50.white, mull: false }); });
+    for (const side of [1, -1]) S.at({ p: [side * 2.8, 0, 0], ry: (side * Math.PI) / 2 }, () => { windowAt(S, G, -2, 1.4, 0.9, 1.2, { lit, frame: F50.white }); windowAt(S, G, 2, 1.4, 0.9, 1.2, { lit: lit && side > 0, frame: F50.white }); });
+    S.at({ p: [4.6, 0, -1.5] }, () => shell(S, { w: 3, d: 4, h: 2.2, rh: 1.1, eave: 0.3, gableOv: 0.2, wall: F50.falu, roof: F50.slate, roofB: shade(F50.slate, 0.92), bands: 0, found: C.stone, foundD: 1.0 })); // the store
+    S.tube([-4.2, 0, 3.5], [-4.2, 7.2, 3.5], 0.07, 0.05, 5, F50.white); // flagstaff
+    S.tri([-4.2, 7.2, 3.5], [-4.2, 6.5, 3.5], [-5.3, 6.85, 3.5], 0x3b78b8); S.tri([-4.2, 6.85, 3.5], [-4.2, 6.5, 3.5], [-5.3, 6.7, 3.5], 0xe8c04f);
+  });
+}
+// A fish-canning factory (konservfabrik) at the waterfront: a long two-storey hall, a boiler house with a tall brick chimney, a loading pier
+// with a crane, barrels. Looks: see docs/WORLD-1950.md; designer's choice where not documented.
+export function addCanningFactory(S, G, { wall = F50.brickPale, lit = true } = {}) {
+  shell(S, { w: 9, d: 16, h: 5.2, rh: 2.4, eave: 0.5, gableOv: 0.4, wall, roof: F50.tarRoof, roofB: shade(F50.tarRoof, 0.92), bands: 0, found: C.stone, foundD: 1.6 });
+  S.at({ p: [0, 0, 8] }, () => { for (const x of [-2.6, 0, 2.6]) { windowAt(S, G, x, 1.8, 1.1, 1.4, { lit, frame: F50.white }); windowAt(S, G, x, 4.0, 1.1, 1.1, { lit, frame: F50.white, mull: false }); } S.quad([-1.1, 0, 0.05], [1.1, 0, 0.05], [1.1, 2.6, 0.05], [-1.1, 2.6, 0.05], shade(F50.faluDark, 0.9)); });
+  for (const side of [1, -1]) S.at({ p: [side * 4.5, 0, 0], ry: (side * Math.PI) / 2 }, () => { for (let i = 0; i < 5; i++) { const x = -5.6 + i * 2.8; windowAt(S, G, x, 1.8, 1.0, 1.3, { lit: lit && i !== 3, frame: F50.white, mull: false }); windowAt(S, G, x, 4.0, 1.0, 1.0, { lit: lit && i !== 1, frame: F50.white, mull: false }); } });
+  S.at({ p: [-7.2, 0, -3.5] }, () => shell(S, { w: 4.6, d: 5.6, h: 4.4, rh: 1.2, eave: 0.3, gableOv: 0.2, wall: F50.brick, roof: F50.tarRoof, roofB: shade(F50.tarRoof, 0.92), bands: 0, found: C.stone, foundD: 1.4 }));
+  S.tube([-7.2, 0, -3.5], [-7.2, 17, -3.5], 0.7, 0.45, 8, F50.brick); S.tube([-7.2, 16.2, -3.5], [-7.2, 16.5, -3.5], 0.5, 0.5, 8, F50.black); // the chimney
+  S.box(0, 0.32, 13.5, 4, 0.14, 11, C.wood); for (const x of [-1.8, 1.8]) for (const z of [9.5, 12, 14.5, 17]) S.tube([x, -0.8, z], [x, 0.3, z], 0.1, 0.1, 4, C.woodDark); // the pier
+  S.tube([1.4, 0.4, 16.5], [1.4, 4.0, 16.5], 0.1, 0.08, 5, F50.black); S.tube([1.4, 4.0, 16.5], [1.4, 3.2, 14.6], 0.07, 0.06, 4, F50.black); // a crane
+  for (const [x, z] of [[-1.2, 11], [-0.4, 11.9], [-1.2, 12.8]]) S.drum(x, 0.4, z, 0.3, 0.7, 8, C.chest, shade(C.chest, 1.12));
+}
+
+// Period sea marks (docs/WORLD-1950.md, "Sea marks"): a buoy or a beacon in the style the 1950s Swedish charts used. A variant is
+// "<colour>-<shape>": colour red | green | black | white | yellow, shape cone | can | spar. Which colour and shape marks a port or a
+// starboard side comes from data/world-1950.json (the world builder reads it), not from this file; this only draws what it is asked for.
+export const BUOY_COLOURS = { red: 0xb54a3c, green: 0x4f8a63, black: 0x2f3034, white: 0xeee8d6, yellow: 0xe0b845, redblack: 0x2f3034 }; // redblack: the red-and-black banded 'kryssprick' (a danger passable on both sides)
+export const BUOY_SHAPES = ['cone', 'can', 'spar'];
+export const BUOYS_1950 = Object.fromEntries([...Object.keys(BUOY_COLOURS).flatMap((c) => BUOY_SHAPES.map((sh) => [`${c}-${sh}`, { colour: c, shape: sh }]))]);
+export function addBuoy1950(S, G, { variant = 'red-cone', topmark = null } = {}) {
+  const [colour, shape] = String(variant).split('-');
+  const body = BUOY_COLOURS[colour] ?? BUOY_COLOURS.red;
+  if (colour === 'redblack') { // horizontal bands, an X (two crossed bars) on top
+    for (let i = 0; i < 4; i++) S.tube([0, -0.2 + i * 1.15, 0], [0, -0.2 + (i + 1) * 1.15, 0], 0.1, 0.09, 5, i % 2 ? BUOY_COLOURS.red : BUOY_COLOURS.black);
+    S.box(0, 4.55, 0, 1.0, 0.1, 0.1, BUOY_COLOURS.black); S.box(0, 4.55, 0, 0.1, 0.1, 1.0, BUOY_COLOURS.black); S.box(0, 4.7, 0, 0.09, 0.4, 0.09, BUOY_COLOURS.black);
+    return;
+  }
+  if (shape === 'spar') { // a pole (an unlit beacon on a rock, or a pole mark): a stout pole and a broom / cone on top, as the 1923 plate shows
+    S.tube([0, -0.2, 0], [0, 4.4, 0], 0.1, 0.06, 5, body);
+    if (topmark === 'cone' || topmark == null) S.pyramid(0, 4.2, 0, 0.5, 0.9, 4, body); else S.drum(0, 4.2, 0, 0.35, 0.5, 6, body);
+    return;
+  }
+  S.drum(0, 0, 0, 0.8, 0.5, 10, body); // the float, a drum at the waterline
+  S.tube([0, 0.5, 0], [0, 2.1, 0], 0.4, 0.14, 8, body); // its body narrowing to the mast
+  S.tube([0, 2.0, 0], [0, 2.9, 0], 0.05, 0.05, 4, F50.black);
+  if (shape === 'cone') S.pyramid(0, 2.6, 0, 0.45, 0.6, 8, body); else S.drum(0, 2.6, 0, 0.3, 0.35, 8, body); // the topmark: a cone or a can
+}
+
+// ======================================================================================================
 //  REGISTRY, createAsset, lab URL
 // ======================================================================================================
 // frame = a radius (m) that fits the asset on screen; maxTris = its budget (tests); variants / toggles feed the lab panel.
@@ -664,11 +850,20 @@ export const ASSETS = {
   rockmark: { era: '1700', label: 'Painted rock', variants: [], frame: 2.4, maxTris: 800, fill: (S, G) => addRockMark(S, G, {}) },
   eka: { era: '1700', label: 'Eka', variants: EKA_VARIANTS, frame: 3.3, maxTris: 800, fill: (S, G, o) => addEka(S, G, { variant: o.variant }) },
   cargoboat: { era: '1700', label: 'Cargo boat', variants: [], toggles: ['sails'], frame: 8, maxTris: 3000, fill: (S, G, o) => addCargoBoat(S, G, { sailUp: o.sails }) },
+  snipa1950: { era: '1950', label: 'Snipa + engine', variants: Object.keys(SNIPA_COLOURS), frame: 4.8, maxTris: 800, fill: (S, G, o) => addSnipa1950(S, G, { variant: o.variant }) },
+  fishboat1950: { era: '1950', label: 'Fishing boat', variants: Object.keys(FISHBOAT_COLOURS), frame: 8, maxTris: 3000, fill: (S, G, o) => addFishingBoat1950(S, G, { variant: o.variant }) },
+  sailboat1950: { era: '1950', label: 'Wooden sailboat', variants: [], toggles: ['sails'], frame: 6, maxTris: 800, fill: (S, G, o) => addSailboat1950(S, G, { sailsUp: o.sails }) },
+  ferry1950: { era: '1950', label: 'Ferry (1950s)', variants: [], frame: 12, maxTris: 3000, fill: (S, G) => addFerry1950(S, G, {}) },
+  house1950: { era: '1950', label: 'Village house', variants: Object.keys(HOUSE_1950_COLOURS), frame: 6, maxTris: 800, fill: (S, G, o) => addHouse1950(S, G, { colour: o.variant }) },
+  sjobod1950: { era: '1950', label: 'Sea-shed', variants: Object.keys(SJOBOD_COLOURS), frame: 6, maxTris: 800, fill: (S, G, o) => addSjobod1950(S, G, { colour: o.variant }) },
+  keeper: { era: '1950', label: 'Keeper\'s house', variants: ['red', 'white'], frame: 7, maxTris: 800, fill: (S, G, o) => addKeeperHouse(S, G, { wall: o.variant }) },
+  canning: { era: '1950', label: 'Canning factory', variants: [], frame: 12, maxTris: 3000, fill: (S, G) => addCanningFactory(S, G, {}) },
+  buoy1950: { era: '1950', label: 'Sea marks', variants: Object.keys(BUOYS_1950), frame: 3, maxTris: 800, fill: (S, G, o) => addBuoy1950(S, G, { variant: o.variant }) },
   harbourToday: { era: 'scene', label: 'Today harbour', variants: [], frame: 40, maxTris: 12000, fill: (S, G) => addHarbourToday(S, G) },
   harbour1700: { era: 'scene', label: '1700 harbour', variants: [], frame: 40, maxTris: 12000, fill: (S, G) => addHarbour1700(S, G) },
 };
 export const ASSET_IDS = Object.keys(ASSETS);
-export const LAB_ORDER = [...ASSET_IDS.filter((id) => ASSETS[id].era === 'today'), ...ASSET_IDS.filter((id) => ASSETS[id].era === '1700'), 'compare'];
+export const LAB_ORDER = [...ASSET_IDS.filter((id) => ASSETS[id].era === 'today'), ...ASSET_IDS.filter((id) => ASSETS[id].era === '1950'), ...ASSET_IDS.filter((id) => ASSETS[id].era === '1700'), 'compare'];
 export const defaultVariant = (id) => ASSETS[id]?.variants?.[0] ?? '';
 
 // One asset as a THREE.Group: { group, setNight, describe, id, variant }. `night` lights the windows (emissive only).
@@ -680,7 +875,7 @@ export function createAsset(id, { variant, sails = true, night = false } = {}) {
   const G = newGlass();
   S.peers = [G.on, G.off];
   S.at({ p: def.offset ?? [0, 0, 0] }, () => def.fill(S, G, { variant: v, sails })); // offset: centre the asset on the lab's turntable
-  const g = id === 'harbour1700' || def.era === '1700' ? GLASS.y1700 : GLASS.today;
+  const g = id === 'harbour1700' || def.era === '1700' ? GLASS.y1700 : id === 'harbour1950' || def.era === '1950' ? GLASS.y1950 : GLASS.today;
   const group = new THREE.Group();
   group.name = `era-${id}`;
   group.add(S.build(SOLID_MATERIAL));

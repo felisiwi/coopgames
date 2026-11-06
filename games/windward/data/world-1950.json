@@ -1,0 +1,2067 @@
+{
+ "about": "World around 1950 (Epoch VI 'Summer guests', the game's start era): sourced facts, flags and gaps for settlements, lighthouses, sea marks, boats, village looks, Grundsund canal, water level and names. Twin of data/world-1700.json. Every fact carries source ids from sourceRegistry; names, dates, counts and colours that no source gave are null with a notFound note. Items that are our recommendation are invented:true; estimates and nearby-year data are uncertain:true. Human-readable: docs/WORLD-1950.md.",
+ "generated": "2026-11-06",
+ "year": 1950,
+ "era": {
+  "name": "Summer guests",
+  "from": null,
+  "to": null,
+  "epoch": "VI",
+  "source": "games/windward/data/epochs.json (epoch VI) and GAME-DESIGN.md 'The flow, revised: wake in 1950'; epoch from/to years not re-read here (null = not checked in this mission)"
+ },
+ "region": {
+  "s": 58.085,
+  "w": 11.25,
+  "n": 58.3,
+  "e": 11.5
+ },
+ "flagsKey": {
+  "uncertain": "not directly documented for 1950: estimated, inferred, from a nearby year, from a weak source, or sources disagree",
+  "invented": "our recommendation or design choice, no source says it existed",
+  "confidence": {
+   "documented": "a source read in this mission states it for the place and a year at or near 1950",
+   "derived": "our arithmetic or a direct reading across documented numbers",
+   "inferred": "reasoned from related documented facts (e.g. a rule valid 1923-1965 assumed for 1950)",
+   "invented": "our choice"
+  },
+  "read": "true = page/PDF/image read in full or in the parts quoted; 'search-summary' = only a search-result snippet seen (weak)"
+ },
+ "sourceRegistry": {
+  "S01": {
+   "title": "Lighthouses of Sweden: Central Bohuslän (Lighthouse Directory, ibiblio)",
+   "url": "https://ibiblio.org/lighthouse/swbohuc.htm",
+   "type": "secondary",
+   "read": true,
+   "note": "Directory by Russ Rowlett; present-day descriptions. Used for today's looks and for Islandsberg (1) keeper's house, Stångehuvud, Hättan, Gäven, Gulskåren, Måseskär. Conflicts with fyr.org on Stångehuvud (see S07)."
+  },
+  "S02": {
+   "title": "fyrwiki (Svenska Fyrsällskapet): Måseskär",
+   "url": "https://www.fyr.org/wiki/index.php/M%C3%A5sesk%C3%A4r",
+   "type": "primary",
+   "read": true,
+   "note": "Svenska Fyrsällskapet wiki, quotes Lotsverket records, 'Våra fyrar 1944' and 'Fyrhandboken'. Manned 1865-1997; electrified 1950; keeper staff and dwellings 1944."
+  },
+  "S03": {
+   "title": "fyrwiki: Hållö",
+   "url": "https://www.fyr.org/wiki/index.php/H%C3%A5ll%C3%B6",
+   "type": "primary",
+   "read": true,
+   "note": "Manned 1842-1969; electrified 1947-48; 'Våra fyrar 1944' (3 dwellings, tower colours)."
+  },
+  "S04": {
+   "title": "fyrwiki: Islandsberg",
+   "url": "https://www.fyr.org/wiki/index.php/Islandsberg",
+   "type": "primary",
+   "read": true,
+   "note": "Old wooden keeper's house station 1883-1938; new unmanned concrete AGA tower 1938; old house sold 1948."
+  },
+  "S05": {
+   "title": "fyrwiki: Hättan",
+   "url": "https://www.fyr.org/wiki/index.php/H%C3%A4ttan",
+   "type": "primary",
+   "read": true,
+   "note": "Unmanned leading light, established 1938 (Dalén light, white tower with black band). NB the same page also covers an older pilot station Hättan near Uddevalla (not this one)."
+  },
+  "S06": {
+   "title": "fyrwiki: Gäven",
+   "url": "https://www.fyr.org/wiki/index.php/G%C3%A4ven",
+   "type": "primary",
+   "read": true,
+   "note": "1835 pole mark with pilot lookout; light 1917; rebuilt 1941; unmanned."
+  },
+  "S07": {
+   "title": "fyrwiki: Stångehuvud",
+   "url": "https://www.fyr.org/wiki/index.php/St%C3%A5ngehuvud",
+   "type": "primary",
+   "read": true,
+   "note": "States the light was EXTINGUISHED in 1940 and replaced by Stångholmen. Conflicts with ibiblio (S01) 'inactive since the 1990s'. fyr.org is the more detailed and dated; ibiblio probably reflects the building, not the light."
+  },
+  "S08": {
+   "title": "fyrwiki: Stångholmen",
+   "url": "https://www.fyr.org/wiki/index.php/St%C3%A5ngholmen",
+   "type": "primary",
+   "read": true,
+   "note": "1940 unmanned light, white sheet-metal 'fyrkur', replaced Stångehuvud."
+  },
+  "S09": {
+   "title": "fyrwiki: Fredagsholmen",
+   "url": "https://www.fyr.org/wiki/index.php/Fredagsholmen",
+   "type": "primary",
+   "read": true,
+   "note": "1883 station served from Islandsberg; AGA light 1917; rebuilt 1942 (ibiblio S01 says 1943)."
+  },
+  "S10": {
+   "title": "fyrwiki: Ösö (near Islandsberg)",
+   "url": "https://www.fyr.org/wiki/index.php/%C3%96s%C3%B6",
+   "type": "primary",
+   "read": true,
+   "note": "Old unmanned leading light 1883, AGA 1917, ceased 1938 (marked '(?)')."
+  },
+  "S11": {
+   "title": "fyrwiki: Svensholmen",
+   "url": "https://www.fyr.org/wiki/index.php/Svensholmen",
+   "type": "primary",
+   "read": true,
+   "note": "Unmanned; octagonal iron 'fyrkur' with AGA light from 1915; sectors 1940."
+  },
+  "S12": {
+   "title": "fyrwiki: Oxskär",
+   "url": "https://www.fyr.org/wiki/index.php/Oxsk%C3%A4r",
+   "type": "primary",
+   "read": true,
+   "note": "Unmanned leading light 1929, white 'fyrkur'."
+  },
+  "S13": {
+   "title": "fyrwiki: Grötö",
+   "url": "https://www.fyr.org/wiki/index.php/Gr%C3%B6t%C3%B6",
+   "type": "primary",
+   "read": true,
+   "note": "Unmanned; 1938 AGA light, white 'fyrkur'; sectors changed 1954."
+  },
+  "S14": {
+   "title": "fyrwiki: Hängdyn",
+   "url": "https://www.fyr.org/wiki/index.php/H%C3%A4ngdyn",
+   "type": "primary",
+   "read": true,
+   "note": "Established 1949, white 'fyrkur', AGA light."
+  },
+  "S15": {
+   "title": "fyrwiki: Släggabåden",
+   "url": "https://www.fyr.org/wiki/index.php/Sl%C3%A4ggab%C3%A5den",
+   "type": "primary",
+   "read": true,
+   "note": "Established 1961, so NOT standing in 1950."
+  },
+  "S16": {
+   "title": "sv.wikipedia: Måseskär",
+   "url": "https://sv.wikipedia.org/wiki/M%C3%A5sesk%C3%A4r",
+   "type": "secondary",
+   "read": true,
+   "note": "Cites Riksantikvarieämbetet and Thunman 2000 (Sveriges fyrplatser). Slate roofs c.1900; 1950 electrified; 1955 electric motor lets the light be monitored from the dwelling."
+  },
+  "S17": {
+   "title": "sv.wikipedia: Islandsberg",
+   "url": "https://sv.wikipedia.org/wiki/Islandsberg",
+   "type": "secondary",
+   "read": true,
+   "note": "Original 1883 combined light/dwelling replaced 1938 by an unmanned AGA light; old house now a private summer house."
+  },
+  "S18": {
+   "title": "fyrwiki: Utprickning",
+   "url": "https://www.fyr.org/wiki/index.php/Utprickning",
+   "type": "primary",
+   "read": true,
+   "note": "Three phases in Sweden: 'svensk utprickning' 19th c.-1965, 'nordisk utprickning' 1965-early 1980s, System A early 1980s. Contains the drawings read as S27/S28."
+  },
+  "S19": {
+   "title": "SFS 1965:56 Sjöfartsstyrelsens kungörelse angående svenskt utprickningssystem (lagen.nu)",
+   "url": "https://lagen.nu/1965:56",
+   "type": "primary",
+   "read": true,
+   "note": "In force 1965-07-01, repealed 1996-10-01. The NORDIC system that replaced the older Swedish one: NOT the 1950 system; kept as context only."
+  },
+  "S20": {
+   "title": "SJÖFS 1979:16 (Sjöfartsverket, PDF)",
+   "url": "https://www-n.sjofartsverket.se/globalassets/om-oss/lagrum/sjofs/1970-1989/79-016.pdf",
+   "type": "primary",
+   "read": true,
+   "note": "Issued 11 June 1979, in force 17 March 1980 for waters Svinesund (Norwegian border) to Stenshuvud: transition to 'System A, kombinerat kardinalt och lateralt system; rött om babord', mark by mark as announced in Ufs. Covers the Bohuslän coast. The PDF was read as extracted text (WebFetch saved it; pdftotext)."
+  },
+  "S21": {
+   "title": "SJÖFS 1980:43 (Sjöfartsverket, PDF)",
+   "url": "https://www-n.sjofartsverket.se/globalassets/om-oss/lagrum/sjofs/1970-1989/80-043.pdf",
+   "type": "primary",
+   "read": true,
+   "note": "Same transition rule for Åhus-Gävle, in force 30 March 1981. Shows the rollout was region by region (not Bohuslän)."
+  },
+  "S22": {
+   "title": "sv.wikipedia: Sjömärke",
+   "url": "https://sv.wikipedia.org/wiki/Sj%C3%B6m%C3%A4rke",
+   "type": "secondary",
+   "read": true,
+   "note": "Types of sea mark; chart abbreviations Bk, Kl, Stg; says System A exists since 1980-1982 (the page itself flags the claim as not in its cited source)."
+  },
+  "S23": {
+   "title": "sv.wikipedia: Prick",
+   "url": "https://sv.wikipedia.org/wiki/Prick",
+   "type": "secondary",
+   "read": true,
+   "note": "Modern definition; confirms earlier national standards existed."
+  },
+  "S24": {
+   "title": "fyrwiki: Kummel",
+   "url": "https://www.fyr.org/wiki/index.php/Kummel",
+   "type": "primary",
+   "read": true,
+   "note": "Quotes Underrättelser 1852: cairns of stone, truncated cone, sometimes with a pole and top sign; small ones are 'rös'. Photo of a white-painted stone kummel; Islandsberg kummel pictured."
+  },
+  "S25": {
+   "title": "fyrwiki: Stångmärke",
+   "url": "https://www.fyr.org/wiki/index.php/St%C3%A5ngm%C3%A4rke",
+   "type": "primary",
+   "read": true,
+   "note": "Quotes Underrättelse 1842: tall pole with stays, often a barrel/board on top, partly clad with planks 'på Gäfven'."
+  },
+  "S26": {
+   "title": "fyrwiki: Prick",
+   "url": "https://www.fyr.org/wiki/index.php/Prick",
+   "type": "primary",
+   "read": true,
+   "note": "A prick is a pole with a float; wood (now mostly plastic); 'utsjöprickar' formerly 'remmare'; leading lines marked with white painted patches."
+  },
+  "S27": {
+   "title": "Plate 'Bil. 4 Utprickning' from Svensk Lots 1923 (image on fyrwiki: Utprickning1923TBerglund.jpg)",
+   "url": "https://wiki.fyr.org/images/4/42/Utprickning1923TBerglund.jpg",
+   "type": "primary",
+   "read": true,
+   "note": "Colour plate read as an image on 2026-11-06. Valid for 1923; fyr.org says the Swedish system lasted to 1965, so it is ASSUMED unchanged in 1950 (uncertain)."
+  },
+  "S28": {
+   "title": "Redrawn chart 'Utprickning svensk' (fyrwiki image Utprickning_svensk.jpg)",
+   "url": "https://wiki.fyr.org/images/5/57/Utprickning_svensk.jpg",
+   "type": "secondary",
+   "read": true,
+   "note": "Schematic of the same system (spar marks only), read as an image."
+  },
+  "S29": {
+   "title": "SMHI: Havsvattenstånd 2026, table mwreg_MW.pdf",
+   "url": "https://www.smhi.se/hfa_coord/BOOS/dbkust/mwreg_MW.pdf",
+   "type": "primary",
+   "read": true,
+   "note": "Column 'Apparent landhöjning' cm/yr, footnote 'Relativ landhöjning för mätperioden'. Re-read in this mission: Marstrand 0.16, Göteborg-Krossholmen 0.16, Smögen 0.18, Kungsvik 0.20."
+  },
+  "S30": {
+   "title": "sv.wikipedia: Lysekil",
+   "url": "https://sv.wikipedia.org/wiki/Lysekil",
+   "type": "secondary",
+   "read": true,
+   "note": "Town history: stad 1903, mechanical works (Skandiamotorn), PLM from 1920s, ball-bearing export WWII, Curman villas. Table has 1960+ counts only."
+  },
+  "S31": {
+   "title": "sv.wikipedia: Lysekils stad",
+   "url": "https://sv.wikipedia.org/wiki/Lysekils_stad",
+   "type": "secondary",
+   "read": true,
+   "note": "Lysekil tätort 5,971 inhabitants on 1 Nov 1960 (SCB Folkräkningen 1960). No 1950 figure printed."
+  },
+  "S32": {
+   "title": "sv.wikipedia: Fiskebäckskil",
+   "url": "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskil",
+   "type": "secondary",
+   "read": true,
+   "note": "Two population series for 1950: 370 (chapel parish/kommun excl. Östersidan) and 535 (incl. Östersidan, SCB). Municipalsamhälle dissolved 31 Dec 1951. Bibliography lists 'AB Lyckes söners konservfabrik på Östersidan' (Vikarvet 1996/97) - title only."
+  },
+  "S33": {
+   "title": "sv.wikipedia: Grundsund",
+   "url": "https://sv.wikipedia.org/wiki/Grundsund",
+   "type": "secondary",
+   "read": true,
+   "note": "1950: 983 inhabitants (SCB Folk- och bostadsräkningarna). Fishing village; never a bath resort; 20th-century raincoat and canning industry; a Bovik cannery for mackerel in tomato sauce (undated)."
+  },
+  "S34": {
+   "title": "sv.wikipedia: Gullholmen",
+   "url": "https://sv.wikipedia.org/wiki/Gullholmen",
+   "type": "secondary",
+   "read": true,
+   "note": "Parish counts; 1900: 651 in the municipalsamhälle."
+  },
+  "S35": {
+   "title": "sv.wikipedia: Käringön",
+   "url": "https://sv.wikipedia.org/wiki/K%C3%A4ring%C3%B6n",
+   "type": "secondary",
+   "read": true,
+   "note": "Counts 1900 568, 1909 614, 1925 548, 1944 336. Sailors' visit place today."
+  },
+  "S36": {
+   "title": "sv.wikipedia: Härmanö",
+   "url": "https://sv.wikipedia.org/wiki/H%C3%A4rman%C3%B6",
+   "type": "secondary",
+   "read": true,
+   "note": "Feldspar quarried at Höpallen and Stenvik 'under 1900-talets första hälft'; reserve 1967."
+  },
+  "S37": {
+   "title": "sv.wikipedia: Hälleviksstrand",
+   "url": "https://sv.wikipedia.org/wiki/H%C3%A4lleviksstrand",
+   "type": "secondary",
+   "read": true,
+   "note": "Counts 1900-1950 (1950: 277), village history, shipyard from early 1900s, church 1904. (Earlier WORLD-1700 work found this page 404; it loads now.)"
+  },
+  "S38": {
+   "title": "games/windward/data/settlements-history.json (project file)",
+   "url": "games/windward/data/settlements-history.json",
+   "type": "project",
+   "read": true,
+   "note": "Project-curated counts, each cited there to sv.wikipedia / SCB / Tabellverket. Used as a cross-check; the Fiskebäckskil/Grundsund/Gullholmen/Hälleviksstrand 1950 figures were re-verified against sv.wikipedia where noted."
+  },
+  "S39": {
+   "title": "Orust kommun: Kulturmiljöer på Orust, Del 1 Historik (PDF)",
+   "url": "https://www.orust.se/download/18.1f85c5af18509aabb4a7d9/1670938880017/Kulturmilj%C3%B6er%20p%C3%A5%20Orust%20Del%201%20-%20Historik.pdf",
+   "type": "primary",
+   "read": true,
+   "note": "Municipal heritage survey (49 pp.). Used for canneries, steamer era, summer guests, boatyards. Orust = Gullholmen, Härmanö, Käringön, Hälleviksstrand."
+  },
+  "S40": {
+   "title": "Orust kommun: Kulturmiljöer på Orust, Del 2 Beskrivning och rekommendationer (PDF)",
+   "url": "https://www.orust.se/download/18.1f85c5af18509aabb4a7da/1670938880079/Kulturmilj%C3%B6er%20p%C3%A5%20Orust%20Del%202%20-%20Beskrivning%20och%20rekommendationer.pdf",
+   "type": "primary",
+   "read": true,
+   "note": "Municipal heritage survey (208 pp.). Colours/roofs are TODAY'S PRESERVATION RECOMMENDATIONS that describe traditional practice; not a statement about 1950."
+  },
+  "S41": {
+   "title": "Bohusläns museum Kunskapsbanken: Gullholmen",
+   "url": "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/gullholmen/",
+   "type": "primary",
+   "read": true,
+   "note": "Read via WebFetch (summary of page returned by the fetch tool)."
+  },
+  "S42": {
+   "title": "Bohusläns museum Kunskapsbanken: Ångbåten kommer",
+   "url": "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/angbaten-kommer/",
+   "type": "primary",
+   "read": true,
+   "note": "Read via WebFetch. Steamer era ended in the 1950s; steamers black and yellow, mostly white only in the 1920s-30s."
+  },
+  "S43": {
+   "title": "Västsverige.com: Steamboat Bohuslän",
+   "url": "https://www.vastsverige.com/en/visitockero/produkter/steamboat-goteborg/",
+   "type": "tourism",
+   "read": true,
+   "note": "S/S Bohuslän 1914, 43.13 x 7.42 m, 280 passengers, 12 kn; Göteborg-Marstrand-Lysekil-Smögen-Gravarne for about 40 years (read via WebFetch)."
+  },
+  "S44": {
+   "title": "DigitaltMuseum / Bohusläns museum: 'Båten på bilden är Ran som gick i trafik mellan Fiskebäckskil och Lysekil. Byggd 1876 vid Hudiksvalls mekaniska verkstad som Stocka' (UMFA55582:0113)",
+   "url": "https://digitaltmuseum.se/021017359605/baten-pa-bilden-ar-ran-som-gick-i-trafik-mellan-fiskebackskil-och-lysekil",
+   "type": "primary",
+   "read": true,
+   "note": "Photographer 'förmodad' Carl Alfred Träff (1880-1947). Photo date not given. Owner, years, size, colours not stated."
+  },
+  "S45": {
+   "title": "DigitaltMuseum / Bohusläns museum: 'Passagerarfärjan RAN i Fiskebäckskil' (UMFA53263:4120)",
+   "url": "https://digitaltmuseum.se/011014334287/passagerarfarjan-ran-i-fiskebackskil",
+   "type": "primary",
+   "read": true,
+   "note": "Postcard, undated; subject terms include passagerarbåt; route Fiskebäckskil-Lysekil."
+  },
+  "S46": {
+   "title": "DigitaltMuseum / Bohusläns museum: 'Kajen vid Rosvikstorg 1959'",
+   "url": "https://digitaltmuseum.se/011014331948/kajen-vid-rosvikstorg-1959",
+   "type": "primary",
+   "read": true,
+   "note": "Postcard 9 Oct 1959, Lysekil södra hamnen: passenger boat GULLMAREN from Oxevik at the quay, an unnamed bunker boat registered in Lysekil outside it."
+  },
+  "S47": {
+   "title": "glicko.me: 'Passagerarbåten M/S Ran har fått en ny hemmahamn' (local blog)",
+   "url": "https://glicko.me/2020/03/29/passagerarbaten-m-s-ran-har-fatt-en-ny-hemmahamn/",
+   "type": "tourism",
+   "read": true,
+   "note": "A DIFFERENT, later M/S Ran: built 1945 Norrköping as navy tug Beckholmen, RAN of HB Skärgårdstrafik Lysekil 1963-1975, then Lysekils kommun. Not a 1950 ferry. Blog: weak."
+  },
+  "S48": {
+   "title": "DigitaltMuseum / Bohusläns museum: fishing vessel LL 158 Sandö (record 011025429787)",
+   "url": "https://digitaltmuseum.se/011025429787/bat",
+   "type": "primary",
+   "read": true,
+   "note": "Built 1948, V & T Löfbergs, Rönnäng; 24.6 x 6.6 m; carvel oak; June Munktell 3-cyl 225 hp, B&W Alpha 330 hp 1955; white linseed-oil paint above waterline, red copper bottom, red stripe, black registration; home port Grundsund; long-line fishing from 1949. Read via WebFetch."
+  },
+  "S49": {
+   "title": "Tidningen Västsverige: 'Tre legendariska fiskebåtar till upphuggning'",
+   "url": "https://www.tidningenvastsverige.se/artikel/tre-legendariska-fiskebatar-till-upphuggning/",
+   "type": "secondary",
+   "read": true,
+   "note": "Wooden carvel fishing boats with crude-oil engines; about 1,300 imported/built in the 1900s; round bulky hull; steel fishing boats from 1959 (read via WebFetch; newspaper)."
+  },
+  "S50": {
+   "title": "sv.wikipedia: Kosterbåt",
+   "url": "https://sv.wikipedia.org/wiki/Kosterb%C3%A5t",
+   "type": "secondary",
+   "read": true,
+   "note": "Clinker, gaff-rigged decked drift-net boat of 10-12 m; sailing class rules 1934; K6 1944; serial GRP production from 1967 (Allegro 27)."
+  },
+  "S51": {
+   "title": "sv.wikipedia: Folkbåt",
+   "url": "https://sv.wikipedia.org/wiki/Folkb%C3%A5t",
+   "type": "secondary",
+   "read": true,
+   "note": "7.64 m, clinker wood, long keel, first launched 23 April 1942, about 400 boats by 1952; GRP only from 1976."
+  },
+  "S52": {
+   "title": "sv.wikipedia: Tändkulemotor",
+   "url": "https://sv.wikipedia.org/wiki/R%C3%A5oljemotor",
+   "type": "secondary",
+   "read": true,
+   "note": "Hot-bulb (tändkule-/råoljemotor): the 'dunk-dunk' sound of old fishing boats; Bohuslän's larger boats often had two-cylinder engines; two-stroke, reversible by stopping and restarting."
+  },
+  "S53": {
+   "title": "sv.wikipedia: Lars Laurin",
+   "url": "https://sv.wikipedia.org/wiki/Lars_Laurin",
+   "type": "secondary",
+   "read": true,
+   "note": "Born Grundsund 1869; Lysekil boat-engine firm (Skandiaverken from 1920); hot-bulb engines made there until 1966."
+  },
+  "S54": {
+   "title": "Skaftö.com: Fakta (Fiskebäckskil, Grundsund, Östersidan)",
+   "url": "https://www.skafto.com/section.php?c=8",
+   "type": "tourism",
+   "read": true,
+   "note": "Local guide: Grundsund canal and pier built 1914-1918; long pier with boathouses along the canal; Östersidan had guano factories, salteries and canneries in the 1800s; Bovik's guano factory ruins on Klubban."
+  },
+  "S55": {
+   "title": "Västsverige.com: Canal festival 2016 / Kanalfesten Grundsund 2018",
+   "url": "https://www.vastsverige.com/en/skafto---eng/skafto-articles/the-canal-festival-2016/",
+   "type": "tourism",
+   "read": true,
+   "note": "1911 parliament funds; 1913 state aid SEK 650,000; work January 1914 to 1918; 'third alternative' = canal through the village; no formal opening until 2018. Companion: https://www.vastsverige.com/skafto/artiklar/kanalfesten-grundsund-2018"
+  },
+  "S56": {
+   "title": "Granitkusten: Lysekils berättelse",
+   "url": "https://www.granitkusten.com/berattarbankar/lysekils-berattelse/",
+   "type": "secondary",
+   "read": true,
+   "note": "Stone quarries in Lysekil municipality (Spjösvik by N. Grundsund, Rixö, Lahälla knottfabrik 1927-28; stone-cutting ended in the 1960s-70s at Lahälla); photo caption 'Konservfabriken i Sjöbol' (undated)."
+  },
+  "S57": {
+   "title": "Rio kulturkooperativ: rapport kulturreservat för stenindustri i Bohuslän (PDF, lysekil.se)",
+   "url": "https://lysekil.se/download/18.3be134881547df41a4bbc7e8/1463255247950/Rio%20kulturkooperativ%20-%20rapport%20kulturreservat%20f%C3%B6r%20stenindustri%20i%20Bohusl%C3%A4n.pdf",
+   "type": "primary",
+   "read": true,
+   "note": "WWII 'en slutgiltig nedgång för stenindustrin'; some production remains."
+  },
+  "S58": {
+   "title": "sv.wikipedia: Carl Wilhelmson (färja)",
+   "url": "https://sv.wikipedia.org/wiki/Carl_Wilhelmson_(f%C3%A4rja)",
+   "type": "secondary",
+   "read": true,
+   "note": "The MODERN ferry (built 1990, 27.37 m): NOT the 1950 ferry. Listed to prevent confusion."
+  },
+  "S59": {
+   "title": "Search-result summaries (no page opened): Gullmarsfärjan II / M/S Emelie / Allan and Åke Harrysson; old Ran bought to Skaftö 1896 by K. J. Ödman and in service into the 1960s",
+   "url": "search-summary (WebSearch, 2026-11-06)",
+   "type": "tourism",
+   "read": "search-summary",
+   "note": "WEAK. Seen only as search-engine summaries: Gullmarsfärjan II (ex Danish M/S Emelie) sold 1963, in service Lysekil-Skaftö 11 May 1965 (to 1991); the old Ran 'köptes till Skaftö 1896', service 'till någon gång på 1960-talet'. No page was opened; do not build on these."
+  },
+  "S60": {
+   "title": "Search-result summary: Bohusläns museum 'Bygga om, bygga till och underhålla' (traditional Bohuslän paint: linseed oil for dwellings, slamfärg for outbuildings)",
+   "url": "https://www.bohuslansmuseum.se/arkeologi-och-kulturmiljo/bygga-i-bohuslan/avsnitt-1-bygga-om-till-och-underhalla/",
+   "type": "primary",
+   "read": "search-summary",
+   "note": "WEAK. The page itself would not load (blank); only the search summary was seen: dwellings typically light oil paint, outbuildings slamfärg (red), simple cottages often red."
+  },
+  "S61": {
+   "title": "Search-result summary: Njord blog 'Sveriges största fiskelägen' (1914-15 boat counts)",
+   "url": "https://fiske.zaramis.se/2019/12/15/sveriges-storsta-fiskelagen-genom-tiderna-forsta-varldskriget/",
+   "type": "tourism",
+   "read": "search-summary",
+   "note": "WEAK and the wrong year (1914-15: Grundsund 146 / 210, Gullholmen 100 / 170, two unlabelled tables). Not used as a 1950 figure."
+  }
+ },
+ "waterLevel": {
+  "offsetM": 0.13,
+  "rangeM": [
+   0.12,
+   0.15
+  ],
+  "meaning": "In 1950 the sea stood about this much HIGHER against the land than it does today (add to today's water level when drawing 1950; equivalently lower today's land and rocks by this much). Our arithmetic, not a published figure.",
+  "derivation": {
+   "publishedRates": [
+    {
+     "station": "Marstrand",
+     "cmPerYear": 0.16,
+     "source": "S29"
+    },
+    {
+     "station": "Göteborg-Krossholmen/Torshamnen",
+     "cmPerYear": 0.16,
+     "source": "S29"
+    },
+    {
+     "station": "Smögen",
+     "cmPerYear": 0.18,
+     "source": "S29"
+    },
+    {
+     "station": "Kungsvik",
+     "cmPerYear": 0.2,
+     "source": "S29"
+    }
+   ],
+   "lysekilGauge": "none: SMHI lists no Lysekil station; Lysekil lies between Marstrand (0.16) and Smögen (0.18), so 0.16-0.20 cm/yr as in WORLD-1700.",
+   "years": 75,
+   "arithmeticCm": {
+    "low": "0.16 x 75 = 12.0",
+    "high": "0.20 x 75 = 15.0",
+    "mid": "0.18 x 75 = 13.5"
+   },
+   "caveats": [
+    "The offset is OUR arithmetic (rate x 75 years, 1950 to 2025), not a published figure.",
+    "SMHI calls the column 'Relativ landhöjning för mätperioden' (the gauge period is not printed in the table); the gauge era overlaps 1950-2025 well, so assuming a constant rate over these 75 years is far less of a stretch than over the 325 years used for 1700, which is why the range is narrow (12-15 cm). An unknown acceleration in sea-level rise would make it somewhat larger; not quantified.",
+    "Mean sea level, not chart datum."
+   ]
+  },
+  "effectOnAwashRocks": "About 13 cm: small. A rock that is 'awash' today (at the mean water surface) would sit roughly 13 cm below the surface in 1950, still hidden at normal water level and still breaking in swell. Negligible for drawing, but not zero if rocks are drawn at exact water height. No rocks are listed here by design.",
+  "uncertain": true,
+  "confidence": "derived",
+  "sources": [
+   "S29"
+  ]
+ },
+ "settlements": {
+  "list": [
+   {
+    "id": "lysekil",
+    "name": "Lysekil",
+    "lat": 58.27717,
+    "lon": 11.4431,
+    "existsAround1950": "yes",
+    "sizeClass": "small-town",
+    "sizeEstimated": true,
+    "sizeNote": "Stad since 1 April 1903 (S31). No 1950 count was found: the nearest documented figure is 5,969-5,971 for the tätort in 1960. The 1950 value is therefore NOT stated; 1960 is ten years later.",
+    "counts": [
+     {
+      "year": 1960,
+      "value": 5969,
+      "unit": "tätort (SCB), as copied in settlements-history.json",
+      "source": "S38"
+     },
+     {
+      "year": 1960,
+      "value": 5971,
+      "unit": "tätort, 1 Nov 1960 (SCB Folkräkningen 1960 via sv.wikipedia)",
+      "source": "S31"
+     }
+    ],
+    "livelihood": [
+     "fishing and fishing-boat ownership (town of fishers/skippers: 'skepparsamhället som blev industristad', Hansson 1983 title)",
+     "engineering: Lysekils Mekaniska Verkstad (founded 1899) built the Skandia hot-bulb boat engines; PLM from the 1920s (S30, S53)",
+     "stone industry (stenhuggeri, quarries at Rixö, Hjälmedal etc.): the Second World War brought 'en slutgiltig nedgång', some production remained (S57, S56)",
+     "fish canning: a cannery at Sjöbol is photographed (undated, S56); in the later 1800s Lysekil was a canning centre (search summary only, weak, not cited as fact)",
+     "bathing resort since 1846 (S38) and 'badort' with Curman's villas (S30)",
+     "passenger ferry link to Skaftö/Fiskebäckskil across Gullmarn (S44, S45)"
+    ],
+    "hasCanningFactory": null,
+    "summerGuests": true,
+    "notes": [
+     "Canning in 1950: a factory at Sjöbol is documented only by an undated photo; whether it ran in 1950 is not found.",
+     "1943-45 secret ball-bearing export to Britain ('Operation Bridford') ran from Lysekil (S30): living memory in 1950.",
+     "Notable institutions in 1950 not researched beyond the town status and church parish (Lysekils församling since 1700, S30)."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S30",
+     "S31",
+     "S38",
+     "S53",
+     "S56",
+     "S57"
+    ]
+   },
+   {
+    "id": "fiskebackskil",
+    "name": "Fiskebäckskil",
+    "lat": 58.24565,
+    "lon": 11.45663,
+    "existsAround1950": "yes",
+    "sizeClass": "small-fishing-village",
+    "sizeEstimated": false,
+    "sizeNote": "Two series for 1950 that differ by what is counted: 370 (kommun/chapel parish, EXCLUDING Östersidan) and 535 (INCLUDING Östersidan, SCB Folk- och bostadsräkningarna). Use 535 for 'Fiskebäckskil + Östersidan as one built-up area' (the sv.wikipedia note says the figures to 1950 are 'i stort sett sammanfallande med tätbebyggelsen').",
+    "counts": [
+     {
+      "year": 1950,
+      "value": 370,
+      "unit": "kommun/chapel parish excl. Östersidan",
+      "source": "S32"
+     },
+     {
+      "year": 1950,
+      "value": 535,
+      "unit": "incl. Östersidan (SCB)",
+      "source": "S32"
+     },
+     {
+      "year": 1940,
+      "value": 571,
+      "unit": "incl. Östersidan (SCB)",
+      "source": "S32"
+     },
+     {
+      "year": 1960,
+      "value": 426,
+      "unit": "tätort (SCB)",
+      "source": "S32"
+     }
+    ],
+    "livelihood": [
+     "fishing (old fishing place) and, above all in the 1800s, a skippers' community with Bohuslän's largest freight fleet (S32)",
+     "bathing resort since 1867 (museum record, museum record: 'Fiskebäckskil etablerades som badort 1867', Sekelskiftets Bohuslän p.119, seen on DigitaltMuseum UMFA53264:0208, not a registry source) and 'under 1900-talet alltmer en renodlad sommarort' (S32)",
+     "locals earned extra by renting rooms to summer guests (S54)",
+     "Östersidan had guano factories, salteries and canneries in the 1800s (S54)",
+     "passenger link to Lysekil (S44, S45)"
+    ],
+    "hasCanningFactory": null,
+    "summerGuests": true,
+    "notes": [
+     "Cannery on Östersidan: the only name found is a bibliography title 'AB Lyckes söners konservfabrik på Östersidan, Fiskebäckskil' (Vikarvet 1996/97) in the sv.wikipedia reference list; no dates, no confirmation that it ran in 1950 (S32).",
+     "Municipalsamhälle dissolved 31 Dec 1951 when the landkommun merged into Skaftö (S32): in 1950 it was still its own small municipality.",
+     "Fiskebäckskil church from 1772 (S54); bath restaurant and pier existed in 1937 (museum photo, not cited as source id)."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S32",
+     "S54",
+     "S38"
+    ]
+   },
+   {
+    "id": "grundsund",
+    "name": "Grundsund",
+    "lat": 58.21336,
+    "lon": 11.41924,
+    "existsAround1950": "yes",
+    "sizeClass": "fishing-village",
+    "sizeEstimated": false,
+    "sizeNote": "983 inhabitants in 1950 (parish/locality as printed on sv.wikipedia, from SCB). The largest of the seven by documented count. Parish counts: 1940 976, 1930 1,141, 1920 1,212 (peak).",
+    "counts": [
+     {
+      "year": 1950,
+      "value": 983,
+      "unit": "parish/locality as printed (SCB)",
+      "source": "S33"
+     },
+     {
+      "year": 1940,
+      "value": 976,
+      "unit": "same",
+      "source": "S33"
+     },
+     {
+      "year": 1960,
+      "value": 862,
+      "unit": "tätort (SCB)",
+      "source": "S33"
+     }
+    ],
+    "livelihood": [
+     "fishing: a big fishing village; English cutters bought early 1900s for mackerel fishing (S33); home port of the 1948 wooden vessel Sandö, long-line fishing from 1949 (S48)",
+     "20th-century industry: raincoat manufacture and canning ('konservindustri'), undated (S33)",
+     "stone quarrying at Spjösvik by Norra Grundsund, one of the oldest quarries (S56; 1950 activity not stated)",
+     "sailing freight (S54)",
+     "harbour and canal built 1914-1918 (S55)"
+    ],
+    "hasCanningFactory": null,
+    "summerGuests": false,
+    "notes": [
+     "sv.wikipedia: 'Det förvandlades aldrig till badort och skepparsamhälle': so summerGuests is false in the bath-resort sense; individual summer visitors in 1950 are not documented.",
+     "Cannery: 'I Bovik fanns en konservfabrik som gjorde konserver med makrill i tomatsås' (S33), undated; a company 'Bovik konservfabriker AB' is named for HÄLLEVIKSSTRAND, 1934 (S39); no source ties the two together.",
+     "Municipalsamhälle dissolved 31 Dec 1951 (S33).",
+     "Folkets Hus premises from 1925 and 1952 (S33)."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S33",
+     "S48",
+     "S54",
+     "S55",
+     "S56"
+    ]
+   },
+   {
+    "id": "gullholmen",
+    "name": "Gullholmen",
+    "lat": 58.17993,
+    "lon": 11.40585,
+    "existsAround1950": "yes",
+    "sizeClass": "fishing-village",
+    "sizeEstimated": false,
+    "sizeNote": "Parish count 1950: 466 (includes Härmanö; do not add to Härmanö). Peak 'drygt 800' in 1910 (S41, S40). About 150 houses and 100 boathouses/storehouses in 1920 (S40).",
+    "counts": [
+     {
+      "year": 1950,
+      "value": 466,
+      "unit": "parish incl. Härmanö (sv.wikipedia / project file)",
+      "source": "S38"
+     },
+     {
+      "year": 1940,
+      "value": 524,
+      "unit": "parish incl. Härmanö",
+      "source": "S38"
+     },
+     {
+      "year": 1910,
+      "value": 811,
+      "unit": "parish incl. Härmanö (also 'drygt 800' in S40/S41)",
+      "source": "S38"
+     },
+     {
+      "year": 1920,
+      "value": 150,
+      "unit": "houses (approx.)",
+      "source": "S40"
+     },
+     {
+      "year": 1920,
+      "value": 100,
+      "unit": "boathouses/storehouses (approx.)",
+      "source": "S40"
+     },
+     {
+      "year": 1960,
+      "value": 313,
+      "unit": "tätort (SCB)",
+      "source": "S38"
+     }
+    ],
+    "livelihood": [
+     "large-sea fishing (storsjöfiske) 'från 1800-talet och fram till 1900-talets mitt' (S40)",
+     "freight sailing combined with fishing (S40, S41)",
+     "fish-processing industry on the island 'fram till 1960-talet' (S40, S41)",
+     "tourism growing in the 1900s: seaside resort after WWI; the folk-movement-owned Reso built the holiday facility Gullholmsbaden on Härmanö in 1942 (S39, S40, S41)"
+    ],
+    "hasCanningFactory": null,
+    "summerGuests": true,
+    "notes": [
+     "Cannery: J. J. Hallgren & Söner (cannery from 1864, bought 1898 by AB Sveriges Förenade Konservfabriker; S41). SOURCES CONFLICT on 1950: the museum says fish processing continued to the 1960s (S41, S40), while the Länsstyrelsen text quoted in settlements-history.json says the cannery had closed after WWI (no year). So hasCanningFactory is null.",
+     "Today about 10% of houses are permanently inhabited (S34): the summer-home share in 1950 is not documented; the settlements file says 'many houses became summer homes' after WWI (S38).",
+     "1799 timber church, school, post: an independent community (S40). Gullholmen was a crown island ('kronoholme'), free to build on (S34 does not state it; S40 says Käringön was a crown island until the 1990s; the 1999 date for Gullholmen is from a search summary of a Länsstyrelsen page): free building, hence very dense.",
+     "Passenger steamers from Gothenburg took about four hours; the quay was the steamboat landing (S41)."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S38",
+     "S40",
+     "S41",
+     "S39",
+     "S34"
+    ]
+   },
+   {
+    "id": "harmano",
+    "name": "Härmanö",
+    "lat": 58.16015,
+    "lon": 11.37571,
+    "existsAround1950": "yes",
+    "sizeClass": "farm-and-fishing",
+    "sizeEstimated": true,
+    "sizeNote": "No separate count: Härmanö residents are inside the Gullholmen parish figure (466 in 1950). Farms on the east side; the old fishing hamlet Härmanösund was abandoned in 1705 (S40). The 'size' is a description, not a number.",
+    "counts": [],
+    "livelihood": [
+     "farming on the east side (S40)",
+     "feldspar quarrying at Höpallen and Stenvik 'under 1900-talets första hälft' (S36)",
+     "from the 1930s almost all new building around Gullholmen happened on the Härmanö side (S40); Gullholmsbaden holiday facility 1942 (S39)"
+    ],
+    "hasCanningFactory": false,
+    "summerGuests": true,
+    "notes": [
+     "Härmanö nature reserve was created only in 1967 (S36): not a reserve in 1950.",
+     "A 1950 archaeological dig at Skållehus (southern tip) found 1500s-1700s dwellings (S40): an event in the game year, not a settlement.",
+     "hasCanningFactory false: none found for Härmanö itself (the Gullholmen cannery is on Gullholmen)."
+    ],
+    "uncertain": true,
+    "confidence": "inferred",
+    "sources": [
+     "S36",
+     "S40",
+     "S39",
+     "S38"
+    ]
+   },
+   {
+    "id": "karingon",
+    "name": "Käringön",
+    "lat": 58.10985,
+    "lon": 11.36359,
+    "existsAround1950": "yes",
+    "sizeClass": "small-fishing-village",
+    "sizeEstimated": false,
+    "sizeNote": "Counts: 1944 336 (printed, unlabelled), 1925 548, 1960 211 (tätort). 1950 itself not found; between 336 (1944) and 211 (1960).",
+    "counts": [
+     {
+      "year": 1944,
+      "value": 336,
+      "unit": "as printed (unlabelled)",
+      "source": "S35"
+     },
+     {
+      "year": 1925,
+      "value": 548,
+      "unit": "as printed",
+      "source": "S35"
+     },
+     {
+      "year": 1960,
+      "value": 211,
+      "unit": "tätort (SCB)",
+      "source": "S38"
+     }
+    ],
+    "livelihood": [
+     "large-sea fishing and freight (S40)",
+     "visitors in the 1900s summers: guesthouses and cafés in former dwellings, never a real resort area (S40)",
+     "pilots and lighthouse staff lived on Lotsberget in the west (S40); Måseskär's keepers got post and supply via Käringön (S02: 'Postadress Käringön', boat 3-4 trips a month in 1944)"
+    ],
+    "hasCanningFactory": null,
+    "summerGuests": true,
+    "notes": [
+     "Double houses ('dubbelhus') dominate the later building; church 1796, red-painted for its first c.100 years (S40).",
+     "Harbour in its present form made in the 1930s (S40).",
+     "Municipalsamhälle 1886 to 1959 (S35)."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S35",
+     "S38",
+     "S40",
+     "S02"
+    ]
+   },
+   {
+    "id": "hallevikstrand",
+    "name": "Hälleviksstrand",
+    "lat": 58.12329,
+    "lon": 11.4454,
+    "existsAround1950": "yes",
+    "sizeClass": "small-fishing-village",
+    "sizeEstimated": false,
+    "sizeNote": "277 inhabitants in 1950 (folkräkning as printed); 1940 346; 1960 229.",
+    "counts": [
+     {
+      "year": 1950,
+      "value": 277,
+      "unit": "folkräkning as printed",
+      "source": "S37"
+     },
+     {
+      "year": 1940,
+      "value": 346,
+      "unit": "same",
+      "source": "S37"
+     },
+     {
+      "year": 1960,
+      "value": 229,
+      "unit": "tätort (SCB)",
+      "source": "S37"
+     }
+    ],
+    "livelihood": [
+     "large-sea fishing and freight, decline after WWI (S40)",
+     "boatbuilding: Hälleviksstrands varv/slip from 1907, specialising in cutter conversions; Iceland-fishing boats built under roof in the 1940s (S39, S40)",
+     "fish/herring/vegetable canning: 'Bovik konservfabriker AB' from 1934 on the road north of the village, closed 1976 (S39, S40)",
+     "ex-bathing guests built summer houses; bathhouse built in the late 1800s (S40)",
+     "steamer pier (Gothenburg line); bus road from 1927 (S40)",
+     "a stonemason's yard from 1905 (settlements file, S38)"
+    ],
+    "hasCanningFactory": true,
+    "summerGuests": true,
+    "notes": [
+     "The cannery name 'Bovik konservfabriker AB' appears in S39; S40 prints 'startade AB en konservfabrik' (name cut). Closure year 1976 from S40.",
+     "Big fire 1905 burnt about 60 buildings (half dwellings, half boathouses); houses rebuilt with gables to the west (S40). Chapel of 1904 originally golden-ochre painted, red today (S40).",
+     "Feldspar/steamer details for 1950 not further researched."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S37",
+     "S39",
+     "S40",
+     "S38"
+    ]
+   }
+  ],
+  "extraPlaces": [],
+  "note": "Seven places as requested. Skaftö hamlets (Stockevik, Rågårdsvik, Bovik, Ösö) were NOT researched; Grundsund is on Ösö and Skaftölandet (S33) and Bovik/Klubban (Östersidan) are named in S33/S54 only in passing. The 1950 counts for Lysekil and Käringön are NOT found (nearest years given)."
+ },
+ "lighthouses": {
+  "list": [
+   {
+    "id": "maseskar",
+    "name": "Måseskär",
+    "lat": 58.0941,
+    "lon": 11.3304,
+    "inWindow": true,
+    "builtYear": 1865,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "keepers",
+    "unmannedSince": 1997,
+    "light1950": {
+     "colour": "white",
+     "pattern": "Bx(3) W 30 s: three flashes in a 30-second period (electric incandescent lamp from 1950; kerosene/Lux before). Fixed red until 1887 and then white flash: NOT red in 1950",
+     "source": "S02"
+    },
+    "tower": {
+     "look": "Open iron pylon tower ('Heidenstam lighthouse', 22 m), red-and-white checkered above, with the stair column below painted with a white middle band (1872 description); open at the bottom; lens room on top. 1944: 'Röd- och vitrutigt 22 m högt nedtill öppet fyrtorn av järn'.",
+     "colours": [
+      "red",
+      "white"
+     ],
+     "material": "cast/galvanised iron, painted"
+    },
+    "keeperBuildings": {
+     "present": true,
+     "look": "Light station 'fyrbyn': a prefab wooden dwelling house (Bark & Warburg, 1865) east of the tower, outhouse, food cellar, privy; brick engine house for the fog siren (1885); boathouse with slip, boat crane (new 1953), quay and breakwater of concrete (1941). Slate roofs on the dwelling, outhouse and cellar from about 1900. 1944: keeper (Fm) 3 rooms and kitchen, keeper's assistants (Fv, Fb) 2 rooms and kitchen each, 'inga bekvämligheter'. Island 500 x 300 m, bare rock, no vegetation: all buildings visible far out to sea as a daymark.",
+     "colours": [
+      "red (dwelling painted red in 1865 per the original description; 1950 colour NOT documented)"
+     ]
+    },
+    "notes": [
+     "Staff in 1944 (Våra fyrar): Fm (fyrmästare), Fv (fyrvaktare), Fb (fyrbiträde), a relief during the summer holidays; class I station. Fyrmästare Alfred Nilén 1919 and Holm 1924 are named in photo captions (not 1950).",
+     "Electrified 1950 (cable laid); 1953 new fog-signal keyer; 1955 clockwork and weight replaced by an electric motor, light monitorable from the dwelling (S02, S16). Fog signal 1961: Tyfon 2 blasts per 30 s; before that a siren (motor-driven since 1916).",
+     "Manned until 1997 although the old tower went dark in 1978 (S02): so in 1950 and for decades after, there were keepers.",
+     "The design notes' 'Måseskär's red light': in 1950 the light was WHITE flashing; red appears today only as a sector colour. 1865-1887 the fixed light was red (S02). Red in 1950 would be an anachronism."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S02",
+     "S16",
+     "S01"
+    ]
+   },
+   {
+    "id": "islandsberg",
+    "name": "Islandsberg",
+    "lat": 58.1976349,
+    "lon": 11.4050317,
+    "inWindow": true,
+    "builtYear": 1883,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1938,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "Bx(4) WRG 12 s (AGA light, 4th-order lens, 200 degree sector with screen; focal height 13.5 m; W 600 cd) from the 1938 concrete tower. The OLD 1883 light in the keeper's house was extinguished in 1938.",
+     "source": "S04"
+    },
+    "tower": {
+     "look": "New (1938) light: white concrete tower 7.1 m high, 425 m north of the old house, with an octagonal iron 'fyrkur' on top (replaced by a round plastic one in the 1970s). Old light: a wooden 1.5-storey combined keeper's house with the lens behind a window row in an upper-floor gable.",
+     "colours": [
+      "white"
+     ],
+     "material": "concrete (new); painted timber house (old)"
+    },
+    "keeperBuildings": {
+     "present": true,
+     "look": "Old wooden keeper's house, 1.5 storey, light shown from an upper window; the gable towards the sea painted white, the rest red (S04, S01). Stood empty 1938-1948, then sold 1948 to captain Parrow and his wife Karin Parrow (sister of Evert Taube): a private house in 1950.",
+     "colours": [
+      "red",
+      "white"
+     ]
+    },
+    "notes": [
+     "CONTRADICTS the design notes: Islandsberg was not dark in 1950. Only the old keeper's light went dark in 1938; the new automatic AGA tower 425 m north WAS lit. The station was de-manned in 1938.",
+     "The old station also tended the unmanned lights Ösö and Fredagsholmen (1883) until 1938 (S04). Ösö (near Islandsberg) ceased in 1938(?) (S10).",
+     "A stone 'kummel' stands on Islandsberg (photo on S24; date not stated)."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S04",
+     "S01",
+     "S17",
+     "S10"
+    ]
+   },
+   {
+    "id": "hattan",
+    "name": "Hättan",
+    "lat": 58.174137,
+    "lon": 11.37307,
+    "inWindow": true,
+    "builtYear": 1938,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1938,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "B(2) WRG 15 s (Dalén/AGA light, 4th-order lens; focal height 15 m; range 13 M)",
+     "source": "S05"
+    },
+    "tower": {
+     "look": "White round tower 8.9 m high with one black horizontal band, on a skerry off Stora Härmanö's NW point.",
+     "colours": [
+      "white",
+      "black"
+     ],
+     "material": "concrete (ibiblio: round tower)"
+    },
+    "keeperBuildings": {
+     "present": null,
+     "look": "None documented; an unmanned leading light has no keeper's house. NOTE the fyr.org page also describes an older PILOT station Hättan near Uddevalla (not this one).",
+     "colours": []
+    },
+    "notes": [
+     "Established 1938 as an unmanned light (S05: 'obemannad ledfyr'). Light character changed 1973 (so not the present Fl(2) WRG 6 s)."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S05",
+     "S01"
+    ]
+   },
+   {
+    "id": "gaven",
+    "name": "Gäven",
+    "lat": 58.2709628,
+    "lon": 11.3504693,
+    "inWindow": true,
+    "builtYear": 1941,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1917,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "Bx(3) WRG 9 s (AGA light, 4th-order lens; 12 M; focal height 27 m) from the 1941 rebuild. Before 1941: Bx WRG 3 s.",
+     "source": "S06"
+    },
+    "tower": {
+     "look": "White 9.4 m round tower with one black band, with an octagonal iron 'fyrkur' (lantern house) on top; before 1941 a white 9.5 m concrete-and-iron tower. On the rock stood from 1835 a 15 m pole mark (hjärtspira with eight stays, clad in the middle as a pilot lookout, red with a square board half red/half white), blown down in a storm and replaced; Lysekil's new church of 1901 became the new landfall mark.",
+     "colours": [
+      "white",
+      "black"
+     ],
+     "material": "concrete and iron"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None: unmanned from the 1917 AGA light on; gas cylinders changed by staff from Erholmen (Marstrand) after 1920.",
+     "colours": []
+    },
+    "notes": [
+     "The 1941 tower with black band is what the game already models; the black band is correct for 1950."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S06",
+     "S01"
+    ]
+   },
+   {
+    "id": "stangehuvud",
+    "name": "Stångehuvud",
+    "lat": 58.2711831,
+    "lon": 11.4134545,
+    "inWindow": true,
+    "builtYear": 1890,
+    "standingIn1950": true,
+    "lit1950": false,
+    "manned1950": "dark",
+    "unmannedSince": 1890,
+    "light1950": null,
+    "tower": {
+     "look": "Small white wooden 'fyrkur' (prefab by Bark & Warburg, Göteborg), 4 m, with a black A-frame roof (ibiblio); the 1890 light had coloured glass sector screens on frames in the rock (looked like dark screens on old photos).",
+     "colours": [
+      "white",
+      "black (roof)"
+     ],
+     "material": "wood"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None: always unmanned (leading light; AGA acetylene light from 1918).",
+     "colours": []
+    },
+    "notes": [
+     "fyr.org: 'Släcktes fyren' in 1940, replaced by the new Stångholmen light (1940, white sheet-metal fyrkur, K WRG 4 s). So in 1950 the HOUSE stood but its light was out. ibiblio (S01) says 'inactive since the 1990s': a CONFLICT (uncertain). The more detailed and dated fyr.org is used.",
+     "The building was preserved as a landmark in the Stångehuvud nature reserve (S01, S07)."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S07",
+     "S08",
+     "S01"
+    ]
+   },
+   {
+    "id": "stangholmen",
+    "name": "Stångholmen",
+    "lat": null,
+    "lon": null,
+    "inWindow": true,
+    "builtYear": 1940,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1940,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "K WRG 4 s (quick flashing), AGA, 6th-order lens, focal height 6 m",
+     "source": "S08"
+    },
+    "tower": {
+     "look": "White octagonal iron/sheet-metal 'fyrkur' on a base, 4 m (replaced by a round plastic one in 1974).",
+     "colours": [
+      "white"
+     ],
+     "material": "sheet metal"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None.",
+     "colours": []
+    },
+    "notes": [
+     "Position not extracted: on an island just off Lysekil harbour, c.500 m north of Flatholmen (S01). Not copied from a map."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S08",
+     "S01"
+    ]
+   },
+   {
+    "id": "fredagsholmen",
+    "name": "Fredagsholmen",
+    "lat": null,
+    "lon": null,
+    "inWindow": true,
+    "builtYear": 1942,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1917,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "Bx WRG 3 s (5.8 M, focal height 5.5 m) after 1942; before that 1917 AGA Bx WRG 3 s 8 M.",
+     "source": "S09"
+    },
+    "tower": {
+     "look": "1942: white sheet-metal 'fyrkur' standing on a concrete base (replaced the white wooden light house with a lantern on the gable); ibiblio calls it a round concrete tower of 1943 with red lantern roof today.",
+     "colours": [
+      "white"
+     ],
+     "material": "sheet metal on concrete"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None; served from Islandsberg's staff until 1938, then from Erholmen.",
+     "colours": []
+    },
+    "notes": [
+     "Rebuild year 1942 (fyr.org) vs 1943 (ibiblio): uncertain.",
+     "On the south point of an island about 1.5 km east of Gullholmen (S01)."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S09",
+     "S01"
+    ]
+   },
+   {
+    "id": "grotoe",
+    "name": "Grötö",
+    "lat": null,
+    "lon": null,
+    "inWindow": true,
+    "builtYear": 1917,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1917,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "Bx WRG 3 s, 9 M, AGA 6th-order lens, focal height 4.5 m (1938); sector layout changed 1954",
+     "source": "S13"
+    },
+    "tower": {
+     "look": "white 'fyrkur' (round lantern on a round concrete/masonry base per ibiblio)",
+     "colours": [
+      "white"
+     ],
+     "material": "unknown"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None documented (unmanned leading light).",
+     "colours": []
+    },
+    "notes": [
+     "Minor unmanned light; position not extracted (use ibiblio/OSM if needed). Station year shown, not tower year."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S13",
+     "S01"
+    ]
+   },
+   {
+    "id": "gulskaren",
+    "name": "Gulskåren",
+    "lat": null,
+    "lon": null,
+    "inWindow": true,
+    "builtYear": 1917,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1917,
+    "light1950": null,
+    "tower": {
+     "look": "white round concrete tower 6 m (today, ibiblio)",
+     "colours": [
+      "white"
+     ],
+     "material": "unknown"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None documented (unmanned leading light).",
+     "colours": []
+    },
+    "notes": [
+     "Minor unmanned light; position not extracted (use ibiblio/OSM if needed). Station year shown, not tower year."
+    ],
+    "uncertain": true,
+    "confidence": "inferred",
+    "sources": [
+     "S01",
+     "S01"
+    ]
+   },
+   {
+    "id": "svensholmen",
+    "name": "Svensholmen",
+    "lat": null,
+    "lon": null,
+    "inWindow": false,
+    "builtYear": 1890,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": null,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "Bx WRG 3 s 10 M (AGA, octagonal iron fyrkur since 1915); sectors reset 1940",
+     "source": "S11"
+    },
+    "tower": {
+     "look": "octagonal iron 'fyrkur' with white house; today a 7 m concrete tower of 2003",
+     "colours": [
+      "white"
+     ],
+     "material": "unknown"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None documented (unmanned leading light).",
+     "colours": []
+    },
+    "notes": [
+     "Minor unmanned light; position not extracted (use ibiblio/OSM if needed). Station year shown, not tower year."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S11",
+     "S01"
+    ]
+   },
+   {
+    "id": "oxskar",
+    "name": "Oxskär",
+    "lat": null,
+    "lon": null,
+    "inWindow": true,
+    "builtYear": 1929,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1929,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "Bx(3) WRG 3 s 9 M from 1956; Bx(3) WRG 8 s 9 M before",
+     "source": "S12"
+    },
+    "tower": {
+     "look": "white 'fyrkur' on a round concrete base (octagonal lantern)",
+     "colours": [
+      "white"
+     ],
+     "material": "unknown"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None documented (unmanned leading light).",
+     "colours": []
+    },
+    "notes": [
+     "Minor unmanned light; position not extracted (use ibiblio/OSM if needed). Station year shown, not tower year."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S12",
+     "S01"
+    ]
+   },
+   {
+    "id": "hangdyn",
+    "name": "Hängdyn",
+    "lat": null,
+    "lon": null,
+    "inWindow": true,
+    "builtYear": 1949,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "automatic",
+    "unmannedSince": 1949,
+    "light1950": {
+     "colour": "white, red and green sectors",
+     "pattern": "Sx (quick flash) WRG 90/min 7 M, focal 4.8 m",
+     "source": "S14"
+    },
+    "tower": {
+     "look": "white 'fyrkur'; ibiblio: today a black round concrete tower with white lantern and red roof",
+     "colours": [
+      "white"
+     ],
+     "material": "unknown"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "None documented (unmanned leading light).",
+     "colours": []
+    },
+    "notes": [
+     "Minor unmanned light; position not extracted (use ibiblio/OSM if needed). Station year shown, not tower year."
+    ],
+    "uncertain": true,
+    "confidence": "documented",
+    "sources": [
+     "S14",
+     "S01"
+    ]
+   },
+   {
+    "id": "slaggabaden",
+    "name": "Släggabåden",
+    "lat": null,
+    "lon": null,
+    "inWindow": true,
+    "builtYear": 1961,
+    "standingIn1950": false,
+    "lit1950": false,
+    "manned1950": "unknown",
+    "unmannedSince": null,
+    "light1950": null,
+    "tower": {
+     "look": "White tower with octagonal lantern on a grey sea base, 8.3 m (1961).",
+     "colours": [
+      "white",
+      "grey"
+     ],
+     "material": "concrete"
+    },
+    "keeperBuildings": {
+     "present": false,
+     "look": "n/a",
+     "colours": []
+    },
+    "notes": [
+     "NOT standing in 1950: established 1961 (S15). Listed so the game does not draw it. Present-day entrance light to Lysekil harbour."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S15",
+     "S01"
+    ]
+   },
+   {
+    "id": "hallo",
+    "name": "Hållö",
+    "lat": 58.3359,
+    "lon": 11.2173,
+    "inWindow": false,
+    "builtYear": 1842,
+    "standingIn1950": true,
+    "lit1950": true,
+    "manned1950": "keepers",
+    "unmannedSince": 1969,
+    "light1950": {
+     "colour": "white",
+     "pattern": "Bx W 5 s (one white flash every 5 s, 1.2 s light, 3.8 s dark; 2nd-order lens; electric lamp since 1948; 1961: 17 M, 400,000 HK). Circular radio beacon RC 'LL' from 1948. Fog: Nautofon 'one long, two short' per 60 s from a red 12 m mast 600 m south of the tower.",
+     "source": "S03"
+    },
+    "tower": {
+     "look": "20 m round tower of whitewashed granite rubble (1841-42), topped since 1868 by a c.5 m conical red cast-iron watch room; black lantern.",
+     "colours": [
+      "white",
+      "red",
+      "black (lantern, per ibiblio)"
+     ],
+     "material": "stone with iron top"
+    },
+    "keeperBuildings": {
+     "present": true,
+     "look": "1944: three dwelling houses (fyrmästare 3 rooms and kitchen; fyrvaktare and fyrbiträde 2 rooms and kitchen each; central heating in one; no running water or electric light in 1944). One house built 1936-37 from timber of the demolished Klövskär station. A radio-bearing house (Telegrafverket 1922, c.200 m south) housed two telegraphists; machine house 1948; cows and sheep kept; c.200 m2 planting plot per staff member. Wall colours of the dwellings: NOT found.",
+     "colours": []
+    },
+    "notes": [
+     "OUTSIDE the game window (58.336 N is north of 58.30 N): keepers until 1969 (S03). Included because the user asked for lights near Lysekil; use as the closest manned neighbour of Måseskär.",
+     "Coordinates are the project's own (lighthouses.js, dm(58,20.155) / dm(11,13.040)), not from a 1950 source."
+    ],
+    "uncertain": false,
+    "confidence": "documented",
+    "sources": [
+     "S03",
+     "S01"
+    ]
+   }
+  ],
+  "note": "The big finding: in the game window ONLY Måseskär had keepers in 1950 (Hållö, 15 km north, also). Islandsberg (de-manned 1938), Hättan (1938), Gäven (1917), Fredagsholmen, Grötö, Stångholmen, Oxskär, Svensholmen etc. were unmanned AGA/Dalén automatic lights serviced from Erholmen (Marstrand). The 'dark' ones are Stångehuvud (since 1940) and the old Islandsberg house (since 1938); the Islandsberg station itself was lit by its new tower. Other minor lights in the area (Råö nedre/övre 1929, Käringön kummel 1929, Flatholmen 1917, Bläckhall 1890, Ösö 1883-1938) exist in the sources but were not given separate entries. Positions marked null were not extracted from a source and must not be guessed; lat/lon given for the six entries whose coordinates the project already holds (lighthouses.js, taken from ibiblio's map links on 2026-11-05)."
+ },
+ "seaMarks": {
+  "system": {
+   "name": "Swedish pre-1965 'svensk utprickning' (the system in force in 1950, ASSUMED unchanged from the 1923 plate); then 'nordisk utprickning' 1965-early 1980s; then IALA System A",
+   "iala_a_switch": {
+    "year": 1980,
+    "detail": "System A (SJÖFS 1979:14, 'kombinerat kardinalt och lateralt system; rött om babord') came into force for the west coast Svinesund-Stenshuvud on 17 March 1980 (SJÖFS 1979:16), mark by mark as work progressed, announced in Underrättelser för sjöfarande; the east coast Åhus-Gävle followed on 30 March 1981 (SJÖFS 1980:43). fyr.org says 'början av 1980-talet'. The 1965 Nordic system lasted 1965-07-01 to the transition.",
+    "sources": [
+     "S20",
+     "S21",
+     "S18"
+    ]
+   },
+   "lateral": {
+    "port": {
+     "colour": "1950: there was no 'port/starboard' by colour. Fairway marks were by compass side: on the NORTH and EAST side of the fairway (main direction fixed in the sailing directions, usually in towards harbour) RED; on the SOUTH and WEST side BLACK (or black-white). Port/starboard 'rött om babord' only from System A.",
+     "shape": "red side: 'kvastprick' (red pole with a broom/besom of twigs on top, pointing up; sometimes two brooms) or 'röd ballongprick' (red pole with 1-3 slatted balls); red buoys cone/pyramid-shaped. Fixed red 'kvastprick' (pole with a downward broom/triangle on rock) for N/E side."
+    },
+    "starboard": {
+     "colour": "BLACK (south and west side). 1923 plate: 'svart ballongremmare', 'slätprick' (plain pole, painted black-white) and black buoys.",
+     "shape": "black side: 'släta' pole (plain, painted black with a white upper part), 'svart ballongprick' (black pole with 1-3 slatted balls); black conical/pyramidal buoys; fixed black 'slätprick' with an upward arrow (cone) top on rock."
+    },
+    "sources": [
+     "S27",
+     "S28",
+     "S18"
+    ],
+    "note": "Colours are inverse to a modern 'red = port': the old rule is the compass side of the fairway's main direction, not the side of the vessel. 'Röd boj: r. sken, Sv. boj: v. el. g. sken' (red buoy: red light; black buoy: white or green light)."
+   },
+   "other": [
+    {
+     "kind": "cross mark / middle of fairway ('kryssprick', 'kryssremmare', 'klotprick')",
+     "look": "Red-and-black banded pole (horizontal bands) with an X (cross) or a ball on top; marks a small shoal passable on both sides, or the middle of a fairway.",
+     "sources": [
+      "S27",
+      "S28"
+     ]
+    },
+    {
+     "kind": "open-sea shoal marks ('remmare'; cardinal-like)",
+     "look": "By compass side of the shoal: NORTH black pole with black ball(s); EAST black-and-white pole with black-white balls ('vitt bälte'); SOUTH red pole with up-pointing broom(s) and red balls; WEST red with down-pointing brooms. Buoys: black N/W, black with white band E, red S/W.",
+     "sources": [
+      "S27",
+      "S28"
+     ]
+    },
+    {
+     "kind": "wreck marks",
+     "look": "GREEN poles with flags/balls, and a green wreck light buoy flashing green (1923 plate).",
+     "sources": [
+      "S27"
+     ]
+    },
+    {
+     "kind": "light buoys, bell buoys, sound buoys",
+     "look": "Red or black steel buoys: a lantern cage on a conical float; bell buoys with a cage and bell; a 'ljudboj' as a black cone. White flash for light buoys in open sea (plate note).",
+     "sources": [
+      "S27"
+     ]
+    },
+    {
+     "kind": "cairns (kummel / rös)",
+     "look": "Stone cone, sometimes whitewashed, sometimes with a pole and a top sign; chart abbreviation Kl.",
+     "sources": [
+      "S24",
+      "S22"
+     ]
+    },
+    {
+     "kind": "pole marks / beacons (stångmärke, spirbåk, båk)",
+     "look": "A tall pole with stays, partly clad in boards, with a barrel, board or arm on top; Måseskär's was removed in 1865, Gäven's blown down.",
+     "sources": [
+      "S25",
+      "S22"
+     ]
+    },
+    {
+     "kind": "leading lines (ensmärken / linjetavlor)",
+     "look": "Lights, or boards/painted white patches on rock; white painted patches used to line up buoy-laying.",
+     "sources": [
+      "S26"
+     ]
+    }
+   ],
+   "uncertain": true,
+   "uncertaintyNote": "The 1923 plate (Svensk Lots 1923) is the only graphic found; fyr.org dates the Swedish system 'to 1965'. That the plate still held in 1950 is ASSUMED. The 1965 Nordic rules (S19) are different (red and black-white lateral; see notes) and must not be used for 1950."
+  },
+  "todayKindsVs1950": [
+   {
+    "kind": "lateral (100: 53 red, 47 green; mostly unlit spar buoys; 20 are invented harbour gates)",
+    "countToday": 100,
+    "existedIn1950": "partly",
+    "look1950": "The concept existed but with BLACK and RED by compass side, not red/green by vessel side. Draw N/E-side marks red (broom or ball on a pole, cone buoys) and S/W-side marks black/black-white. No green marks (green was for wrecks).",
+    "sources": [
+     "S27",
+     "S28",
+     "S18"
+    ]
+   },
+   {
+    "kind": "cardinal (10: black/yellow buoys)",
+    "countToday": 10,
+    "existedIn1950": "partly",
+    "look1950": "Compass-side marking existed for open-sea shoals but with other colours: N black, E black-white, S red, W red with brooms. No yellow. Draw a different look.",
+    "sources": [
+     "S27",
+     "S28"
+    ]
+   },
+   {
+    "kind": "isolated_danger (38 black beacon piles + 1 white)",
+    "countToday": 38,
+    "existedIn1950": "partly",
+    "look1950": "A red-and-black banded 'kryssprick' (X or ball on top) for a shoal passable on both sides; fixed poles on rocks ('fasta prickar') existed. The modern 'isolated danger' look (black over red with two balls) did not exist.",
+    "sources": [
+     "S27",
+     "S28"
+    ]
+   },
+   {
+    "kind": "special (37, yellow)",
+    "countToday": 37,
+    "existedIn1950": false,
+    "look1950": "Yellow special marks (X topmark) belong to IALA; no yellow category in the 1923 plate or the 1965 rules. Do not draw (or draw as plain black/red poles if the position must have a mark).",
+    "sources": [
+     "S27",
+     "S19"
+    ]
+   },
+   {
+    "kind": "light (41 minor lights; sector WRG)",
+    "countToday": 41,
+    "existedIn1950": "partly",
+    "look1950": "Many of today's minor lights are on sites with unmanned AGA/Dalén lights from 1883-1949 (white wooden or iron-sheet 'fyrkur' with lantern, often a coloured-sector mask). Which of the 41 specific lights existed in 1950 was NOT checked individually; the sectors differ from today.",
+    "sources": [
+     "S09",
+     "S11",
+     "S12",
+     "S13",
+     "S08"
+    ]
+   },
+   {
+    "kind": "leading lines (12: 10 leading, 2 clearing)",
+    "countToday": 12,
+    "existedIn1950": null,
+    "look1950": "Leading lines as a kind existed (S26); the dates of these 12 specific lines were not checked.",
+    "sources": [
+     "S26"
+    ]
+   }
+  ],
+  "notes": [
+   "Counts come from assets/coast/seamarks.json (OSM, IALA A); 'total 226 = 206 real + 20 invented harbour gates'.",
+   "1965 Nordic rules (S19; NOT 1950), as the text reads: open-sea shoals by cardinal side (N white with a black belt and a black triangle point-up; E white-red with two red triangles point to point; S red with a red triangle base-up; W black-white with two black triangles base to base); inshore fairways: N and W side RED 'trattprick' (red triangle base-up on top; red buoys), S and E side black-white 'slätprick' (no topmark) or 'konprick' (black triangle point-up; black buoys); middle/limited shoal black-red 'klotprick' (ball). So the 1965 system keeps red = N/W and black = S/E but flips which compass side the 1923 plate gives (1923: red N/E, black S/W). Do not use it for 1950.",
+   "Light buoys: AGA acetylene light buoys since 1904 (search summary only; not cited).",
+   "No source found for how a typical 1950 Bohuslän 'bak' (unlit beacon) differed from a pole mark; only the 1842/1852 Underrättelser quotes on fyr.org."
+  ]
+ },
+ "boats": {
+  "summary": "Wooden boats and the sound of single/two-cylinder hot-bulb ('tändkule') engines: the 1950 water is working boats. Large carvel-built wooden fishing boats (round, bulky hulls) from yards on Orust/Tjörn, often with Bolinder/Munktell crude-oil engines, white linseed-oil paint above a red bottom with a red stripe (documented for Sandö 1948); old English-built cutters (kuttrar, bought c.1900, 57 of Gullholmen's 70 sailing vessels in 1913) rebuilt with motors; small open motor snipor (4-8 m) for setting nets; Kosterbåtar as sailing yachts and Folkbåtar (first launched 1942, c.400 by 1952). Plastic boats arrive late: serial GRP Kosterbåtar from 1967, Folkbåt only 1976; steel fishing boats from 1959. The Lysekil-Skaftö ferry of 1950 could NOT be identified.",
+  "fishing": [
+   {
+    "id": "storbacke-trawler-1948",
+    "name": "Large wooden fishing vessel (type example Sandö LL 158, 1948)",
+    "role": "long-line (storbacke) fishing for ling, North Sea herring; later trawling",
+    "hull": "carvel oak, copper sheathing in places, 24.6 x 6.6 m, 107 gross tons; deck of oiled Norrland pine; carvel; high-sided and bulky",
+    "colours": "red copper bottom paint, white linseed-oil paint above the waterline, a red stripe, black registration marking; oiled deck; clear-varnished rails",
+    "engine": "June Munktell 3-cylinder 225 hp (1948); B&W Alpha diesel 330 hp from 1955",
+    "lengthM": 24.6,
+    "status": "documented (one boat, 1948; Sandö was the largest fishing boat in Sweden when new per a search summary not cited)",
+    "text": "Built 1948 by V & T Löfberg, Rönnäng, Tjörn; home port Grundsund; long-line fishing from 1949 with a seven-man crew (under the 1972+ owner). Typical of the biggest 1950 boats; most boats were much smaller.",
+    "sources": [
+     "S48",
+     "S49"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "motor-fishing-boat",
+    "name": "Wooden motor fishing boat (mid-size, carvel)",
+    "role": "fishing (drift/trawl), freight",
+    "hull": "wooden, carvel (not clinker), 'rund bullig form' so that boats could be packed tightly in the harbours; built in yards deep in the fjords near forests (e.g. Bröderna Olsson, Studseröd); about 1,300 such boats in the region during the 1900s; the biggest 90-100 ft",
+    "colours": null,
+    "engine": "large hot-bulb/crude-oil engines ('råoljemotor'), the 'dunk-dunk' sound; larger Bohuslän boats often two-cylinder (S52); Lysekil's Skandiaverken made hot-bulb engines to 1966 (S53); Bolinder crude-oil engines are named for Hållö's station launches in 1944 (S03)",
+    "lengthM": null,
+    "status": "partly",
+    "text": "Hull colours of ordinary 1950 fishing boats were NOT found (only Sandö's). 'Tuff-tuff' as a word: not found; the documented term is 'tändkulemotor / råoljemotor'.",
+    "sources": [
+     "S49",
+     "S52",
+     "S53",
+     "S03"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "english-cutter",
+    "name": "Old English-built cutter (kutter), rebuilt for motor",
+    "role": "mackerel, Iceland and North Sea fishing",
+    "hull": "English wooden trawler; Hälleviksstrands slip specialised in 'förbyggnad' (major rebuilds) of cutters",
+    "colours": null,
+    "engine": "retro-fitted motors; Gullholmen: 57 of 70 sailing vessels in 1913 were English cutters (names like Conquest, Discovery, Liberator, Pride of the Ocean, S41); Käringön had 17 in 1915 (S40); Grundsund bought its first in 1884 (search summary only)",
+    "lengthM": null,
+    "status": "documented for 1900-1915; their presence in 1950 not stated",
+    "text": "Existed up to the 1950s in some numbers is plausible; the Iceland fishing 'LL 491 Rudolf' by an English cutter ran 1932-39 and 1945-54 (search summary only, weak).",
+    "sources": [
+     "S39",
+     "S40",
+     "S41"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "open-motor-snipa",
+    "name": "Open motor snipa",
+    "role": "setting and hauling nets, local transport",
+    "hull": "wooden, pointed bow and pointed ('spetsgattad') slightly rounded stern, 4-8 m, open or partly decked; clinker in tradition",
+    "colours": null,
+    "engine": "small inboard hot-bulb or petrol engine; 'öppen motorsnipa' is the common net-hauling boat (S-wiki)",
+    "lengthM": 6,
+    "status": "partly (type documented generically, not a 1950 Bohuslän boat)",
+    "text": "Bohuslän's own variant is the 'bohussnipa'. 'Hajk' and 'storbåt' as fishing boat types: NOT found (storbåt = ship's launch, hajk = scout hike).",
+    "sources": [
+     "S50"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "kosterbat-fishing",
+    "name": "Koster boat (original fishing form)",
+    "role": "decked drift-net boat",
+    "hull": "clinker, gaff rig with bowsprit, 10-12 m, broad, round, flared above the waterline with a deep sharp underbody",
+    "colours": null,
+    "engine": "sail (the original); motorised later",
+    "lengthM": 11,
+    "status": "documented as a type; 1950 use not stated",
+    "text": "Evolved from the snipa; the word 'kosterbåt' arose in the late 1800s when the type was raced.",
+    "sources": [
+     "S50"
+    ],
+    "uncertain": true
+   }
+  ],
+  "leisure": [
+   {
+    "id": "folkbat",
+    "name": "Nordisk Folkbåt",
+    "role": "family/club sailboat",
+    "hull": "7.64 m, clinker-built wood, long keel, wooden mast; 17 + 7 m2 sails; first launched 23 April 1942 near Gothenburg; about 400 by 1952",
+    "colours": null,
+    "engine": "none (sail)",
+    "lengthM": 7.64,
+    "status": "documented",
+    "text": "A modern 1950 boat but already there; GRP version only 1976.",
+    "sources": [
+     "S51"
+    ],
+    "uncertain": false
+   },
+   {
+    "id": "kosterbat-yacht",
+    "name": "Koster boat as yacht (K20-K45; K6 from 1944)",
+    "role": "racing/cruising",
+    "hull": "clinker; Bermuda rig ('moderniserad koster') as leisure boat; rules 1934; K6 first built 1944, 6.25 m",
+    "colours": null,
+    "engine": "sail",
+    "lengthM": null,
+    "status": "documented",
+    "text": "Serial GRP Kosterbåtar from 1967 (Allegro 27) - so none in 1950.",
+    "sources": [
+     "S50"
+    ],
+    "uncertain": false
+   },
+   {
+    "id": "skargardskryssare",
+    "name": "Skärgårdskryssare (SK)",
+    "role": "racing cruiser",
+    "hull": "long, narrow, low freeboard, tall rig; originally mahogany or pine; rule 1908, revised 1916-1925",
+    "colours": null,
+    "engine": "sail",
+    "lengthM": null,
+    "status": "documented generically (Baltic origin); presence at Lysekil not documented",
+    "text": "Golden age 1910-1930.",
+    "sources": [],
+    "uncertain": true
+   },
+   {
+    "id": "rowing-boats",
+    "name": "Rowing boats (ekor / snipor)",
+    "role": "transport, harbour",
+    "hull": "wood",
+    "colours": null,
+    "engine": null,
+    "lengthM": null,
+    "status": "mentioned (S41: 'ekor') only",
+    "text": "Details not found.",
+    "sources": [
+     "S41"
+    ],
+    "uncertain": true
+   }
+  ],
+  "ferry": {
+   "route": "Lysekil-Fiskebäckskil",
+   "operator": null,
+   "name": null,
+   "builtYear": null,
+   "lengthM": null,
+   "look": "UNKNOWN for 1950. The only dated-by-association items: (a) a Bohusläns museum postcard of the passenger ferry RAN in Fiskebäckskil harbour (undated; 'Ran' built 1876 as Stocka at Hudiksvalls mekaniska verkstad; photographer 'presumed' Carl Alfred Träff, who died 1947, which would put the picture before 1947, our inference); (b) a 1959 postcard of the passenger boat GULLMAREN (from Oxevik) at Lysekil's south harbour.",
+   "colours": null,
+   "passengers": null,
+   "status": "partly",
+   "text": "The 1950 ferry is NOT identified. 'Ran' (1876) is the only vessel a primary source (Bohusläns museum) ties to the route, undated. Do NOT confuse with: the later M/S Ran (1945 navy tug Beckholmen, passenger boat of HB Skärgårdstrafik Lysekil 1963-75, S47), Gullmarsfärjan II (ex M/S Emelie, 1965-1991; search summary only S59), Carl Wilhelmson (1990, S58) or electric Elise (2024). Search summaries claim the old Ran was bought to Skaftö in 1896 by K. J. Ödman of Sälvik and served into the 1960s (S59: weak, unverified). Operator in 1950: not found. Whether it was passenger-only or took cars: not found (the 1960s car-ferry Gullmarsfärjan suggests a car ferry only arrived in the 1960s, our inference).",
+   "sources": [
+    "S44",
+    "S45",
+    "S46",
+    "S47",
+    "S58",
+    "S59"
+   ],
+   "uncertain": true
+  },
+  "otherPassengerBoats": [
+   {
+    "id": "ss-bohuslan",
+    "name": "S/S Bohuslän",
+    "route": "Göteborg-Marstrand-Lysekil-Smögen-Gravarne (Kungshamn)",
+    "builtYear": 1914,
+    "lengthM": 43.13,
+    "look": "Steamship, 7.42 m wide, 700 hp steam engine, 12 kn, 280 passengers, tall funnel. Hull/funnel colours of this ship: NOT found. General rule: Bohuslän coastal steamers were black and yellow, mostly white only in the 1920s-30s (S42).",
+    "status": "documented (ran 'under 40 år' from 1914; whether it still ran in 1950 is inferred, not stated; the steamer era ended in the 1950s per S42)",
+    "sources": [
+     "S43",
+     "S42"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "gullmaren",
+    "name": "Passenger boat GULLMAREN (from Oxevik)",
+    "route": "not stated; at Lysekil south harbour on 9 Oct 1959",
+    "builtYear": null,
+    "lengthM": null,
+    "look": "not stated",
+    "status": "documented (1959 postcard) only",
+    "sources": [
+     "S46"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "steamers-to-gullholmen",
+    "name": "Gothenburg steamers to Gullholmen / Käringön / Hälleviksstrand",
+    "route": "Göteborg coast line calling at Hälleviksstrand pier; Gullholmen about 4 hours by steamer",
+    "builtYear": null,
+    "lengthM": null,
+    "look": "S/S Bohuslän pictured at Hälleviksstrand pier (S42); Käringön harbour 1897: 'Viken'",
+    "status": "partly: steamer era ended in the 1950s; no 1950 timetable or boat names found for Gullholmen/Käringön",
+    "sources": [
+     "S41",
+     "S42",
+     "S39"
+    ],
+    "uncertain": true
+   }
+  ],
+  "traffic": {
+   "level": "moderate: working fishing boats and freight vessels, a few steamers and ferries, local rowing/snipa boats, a handful of sailing yachts and Folkbåtar; no plastic boats, no big motor-yacht fleet",
+   "levelBasis": "fleet sizes for 1950 were NOT found. Anchors: Gullholmen 70 sailing vessels in 1913 (S41); fishing declined after WWI and 'efter 1965 minskade nordsjöfisket drastiskt' (S39); holiday rights 1938 (2 weeks), 1951 (3 weeks) (S39) grew summer traffic.",
+   "recommendation": "INVENTED: about 4-8 moving working boats within sight in the Lysekil/Grundsund area, 1-3 near Gullholmen/Käringön, 0-2 sailing yachts (more in July); one ferry shuttling Lysekil-Fiskebäckskil; one coastal steamer line (black/white hull per era choice).",
+   "invented": true,
+   "reason": "No source gives 1950 fleet counts; this is a pacing choice for gameplay.",
+   "uncertain": true,
+   "sources": [
+    "S39",
+    "S41"
+   ]
+  },
+  "unresolved": [
+   "Name, owner, size and colours of the 1950 Lysekil-Fiskebäckskil ferry",
+   "Fleet size per village in 1950",
+   "Hull colours of ordinary 1950 fishing boats besides Sandö",
+   "Whether Gothenburg steamers still called at Gullholmen/Käringön in 1950 and their names",
+   "'Tuff-tuff', 'hajk' and 'storbåt' as local boat terms: not found as such"
+  ],
+  "sources": [
+   "S41",
+   "S42",
+   "S43",
+   "S44",
+   "S45",
+   "S46",
+   "S47",
+   "S48",
+   "S49",
+   "S50",
+   "S51",
+   "S52",
+   "S53",
+   "S58"
+  ]
+ },
+ "village": {
+  "houseTypes": [
+   {
+    "id": "dubbelhus",
+    "name": "Double-width house (dubbelhus, 'västsvenskt dubbelhus')",
+    "look": "Two-room-deep, 1.5-storey wooden house with symmetric windows, protruding eaves, vertical wood panel and window carpentry; pitched roof c.30-35 degrees; gable to the west on Käringön and Hälleviksstrand; carpentry details shared by houses from c.1900. The dominant house type on Käringön 'i sekelskiftet och en bra bit in på 1900-talet'.",
+    "colours": [
+     "white (dwellings, per municipal recommendation of traditional practice)"
+    ],
+    "sources": [
+     "S40"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "enkelstuga",
+    "name": "Single-width cottage (enkelstuga)",
+    "look": "Smaller, often single-width houses around the oldest harbour sound (Isackes sund, Käringön); older, small, some log boathouses.",
+    "colours": [
+     "not documented"
+    ],
+    "sources": [
+     "S40"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "stenstuga",
+    "name": "Stone cottage (Gullholmen 'Stenstugan')",
+    "look": "A whitewashed stone house from the 1800s, one of the oldest buildings.",
+    "colours": [
+     "white (whitewash)"
+    ],
+    "sources": [
+     "S41"
+    ],
+    "uncertain": false
+   },
+   {
+    "id": "skepparhus",
+    "name": "Skipper's house (Fiskebäckskil)",
+    "look": "'Skepparhusen var oftast stora och hade utsirade detaljer' (large, with carved details).",
+    "colours": [
+     "not documented"
+    ],
+    "sources": [
+     "S54"
+    ],
+    "uncertain": false
+   },
+   {
+    "id": "cellar-store-house",
+    "name": "House with a storehouse in the cellar (Gullholmen)",
+    "look": "Because of lack of land, dwellings with storehouses in the cellar, and building across the sound on Lilla Härmanö.",
+    "colours": [
+     "not documented"
+    ],
+    "sources": [
+     "S40",
+     "S41"
+    ],
+    "uncertain": false
+   }
+  ],
+  "wallColours1950": {
+   "dwellings": "white or mild light colour is the municipality's present recommendation for houses; red houses may stay red; on white houses the window frames traditionally were NOT white but green, 'engelskt rött' or ochre-yellow; blue 'inte vanligt förrän från 1900-talets mitt' (S40). That is a modern preservation guideline stating traditional practice, NOT a 1950 colour survey: uncertain. A search summary of the Bohusläns museum says dwellings were typically light oil paint and outbuildings red slamfärg (S60, weak).",
+   "outbuildings": "boathouses/sjöbodar red (falu-red) or, in single cases, ochre-yellow, unless left unpainted (S40; Gullholmen: red sjöbodar, S41 photo caption). Käringön church: red for its first c.100 years (S40); Hälleviksstrand chapel 1904 originally golden ochre (S40).",
+   "falured": "Falu red as a pigment term is not stated for villages in S40 beyond 'rödfärgade' and, for farms, 'faluröda ekonomibyggnader' (S40).",
+   "uncertain": true,
+   "sources": [
+    "S40",
+    "S41",
+    "S60"
+   ]
+  },
+  "roofs": [
+   {
+    "material": "red unglazed clay tile (present recommendation 'om inte annat är historiskt motiverat')",
+    "note": "Roof material in 1950 was not surveyed; the old light stations' dwellings had slate roofs from about 1900 (Måseskär, S16); the old lighthouse 'fyrkur' were white sheet-metal.",
+    "sources": [
+     "S40",
+     "S16"
+    ],
+    "uncertain": true
+   }
+  ],
+  "boathouses": {
+   "look": "Dense rows of sjöbodar/magasin along the shore (Gullholmen: about 100 in 1920), red-painted or unpainted wood, gable to the water, often with small harbour piers; Grundsund's long pier with boathouses along the canal; large 'magasin' for oats/herring at Hälleviksstrand's quay (oats export, 1800s). Rows of boathouses typical of the older fishing places; the later trawl/snurrevad villages had 'i stort sett helt' no long rows of sjöbodar or quays.",
+   "sources": [
+    "S40",
+    "S41",
+    "S54"
+   ],
+   "uncertain": true
+  },
+  "piers": {
+   "look": "Wooden piers (bryggor) and stone piers; Grundsund: long pier with boathouses along the canal and a protective pier built 1914-18 (S54); Gullholmen: steamboat landing quay; Hälleviksstrand: steamer pier/harbour plan (S40). Fish-drying racks and net racks: NOT found in any source read.",
+   "sources": [
+    "S40",
+    "S41",
+    "S54"
+   ],
+   "uncertain": true
+  },
+  "canningFactories": [
+   {
+    "id": "gullholmen-hallgren",
+    "name": "J. J. Hallgren & Söner (cannery, from 1864; SFK from 1898)",
+    "place": "Gullholmen",
+    "lat": 58.17993,
+    "lon": 11.40585,
+    "from": 1864,
+    "to": null,
+    "look": "Not described (Länsstyrelsen/museum: buildings for fish processing among the dwellings, boathouses and quays). Material, chimney, size: NOT found.",
+    "status": "conflict: operating to the 1960s per S41/S40 ('fiskberedningsindustri'), 'cannery closed' per the Länsstyrelsen text in settlements-history (no year). Operator in 1950 unknown.",
+    "sources": [
+     "S41",
+     "S40",
+     "S38"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "hallevikstrand-bovik",
+    "name": "Bovik konservfabriker AB (cannery; fish, herring and vegetables)",
+    "place": "Hälleviksstrand",
+    "lat": null,
+    "lon": null,
+    "from": 1934,
+    "to": 1976,
+    "look": "A cannery by the main road north of the village; the building's look: NOT found.",
+    "status": "operating in 1950 (1934-1976)",
+    "sources": [
+     "S39",
+     "S40"
+    ],
+    "uncertain": false
+   },
+   {
+    "id": "lysekil-sjobol",
+    "name": "Konservfabriken i Sjöbol (name not given)",
+    "place": "Lysekil (Sjöbol, now the refinery site)",
+    "lat": null,
+    "lon": null,
+    "from": null,
+    "to": null,
+    "look": "A photograph exists (undated); the page describes the cannery as standing where Preem's refinery now is.",
+    "status": "uncertain: undated photo only",
+    "sources": [
+     "S56"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "fiskebackskil-lyckes",
+    "name": "AB Lyckes söners konservfabrik",
+    "place": "Östersidan, Fiskebäckskil",
+    "lat": null,
+    "lon": null,
+    "from": null,
+    "to": null,
+    "look": "not found",
+    "status": "uncertain: only a bibliography title (Vikarvet 1996/97) in the Fiskebäckskil sv.wikipedia article; dates unknown; Östersidan canneries mentioned generally for the 1800s (S54)",
+    "sources": [
+     "S32",
+     "S54"
+    ],
+    "uncertain": true
+   },
+   {
+    "id": "grundsund-bovik",
+    "name": "Bovik cannery (mackerel in tomato sauce)",
+    "place": "Grundsund (Bovik)",
+    "lat": null,
+    "lon": null,
+    "from": null,
+    "to": null,
+    "look": "not found",
+    "status": "uncertain: sv.wikipedia says a cannery existed in Bovik, undated; the Orust survey names Bovik konservfabriker AB at Hälleviksstrand; no source links them",
+    "sources": [
+     "S33",
+     "S39"
+    ],
+    "uncertain": true
+   }
+  ],
+  "summerHouses": {
+   "where": "Lysekil: Curman's villas ('sommarhus i fornnordisk stil', 1800s) and the bath establishment (burned 1939); Fiskebäckskil: bath resort since 1867, bath restaurant and pier (1937 photo), locals renting rooms; Hälleviksstrand and Käringön: bath guests 1880s-90s who later built own summer houses; Gullholmen: holiday facility Gullholmsbaden (Reso, 1942) on Härmanö.",
+   "when50": "Paid leave: two weeks from 1938, three weeks from 1951 (S39): the summer-guest wave builds up from 1950; many houses had become summer homes after WWI in Gullholmen and Hälleviksstrand (S38, S40).",
+   "snickarglädje": "The word 'snickarglädje' was NOT found in any source; the Orust survey speaks of a shared 'snickeritradition' for house details around 1900 (S40).",
+   "sources": [
+    "S30",
+    "S38",
+    "S39",
+    "S40",
+    "S41",
+    "S54"
+   ],
+   "uncertain": true
+  },
+  "notes": "Everything under 'colours' and 'roofs' comes from present-day preservation guidance or general descriptions, not a 1950 photograph survey. Treat colours as designer's choice informed by these sources."
+ },
+ "grundsundCanal": {
+  "openedYear": 1918,
+  "state1950": "Existing: the canal and harbour were built 1914-1918 with 650,000 SEK of state aid (1913); there was no formal opening in 1918 (it was 'inaugurated' in 2018). It separates Skaftö from Ösö and splits the village into an eastern and a western half; a protective pier shelters against storm and swell; a long pier with boathouses lies along it. 1950 condition (dredging, quays) NOT documented.",
+  "dimensions": {
+   "width": null,
+   "depth": null,
+   "lengthNote": "not found; one source mentions a 1,500 m paddling stretch for a relay race, which is a race route, not the canal length",
+   "note": "The Skaftö Öråd booklet on the canal build is the source that would hold figures; not read"
+  },
+  "sources": [
+   "S54",
+   "S55",
+   "S33"
+  ],
+  "uncertain": false
+ },
+ "names": [],
+ "namesNote": "No 1950-era spelling difference was found. Old spellings found in other eras (Kierlingøon 1659 etc.) are in WORLD-1700. Not found, not guessed: e.g. whether 'Käringön' was written 'Kärringö' (the old Lotsverket texts quoted on fyr.org use 'Kärringö/Käringö', e.g. 'Kärringö lotsplats', undated for 1950), 'Gäfven' (1842/1852 spelling of Gäven).",
+ "notFound": [
+  "Name/operator/size/colours of the 1950 Lysekil-Fiskebäckskil ferry",
+  "1950 population of Lysekil and Käringön (nearest years given)",
+  "Fleet counts per village in 1950",
+  "Canning factory buildings' look (brick/wood, chimney, size) for any place",
+  "Wall colours of lighthouse keepers' houses at Måseskär and Hållö in 1950",
+  "Dimensions of the Grundsund canal",
+  "Fish-drying racks / net racks in any source",
+  "Hull colours of ordinary 1950 fishing boats besides Sandö",
+  "Date the 1923 Swedish buoyage plate was replaced between 1923 and 1965 (assumed unchanged)",
+  "Positions of Stångholmen, Fredagsholmen, Grötö, Gulskåren, Oxskär, Svensholmen, Hängdyn (not copied from a map)",
+  "'Snickarglädje', 'hajk', 'storbåt' (as boat), 'tuff-tuff' as terms in any source read",
+  "1950 timetable of coastal steamers to Gullholmen/Käringön and their names",
+  "Whether the Gothenburg steamer S/S Bohuslän still ran in 1950 (about 40 years from 1914 per S43; the steamer era ended 'under 1950-talet' per S42)"
+ ]
+}

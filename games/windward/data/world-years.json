@@ -11,20 +11,171 @@
       "epoch": "New border (data/epochs.json)",
       "source": "world-1700.json",
       "kit": "1700",
-      "waterOffset": { "from": "source", "path": "waterLevel.offsetM", "note": "the sea stood this many real metres higher against the land than today (our arithmetic on SMHI's rate, range 0.45-0.70; docs/WORLD-1700.md section 3)" },
-      "hiddenRocks": { "from": "source", "path": "shoals.list", "where": { "in1700": "just-under" }, "note": "rocks awash today are just under the surface in 1700: still solid for a keel, no longer plainly visible" },
+      "waterOffset": {
+        "from": "source",
+        "path": "waterLevel.offsetM",
+        "note": "the sea stood this many real metres higher against the land than today (our arithmetic on SMHI's rate, range 0.45-0.70; docs/WORLD-1700.md section 3)"
+      },
+      "hiddenRocks": {
+        "from": "source",
+        "path": "shoals.list",
+        "where": {
+          "in1700": "just-under"
+        },
+        "note": "rocks awash today are just under the surface in 1700: still solid for a keel, no longer plainly visible"
+      },
       "lights": false,
-      "seaMarks": { "modern": false, "kinds": ["cairn", "painted-rock-mark"], "note": "only cairns and painted rocks are drawn; the one spar mark (Hattan, invented) has no model yet and is not drawn" },
+      "seaMarks": {
+        "modern": false,
+        "kinds": [
+          "cairn",
+          "painted-rock-mark"
+        ],
+        "note": "only cairns and painted rocks are drawn; the one spar mark (Hattan, invented) has no model yet and is not drawn"
+      },
       "settlements": {
         "from": "source",
         "path": "settlements",
-        "showIf": ["yes", "probable", "uncertain"],
+        "showIf": [
+          "yes",
+          "probable",
+          "uncertain"
+        ],
         "householdsPerCottage": 2,
-        "cottagesBySizeClass": { "hamlet": 4, "farm-and-fishing": 3, "fishing-village": 12, "small-fishing-village": 10, "unknown": 2 },
+        "cottagesBySizeClass": {
+          "hamlet": 4,
+          "farm-and-fishing": 3,
+          "fishing-village": 12,
+          "small-fishing-village": 10,
+          "unknown": 2
+        },
         "note": "a cottage stands for about two households (poor strandsittare shared small plots); a size class with no count uses the table; the table is OUR bracket between the two nearest documented counts, not a source figure"
       },
-      "names": { "from": "source", "path": "names", "note": "only documented old forms are used; a place with none shows no name" },
-      "boats": { "kit": "eka", "moored": 5, "sailing": 2, "note": "quiet coast (docs/WORLD-1700.md section 5): few boats, one or two aboard each" }
+      "names": {
+        "from": "source",
+        "path": "names",
+        "note": "only documented old forms are used; a place with none shows no name"
+      },
+      "boats": {
+        "kit": "eka",
+        "moored": 5,
+        "sailing": 2,
+        "note": "quiet coast (docs/WORLD-1700.md section 5): few boats, one or two aboard each"
+      }
+    },
+    {
+      "id": "1950",
+      "label": "1950",
+      "year": 1950,
+      "from": 1930,
+      "to": 1969,
+      "epoch": "Summer guests (data/epochs.json)",
+      "source": "world-1950.json",
+      "kit": "1950",
+      "waterOffset": {
+        "from": "source",
+        "path": "waterLevel.offsetM",
+        "note": "a few centimetres: our arithmetic on SMHI's uplift rate over 75 years (docs/WORLD-1950.md)"
+      },
+      "hiddenRocks": null,
+      "lights": {
+        "from": "source",
+        "path": "lighthouses.list",
+        "where": {
+          "inWindow": true,
+          "standingIn1950": true
+        },
+        "note": "only the lights standing in 1950; each carries lit / manned (keepers) from the data",
+        "modelOverrides": {
+          "islandsberg": {
+            "lit": false,
+            "manned": "dark",
+            "keeperHouse": false,
+            "why": "the game's Islandsberg tower IS the old 1883 keeper's-house light, extinguished in 1938 (docs/WORLD-1950.md B). The new automatic concrete tower 425 m north was lit in 1950 but has no model, so the lab shows the old house dark"
+          },
+          "maseskar": {
+            "keeperWall": "red",
+            "why": "the dwelling was painted red in 1865 (S16); its 1950 colour is not documented: red is the designer's choice"
+          }
+        }
+      },
+      "seaMarks": {
+        "modern": false,
+        "period": {
+          "from": "source",
+          "path": "seaMarks",
+          "map": {
+            "lateral": {
+              "port": [
+                "red-cone",
+                "red-spar"
+              ],
+              "starboard": [
+                "black-cone",
+                "black-spar"
+              ]
+            },
+            "isolated_danger": [
+              "redblack-spar"
+            ],
+            "note": "1950 buoyage was by COMPASS SIDE of the fairway (red N/E, black S/W; docs/WORLD-1950.md C), not port/starboard by vessel. Today's OSM marks carry IALA's side as seen from the sea; for the mostly west-to-east fairways of this coast port = north, starboard = south, so port -> red and starboard -> black (the data file gives the same pairing). A mark picks cone buoy or pole by a hash of its id. isolated_danger -> the red-and-black banded 'kryssprick'. cardinal, special and the 41 minor lights are not drawn (no model / not in 1950)."
+          }
+        },
+        "kinds": [],
+        "note": "the OSM marks are today's IALA A marks; the period look and which kinds existed come from the 1950 data"
+      },
+      "settlements": {
+        "from": "source",
+        "path": "settlements.list",
+        "existsKey": "existsAround1950",
+        "showIf": [
+          "yes",
+          "probable",
+          "uncertain"
+        ],
+        "peoplePerCottage": 25,
+        "countYears": [
+          1930,
+          1970
+        ],
+        "minCottages": 3,
+        "maxCottages": 28,
+        "cottagesBySizeClass": {
+          "hamlet": 5,
+          "farm-and-fishing": 4,
+          "small-fishing-village": 10,
+          "fishing-village": 16,
+          "village": 20,
+          "small-town": 28,
+          "unknown": 3
+        },
+        "colours": {
+          "white": 0.4,
+          "red": 0.35,
+          "ochre": 0.25
+        },
+        "note": "one game house stands for about 25 people (stylised; a real village has far more houses than fit); capped at 28; a size class with no count uses the table. The table and the 25 are OUR scale, not source figures. Wall colours (white, 'English red', ochre) follow the municipal preservation advice quoted in docs/WORLD-1950.md E, which is NOT a 1950 survey: uncertain."
+      },
+      "industry": {
+        "from": "source",
+        "path": "village.canningFactories",
+        "note": "fish-canning factories with a dated operation in or spanning 1950: Gullholmen (Hallgren, from 1864; its 1950 status is conflicting in the sources: uncertain) and Hälleviksstrand (Bovik, 1934-1976). The other three entries are undated photos or titles and are not drawn.",
+        "include": [
+          "gullholmen-hallgren",
+          "hallevikstrand-bovik"
+        ]
+      },
+      "names": {
+        "from": "settlements",
+        "note": "modern names (no differing 1950 spellings found)"
+      },
+      "boats": {
+        "kit": "1950",
+        "moored": 10,
+        "sailing": 3,
+        "ferry": true,
+        "note": "busier than 1700 (wooden fishing fleet, first leisure boats) but nothing like today; counts are our recommendation (invented), see docs/WORLD-1950.md"
+      }
     },
     {
       "id": "today",
@@ -35,13 +186,29 @@
       "epoch": "Today (the lure)",
       "source": null,
       "kit": "today",
-      "waterOffset": { "from": "value", "value": 0 },
+      "waterOffset": {
+        "from": "value",
+        "value": 0
+      },
       "hiddenRocks": null,
       "lights": true,
-      "seaMarks": { "modern": true, "kinds": [] },
-      "settlements": { "from": "game", "note": "the game's own village placement (src/coast-world.js placeCoastVillages), unchanged" },
-      "names": { "from": "game", "note": "modern names" },
-      "boats": { "kit": "koster", "moored": 0, "sailing": 0 }
+      "seaMarks": {
+        "modern": true,
+        "kinds": []
+      },
+      "settlements": {
+        "from": "game",
+        "note": "the game's own village placement (src/coast-world.js placeCoastVillages), unchanged"
+      },
+      "names": {
+        "from": "game",
+        "note": "modern names"
+      },
+      "boats": {
+        "kit": "koster",
+        "moored": 0,
+        "sailing": 0
+      }
     }
   ]
 }
