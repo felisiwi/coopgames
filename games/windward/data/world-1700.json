@@ -1,0 +1,2459 @@
+{
+  "about": "The coast around 1700 (the end of the era \"New border\", 1658-1705, inside the epoch New Crown) for the Windward game, so it can switch years later. New data only: no game code reads this file yet. Everything is sourced; anything uncertain says so; anything invented is marked invented. Facts come from fetched pages and PDFs read on 2026-11-06, never from memory. Do not decide here whether the player's chart is wiped on arrival: that is Felix's call.",
+  "generated": "2026-11-06",
+  "year": 1700,
+  "era": {
+    "name": "New border",
+    "from": 1658,
+    "to": 1705,
+    "epoch": "new-crown",
+    "source": "games/windward/data/epochs.json"
+  },
+  "region": {
+    "s": 58.085,
+    "w": 11.25,
+    "n": 58.3,
+    "e": 11.5
+  },
+  "flagsKey": {
+    "uncertain": "true when the 1700 state of the thing is not directly documented for 1700 (estimated, inferred, from a nearby year, or from a weak source)",
+    "invented": "true for placements or choices made by us as a plausible recommendation, with no source that it existed",
+    "confidence": "documented | inferred | derived | recommended"
+  },
+  "sourceRegistry": {
+    "S01": {
+      "url": "https://www.smhi.se/hfa_coord/BOOS/dbkust/mwreg_MW.pdf",
+      "what": "SMHI table \"Havsvattenstånd 2026\", column \"Apparent landhöjning *\", cm/år, footnote \"* Relativ landhöjning för mätperioden\"",
+      "reliability": "primary",
+      "readOn": "2026-11-06 (PDF text extracted locally)"
+    },
+    "S02": {
+      "url": "https://www.smhi.se/kunskapsbanken/oceanografi/vattenstand-och-klimat/landhojning-och-vattenstand",
+      "what": "SMHI: definitions of absolute / levelled / apparent land uplift",
+      "reliability": "primary",
+      "readOn": "2026-11-06"
+    },
+    "S03": {
+      "url": "https://www.smhi.se/kunskapsbanken/oceanografi/vattenstand-och-klimat/havsnivahojningen-syns-i-matningar",
+      "what": "SMHI: global sea level up about two decimetres since the early 1900s",
+      "reliability": "primary",
+      "readOn": "2026-11-06"
+    },
+    "S04": {
+      "url": "search-summary only: Swedish Maritime Administration 2025 report on Stockholm land uplift (page not opened)",
+      "what": "Stockholm rates 0.47 cm/yr (1774-1885) vs 0.38 (1886-2024); only seen in a search summary",
+      "reliability": "search-summary",
+      "readOn": "2026-11-06"
+    },
+    "S05": {
+      "url": "https://sv.wikipedia.org/wiki/Lysekil",
+      "what": "sv.wikipedia Lysekil (1578 spelling, 1645 and 1750 counts, herring 1666-1675, parish since 1700)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S06": {
+      "url": "https://sv.wikipedia.org/wiki/Lyse_socken",
+      "what": "sv.wikipedia Lyse socken (Lysekils församling split off c.1700; Lysa 1317)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S07": {
+      "url": "https://sv.wikipedia.org/wiki/Morlanda_socken",
+      "what": "sv.wikipedia Morlanda socken (Molanda 1388; Fiskebäckskils församling split off in the 1600s)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S08": {
+      "url": "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskil",
+      "what": "sv.wikipedia Fiskebäckskil",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S09": {
+      "url": "https://www.vastsverige.com/lysekil/produkter/skafto-fiskebackskils-kyrka/",
+      "what": "vastsverige.com Fiskebäckskils kyrka (old wooden church from the 1500s, font 1600s, altarpiece 1665)",
+      "reliability": "tourism",
+      "readOn": "2026-11-06"
+    },
+    "S10": {
+      "url": "https://sv.wikipedia.org/wiki/Grundsund",
+      "what": "sv.wikipedia Grundsund (name from the shallow sound; fiskeläge from the 1600s at least)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S11": {
+      "url": "https://digitaltmuseum.org/021017762068",
+      "what": "Bohusläns museum via DigitaltMuseum, \"Miljö 20. Grundsund\" (citing Kulturmiljöer Lysekils kommun)",
+      "reliability": "primary",
+      "readOn": "2026-11-06"
+    },
+    "S12": {
+      "url": "https://www.vastsverige.com/skafto/artiklar/kanalfesten-2016/",
+      "what": "vastsverige.com Kanalfesten 2016: harbour \"allt grundare\", 1886 survey money, 1892 dredging question, canal 1914-1918",
+      "reliability": "tourism",
+      "readOn": "2026-11-06"
+    },
+    "S13": {
+      "url": "https://www.vastsverige.com/skafto/artiklar/kanalfesten-grundsund-2018",
+      "what": "vastsverige.com Kanalfesten Grundsund 2018: canal and harbour built 1914-1918, no opening in 1918",
+      "reliability": "tourism",
+      "readOn": "2026-11-06"
+    },
+    "S14": {
+      "url": "https://www.vastsverige.com/lysekil/produkter/skafto-grundsund/",
+      "what": "vastsverige.com Grundsund (canal dug in the First World War; herring period of the 1700s)",
+      "reliability": "tourism",
+      "readOn": "2026-11-06"
+    },
+    "S15": {
+      "url": "https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2012-39.pdf",
+      "what": "Bohusläns museum rapport 2012:39, Gullholmens hamn (1588, 1610, 1645, late 1600s, Gyldenløve feud, Tordenskiold, Felterus map 1673)",
+      "reliability": "primary",
+      "readOn": "2026-11-06 (PDF text extracted locally)"
+    },
+    "S16": {
+      "url": "https://sv.wikipedia.org/wiki/Gullholmen",
+      "what": "sv.wikipedia Gullholmen",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S17": {
+      "url": "https://sv.wikipedia.org/wiki/K%C3%A4ring%C3%B6n",
+      "what": "sv.wikipedia Käringön (Kierlingøon 1659; \"käring\" = whitewashed cairn theory, Svenskt ortnamnslexikon 2003)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S18": {
+      "url": "data/history-start-area.md (project file, relays Svenska kyrkan Käringöns kyrka and vastsverige.com Käringön)",
+      "what": "Käringön inhabited since the 1500s; Saltskär \"käring\" mark; Olof Knape born 1664",
+      "reliability": "project-file",
+      "readOn": "2026-11-06"
+    },
+    "S19": {
+      "url": "https://sv.wikipedia.org/wiki/M%C3%A5sesk%C3%A4r",
+      "what": "sv.wikipedia Måseskär (\"Ännu tidigare fanns ett stenkummel på samma plats\"; stångmärke 1829; light 1865)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S20": {
+      "url": "https://hhogman.se/maritime-piloting-swe.htm",
+      "what": "Hans Högman, history of maritime piloting in Sweden (1579, 1667, 1677, 1696 decree, 97 pilot stations end of 1600s)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S21": {
+      "url": "https://www.vastsverige.com/tanum/produkter/vaderoarnaslotsutkik/",
+      "what": "vastsverige.com Väderöarnas lotsutkik (pilots since at least the 1600s; station 1754) - outside the region",
+      "reliability": "tourism",
+      "readOn": "2026-11-06"
+    },
+    "S22": {
+      "url": "https://sv.wikipedia.org/wiki/Sj%C3%B6m%C3%A4rke",
+      "what": "sv.wikipedia Sjömärke (kinds of sea marks: kummel, båkar, stångmärken)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S23": {
+      "url": "https://sv.wikipedia.org/wiki/Sillperiod",
+      "what": "sv.wikipedia Sillperiod (1660-1680, 1747-1809)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S24": {
+      "url": "https://www.vastsverige.com/uddevalla/guider1/Uddevallas-sillhistoria/",
+      "what": "vastsverige.com Uddevallas sillhistoria (1660-1680, 1747-1808)",
+      "reliability": "tourism",
+      "readOn": "2026-11-06"
+    },
+    "S25": {
+      "url": "https://sv.wikipedia.org/wiki/Kapare",
+      "what": "sv.wikipedia Kapare (Swedish privateer vessels from 1709)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    },
+    "S26": {
+      "url": "https://en.wikipedia.org/wiki/Battle_of_Marstrand",
+      "what": "en.wikipedia Battle of Marstrand (Gyldenløve landing 1677); only seen in a search summary",
+      "reliability": "search-summary",
+      "readOn": "2026-11-06"
+    },
+    "S27": {
+      "url": "https://en.wikipedia.org/wiki/Attack_on_Marstrand",
+      "what": "en.wikipedia Attack on Marstrand (Tordenskiold 1719); only seen in a search summary",
+      "reliability": "search-summary",
+      "readOn": "2026-11-06"
+    },
+    "S28": {
+      "url": "https://www.spfseniorerna.se/globalassets/foreningar/spf-seniorerna-morup-stafsinge/sill.pdf",
+      "what": "SPF Seniorerna \"Sill\" slides citing the 2024 book Sill: Dutch 1600s clinker-built decked herring boats; only seen in a search summary",
+      "reliability": "search-summary",
+      "readOn": "2026-11-06"
+    },
+    "S29": {
+      "url": "games/windward/data/settlements-history.json",
+      "what": "project data: sourced settlement phases, first records and counts for the Coast Lab",
+      "reliability": "project-file",
+      "readOn": "2026-11-06"
+    },
+    "S30": {
+      "url": "games/windward/assets/coast/shoals.json",
+      "what": "project data from OpenStreetMap (ODbL 1.0): rocks with Swedish chart levels",
+      "reliability": "project-file",
+      "readOn": "2026-11-06"
+    },
+    "S31": {
+      "url": "games/windward/assets/coast/names.json",
+      "what": "project data from OpenStreetMap (ODbL 1.0): islands, skerries, harbours, coordinates",
+      "reliability": "project-file",
+      "readOn": "2026-11-06"
+    },
+    "S32": {
+      "url": "games/windward/LIGHTHOUSES.md and data/epochs.json",
+      "what": "project data: first lighthouse in the region is much later than 1700 (Carlsten fortress light 1782 is the earliest in epochs.json)",
+      "reliability": "project-file",
+      "readOn": "2026-11-06"
+    },
+    "S33": {
+      "url": "games/windward/docs/BOAT-BRIEF.md",
+      "what": "project design brief: the ~1700 player boat is a small tarred clinker eka with a spritsail (a design choice, not a historical source)",
+      "reliability": "project-file",
+      "readOn": "2026-11-06"
+    },
+    "S34": {
+      "url": "https://sv.wikipedia.org/wiki/H%C3%A5ll%C3%B6",
+      "what": "sv.wikipedia Hållö: \"Bohusläns äldsta\" lighthouse, no year in the passage read (marginal, just north of the region)",
+      "reliability": "secondary",
+      "readOn": "2026-11-06"
+    }
+  },
+  "waterLevel": {
+    "offsetM": 0.55,
+    "rangeM": [
+      0.45,
+      0.7
+    ],
+    "meaning": "In 1700 the sea stood about this much HIGHER against the land than it does today. Add it to today's water level when drawing 1700 (equivalently: lower every piece of today's land and rock by this much).",
+    "uncertain": true,
+    "confidence": "derived",
+    "derivation": {
+      "publishedRates": [
+        {
+          "station": "Marstrand",
+          "cmPerYear": 0.16,
+          "source": "S01"
+        },
+        {
+          "station": "Göteborg (Torshamnen/Krossholmen)",
+          "cmPerYear": 0.16,
+          "source": "S01"
+        },
+        {
+          "station": "Smögen",
+          "cmPerYear": 0.18,
+          "source": "S01"
+        },
+        {
+          "station": "Kungsvik",
+          "cmPerYear": 0.2,
+          "source": "S01"
+        }
+      ],
+      "lysekilGauge": "none. SMHI lists no Lysekil station. Lysekil sits between Marstrand (0.16) and Smögen (0.18), so 0.16-0.20 cm/yr is used.",
+      "years": 325,
+      "arithmeticCm": {
+        "low": 52,
+        "high": 65,
+        "mid": 55.3
+      },
+      "meaningOfRate": "SMHI: apparent uplift is \"ett mått på hur jordskorpan rör sig relativt havets medelnivå\", i.e. how fast the land rises relative to mean sea level (it already includes today's climate sea-level rise). The table footnote says \"Relativ landhöjning för mätperioden\"; the measurement period itself is not printed in the table.",
+      "caveats": [
+        "The offset is OUR arithmetic (rate x 325 years), not a published figure. SMHI publishes the rate, not a 1700 water level.",
+        "A modern gauge-period rate is extended back to 1700 as if constant. Sea-level rise accelerated in the 1900s, so the apparent uplift before the gauge era was probably somewhat larger; the range goes up to 0.70 m for that reason. This is an inference. The only supporting figures seen (Stockholm 0.47 cm/yr in 1774-1885 vs 0.38 later) come from a search summary of a Swedish Maritime Administration report that was not opened (S04), and Stockholm is a different uplift regime.",
+        "Mean sea level, not chart datum: an \"awash\" rock is at about the mean water surface."
+      ]
+    },
+    "sources": [
+      "S01",
+      "S02",
+      "S03",
+      "S04"
+    ]
+  },
+  "shoals": {
+    "rule": "Offset applied to the OSM chart levels in shoals.json. \"awash\" (in the water surface today) -> under water by about the offset (\"just-under\": about half a metre below the surface, visible as a pale patch or a breaker in swell, a real hazard for a keel). \"covers\" -> also just under. \"dry\" (one rock, height unknown) -> awash if it stands less than the offset above the water, otherwise still dry. \"submerged\" and \"unknown\" rocks stay under water, only deeper by the offset (the four with a stated depth, 3.8-7.1 m, become 4.3-7.6 m).",
+    "counts": {
+      "awashToJustUnder": 200,
+      "coversToJustUnder": 2,
+      "dryToAwashOrDry": 1,
+      "submergedOrUnknownUnchanged": 78
+    },
+    "list": [
+      {
+        "id": "node/3703696361",
+        "lat": 58.08513,
+        "lon": 11.4557,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703694241",
+        "lat": 58.08522,
+        "lon": 11.46506,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703696362",
+        "lat": 58.08536,
+        "lon": 11.45553,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703696382",
+        "lat": 58.08625,
+        "lon": 11.46213,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703696384",
+        "lat": 58.0864,
+        "lon": 11.46054,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675760078",
+        "lat": 58.08689,
+        "lon": 11.44087,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4023031437",
+        "lat": 58.08714,
+        "lon": 11.44553,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703694289",
+        "lat": 58.08824,
+        "lon": 11.46719,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703694288",
+        "lat": 58.08824,
+        "lon": 11.46791,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703694293",
+        "lat": 58.08839,
+        "lon": 11.4672,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703694294",
+        "lat": 58.0884,
+        "lon": 11.4677,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703694296",
+        "lat": 58.08854,
+        "lon": 11.46713,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708051",
+        "lat": 58.08952,
+        "lon": 11.45419,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708052",
+        "lat": 58.0897,
+        "lon": 11.45402,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708053",
+        "lat": 58.09053,
+        "lon": 11.45541,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708054",
+        "lat": 58.09065,
+        "lon": 11.42913,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708055",
+        "lat": 58.09067,
+        "lon": 11.45532,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708056",
+        "lat": 58.09082,
+        "lon": 11.42732,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708747",
+        "lat": 58.09137,
+        "lon": 11.4325,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708748",
+        "lat": 58.09138,
+        "lon": 11.43345,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708749",
+        "lat": 58.09139,
+        "lon": 11.43293,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708750",
+        "lat": 58.09145,
+        "lon": 11.43225,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708751",
+        "lat": 58.09159,
+        "lon": 11.433,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708752",
+        "lat": 58.0917,
+        "lon": 11.43279,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708753",
+        "lat": 58.09173,
+        "lon": 11.43241,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708764",
+        "lat": 58.09189,
+        "lon": 11.43238,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675762444",
+        "lat": 58.09246,
+        "lon": 11.44555,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943154702",
+        "lat": 58.09593,
+        "lon": 11.47691,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943154701",
+        "lat": 58.09597,
+        "lon": 11.47708,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943154703",
+        "lat": 58.09602,
+        "lon": 11.47737,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943154704",
+        "lat": 58.09604,
+        "lon": 11.47763,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703708058",
+        "lat": 58.09947,
+        "lon": 11.4431,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161414",
+        "lat": 58.10108,
+        "lon": 11.45751,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161413",
+        "lat": 58.10135,
+        "lon": 11.45712,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161412",
+        "lat": 58.10137,
+        "lon": 11.45408,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161418",
+        "lat": 58.10176,
+        "lon": 11.46375,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161417",
+        "lat": 58.10203,
+        "lon": 11.46188,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943111182",
+        "lat": 58.10226,
+        "lon": 11.43038,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943111183",
+        "lat": 58.10236,
+        "lon": 11.43011,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943111184",
+        "lat": 58.10238,
+        "lon": 11.42976,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943111186",
+        "lat": 58.10245,
+        "lon": 11.43024,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943111187",
+        "lat": 58.10246,
+        "lon": 11.43065,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943111185",
+        "lat": 58.10247,
+        "lon": 11.43001,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161416",
+        "lat": 58.10276,
+        "lon": 11.4606,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713877",
+        "lat": 58.10292,
+        "lon": 11.4369,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713878",
+        "lat": 58.10296,
+        "lon": 11.43643,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730147",
+        "lat": 58.10311,
+        "lon": 11.35729,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730146",
+        "lat": 58.10329,
+        "lon": 11.35751,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713879",
+        "lat": 58.10333,
+        "lon": 11.43732,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713880",
+        "lat": 58.10395,
+        "lon": 11.43377,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022535058",
+        "lat": 58.10399,
+        "lon": 11.46024,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713881",
+        "lat": 58.10406,
+        "lon": 11.43367,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713882",
+        "lat": 58.1042,
+        "lon": 11.43358,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730143",
+        "lat": 58.10432,
+        "lon": 11.36039,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943130891",
+        "lat": 58.10464,
+        "lon": 11.433,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730145",
+        "lat": 58.1047,
+        "lon": 11.35468,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730142",
+        "lat": 58.10471,
+        "lon": 11.36379,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022421081",
+        "lat": 58.10554,
+        "lon": 11.47136,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730144",
+        "lat": 58.10567,
+        "lon": 11.35661,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713909",
+        "lat": 58.1057,
+        "lon": 11.42923,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703713910",
+        "lat": 58.1058,
+        "lon": 11.44195,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022529677",
+        "lat": 58.10673,
+        "lon": 11.45808,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022549629",
+        "lat": 58.10894,
+        "lon": 11.45184,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022549630",
+        "lat": 58.10906,
+        "lon": 11.45066,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730141",
+        "lat": 58.10983,
+        "lon": 11.3753,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730139",
+        "lat": 58.10986,
+        "lon": 11.37169,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730148",
+        "lat": 58.10994,
+        "lon": 11.35793,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5706518880",
+        "lat": 58.10998,
+        "lon": 11.37178,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7972730140",
+        "lat": 58.11046,
+        "lon": 11.37349,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022549633",
+        "lat": 58.11086,
+        "lon": 11.44334,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022549634",
+        "lat": 58.11093,
+        "lon": 11.44354,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161408",
+        "lat": 58.11208,
+        "lon": 11.46443,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161407",
+        "lat": 58.11214,
+        "lon": 11.46472,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161406",
+        "lat": 58.11252,
+        "lon": 11.46528,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161397",
+        "lat": 58.11376,
+        "lon": 11.46158,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943161384",
+        "lat": 58.11451,
+        "lon": 11.4653,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022557498",
+        "lat": 58.11638,
+        "lon": 11.44756,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022557499",
+        "lat": 58.11647,
+        "lon": 11.4456,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022558420",
+        "lat": 58.11789,
+        "lon": 11.44588,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022578769",
+        "lat": 58.11847,
+        "lon": 11.43212,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022558476",
+        "lat": 58.11855,
+        "lon": 11.44136,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943166928",
+        "lat": 58.1206,
+        "lon": 11.43796,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943166929",
+        "lat": 58.1207,
+        "lon": 11.43785,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943166930",
+        "lat": 58.1221,
+        "lon": 11.43744,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943122719",
+        "lat": 58.12227,
+        "lon": 11.39509,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740346",
+        "lat": 58.12231,
+        "lon": 11.42137,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943122720",
+        "lat": 58.12239,
+        "lon": 11.39942,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173770",
+        "lat": 58.12298,
+        "lon": 11.43777,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173771",
+        "lat": 58.12315,
+        "lon": 11.43779,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022595413",
+        "lat": 58.12344,
+        "lon": 11.4227,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740347",
+        "lat": 58.12344,
+        "lon": 11.42271,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755678",
+        "lat": 58.12346,
+        "lon": 11.4323,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755679",
+        "lat": 58.12359,
+        "lon": 11.43225,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740365",
+        "lat": 58.12398,
+        "lon": 11.41735,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740366",
+        "lat": 58.12399,
+        "lon": 11.41657,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740371",
+        "lat": 58.12399,
+        "lon": 11.41737,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943122718",
+        "lat": 58.12409,
+        "lon": 11.40446,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740388",
+        "lat": 58.12423,
+        "lon": 11.41829,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740384",
+        "lat": 58.12431,
+        "lon": 11.41676,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703740400",
+        "lat": 58.1248,
+        "lon": 11.41877,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755696",
+        "lat": 58.12783,
+        "lon": 11.42133,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675698507",
+        "lat": 58.12789,
+        "lon": 11.37844,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755709",
+        "lat": 58.12806,
+        "lon": 11.41574,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755711",
+        "lat": 58.12808,
+        "lon": 11.41536,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173748",
+        "lat": 58.12808,
+        "lon": 11.42085,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755718",
+        "lat": 58.1282,
+        "lon": 11.42193,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755721",
+        "lat": 58.12824,
+        "lon": 11.42179,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675697906",
+        "lat": 58.13019,
+        "lon": 11.3784,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4022618330",
+        "lat": 58.13053,
+        "lon": 11.42155,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/14239347783",
+        "lat": 58.13092,
+        "lon": 11.35957,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/14239347782",
+        "lat": 58.13117,
+        "lon": 11.35968,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3703755268",
+        "lat": 58.13171,
+        "lon": 11.39979,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/14239347790",
+        "lat": 58.13268,
+        "lon": 11.35601,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675700142",
+        "lat": 58.13312,
+        "lon": 11.39407,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173727",
+        "lat": 58.13452,
+        "lon": 11.41939,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173728",
+        "lat": 58.13467,
+        "lon": 11.41976,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173730",
+        "lat": 58.13475,
+        "lon": 11.41949,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173729",
+        "lat": 58.13477,
+        "lon": 11.41959,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173705",
+        "lat": 58.13517,
+        "lon": 11.42029,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173678",
+        "lat": 58.13608,
+        "lon": 11.41787,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173645",
+        "lat": 58.13648,
+        "lon": 11.41844,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943173655",
+        "lat": 58.13656,
+        "lon": 11.41809,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675709923",
+        "lat": 58.13799,
+        "lon": 11.39803,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675709924",
+        "lat": 58.13863,
+        "lon": 11.39785,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675703421",
+        "lat": 58.13929,
+        "lon": 11.39531,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675690234",
+        "lat": 58.13942,
+        "lon": 11.37126,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675703687",
+        "lat": 58.13943,
+        "lon": 11.39739,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675703420",
+        "lat": 58.13958,
+        "lon": 11.39515,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675690235",
+        "lat": 58.1398,
+        "lon": 11.37084,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675667501",
+        "lat": 58.14106,
+        "lon": 11.38416,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675677615",
+        "lat": 58.1418,
+        "lon": 11.37665,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675664086",
+        "lat": 58.14182,
+        "lon": 11.38232,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675664084",
+        "lat": 58.14192,
+        "lon": 11.38245,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675664085",
+        "lat": 58.14192,
+        "lon": 11.38266,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675664083",
+        "lat": 58.14198,
+        "lon": 11.38227,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675664087",
+        "lat": 58.14212,
+        "lon": 11.38204,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675664088",
+        "lat": 58.14231,
+        "lon": 11.38212,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675664082",
+        "lat": 58.14244,
+        "lon": 11.38355,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675652989",
+        "lat": 58.14498,
+        "lon": 11.38185,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/14239277356",
+        "lat": 58.15003,
+        "lon": 11.41202,
+        "today": "dry",
+        "in1700": "awash-or-dry"
+      },
+      {
+        "id": "node/3570344298",
+        "lat": 58.15025,
+        "lon": 11.41035,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710240401",
+        "lat": 58.15063,
+        "lon": 11.39867,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710238092",
+        "lat": 58.15163,
+        "lon": 11.39732,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710238093",
+        "lat": 58.15169,
+        "lon": 11.39756,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710238095",
+        "lat": 58.15256,
+        "lon": 11.39861,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710238097",
+        "lat": 58.15267,
+        "lon": 11.39875,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710239069",
+        "lat": 58.15275,
+        "lon": 11.3961,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710239070",
+        "lat": 58.15279,
+        "lon": 11.39562,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710239071",
+        "lat": 58.15286,
+        "lon": 11.39612,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3710239072",
+        "lat": 58.15293,
+        "lon": 11.39616,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5022738053",
+        "lat": 58.17323,
+        "lon": 11.45425,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5022601351",
+        "lat": 58.17401,
+        "lon": 11.40973,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4536963150",
+        "lat": 58.17413,
+        "lon": 11.37456,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5022733923",
+        "lat": 58.17474,
+        "lon": 11.45515,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4674746042",
+        "lat": 58.1783,
+        "lon": 11.40898,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4674784670",
+        "lat": 58.17897,
+        "lon": 11.41355,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5022733926",
+        "lat": 58.17901,
+        "lon": 11.42844,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5022733925",
+        "lat": 58.17901,
+        "lon": 11.42856,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5022733924",
+        "lat": 58.17901,
+        "lon": 11.42871,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/5022733927",
+        "lat": 58.17902,
+        "lon": 11.42831,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675234490",
+        "lat": 58.1812,
+        "lon": 11.32545,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943209483",
+        "lat": 58.1815,
+        "lon": 11.4192,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4674777226",
+        "lat": 58.18176,
+        "lon": 11.41413,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4674777227",
+        "lat": 58.18207,
+        "lon": 11.4134,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943207098",
+        "lat": 58.18218,
+        "lon": 11.42072,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4674767184",
+        "lat": 58.18225,
+        "lon": 11.40939,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943207096",
+        "lat": 58.1824,
+        "lon": 11.42115,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943207099",
+        "lat": 58.18248,
+        "lon": 11.42022,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943207097",
+        "lat": 58.18252,
+        "lon": 11.42108,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4674777228",
+        "lat": 58.18276,
+        "lon": 11.41342,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675318147",
+        "lat": 58.18278,
+        "lon": 11.39194,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943209484",
+        "lat": 58.18297,
+        "lon": 11.42062,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943209485",
+        "lat": 58.18316,
+        "lon": 11.41964,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943209486",
+        "lat": 58.1833,
+        "lon": 11.41997,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943209487",
+        "lat": 58.18438,
+        "lon": 11.42077,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675282045",
+        "lat": 58.18482,
+        "lon": 11.39927,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675282046",
+        "lat": 58.18521,
+        "lon": 11.39915,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675279670",
+        "lat": 58.18525,
+        "lon": 11.40113,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675282047",
+        "lat": 58.18549,
+        "lon": 11.39781,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675282048",
+        "lat": 58.18563,
+        "lon": 11.39704,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675288133",
+        "lat": 58.18725,
+        "lon": 11.40049,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4536912705",
+        "lat": 58.18778,
+        "lon": 11.40591,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675202351",
+        "lat": 58.19069,
+        "lon": 11.42301,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4675312308",
+        "lat": 58.19391,
+        "lon": 11.38896,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4536926702",
+        "lat": 58.19948,
+        "lon": 11.46194,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943203468",
+        "lat": 58.20343,
+        "lon": 11.48698,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943203656",
+        "lat": 58.20485,
+        "lon": 11.49175,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4943203655",
+        "lat": 58.20524,
+        "lon": 11.49384,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3545829810",
+        "lat": 58.24909,
+        "lon": 11.45383,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3545829822",
+        "lat": 58.24922,
+        "lon": 11.45433,
+        "today": "covers",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3545846979",
+        "lat": 58.25401,
+        "lon": 11.44758,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3545846987",
+        "lat": 58.25406,
+        "lon": 11.44768,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3545868668",
+        "lat": 58.26115,
+        "lon": 11.47539,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3545868696",
+        "lat": 58.26143,
+        "lon": 11.47399,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3545868716",
+        "lat": 58.26342,
+        "lon": 11.47292,
+        "today": "covers",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/4536902923",
+        "lat": 58.26752,
+        "lon": 11.42441,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3587407555",
+        "lat": 58.26779,
+        "lon": 11.45227,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3587411276",
+        "lat": 58.27577,
+        "lon": 11.45093,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3587411277",
+        "lat": 58.27594,
+        "lon": 11.4507,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/3587411278",
+        "lat": 58.27597,
+        "lon": 11.45055,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7756689157",
+        "lat": 58.28034,
+        "lon": 11.34154,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7756702503",
+        "lat": 58.28209,
+        "lon": 11.34371,
+        "today": "awash",
+        "in1700": "just-under"
+      },
+      {
+        "id": "node/7756684075",
+        "lat": 58.28885,
+        "lon": 11.34644,
+        "today": "awash",
+        "in1700": "just-under"
+      }
+    ],
+    "namedShoals": [
+      {
+        "id": "relation/10249725",
+        "name": "Tors både",
+        "lat": 58.10967,
+        "lon": 11.41649,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "relation/11021067",
+        "name": "Bytebåden",
+        "lat": 58.11333,
+        "lon": 11.35736,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "relation/10249727",
+        "name": "Hästebåden",
+        "lat": 58.11489,
+        "lon": 11.38988,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "node/3667068404",
+        "name": "Sverkerbådan",
+        "lat": 58.13351,
+        "lon": 11.3951,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "relation/10250495",
+        "name": "Långgaps både",
+        "lat": 58.25451,
+        "lon": 11.44335,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "relation/10250158",
+        "name": "Smedjeflut",
+        "lat": 58.25659,
+        "lon": 11.36479,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "relation/10250159",
+        "name": "Smedjeflut",
+        "lat": 58.25671,
+        "lon": 11.36387,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "node/5071047535",
+        "name": "Jämningsbådan",
+        "lat": 58.2638,
+        "lon": 11.38555,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      },
+      {
+        "id": "node/3668662063",
+        "name": "Jämningsbådan",
+        "lat": 58.2656,
+        "lon": 11.38915,
+        "today": "named-shoal-level-unknown",
+        "in1700": "unknown"
+      }
+    ],
+    "namedShoalsNote": "OSM gives these bare-rock outlines and names but no height, and three are marked by modern buoys or beacons. Whether they were awash in 1700 cannot be decided from the data. Names ending in -båden/-både/-flut mean a shoal where the sea breaks, so they were hazards then too.",
+    "skerriesNote": "names.json holds 283 skerries and 10 islands with positions only, no heights. Which of them were awash in 1700 needs elevation data (a skerry standing less than about 0.55 m above today's mean water would have been awash or under). TODO(felix): confirm whether to source heights (Lantmäteriet elevation) before the game uses this.",
+    "uncertain": true,
+    "confidence": "derived",
+    "sources": [
+      "S30",
+      "S31",
+      "S01"
+    ]
+  },
+  "settlements": [
+    {
+      "id": "lysekil",
+      "name": "Lysekil",
+      "lat": 58.27717,
+      "lon": 11.4431,
+      "existsAround1700": "yes",
+      "sizeClass": "fishing-village",
+      "sizeEstimated": true,
+      "sizeNote": "No count for 1700 exists (\"saknas statistik\"). It lies between 82 adults (1645, about half of them strandsittare) and 226 people (1750), so a fishing village of a few dozen households. The bracket is documented; the placement inside it is our estimate.",
+      "counts": [
+        {
+          "year": 1645,
+          "value": 82,
+          "unit": "adults",
+          "source": "S05"
+        },
+        {
+          "year": 1750,
+          "value": 226,
+          "unit": "people",
+          "source": "S05"
+        },
+        {
+          "year": 1760,
+          "value": 332,
+          "unit": "people",
+          "source": "S05"
+        }
+      ],
+      "livelihood": [
+        "fishing",
+        "herring packing and inspection allowed from 1666",
+        "some trade (the page says it is believed to have happened)"
+      ],
+      "notes": [
+        "Own church and priest already before the herring period of 1566-1587 (\"hade egen kyrka och präst\").",
+        "\"I kyrkligt hänseende har Lysekil sedan 1700 hört till Lysekils församling\": the parish forms around the year the game lands in.",
+        "\"Efter stora sillfångster år 1666 blev Lysekil en av de sex hamnar i länet där sillpackning och sillvrakning tilläts.\" \"Dock så avtog sillperioden redan 1675.\"",
+        "The sv.wikipedia infobox says \"Grundad 1570\" with no source; not used."
+      ],
+      "uncertain": true,
+      "confidence": "inferred",
+      "sources": [
+        "S05",
+        "S06",
+        "S29"
+      ]
+    },
+    {
+      "id": "fiskebackskil",
+      "name": "Fiskebäckskil",
+      "lat": 58.24565,
+      "lon": 11.45663,
+      "existsAround1700": "yes",
+      "sizeClass": "fishing-village",
+      "sizeEstimated": true,
+      "sizeNote": "No 1700 count found. A parish centre in the 1600s with a wooden church, so more than a few cottages. The 1750 population (a Tabellverket figure with restricted licence) is in settlements-history.json and is deliberately not copied here.",
+      "counts": [],
+      "livelihood": [
+        "fishing (the village is said to have been founded in the 1500s herring period)"
+      ],
+      "notes": [
+        "Fiskebäckskils församling was split off Morlanda \"på 1600-talet\" (no exact year).",
+        "Old wooden church from the 1500s (replaced in 1772); oak font from the 1600s; altarpiece from 1665; bell cast 1535 (tourism page).",
+        "\"Samhället har sedan 1500-talet vuxit fram som fiskeläge\" on the west side of a deep inlet (\"kil\").",
+        "The skipper-town (skepparsamhälle) phase is the 1800s, not 1700."
+      ],
+      "uncertain": true,
+      "confidence": "inferred",
+      "sources": [
+        "S07",
+        "S08",
+        "S09",
+        "S29"
+      ]
+    },
+    {
+      "id": "grundsund",
+      "name": "Grundsund",
+      "lat": 58.21336,
+      "lon": 11.41924,
+      "existsAround1700": "uncertain",
+      "sizeClass": "hamlet",
+      "sizeEstimated": true,
+      "sizeNote": "Sources disagree. sv.wikipedia: \"anor åtminstone från 1600-talet som fiskeläge men det var först i samband med de stora sillperioderna som bebyggelsen ökade\". The Bohusläns museum text: \"Nuvarande samhället Grundsund har sitt ursprung i 1700-talets sillperiod\" (which begins 1747) and says the village was then three clusters of buildings, with Ösö and Bovik on either side of the narrow sound. So in 1700 a few cottages on the sound at most; draw it small.",
+      "counts": [],
+      "livelihood": [
+        "fishing"
+      ],
+      "notes": [
+        "Chapel licence February 1798, consecrated 5 October 1799; more than 400 people in the last half of the 1700s.",
+        "An existing project note in settlements-history.json says the scattered settlements took the name Grundsund when the church was built in 1798-99. That claim was not re-verified in this mission; it matters for whether \"Grundsund\" was a place name in 1700."
+      ],
+      "uncertain": true,
+      "confidence": "inferred",
+      "sources": [
+        "S10",
+        "S11",
+        "S14",
+        "S29"
+      ]
+    },
+    {
+      "id": "gullholmen",
+      "name": "Gullholmen",
+      "lat": 58.17993,
+      "lon": 11.40585,
+      "existsAround1700": "yes",
+      "sizeClass": "small-fishing-village",
+      "sizeEstimated": false,
+      "sizeNote": "The closest counts to 1700: 20 fishing families \"i slutet av 1600-talet\" (Holmberg 1979 as cited by the museum). About 100 houses only by 1800, after the herring period.",
+      "counts": [
+        {
+          "year": 1610,
+          "value": 24,
+          "unit": "strandsittare (resident households on rented shore plots)",
+          "source": "S15"
+        },
+        {
+          "year": 1645,
+          "value": 39,
+          "unit": "strandsittare households (about), plus \"forarmede\"",
+          "source": "S15"
+        },
+        {
+          "year": null,
+          "approx": "slutet av 1600-talet",
+          "value": 20,
+          "unit": "fishing families (Holmberg 1979 as cited by the museum)",
+          "source": "S15"
+        }
+      ],
+      "livelihood": [
+        "fishing",
+        "a natural harbour and anchorage"
+      ],
+      "notes": [
+        "A \"kronoholme\" (crown land, free to build on) until 1999 (existing project note).",
+        "Marked as an anchorage on the earliest Swedish maps of Bohuslän; Felterus's map of 1673 shows Gullholmen and Stora and Lilla Hermanö.",
+        "Gyldenløve feud (late 1600s): \"den norska roddflottan ankrade vid Gullholmen\". Great Northern War: Tordenskiold calls it one of the coast's \"mest brugelige Havne\".",
+        "The sound between Gullholmen and Lilla Härmanö is partly dredged today; the northern part, deeper than 4-4.5 m, looked untouched by dredging and held a harbour cultural layer (undated finds; pottery from the dredged area dates 1600-1900)."
+      ],
+      "uncertain": false,
+      "confidence": "documented",
+      "sources": [
+        "S15",
+        "S16",
+        "S29"
+      ]
+    },
+    {
+      "id": "harmano",
+      "name": "Härmanö",
+      "lat": 58.16015,
+      "lon": 11.37571,
+      "existsAround1700": "yes",
+      "sizeClass": "farm-and-fishing",
+      "sizeEstimated": true,
+      "sizeNote": "No count. Farms on the east side \"åtminstone sedan 1500-talet\" with home fishing and freight sailing; about ten house platforms from the 1500s-1600s excavated at Skållehus. The farm Härm is the oldest.",
+      "counts": [],
+      "livelihood": [
+        "farming",
+        "home fishing",
+        "freight sailing"
+      ],
+      "notes": [
+        "First map record: Felterus 1673 (\"Stora och Lilla Hermanö\"). Earlier mentions are of Hermanösund, whose location is disputed, so they are not used."
+      ],
+      "uncertain": true,
+      "confidence": "inferred",
+      "sources": [
+        "S29",
+        "S15"
+      ]
+    },
+    {
+      "id": "karingon",
+      "name": "Käringön",
+      "lat": 58.10985,
+      "lon": 11.36359,
+      "existsAround1700": "yes",
+      "sizeClass": "hamlet",
+      "sizeEstimated": true,
+      "sizeNote": "No count before 1900 found. Written \"Kierlingøon\" in 1659 and said to have been inhabited since the 1500s; the island \"was put on the map\" only by the herring period from 1747. Draw it as a few fishing cottages.",
+      "counts": [],
+      "livelihood": [
+        "fishing"
+      ],
+      "notes": [
+        "Olof Knape (later Strömstierna) was born here on 29 January 1664 and was made an admiralty captain in 1700 (a person who is a link to the sea in 1700)."
+      ],
+      "uncertain": true,
+      "confidence": "inferred",
+      "sources": [
+        "S17",
+        "S18",
+        "S29"
+      ]
+    },
+    {
+      "id": "hallevikstrand",
+      "name": "Hälleviksstrand",
+      "lat": 58.12329,
+      "lon": 11.4454,
+      "existsAround1700": "probable",
+      "sizeClass": "unknown",
+      "sizeEstimated": true,
+      "sizeNote": "First written mention 1617; nothing found for 1700. Herring salteries came in the 1700s herring period (after 1747). Treat as a few cottages at most.",
+      "counts": [],
+      "livelihood": [
+        "fishing (probable)"
+      ],
+      "notes": [
+        "The sv.wikipedia page for Hälleviksstrand returned 404 in this mission, so only the existing project data was used."
+      ],
+      "uncertain": true,
+      "confidence": "inferred",
+      "sources": [
+        "S29"
+      ]
+    }
+  ],
+  "seaMarks": {
+    "lighthousesStanding": [],
+    "lighthousesNote": "No lighthouse stood in the region in 1700. The earliest light in the project data is the Carlsten fortress light at Marstrand (1782, outside the region); the earliest tower in the region is much later (Hållö 1842, \"Bohusläns äldsta\" per sv.wikipedia, just north of the region; Måseskär 1865). A state pilot service did exist (see pilotage).",
+    "sources": [
+      "S19",
+      "S17",
+      "S18",
+      "S22",
+      "S20",
+      "S31",
+      "S32"
+    ],
+    "kinds": [
+      {
+        "kind": "cairn",
+        "swedish": "kummel / röse",
+        "documented": "the word and the mark type are documented generally; no dated 1700 example in the region"
+      },
+      {
+        "kind": "spar-mark",
+        "swedish": "stångmärke",
+        "documented": "first documented in the region in 1829 (Måseskär): later than 1700"
+      },
+      {
+        "kind": "painted-rock-mark",
+        "swedish": "vitmålat röse / målad sten",
+        "documented": "only the theory that \"käring\" names a whitewashed cairn (Käringön, Saltskär); no documented painted rock mark for 1700"
+      },
+      {
+        "kind": "beacon-fire",
+        "swedish": "tänd eld / vårdkase",
+        "documented": "a Skåne source says important fairways \"kunde vara markerade med tända eldar\"; nothing found for Bohuslän"
+      },
+      {
+        "kind": "church-tower",
+        "swedish": "kyrktorn som riktmärke",
+        "documented": "a Skåne source names church towers as land marks; Fiskebäckskil and Lysekil had churches"
+      }
+    ],
+    "pilotage": {
+      "items": [
+        {
+          "year": 1579,
+          "text": "The organisation of pilots and pilotage began in Sweden.",
+          "sources": [
+            "S20"
+          ]
+        },
+        {
+          "year": 1667,
+          "text": "Under the Swedish Maritime Code of 1667 shipmasters must use a pilot.",
+          "sources": [
+            "S20"
+          ]
+        },
+        {
+          "year": 1696,
+          "text": "Decree of 19 September 1696 establishes the Royal Board of Pilot Services (Kungliga Lotsverket).",
+          "sources": [
+            "S20"
+          ]
+        },
+        {
+          "year": 1700,
+          "text": "At the end of the 1600s there were 97 pilot stations and 10 lighthouse stations in Sweden. No Bohuslän pilot station of c.1700 is named in the pages read. Väderöarna (outside the region) had pilots \"sedan åtminstone 1600-talet\", with a pilot place in 1754.",
+          "sources": [
+            "S20",
+            "S21"
+          ]
+        }
+      ],
+      "uncertain": true,
+      "sources": [
+        "S20",
+        "S21"
+      ]
+    },
+    "marks": [
+      {
+        "id": "maseskar-cairn",
+        "name": "Måseskär cairn",
+        "kind": "cairn",
+        "status": "documented-undated",
+        "lat": 58.09363,
+        "lon": 11.33052,
+        "invented": false,
+        "uncertain": true,
+        "evidence": "\"Ännu tidigare fanns ett stenkummel på samma plats\" (before the 1829 pole mark). No year; it may or may not have stood in 1700. Placed at the skerry's OSM position.",
+        "sources": [
+          "S19",
+          "S31"
+        ]
+      },
+      {
+        "id": "karingon-cairn",
+        "name": "Käringön white cairn (theory)",
+        "kind": "painted-rock-mark",
+        "status": "theory",
+        "lat": 58.10985,
+        "lon": 11.36359,
+        "invented": false,
+        "uncertain": true,
+        "evidence": "The name Kierlingøon (1659) \"antas innehålla käring i betydelsen (vitmålat) röse till ledning för sjöfarande\" (Svenskt ortnamnslexikon 2003 via sv.wikipedia). A tourism page adds that \"käring\" also named a navigation mark at Saltskär, and that the origin of the name is disputed. A theory about a name, not an observed mark.",
+        "sources": [
+          "S17",
+          "S18"
+        ]
+      },
+      {
+        "id": "stangehuvud-cairn",
+        "name": "Stångehuvud point",
+        "kind": "cairn",
+        "status": "recommended-invented",
+        "lat": 58.2711831,
+        "lon": 11.4134545,
+        "invented": true,
+        "uncertain": true,
+        "evidence": "INVENTED placement. Prominent headland on the approach to Lysekil and the mouth of Gullmarn. The place name is not used as evidence.",
+        "sources": [
+          "S31",
+          "S22"
+        ]
+      },
+      {
+        "id": "islandsberg-cairn",
+        "name": "Islandsberg point",
+        "kind": "cairn",
+        "status": "recommended-invented",
+        "lat": 58.1976349,
+        "lon": 11.4050317,
+        "invented": true,
+        "uncertain": true,
+        "evidence": "INVENTED placement. Headland on the southern approach to the Grundsund sound and Skaftö's west side.",
+        "sources": [
+          "S31",
+          "S22"
+        ]
+      },
+      {
+        "id": "gaven-rock-mark",
+        "name": "Gäven outer rock",
+        "kind": "painted-rock-mark",
+        "status": "recommended-invented",
+        "lat": 58.2709628,
+        "lon": 11.3504693,
+        "invented": true,
+        "uncertain": true,
+        "evidence": "INVENTED placement. Outer rock off Lysekil; the first thing a boat from the open sea can steer on.",
+        "sources": [
+          "S31",
+          "S22"
+        ]
+      },
+      {
+        "id": "hattan-spar",
+        "name": "Hättan outer skerry",
+        "kind": "spar-mark",
+        "status": "recommended-invented",
+        "lat": 58.174137,
+        "lon": 11.37307,
+        "invented": true,
+        "uncertain": true,
+        "evidence": "INVENTED placement. Outer skerry west of Härmanö and Gullholmen, the seaward mark for the Gullholmen anchorage. A spar is a guess: the first documented spar mark in the region is 1829.",
+        "sources": [
+          "S31",
+          "S22"
+        ]
+      },
+      {
+        "id": "gullholmen-entrance-cairn",
+        "name": "Gullholmen harbour entrance",
+        "kind": "cairn",
+        "status": "recommended-invented",
+        "lat": 58.17993,
+        "lon": 11.40585,
+        "invented": true,
+        "uncertain": true,
+        "evidence": "INVENTED placement. Placed at the village point (exact entrance to be set when drawing). Entrance to the natural harbour in the sound between Gullholmen and Lilla Härmanö, an anchorage on the earliest maps and \"mest brugelige Havne\" in the Great Northern War.",
+        "sources": [
+          "S31",
+          "S22"
+        ]
+      },
+      {
+        "id": "grundsund-mouth-cairn",
+        "name": "Grundsund harbour mouth",
+        "kind": "cairn",
+        "status": "recommended-invented",
+        "lat": 58.216,
+        "lon": 11.41577,
+        "invented": true,
+        "uncertain": true,
+        "evidence": "INVENTED placement. The OSM guest-harbour position; the sound is the village's reason for being.",
+        "sources": [
+          "S31",
+          "S22"
+        ]
+      },
+      {
+        "id": "krakesundsgap-cairn",
+        "name": "Kråkesundsgap entrance",
+        "kind": "cairn",
+        "status": "recommended-invented",
+        "lat": 58.10179,
+        "lon": 11.44111,
+        "invented": true,
+        "uncertain": true,
+        "evidence": "INVENTED placement. The gap between Orust and the islands, midpoint of the two OSM lights.",
+        "sources": [
+          "S31",
+          "S22"
+        ]
+      }
+    ],
+    "recommendation": "Documented marks are weak for 1700 (one undated cairn, one name theory). For the game, draw cairns at the harbour mouths and prominent points listed as \"recommended-invented\", whitewash the Käringön one as a nod to the name theory, and keep spar marks to a few outer skerries. Flagged invented in the data and in the doc: if the game ever claims these are historical, it is wrong."
+  },
+  "names": [
+    {
+      "id": "n-lysekil",
+      "modern": "Lysekil",
+      "form": "Lusekijll",
+      "year": 1578,
+      "quote": "Ortnamnet skrevs 1578 Lusekijll.",
+      "note": "No spelling for 1700 itself was found. The church village was written Lysa in 1317. The parish name Lysekils församling dates from c.1700.",
+      "uncertain": true,
+      "sources": [
+        "S05",
+        "S06"
+      ]
+    },
+    {
+      "id": "n-karingon",
+      "modern": "Käringön",
+      "form": "Kierlingøon",
+      "year": 1659,
+      "quote": "Käringön skrevs 1659 Kierlingøon.",
+      "note": "The nearest documented spelling to 1700.",
+      "uncertain": false,
+      "sources": [
+        "S17"
+      ]
+    },
+    {
+      "id": "n-gullholmen",
+      "modern": "Gullholmen",
+      "form": "Guldholmen",
+      "year": 1588,
+      "quote": "\"paa Guldholmen\" (letter of 1588 about Jens Opekop)",
+      "note": "The museum notes that earlier name-matches with the saga place Gulleyna are disputed and are not used.",
+      "uncertain": false,
+      "sources": [
+        "S15"
+      ]
+    },
+    {
+      "id": "n-harmano",
+      "modern": "Härmanö",
+      "form": "Hermanö",
+      "year": 1673,
+      "quote": "Felterus's map of 1673, \"visande Gullholmen och Stora och Lilla Hermanö\" (the museum's caption)",
+      "note": "The caption is the museum's wording; the map itself was not read, so the exact spelling on the map is unconfirmed. The sound was called Hermanösund.",
+      "uncertain": true,
+      "sources": [
+        "S15"
+      ]
+    },
+    {
+      "id": "n-morlanda",
+      "modern": "Morlanda",
+      "form": "Molanda",
+      "year": 1388,
+      "quote": "Namnet skrevs 1388 Molanda.",
+      "note": "Mother parish of Fiskebäckskil, Käringön, Grundsund and Gullholmen; its church is on Orust, outside the region, so this entry has no position.",
+      "uncertain": true,
+      "sources": [
+        "S07"
+      ]
+    }
+  ],
+  "boats": {
+    "summary": "The documented picture of 1700 is thin. What exists: small fishing households (Gullholmen 20 fishing families at the end of the 1600s, Lysekil about half of 82 adults being strandsittare in 1645), state pilotage, war traffic in the Gyldenløve feud and the Great Northern War, and no herring boom. The boat types of ordinary fishermen around 1700 were NOT found in any readable source.",
+    "fishingPeople": [
+      {
+        "id": "strandsittare",
+        "text": "The common fishermen are strandsittare: resident households on rented shore plots, \"framförallt vanlig under 1600-talet\". Gullholmen: 24 in 1610, about 39 households in 1645, 20 fishing families at the end of the 1600s. Lysekil in 1645: about half of 82 adults.",
+        "uncertain": false,
+        "sources": [
+          "S15",
+          "S05"
+        ]
+      }
+    ],
+    "vessels": [
+      {
+        "id": "player-eka",
+        "name": "small clinker eka with a spritsail",
+        "role": "player boat",
+        "status": "design-choice",
+        "text": "The project brief chose a small tarred clinker eka with a rust-brown spritsail. No historical source for this exact type in 1700 was found; the repo's own brief names it as a design decision.",
+        "uncertain": true,
+        "sources": [
+          "S33"
+        ]
+      },
+      {
+        "id": "dutch-herring-boat",
+        "name": "Dutch-style clinker-built decked herring boat",
+        "role": "fishing",
+        "status": "weak-secondary",
+        "text": "A slide deck citing the 2024 book \"Sill\" says Dutch 1600s fishing changed herring fishing with clinker-built, decked boats. Only a search summary was seen; no Bohuslän boat is tied to it.",
+        "uncertain": true,
+        "sources": [
+          "S28"
+        ]
+      },
+      {
+        "id": "norwegian-rowing-fleet",
+        "name": "Norwegian skerry/rowing fleet",
+        "role": "war",
+        "status": "documented",
+        "text": "Gyldenløve feud (late 1600s): \"den norska roddflottan ankrade vid Gullholmen\" (Göteborgs eskader och örlogsstation as cited by the museum). A flotilla of skerry boats raided the Bohuslän coast, and Gyldenløve landed about 800 men at Marstrand on 2 July 1677 (search summaries).",
+        "uncertain": false,
+        "sources": [
+          "S15",
+          "S26"
+        ]
+      },
+      {
+        "id": "swedish-privateers",
+        "name": "Swedish privateers (brigantine, huckert, galliot, frigate)",
+        "role": "war",
+        "status": "documented-elsewhere",
+        "text": "From 1709 the Kapare page lists privateers such as \"Siöblad (Kapar brigantin med 16-20 kanoner 1709-1711)\", \"Västgöten (Kapar huckert 1710-1717)\" and \"Fortuna (Kapar galliot 1715-)\". Where they sailed from is not stated.",
+        "uncertain": true,
+        "sources": [
+          "S25"
+        ]
+      },
+      {
+        "id": "tordenskiold-1719",
+        "name": "Danish-Norwegian warships under Tordenskiold",
+        "role": "war",
+        "status": "weak-secondary",
+        "text": "In 1719 ships under Tordenskiold attacked Marstrand harbour (search summary only). Gullholmen is called one of the coast's \"mest brugelige Havne\" by him in the Great Northern War.",
+        "uncertain": false,
+        "sources": [
+          "S27",
+          "S15"
+        ]
+      },
+      {
+        "id": "pilot-boats",
+        "name": "pilots and pilot boats",
+        "role": "pilotage",
+        "status": "documented-general",
+        "text": "Compulsory pilotage under the 1667 Maritime Code, Kungliga Lotsverket from 1696. No boat type or Bohuslän station c.1700 found.",
+        "uncertain": true,
+        "sources": [
+          "S20"
+        ]
+      }
+    ],
+    "traffic": {
+      "level": "quiet",
+      "levelBasis": "No herring period is listed between 1660-1680 and 1747-1809 in either source read (\"Sillperiod\" and the Uddevalla page). Lysekil: \"sillperioden avtog redan 1675\". No source states that the herring were absent in 1680-1747, only that no period is listed. War brought spikes: the Great Northern War began 11 February 1700, and from 1709 privateers sailed. The epochs.json vibe for the era is \"unsettled\".",
+      "recommendation": "RECOMMENDATION (invented, not sourced): few fishing boats in sight, mostly rowed or sailed single-handed or by two, a pilot boat now and then, a rare armed vessel; busier around Marstrand than around Skaftö. Raise the traffic around 1709-1719 if the game cares about the war.",
+      "uncertain": true,
+      "sources": [
+        "S23",
+        "S24",
+        "S05",
+        "S25"
+      ]
+    },
+    "unresolved": [
+      "Boat types and crew sizes of Bohuslän fishermen around 1700 (eka, storbåt, snipa, skuta): no readable source; two PDFs (Strandsittarna i Bohuslän under 1600; Sillfiskare och andra) were unreadable or returned 409.",
+      "Counts of boats or ship movements near Lysekil, Gullholmen or Käringön around 1700.",
+      "Whether foreign (Dutch) shipping passed the region in 1700."
+    ],
+    "sources": [
+      "S15",
+      "S05",
+      "S33",
+      "S28",
+      "S26",
+      "S25",
+      "S27",
+      "S20",
+      "S23",
+      "S24"
+    ]
+  },
+  "grundsundSound": {
+    "summary": "No depth for the sound before the 1914-1918 canal was found in any source. What is known: it was a shallow sound (\"grunda sund\") between Skaftölandet and Ösö, the village is named after it, the harbour was \"allt grundare\" by the 1910s, and a canal was dug 1914-1918.",
+    "facts": [
+      {
+        "text": "\"är uppkallat efter det grunda sund, nu kallat Grundsunds kanal, som skiljer dessa öar från varandra.\"",
+        "sources": [
+          "S10"
+        ]
+      },
+      {
+        "text": "Museum text: \"Där Gåsöfjorden går in i ett trångt sund mot Värbofjorden ligger på ömse sidor fiskeläget Grundsund. Den djupa hamnrännan löper genom ett bergspass som ger hamnen ett vindskyddat läge.\" (a present-day description of the harbour channel; no depth given). In the 1700s the village was three clusters; Ösö and Bovik lay on either side of the narrow sound.",
+        "sources": [
+          "S11"
+        ]
+      },
+      {
+        "text": "\"Väl hemma kunde dom inte gå in i den allt grundare hamnen.\" The Reichstag member from Orust asked for money in 1886 to survey the harbour area (650 kr; surveyed the next year). In 1892 dredging was raised at the municipal meeting but nothing happened. 1911-1913: state funds; the canal option was chosen. \"Arbetet påbörjades i januari 1914 och slutfördes 1918.\" No ceremony in 1918; formally inaugurated in the 2018 festival.",
+        "sources": [
+          "S12",
+          "S13"
+        ]
+      },
+      {
+        "text": "The canal was dug during the First World War so that fishing boats and schooners could pass more easily and to give a larger sheltered harbour.",
+        "sources": [
+          "S14"
+        ]
+      }
+    ],
+    "notFound": [
+      "depth of the sound before the canal",
+      "whether boats could pass at all, at high water, or only small ones",
+      "a bridge or ford before the canal",
+      "canal width and depth as built (the 1 500 m figure is a race leg, not the canal length)"
+    ],
+    "linkToWaterLevel": "Whatever the sound's depth was before 1914, the 1700 sea stood about 0.55 m (range 0.45-0.70) higher against the land than today. Silting plus land uplift fits \"allt grundare\", but that connection is our inference, not a source statement.",
+    "recommendation": "RECOMMENDATION (invented, not sourced; matches the GAME-DESIGN \"Dug channels\" rule): in 1700 the sound is shallow, passable by an eka and small rowed boats, closed to anything with a deeper keel; the through route for larger boats arrives with the canal in epoch V. Use the 0.55 m offset on any modern depth.",
+    "uncertain": true,
+    "sources": [
+      "S10",
+      "S11",
+      "S12",
+      "S13",
+      "S14",
+      "S01"
+    ]
+  }
+}
