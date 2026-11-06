@@ -9,7 +9,7 @@ Two low-poly kits to make the coast busy, plus a phone-first lab to look at them
 - `era-asset-lab.html` + `src/era-asset-lab.js`: the lab (the game's own sea, sky, light and camera angle; same approach as
   `boat-lab.html`). Orbit and "game camera", Day / Dusk, triangle count, ◀ ▶ to step through assets, the address keeps the
   settings (`?asset=ferry&v=navy&night=1&rot=40&cam=game&zoom=1`, `?asset=compare&focus=1700`).
-- `src/era-assets.test.js`: `node games/windward/src/era-assets.test.js` (13 checks: triangle budgets, determinism, sizes,
+- `src/era-assets.test.js`: `node games/windward/src/era-assets.test.js` (14 checks: triangle budgets, determinism, sizes,
   dusk windows with no lights, materials, URL round-trip, the lab page's element ids).
 - Screenshots here (the lab in a 390x844 frame): `compare-day.png`, `compare-dusk.png`, `all-assets-sheet.jpg` (12 assets,
   each a 390x844 view at half size), `panel-open.png`.
@@ -59,7 +59,7 @@ Try it: `era-asset-lab.html` (opens on the Today vs 1700 comparison), or `?asset
 ## 1700 kit
 
 - **Cottages**: small (about 3-4 m by 4-6 m, walls under 2 m), unpainted weathered grey timber in horizontal bands, one tiny
-  window, a low door, a stone foundation. Roofs: turf with tussocks (a, c) or clay tile (b). Variant b has a lean-to, c a big
+  window, a low door, a stone foundation. Roofs: turf with tussocks (a, c) or old grey-brown tile (b; was red until 2026-11-06: nothing on a poor 1700 cottage is painted red). Variant b has a lean-to, c a big
   stone chimney at the gable end.
 - **Sea-shed (sjobod)**: tarred grey timber, big double doors in the sea-facing gable, a granite slip with two rollers.
 - **Drying racks (hjallar)**: leaning A-frames carrying a long pole, split fish hanging in a row.

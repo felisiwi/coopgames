@@ -84,6 +84,16 @@ check('the 1700 kit is humble and the Today kit is big: cottage vs summer house 
   }
 });
 
+check('no red on a 1700 cottage (bare grey timber; roofs turf or old grey-brown tile)', () => {
+  for (const v of ['a', 'b', 'c']) {
+    const col = solidOf(createAsset('cottage', { variant: v })).geometry.attributes.color;
+    for (let i = 0; i < col.count; i++) {
+      const [r, g] = [col.getX(i), col.getY(i)]; // linear values; the door (brown) has r/g ~1.5, the old red tile had ~3.3
+      assert.ok(!(r > 0.25 && r > 2 * g), `cottage ${v}: a red triangle (${r.toFixed(2)}, ${g.toFixed(2)})`);
+    }
+  }
+});
+
 check('windows: houses and the ferry have glass; dusk turns it warm with no new lights; day turns it back', () => {
   for (const [id, v] of [['summerhouse', 'cream'], ['cottage', 'a'], ['ferry', ''], ['sailboat', 'navy'], ['harbourToday', ''], ['harbour1700', '']]) {
     const a = createAsset(id, { variant: v });
