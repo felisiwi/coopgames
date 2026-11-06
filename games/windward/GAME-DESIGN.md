@@ -1395,3 +1395,15 @@ moored or the friend's consent (same pattern as crossing to another era).
    at her house, the house from the opening.
 **You're the reason your grandparents meet:** the boy sends you to Britta.
 Britta born ~1933 (17 in 1950, ~93 in the finale).
+
+**Decisions (Felix, 2026-11-06, late afternoon):**
+- **The first big jump lands in late 1703**, echoing the great North Sea storm of November 1703
+  (no great storm is recorded locally around 1700; docs/PEOPLE-1700.md). The jump storm is ours.
+- **Torhild lives by Lysekil**, the only recorded pilot station in our area. Pilots were paid
+  per ship, so her family also fishes and farms. A hook for later eras: in 1716 Tordenskiold
+  captured the Swedish pilot who had guided the fleet into Dynekilen.
+- **Co-op starts as "you visit the host's world"** (docs/COOP-CHECK.md): the friend sails in
+  the host's game: the host's era, chapter progress, lit lights and story. The friend keeps
+  personal souvenirs (discovered names, light log). Fix first: a host session message on join
+  (clock offset and era), and game options through the hub's launch message (touches the shared
+  hub: tell Kenny).

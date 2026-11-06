@@ -3,7 +3,7 @@ id: torhild-1700
 thread: torhild
 name: Torhild
 era: new-border            # epochs.json era id; she meets you at the end of New border (~1700)
-place: grundsund           # place id (to be created in places/); start area
+place: lysekil             # Lysekil had the area's only recorded pilot station (docs/PEOPLE-1700.md)
 role: the pilot's daughter; teaches you to sail and read the coast after the jump
 relation: first friend after the jump
 status: alive
@@ -14,7 +14,7 @@ summary: A down-to-earth pilot's daughter who knows every mark, shoal and secret
 ---
 
 ## Story
-**(lore)** Torhild is a **pilot's daughter** from the Grundsund area: a working family, not posh.
+**(lore)** Torhild is a **pilot's daughter** from Lysekil: a working family, not posh.
 Her father guides ships through the skerries (Sweden's state pilot service was founded by decree
 in 1696, and compulsory pilotage dates from 1667; see docs/WORLD-1700.md). With no lighthouses
 yet, the pilots' knowledge of cairns, marks and leading lines is how the coast is read, and
