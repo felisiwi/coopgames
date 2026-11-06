@@ -1,0 +1,5264 @@
+{
+ "generated": "2026-11-06",
+ "source": "OpenStreetMap contributors, ODbL 1.0, via Overpass API (tools/fetch-seamarks.mjs)",
+ "osmDataTimestamp": "2026-11-06T06:24:18Z",
+ "region": {
+  "s": 58.085,
+  "w": 11.25,
+  "n": 58.3,
+  "e": 11.5
+ },
+ "note": "IALA A (Sweden): red to port / green to starboard when entering from seaward. Cardinal colours: N black/yellow, E black/yellow/black, S yellow/black, W yellow/black/yellow. lights[].text is the standard abbreviation, e.g. \"Q(3) W 10s\".",
+ "counts": {
+  "total": 206,
+  "byType": {
+   "cardinal": 10,
+   "lateral": 80,
+   "isolated_danger": 38,
+   "light": 41,
+   "special": 37
+  },
+  "leadingLines": 12
+ },
+ "harbours": [
+  {
+   "name": "Långeviks småbåtshamn",
+   "id": "node/3502067409",
+   "lat": 58.28668,
+   "lon": 11.43151,
+   "category": "marina",
+   "within1500m": 2,
+   "nearestMarkM": 705,
+   "byType": {
+    "isolated_danger": 1,
+    "special": 1
+   }
+  },
+  {
+   "name": "Valbodalen småbåtshamn",
+   "id": "node/3502067432",
+   "lat": 58.28931,
+   "lon": 11.43442,
+   "category": "marina",
+   "within1500m": 1,
+   "nearestMarkM": 941,
+   "byType": {
+    "special": 1
+   }
+  },
+  {
+   "name": "Fiskebäckskils småbåtshamn",
+   "id": "node/3547435944",
+   "lat": 58.24241,
+   "lon": 11.46113,
+   "category": "marina",
+   "within1500m": 9,
+   "nearestMarkM": 853,
+   "byType": {
+    "special": 5,
+    "cardinal": 2,
+    "lateral": 1,
+    "isolated_danger": 1
+   }
+  },
+  {
+   "name": "Grundsunds Marina",
+   "id": "node/3547484766",
+   "lat": 58.20887,
+   "lon": 11.42192,
+   "category": "marina",
+   "within1500m": 6,
+   "nearestMarkM": 516,
+   "byType": {
+    "light": 3,
+    "lateral": 2,
+    "isolated_danger": 1
+   }
+  },
+  {
+   "name": "Småbåtshamn Kolholmarna/Grötö",
+   "id": "node/3587420744",
+   "lat": 58.27407,
+   "lon": 11.45129,
+   "category": "marina",
+   "within1500m": 19,
+   "nearestMarkM": 333,
+   "byType": {
+    "light": 5,
+    "special": 12,
+    "lateral": 2
+   }
+  },
+  {
+   "name": "Havsbadets gästhamn",
+   "id": "node/3587426816",
+   "lat": 58.26988,
+   "lon": 11.43736,
+   "category": "marina",
+   "within1500m": 22,
+   "nearestMarkM": 233,
+   "byType": {
+    "light": 6,
+    "special": 12,
+    "isolated_danger": 1,
+    "lateral": 3
+   }
+  },
+  {
+   "name": "Ellös gästhamn",
+   "id": "node/3640752946",
+   "lat": 58.18473,
+   "lon": 11.46599,
+   "category": "marina",
+   "within1500m": 7,
+   "nearestMarkM": 428,
+   "byType": {
+    "lateral": 3,
+    "isolated_danger": 4
+   }
+  },
+  {
+   "name": "Stockens gästhamn",
+   "id": "node/3640912546",
+   "lat": 58.15037,
+   "lon": 11.41344,
+   "category": "marina",
+   "within1500m": 12,
+   "nearestMarkM": 888,
+   "byType": {
+    "light": 4,
+    "isolated_danger": 2,
+    "lateral": 6
+   }
+  },
+  {
+   "name": "Hälleviksstrands Hamn",
+   "id": "node/3667339255",
+   "lat": 58.1224,
+   "lon": 11.44234,
+   "category": "marina",
+   "within1500m": 6,
+   "nearestMarkM": 934,
+   "byType": {
+    "light": 1,
+    "isolated_danger": 1,
+    "lateral": 4
+   }
+  },
+  {
+   "name": "Norra Hamnens gästhamn",
+   "id": "node/3681316450",
+   "lat": 58.27617,
+   "lon": 11.4229,
+   "category": "marina",
+   "within1500m": 10,
+   "nearestMarkM": 283,
+   "byType": {
+    "light": 3,
+    "special": 3,
+    "isolated_danger": 1,
+    "lateral": 3
+   }
+  },
+  {
+   "name": "Käringöns gästhamn",
+   "id": "node/4020094471",
+   "lat": 58.11327,
+   "lon": 11.36333,
+   "category": "marina",
+   "within1500m": 11,
+   "nearestMarkM": 278,
+   "byType": {
+    "light": 2,
+    "isolated_danger": 2,
+    "cardinal": 2,
+    "lateral": 4,
+    "special": 1
+   }
+  },
+  {
+   "name": "Hällevik Yacht Club",
+   "id": "node/4020264446",
+   "lat": 58.11701,
+   "lon": 11.45811,
+   "category": "marina",
+   "within1500m": 5,
+   "nearestMarkM": 751,
+   "byType": {
+    "isolated_danger": 2,
+    "lateral": 1,
+    "special": 2
+   }
+  },
+  {
+   "name": "Hälleviksstrands Varvs Marina",
+   "id": "node/4020264447",
+   "lat": 58.1187,
+   "lon": 11.44647,
+   "category": "marina",
+   "within1500m": 8,
+   "nearestMarkM": 918,
+   "byType": {
+    "light": 1,
+    "isolated_danger": 2,
+    "lateral": 3,
+    "special": 2
+   }
+  },
+  {
+   "name": "Edshultshalls gästhamn",
+   "id": "node/4020296705",
+   "lat": 58.10785,
+   "lon": 11.46554,
+   "category": "marina",
+   "within1500m": 8,
+   "nearestMarkM": 615,
+   "byType": {
+    "isolated_danger": 3,
+    "lateral": 3,
+    "special": 2
+   }
+  },
+  {
+   "name": "Stångholmesunds småbåtshamn",
+   "id": "node/4277551636",
+   "lat": 58.26762,
+   "lon": 11.42104,
+   "category": "marina",
+   "within1500m": 9,
+   "nearestMarkM": 416,
+   "byType": {
+    "light": 3,
+    "special": 2,
+    "isolated_danger": 2,
+    "lateral": 2
+   }
+  },
+  {
+   "name": "Fiskhamnens gästhamn",
+   "id": "node/4277554602",
+   "lat": 58.27471,
+   "lon": 11.44157,
+   "category": "marina",
+   "within1500m": 20,
+   "nearestMarkM": 248,
+   "byType": {
+    "light": 5,
+    "special": 12,
+    "isolated_danger": 1,
+    "lateral": 2
+   }
+  },
+  {
+   "name": "Gullmarsstrands småbåtshamn",
+   "id": "node/4277562710",
+   "lat": 58.24988,
+   "lon": 11.45782,
+   "category": "marina",
+   "within1500m": 14,
+   "nearestMarkM": 263,
+   "byType": {
+    "special": 10,
+    "cardinal": 2,
+    "lateral": 1,
+    "isolated_danger": 1
+   }
+  },
+  {
+   "name": "Lyckans slip Marina",
+   "id": "node/4277628135",
+   "lat": 58.24355,
+   "lon": 11.46113,
+   "category": "marina",
+   "within1500m": 9,
+   "nearestMarkM": 758,
+   "byType": {
+    "special": 5,
+    "cardinal": 2,
+    "lateral": 1,
+    "isolated_danger": 1
+   }
+  },
+  {
+   "name": "Gåsö småbåtshamn",
+   "id": "node/4277651081",
+   "lat": 58.23394,
+   "lon": 11.4121,
+   "category": "marina",
+   "within1500m": 3,
+   "nearestMarkM": 775,
+   "byType": {
+    "isolated_danger": 1,
+    "lateral": 2
+   }
+  },
+  {
+   "name": "Gullholmens gästhamn",
+   "id": "node/4279256552",
+   "lat": 58.17695,
+   "lon": 11.40476,
+   "category": "marina",
+   "within1500m": 12,
+   "nearestMarkM": 228,
+   "byType": {
+    "light": 3,
+    "isolated_danger": 3,
+    "lateral": 5,
+    "cardinal": 1
+   }
+  },
+  {
+   "name": "Stockeviks småbåtshamn",
+   "id": "node/4279270450",
+   "lat": 58.23555,
+   "lon": 11.43032,
+   "category": "marina",
+   "within1500m": 1,
+   "nearestMarkM": 1355,
+   "byType": {
+    "isolated_danger": 1
+   }
+  },
+  {
+   "name": "Grundsunds hamn",
+   "id": "node/4279916839",
+   "lat": 58.216,
+   "lon": 11.41577,
+   "category": "marina",
+   "within1500m": 8,
+   "nearestMarkM": 89,
+   "byType": {
+    "light": 2,
+    "lateral": 4,
+    "isolated_danger": 2
+   }
+  },
+  {
+   "name": "Käringön fiskehamn",
+   "id": "node/5833458579",
+   "lat": 58.11285,
+   "lon": 11.36646,
+   "category": "fishing",
+   "within1500m": 12,
+   "nearestMarkM": 181,
+   "byType": {
+    "light": 2,
+    "isolated_danger": 2,
+    "cardinal": 2,
+    "lateral": 5,
+    "special": 1
+   }
+  },
+  {
+   "name": "Fröjdendals småbåtshamn",
+   "id": "node/5955759291",
+   "lat": 58.19681,
+   "lon": 11.49136,
+   "category": "marina",
+   "within1500m": 23,
+   "nearestMarkM": 192,
+   "byType": {
+    "light": 6,
+    "isolated_danger": 9,
+    "lateral": 8
+   }
+  }
+ ],
+ "marks": [
+  {
+   "id": "node/3667190559",
+   "lat": 58.08655,
+   "lon": 11.38887,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "east",
+   "colours": [
+    "black",
+    "yellow",
+    "black"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones base together",
+    "colour": "black"
+   }
+  },
+  {
+   "id": "node/3667189464",
+   "lat": 58.08738,
+   "lon": 11.44608,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3667213719",
+   "lat": 58.09052,
+   "lon": 11.33211,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/3667094844",
+   "lat": 58.09226,
+   "lon": 11.44557,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Pipeskär",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/1531131680",
+   "lat": 58.09449,
+   "lon": 11.44582,
+   "type": "light",
+   "form": "light",
+   "name": "Bråtö",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "green",
+     "period": 12,
+     "range": 3,
+     "height": 7,
+     "sectorStart": 336.5,
+     "sectorEnd": 350,
+     "text": "Fl(4) G 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "white",
+     "period": 12,
+     "range": 3,
+     "height": 7,
+     "sectorStart": 350,
+     "sectorEnd": 355,
+     "text": "Fl(4) W 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "red",
+     "period": 12,
+     "range": 4,
+     "height": 7,
+     "sectorStart": 355,
+     "sectorEnd": 90,
+     "text": "Fl(4) R 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "green",
+     "period": 12,
+     "range": 3,
+     "height": 7,
+     "sectorStart": 90,
+     "sectorEnd": 132,
+     "text": "Fl(4) G 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "white",
+     "period": 12,
+     "range": 5,
+     "height": 7,
+     "sectorStart": 132,
+     "sectorEnd": 137,
+     "text": "Fl(4) W 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "red",
+     "period": 12,
+     "range": 4,
+     "height": 7,
+     "sectorStart": 137,
+     "text": "Fl(4) R 12s"
+    }
+   ]
+  },
+  {
+   "id": "node/3667088288",
+   "lat": 58.09473,
+   "lon": 11.46647,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Edshultshalls gästhamn"
+  },
+  {
+   "id": "node/3667107869",
+   "lat": 58.09623,
+   "lon": 11.46829,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Edshultshalls gästhamn"
+  },
+  {
+   "id": "node/11257037985",
+   "lat": 58.0985,
+   "lon": 11.37245,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/3667101435",
+   "lat": 58.09899,
+   "lon": 11.46777,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "topmark": {
+    "shape": "cone, point up",
+    "colour": "green"
+   },
+   "nearHarbour": "Edshultshalls gästhamn"
+  },
+  {
+   "id": "node/11257037984",
+   "lat": 58.09935,
+   "lon": 11.3764,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/3667351713",
+   "lat": 58.09988,
+   "lon": 11.36003,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/4675736163",
+   "lat": 58.10011,
+   "lon": 11.44101,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "white"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/11257037983",
+   "lat": 58.10045,
+   "lon": 11.37818,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/1531131314",
+   "lat": 58.10064,
+   "lon": 11.441,
+   "type": "light",
+   "form": "light",
+   "name": "Kråkesundsgap Södra",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 243,
+     "sectorEnd": 253,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 6,
+     "height": 13,
+     "sectorEnd": 358.5,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 358.5,
+     "sectorEnd": 45,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "sectorStart": 45,
+     "sectorEnd": 50,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 6,
+     "height": 13,
+     "sectorStart": 50,
+     "sectorEnd": 78,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 78,
+     "sectorEnd": 93.5,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 8,
+     "height": 13,
+     "sectorStart": 93.5,
+     "sectorEnd": 118,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 140,
+     "sectorEnd": 195.5,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 8,
+     "height": 13,
+     "sectorStart": 195.5,
+     "sectorEnd": 220,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 6,
+     "height": 13,
+     "sectorStart": 220,
+     "sectorEnd": 243,
+     "text": "Fl(2) R 6s"
+    }
+   ]
+  },
+  {
+   "id": "node/3667196472",
+   "lat": 58.10142,
+   "lon": 11.40295,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3667351966",
+   "lat": 58.10165,
+   "lon": 11.36303,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/1531131658",
+   "lat": 58.10295,
+   "lon": 11.44123,
+   "type": "light",
+   "form": "light",
+   "name": "Kråkesundsgap Norra",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "white",
+     "range": 4,
+     "height": 5,
+     "text": "Q W"
+    }
+   ]
+  },
+  {
+   "id": "node/3667351714",
+   "lat": 58.1045,
+   "lon": 11.36957,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/11413025626",
+   "lat": 58.107,
+   "lon": 11.44717,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Edshultshalls gästhamn"
+  },
+  {
+   "id": "node/3667283983",
+   "lat": 58.10727,
+   "lon": 11.38562,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/3667085529",
+   "lat": 58.10812,
+   "lon": 11.4483,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Edshultshalls gästhamn"
+  },
+  {
+   "id": "node/11413025627",
+   "lat": 58.10833,
+   "lon": 11.44533,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Hälleviksstrands Varvs Marina"
+  },
+  {
+   "id": "node/3667287590",
+   "lat": 58.10905,
+   "lon": 11.38363,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "topmark": {
+    "shape": "cylinder",
+    "colour": "red"
+   },
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/3667273071",
+   "lat": 58.10918,
+   "lon": 11.3772,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "east",
+   "colours": [
+    "black",
+    "yellow",
+    "black"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones base together",
+    "colour": "black"
+   },
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/3667081593",
+   "lat": 58.11033,
+   "lon": 11.45617,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Edshultshalls gästhamn"
+  },
+  {
+   "id": "node/1531131852",
+   "lat": 58.11062,
+   "lon": 11.37257,
+   "type": "light",
+   "form": "light",
+   "name": "Käringön kummel fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 3,
+     "range": 7,
+     "height": 9,
+     "sectorStart": 152,
+     "sectorEnd": 173.5,
+     "text": "Iso W 3s"
+    },
+    {
+     "character": "Iso",
+     "colour": "green",
+     "period": 3,
+     "range": 4,
+     "height": 9,
+     "sectorStart": 173.5,
+     "sectorEnd": 209.5,
+     "text": "Iso G 3s"
+    },
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 3,
+     "range": 7,
+     "height": 9,
+     "sectorStart": 209.5,
+     "sectorEnd": 212,
+     "text": "Iso W 3s"
+    },
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 3,
+     "range": 5,
+     "height": 9,
+     "sectorStart": 212,
+     "sectorEnd": 237,
+     "text": "Iso R 3s"
+    },
+    {
+     "character": "Iso",
+     "colour": "green",
+     "period": 3,
+     "range": 4,
+     "height": 9,
+     "sectorStart": 299,
+     "sectorEnd": 310,
+     "text": "Iso G 3s"
+    },
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 3,
+     "range": 7,
+     "height": 9,
+     "sectorStart": 310,
+     "sectorEnd": 316,
+     "text": "Iso W 3s"
+    },
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 3,
+     "range": 5,
+     "height": 9,
+     "sectorStart": 316,
+     "sectorEnd": 322,
+     "text": "Iso R 3s"
+    }
+   ],
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/8826575298",
+   "lat": 58.11187,
+   "lon": 11.36892,
+   "type": "special",
+   "form": "beacon",
+   "colours": [
+    "grey"
+   ],
+   "topmark": {
+    "shape": "board"
+   },
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/3667224389",
+   "lat": 58.11434,
+   "lon": 11.34696,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Käringöns gästhamn"
+  },
+  {
+   "id": "node/3667280444",
+   "lat": 58.11453,
+   "lon": 11.36742,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "north",
+   "colours": [
+    "black",
+    "yellow"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones up",
+    "colour": "black"
+   },
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/4022565831",
+   "lat": 58.11623,
+   "lon": 11.43153,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Hälleviksstrands Varvs Marina"
+  },
+  {
+   "id": "node/3667230980",
+   "lat": 58.1172,
+   "lon": 11.35043,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Käringöns gästhamn"
+  },
+  {
+   "id": "node/1531131750",
+   "lat": 58.11785,
+   "lon": 11.3763,
+   "type": "light",
+   "form": "light",
+   "name": "Oxskär",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 4,
+     "height": 7,
+     "sectorStart": 326.5,
+     "sectorEnd": 341,
+     "text": "Fl(3) G 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "white",
+     "period": 9,
+     "range": 6,
+     "height": 7,
+     "sectorStart": 341,
+     "sectorEnd": 348,
+     "text": "Fl(3) W 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "red",
+     "period": 9,
+     "range": 4,
+     "height": 7,
+     "sectorStart": 348,
+     "sectorEnd": 54.5,
+     "text": "Fl(3) R 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "white",
+     "period": 9,
+     "range": 6,
+     "height": 7,
+     "sectorStart": 54.5,
+     "sectorEnd": 63,
+     "text": "Fl(3) W 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 4,
+     "height": 7,
+     "sectorStart": 240,
+     "sectorEnd": 251,
+     "text": "Fl(3) G 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "red",
+     "period": 9,
+     "range": 4,
+     "height": 7,
+     "sectorStart": 251,
+     "sectorEnd": 253,
+     "text": "Fl(3) R 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 4,
+     "height": 7,
+     "sectorStart": 253,
+     "sectorEnd": 260,
+     "text": "Fl(3) G 9s"
+    }
+   ],
+   "nearHarbour": "Käringön fiskehamn"
+  },
+  {
+   "id": "node/3667026835",
+   "lat": 58.11919,
+   "lon": 11.42591,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Hälleviksstrands Hamn"
+  },
+  {
+   "id": "node/3667085516",
+   "lat": 58.11929,
+   "lon": 11.42721,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Hälleviksstrands Hamn"
+  },
+  {
+   "id": "node/3667311712",
+   "lat": 58.11954,
+   "lon": 11.47258,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Hällevik Yacht Club"
+  },
+  {
+   "id": "node/3667157817",
+   "lat": 58.12186,
+   "lon": 11.39434,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3667157818",
+   "lat": 58.12206,
+   "lon": 11.39936,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/1531131908",
+   "lat": 58.12245,
+   "lon": 11.42372,
+   "type": "light",
+   "form": "light",
+   "name": "Porsnäsudde",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 3,
+     "height": 6,
+     "sectorStart": 315.5,
+     "sectorEnd": 326.5,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 5,
+     "height": 6,
+     "sectorStart": 326.5,
+     "sectorEnd": 329,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 4,
+     "height": 6,
+     "sectorStart": 329,
+     "sectorEnd": 139.5,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 5,
+     "height": 6,
+     "sectorStart": 139.5,
+     "sectorEnd": 165,
+     "text": "Fl(2) W 6s"
+    }
+   ],
+   "nearHarbour": "Hälleviksstrands Hamn"
+  },
+  {
+   "id": "node/4022595414",
+   "lat": 58.12524,
+   "lon": 11.42033,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Hälleviksstrands Hamn"
+  },
+  {
+   "id": "node/4022611026",
+   "lat": 58.12805,
+   "lon": 11.4196,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Hälleviksstrands Hamn"
+  },
+  {
+   "id": "node/4022611027",
+   "lat": 58.12813,
+   "lon": 11.41881,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3667027924",
+   "lat": 58.13167,
+   "lon": 11.41643,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/4022639687",
+   "lat": 58.13219,
+   "lon": 11.4165,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4022639688",
+   "lat": 58.13222,
+   "lon": 11.41717,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/1531131965",
+   "lat": 58.13233,
+   "lon": 11.40151,
+   "type": "light",
+   "form": "light",
+   "name": "Järnskär fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 3,
+     "height": 5,
+     "sectorStart": 28,
+     "sectorEnd": 50,
+     "text": "Fl G 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 3,
+     "range": 3,
+     "height": 5,
+     "sectorStart": 50,
+     "sectorEnd": 64,
+     "text": "Fl W 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "range": 4,
+     "height": 5,
+     "sectorStart": 64,
+     "sectorEnd": 95,
+     "text": "Fl R 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 3,
+     "height": 5,
+     "sectorStart": 95,
+     "sectorEnd": 140.5,
+     "text": "Fl G 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 3,
+     "range": 3,
+     "height": 5,
+     "sectorStart": 140.5,
+     "sectorEnd": 147.5,
+     "text": "Fl W 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "range": 4,
+     "height": 5,
+     "sectorStart": 147.5,
+     "sectorEnd": 230,
+     "text": "Fl R 3s"
+    }
+   ]
+  },
+  {
+   "id": "node/4022640389",
+   "lat": 58.13277,
+   "lon": 11.41525,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3667078163",
+   "lat": 58.13278,
+   "lon": 11.39557,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/1531131932",
+   "lat": 58.13278,
+   "lon": 11.42013,
+   "type": "light",
+   "form": "light",
+   "name": "Koljebergskil",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "red",
+     "range": 6,
+     "height": 21,
+     "text": "Q R"
+    }
+   ]
+  },
+  {
+   "id": "node/1531131954",
+   "lat": 58.13283,
+   "lon": 11.41834,
+   "type": "light",
+   "form": "light",
+   "name": "Koljebergskil",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 3,
+     "range": 6,
+     "height": 11,
+     "text": "Iso R 3s"
+    }
+   ]
+  },
+  {
+   "id": "node/3667076227",
+   "lat": 58.13303,
+   "lon": 11.39896,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "north",
+   "colours": [
+    "black",
+    "yellow"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones up",
+    "colour": "black"
+   }
+  },
+  {
+   "id": "node/3667068404",
+   "lat": 58.13351,
+   "lon": 11.3951,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Sverkerbådan",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/3667076265",
+   "lat": 58.13364,
+   "lon": 11.40065,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "topmark": {
+    "shape": "cylinder",
+    "colour": "red"
+   }
+  },
+  {
+   "id": "node/3667078223",
+   "lat": 58.13517,
+   "lon": 11.39829,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3667065517",
+   "lat": 58.1358,
+   "lon": 11.39965,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/1531131944",
+   "lat": 58.13594,
+   "lon": 11.41533,
+   "type": "light",
+   "form": "light",
+   "name": "Sorhallsudde",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 4,
+     "range": 9,
+     "height": 7,
+     "text": "Iso W 4s"
+    }
+   ]
+  },
+  {
+   "id": "node/1531131921",
+   "lat": 58.13718,
+   "lon": 11.41471,
+   "type": "light",
+   "form": "light",
+   "name": "Sorhallsudde",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "white",
+     "range": 8,
+     "height": 8,
+     "text": "Q W"
+    }
+   ],
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3667069470",
+   "lat": 58.13838,
+   "lon": 11.40453,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3667071123",
+   "lat": 58.13875,
+   "lon": 11.39744,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/3667354523",
+   "lat": 58.13947,
+   "lon": 11.39582,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "text": "Fl(2) G 6s"
+    }
+   ]
+  },
+  {
+   "id": "node/3667055022",
+   "lat": 58.1421,
+   "lon": 11.39767,
+   "type": "light",
+   "form": "light",
+   "name": "Stenskärsränna",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 2,
+     "text": "Fl W 2s"
+    }
+   ],
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3667069500",
+   "lat": 58.14248,
+   "lon": 11.40949,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3667354524",
+   "lat": 58.14434,
+   "lon": 11.39731,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3668257063",
+   "lat": 58.1497,
+   "lon": 11.39703,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "text": "Fl R 3s"
+    }
+   ],
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3668254805",
+   "lat": 58.15045,
+   "lon": 11.39537,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/1531132091",
+   "lat": 58.15084,
+   "lon": 11.39831,
+   "type": "light",
+   "form": "light",
+   "name": "Råö nedre",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "green",
+     "range": 4,
+     "height": 5,
+     "sectorStart": 283,
+     "sectorEnd": 74,
+     "text": "Q G"
+    },
+    {
+     "character": "Q",
+     "colour": "white",
+     "range": 4,
+     "height": 5,
+     "sectorStart": 74,
+     "sectorEnd": 229,
+     "text": "Q W"
+    }
+   ],
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3668253733",
+   "lat": 58.15177,
+   "lon": 11.39702,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "text": "Fl R 3s"
+    }
+   ],
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3668245723",
+   "lat": 58.15517,
+   "lon": 11.39759,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/1531132041",
+   "lat": 58.15973,
+   "lon": 11.39959,
+   "type": "light",
+   "form": "light",
+   "name": "Råö övre",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "green",
+     "period": 5,
+     "range": 3,
+     "height": 8,
+     "sectorStart": 345,
+     "sectorEnd": 10,
+     "text": "Iso G 5s"
+    },
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 5,
+     "range": 3,
+     "height": 8,
+     "sectorStart": 10,
+     "sectorEnd": 198.5,
+     "text": "Iso W 5s"
+    }
+   ],
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3668253339",
+   "lat": 58.16126,
+   "lon": 11.39883,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "text": "Fl(2) G 6s"
+    }
+   ],
+   "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "node/3668253180",
+   "lat": 58.16303,
+   "lon": 11.39983,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "text": "Fl(2) G 6s"
+    }
+   ]
+  },
+  {
+   "id": "node/3667352998",
+   "lat": 58.16667,
+   "lon": 11.40115,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Pilgrimen",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/1531132006",
+   "lat": 58.16896,
+   "lon": 11.40289,
+   "type": "light",
+   "form": "light",
+   "name": "Strömholmen",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 4,
+     "height": 9,
+     "sectorStart": 163,
+     "sectorEnd": 186.5,
+     "text": "Fl G 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 3,
+     "range": 6,
+     "height": 9,
+     "sectorStart": 186.5,
+     "sectorEnd": 14,
+     "text": "Fl W 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "range": 4,
+     "height": 9,
+     "sectorStart": 14,
+     "sectorEnd": 29.5,
+     "text": "Fl R 3s"
+    }
+   ],
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/1531134988",
+   "lat": 58.17414,
+   "lon": 11.37317,
+   "type": "light",
+   "form": "light",
+   "name": "Hättan fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 5,
+     "height": 15,
+     "sectorStart": 19.5,
+     "sectorEnd": 35.7,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 8,
+     "height": 15,
+     "sectorStart": 35.7,
+     "sectorEnd": 51.5,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 6,
+     "height": 15,
+     "sectorStart": 51.5,
+     "sectorEnd": 77.2,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 5,
+     "height": 15,
+     "sectorStart": 77.2,
+     "sectorEnd": 115.6,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 8,
+     "height": 15,
+     "sectorStart": 115.6,
+     "sectorEnd": 124.1,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 6,
+     "height": 15,
+     "sectorStart": 124.1,
+     "sectorEnd": 150,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 5,
+     "height": 15,
+     "sectorStart": 150,
+     "sectorEnd": 209.6,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 8,
+     "height": 15,
+     "sectorStart": 209.6,
+     "sectorEnd": 215.6,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 6,
+     "height": 15,
+     "sectorStart": 215.6,
+     "sectorEnd": 225.4,
+     "text": "Fl(2) R 6s"
+    }
+   ]
+  },
+  {
+   "id": "node/1531132635",
+   "lat": 58.17462,
+   "lon": 11.40516,
+   "type": "light",
+   "form": "light",
+   "name": "Tvestjärten",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 5,
+     "height": 5,
+     "sectorStart": 324.5,
+     "sectorEnd": 196.5,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 4,
+     "height": 5,
+     "sectorStart": 196.5,
+     "sectorEnd": 203.5,
+     "text": "Fl(2) R 6s"
+    }
+   ],
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668211686",
+   "lat": 58.17778,
+   "lon": 11.40831,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668210696",
+   "lat": 58.17876,
+   "lon": 11.40777,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668225151",
+   "lat": 58.18005,
+   "lon": 11.40897,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668223219",
+   "lat": 58.18011,
+   "lon": 11.40796,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "south",
+   "colours": [
+    "yellow",
+    "black"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones down",
+    "colour": "black"
+   },
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/4296962700",
+   "lat": 58.1809,
+   "lon": 11.46187,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Ellös gästhamn"
+  },
+  {
+   "id": "node/3668219641",
+   "lat": 58.18105,
+   "lon": 11.41018,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/4296962701",
+   "lat": 58.18137,
+   "lon": 11.46187,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Ellös gästhamn"
+  },
+  {
+   "id": "node/3668232880",
+   "lat": 58.18182,
+   "lon": 11.4329,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3667249911",
+   "lat": 58.182,
+   "lon": 11.31957,
+   "type": "cardinal",
+   "form": "buoy",
+   "name": "Skrämjas ungar",
+   "direction": "west",
+   "colours": [
+    "yellow",
+    "black",
+    "yellow"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones point together",
+    "colour": "black"
+   }
+  },
+  {
+   "id": "node/4296962702",
+   "lat": 58.18253,
+   "lon": 11.46,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Ellös gästhamn"
+  },
+  {
+   "id": "node/3668208604",
+   "lat": 58.1864,
+   "lon": 11.3854,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "east",
+   "colours": [
+    "black",
+    "yellow",
+    "black"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones base together",
+    "colour": "black"
+   }
+  },
+  {
+   "id": "node/1531134954",
+   "lat": 58.18649,
+   "lon": 11.42178,
+   "type": "light",
+   "form": "light",
+   "name": "Fredagsholmen fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 3,
+     "height": 5,
+     "sectorStart": 286.6,
+     "sectorEnd": 294,
+     "text": "Fl G 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 3,
+     "range": 5,
+     "height": 5,
+     "sectorStart": 294,
+     "sectorEnd": 300.7,
+     "text": "Fl W 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "range": 4,
+     "height": 5,
+     "sectorStart": 300.7,
+     "sectorEnd": 54.8,
+     "text": "Fl R 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 3,
+     "height": 5,
+     "sectorStart": 54.8,
+     "sectorEnd": 114.7,
+     "text": "Fl G 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 3,
+     "range": 5,
+     "height": 5,
+     "sectorStart": 114.7,
+     "sectorEnd": 122.1,
+     "text": "Fl W 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "range": 4,
+     "height": 5,
+     "sectorStart": 122.1,
+     "sectorEnd": 136.2,
+     "text": "Fl R 3s"
+    }
+   ],
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668183613",
+   "lat": 58.18661,
+   "lon": 11.41571,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668172214",
+   "lat": 58.18797,
+   "lon": 11.40583,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Dynan",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668181606",
+   "lat": 58.18848,
+   "lon": 11.40248,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Gullholmens gästhamn"
+  },
+  {
+   "id": "node/3668206261",
+   "lat": 58.18994,
+   "lon": 11.42282,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Jonsborg nedre",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/4296966791",
+   "lat": 58.19073,
+   "lon": 11.47402,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Ellös gästhamn"
+  },
+  {
+   "id": "node/4296966792",
+   "lat": 58.19117,
+   "lon": 11.47552,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Ellös gästhamn"
+  },
+  {
+   "id": "node/4296975602",
+   "lat": 58.19168,
+   "lon": 11.47528,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Ellös gästhamn"
+  },
+  {
+   "id": "node/4296975603",
+   "lat": 58.19173,
+   "lon": 11.47783,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/3668218412",
+   "lat": 58.19246,
+   "lon": 11.42656,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Jonsborg övre",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/1531133441",
+   "lat": 58.19306,
+   "lon": 11.48744,
+   "type": "light",
+   "form": "light",
+   "name": "Hallen övre",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "green",
+     "period": 4,
+     "range": 8,
+     "height": 9,
+     "text": "Iso G 4s"
+    }
+   ],
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4365248067",
+   "lat": 58.19383,
+   "lon": 11.37437,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/4322317799",
+   "lat": 58.19479,
+   "lon": 11.48486,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/1531133382",
+   "lat": 58.19495,
+   "lon": 11.48847,
+   "type": "light",
+   "form": "light",
+   "name": "Hallen nedre",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "green",
+     "range": 8,
+     "height": 5,
+     "text": "Q G"
+    }
+   ],
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4365248068",
+   "lat": 58.19568,
+   "lon": 11.3724,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spherical",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/4322308942",
+   "lat": 58.19572,
+   "lon": 11.48883,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322317696",
+   "lat": 58.19595,
+   "lon": 11.48728,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "can",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "text": "Fl R 3s"
+    }
+   ],
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4365248069",
+   "lat": 58.19749,
+   "lon": 11.37437,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/1531134864",
+   "lat": 58.19819,
+   "lon": 11.49636,
+   "type": "light",
+   "form": "light",
+   "name": "Ornekullen nedre",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "red",
+     "range": 9,
+     "height": 20,
+     "text": "Q R"
+    }
+   ],
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/1531133456",
+   "lat": 58.19931,
+   "lon": 11.49984,
+   "type": "light",
+   "form": "light",
+   "name": "Örnekullen övre",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 4,
+     "range": 9,
+     "height": 32,
+     "text": "Iso R 4s"
+    }
+   ],
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/3668208607",
+   "lat": 58.19937,
+   "lon": 11.46184,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/4322307764",
+   "lat": 58.19977,
+   "lon": 11.48945,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322308519",
+   "lat": 58.19985,
+   "lon": 11.49137,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/1531135127",
+   "lat": 58.20137,
+   "lon": 11.40545,
+   "type": "light",
+   "form": "light",
+   "name": "Islandsberg fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "green",
+     "period": 12,
+     "range": 4,
+     "height": 13,
+     "sectorStart": 310,
+     "sectorEnd": 31.5,
+     "text": "Fl(4) G 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "white",
+     "period": 12,
+     "range": 7,
+     "height": 13,
+     "sectorStart": 31.5,
+     "sectorEnd": 34.2,
+     "text": "Fl(4) W 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "red",
+     "period": 12,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 34.2,
+     "sectorEnd": 38.6,
+     "text": "Fl(4) R 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "red",
+     "period": 12,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 44.4,
+     "sectorEnd": 47.9,
+     "text": "Fl(4) R 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "green",
+     "period": 12,
+     "range": 4,
+     "height": 13,
+     "sectorStart": 47.9,
+     "sectorEnd": 85.5,
+     "text": "Fl(4) G 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "red",
+     "period": 12,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 85.5,
+     "sectorEnd": 125.6,
+     "text": "Fl(4) R 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "green",
+     "period": 12,
+     "range": 4,
+     "height": 13,
+     "sectorStart": 125.6,
+     "sectorEnd": 181.2,
+     "text": "Fl(4) G 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "white",
+     "period": 12,
+     "range": 7,
+     "height": 13,
+     "sectorStart": 181.2,
+     "sectorEnd": 184.9,
+     "text": "Fl(4) W 12s"
+    },
+    {
+     "character": "Fl",
+     "group": 4,
+     "colour": "red",
+     "period": 12,
+     "range": 5,
+     "height": 13,
+     "sectorStart": 184.9,
+     "sectorEnd": 235,
+     "text": "Fl(4) R 12s"
+    }
+   ],
+   "nearHarbour": "Grundsunds Marina"
+  },
+  {
+   "id": "node/4322307733",
+   "lat": 58.20312,
+   "lon": 11.49161,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322307972",
+   "lat": 58.20396,
+   "lon": 11.49331,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322307908",
+   "lat": 58.20447,
+   "lon": 11.49241,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/1531133299",
+   "lat": 58.20456,
+   "lon": 11.49208,
+   "type": "light",
+   "form": "light",
+   "name": "Tarneskar",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 4,
+     "range": 8,
+     "height": 5,
+     "sectorStart": 8.3,
+     "sectorEnd": 11.9,
+     "text": "Iso W 4s"
+    },
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 4,
+     "range": 8,
+     "height": 5,
+     "sectorStart": 11.9,
+     "sectorEnd": 90,
+     "text": "Iso R 4s"
+    },
+    {
+     "character": "Iso",
+     "range": 8,
+     "height": 5,
+     "sectorStart": 90,
+     "sectorEnd": 200,
+     "text": "Iso"
+    },
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 4,
+     "range": 8,
+     "height": 5,
+     "sectorStart": 200,
+     "sectorEnd": 288,
+     "text": "Iso R 4s"
+    },
+    {
+     "character": "Iso",
+     "colour": "green",
+     "period": 4,
+     "range": 8,
+     "height": 5,
+     "sectorStart": 288,
+     "sectorEnd": 8.3,
+     "text": "Iso G 4s"
+    }
+   ],
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322297232",
+   "lat": 58.2048,
+   "lon": 11.49451,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/6911501134",
+   "lat": 58.20485,
+   "lon": 11.493,
+   "type": "light",
+   "form": "light",
+   "name": "Tärneskär nedre",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 4,
+     "range": 8,
+     "height": 5,
+     "text": "Iso R 4s"
+    }
+   ],
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322301125",
+   "lat": 58.20523,
+   "lon": 11.49405,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322300210",
+   "lat": 58.20596,
+   "lon": 11.49537,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322299650",
+   "lat": 58.20634,
+   "lon": 11.4985,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/4322299651",
+   "lat": 58.20686,
+   "lon": 11.49859,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Fröjdendals småbåtshamn"
+  },
+  {
+   "id": "node/3668262438",
+   "lat": 58.20729,
+   "lon": 11.41364,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Grundsunds Marina"
+  },
+  {
+   "id": "node/4277421983",
+   "lat": 58.20862,
+   "lon": 11.31413,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Bonden",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/4536905709",
+   "lat": 58.21088,
+   "lon": 11.40582,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Grundsunds hamn"
+  },
+  {
+   "id": "node/4322349834",
+   "lat": 58.21498,
+   "lon": 11.47878,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/1531135163",
+   "lat": 58.21616,
+   "lon": 11.40425,
+   "type": "light",
+   "form": "light",
+   "name": "Grötö",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 3,
+     "height": 4,
+     "sectorStart": 173,
+     "sectorEnd": 201,
+     "text": "Fl G 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 3,
+     "range": 6,
+     "height": 4,
+     "sectorStart": 201,
+     "sectorEnd": 204.5,
+     "text": "Fl W 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "range": 4,
+     "height": 4,
+     "sectorStart": 204.2,
+     "sectorEnd": 237.2,
+     "text": "Fl R 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 3,
+     "height": 4,
+     "sectorStart": 237.2,
+     "sectorEnd": 295.6,
+     "text": "Fl G 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 3,
+     "range": 6,
+     "height": 4,
+     "sectorStart": 295.6,
+     "sectorEnd": 350.7,
+     "text": "Fl W 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "range": 4,
+     "height": 4,
+     "sectorStart": 350.7,
+     "sectorEnd": 6.5,
+     "text": "Fl R 3s"
+    },
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 3,
+     "range": 3,
+     "height": 4,
+     "sectorStart": 6.5,
+     "sectorEnd": 35.8,
+     "text": "Fl G 3s"
+    }
+   ],
+   "nearHarbour": "Grundsunds hamn"
+  },
+  {
+   "id": "node/1531135051",
+   "lat": 58.21678,
+   "lon": 11.41545,
+   "type": "light",
+   "form": "light",
+   "name": "pir",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "green",
+     "period": 8,
+     "range": 3,
+     "height": 5,
+     "sectorStart": 111,
+     "sectorEnd": 132.7,
+     "text": "Oc(2) G 8s"
+    },
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "white",
+     "period": 8,
+     "range": 6,
+     "height": 5,
+     "sectorStart": 132.7,
+     "sectorEnd": 161.2,
+     "text": "Oc(2) W 8s"
+    },
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "red",
+     "period": 8,
+     "range": 4,
+     "height": 5,
+     "sectorStart": 161.2,
+     "sectorEnd": 172,
+     "text": "Oc(2) R 8s"
+    }
+   ],
+   "nearHarbour": "Grundsunds hamn"
+  },
+  {
+   "id": "node/4322349810",
+   "lat": 58.21704,
+   "lon": 11.47752,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/3668611806",
+   "lat": 58.21752,
+   "lon": 11.41186,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Grundsunds hamn"
+  },
+  {
+   "id": "node/4276729003",
+   "lat": 58.2219,
+   "lon": 11.4126,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Grundsunds hamn"
+  },
+  {
+   "id": "node/3668627574",
+   "lat": 58.22674,
+   "lon": 11.41435,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Lökarna",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Gåsö småbåtshamn"
+  },
+  {
+   "id": "node/4276741136",
+   "lat": 58.22707,
+   "lon": 11.40987,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Gåsö småbåtshamn"
+  },
+  {
+   "id": "node/4322350339",
+   "lat": 58.2279,
+   "lon": 11.4802,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322350397",
+   "lat": 58.23017,
+   "lon": 11.48048,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322350398",
+   "lat": 58.23131,
+   "lon": 11.48267,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322350232",
+   "lat": 58.23271,
+   "lon": 11.48806,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "topmark": {
+    "shape": "cylinder",
+    "colour": "red"
+   }
+  },
+  {
+   "id": "node/4322350005",
+   "lat": 58.23298,
+   "lon": 11.4864,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322350233",
+   "lat": 58.2331,
+   "lon": 11.4868,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4277430389",
+   "lat": 58.23533,
+   "lon": 11.26202,
+   "type": "cardinal",
+   "form": "buoy",
+   "name": "Tovas ungar",
+   "direction": "west",
+   "colours": [
+    "yellow",
+    "black",
+    "yellow"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "pillar",
+   "topmark": {
+    "shape": "2 cones point together",
+    "colour": "black"
+   },
+   "lights": [
+    {
+     "character": "Q",
+     "group": 9,
+     "colour": "white",
+     "period": 15,
+     "text": "Q(9) W 15s"
+    }
+   ]
+  },
+  {
+   "id": "node/4322343852",
+   "lat": 58.2355,
+   "lon": 11.48764,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322339711",
+   "lat": 58.23601,
+   "lon": 11.48817,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322339707",
+   "lat": 58.23675,
+   "lon": 11.48855,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322327101",
+   "lat": 58.23705,
+   "lon": 11.48837,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322335488",
+   "lat": 58.23923,
+   "lon": 11.48962,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322336244",
+   "lat": 58.23935,
+   "lon": 11.48934,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322335209",
+   "lat": 58.24316,
+   "lon": 11.4929,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322327092",
+   "lat": 58.24329,
+   "lon": 11.49239,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/4322317879",
+   "lat": 58.24839,
+   "lon": 11.47024,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/4276740337",
+   "lat": 58.24953,
+   "lon": 11.42469,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a"
+  },
+  {
+   "id": "node/13973241639",
+   "lat": 58.24983,
+   "lon": 11.45037,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/13973241638",
+   "lat": 58.24987,
+   "lon": 11.44983,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/13973241640",
+   "lat": 58.25015,
+   "lon": 11.45048,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/13973241637",
+   "lat": 58.25032,
+   "lon": 11.45,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/4279871984",
+   "lat": 58.25067,
+   "lon": 11.46205,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "east",
+   "colours": [
+    "black",
+    "yellow",
+    "black"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones base together",
+    "colour": "black"
+   },
+   "lights": [
+    {
+     "character": "Q",
+     "group": 3,
+     "colour": "white",
+     "period": 10,
+     "text": "Q(3) W 10s"
+    }
+   ],
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/1531135268",
+   "lat": 58.25108,
+   "lon": 11.46482,
+   "type": "special",
+   "form": "beacon",
+   "name": "Fiskelbackskil",
+   "colours": [
+    "black"
+   ],
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/4279869838",
+   "lat": 58.25133,
+   "lon": 11.46167,
+   "type": "cardinal",
+   "form": "buoy",
+   "direction": "south",
+   "colours": [
+    "yellow",
+    "black"
+   ],
+   "colourPattern": "horizontal",
+   "shape": "spar",
+   "topmark": {
+    "shape": "2 cones down",
+    "colour": "black"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/4279869839",
+   "lat": 58.25163,
+   "lon": 11.46227,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "text": "Fl(2) G 6s"
+    }
+   ],
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/12856123491",
+   "lat": 58.25575,
+   "lon": 11.4493,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/12187178146",
+   "lat": 58.25585,
+   "lon": 11.44718,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/11848454960",
+   "lat": 58.25642,
+   "lon": 11.4529,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "yellow",
+     "period": 3,
+     "text": "Fl Y 3s"
+    }
+   ],
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/3587476023",
+   "lat": 58.25673,
+   "lon": 11.45487,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "yellow",
+     "period": 3,
+     "text": "Fl Y 3s"
+    }
+   ],
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/4279879419",
+   "lat": 58.25683,
+   "lon": 11.45173,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "node/3668631939",
+   "lat": 58.25747,
+   "lon": 11.42306,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Spättan",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Stångholmesunds småbåtshamn"
+  },
+  {
+   "id": "node/3668643388",
+   "lat": 58.26085,
+   "lon": 11.38618,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Byxeskären",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/1531140189",
+   "lat": 58.26162,
+   "lon": 11.3866,
+   "type": "light",
+   "form": "light",
+   "name": "Byxeskären",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "VQ",
+     "colour": "green",
+     "range": 3,
+     "height": 10,
+     "sectorStart": 70,
+     "sectorEnd": 270,
+     "text": "VQ G"
+    }
+   ]
+  },
+  {
+   "id": "node/1531140211",
+   "lat": 58.26216,
+   "lon": 11.41332,
+   "type": "light",
+   "form": "light",
+   "name": "Flatholmen",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 4,
+     "range": 5,
+     "height": 10,
+     "sectorStart": 304,
+     "sectorEnd": 335,
+     "text": "Fl G 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 4,
+     "range": 5,
+     "height": 10,
+     "sectorStart": 90.5,
+     "sectorEnd": 94.8,
+     "text": "Fl G 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 4,
+     "range": 11,
+     "height": 10,
+     "sectorStart": 94.8,
+     "sectorEnd": 95.6,
+     "text": "Fl W 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 4,
+     "range": 6,
+     "height": 10,
+     "sectorStart": 95.6,
+     "sectorEnd": 112.5,
+     "text": "Fl R 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 4,
+     "range": 5,
+     "height": 10,
+     "sectorStart": 112.5,
+     "sectorEnd": 129,
+     "text": "Fl G 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 4,
+     "range": 11,
+     "height": 10,
+     "sectorStart": 129,
+     "sectorEnd": 138.5,
+     "text": "Fl W 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 4,
+     "range": 6,
+     "height": 10,
+     "sectorStart": 138.5,
+     "sectorEnd": 200,
+     "text": "Fl R 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "green",
+     "period": 4,
+     "range": 5,
+     "height": 10,
+     "sectorStart": 200,
+     "sectorEnd": 257,
+     "text": "Fl G 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "white",
+     "period": 4,
+     "range": 11,
+     "height": 10,
+     "sectorStart": 257,
+     "sectorEnd": 265,
+     "text": "Fl W 4s"
+    },
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 4,
+     "range": 6,
+     "height": 10,
+     "sectorStart": 265,
+     "sectorEnd": 304,
+     "text": "Fl R 4s"
+    }
+   ],
+   "nearHarbour": "Stångholmesunds småbåtshamn"
+  },
+  {
+   "id": "node/5071047535",
+   "lat": 58.2638,
+   "lon": 11.38555,
+   "type": "lateral",
+   "form": "buoy",
+   "name": "Jämningsbådan",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "can",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "text": "Fl R 3s"
+    }
+   ]
+  },
+  {
+   "id": "node/3668662063",
+   "lat": 58.2656,
+   "lon": 11.38915,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "name": "Jämningsbådan",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile"
+  },
+  {
+   "id": "node/1531140158",
+   "lat": 58.26591,
+   "lon": 11.43807,
+   "type": "light",
+   "form": "light",
+   "name": "Släggabåden",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "LFl",
+     "colour": "green",
+     "period": 8,
+     "range": 6,
+     "height": 7,
+     "sectorStart": 195,
+     "sectorEnd": 226,
+     "text": "LFl G 8s"
+    },
+    {
+     "character": "LFl",
+     "colour": "red",
+     "period": 8,
+     "range": 7,
+     "height": 7,
+     "sectorStart": 226,
+     "sectorEnd": 248.5,
+     "text": "LFl R 8s"
+    },
+    {
+     "character": "LFl",
+     "colour": "green",
+     "period": 8,
+     "range": 6,
+     "height": 7,
+     "sectorStart": 248.5,
+     "sectorEnd": 261.5,
+     "text": "LFl G 8s"
+    },
+    {
+     "character": "LFl",
+     "colour": "white",
+     "period": 8,
+     "range": 10,
+     "height": 7,
+     "sectorStart": 261.5,
+     "sectorEnd": 273,
+     "text": "LFl W 8s"
+    },
+    {
+     "character": "LFl",
+     "colour": "red",
+     "period": 8,
+     "range": 7,
+     "height": 7,
+     "sectorStart": 273,
+     "sectorEnd": 316,
+     "text": "LFl R 8s"
+    },
+    {
+     "character": "LFl",
+     "colour": "red",
+     "period": 8,
+     "range": 7,
+     "height": 7,
+     "sectorStart": 316,
+     "sectorEnd": 352.5,
+     "text": "LFl R 8s"
+    },
+    {
+     "character": "LFl",
+     "colour": "green",
+     "period": 8,
+     "range": 6,
+     "height": 7,
+     "sectorStart": 352.5,
+     "sectorEnd": 83,
+     "text": "LFl G 8s"
+    },
+    {
+     "character": "LFl",
+     "colour": "white",
+     "period": 8,
+     "range": 10,
+     "height": 7,
+     "sectorStart": 83,
+     "sectorEnd": 85,
+     "text": "LFl W 8s"
+    }
+   ],
+   "nearHarbour": "Havsbadets gästhamn"
+  },
+  {
+   "id": "node/1531140241",
+   "lat": 58.26647,
+   "lon": 11.41429,
+   "type": "light",
+   "form": "light",
+   "name": "Stångholmens fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Iso",
+     "colour": "green",
+     "period": 4,
+     "range": 3,
+     "height": 6,
+     "sectorStart": 155,
+     "sectorEnd": 163.5,
+     "text": "Iso G 4s"
+    },
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 4,
+     "range": 6,
+     "height": 6,
+     "sectorStart": 163.5,
+     "sectorEnd": 165,
+     "text": "Iso W 4s"
+    },
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 4,
+     "range": 4,
+     "height": 6,
+     "sectorStart": 165,
+     "sectorEnd": 245,
+     "text": "Iso R 4s"
+    },
+    {
+     "character": "Iso",
+     "colour": "green",
+     "period": 4,
+     "range": 3,
+     "height": 6,
+     "sectorStart": 245,
+     "sectorEnd": 293,
+     "text": "Iso G 4s"
+    },
+    {
+     "character": "Iso",
+     "colour": "white",
+     "period": 4,
+     "range": 6,
+     "height": 6,
+     "sectorStart": 293,
+     "sectorEnd": 328,
+     "text": "Iso W 4s"
+    },
+    {
+     "character": "Iso",
+     "colour": "red",
+     "period": 4,
+     "range": 4,
+     "height": 6,
+     "sectorStart": 328,
+     "sectorEnd": 11,
+     "text": "Iso R 4s"
+    }
+   ],
+   "nearHarbour": "Stångholmesunds småbåtshamn"
+  },
+  {
+   "id": "node/9872988478",
+   "lat": 58.2666,
+   "lon": 11.33472,
+   "type": "lateral",
+   "form": "buoy",
+   "name": "Trillingflagen",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "can",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "text": "Fl R 3s"
+    }
+   ]
+  },
+  {
+   "id": "node/4536897391",
+   "lat": 58.26726,
+   "lon": 11.43235,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "purpose": "cable",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Havsbadets gästhamn"
+  },
+  {
+   "id": "node/3569675916",
+   "lat": 58.2675,
+   "lon": 11.457,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "yellow",
+     "period": 3,
+     "text": "Fl Y 3s"
+    }
+   ],
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/4536902925",
+   "lat": 58.26781,
+   "lon": 11.43803,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Havsbadets gästhamn"
+  },
+  {
+   "id": "node/3569715005",
+   "lat": 58.2679,
+   "lon": 11.45493,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/1531135326",
+   "lat": 58.26791,
+   "lon": 11.45342,
+   "type": "light",
+   "form": "light",
+   "name": "Lysekils redd",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "white",
+     "range": 4,
+     "height": 6,
+     "text": "Q W"
+    }
+   ],
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3569688910",
+   "lat": 58.26968,
+   "lon": 11.45118,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/4277425310",
+   "lat": 58.26997,
+   "lon": 11.27008,
+   "type": "lateral",
+   "form": "buoy",
+   "name": "Brofjorden Nr 2",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "conical",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "text": "Fl(2) G 6s"
+    }
+   ]
+  },
+  {
+   "id": "node/4276771455",
+   "lat": 58.27007,
+   "lon": 11.41197,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Stångholmesunds småbåtshamn"
+  },
+  {
+   "id": "node/3569695093",
+   "lat": 58.27033,
+   "lon": 11.45113,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3569695094",
+   "lat": 58.27043,
+   "lon": 11.45203,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3569711593",
+   "lat": 58.27047,
+   "lon": 11.45245,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3569675917",
+   "lat": 58.27067,
+   "lon": 11.44588,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3569705993",
+   "lat": 58.27067,
+   "lon": 11.452,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3569695130",
+   "lat": 58.27067,
+   "lon": 11.45245,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/1531140087",
+   "lat": 58.27069,
+   "lon": 11.44984,
+   "type": "light",
+   "form": "light",
+   "name": "Degausing Station",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "F",
+     "colour": "red",
+     "range": 2,
+     "text": "F R"
+    }
+   ],
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/1531135300",
+   "lat": 58.27077,
+   "lon": 11.4533,
+   "type": "light",
+   "form": "light",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "F",
+     "colour": "red",
+     "range": 2,
+     "text": "F R"
+    }
+   ],
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/1531140229",
+   "lat": 58.27087,
+   "lon": 11.35071,
+   "type": "light",
+   "form": "light",
+   "name": "Gäven fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "red",
+     "period": 9,
+     "range": 6,
+     "height": 27,
+     "sectorStart": 88,
+     "sectorEnd": 110,
+     "text": "Fl(3) R 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 5,
+     "height": 27,
+     "sectorStart": 110,
+     "sectorEnd": 122,
+     "text": "Fl(3) G 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 5,
+     "height": 27,
+     "sectorStart": 234,
+     "sectorEnd": 241,
+     "text": "Fl(3) G 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "white",
+     "period": 9,
+     "range": 8,
+     "height": 27,
+     "sectorStart": 241,
+     "sectorEnd": 261,
+     "text": "Fl(3) W 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "red",
+     "period": 9,
+     "range": 6,
+     "height": 27,
+     "sectorStart": 261,
+     "sectorEnd": 311,
+     "text": "Fl(3) R 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 5,
+     "height": 27,
+     "sectorStart": 311,
+     "sectorEnd": 2.5,
+     "text": "Fl(3) G 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 5,
+     "height": 27,
+     "sectorStart": 2.5,
+     "sectorEnd": 24,
+     "text": "Fl(3) G 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "white",
+     "period": 9,
+     "range": 8,
+     "height": 27,
+     "sectorStart": 24,
+     "sectorEnd": 30,
+     "text": "Fl(3) W 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "red",
+     "period": 9,
+     "range": 6,
+     "height": 27,
+     "sectorStart": 30,
+     "sectorEnd": 41.5,
+     "text": "Fl(3) R 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "green",
+     "period": 9,
+     "range": 5,
+     "height": 27,
+     "sectorStart": 41.5,
+     "sectorEnd": 53.5,
+     "text": "Fl(3) G 9s"
+    },
+    {
+     "character": "Fl",
+     "group": 3,
+     "colour": "white",
+     "period": 9,
+     "range": 8,
+     "height": 27,
+     "sectorStart": 53.5,
+     "sectorEnd": 88,
+     "text": "Fl(3) W 9s"
+    }
+   ]
+  },
+  {
+   "id": "node/3569682293",
+   "lat": 58.27093,
+   "lon": 11.45107,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3569684303",
+   "lat": 58.27108,
+   "lon": 11.45108,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3707614126",
+   "lat": 58.27144,
+   "lon": 11.4597,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Småbåtshamn Kolholmarna/Grötö"
+  },
+  {
+   "id": "node/3587424722",
+   "lat": 58.27394,
+   "lon": 11.44555,
+   "type": "light",
+   "form": "light",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "F",
+     "colour": "white",
+     "text": "F W"
+    }
+   ],
+   "nearHarbour": "Fiskhamnens gästhamn"
+  },
+  {
+   "id": "node/4277423734",
+   "lat": 58.27565,
+   "lon": 11.25755,
+   "type": "lateral",
+   "form": "buoy",
+   "name": "Brofjorden Nr 1",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "can",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "text": "Fl R 3s"
+    }
+   ]
+  },
+  {
+   "id": "node/11257034581",
+   "lat": 58.27578,
+   "lon": 11.34763,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/12462835736",
+   "lat": 58.2763,
+   "lon": 11.34903,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/3668669857",
+   "lat": 58.27635,
+   "lon": 11.41809,
+   "type": "isolated_danger",
+   "form": "beacon",
+   "colours": [
+    "black"
+   ],
+   "shape": "pile",
+   "nearHarbour": "Norra Hamnens gästhamn"
+  },
+  {
+   "id": "node/12462835735",
+   "lat": 58.27677,
+   "lon": 11.34815,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/1531140222",
+   "lat": 58.27946,
+   "lon": 11.39077,
+   "type": "light",
+   "form": "light",
+   "name": "Gulskären",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 7,
+     "height": 9,
+     "sectorStart": 237,
+     "sectorEnd": 258,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 5,
+     "height": 9,
+     "sectorStart": 258,
+     "sectorEnd": 315,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 5,
+     "height": 9,
+     "sectorStart": 315,
+     "sectorEnd": 346.5,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 4,
+     "height": 9,
+     "sectorStart": 346.5,
+     "sectorEnd": 56.5,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "white",
+     "period": 6,
+     "range": 7,
+     "height": 9,
+     "sectorStart": 56.5,
+     "sectorEnd": 59.5,
+     "text": "Fl(2) W 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "red",
+     "period": 6,
+     "range": 5,
+     "height": 9,
+     "sectorStart": 59.5,
+     "sectorEnd": 132,
+     "text": "Fl(2) R 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 4,
+     "height": 9,
+     "sectorStart": 132,
+     "sectorEnd": 141,
+     "text": "Fl(2) G 6s"
+    },
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "range": 4,
+     "height": 9,
+     "sectorStart": 141,
+     "sectorEnd": 237,
+     "text": "Fl(2) G 6s"
+    }
+   ]
+  },
+  {
+   "id": "node/4276773425",
+   "lat": 58.28065,
+   "lon": 11.40422,
+   "type": "lateral",
+   "form": "buoy",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "spar",
+   "system": "iala-a",
+   "nearHarbour": "Norra Hamnens gästhamn"
+  },
+  {
+   "id": "node/4277431691",
+   "lat": 58.28463,
+   "lon": 11.30003,
+   "type": "lateral",
+   "form": "buoy",
+   "name": "Brofjorden Nr 4",
+   "side": "starboard",
+   "colours": [
+    "green"
+   ],
+   "shape": "conical",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "group": 2,
+     "colour": "green",
+     "period": 6,
+     "text": "Fl(2) G 6s"
+    }
+   ]
+  },
+  {
+   "id": "node/8625492195",
+   "lat": 58.28615,
+   "lon": 11.41952,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "purpose": "outfall",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   },
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "yellow",
+     "period": 6,
+     "text": "Fl Y 6s"
+    }
+   ],
+   "nearHarbour": "Långeviks småbåtshamn"
+  },
+  {
+   "id": "node/4277431345",
+   "lat": 58.28905,
+   "lon": 11.28837,
+   "type": "lateral",
+   "form": "buoy",
+   "name": "Brofjorden Nr 3",
+   "side": "port",
+   "colours": [
+    "red"
+   ],
+   "shape": "can",
+   "system": "iala-a",
+   "lights": [
+    {
+     "character": "Fl",
+     "colour": "red",
+     "period": 3,
+     "text": "Fl R 3s"
+    }
+   ]
+  },
+  {
+   "id": "node/11413072618",
+   "lat": 58.2891,
+   "lon": 11.35355,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/11413072619",
+   "lat": 58.29088,
+   "lon": 11.354,
+   "type": "special",
+   "form": "buoy",
+   "colours": [
+    "yellow"
+   ],
+   "shape": "spar",
+   "topmark": {
+    "shape": "x-shape",
+    "colour": "yellow"
+   }
+  },
+  {
+   "id": "node/1531140262",
+   "lat": 58.29202,
+   "lon": 11.40247,
+   "type": "light",
+   "form": "light",
+   "name": "Hängdyn",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "green",
+     "range": 2,
+     "height": 5,
+     "sectorStart": 264,
+     "sectorEnd": 36,
+     "text": "Q G"
+    },
+    {
+     "character": "Q",
+     "colour": "white",
+     "range": 5,
+     "height": 5,
+     "sectorStart": 36,
+     "sectorEnd": 43,
+     "text": "Q W"
+    },
+    {
+     "character": "Q",
+     "colour": "red",
+     "range": 3,
+     "height": 5,
+     "sectorStart": 43,
+     "sectorEnd": 90,
+     "text": "Q R"
+    },
+    {
+     "character": "Q",
+     "colour": "green",
+     "range": 2,
+     "height": 5,
+     "sectorStart": 90,
+     "sectorEnd": 143,
+     "text": "Q G"
+    },
+    {
+     "character": "Q",
+     "colour": "white",
+     "range": 5,
+     "height": 5,
+     "sectorStart": 143,
+     "sectorEnd": 146,
+     "text": "Q W"
+    },
+    {
+     "character": "Q",
+     "colour": "red",
+     "range": 3,
+     "height": 5,
+     "sectorStart": 146,
+     "sectorEnd": 264,
+     "text": "Q R"
+    }
+   ]
+  },
+  {
+   "id": "node/1531153797",
+   "lat": 58.29302,
+   "lon": 11.31128,
+   "type": "light",
+   "form": "light",
+   "name": "Brandskärsflak fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "red",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 226.5,
+     "sectorEnd": 311,
+     "text": "Oc(2) R 8s"
+    },
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "green",
+     "period": 8,
+     "height": 25,
+     "sectorStart": 311,
+     "sectorEnd": 352,
+     "text": "Oc(2) G 8s"
+    },
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "red",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 352,
+     "sectorEnd": 28,
+     "text": "Oc(2) R 8s"
+    },
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "green",
+     "period": 8,
+     "height": 25,
+     "sectorStart": 28,
+     "sectorEnd": 45,
+     "text": "Oc(2) G 8s"
+    },
+    {
+     "character": "Oc",
+     "group": 2,
+     "colour": "white",
+     "period": 8,
+     "range": 16,
+     "height": 25,
+     "text": "Oc(2) W 8s"
+    }
+   ]
+  },
+  {
+   "id": "node/1531153563",
+   "lat": 58.2966,
+   "lon": 11.30962,
+   "type": "light",
+   "form": "light",
+   "name": "Dynabrott fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Oc",
+     "colour": "red",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 52.2,
+     "sectorEnd": 60,
+     "text": "Oc R 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "red",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 60,
+     "sectorEnd": 71,
+     "text": "Oc R 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "red",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 71,
+     "sectorEnd": 77.4,
+     "text": "Oc R 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "green",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 77.4,
+     "sectorEnd": 180,
+     "text": "Oc G 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "green",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 180,
+     "sectorEnd": 191,
+     "text": "Oc G 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "green",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 191,
+     "sectorEnd": 209,
+     "text": "Oc G 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "red",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 209,
+     "sectorEnd": 214.9,
+     "text": "Oc R 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "green",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 214.9,
+     "sectorEnd": 226,
+     "text": "Oc G 8s"
+    },
+    {
+     "character": "Oc",
+     "colour": "white",
+     "period": 8,
+     "range": 14,
+     "height": 25,
+     "sectorStart": 226,
+     "sectorEnd": 52.2,
+     "text": "Oc W 8s"
+    }
+   ]
+  },
+  {
+   "id": "node/1531150416",
+   "lat": 58.2985,
+   "lon": 11.32693,
+   "type": "light",
+   "form": "light",
+   "name": "Tån fyr",
+   "rank": "minor",
+   "lights": [
+    {
+     "character": "Q",
+     "colour": "red",
+     "range": 6,
+     "height": 12,
+     "sectorEnd": 224,
+     "text": "Q R"
+    },
+    {
+     "character": "Q",
+     "colour": "green",
+     "range": 5,
+     "height": 12,
+     "sectorStart": 2,
+     "sectorEnd": 37.5,
+     "text": "Q G"
+    },
+    {
+     "character": "Q",
+     "colour": "white",
+     "range": 8,
+     "height": 12,
+     "sectorStart": 37.5,
+     "sectorEnd": 224,
+     "text": "Q W"
+    }
+   ]
+  }
+ ],
+ "lines": [
+  {
+   "id": "way/362392078",
+   "category": "leading",
+   "bearingDeg": 345,
+   "points": [
+    [
+     11.41471,
+     58.13718
+    ],
+    [
+     11.41533,
+     58.13594
+    ],
+    [
+     11.41984,
+     58.12619
+    ]
+   ]
+  },
+  {
+   "id": "way/362416748",
+   "category": "leading",
+   "bearingDeg": 43.3,
+   "points": [
+    [
+     11.47258,
+     58.11954
+    ],
+    [
+     11.45617,
+     58.11033
+    ],
+    [
+     11.41144,
+     58.08526
+    ]
+   ]
+  },
+  {
+   "id": "way/399535190",
+   "category": "leading",
+   "bearingDeg": 32.6,
+   "points": [
+    [
+     11.40949,
+     58.14248
+    ],
+    [
+     11.40453,
+     58.13838
+    ],
+    [
+     11.39058,
+     58.12687
+    ]
+   ]
+  },
+  {
+   "id": "way/473402491",
+   "category": "leading",
+   "points": [
+    [
+     11.42656,
+     58.19246
+    ],
+    [
+     11.42282,
+     58.18994
+    ],
+    [
+     11.41692,
+     58.18597
+    ]
+   ]
+  },
+  {
+   "id": "way/482928515",
+   "category": "clearing",
+   "bearingDeg": 49,
+   "points": [
+    [
+     11.30773,
+     58.29217
+    ],
+    [
+     11.37791,
+     58.32392
+    ],
+    [
+     11.41006,
+     58.33845
+    ]
+   ]
+  },
+  {
+   "id": "way/482931662",
+   "category": "leading",
+   "bearingDeg": 46.4,
+   "points": [
+    [
+     11.42651,
+     58.35308
+    ],
+    [
+     11.40583,
+     58.34283
+    ],
+    [
+     11.30745,
+     58.29405
+    ]
+   ]
+  },
+  {
+   "id": "way/931291530",
+   "category": "leading",
+   "bearingDeg": 194,
+   "points": [
+    [
+     11.48744,
+     58.19306
+    ],
+    [
+     11.48847,
+     58.19495
+    ],
+    [
+     11.49094,
+     58.1994
+    ]
+   ]
+  },
+  {
+   "id": "way/931291531",
+   "category": "leading",
+   "bearingDeg": 58.8,
+   "points": [
+    [
+     11.49984,
+     58.19931
+    ],
+    [
+     11.49636,
+     58.19819
+    ],
+    [
+     11.48638,
+     58.19501
+    ]
+   ]
+  },
+  {
+   "id": "way/932378260",
+   "category": "leading",
+   "bearingDeg": 93.5,
+   "points": [
+    [
+     11.42013,
+     58.13278
+    ],
+    [
+     11.41834,
+     58.13283
+    ],
+    [
+     11.41232,
+     58.13299
+    ]
+   ]
+  },
+  {
+   "id": "way/932382025",
+   "category": "clearing",
+   "bearingDeg": 51,
+   "points": [
+    [
+     11.41006,
+     58.33845
+    ],
+    [
+     11.37696,
+     58.32444
+    ],
+    [
+     11.30564,
+     58.29424
+    ]
+   ]
+  },
+  {
+   "id": "way/932382026",
+   "category": "leading",
+   "bearingDeg": 50,
+   "points": [
+    [
+     11.41006,
+     58.33845
+    ],
+    [
+     11.3773,
+     58.32411
+    ],
+    [
+     11.29943,
+     58.28999
+    ]
+   ]
+  },
+  {
+   "id": "way/939518291",
+   "category": "leading",
+   "bearingDeg": 239.4,
+   "points": [
+    [
+     11.49208,
+     58.20456
+    ],
+    [
+     11.493,
+     58.20485
+    ],
+    [
+     11.51033,
+     58.21043
+    ]
+   ]
+  }
+ ]
+}
