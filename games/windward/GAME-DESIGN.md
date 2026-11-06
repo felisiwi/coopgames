@@ -1253,3 +1253,8 @@ places like the fishery.
   (opened 15 July 1935), about 200 men, mostly out-of-work local stonemasons (relief work),
   30-40 m at its narrowest, swing bridge. It's north of today's map window, so it's a future
   POI when the map grows. Felix to confirm it's the one he meant.
+Grundsund on the big map (Felix, 2026-11-06): reach it from both ends (north entrance → guest
+harbour basin; south entrance past Skutevik → fishing-harbour basin). The narrow canal through
+the village stays closed at 1:10. Sailing through it is a Grundsund close-up feature (fits
+history: shallow until the 1914-18 canal). General rule: carve to reach harbour basins, and
+leave narrow inner channels to the close-ups.

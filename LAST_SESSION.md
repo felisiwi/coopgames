@@ -6,7 +6,7 @@ sea-marks (invented gates look the same; the chart shows them only with ?debug=1
 are dark; moor close + slow, the camera circles, the light comes on mid-circle, the fog lifts, "lights 2/5" saved, goal grandma in Fiskebäckskil, end
 card. Batch 3, the storm card (once; the Task button on the chart reopens it). Also: skerries that only share a major place's name (the 2 OSM
 "Marstrand" skerries) show no name. Details, numbers, screenshots: `games/windward/docs/LIGHTHOUSE-TASK.md`. 1c (CHART.md), passes and seamarks
-data are merged to main. Harbour approaches (Grundsund through-channel) are on felix/windward-harbour-approaches.
+data are merged to main, and so are the harbour approaches (16 harbour-tier carves following the real banks, docs/harbours/), now carved in the game.
 
 Where things are:
 - Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`

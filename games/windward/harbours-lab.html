@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windward Harbours Lab</title>
+<style>
+  :root { color-scheme: dark; --bg: #0e1a24; --panel: rgba(14, 26, 36, 0.95); --line: #2c4556; --text: #e6eef2; --dim: #9db3c0; --accent: #6fd0d6; --on: #06222a; --warn: #ffb36b; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font: 14px/1.35 system-ui, sans-serif; }
+  body { padding: 8px 8px 120px; }
+  h1 { font-size: 15px; margin: 4px 2px 6px; font-weight: 600; }
+  #views { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  @media (min-width: 820px) { #views { grid-template-columns: 1fr 1fr; } body { padding-bottom: 12px; } }
+  .view { background: #0a141c; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .view h2 { margin: 0; padding: 7px 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); display: flex; justify-content: space-between; gap: 8px; }
+  .view h2 b { text-transform: none; letter-spacing: 0; font-weight: 600; }
+  .bad { color: #ff9a8a; } .good { color: #8be0a3; }
+  canvas { display: block; width: 100%; height: auto; }
+  #info { margin: 8px 2px; font-size: 13px; line-height: 1.45; } #info b { font-size: 15px; } #info .dim { color: var(--dim); } #info .warn { color: var(--warn); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--dim); margin: 2px 2px 6px; }
+  .legend span::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--c); border: 1px solid rgba(255,255,255,.25); }
+  #panel { position: fixed; z-index: 4; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 560px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(6px); }
+  @media (min-width: 820px) { #panel { position: static; max-width: none; margin-top: 8px; } }
+  #head { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; background: none; color: inherit; font: 600 14px system-ui, sans-serif; text-align: left; cursor: pointer; }
+  #head .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #body { display: none; padding: 0 12px 12px; max-height: min(62vh, 560px); overflow: auto; }
+  #panel.open #body { display: block; }
+  @media (min-width: 820px) { #body { display: block; max-height: none; } #head .chev { display: none; } }
+  h3 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  button.chip { font: inherit; color: var(--text); background: #1c3140; border: 1px solid var(--line); border-radius: 10px; padding: 0 11px; min-height: 44px; cursor: pointer; }
+  button.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on); font-weight: 600; }
+  button.chip small { opacity: .75; margin-left: 4px; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--dim); z-index: 6; padding: 24px; text-align: center; white-space: pre-wrap; }
+  details { margin: 8px 2px; } summary { cursor: pointer; color: var(--dim); padding: 8px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; } td, th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; } th { color: var(--dim); font-weight: 600; }
+  tr.row { cursor: pointer; } tr.row:hover { background: #14262f; }
+  #details { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
+  .pair { background: #0a141c; border: 1px solid var(--line); border-radius: 12px; padding: 6px 8px 8px; } .pair h4 { margin: 2px 2px 6px; font-size: 12px; font-weight: 600; color: var(--dim); }
+  .pair .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .pair canvas { border-radius: 8px; }
+  @media (min-width: 820px) { #details { grid-template-columns: 1fr 1fr 1fr; } }
+  #credit { font-size: 11px; color: var(--dim); margin: 8px 2px; } #credit a { color: inherit; }
+</style>
+</head>
+<body>
+<h1>Harbours Lab: can the boat sail INTO the harbour?</h1>
+<div class="legend">
+  <span style="--c:#a9b378">land</span><span style="--c:#3b78be">sea the boat can sail</span><span style="--c:#9fd3e0">sea too tight for the hull</span><span style="--c:#ff3fb8">carve outline</span><span style="--c:#ffffff">quay / pier lines</span><span style="--c:#ff4a3a">red mark (port)</span><span style="--c:#3ce05a">green mark (starboard)</span><span style="--c:#19e6ff">the quay water</span><span style="--c:#fff5d6">boat (8 × 2.4 m)</span>
+</div>
+<div id="views">
+  <div class="view"><h2><span>Today (with the ship batch)</span><b id="beforeState"></b></h2><canvas id="before"></canvas></div>
+  <div class="view"><h2><span id="afterTitle">With the harbour approach</span><b id="afterState"></b></h2><canvas id="after"></canvas></div>
+</div>
+<div id="info"></div>
+<div id="details"></div>
+<details id="tableBox"><summary>All harbours and villages: open or blocked, and where</summary><table id="table"></table></details>
+<div id="panel">
+  <button id="head" type="button" aria-expanded="false" aria-controls="body"><span class="name" id="headname">Harbours</span><span class="chev" aria-hidden="true">▲</span></button>
+  <div id="body">
+    <h3 id="h3a">Blocked today: carved approaches</h3><div class="chips" id="carved"></div>
+    <h3 id="h3b">Already open</h3><div class="chips" id="open"></div>
+  </div>
+</div>
+<div id="credit">Harbour approaches derive from OpenStreetMap's coastline, quays and marks, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL). Land cover and height: the game's coast raster.</div>
+<div id="loading">loading the coast…</div>
+<script type="module">
+import { loadCoast } from './src/coast-data.js';
+import { buildCoastWorld, COAST_TILES } from './src/coast-world.js';
+import { applyPasses, resetPasses, findRoute } from './src/passes.js';
+import { findRouteVia } from './src/harbour-approach.js';
+import { isBlocked, HULL_RADIUS_M } from './src/shore.js';
+
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+let world, file, audit, H0, CL0, shipState;
+const state = { name: params.get('h') };
+
+async function load() {
+  const base = './assets/coast/';
+  const [passes, aud, skerries] = await Promise.all([fetch(base + 'passes.json').then((r) => r.json()), fetch(base + 'harbour-audit.json').then((r) => r.json()), fetch(base + 'skerries.json').then((r) => r.json())]);
+  const coast = await loadCoast(base, undefined, COAST_TILES);
+  world = buildCoastWorld(coast, { skerries: skerries.skerries });
+  file = passes; audit = aud; H0 = world.H.slice(); CL0 = world.CL.slice();
+  applyPasses(world, file, { tiers: ['ship'], depth: false }); shipState = { H: world.H.slice(), CL: world.CL.slice() };
+}
+const toShip = () => { world.H.set(shipState.H); world.CL.set(shipState.CL); resetPasses(world); applyPasses(world, file, { tiers: ['ship'], depth: false }); };
+const rowId = (r, i) => `${r.name}|${i}`;
+
+// ---- drawing ----
+function drawPanel(canvas, win, pass, row, { outline, route, boats }) {
+  const dpr = Math.min(2, devicePixelRatio || 1), cssW = canvas.parentElement.clientWidth || 380;
+  canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssW * dpr * (win.h / win.w));
+  const ctx = canvas.getContext('2d'), k = canvas.width / win.w, cell = world.pxM;
+  const a0 = Math.floor((win.x0 - world.x0) / cell), a1 = Math.ceil((win.x0 + win.w - world.x0) / cell), b0 = Math.floor((win.z0 - world.z0) / cell), b1 = Math.ceil((win.z0 + win.h - world.z0) / cell);
+  for (let b = b0; b <= b1; b++) for (let a = a0; a <= a1; a++) {
+    const x = world.x0 + (a + 0.5) * cell, z = world.z0 + (b + 0.5) * cell, h = world.heightAt(x, z);
+    let c;
+    if (h > 0) { const t = Math.min(1, Math.max(0, (h - 0.4) / 9)); c = [168 - 40 * t, 176 - 30 * t, 120 + 10 * t]; }
+    else if (isBlocked(world.heightAt, x, z)) c = [159, 211, 224];
+    else { const d = Math.min(1, Math.max(0, (-h - 1) / 5)); c = [70 - 20 * d, 135 - 35 * d, 200 - 30 * d]; }
+    ctx.fillStyle = `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
+    ctx.fillRect((x - cell / 2 - win.x0) * k, (z - cell / 2 - win.z0) * k, cell * k + 0.6, cell * k + 0.6);
+  }
+  const sx = (x) => (x - win.x0) * k, sz = (z) => (z - win.z0) * k, G = (p) => world.toGame(p[0] ?? p.lon, p[1] ?? p.lat);
+  const ctxLines = pass?.context;
+  if (ctxLines) {
+    ctx.save(); ctx.lineCap = 'round';
+    for (const l of ctxLines.piers) { ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = Math.max(1, dpr * 1.1); ctx.beginPath(); l.forEach((p, i) => { const [x, z] = G(p); i ? ctx.lineTo(sx(x), sz(z)) : ctx.moveTo(sx(x), sz(z)); }); ctx.stroke(); }
+    for (const l of ctxLines.quays) { ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(2, dpr * 2.4); ctx.beginPath(); l.forEach((p, i) => { const [x, z] = G(p); i ? ctx.lineTo(sx(x), sz(z)) : ctx.moveTo(sx(x), sz(z)); }); ctx.stroke(); }
+    for (const l of ctxLines.lines) { ctx.strokeStyle = '#ffe9a0'; ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.lineWidth = dpr * 1.4; ctx.beginPath(); l.forEach((p, i) => { const [x, z] = G(p); i ? ctx.lineTo(sx(x), sz(z)) : ctx.moveTo(sx(x), sz(z)); }); ctx.stroke(); ctx.setLineDash([]); }
+    for (const m of ctxLines.marks) { const [x, z] = G([m.lon, m.lat]); ctx.fillStyle = m.side === 'port' ? '#ff4a3a' : '#3ce05a'; ctx.strokeStyle = '#fff'; ctx.lineWidth = dpr; ctx.beginPath(); ctx.arc(sx(x), sz(z), 4 * dpr, 0, 7); ctx.fill(); ctx.stroke(); }
+    ctx.restore();
+  }
+  if (pass) { // the carve outline
+    ctx.save(); ctx.lineWidth = Math.max(1.5, dpr * 1.2); ctx.strokeStyle = '#ff3fb8'; if (outline === 'dashed') ctx.setLineDash([6 * dpr, 4 * dpr]);
+    for (const ring of pass.polygon) { ctx.beginPath(); ring.forEach(([lon, lat], i) => { const [x, z] = world.toGame(lon, lat); i ? ctx.lineTo(sx(x), sz(z)) : ctx.moveTo(sx(x), sz(z)); }); ctx.closePath(); ctx.stroke(); }
+    ctx.restore();
+  }
+  if (route?.ok) { ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = dpr * 1.6; ctx.setLineDash([2 * dpr, 5 * dpr]); ctx.beginPath(); route.path.forEach(([x, z], i) => (i ? ctx.lineTo(sx(x), sz(z)) : ctx.moveTo(sx(x), sz(z)))); ctx.stroke(); ctx.restore(); }
+  if (pass?.waypoints) { // numbered waypoints along the through-channel, and the light
+    ctx.save(); ctx.font = `700 ${11 * dpr}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    pass.waypoints.forEach((w, i) => { const [x, z] = world.toGame(w.lon, w.lat); ctx.fillStyle = '#0a141c'; ctx.strokeStyle = '#ffe9a0'; ctx.lineWidth = dpr * 1.5; ctx.beginPath(); ctx.arc(sx(x), sz(z), 8 * dpr, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#ffe9a0'; ctx.fillText(String(i + 1), sx(x), sz(z) + 0.5 * dpr); });
+    for (const l of pass.context?.lights ?? []) { const [x, z] = world.toGame(l.lon, l.lat); ctx.fillStyle = '#fff6b0'; ctx.strokeStyle = '#7a5d00'; ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 5, r = i % 2 ? 3.5 * dpr : 8 * dpr; ctx.lineTo(sx(x) + Math.cos(a) * r, sz(z) + Math.sin(a) * r); } ctx.closePath(); ctx.fill(); ctx.stroke(); }
+    ctx.restore();
+  }
+  // the quay water: a cyan ring
+  const q = pass?.harbour?.quay ?? row.quay ?? { lat: row.lat, lon: row.lon };
+  const [qx, qz] = world.toGame(q.lon, q.lat);
+  ctx.save(); ctx.strokeStyle = '#19e6ff'; ctx.lineWidth = dpr * 2; ctx.beginPath(); ctx.arc(sx(qx), sz(qz), 7 * dpr, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(sx(qx), sz(qz), 1.8 * dpr, 0, 7); ctx.fillStyle = '#19e6ff'; ctx.fill(); ctx.restore();
+  for (const { x, z, ang, ghost } of boats) {
+    ctx.save(); ctx.translate(sx(x), sz(z)); ctx.rotate(ang); ctx.globalAlpha = ghost ? 0.72 : 1; ctx.fillStyle = '#fff5d6'; ctx.strokeStyle = '#3a2a10'; ctx.lineWidth = dpr;
+    const L = 4 * k, B = 1.2 * k;
+    ctx.beginPath(); ctx.moveTo(L, 0); ctx.quadraticCurveTo(L * 0.35, B * 1.25, -L, B * 0.8); ctx.lineTo(-L, -B * 0.8); ctx.quadraticCurveTo(L * 0.35, -B * 1.25, L, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.setLineDash([3 * dpr, 3 * dpr]); ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, HULL_RADIUS_M * k, 0, 7); ctx.stroke(); ctx.restore();
+  }
+  ctx.fillStyle = 'rgba(8,16,22,.8)'; ctx.fillRect(8 * dpr, canvas.height - 26 * dpr, 10 * k + 70 * dpr, 20 * dpr);
+  ctx.fillStyle = '#fff'; ctx.fillRect(14 * dpr, canvas.height - 16 * dpr, 10 * k, 2 * dpr); ctx.font = `${11 * dpr}px system-ui`; ctx.fillText('100 m real', 14 * dpr + 10 * k + 6 * dpr, canvas.height - 12 * dpr);
+}
+const boatsAlong = (route, A, B) => {
+  if (!route?.ok) return [{ x: A[0], z: A[1], ang: Math.atan2(B[1] - A[1], B[0] - A[0]), ghost: false }];
+  const P = route.path, at = (f) => { const i = Math.min(P.length - 2, Math.max(0, Math.floor(f * (P.length - 1)))); const [x, z] = P[i], [x2, z2] = P[i + 1]; return { x, z, ang: Math.atan2(z2 - z, x2 - x), ghost: f < 0.99 }; };
+  return [at(0), at(0.4), at(0.75), at(0.985)];
+};
+
+// ---- show one harbour ----
+function windowOf(pts, pad = 24, aspect = 0.8) {
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (const [x, z] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+  const w = Math.max(70, x1 - x0 + 2 * pad), h = Math.max(56, z1 - z0 + 2 * pad), side = Math.max(w, h / aspect), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  return { x0: cx - side / 2, z0: cz - (side * aspect) / 2, w: side, h: side * aspect };
+}
+function windowFor(pass, row) {
+  const pts = [];
+  if (pass) for (const r of pass.polygon) for (const [lon, lat] of r) pts.push(world.toGame(lon, lat));
+  pts.push(world.toGame(pass?.harbour?.quay.lon ?? row.quay?.lon ?? row.lon, pass?.harbour?.quay.lat ?? row.quay?.lat ?? row.lat));
+  return windowOf(pts, 24, pass?.through ? 1.55 : 0.8); // a through-channel is long and thin: a tall window
+}
+// a through-channel: the boat sails the legs between the waypoints (not just "north end to south end": the two ends open onto the same sea)
+function viaRoute(pass) {
+  const pts = pass.waypoints.map((w) => world.toGame(w.lon, w.lat));
+  let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+  return findRouteVia(world, pts, { margin: 25 });
+}
+function boatsFrom(path, fractions) {
+  if (!path || path.length < 2) return [];
+  return fractions.map((f, k) => { const i = Math.min(path.length - 2, Math.max(0, Math.floor(f * (path.length - 1)))); const [x, z] = path[i], [x2, z2] = path[i + 1]; return { x, z, ang: Math.atan2(z2 - z, x2 - x), ghost: k !== 0 && k !== fractions.length - 1 }; });
+}
+const FRACS = [0, 0.18, 0.36, 0.55, 0.74, 0.92, 0.995];
+function paintAll(which, pass, row, win, route) {
+  const canvas = $(which);
+  const boats = pass?.through ? boatsFrom(route?.path, route?.ok ? FRACS : [0]) : null;
+  return { canvas, win, boats };
+}
+function detailWindows(pass) {
+  const pts = pass.waypoints.map((w) => world.toGame(w.lon, w.lat)), n = pts.length;
+  const groups = n >= 6 ? [[0, 2], [2, 4], [4, n - 1]] : [[0, n - 1]];
+  const names = n >= 6 ? ['North entrance and the guest harbour', 'The village and the bridge (the narrows)', 'The southern basin and the exit west'] : ['The channel'];
+  return groups.map(([i, j], k) => ({ title: names[k], win: windowOf(pts.slice(i, j + 1), 22, 0.8) }));
+}
+function show(idx) {
+  const r = audit.harbours[idx]; state.name = r.name; state.idx = idx;
+  const pass = r.passes?.length ? file.passes.find((p) => p.id === r.passes[0]) : null;
+  const win = windowFor(pass, r);
+  const details = pass?.through ? detailWindows(pass) : [];
+  $('details').innerHTML = details.map((d, i) => `<div class="pair"><h4>${i + 1}. ${d.title}</h4><div class="two"><canvas id="db${i}"></canvas><canvas id="da${i}"></canvas></div></div>`).join('');
+  toShip();
+  let rb, ra, S, B, L, boatsB, boatsA;
+  if (pass) {
+    S = world.toGame(pass.a.lon, pass.a.lat); B = world.toGame(pass.b.lon, pass.b.lat);
+    L = pass.line.reduce((t, p, i) => (i ? t + Math.hypot(...[0, 1].map((j) => world.toGame(...p)[j] - world.toGame(...pass.line[i - 1])[j])) : 0), 0);
+    if (pass.through) {
+      rb = viaRoute(pass); boatsB = boatsFrom(rb.path.length > 1 ? rb.path : [S, S], rb.ok ? FRACS : [0]);
+      if (!rb.ok) boatsB = [{ x: S[0], z: S[1], ang: Math.atan2(world.toGame(pass.waypoints[1].lon, pass.waypoints[1].lat)[1] - S[1], world.toGame(pass.waypoints[1].lon, pass.waypoints[1].lat)[0] - S[0]), ghost: false }];
+    } else { rb = findRoute(world, S, B, { margin: 40 + L }); if (rb.ok && rb.length > 1.35 * L + 25) rb = { ok: false }; boatsB = boatsAlong(rb, S, B); }
+    drawPanel($('before'), win, pass, r, { outline: 'dashed', route: pass.through ? null : rb, boats: boatsB });
+    details.forEach((d, i) => drawPanel($('db' + i), d.win, pass, r, { outline: 'dashed', route: null, boats: boatsB.filter((b) => b.x >= d.win.x0 && b.x <= d.win.x0 + d.win.w && b.z >= d.win.z0 && b.z <= d.win.z0 + d.win.h) }));
+    const deps = (pass.dependsOn ?? []).map((id) => file.passes.find((q) => q.id === id));
+    applyPasses(world, [...deps, pass], { ids: [...deps.map((q) => q.id), pass.id], depth: false });
+    if (pass.through) { ra = viaRoute(pass); boatsA = boatsFrom(ra.path, ra.ok ? FRACS : [0]); } else { ra = findRoute(world, S, B, { margin: 40 + L }); boatsA = boatsAlong(ra, S, B); }
+    const routeLine = pass.through ? (ra.ok ? { ok: true, path: ra.path } : null) : ra;
+    drawPanel($('after'), win, pass, r, { outline: 'solid', route: routeLine, boats: boatsA });
+    details.forEach((d, i) => drawPanel($('da' + i), d.win, pass, r, { outline: 'solid', route: routeLine, boats: boatsA.filter((b) => b.x >= d.win.x0 && b.x <= d.win.x0 + d.win.w && b.z >= d.win.z0 && b.z <= d.win.z0 + d.win.h) }));
+  } else { // already open: show the boat at the closest sailable point to the quay
+    const [qx, qz] = world.toGame(r.quay?.lon ?? r.lon, r.quay?.lat ?? r.lat);
+    let best = null, bd = Infinity;
+    for (let dj = -12; dj <= 12; dj++) for (let di = -12; di <= 12; di++) { const x = qx + di * world.pxM, z = qz + dj * world.pxM; if (!isBlocked(world.heightAt, x, z) && Math.hypot(di, dj) < bd) { bd = Math.hypot(di, dj); best = [x, z]; } }
+    const boats = best ? [{ x: best[0], z: best[1], ang: Math.atan2(qz - best[1], qx - best[0]), ghost: false }] : [];
+    drawPanel($('before'), win, null, r, { boats }); drawPanel($('after'), win, null, r, { boats });
+    rb = ra = { ok: true };
+  }
+  toShip();
+  const hasPass = !!pass, th = r.topology;
+  const thLabel = { 'through-route': 'a through-route (two ways out)', 'dead end': 'a dead end (one way in)', 'open coast': 'on open water' }[th?.topology] ?? th?.topology ?? '';
+  $('beforeState').innerHTML = pass?.through ? (rb.ok ? '<span class="good">sailable end to end already</span>' : `<span class="bad">closed at leg ${rb.leg} of ${pass.waypoints.length - 1}</span>`) : r.reachShipM !== null && r.reachShipM <= 60 ? `<span class="good">open: boat within ${r.reachShipM} m of the quay</span>` : `<span class="bad">blocked: ${r.reachShipM === null ? 'no sailable water within 400 m' : `${r.reachShipM} m from the quay`}</span>`;
+  $('afterState').innerHTML = pass?.through ? (ra.ok ? `<span class="good">open end to end: ${Math.round(ra.length * 10)} m</span>` : `<span class="bad">still closed at leg ${ra.leg}</span>`) : r.finalOpen ? `<span class="good">open: ${r.reachAfterM} m from the quay${hasPass ? `, ${Math.round((ra.length ?? 0) * 10)} m route` : ''}</span>` : '<span class="bad">still blocked</span>';
+  $('afterTitle').textContent = pass?.through ? 'The whole channel carved' : hasPass ? 'With the harbour approach' : 'Nothing to carve';
+  const kindLabel = { village: 'village', harbour: 'natural harbour', quay: 'quay (OSM harbour / marina)', favourite: "Felix's pin" }[r.kind] ?? r.kind;
+  const wpList = pass?.through ? `<br><span class="dim">${pass.waypoints.map((w, i) => `${i + 1} ${w.name.replace(/ \(.*\)/, '')}`).join(' → ')}</span>` : '';
+  $('info').innerHTML = `<b>${r.name}</b> <span class="dim">(${kindLabel}${r.via ? `, quay: ${r.via}` : ''}; ${r.confidence}${thLabel ? `; ${thLabel}` : ''})</span><br>
+    Today the raster lets the boat's centre get <b>${r.reachRawM === null ? 'nowhere near' : r.reachRawM + ' m'}</b> from the quay water${r.reachShipM !== r.reachRawM ? `; with the ship batch ${r.reachShipM === null ? 'still nowhere near' : r.reachShipM + ' m'}` : ''}. "In the harbour" = within 60 m.
+    ${pass ? `<br>${pass.through ? 'Through-channel' : 'Approach'}: real channel <b>${pass.realWidthM} m</b> wide at its narrowest, <b>${pass.lengthM} m</b> long, carved to <b>${pass.carveWidthM} m</b> (<b>${pass.widenFactor > 2 ? '<span class="warn">' : ''}×${pass.widenFactor}${pass.widenFactor > 2 ? '</span>' : ''}</b>), ${pass.landRemovedM2.toLocaleString('en')} m² of land turned to water. ${pass.harbour.marksUsed ? 'The route follows the red/green marks.' : 'No OSM marks lead through here: the route follows the real channel.'} ${pass.context.quays.length ? 'The quay line stays land.' : ''}${pass.through ? ' Both basins keep their real shape; only the narrows are widened.' : ''}${pass.dependsOn?.length ? ` Needs ${pass.dependsOn.join(', ')}.` : ''}${wpList}` : `<br>${r.finalOpen ? 'Nothing to carve here.' : r.status}`}
+    ${r.blockedAt && !pass?.through ? `<br><span class="dim">It blocked at ${r.blockedAt.lat}, ${r.blockedAt.lon}: ${r.blockedAt.lengthM} m of channel, narrowest ${r.blockedAt.narrowestM} m.</span>` : ''}
+    ${th?.secondMouth && !pass?.through ? `<br><span class="dim">Real topology: a second way out exists (${th.secondMouth.lengthM} m, narrowest ${th.secondMouth.narrowestM} m).</span>` : ''}${th?.note && th.topology !== 'open coast' ? `<br><span class="dim">${th.note}</span>` : ''}`;
+  $('headname').textContent = `${r.name}${hasPass ? `: ×${pass.widenFactor}` : ''}`;
+  for (const host of [$('carved'), $('open')]) for (const b of host.children) b.classList.toggle('on', Number(b.dataset.idx) === idx);
+  const q = new URLSearchParams(location.search); q.set('h', r.name); q.set('i', idx); history.replaceState(null, '', location.pathname + '?' + q);
+  return { beforeOpen: rb?.ok, afterOpen: ra?.ok, reachAfter: r.reachAfterM, pass: pass?.id ?? null, through: !!pass?.through, legsAfter: ra?.legs?.length };
+}
+
+function build() {
+  const order = (r) => (r.passes?.length ? 0 : 1);
+  audit.harbours.forEach((r, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.idx = i;
+    const pass = r.passes?.length ? file.passes.find((p) => p.id === r.passes[0]) : null;
+    b.innerHTML = `${r.name}<small>${pass ? '×' + pass.widenFactor : r.reachAfterM + ' m'}</small>`;
+    b.onclick = () => { show(i); $('panel').classList.remove('open'); scrollTo(0, 0); };
+    (order(r) === 0 ? $('carved') : $('open')).append(b);
+  });
+  $('h3a').textContent = `Blocked today: ${$('carved').children.length} carved approaches`;
+  $('h3b').textContent = `Already open: ${$('open').children.length} (nothing to carve)`;
+  $('head').onclick = () => { const o = $('panel').classList.toggle('open'); $('head').setAttribute('aria-expanded', o); };
+  const t = $('table');
+  t.innerHTML = '<tr><th>harbour / village</th><th>today</th><th>after</th><th>where it blocks</th></tr>' + audit.harbours.map((r, i) => `<tr class="row" data-idx="${i}"><td>${r.name}</td><td class="${r.reachShipM !== null && r.reachShipM <= 60 ? 'good' : 'bad'}">${r.reachRawM === null ? 'none' : r.reachRawM + ' m'}${r.reachShipM !== r.reachRawM ? ' → ' + (r.reachShipM ?? 'none') : ''}</td><td class="${r.finalOpen ? 'good' : 'bad'}">${r.reachAfterM ?? 'none'} m</td><td>${r.blockedAt ? `${r.blockedAt.lengthM} m channel, ${r.blockedAt.narrowestM} m wide` : r.finalOpen ? '' : r.status}</td></tr>`).join('');
+  t.onclick = (e) => { const tr = e.target.closest('tr.row'); if (tr) { show(Number(tr.dataset.idx)); scrollTo(0, 0); } };
+}
+
+try {
+  await load(); build(); $('loading').remove();
+  if (params.get('bare') === '1') $('panel').style.display = 'none';
+  const byIndex = params.get('i') !== null ? Number(params.get('i')) : -1; // i= picks by position (two harbours are both called Småbåtshamn)
+  const idx = byIndex >= 0 ? byIndex : Math.max(0, audit.harbours.findIndex((r) => r.name === (state.name ?? 'Grundsunds Marina')));
+  const out = show(idx);
+  addEventListener('resize', () => show(state.idx));
+  window.__harboursLab = { ready: true, count: audit.harbours.length, first: out, names: audit.harbours.map((r) => r.name), show, counts: audit.counts };
+} catch (err) { console.error(err); $('loading').textContent = 'could not load: ' + (err.stack || err); window.__harboursLabError = String(err.stack || err); }
+</script>
+</body>
+</html>
