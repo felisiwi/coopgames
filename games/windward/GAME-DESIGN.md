@@ -1328,3 +1328,6 @@ born ~1936 → ~90 today.
 "granddad's boat", the same koster you inherit in today's opening scene. The boat has no
 beginning: a time loop that ties you, granddad and Svalan together. (The boat lab's wear
 slider can show her repaired, newer self.)
+**While Svalan is repaired (Felix, 2026-11-06):** granddad's family lends you a small boat (an
+old snipa or eka), and you do chapter 1's lighthouse task in it. When the five lights burn,
+Svalan is ready, repaired and freshly painted: that's the chapter 1 reward.
