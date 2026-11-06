@@ -1,10 +1,11 @@
 # Last session
 
-**2026-11-06: Windward stage 1e, chapter 1 in 1950** (branch `felix/windward-chapter1-1950`, describes `ec4092c`; pushed, NOT merged). The game builds from `worldAtYear(1950)` (default year 1950;
-`?year=2015` is the Today game, untouched, own save keys). Batch 1 world adapter + 1950 kit; batch 2 opening (SVG, once), waking on Skaftö, borrowed eka, Britta; batch 3
-(`src/task-1950.js`): gas at the Lysekil quay -> relight Hättan, Gäven, Stångholmen, Fredagsholmen -> post to the unnamed Måseskär keeper -> Britta ("the lights talk") ->
-Svalan relaunched, you switch eka -> koster -> Kråksundsgap Södra glimpse (small iron lantern becomes the 1954 tower, then gone). Wreck is on Skaftö's mainland shore
-(`src/wake-plan.js`). All story copy: `src/story-1950.js`, invented lines marked INVENTED-DIALOGUE / TODO(felix). `?lights=reset` restarts the job; `?opening=1` replays the opening.
+**2026-11-06: Windward stage 1e, chapter 1 in 1950, REVISED plan** (branch `felix/windward-chapter1-1950`, describes `ff2d3f1`; pushed, NOT merged). Plan changed after Felix's
+phone test (GAME-DESIGN.md "Opening and chapter 1 story, revised"). Done: batch 1 world adapter; **batch 2b the opening in the engine** (`src/opening-stage.js`: dusk over today's
+Fiskebäckskil, storm, lighthouse rewind `src/rewind.js`, looks `src/dusk.js`, site `src/opening-site.js`; then dawn on the 1950 mainland shore); the SVG opening is deleted.
+STILL TO DO under the revised plan: **2c** the first story beats (the boy; errand to Grundsund for parts; "someone in Fiskebäckskil was asking for help") replacing today's wake
+cards in `src/story-1950.js`; **3** the task redone (an earlier batch-3 build, `f452ffe`, is in the history but its story is superseded: Britta ~17, her house = the opening's house,
+depot = her family's shed instead of Lysekil, report back at her house). `?opening=1` replays, `?lights=reset` restarts. All copy is draft (TODO(felix)).
 
 Where things are:
 - Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`
@@ -26,5 +27,5 @@ harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connecti
 
 ## Next
 
-1. Felix: phone check of 1950 (checklist in the batch 3 report); decide the TODO(felix) copy and the open choices (night for the glimpse, depot/post, year on cards); then merge.
+1. Felix: phone check of the opening (batch 2b report); then batch 2c (story beats) and batch 3 (the task, revised).
 2. Open data TODOs: Bx/B/K light readings, Stångholmen position, the four undrawn fyrkurar, 1950 buoy colour, ferry timetable. Then: night navigation, harbour close-ups.
