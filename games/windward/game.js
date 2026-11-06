@@ -39,6 +39,10 @@ import { parseGameStyle } from './src/terrain-style.js';
 import { createArrivals, giftFor } from './src/arrival.js';
 import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
+import { LIGHTHOUSES } from './src/lighthouses.js';
+import { createLanternFx } from './src/lantern.js';
+import { createLighthouseTask, GRANDMA_ID } from './src/lighthouse-task.js';
+import { createTaskUi } from './src/task-ui.js';
 import { createLife } from './src/life.js';
 import { createShoalLayer } from './src/shoal-look.js';
 import { createSeamarkLayer } from './src/seamark-layer.js';
@@ -390,7 +394,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   if (coast && debugOverlay) window.__lureOn = lureOn;
   if (lureOn && debugOverlay) window.__lure = { arrivals, deck, moment, life, audio, names: coast.names }; // headless checks
   // The HUD counter on the real coast: places you have named (there are no "finds" to count).
-  const progressText = () => (coast ? `places named ${nameBook.count()}` : `found ${found.size}/${discoverables.length}`);
+  const progressText = () => (coast ? `places named ${nameBook.count()}${task && task.progressText() ? ` · ${task.progressText()}` : ''}` : `found ${found.size}/${discoverables.length}`);
   const other = { x: null, z: null, heading: 0, speed: 0 };
   let otherLastPosAtS = null; // for partnerState() (src/partner.js)
   let partnerLeftAtS = null; // when the "friend left" notice started
@@ -546,9 +550,38 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Phone controls (src/phone.js): hold to aim, second-thumb sheet, arc,
   // wind at the boat. The corner HUD and keyboard legend are hidden there.
   const phone = isPhone ? createPhoneControls({ canvas, camera, onPing: () => doPing() }) : null;
+  // Stage 1d, the first task: the storm put the five lighthouses nearest the start out. Sail to each (close and slow: the boat moors, the camera
+  // circles, the light comes back on, the fog lifts), then report to grandma in Fiskebäckskil. Progress is saved on the device (?lights=reset forgets it).
+  const task = coast ? createLighthouseTask({ lights: coast.names.filter((e) => e.kind === 'light'), spawn: coast.spawn || { x: self.x, z: self.z } }) : null;
+  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') task.reset();
+  const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
+  if (coast && task) {
+    for (const l of coast.lights) {
+      const entry = LIGHTHOUSES.find((x) => x.name === l.name);
+      if (!entry || !l.group) continue;
+      const fx = createLanternFx(l.group, entry);
+      fx.setLit(!task.isDark(`light:${l.name}`));
+      lanternFx.set(`light:${l.name}`, fx);
+    }
+  }
+  const grandma = coast ? coast.names.find((e) => e.id === GRANDMA_ID) : null;
+  const taskUi = task ? createTaskUi({ parent: document.body }) : null;
+  // The light came back on (the relight timeline says when): save it, light the lantern, the calm sound; after the fifth, the goal is grandma.
+  function onRelit(entry) {
+    const r = task.restore(entry.id);
+    lanternFx.get(entry.id)?.setLit(true);
+    audio?.relight();
+    if (r && r.all && grandma) chartCtl?.setTarget(grandma);
+    if (!r) return `${entry.name} is lit.`;
+    return r.all ? `${entry.name} is lit. All ${task.total} lights burn again: report to grandma in Fiskebäckskil.` : `${entry.name} is lit again · ${r.count} of ${task.total} lights restored`;
+  }
   // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
   const chartCtl = coast
     ? createChartController({
+      isDark: (id) => !!task && task.isDark(id),
+      holdTarget: (entry) => !!task && task.isDark(entry.id), // a dark light's tag stays until it is lit
+      onRelit,
+      onArrive: (entry) => { if (task && task.phase === 'report' && entry.id === GRANDMA_ID) { task.finish(); taskUi.showEnd(); } },
       canvas, coast, nameBook, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
       onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
       // "Navigate here": the target's edge tag (src/name-labels.js); null clears it
@@ -561,6 +594,8 @@ function startGame({ canvas, net, seed, role }, coast) {
     })
     : null;
   chartCtl?.setPhoneInterrupt(() => phone?.interrupt());
+  if (task && chartCtl && grandma && task.phase === 'report') chartCtl.setTarget(grandma); // reloaded with all five lit: the goal is still grandma
+  if (task && debugOverlay) window.__task = { task, lanternFx, taskUi, grandma };
   if (chartCtl && debugOverlay) window.__chart = chartCtl;
   if (phone && debugOverlay) window.__phoneCtl = phone;
   if (phone) {
@@ -642,6 +677,12 @@ function startGame({ canvas, net, seed, role }, coast) {
       self.z += Math.cos(self.heading) * self.speed * dt;
     }
 
+    // Stage 1d: moored at a dark lighthouse (close enough AND slow): the relight begins (the boat is held while the camera does the visit view).
+    if (task && chartCtl && !chartCtl.visiting && !task.done) {
+      const moored = task.arrival(self.x, self.z, self.speed);
+      if (moored) chartCtl.relightById(moored.id);
+      else if (task.hint(self.x, self.z, self.speed, nowS)) chartCtl.toast('Ease off to moor at the dark lighthouse', 3600);
+    }
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
     stepWaves(waves, dt, wind, self.x, self.z); // before anything samples the sea this frame
@@ -715,6 +756,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     ctlView = chartCtl
       ? chartCtl.update(dt, nowS, { x: self.x, z: self.z, heading: self.heading, speed: self.speed }, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, Math.min(window.devicePixelRatio || 1, 2), partnerPos ? [{ x: partnerPos.x, z: partnerPos.z, heading: partnerPos.heading }] : [])
       : null;
+    for (const [id, fx] of lanternFx) fx.update(nowS, ctlView && ctlView.relight && ctlView.relight.id === id ? ctlView.relight.lamp : 1); // lit lanterns flash their real pattern; the one being relit warms up
     const lookAt = ctlView ? ctlView.focus : self;
     viewTarget.set(lookAt.x, ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z);
     water.update(waves, wind, viewTarget, dt, camera.position);
@@ -730,7 +772,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     }
 
     if (isFixedCamera) {
-      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined);
+      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined, ctlView ? ctlView.yaw : 0);
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }

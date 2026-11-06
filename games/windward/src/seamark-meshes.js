@@ -132,7 +132,7 @@ let BODY_MATERIAL;
 const bodyMaterial = () => (BODY_MATERIAL ??= new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide }));
 
 let glowTexture;
-function getGlowTexture() { // a soft radial falloff, drawn once (browser only; node has no canvas)
+export function getGlowTexture() { // a soft radial falloff, drawn once (browser only; node has no canvas)
   if (glowTexture !== undefined) return glowTexture;
   glowTexture = null;
   if (typeof document !== 'undefined') {

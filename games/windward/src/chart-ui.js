@@ -92,9 +92,10 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
       cardSub.textContent = info.sub || '';
       navBtn.style.display = info.nav ? 'inline-block' : 'none';
       navBtn.textContent = info.nav === 'stop' ? 'Stop navigating' : 'Navigate here';
+      backBtn.style.display = info.back === 'none' ? 'none' : 'inline-block'; // the relight: nothing to press, the camera returns by itself
       backBtn.textContent = info.back === 'close' ? 'Close' : 'Back to the boat';
       backBtn.setAttribute('aria-label', info.back === 'close' ? 'Close this card' : 'Return the view to your boat');
-      jumpBtn.style.display = info.back === 'close' ? 'none' : 'inline-block';
+      jumpBtn.style.display = info.back === 'close' || info.back === 'none' ? 'none' : 'inline-block';
     },
     toast(text, ms = 3200) {
       toastEl.textContent = text;

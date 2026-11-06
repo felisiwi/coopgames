@@ -588,7 +588,7 @@ export async function loadRealCoast(opts = {}) {
   return {
     world, group, depthMap: world.depthMap, spawn, trees, terrain, terrainStyle, clamp, update, names,
     findOpenWater: (x, z, o) => findOpenWater(world, x, z, o), // for the debug jump to a lighthouse
-    lights: lights.filter((l) => l.group).map((l) => ({ name: l.name, x: l.group.position.x, y: l.group.position.y, z: l.group.position.z })), // where gulls may perch (stage 1b)
+    lights: lights.filter((l) => l.group).map((l) => ({ name: l.name, x: l.group.position.x, y: l.group.position.y, z: l.group.position.z, group: l.group })), // + the tower's group (stage 1d: its lantern glows) // where gulls may perch (stage 1b)
     heightAt: world.heightAt,
     sailHeightAt, shoalSlowAt: shoalIndex.slowAt, // stage 1d: hard shoals are solid, soft ones slow the boat
     sea: { shoalList, shoalIndex, marks: seamarksJson.marks, lines: seamarksJson.lines, harbours: seamarksJson.harbours, credit: seamarksJson.credit, licence: seamarksJson.licence },

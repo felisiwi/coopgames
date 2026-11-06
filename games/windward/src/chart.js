@@ -99,7 +99,7 @@ export function placeLabels(items, W, H) {
 // where the fog has lifted, from SEA_MIN_SCALE; invented marks only when showInvented (?debug=1), with a dashed magenta ring.
 // opts: { canvas, cfg (chart.json), toGame, entries (name list), isKnown(id), explored, seen(entry) (src/seen.js; defaults to the label point's fog), lights: [{ id, name, x, z, inWindow, entry }],
 //         baseUrl (folder of the pictures), makeCanvas, loadImage }
-export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, seen = (e) => explored.isExplored(e.x, e.z), lights, sea = null, showInvented = false, baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
+export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, seen = (e) => explored.isExplored(e.x, e.z), lights, sea = null, showInvented = false, isDark = () => false, baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
   const ctx = canvas.getContext('2d');
   const detailRect = boundsRect(toGame, cfg.detail);
   const overRect = boundsRect(toGame, cfg.overview);
@@ -282,8 +282,12 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, s
         ctx.globalAlpha = isLight ? 1 : labelA;
         if (isLight) {
           const m = Math.max(0.5, Math.min(1, s / 0.25)); // smaller on the whole-coast view, where lights crowd
-          ctx.fillStyle = '#f2c46d'; ctx.strokeStyle = INK; ctx.lineWidth = 1.4;
+          const dark = isDark(d.e.id); // the storm put it out: a hollow grey triangle marked "dark"; lit ones are gold
+          ctx.fillStyle = dark ? 'rgba(150,146,140,0.25)' : '#f2c46d'; ctx.strokeStyle = dark ? 'rgba(61,50,38,0.7)' : INK; ctx.lineWidth = 1.4;
+          if (dark) ctx.setLineDash([3, 2]);
           ctx.beginPath(); ctx.moveTo(sx, sy - 9 * m); ctx.lineTo(sx + 6.5 * m, sy + 5 * m); ctx.lineTo(sx - 6.5 * m, sy + 5 * m); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.setLineDash([]);
+          if (dark && s > 0.12) { ctx.font = 'italic 11px "IM Fell English", Georgia, serif'; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(61,50,38,0.75)'; ctx.fillText('dark', sx, sy + 17 * m); }
           if (state.visitId === d.e.id) { ctx.strokeStyle = '#b8432f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.stroke(); }
           hits.push({ type: 'light', id: d.e.id, entry: d.e, x: sx, y: sy, r: Math.max(16, 24 * m) });
         } else if (d.e.kind === 'village' || d.e.kind === 'harbour') {

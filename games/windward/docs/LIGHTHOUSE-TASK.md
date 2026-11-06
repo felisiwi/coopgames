@@ -40,3 +40,17 @@ So +21k triangles (the shoal layer is 19k in three instanced draws) and +45 draw
 TODO(felix): real-phone fps; the shoal radii (`shoal-look.js`) and the 420 m mark radius are first guesses.
 
 ![gate](lighthouse-task/b1-gate-fiskebackskil.png) ![rock](lighthouse-task/b1-surf-rock.png)
+
+## Batch 2: the task
+
+The storm put out the five lighthouses nearest the start: **Islandsberg, Hättan, Stångehuvud, Gäven, Kråksundsgap Södra** (`pickTaskLights`; Måseskär, out at sea, stays lit).
+
+- **Dark and lit** (`src/lantern.js`): a dark lighthouse has a dull blue-grey lantern, no halo, no beam. A lit one glows warm, its halo flashes on its REAL pattern (`lightOnAt` from `lighthouses.js`: flash / occulting / on-off, counts, lengths and gaps, tested against all 29 towers), and a soft beam sweeps round (faint by day). Emissive only, no PointLight.
+- **The chart and minimap mark them "dark"**: a hollow dashed grey triangle (with the word "dark" on the chart); lit ones are gold. The card says "Dark since the storm".
+- **Moor** (`MOOR_M` 45 game m, `MOOR_MAX_SPEED` 3 m/s = 5.8 kn): close enough AND slow starts the relight; the boat is held. Too fast near a dark light: a quiet toast "Ease off to moor at the dark lighthouse" (at most every 25 s). The nearest sailable water is 4 to 12 m from each rock, so 45 m is comfortable; the camera sees about 45 m, so the tower is in view. TODO(felix): confirm by feel.
+- **The sequence** (`src/relight.js`, one timeline, about 14 s): the visit view glides in (1.6 s), the camera turns once round the lighthouse (10 s, eased, ends north-up again), the light comes on MID-circle (the lamp warms up over 1.4 s) with a calm sound (`audio.relight()`: a warm chord swell and two soft chimes, nothing sharp), then half a second later the fog lifts on the chart in a wide circle (`REVEAL_RADIUS_M` 600 game m = 6 km real, growing from nothing over 2.6 s, `explored.reveal`), a short rest, and the camera returns to the boat. The toast says "Hättan is lit again · 2 of 5 lights restored".
+- **Progress** (`windward.lights.v1` in localStorage): shown subtly in the HUD line ("lights 2/5"); `?lights=reset` forgets it. A "Navigate here" tag on a dark light does not clear on arrival: it clears when the light is lit.
+- **After the fifth**: the goal is "report to grandma": a Navigate-here target on Fiskebäckskil is set automatically (and again after a reload while it is the goal), the HUD says "report to grandma". Arriving there shows the end card ("The lights are burning", `END_CARD` in `src/task-ui.js`), saves "done", and the HUD line goes quiet.
+- **Camera**: the circle uses a yaw on the fixed camera (`updateFixedCamera(..., yaw)`); everywhere else the camera stays north-up.
+
+![dark](lighthouse-task/b2-dark-lighthouse.png) ![on](lighthouse-task/b2-light-on-mid-circle.png) ![chart dark](lighthouse-task/b2-chart-dark.png) ![fog](lighthouse-task/b2-chart-fog-lifted.png) ![goal](lighthouse-task/b2-goal-tag.png) ![end](lighthouse-task/b2-end-card.png)

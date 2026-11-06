@@ -14,9 +14,11 @@ import { attachZoomInput } from './zoom-input.js';
 import { deviceStorage } from './names.js';
 import { createSeen } from './seen.js';
 import { markKind } from './seamark-layer.js';
+import { relightFrame, REVEAL_RADIUS_M } from './relight.js';
 import { createNavTarget } from './nav-target.js';
 
 export const VISIT_ZOOM = 0.8; // close enough to look at the lighthouse
+export const RELIGHT_ZOOM = 1.05; // a little wider for the relight: the tower and the sea round it as the camera turns
 export const ZOOM_EASE = 9; // 1/s: how fast the shown zoom follows the target
 export const FOCUS_EASE = 3.2; // 1/s: how fast the view glides to a lighthouse and back
 // How much the view centres on the whole coast: 0 until about half way (in log zoom) from the chart to the full chart, 1 at the full chart.
@@ -25,10 +27,11 @@ export const TAP_MAX_PX = 8;
 export const TAP_MAX_MS = 450;
 
 // What the visit card says for a lighthouse entry: the discovery rules (description until named), plus the year it was lit.
-export function lightInfo(entry, known, lights = LIGHTHOUSES) {
+export function lightInfo(entry, known, lights = LIGHTHOUSES, dark = false) {
   const meta = lights.find((l) => l.name === entry.name);
   const title = known ? entry.name : (entry.desc || 'A lighthouse');
   const parts = [];
+  if (dark) parts.push('Dark since the storm');
   if (known && entry.desc) parts.push(entry.desc);
   parts.push(meta && meta.built ? `Lighthouse · built ${meta.built}` : 'Lighthouse');
   return { title, sub: parts.join(' · ') };
@@ -52,6 +55,9 @@ export function placeInfo(entry) {
   return { title: entry.name, sub: [entry.desc, KIND_LINE[entry.kind]].filter(Boolean).join(' · ') };
 }
 
+// Stage 1d: isDark(id): a lighthouse the storm put out (the chart and minimap mark it "dark"); holdTarget(entry): a "Navigate here" target that does
+// not clear on arrival (a dark light is cleared when it is lit); onRelit(entry) -> toast text: the light came back on (game.js saves the progress);
+// onArrive(entry): a navigate target was reached.
 // onTarget(entry | null, titleFn): the sail target changed (game.js shows its edge tag). onVisit(entry): a lighthouse visit began
 // (game.js shows that lighthouse's name label, so its description is up while you look at it).
 // What the chart draws of the sea (stage 1d): real marks, the shoals, the leading lines, in game metres.
@@ -63,7 +69,7 @@ export function chartSea(sea, toGame) {
   };
 }
 
-export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
+export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const lights = chartLights(coast.names, toGame);
   const lightList = [...lights.inWindow, ...lights.far];
@@ -71,7 +77,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   const nav = createNavTarget();
   const state = {
     zoom: 1, zoomTarget: 1, returnZoom: 1, pan: { x: 0, z: 0 }, focus: { x: NaN, z: NaN },
-    visit: null, card: null, explored: null, chart: null, cfg: null, W: 390, H: 844, dpr: 1, view: null, t: 0, drag: null, zooming: false, lastSave: 0,
+    visit: null, relight: null, card: null, explored: null, chart: null, cfg: null, W: 390, H: 844, dpr: 1, view: null, t: 0, drag: null, zooming: false, lastSave: 0,
   };
 
   const ui = createChartUi({
@@ -89,7 +95,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   });
   let lastBoat = { x: 0, z: 0, heading: 0 };
   const mini = createMinimap({
-    canvas: ui.mini, heightAt: coast.heightAt, places: coast.names,
+    canvas: ui.mini, heightAt: coast.heightAt, places: coast.names, isDark,
     lights: lights.inWindow.map((e) => ({ id: e.id, x: e.x, z: e.z, name: e.name, entry: e })),
     marks: [], // filled each frame from getMarks (the buoys exist once the life is built)
   });
@@ -103,7 +109,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     setTimeout(() => state.chart && state.chart.ensureLoaded(), 2500); // fetch the pictures soon after load, so a quick zoom-out is never held up
     state.chart = createChart({
       canvas: ui.chartCanvas, cfg, toGame, entries: lightList.concat(coast.names.filter((e) => e.kind !== 'light')), isKnown: (id) => nameBook.isKnown(id),
-      explored: state.explored, seen: (e) => seen.isSeen(e), baseUrl: assetsBase, showInvented: debug,
+      explored: state.explored, seen: (e) => seen.isSeen(e), baseUrl: assetsBase, showInvented: debug, isDark,
       sea: coast.sea ? chartSea(coast.sea, toGame) : null,
     });
   }).catch((err) => { console.warn('chart data failed to load', err); });
@@ -125,7 +131,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   const navTitle = (e) => (e.kind === 'light' ? lightInfo(e, nameBook.isKnown(e.id)).title : (nameBook.isKnown(e.id) ? e.name : (e.desc || e.name)));
   function setTarget(entry) { nav.set(entry); onTarget(entry, () => navTitle(entry)); }
   function clearTarget() { if (!nav.entry) return; nav.clear(); onTarget(null, null); }
-  const cardFor = (entry, back) => ({ ...(entry.kind === 'light' ? lightInfo(entry, nameBook.isKnown(entry.id)) : placeInfo(entry)), nav: entry.outside ? null : (nav.entry && nav.entry.id === entry.id ? 'stop' : 'start'), back });
+  const cardFor = (entry, back) => ({ ...(entry.kind === 'light' ? lightInfo(entry, nameBook.isKnown(entry.id), undefined, isDark(entry.id)) : placeInfo(entry)), nav: entry.outside ? null : (nav.entry && nav.entry.id === entry.id ? 'stop' : 'start'), back });
   function closeCard() { state.card = null; ui.showVisit(null); }
   function onNavigatePressed() {
     const entry = state.visit ? state.visit.entry : state.card;
@@ -156,12 +162,28 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     ui.showVisit(cardFor(entry, 'boat'));
     onVisit(entry);
   }
+  // The relight (stage 1d): the boat has moored at a dark lighthouse. The visit view, one slow turn round it, the light comes back on mid-turn,
+  // the fog lifts in a wide circle, the camera returns to the boat (src/relight.js is the timeline).
+  function startRelight(entry) {
+    if (state.visit || state.relight || entry.outside) return false;
+    state.returnZoom = state.zoomTarget < ZOOM_CHART_START ? state.zoomTarget : 1;
+    state.card = null;
+    state.visit = { entry, x: entry.x, z: entry.z, relight: true };
+    state.relight = { entry, t: 0, lit: false };
+    state.zoomTarget = RELIGHT_ZOOM;
+    state.pan = { x: 0, z: 0 };
+    const info = lightInfo(entry, nameBook.isKnown(entry.id), undefined, true);
+    ui.showVisit({ title: info.title, sub: 'Moored. The lamp is being lit again…', nav: null, back: 'none' });
+    onVisit(entry);
+    return true;
+  }
   function openPlace(entry) {
     state.card = entry;
     ui.showVisit(cardFor(entry, 'close'));
   }
   function endVisit() {
     state.visit = null;
+    state.relight = null;
     state.zoomTarget = Math.min(state.returnZoom, ZOOM_CHART_START - 0.5);
     state.pan = { x: 0, z: 0 };
     ui.showVisit(null);
@@ -211,6 +233,9 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     get visiting() { return !!state.visit; },
     setPhoneInterrupt(fn) { coastPhoneInterrupt = fn; },
     toggleChart, endVisit, setTarget, clearTarget,
+    toast: (text, ms) => ui.toast(text, ms),
+    relightById(id) { const e = lightList.find((l) => l.id === id); return e ? startRelight(e) : false; },
+    get relighting() { return !!state.relight; },
     get target() { return nav.entry; },
     canSee: (entry) => seen.isSeen(entry),
     visitById(id) { const e = lightList.find((l) => l.id === id); if (e) startVisit(e); return !!e; },
@@ -218,8 +243,24 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     // Once a frame. boat: { x, z, heading, speed }. Returns what the camera and renderer should do.
     update(dt, nowS, boat, W, H, dpr, friends = []) {
       lastBoat = boat;
-      const arrived = nav.update(boat.x, boat.z);
-      if (arrived) { onTarget(null, null); ui.toast(`Arrived at ${navTitle(arrived)}`, 3200); }
+      // the relight timeline: the light comes on mid-turn, the fog lifts a little after, then the camera goes back to the boat
+      let relightOut = null;
+      if (state.relight) {
+        const r = state.relight;
+        r.t += dt;
+        const f = relightFrame(r.t);
+        if (f.ignited && !r.lit) {
+          r.lit = true;
+          const msg = onRelit(r.entry);
+          if (msg) ui.toast(msg, 5600);
+          if (nav.entry && nav.entry.id === r.entry.id) clearTarget();
+        }
+        if (state.explored && f.revealFrac > 0) state.explored.reveal(r.entry.x, r.entry.z, REVEAL_RADIUS_M * f.revealFrac);
+        relightOut = { id: r.entry.id, lamp: f.lamp, lit: r.lit, yaw: f.yaw };
+        if (f.done) { state.explored?.save(true); endVisit(); relightOut = { ...relightOut, yaw: 0, done: true }; }
+      }
+      const arrived = nav.entry && holdTarget(nav.entry) ? null : nav.update(boat.x, boat.z);
+      if (arrived) { onTarget(null, null); ui.toast(`Arrived at ${navTitle(arrived)}`, 3200); onArrive(arrived); }
       state.W = W; state.H = H; state.dpr = dpr;
       if (!marksSet) { const m = getMarks(); if (m && m.length) { mini.marks.push(...m); marksSet = true; } }
       if (Number.isNaN(state.focus.x)) { state.focus.x = boat.x; state.focus.z = boat.z; }
@@ -266,6 +307,8 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
         t,
         skip3D: t >= 0.999 && state.chart && state.chart.loaded, // the chart covers the view: pause the 3D render
         visiting: !!state.visit,
+        yaw: relightOut ? relightOut.yaw : 0, // the camera's turn round the target (the relight's slow circle); 0 = north-up
+        relight: relightOut, // { id, lamp 0..1, lit, yaw, done? } while a light is being relit
         zooming: state.zooming,
         chartLoaded: !!(state.chart && state.chart.loaded),
       };

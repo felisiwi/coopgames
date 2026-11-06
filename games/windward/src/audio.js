@@ -10,6 +10,8 @@
 export const BELL = { base: 523, partials: [[0.5, 0.5, 3.2], [1, 0.9, 2.6], [1.2, 0.4, 2.0], [1.5, 0.3, 1.5], [2, 0.35, 1.1], [2.5, 0.12, 0.7], [3, 0.1, 0.5]], strikes: [0, 0.62], gain: 0.22 };
 export const HORN = { freqs: [98, 98.9, 147], attack: 0.1, hold: 0.55, release: 0.5, cutoff: 380, gain: 0.12 };
 // One gull cry: pitch glides down-up while a fast vibrato wobbles it. cries: [start offset s, base Hz, length s]
+// The relight cue (stage 1d): a low, warm C-major chord that swells and fades, with two soft chimes (a fifth apart) as the lamp catches.
+export const RELIGHT_SOUND = { chord: [[130.8, 1], [196, 0.8], [261.6, 0.7], [329.6, 0.5]], attack: 1.1, hold: 1.4, release: 2.4, gain: 0.07, chimes: [[880, 0.9], [1318.5, 1.6]], chimeGain: 0.05 };
 export const GULL = { vibratoHz: 24, vibratoDepth: 0.06, gain: 0.05 };
 
 export const MOMENT = {
@@ -132,6 +134,15 @@ export function createAudio(ContextClass = globalThis.AudioContext || globalThis
         o.start(t);
         o.stop(t + 0.22);
       } catch { /* ignore */ }
+    },
+    // A lighthouse coming back on (stage 1d): calm. A warm chord swells under two soft chimes, nothing sharp, over about four seconds.
+    relight(delayS = 0, gain = 1) {
+      if (!live()) return;
+      try {
+        const t = ctx.currentTime + delayS;
+        for (const [f, g] of RELIGHT_SOUND.chord) tone('sine', f, t, RELIGHT_SOUND.attack, RELIGHT_SOUND.hold, RELIGHT_SOUND.release, RELIGHT_SOUND.gain * g * gain);
+        RELIGHT_SOUND.chimes.forEach(([f, at]) => tone('sine', f, t + at, 0.01, 0, 2.2, RELIGHT_SOUND.chimeGain * gain));
+      } catch { /* sound must never break the game */ }
     },
     // The whole harbour moment's sound: bell (and horn for a village), then gulls in the background.
     arrival(kind) {

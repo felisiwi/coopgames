@@ -71,6 +71,26 @@ export function createExplored(rect, { cell = CELL_M, radius = REVEAL_M, storage
       if (added) { count += added; dirty += added; version++; }
       return added;
     },
+    // Lift the fog in a disc of any radius (game metres) round (x, z): a lighthouse coming back on lifts a wide circle. No movement throttle.
+    // Returns the number of cells newly lifted.
+    reveal(x, z, radiusM) {
+      const ci = Math.floor((x - rect.x0) / cell);
+      const cj = Math.floor((z - rect.z0) / cell);
+      const rr = Math.ceil(radiusM / cell);
+      let added = 0;
+      for (let j = -rr; j <= rr; j++) {
+        for (let i = -rr; i <= rr; i++) {
+          const a = ci + i;
+          const b = cj + j;
+          if (a < 0 || b < 0 || a >= cols || b >= rows) continue;
+          if (Math.hypot(i, j) * cell > radiusM) continue;
+          const k = b * cols + a;
+          if (!cells[k]) { cells[k] = 1; added++; }
+        }
+      }
+      if (added) { count += added; dirty += added; version++; }
+      return added;
+    },
     // Writes to the device when enough has changed (or force). Never throws.
     save(force = false) {
       if (!dirty || (!force && dirty < 40)) return false;
