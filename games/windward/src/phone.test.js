@@ -2,7 +2,7 @@
 // drawing parts need a real phone; these are the bits that can be silently wrong).
 import assert from 'node:assert/strict';
 import { CONFIG } from './config.js';
-import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, ropeHit, ropeSlack, ropeSag, swipeTrim, SECOND_FINGER_SHEET, ROPE_HIT_HALF_W } from './phone.js';
+import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, ropeHit, swipeTrim, ropeScrollStep, ROPE_STRIPE_PERIOD, SECOND_FINGER_SHEET, ROPE_HIT_HALF_W } from './phone.js';
 import { angleOffWind, leewardSign } from './sail.js';
 
 const DEG = Math.PI / 180;
@@ -80,14 +80,21 @@ check('rope: swipe down = pull in (trim down), swipe up = let out, relative to w
   assert.ok(Math.abs(swipeTrim(0.5, 10, phoneGeom) - swipeTrim(swipeTrim(0.5, 4, phoneGeom), 6, phoneGeom)) < 1e-9, 'a swipe adds up the same in parts');
   assert.ok(range > 0);
 });
-check('rope: it shows the trim by its shape: taut and straight when sheeted in, sagging when eased', () => {
-  assert.equal(ropeSag(CONFIG.TRIM_MIN, phoneGeom), 0, 'sheeted in: no sag');
-  assert.ok(ropeSag(CONFIG.TRIM_MAX, phoneGeom) > 20, 'eased right out: a deep curve');
-  assert.ok(ropeSag(CONFIG.TRIM_MAX, phoneGeom) < phoneGeom.len / 4, 'but still a rope, not a loop');
-  let last = -1;
-  for (let t = CONFIG.TRIM_MIN; t <= CONFIG.TRIM_MAX + 1e-9; t += 0.1) { const v = ropeSag(t, phoneGeom); assert.ok(v >= last); last = v; }
-  assert.equal(ropeSlack(CONFIG.TRIM_MIN), 0);
-  assert.equal(ropeSlack(CONFIG.TRIM_MAX), 1);
+check('rope: the stripes run with the swipe (down = pulling in, up = letting out) and ease to a stop after you let go', () => {
+  const down = ropeScrollStep(0, 300, 0.1, true);
+  assert.ok(Math.abs(down.offset - 3) < 1e-9, 'a downward run of 300 px/s for 0.1 s moves the stripes 30 px = 3 px past a whole period');
+  assert.equal(ropeScrollStep(2, 100, 0.01, true).offset > 2, true);
+  assert.equal(ropeScrollStep(2, -100, 0.01, true).offset < 2, true, 'up moves them up');
+  let o = 4; let v = 400;
+  const held = ropeScrollStep(o, v, 0.016, true);
+  assert.equal(held.vel, 400, 'while the finger is on the rope the run keeps its speed');
+  let t = 0; let prev = Math.abs(v);
+  for (let i = 0; i < 200; i++) { ({ offset: o, vel: v } = ropeScrollStep(o, v, 0.016, false)); t += 0.016; assert.ok(Math.abs(v) <= prev + 1e-9, 'only slows down'); prev = Math.abs(v); }
+  assert.equal(v, 0, 'and stops');
+  assert.ok(t < 4);
+  const stopped = ropeScrollStep(5, 0, 0.5, false);
+  assert.equal(stopped.offset, 5, 'at rest the stripes sit still');
+  for (const off of [-30, 0, 4, 12345]) { const r = ropeScrollStep(off, 50, 0.1, true).offset; assert.ok(r >= 0 && r < ROPE_STRIPE_PERIOD, 'offset stays within one period'); }
 });
 check('rope: small to look at, thumb-sized to touch, on screen on small and large phones; the rest of the screen is not the rope', () => {
   assert.ok(ROPE_HIT_HALF_W * 2 >= 80, 'at least 80 px wide to touch');

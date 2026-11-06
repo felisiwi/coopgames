@@ -552,6 +552,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     : null;
   chartCtl?.setPhoneInterrupt(() => phone?.interrupt());
   if (chartCtl && debugOverlay) window.__chart = chartCtl;
+  if (phone && debugOverlay) window.__phoneCtl = phone;
   if (phone) {
     for (const el of [hud.rose, hud.text, hud.bar, hud.legend]) el.style.display = 'none';
     hud.notice.style.bottom = '44px';
