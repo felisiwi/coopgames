@@ -94,15 +94,15 @@
  "markers": [
   {
    "year": 1700,
-   "label": "first jump lands"
+   "label": "first big jump lands"
   },
   {
-   "year": 1905,
-   "label": "time warp lands"
+   "year": 1950,
+   "label": "you wake here (home base)"
   },
   {
-   "year": 2015,
-   "label": "you start (casual)"
+   "year": 2026,
+   "label": "finale: home"
   }
  ],
  "epochs": [
@@ -684,7 +684,7 @@
   }
  ],
  "seasonArc": "Felix 2026-11-05: seasons run as one year across the timeline — autumn to winter (Kings and raiders), spring (New Crown) to summer and autumn (Silver Sea), late autumn and winter (Light and Stone), a long cold spring (Engines and wars), then summer (Summer guests, Today). Season = mood of the era; the historical herring fishery was a winter fishery (see GAME-DESIGN.md).",
- "flow": "Felix 2026-11-05: start casual on Today's coast → time warp to ~1905 (end of IV) → first jump to the end of New border (~1700), so soon after warming up the 1706 crown-land ordinance lets you claim and build. Eras unlock spaced out across the timeline, not in order, so moving back and forth stays engaging.",
+ "flow": "Felix 2026-11-06 (supersedes 2026-11-05): a ~30 s opening scene today (old Britta's kitchen, the koster, a storm, not playable) → you wake around 1950 (Epoch VI, Summer guests), the long home base: chapter 1 (dark lighthouses, keepers, young Britta) and more → the first big jump to ~1700 (Torhild) once the story has earned it → later eras → the finale back in today, old Britta (and maybe granddad) at the door. Today's coast is the final, fully unlocked era.",
  "firstRelease": {
   "note": "Q1 (Felix 2026-11-05): built for real first",
   "eras": [

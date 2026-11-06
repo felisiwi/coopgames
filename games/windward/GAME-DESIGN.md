@@ -1298,3 +1298,27 @@ everything people made did). Your memory can't be trusted: the sea stood about 0
 ghost shows safe water where a hidden rock lies. Torhild, the pilot's daughter, teaches you to
 read the coast the old way (cairns, marks, leading lines). Re-sailing an area inks it in as a
 real 1700 chart over the faded memory, and places come back one by one with their old names.
+
+## The flow, revised: wake in 1950 (Felix, 2026-11-06; supersedes "start casual on Today's coast → time warp ~1905 → first jump ~1700")
+1. **Opening scene, today (~30 s, not playable):** old Britta's kitchen in Fiskebäckskil,
+   granddad's koster Svalan at the jetty, a storm rolling in. You go out; darkness.
+2. **You wake around 1950** (Epoch VI, "Summer guests"), the long **home base** and where
+   you first sail. Britta is about 14, a fisherman's daughter on Skaftö, who finds you and
+   becomes your friend and guide. **Chapter 1 happens here:** the dark lighthouses (most
+   still have keepers in 1950; Islandsberg really was dark from 1938), the reward, and
+   Måseskär's red light as the first sign that time is strange (not an instant jump).
+   Chapter 2 also stays in 1950 (young granddad, harbour close-ups, co-op).
+3. **The first big jump** to ~1700 (Torhild, the pilot's daughter) comes when the story has
+   earned it, a couple of hours in. 1950 stays the era you return to.
+4. **Later eras.**
+5. **Finale: back home to today**, the final, fully unlocked era. Old Britta opens the door:
+   "I've been waiting for you since 1950." (Her "has seen you before" mystery pays off from
+   her side.)
+**Granddad and changing history (idea):** in 1950 he's a boy Britta likes. In the original
+timeline he was lost at sea one night when a light was dark; your lighthouse work changes
+that, and in the finale the door opens on both of them, old together.
+**Consequences to carry through (1950 world):** retro wooden boats and inboard put-put engines
+(plastic boats arrive late 1960s), the 1950s ferry, fewer summer guests, keepers at the
+lights, paper charts (no GPS), period sea-mark system (Sweden adopted IALA A later; check the
+1950s Swedish buoyage before building marks), Svalan with white sails fits. Ages: Britta
+born ~1936 → ~90 today.
