@@ -85,24 +85,31 @@ Read GAME-DESIGN.md "End of chapter 1: the lights speak". Screenshots (390x844, 
 3. **Grandma** (`task-ui.js`, `GRANDMA_CARD`): harbour entry -> the harbour moment -> a dusk-toned card: "He always said the lights talk, if you know how to listen."
    / "She gives you granddad's sea chest." The chest is saved (`windward.chapter1.v1`) and appears in Svalan's third deck slot (empty until now). `bb-3`, `bb-4`.
 4. **Granddad's chart** (`data/granddad-chart.json`, `chart.js`): after the chest, 8 favourites inside the region from "Felix's favourite places" get a red ring and a
-   Navigate card (each is a real name-list entry), plus the strange mark (dashed ring, "?"). It wins a tap over the lighthouse marker under it. `bb-5`.
-5. **The strange mark** (`src/old-tower.js`): within 55 m of Måseskär's old 1865 tower (58.0938 N, 11.3302 E) with the chest open: a faint amber flash on the tower's
-   own lantern, one bell, the fog thickens round the boat (the existing `HAZE_*` values, tweened and restored exactly; checked: base == after), the camera drifts toward
+   Navigate card (each is a real name-list entry), plus the strange mark (dashed ring, "?"). It wins a tap over the lighthouse marker under it. Its card reads "Måseskär, the old tower / Granddad's note: a fixed red light" (built from the data; its screenshot was removed because it showed the old text and could not be recaptured, see Verified).
+5. **The strange mark** (`src/old-tower.js`): within 55 m of Måseskär's old 1865 tower (58.0938 N, 11.3302 E) with the chest open: a faint steady red glow on the tower's
+   own lantern (its documented 1865 light), one bell, the fog thickens round the boat (the existing `HAZE_*` values, tweened and restored exactly; checked: base == after), the camera drifts toward
    the tower for the flash (at ~50 m it is off the top of the screen otherwise), then "That tower has been dark since 1978. But you saw it." Saved as chapter 1
-   complete; the tower is added to the light log. `bb-6`..`bb-8`.
-   - The flash frame (`bb-7`) was captured by holding the sequence clock inside the first flash (test only): a 0.6 s flash is shorter than a software-GL capture.
+   complete; the tower is added to the light log, where it reads "steady red" (`bb-9`). `bb-6` (fog), `bb-7` (red glow), `bb-8` (card).
+   - The glow frame (`bb-7`, now red) was captured with the sequence clock held at 1.75 s (test only), so the camera has settled and the glow is at full strength.
    - Framing is a judgment: drift 0.7 shows the lantern at the top edge with the boat low; 0.5 and 0.65 crop the lantern. TODO(felix): look on a phone.
-   - A plain additive halo was invisible against pale fogged land; the ghost uses a warm amber halo with normal blending (`solidHalo`).
+   - A plain additive halo was invisible against pale fogged land; the ghost uses a red halo with normal blending (`solidHalo`, `color`).
 
-### The old tower's light: what is documented, what is invented
+### The old tower's light: documented, nothing invented
 - **Documented** (IALA Heritage, https://heritage.iala.int/?p=47107; en/sv Wikipedia "Måseskär"): 1865 a fixed red light (2nd order Lepaute lens, three-wick oil lamp, red
   glass, 12 nm); 1884 a four-wick kerosene lamp; 1887 a rotating 3rd order Fresnel lens (clockwork), white light; 1950 electricity; 31 Aug 1978 the old light was turned off
   when the new fibreglass tower took over (the new light is Fl(3) WRG 30 s).
-- **Not documented: the old tower's final characteristic.** A rotating lens means it flashed, but no group or period is stated in any source I found.
-- **Invented, flagged** (`"invented": true` in the data, asserted by a test): two white flashes every 15 s (0.6 s each), chosen to differ from the new tower's Fl(3) 30 s.
-  Never presented as fact in the game beyond "Granddad's note". TODO(felix): confirm or replace.
+- **What the game shows (Felix's call, 2026-11-06): the original 1865 characteristic, a fixed (steady) red light.** It is documented, so there is no `invented` flag any more
+  (a test asserts the data contains none). The glyph and the light log say "steady red"; the ghost glows steady red for the moment.
+- Caveat, stated plainly: that was the light of 1865. The same sources say the tower later changed lamps and from 1887 had a rotating white lens, so "fixed red" is the
+  original characteristic, not what the tower showed on the day it went dark in 1978. (An earlier draft invented a two-flash pattern for the final years; it is gone.)
 
-### Verified (browser run on a fresh profile, zero page errors) and not
-- Verified: all 47 test files pass; start card -> relight (glyph, log) -> Lights list -> all five lit -> harbour -> grandma -> chest on deck -> chart marks -> tap strange mark
-  (Navigate target set) -> Måseskär sequence (flash, bell, fog 1.18 -> 0.41 -> 1.18, card, saved) -> reload keeps the chest, tower seen, log, and all five lights lit.
-- Not verified: sound (chimes, bell) was not heard, only called; a real phone; the flash in the natural (unheld) run, whose capture lands after the 0.6 s flash.
+### Verified and not (after the red-light change, 2026-11-06)
+- Verified: all 47 test files pass, including the new data test (documented fixed red, no `invented` anywhere, steady, log row "steady red", red glow colour).
+  In the browser: the red glow on the old tower's lantern (`bb-7`), the light log row "Måseskär, the old tower: steady red" (`bb-9`), and the chart's hit-test returns
+  the strange mark at its screen position (called directly, 3 of 3). Zero page errors in those runs.
+- Verified earlier (before this change, same code paths): the whole flow start card -> relight -> Lights -> five lit -> harbour -> grandma -> chest -> chart marks ->
+  Måseskär sequence (bell, fog 1.18 -> 0.41 -> 1.18, card, saved) -> reload keeps everything, and Islandsberg / Stångehuvud start dark and stay lit after a reload.
+- **Not re-verified after this change:** the full end-to-end run. The re-run stopped at the tap on the strange mark, and that is the TEST SCRIPT, not the game: a
+  touch sent over CDP did not register as a tap under software GL, and a synthetic pointer event made the game's `setPointerCapture` throw (fake pointer id). The
+  game's own hit-test is fine (above). So the natural sequence run, the haze restore and the reload with the new data were not repeated. A real phone is the check.
+- Not verified: sound (chimes, bell) was not heard, only called; a real phone.

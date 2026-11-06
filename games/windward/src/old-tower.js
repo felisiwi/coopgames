@@ -1,11 +1,11 @@
 // The strange mark (stage 1d, batch B): Måseskär's old 1865 tower, dark since 1978. Granddad marked it on his chart with a pattern. Sail near it
-// (once the chest is open) and the dark tower gives a faint flash in that pattern, a bell sounds, the fog thickens round the boat for a moment, then a
-// card: "That tower has been dark since 1978. But you saw it." Lightweight: an emissive flash and a fog tint over values the game already has.
+// (once the chest is open) and the dark tower glows its documented 1865 light (a fixed red light), a bell sounds, the fog thickens round the boat for a moment, then a
+// card: "That tower has been dark since 1978. But you saw it." Lightweight: an emissive glow and a fog tint over values the game already has.
 // Pure timeline + fog values; game.js applies them.
 export const STRANGE_TRIGGER_M = 55; // game metres from the tower: near enough to see it
 export const STRANGE = {
-  flashAtS: 1.5, // the flashing starts
-  bellAtS: 2.2, // one bell, as the flash is first seen
+  flashAtS: 1.5, // the old light shows (steady red; the name is from when it was a guessed flash)
+  bellAtS: 2.2, // one bell, as the light is first seen
   fogUpS: 2.5, // the fog thickens over this long ...
   fogHoldUntilS: 7, // ... holds ...
   fogDownS: 3, // ... and thins again over this long

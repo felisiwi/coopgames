@@ -40,6 +40,7 @@ export function logRows(log, lookup, glyphOf) {
     const l = lookup(id);
     if (!l) return null;
     const g = glyphOf(l.light);
-    return { id, name: l.name, glyph: g ? g.glyph : '', text: g ? g.text : 'steady', note: l.note || null };
+    const steady = l.light && l.light.colour ? `steady ${l.light.colour}` : 'steady'; // no flash pattern: a steady light, with its colour when the data gives one
+    return { id, name: l.name, glyph: g ? g.glyph : '', text: g ? g.text : steady, note: l.note || null };
   }).filter(Boolean);
 }

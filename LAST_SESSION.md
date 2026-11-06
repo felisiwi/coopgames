@@ -4,8 +4,8 @@
 Batch 1 water (passes, shoals, 226 OSM marks, credit), Batch 2 the task (5 dark lights nearest Grundsund: moor, circle, light on, fog lifts, saved), Batch 3 storm
 card, naming fix, Batch A (sail-home card; arrival = entering Fiskebäckskil's harbour; no card blur + render paused under cards). Batch B, the lights speak: relit
 lights show their real flash pattern as a glyph + chimes and go in a light log (chart "Lights" button); grandma's dusk card gives granddad's sea chest (Svalan's
-chest slot, saved); his chart adds 8 favourites + the strange mark; near Måseskär's old tower (dark since 1978) a faint flash, a bell, fog, "But you saw it."
-(its pattern is INVENTED, flagged). Details, citations, screenshots: `games/windward/docs/LIGHTHOUSE-TASK.md`. 1c, passes, seamarks, harbours are on main.
+chest slot, saved); his chart adds 8 favourites + the strange mark; near Måseskär's old tower (dark since 1978) a faint steady red glow (its documented 1865 fixed
+red light, IALA Heritage), a bell, fog, "But you saw it." Details, citations, screenshots: `games/windward/docs/LIGHTHOUSE-TASK.md`. 1c, passes, seamarks, harbours are on main.
 
 Where things are:
 - Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`
@@ -25,5 +25,5 @@ harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connecti
 
 ## Next
 
-1. Felix: phone check of 1d (checklist in the report); sound unheard; Måseskär framing; confirm the invented pattern; `?lights=reset` replays chapter 1; then merge 1d.
+1. Felix: phone check of 1d (checklist in the report); sound unheard; Måseskär framing; `?lights=reset` replays chapter 1; then merge 1d.
 2. Confirm the unplaced harbours (`assets/coast/names.json`); Testholmen, Stora Kornö. Then: night navigation (hooks are in), harbour close-ups.

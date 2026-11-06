@@ -6,7 +6,7 @@ import { lightGlyph, LONG_FLASH_S } from './light-glyph.js';
 import { createLightLog, logRows, LOG_KEY } from './light-log.js';
 import { createChapter1, CHAPTER_KEY } from './chapter1.js';
 import { strangeFrame, fogMoodValues, STRANGE, STRANGE_TRIGGER_M, STRANGE_CARD, STRANGE_FLASH_LEVEL } from './old-tower.js';
-import { lightPattern } from './lantern.js';
+import { lightPattern, colourHex } from './lantern.js';
 import { createAudio, LIGHT_CHIME } from './audio.js';
 import { buildNameList } from './names.js';
 
@@ -131,7 +131,7 @@ check('the fog mood: thicker, closer and colder with k; k = 0 is exactly today\'
   assert.ok(half.HAZE_MESH_FAR_MUL < base.HAZE_MESH_FAR_MUL && half.HAZE_MESH_FAR_MUL > thick.HAZE_MESH_FAR_MUL);
 });
 
-check('granddad\'s chart data: every favourite is a real name-list entry in the region; the strange mark is Måseskär\'s old tower and its pattern is honestly flagged invented', () => {
+check('granddad\'s chart data: every favourite is a real name-list entry in the region; the strange mark is Måseskär\'s old tower with its DOCUMENTED 1865 fixed red light (nothing invented)', () => {
   const data = read('../data/granddad-chart.json');
   const names = read('../assets/coast/names.json');
   const settlements = read('../data/settlements-history.json').settlements;
@@ -148,12 +148,18 @@ check('granddad\'s chart data: every favourite is a real name-list entry in the 
   assert.ok(Math.hypot(tx - sx, tz - sz) < 10, 'the mark is on the old tower (within 100 m real)');
   assert.equal(tower.built, 1865);
   assert.equal(tower.lit, false, 'the tower is dark in the light data');
-  assert.equal(s.light.invented, true, 'the pattern is not documented: flagged invented');
-  assert.ok(/NOT documented/.test(s.inventedWhy) && s.sources.length >= 2 && s.sources.every((u) => /^https:\/\//.test(u)), 'with the reason and the sources');
+  assert.deepEqual(s.light, { pattern: 'a fixed red light', colour: 'red', kind: 'fixed' }, 'the 1865 characteristic: a fixed red light');
+  assert.ok(!JSON.stringify(data).includes('invented'), 'nothing in granddad\'s chart is flagged invented any more: the light is documented');
+  assert.ok(/IALA Heritage/.test(s.documented) && /fixed red/.test(s.documented), 'the documentation is stated');
+  assert.ok(s.sources.length >= 2 && s.sources.some((u) => /heritage\.iala\.int/.test(u)) && s.sources.every((u) => /^https:\/\//.test(u)), 'with the IALA Heritage source');
   assert.equal(s.darkSince, '1978-08-31');
-  const g = lightGlyph(s.light);
-  assert.equal(g.text, '●● · 15s');
-  assert.notEqual(g.text, lightGlyph({ kind: 'flash', count: 3, period: 30, flashSeconds: 1.5 }).text, 'unlike the new tower\'s Fl(3) 30 s');
+  assert.equal(lightGlyph(s.light), null, 'steady: no flash glyph');
+  assert.equal(lightPattern(s.light).steady, true, 'the lantern shows it steady');
+  const log = createLightLog(memory());
+  log.add(s.id);
+  const rows = logRows(log, (id) => (id === s.id ? { name: s.name, light: s.light } : null), lightGlyph);
+  assert.equal(rows[0].text, 'steady red', 'the light log says "steady red"');
+  assert.equal(colourHex('red'), 0xff3a2a, 'the ghost glows red');
 });
 
 console.log(`${passed} checks passed`);

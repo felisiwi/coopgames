@@ -42,17 +42,23 @@ export function lightOnAt(light, t) {
   return p.on.some(([a, b]) => u >= a && u < b);
 }
 
+// Light colours as a lamp glows them (the old Måseskär tower is a fixed RED light). Anything unlisted keeps the warm default.
+export const LIGHT_COLOURS = { red: 0xff3a2a, white: 0xfff0c0, green: 0x5be08a };
+export const colourHex = (name) => LIGHT_COLOURS[name];
+
 const DARK_GLASS = 0x3b4752; // a dull blue-grey: the storm has put the lamp out
 const DIM = 0.55; // a lit lantern between flashes still glows a little: you can tell it is burning
 
 // group: the THREE.Group from createLighthouse(name), already placed. entry: the LIGHTHOUSES entry (its `light` pattern).
 // opts.beam: false for a faint ghost of a light (the old Måseskär tower): the glass and halo flash on the pattern, no sweeping beam.
+// opts.color: a hex colour for the glass and the halo (a coloured light); default is the warm lantern.
 // opts.solidHalo: a warm amber halo with normal blending, not additive: additive light vanishes against pale fogged land, and the ghost is seen in fog.
-export function createLanternFx(group, entry, { beam: withBeam = true, solidHalo = false } = {}) {
+export function createLanternFx(group, entry, { beam: withBeam = true, solidHalo = false, color } = {}) {
+  const glassHex = color ?? GLASS;
   const glass = [];
   group.traverse((o) => { if (o.isMesh && /^lantern-glass/.test(o.name)) glass.push(o); });
   const darkMat = new THREE.MeshLambertMaterial({ color: DARK_GLASS, flatShading: true });
-  const litMat = new THREE.MeshBasicMaterial({ color: GLASS, toneMapped: false });
+  const litMat = new THREE.MeshBasicMaterial({ color: glassHex, toneMapped: false });
   const centre = new THREE.Vector3();
   if (glass.length) {
     group.updateWorldMatrix(true, true);
@@ -60,7 +66,7 @@ export function createLanternFx(group, entry, { beam: withBeam = true, solidHalo
     group.worldToLocal(centre);
   } else centre.set(0, 8, 0);
   const haloMat = new THREE.SpriteMaterial({ map: getGlowTexture(), color: 0xffe8a8, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
-  if (solidHalo) { haloMat.blending = THREE.NormalBlending; haloMat.color.setHex(0xffb830); }
+  if (solidHalo) { haloMat.blending = THREE.NormalBlending; haloMat.color.setHex(color ?? 0xffb830); }
   const halo = new THREE.Sprite(haloMat);
   halo.name = 'lantern-halo';
   halo.position.copy(centre);
@@ -96,7 +102,7 @@ export function createLanternFx(group, entry, { beam: withBeam = true, solidHalo
       if (!lit) return;
       const on = lightOnAt(entry.light, t + api.phase * (entry.light?.period ?? 0));
       const k = (on ? 1 : DIM) * level * api.dim;
-      litMat.color.setHex(GLASS).multiplyScalar(0.55 + 0.45 * k);
+      litMat.color.setHex(glassHex).multiplyScalar(0.55 + 0.45 * k);
       haloMat.opacity = 0.9 * k * (on ? 1 : 0.45);
       halo.scale.setScalar((7 + 4 * k) * api.haloMul);
       beamMat.opacity = 0.2 * (on ? 1 : 0.25) * level * api.dim; // faint by day

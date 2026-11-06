@@ -40,7 +40,7 @@ import { createArrivals, giftFor } from './src/arrival.js';
 import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
 import { LIGHTHOUSES } from './src/lighthouses.js';
-import { createLanternFx } from './src/lantern.js';
+import { createLanternFx, colourHex } from './src/lantern.js';
 import { createLighthouseTask, towerLit, GRANDMA_ID, REWARD_DELAY_S, hasSeenStart, markStartSeen, resetStart } from './src/lighthouse-task.js';
 import { createHarbourWater } from './src/harbour-water.js';
 import { createTaskUi } from './src/task-ui.js';
@@ -576,7 +576,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       const entry = LIGHTHOUSES.find((x) => x.name === l.name);
       if (!entry || !l.group) continue;
       const ghost = !!gd && entry.name === gd.strange.tower;
-      const fx = ghost ? createLanternFx(l.group, { ...entry, light: gd.strange.light }, { beam: false, solidHalo: true }) : createLanternFx(l.group, entry);
+      const fx = ghost ? createLanternFx(l.group, { ...entry, light: gd.strange.light }, { beam: false, solidHalo: true, color: colourHex(gd.strange.light.colour) }) : createLanternFx(l.group, entry);
       if (ghost) { fx.phase = 0; fx.dim = STRANGE_FLASH_LEVEL; fx.haloMul = 1.6; fx.setLit(false); towerFx = fx; continue; }
       const taskLight = task.lights.some((t) => t.id === `light:${l.name}`);
       // a task light is lit exactly when restored (Islandsberg and Stångehuvud are dark in real life but start dark AND stay lit once restored, also after a reload);
