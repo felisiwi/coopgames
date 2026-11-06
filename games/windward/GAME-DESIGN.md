@@ -1322,3 +1322,9 @@ that, and in the finale the door opens on both of them, old together.
 lights, paper charts (no GPS), period sea-mark system (Sweden adopted IALA A later; check the
 1950s Swedish buoyage before building marks), Svalan with white sails fits. Ages: Britta
 born ~1936 → ~90 today.
+
+**Svalan's loop (Felix, 2026-11-06):** after the opening storm, Svalan washes up battered in
+1950. Young granddad, a **boatbuilder's son**, finds her and repairs her, and she becomes
+"granddad's boat", the same koster you inherit in today's opening scene. The boat has no
+beginning: a time loop that ties you, granddad and Svalan together. (The boat lab's wear
+slider can show her repaired, newer self.)
