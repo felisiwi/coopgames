@@ -424,6 +424,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     ? createBusyCoast({
       world: coast.busy.world, profile: coast.busy.profile, toGame: coast.world.toGame, houses: coast.summerHouses,
       seaY: (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength),
+      blocked: (x, z) => isBlocked(coast.sailHeightAt, x, z), // the ambient boats stay in water the boat could really be in
       night: new URLSearchParams(window.location.search).get('night') === '1',
     })
     : null;

@@ -13,15 +13,16 @@ export const CATCH_UP = 0.5; // seconds of lag recovered per second: a boat runs
 export const TURN_DIST_M = 30; // after leaving a quay the heading swings from "bow to the quay" to the travel direction over this distance
 
 // ---- routes -----------------------------------------------------------------------------------------------------------
-export function makeRoute(points) {
+// loop: a closed route (its last point is its first): s wraps round instead of stopping at the ends.
+export function makeRoute(points, { loop = false } = {}) {
   const cum = [0];
   for (let i = 1; i < points.length; i++) cum.push(cum[i - 1] + Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]));
-  return { pts: points, cum, length: cum[cum.length - 1] };
+  return { pts: points, cum, length: cum[cum.length - 1], loop };
 }
-// Point at distance s (clamped) along the route.
+// Point at distance s along the route (clamped for a line, wrapped for a loop).
 export function routePoint(route, s) {
   const { pts, cum } = route;
-  const d = Math.max(0, Math.min(route.length, s));
+  const d = route.loop ? ((s % route.length) + route.length) % route.length : Math.max(0, Math.min(route.length, s));
   let lo = 0, hi = cum.length - 1;
   while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] <= d) lo = m; else hi = m; }
   const seg = cum[hi] - cum[lo] || 1, t = (d - cum[lo]) / seg;
@@ -32,6 +33,13 @@ export function routeHeading(route, s, dir = 1, span = 4) {
   const a = routePoint(route, s - span), b = routePoint(route, s + span);
   const h = Math.atan2(b[0] - a[0], b[1] - a[1]);
   return dir >= 0 ? h : normAngle(h + Math.PI);
+}
+// Heading at a STOP, one-sided: a ferry that backs out of its quay along the lane it came in on makes a reversal point in the route (no two-sided
+// tangent there). `arriving` looks back along the way the boat came (dir = +1: from s - span to s; dir = -1: from s + span to s); leaving looks the way
+// it goes (from s to s + dir * span).
+export function stopHeading(route, s, dir, arriving, span = 4) {
+  const [a, b] = arriving ? [routePoint(route, s - dir * span), routePoint(route, s)] : [routePoint(route, s), routePoint(route, s + dir * span)];
+  return Math.atan2(b[0] - a[0], b[1] - a[1]);
 }
 export const normAngle = (a) => { let x = a % TWO_PI; if (x > Math.PI) x -= TWO_PI; if (x < -Math.PI) x += TWO_PI; return x; };
 export const lerpAngle = (a, b, t) => normAngle(a + normAngle(b - a) * t);
@@ -51,17 +59,25 @@ export function makeSchedule({ stopsAtM, speed, dwellS }) {
   // the final stop (stop 0 again) is the first segment of the next cycle: its dwell is segs[0]
   return { cycleS: t, segs, stopsAtM, speed };
 }
+// A boat that never stops: it goes round a closed route at `speed` (cruising or fishing circuits). Returns the same shape as makeSchedule's.
+export function makeLoopSchedule({ lengthM, speed }) {
+  return { loop: true, cycleS: lengthM / speed, speed, lengthM, segs: [], stopsAtM: [] };
+}
 // The heading a boat has on arrival at the stop that segment k (a dwell) belongs to, and the heading it leaves with.
 function dwellHeadings(route, sched, k) {
   const { segs } = sched;
   const prev = segs[(k - 1 + segs.length) % segs.length], next = segs[(k + 1) % segs.length];
   const s = sched.stopsAtM[segs[k].stop];
-  const arr = prev.type === 'move' ? routeHeading(route, s, prev.dir) : routeHeading(route, s, next.dir);
-  const dep = next.type === 'move' ? routeHeading(route, s, next.dir) : arr;
+  const arr = prev.type === 'move' ? stopHeading(route, s, prev.dir, true) : stopHeading(route, s, next.dir, false);
+  const dep = next.type === 'move' ? stopHeading(route, s, next.dir, false) : arr;
   return { arr, dep };
 }
 // Where the boat is at schedule time tau (seconds, any size). Returns { s, dir, moving, speed, heading, stop }.
 export function schedulePose(route, sched, tau) {
+  if (sched.loop) { // round and round, never stopping
+    const s = ((tau * sched.speed) % sched.lengthM + sched.lengthM) % sched.lengthM;
+    return { s, dir: 1, moving: true, speed: sched.speed, heading: routeHeading(route, s, 1), stop: -1 };
+  }
   const T = ((tau % sched.cycleS) + sched.cycleS) % sched.cycleS;
   let k = 0;
   while (k < sched.segs.length - 1 && sched.segs[k + 1].t0 <= T) k++;
@@ -76,7 +92,14 @@ export function schedulePose(route, sched, tau) {
   const k0 = (k - 1 + sched.segs.length) % sched.segs.length;
   if (sched.segs[k0].type === 'dwell') {
     const away = Math.abs(s - seg.from);
-    if (away < TURN_DIST_M) heading = lerpAngle(dwellHeadings(route, sched, k0).arr, heading, smooth(away / TURN_DIST_M));
+    if (away < TURN_DIST_M) {
+      // swing from the arrival heading (bow to the quay) to the travel heading. A boat that backs out along the lane it came in on turns exactly 180 degrees,
+      // where "the shortest way round" flips between frames: the sense of the turn is fixed once, from the heading at the start of the departure.
+      const arr = dwellHeadings(route, sched, k0).arr, h0 = stopHeading(route, seg.from, seg.dir, false), sgn = normAngle(h0 - arr) >= 0 ? 1 : -1;
+      let d = normAngle(heading - arr);
+      if (sgn > 0 && d < -Math.PI / 2) d += TWO_PI; else if (sgn < 0 && d > Math.PI / 2) d -= TWO_PI;
+      heading = normAngle(arr + d * smooth(away / TURN_DIST_M));
+    }
   }
   return { s, dir: seg.dir, moving: true, speed: sched.speed, heading, stop: -1 };
 }

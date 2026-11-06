@@ -10,8 +10,10 @@ import { buildCoastWorld, COAST_TILES, COAST_VEX, COAST_SMOOTH } from '../../gam
 import { applyPasses } from '../../games/windward/src/passes.js';
 import { GAME_PASS_TIERS, createShoalIndex, makeSailHeight } from '../../games/windward/src/sea-truth.js';
 import { buildShoalList } from '../../games/windward/src/shoal-look.js';
-import { isBlocked } from '../../games/windward/src/shore.js';
+import { isBlocked, hullHeight, BLOCK_H } from '../../games/windward/src/shore.js';
 
+// A docked ferry hugs its quay: it keeps this much clear water round it (the player's boat keeps shore.js HULL_RADIUS_M = 2.5 m).
+export const DOCK_MARGIN_M = 1.0;
 export const WINDWARD = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'games', 'windward') + '/';
 const json = (rel) => JSON.parse(readFileSync(WINDWARD + rel, 'utf8'));
 
@@ -28,6 +30,7 @@ export async function loadGameWorld() {
   return {
     coast, world, sailHeightAt, shoalIndex,
     blocked: (x, z) => isBlocked(sailHeightAt, x, z),
+    dockBlocked: (x, z) => hullHeight(sailHeightAt, x, z, DOCK_MARGIN_M) > BLOCK_H, // the water a docking ferry needs: shallows at least DOCK_MARGIN_M away
     toGame: world.toGame, fromGame,
     names: json('assets/coast/names.json'), seamarks: json('assets/coast/seamarks.json'), settlements: json('data/settlements-history.json').settlements,
   };

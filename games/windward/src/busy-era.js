@@ -41,10 +41,18 @@ export function berthBoat(classBlock, berth) {
 }
 // How many berths of a harbour an era fills: fill (0..1) of its berths, at most maxPerHarbour, never fewer than 0.
 export const berthsToFill = (profile, n) => Math.max(0, Math.min(profile.moorings.maxPerHarbour, Math.round(profile.moorings.fill * n)));
-// The routes an era runs, in the profile's order, at most traffic.maxBoats.
+// The routes an era runs, in the profile's order.
 export function routesFor(profile, world) {
-  const list = profile.traffic.routes === 'all' ? world.traffic : profile.traffic.routes.map((id) => world.traffic.find((r) => r.id === id)).filter(Boolean);
-  return list.slice(0, profile.traffic.maxBoats);
+  return profile.traffic.routes === 'all' ? world.traffic : profile.traffic.routes.map((id) => world.traffic.find((r) => r.id === id)).filter(Boolean);
+}
+// The boats an era runs: [{ route, k, n, seed }] (boat k of n on that route). perRoute is a number (every route) or { harbour, cruise, fish, default }.
+// Boats are listed round-robin (every route's first boat, then every route's second ...) and cut at traffic.maxBoats, so the cap thins every route evenly.
+export function boatsFor(profile, world) {
+  const routes = routesFor(profile, world), per = profile.traffic.perRoute ?? 1;
+  const countOf = (r) => (typeof per === 'number' ? per : per[r.kind] ?? per.default ?? 1);
+  const out = [], most = routes.reduce((m, r) => Math.max(m, countOf(r)), 0);
+  for (let k = 0; k < most; k++) for (const r of routes) if (k < countOf(r)) out.push({ route: r, k, n: countOf(r), seed: (r.seed + k * 0.6180339887) % 1 });
+  return out.slice(0, profile.traffic.maxBoats);
 }
 
 // Problems with a profile (empty = fine). `kit` is a kit from src/busy-kits.js: every asset id the profile names must exist in it, with the
@@ -68,18 +76,22 @@ export function validateProfile(profile, kit, world = null) {
   }
   for (const [cls, block] of Object.entries(profile.moorings.classes)) for (const a of block.assets) { const k = asset(a.id, 'vessel', `moorings ${cls}`); if (k && a.stripes) for (const s of a.stripes) need(k.stripes?.includes(s), `moorings ${cls}: stripe "${s}" unknown to ${a.id}`); }
   need(profile.moorings.fill >= 0 && profile.moorings.fill <= 1, 'moorings.fill must be 0..1');
-  need(profile.traffic.maxBoats >= 0 && profile.traffic.maxBoats <= 12, 'traffic.maxBoats must be 0..12 (the budget)');
+  const am = profile.traffic.ambient;
+  if (am) { need(am.count >= 0 && am.count <= 16, 'traffic.ambient.count must be 0..16'); for (const k of Object.keys(am.mix ?? {})) need(!!profile.traffic.classes[k], `ambient mix class "${k}" has no traffic class`); need(am.ring[0] >= 64, 'ambient.ring must start outside the view (>= 64 m)'); }
+  need(profile.traffic.maxBoats >= 0 && profile.traffic.maxBoats <= 40, 'traffic.maxBoats must be 0..40 (the budget)');
   if (profile.ferry.enabled) {
     asset(profile.ferry.asset, 'ferry', 'ferry');
     need(profile.ferry.speed > 0, 'ferry speed');
-    need(Array.isArray(profile.ferry.dwellS) && profile.ferry.dwellS.length === 3, 'ferry dwellS needs one number per stop (3)');
+    need(profile.ferry.lengthM >= 8 && profile.ferry.lengthM <= 16, 'ferry.lengthM must be 8..16 m (1-2 x the player\'s 8 m boat: a play scale)');
+    if (world?.ferry?.maxLengthM) need(profile.ferry.lengthM <= world.ferry.maxLengthM, `ferry.lengthM ${profile.ferry.lengthM} is longer than the docks were planned for (${world.ferry.maxLengthM} m): re-plan with tools/plan-busy-coast.mjs`);
+    need(Array.isArray(profile.ferry.dwellS) && profile.ferry.dwellS.length === (world?.ferry?.stops?.length ?? 2), 'ferry dwellS needs one number per stop (the world data has ' + (world?.ferry?.stops?.length ?? 2) + ')');
   }
   const h = asset(profile.houses.asset, 'house', 'houses');
   if (h) for (const c of profile.houses.colours) need(h.colours?.includes(c), `houses: colour "${c}" unknown to ${profile.houses.asset}`);
   need(profile.houses.share >= 0 && profile.houses.share <= 0.6, 'houses.share must be 0..0.6');
   if (world) {
     if (profile.traffic.routes !== 'all') for (const id of profile.traffic.routes) need(world.traffic.some((r) => r.id === id), `route "${id}" is not in busy-world.json`);
-    for (const r of world.traffic) need(!!profile.traffic.classes[r.class], `no traffic class "${r.class}" for route ${r.id}`);
+    for (const r of routesFor(profile, world)) need(!!profile.traffic.classes[r.class], `no traffic class "${r.class}" for route ${r.id}`);
     for (const m of world.moorings) for (const b of m.berths) need(!!profile.moorings.classes[b.class], `no mooring class "${b.class}" for berth in ${m.id}`);
   }
   return bad;

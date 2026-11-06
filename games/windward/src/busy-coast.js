@@ -18,8 +18,9 @@ import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { Mesher } from './era-assets.js';
 import { getKit } from './busy-kits.js';
-import { makeRoute, makeSchedule, vesselPose, mustYield, stepYield } from './busy-route.js';
-import { vesselFor, berthBoat, berthsToFill, routesFor, frac } from './busy-era.js';
+import { makeRoute, makeSchedule, makeLoopSchedule, vesselPose, mustYield, stepYield } from './busy-route.js';
+import { vesselFor, berthBoat, berthsToFill, boatsFor, frac } from './busy-era.js';
+import { mulberry32, ambientPathAdaptive, ambientAt, ambientDone } from './busy-ambient.js';
 
 export const RENDER_RADIUS_M = 480; // moving boats further than this from the viewer are not written (and not drawn)
 const SOLID = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide });
@@ -55,7 +56,8 @@ const geometryOf = (pos, colr, dynamic = false) => {
   return g;
 };
 
-export function createBusyCoast({ world, profile, kit = null, toGame, seaY, houses = [], night = false, clock = () => Date.now() / 1000 }) {
+// blocked(x, z): true where a boat's centre cannot be (shore.js isBlocked on the game's collision): the ambient boats use it to stay in water. Without it there are none.
+export function createBusyCoast({ world, profile, kit = null, toGame, seaY, houses = [], night = false, clock = () => Date.now() / 1000, blocked = null, seed = 0x5ea }) {
   kit = kit ?? getKit(profile.kit);
   if (!kit) throw new Error(`busy-coast: kit "${profile.kit}" is not registered`);
   const group = new THREE.Group();
@@ -98,19 +100,34 @@ export function createBusyCoast({ world, profile, kit = null, toGame, seaY, hous
   const vessels = [];
   const addVessel = (o) => vessels.push({ ...o, lag: 0, pose: null, visible: false });
   const stopsOf = (route) => [0, route.length];
-  for (const r of routesFor(profile, world)) {
-    const v = vesselFor(profile.traffic.classes[r.class], r.seed);
-    const route = makeRoute(r.route.map(([lon, lat]) => toGame(lon, lat)));
-    const sched = makeSchedule({ stopsAtM: stopsOf(route), speed: v.speed, dwellS: v.dwellS });
+  for (const b of boatsFor(profile, world)) { // boat k of n on a route; a loop route (cruising, fishing) never stops, a line route goes between its two harbours
+    const r = b.route, v = vesselFor(profile.traffic.classes[r.class], b.seed), loop = r.shape === 'loop';
+    const route = makeRoute(r.route.map(([lon, lat]) => toGame(lon, lat)), { loop });
+    const sched = loop ? makeLoopSchedule({ lengthM: route.length, speed: v.speed }) : makeSchedule({ stopsAtM: stopsOf(route), speed: v.speed, dwellS: v.dwellS });
     const tmpl = template(kit, v.asset, { L: v.L, stripe: v.stripe, sailsUp: true, lit: true });
-    addVessel({ id: r.id, kind: 'traffic', route, sched, tmpl, halfLen: tmpl.halfLen, phase: frac(r.seed, 9) * sched.cycleS, tilt: 1 });
+    addVessel({ id: `${r.id}#${b.k}`, kind: 'traffic', route, sched, tmpl, halfLen: tmpl.halfLen, phase: ((b.k + frac(r.seed, 9)) / b.n) * sched.cycleS, tilt: 1 }); // the n boats of a route are spread evenly round its cycle
   }
   if (profile.ferry.enabled) {
     const f = world.ferry;
     const route = makeRoute(f.route.map(([lon, lat]) => toGame(lon, lat)));
     const sched = makeSchedule({ stopsAtM: f.stops.map((s) => s.atM), speed: profile.ferry.speed, dwellS: profile.ferry.dwellS });
-    const tmpl = template(kit, profile.ferry.asset, { lit: true });
+    const fa = kit.assets[profile.ferry.asset];
+    const tmpl = template(kit, profile.ferry.asset, { lit: true, scale: fa.nativeLength ? profile.ferry.lengthM / fa.nativeLength : 1 }); // the era sets the ferry's length (a play scale: ~1.75 x the player's boat)
     addVessel({ id: 'ferry-847', kind: 'ferry', route, sched, tmpl, halfLen: tmpl.halfLen, phase: 0, tilt: 0.4 });
+  }
+  // Ambient boats: a small pool that always sails past the viewer (src/busy-ambient.js). The era says how many and how sail / motor they are.
+  const ambientCfg = profile.traffic.ambient;
+  const rand = mulberry32(seed);
+  const avoidPts = [];
+  for (const m of world.moorings) for (const b of m.berths.slice(0, berthsToFill(profile, m.berths.length))) avoidPts.push(toGame(b.lon, b.lat));
+  for (const st of world.ferry.stops) avoidPts.push(toGame(st.dock[0], st.dock[1]));
+  if (ambientCfg && ambientCfg.count > 0 && blocked) {
+    for (let i = 0; i < ambientCfg.count; i++) {
+      const cls = rand() < (ambientCfg.mix?.sail ?? 0.7) ? 'sail' : 'motor', sd = (0.137 + i * 0.6180339887) % 1;
+      const v = vesselFor(profile.traffic.classes[cls], sd);
+      const tmpl = template(kit, v.asset, { L: v.L, stripe: v.stripe, sailsUp: true, lit: true });
+      addVessel({ id: `ambient#${i}`, kind: 'ambient', cls, tmpl, halfLen: tmpl.halfLen, speed: v.speed, path: null, s: 0, nextTry: 0, tilt: 1 });
+    }
   }
   let capSolid = 0, capGlass = 0;
   for (const v of vessels) { capSolid += v.tmpl.solidPos.length; capGlass += v.tmpl.glassPos.length; }
@@ -134,9 +151,24 @@ export function createBusyCoast({ world, profile, kit = null, toGame, seaY, hous
     let sv = 0, gv = 0;
     boatsVisible = 0; dynamicTriangles = 0;
     for (const v of vessels) {
-      let pose = vesselPose(v.route, v.sched, t + v.phase - v.lag);
-      stepYield(v, dt, mustYield(pose, v.halfLen, others), v.sched.cycleS);
-      pose = vesselPose(v.route, v.sched, t + v.phase - v.lag);
+      let pose;
+      if (v.kind === 'ambient') { // a boat on its own straight leg past the viewer; it respawns when done (at most one try per boat per half second)
+        if (!v.path || ambientDone(v.path, v.s, viewer, ambientCfg.despawnM)) {
+          if (t >= v.nextTry) {
+            v.nextTry = t + 0.5;
+            const path = ambientPathAdaptive(rand, viewer, { freeAt: (x, z) => !blocked(x, z), avoid: avoidPts, ring: ambientCfg.ring, legM: ambientCfg.legM, lateral: ambientCfg.lateral });
+            v.path = path; v.s = path ? (v.fresh === undefined ? rand() * path.len * 0.45 : 0) : 0; v.fresh = false;
+          }
+          if (!v.path) { v.pose = null; v.visible = false; continue; }
+        }
+        const at = ambientAt(v.path, v.s);
+        pose = { x: at.x, z: at.z, heading: at.heading, speed: v.speed, moving: true };
+        if (!mustYield(pose, v.halfLen, others)) v.s += v.speed * dt; // holds still while a player is in its way
+      } else {
+        pose = vesselPose(v.route, v.sched, t + v.phase - v.lag);
+        stepYield(v, dt, mustYield(pose, v.halfLen, others), v.sched.cycleS);
+        pose = vesselPose(v.route, v.sched, t + v.phase - v.lag);
+      }
       v.pose = pose;
       v.visible = Math.hypot(pose.x - viewer.x, pose.z - viewer.z) <= RENDER_RADIUS_M;
       if (!v.visible) continue;
@@ -175,7 +207,7 @@ export function createBusyCoast({ world, profile, kit = null, toGame, seaY, hous
 
   const stats = () => ({
     profile: profile.id, kit: kit.id, placeholderKit: !!profile.placeholderKit,
-    meshes: group.children.length, moored, houses: houses.length, vessels: vessels.length, boatsVisible,
+    meshes: group.children.length, moored, houses: houses.length, vessels: vessels.length, boatsVisible, ambient: vessels.filter((v) => v.kind === 'ambient' && v.pose).length,
     staticTriangles, dynamicTriangles, ferry: vessels.find((v) => v.kind === 'ferry')?.pose ?? null, night: isNight, clock: lastT,
   });
   const dispose = () => { group.traverse((o) => o.geometry?.dispose()); glassMat.dispose(); };

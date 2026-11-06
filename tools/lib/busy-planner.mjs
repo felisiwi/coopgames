@@ -243,7 +243,7 @@ export function planBerths(g, quay, corridor, { seed = 1, radius = 85, maxAlong 
       const r = hash(seed * 977 + n++);
       const kind = r < 0.62 ? 'sail' : 'motor';
       const L = kind === 'sail' ? 7.2 + hash(seed * 31 + n) * 2.4 : 5.2 + hash(seed * 17 + n) * 1.2;
-      if (out.some((o) => Math.hypot(o.x - c[0], o.z - c[1]) < (o.L + L) / 2 * 0.62 + 1.2 + (how === 'buoy' ? 4 : 0))) continue;
+      if (out.some((o) => Math.hypot(o.x - c[0], o.z - c[1]) < (o.L + L) / 2 * 0.9 + 0.8 + (how === 'buoy' ? 4 : 0))) continue; // about a boat length apart: two hulls never overlap
       let heading;
       if (how === 'alongside') {
         const s = towardShore(g, c[0], c[1]);
@@ -259,5 +259,118 @@ export function planBerths(g, quay, corridor, { seed = 1, radius = 85, maxAlong 
   };
   pick(cells.filter((q) => q.d >= g.pxM && q.d <= 4.5), 'alongside', maxAlong, 0);
   pick(cells.filter((q) => q.d >= 7 && q.d <= 22), 'buoy', maxBuoy, 0);
+  return out;
+}
+
+// ---- docks, loops and fishing grounds ----------------------------------------------------------------------------------------
+export const pointAt = (pts, s) => {
+  let acc = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const L = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+    if (s <= acc + L || i === pts.length - 2) { const t = L ? Math.max(0, Math.min(1, (s - acc) / L)) : 0; return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t]; }
+    acc += L;
+  }
+  return pts[0];
+};
+// Unit direction of travel along a polyline at arc length s (looking 6 m either side).
+export function tangentAt(pts, s, span = 6) {
+  const total = pathLength(pts), a = pointAt(pts, Math.max(0, s - span)), b = pointAt(pts, Math.min(total, s + span));
+  const d = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+  return [(b[0] - a[0]) / d, (b[1] - a[1]) / d];
+}
+
+// (`free(x, z)` says whether the hull may be at a point; the default is a place the player's boat centre may be.)
+// Is the whole hull (length 2 * halfLen, half-beam halfBeam, bow towards the unit vector `dir`) in free water, with `bowGap` metres of free
+// water beyond the bow? Every sample point must be a place a boat's CENTRE may be (so there is also the game's 2.5 m hull margin round it).
+export function footprintFree(g, c, dir, halfLen, halfBeam, bowGap = 3, step = 1.5, free = (x, z) => isFree(g, x, z)) {
+  const right = [dir[1], -dir[0]]; // (cos, -sin) of the heading: the starboard side
+  for (let l = -halfLen; l <= halfLen + bowGap + 1e-9; l += step) for (const lat of [-halfBeam - 0.5, 0, halfBeam + 0.5]) {
+    if (!free(c[0] + dir[0] * l + right[0] * lat, c[1] + dir[1] * l + right[1] * lat)) return false;
+  }
+  return true;
+}
+// Distance from (x, z) to the nearest point of a polyline.
+export function distToPolyline(pts, x, z) {
+  let m = Infinity;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [p, q] = [pts[i], pts[i + 1]], dx = q[0] - p[0], dz = q[1] - p[1], L2 = dx * dx + dz * dz || 1;
+    const t = Math.max(0, Math.min(1, ((x - p[0]) * dx + (z - p[1]) * dz) / L2));
+    m = Math.min(m, Math.hypot(x - (p[0] + dx * t), z - (p[1] + dz * t)));
+  }
+  return m;
+}
+// Dock a vessel at one end of a planned polyline: slide the dock point back along the approach (at most maxPull m) until the whole hull fits in
+// clear water with `bowGap` m in front of the bow ("slightly off the quay"), no `keepAway` point ({ p: [x, z], r }) is within r of the centre and
+// no `keepLines` polyline ({ pts, r }) comes within r of the hull axis.
+// mode 'end': the vessel arrives at the end of the polyline (bow = direction of travel); 'start': it leaves the start (bow = the reverse).
+// Returns { ok, points (the polyline shortened to the dock), dock: [x, z], dir (bow direction), pulled (m) }.
+export function pullDock(g, pts, mode, { halfLen, halfBeam, bowGap = 3, maxPull = 80, keepAway = [], keepLines = [], free = undefined } = {}) {
+  const total = pathLength(pts);
+  for (let pull = 0; pull <= maxPull; pull += 0.5) {
+    const s = mode === 'end' ? total - pull : pull;
+    if (s < 0 || s > total) break;
+    const c = pointAt(pts, s), t = tangentAt(pts, s), dir = mode === 'end' ? t : [-t[0], -t[1]];
+    if (keepAway.some((k) => Math.hypot(c[0] - k.p[0], c[1] - k.p[1]) < k.r)) continue;
+    if (!footprintFree(g, c, dir, halfLen, halfBeam, bowGap, 1.5, free)) continue;
+    // the hull axis (stern to bow tip) stays `r` metres off each line (the way into a harbour, the lane at its gate)
+    let onLane = false;
+    for (let l = -halfLen; l <= halfLen + bowGap && !onLane; l += 2) onLane = keepLines.some((k) => distToPolyline(k.pts, c[0] + dir[0] * l, c[1] + dir[1] * l) < k.r);
+    if (onLane) continue;
+    const kept = [];
+    let acc = 0;
+    for (let i = 0; i < pts.length; i++) {
+      if (i) acc += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      if (mode === 'end' ? acc < s : acc > s) kept.push(pts[i]);
+    }
+    const points = mode === 'end' ? [...kept, c] : [c, ...kept];
+    return { ok: true, points, dock: c, dir, pulled: pull };
+  }
+  return { ok: false, points: pts, dock: mode === 'end' ? pts.at(-1) : pts[0], dir: null, pulled: Infinity };
+}
+
+// A closed loop through anchor points (each leg planned shore-shy, then the whole thing smoothed and re-validated). Returns { ok, points (first == last), length }.
+// Chaikin corner cutting on a CLOSED polyline (pts without the repeated first point): the corner between the last and first point is cut too.
+export function chaikinClosed(pts, iters) {
+  let p = pts;
+  for (let it = 0; it < iters; it++) {
+    const q = [];
+    for (let i = 0; i < p.length; i++) { const [a, b] = [p[i], p[(i + 1) % p.length]]; q.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]); }
+    p = q;
+  }
+  return p;
+}
+// A closed loop through anchor points: each leg is planned shore-shy and simplified on its own (a closed loop cannot be simplified as one path:
+// its first and last points coincide), then the loop is smoothed with closed corner cutting as far as it stays valid. Returns { ok, points
+// (first == last, so a route of it can be closed), length }.
+export function planLoop(g, anchors, { want = 40, need = 6 } = {}) {
+  const pts = [];
+  for (let i = 0; i < anchors.length; i++) {
+    const leg = planRoute(g, anchors[i], anchors[(i + 1) % anchors.length], { want });
+    if (!leg.ok) return { ok: false, points: [], length: 0, reason: `leg ${i}: ${leg.reason}` };
+    const simple = simplify(g, leg.path, { floor: Math.max(3, need - 1) });
+    pts.push(...simple.slice(0, -1)); // the last point is the next leg's first
+  }
+  const valid = (p) => p.every((q, i) => segmentOk(g, q, p[(i + 1) % p.length], Math.max(2, need - 2)));
+  let best = pts;
+  for (const it of [2, 1]) { const c = chaikinClosed(pts, it); if (valid(c)) { best = c; break; } }
+  const closed = [...best, best[0]];
+  return { ok: true, points: closed, length: pathLength(closed) };
+}
+
+// Open-water spots (clearance >= minClear), the best (most open) first, no two closer than `spacing`. For fishing grounds.
+export function openWaterSpots(g, { minClear = 40, spacing = 250, near = null, inset = 150 } = {}) {
+  const cand = [];
+  const [x0, z0] = [g.x0 + inset, g.z0 + inset], [x1, z1] = [g.x0 + g.nx * g.pxM - inset, g.z0 + g.nz * g.pxM - inset];
+  for (let b = 0; b < g.nz; b += 3) for (let a = 0; a < g.nx; a += 3) {
+    const k = b * g.nx + a;
+    if (!g.free[k] || g.clear[k] < minClear) continue;
+    const c = centreOf(g, a, b);
+    if (c[0] < x0 || c[0] > x1 || c[1] < z0 || c[1] > z1) continue;
+    if (near) { const d = Math.min(...near.points.map((p) => Math.hypot(p[0] - c[0], p[1] - c[1]))); if (d < near.min || d > near.max) continue; }
+    cand.push({ c, d: g.clear[k] });
+  }
+  cand.sort((p, q) => q.d - p.d);
+  const out = [];
+  for (const { c } of cand) if (!out.some((o) => Math.hypot(o[0] - c[0], o[1] - c[1]) < spacing)) out.push(c);
   return out;
 }
