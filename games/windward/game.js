@@ -140,7 +140,7 @@ export default function start(args) {
     .then(async (coast) => {
       // 1950, the first time: the opening plays in the engine over TODAY's Fiskebäckskil (src/opening-stage.js), then the game begins at dawn on the 1950 coast.
       let opening = null;
-      if (coast.era === '1950' && shouldShowOpening({ era: '1950', seen: hasSeenOpening(eraStorage('1950')), param: q.get('opening') })) {
+      if (coast.era === '1950' && !q.get('jump') && shouldShowOpening({ era: '1950', seen: hasSeenOpening(eraStorage('1950')), param: q.get('opening') })) {
         try { opening = await loadOpeningWorld(args, q, num, jsonAt); } catch (err) { console.warn('the opening could not be built; starting without it:', err); }
       }
       note.remove();
@@ -846,6 +846,14 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     dawn = { t: 0, base: snapshotLook(), onDone: () => {}, paused: !!debugOverlay && !!window.__holdDawn }; // ?debug=1 and window.__holdDawn = true before the opening ends: the dawn waits (screenshots)
     if (debugOverlay) window.__dawn = dawn;
     stepDawn(0);
+  }
+  // ?jump=britta (preview tool, Felix 2026-11-06): skip to the moment you tie up at Britta's jetty, with the story set to "go and find her".
+  // It overwrites this browser's chapter-1 progress, so use a private window to keep a real save.
+  if (era1950 && task && beats && new URLSearchParams(window.location.search).get('jump') === 'britta') {
+    task.reset(); beats.reset(); beats.advance(); beats.advance(); beats.advance(); // find -> errand -> return -> help
+    markIntroSeen(store); markStartSeen(store); wakeScene?.settle();
+    self.x = brittaEntry.x; self.z = brittaEntry.z; self.speed = 0;
+    setTimeout(() => helpMoment(), 1200);
   }
   const qIntro = new URLSearchParams(window.location.search).get('opening');
   if (era1950 && taskUi && beats) {
