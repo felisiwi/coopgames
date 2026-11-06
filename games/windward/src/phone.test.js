@@ -2,7 +2,7 @@
 // drawing parts need a real phone; these are the bits that can be silently wrong).
 import assert from 'node:assert/strict';
 import { CONFIG } from './config.js';
-import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, ropeHit, swipeTrim, ropeScrollStep, ROPE_STRIPE_PERIOD, SECOND_FINGER_SHEET, ROPE_HIT_HALF_W } from './phone.js';
+import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, ropeHit, swipeTrim, ropeScrollStep, ROPE_STRIPE_PERIOD, parseRopeVariant, ropeNeed, ropeGuideStep, ropeShowStep, SECOND_FINGER_SHEET, ROPE_HIT_HALF_W } from './phone.js';
 import { angleOffWind, leewardSign } from './sail.js';
 
 const DEG = Math.PI / 180;
@@ -111,6 +111,37 @@ check('rope: small to look at, thumb-sized to touch, on screen on small and larg
 });
 check('the second-finger sheet is off for now (only the rope and the keyboard trim)', () => {
   assert.equal(SECOND_FINGER_SHEET, false);
+});
+
+check('rope variants: ?rope=a|b|c, a by default, anything else falls back to a', () => {
+  assert.equal(parseRopeVariant(''), 'a');
+  assert.equal(parseRopeVariant('?debug=1'), 'a');
+  for (const v of ['a', 'b', 'c']) assert.equal(parseRopeVariant(`?debug=1&rope=${v}`), v);
+  assert.equal(parseRopeVariant('?rope=z'), 'a');
+  assert.equal(parseRopeVariant('?rope=B'), 'a', 'case matters: only a, b, c');
+});
+check('rope guidance: the arrows say which way to trim, and are gone when trimmed', () => {
+  const ideal = 0.7;
+  assert.equal(ropeNeed(1.3, ideal), -1, 'sail too far out: pull in (sheet in, down)');
+  assert.equal(ropeNeed(0.1, ideal), 1, 'sail too far in: let out (ease, up)');
+  assert.equal(ropeNeed(0.7, ideal), 0, 'trimmed');
+  assert.equal(ropeNeed(0.7 + 0.13, ideal), 0, 'inside the window (8 degrees) still counts as trimmed');
+  assert.equal(ropeNeed(0.7 + 0.2, ideal), -1, 'just outside it does not');
+  let g = 1;
+  for (let i = 0; i < 40; i++) g = ropeGuideStep(g, true, 0.016);
+  assert.equal(g, 0, 'faded out once trimmed');
+  assert.ok(ropeGuideStep(1, true, 0.016) < 1 && ropeGuideStep(1, true, 0.016) > 0.9, 'a gentle fade, not a cut');
+  for (let i = 0; i < 40; i++) g = ropeGuideStep(g, false, 0.016);
+  assert.equal(g, 1, 'and back when the sail drifts off the trim');
+});
+check('rope variant c: the rope shows while you swipe and fades a moment after', () => {
+  let s = 0;
+  for (let i = 0; i < 20; i++) s = ropeShowStep(s, true, 0.016);
+  assert.equal(s, 1);
+  s = ropeShowStep(s, false, 0.016);
+  assert.ok(s < 1 && s > 0.9, 'it lingers');
+  for (let i = 0; i < 60; i++) s = ropeShowStep(s, false, 0.016);
+  assert.equal(s, 0, 'then it is gone');
 });
 
 console.log(`\n${passed} passed`);
