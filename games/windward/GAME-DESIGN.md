@@ -1417,3 +1417,9 @@ Britta born ~1933 (17 in 1950, ~93 in the finale).
    performance so low wind never feels stuck.
 Then: merge chapter 1 (after agent 1's rewind fixes), co-op stage 2 ("visit the host's world"),
 and day/night (reuse dusk.js).
+
+**Rule: players keep their progress (Felix, 2026-11-06).** The live game is shared; players'
+progress lives in their browser (localStorage) on the live address. Every future change must keep
+existing saves working: never rename or drop a save key without a migration that carries the old
+data over, add a test for it, and mention any save change in the report. Changing the live
+address (e.g. a custom domain) loses saves unless we migrate them, so decide the address early.
