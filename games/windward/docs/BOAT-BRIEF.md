@@ -27,7 +27,7 @@ Lambert, Skagen palette (shared/ART.md). Keep src/boat.js's API: createBoatMesh(
   later).
 - **Lantern at night:** a small warm lantern that lights at dusk (ties to the day-night cycle).
 - **Worn, mended look:** patches and a repaired plank; the boat shows its history and can be
-  fixed up later (upgrade hook; ties to Brita's boatbuilder father).
+  fixed up later (upgrade hook, e.g. a boatbuilder in a later era).
 
 ## References
 - Bohuslän sea boat *Vikingen* (Gullholmen, 1860s): two masts, brown sails, white hull with

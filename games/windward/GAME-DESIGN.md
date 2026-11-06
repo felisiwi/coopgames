@@ -1070,7 +1070,7 @@ last saw as a young person, you return at your current (older) age, and that era
 has moved on too: people have grown, new places exist, your claims have developed or
 decayed. Familiar places feel new again. Fits "each era keeps its own world state" (Q40) and
 eras having spans (e.g. Crown shores 1706–1746) with room to move forward inside them.
-Nice side effect: the first jump to ~1700 makes you young, a peer of Brita.
+Nice side effect: the first jump to ~1700 makes you young, a peer of Torhild.
 
 Open questions to grill: what advances your age (play time, jumps, story beats)?; what does
 an era's clock do while you're away (advance by your time away, or by story)?; what age
@@ -1277,3 +1277,15 @@ flash patterns become clues/codes later in the game).
    there: a faint flash in the old tower's pattern from the dark tower, a bell, the fog
    thickening. Card: "That tower has been dark since 1978. But you saw it." That ends chapter
    1 and points to the storm and the jump.
+
+**Characters settled (Felix, 2026-11-06):** **Torhild** is the friend you meet in 1700, the
+**pilot's daughter** (story/characters/torhild-1700.md, formerly the Brita-1700 draft).
+**Brita** is your **grandma** in Fiskebäckskil today (story/characters/brita-today.md).
+
+**Tordenskiold (later, not now):** Felix cleaned up his coat of arms (ref/tordenskiold-arms.png).
+Idea: an asset of his ship with his flag, seen now and then at sea in his era, as friend or
+foe or with some function. History check before building: Peter Wessel (b. 1690) was ennobled
+as Tordenskiold in 1716, and he fought for Denmark-Norway against Sweden on this coast during
+the Great Northern War (Dynekilen 1716, Marstrand/Carlsten 1719). So he belongs to the late
+1710s, not 1700 (he was 10 then). The Danish swallow-tailed naval flag ("splitflag") is a nice
+echo of Svalan, "the swallow".
