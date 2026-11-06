@@ -1289,3 +1289,12 @@ as Tordenskiold in 1716, and he fought for Denmark-Norway against Sweden on this
 the Great Northern War (Dynekilen 1716, Marstrand/Carlsten 1719). So he belongs to the late
 1710s, not 1700 (he was 10 then). The Danish swallow-tailed naval flag ("splitflag") is a nice
 echo of Svalan, "the swallow".
+
+**Decided: the chart after the jump (Felix, 2026-11-06).** Your chart becomes a faint ghost of
+the land only: what you explored on Today's coast stays as faint pencil outlines of islands
+and shores, with no names, harbours, marks or lighthouses (granite barely changed in 300 years;
+everything people made did). Your memory can't be trusted: the sea stood about 0.55 m higher
+(data/world-1700.json), so many rocks you remember as visible are just under water, and the
+ghost shows safe water where a hidden rock lies. Torhild, the pilot's daughter, teaches you to
+read the coast the old way (cairns, marks, leading lines). Re-sailing an area inks it in as a
+real 1700 chart over the faded memory, and places come back one by one with their old names.
