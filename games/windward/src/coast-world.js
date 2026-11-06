@@ -535,9 +535,10 @@ export async function loadRealCoast(opts = {}) {
     json: async (u) => { const t = await (await fetch(u)).text(); bytes += t.length; return JSON.parse(t); },
     bytes: async (u) => { const b = new Uint8Array(await (await fetch(u)).arrayBuffer()); bytes += b.length; return b; },
   };
-  const [coast, settlementsJson, skerryJson, namesJson, placeNames, passesJson, shoalsJson, seamarksJson] = await Promise.all([
+  const [coast, settlementsJson, skerryJson, namesJson, placeNames, passesJson, shoalsJson, seamarksJson, placesJson] = await Promise.all([
     loadCoast(coastUrl, io, COAST_TILES), io.json(dataUrl), io.json(coastUrl + 'skerries.json'), io.json(coastUrl + 'names.json'), io.json(placeNamesUrl),
     io.json(coastUrl + 'passes.json'), io.json(coastUrl + 'shoals.json'), io.json(coastUrl + 'seamarks.json'), // stage 1d: the water tells the truth
+    io.json(coastUrl + 'places.json'), // the major places: a skerry that only shares their name is not named (src/names.js findFalseNamesakes)
   ]);
   T.loadDecodeMs = now() - T.start;
 
@@ -572,7 +573,9 @@ export async function loadRealCoast(opts = {}) {
   // ?cat=lon,lat starts at the open water nearest another point (testing).
   const [sx, sz] = world.toGame(...(opts.at || [namesJson.spawn.lon, namesJson.spawn.lat]));
   const spawn = findOpenWater(world, sx, sz);
-  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames, lights: LIGHTHOUSES });
+  let hiddenNamesakes = [];
+  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames, lights: LIGHTHOUSES,
+    majorPlaces: placesJson.places.filter((p) => p.kind === 'village' || p.kind === 'town'), onHidden: (h) => { hiddenNamesakes = h.map((e) => `${e.name} (${e.id})`); } });
 
   const group = new THREE.Group();
   group.add(terrain.group, trees.group, props);
@@ -599,7 +602,7 @@ export async function loadRealCoast(opts = {}) {
       window: { cells: [world.nx, world.nz], metres: [Math.round(world.nx * world.pxM), Math.round(world.nz * world.pxM)], landPct: +world.landPct.toFixed(1) },
       terrain: terrain.stats, buildings: buildings.length, villages, skerries: world.skerryCount,
       lighthouses: lights.map((l) => ({ name: l.name, movedM: l.movedM, error: l.error })),
-      names: { total: names.length, byKind: names.reduce((o, n) => ((o[n.kind] = (o[n.kind] || 0) + 1), o), {}), unplacedHarbours: namesJson.unplaced.map((u) => u.name) },
+      names: { hiddenNamesakes, total: names.length, byKind: names.reduce((o, n) => ((o[n.kind] = (o[n.kind] || 0) + 1), o), {}), unplacedHarbours: namesJson.unplaced.map((u) => u.name) },
       spawn, spawnFrom: namesJson.spawn, look: world.look,
     },
   };

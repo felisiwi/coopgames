@@ -3,7 +3,7 @@
 // carries on if storage is blocked), and the real names.json accounts for all 15 of Felix's harbours.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { buildNameList, createNameBook, displayName, NAME_RADIUS_M, SIGHT_EXTRA_M, SAME_PLACE_M, STORAGE_KEY } from './names.js';
+import { buildNameList, createNameBook, displayName, NAME_RADIUS_M, SIGHT_EXTRA_M, SAME_PLACE_M, STORAGE_KEY, findFalseNamesakes, NAMESAKE_REACH_M, FAMOUS_NAMES } from './names.js';
 import { layoutLabels, createLabelQueue, keepDistance, labelScore, LABEL_MAX_SHOWN, LABEL_MAX_SHOWN_NARROW, isQuiet, wantsLabel, QUIET_OPACITY, QUIET_SCALE } from './name-labels.js';
 
 let passed = 0;
@@ -225,7 +225,15 @@ check('the same name close together is one place, the more important kind wins; 
     names: { islands: [{ osm: 'r/1', name: 'Käringön', kind: 'skerry', lon: 10, lat: 0 }, { osm: 'r/2', name: 'Käringön', kind: 'skerry', lon: 900, lat: 0 }], harbours: [] },
     villages: [{ name: 'Käringön', lon: 10 + SAME_PLACE_M / 2, lat: 0 }],
   });
-  assert.deepEqual(list.map((e) => `${e.kind}@${e.x}`), ['skerry@900', `village@${10 + SAME_PLACE_M / 2}`], 'the near skerry is the village; the far one is another place');
+  // Käringön is a MAJOR place: the skerry that is the village merges into it, and a far skerry that only shares the name shows no name (1d rule)
+  assert.deepEqual(list.map((e) => `${e.kind}@${e.x}`), [`village@${10 + SAME_PLACE_M / 2}`], 'the near skerry is the village; the far namesake is hidden');
+  // an ordinary name: far apart stays two places, as before
+  const ordinary = buildNameList({
+    ...base,
+    names: { islands: [{ osm: 'r/1', name: 'Svartskär', kind: 'skerry', lon: 10, lat: 0 }, { osm: 'r/2', name: 'Svartskär', kind: 'skerry', lon: 900, lat: 0 }], harbours: [] },
+    villages: [],
+  });
+  assert.deepEqual(ordinary.map((e) => `${e.kind}@${e.x}`).sort(), ['skerry@10', 'skerry@900'], 'the same ordinary name far apart stays two places');
 });
 
 check('label queue: a sighting ranks half a step ahead of its own kind, so a described skerry is not buried behind bare ones', () => {
@@ -283,6 +291,46 @@ check('quiet names only show with their island on screen; a village tag stays as
   assert.equal(wantsLabel({ ...base, quiet: false, onScreen: false }), true, 'village off-screen: sticky edge tag stays');
   assert.equal(wantsLabel({ announced: true, near: false, quiet: true, onScreen: false }), true, 'a fresh announcement shows wherever it is');
   assert.equal(wantsLabel({ announced: false, near: false, quiet: false, onScreen: true }), false, 'far away: gone');
+});
+
+check('false namesakes: a skerry named like a major place that it is not shows no name; the place\'s own island does; harbours are not major places', () => {
+  const anchors = [{ name: 'Käringön', x: 0, z: 0 }, { name: 'Marstrand', x: 5000, z: 5000 }];
+  const rows = [
+    { id: 'a', name: 'Käringön', kind: 'island', x: 20, z: 10 }, // the island the village stands on
+    { id: 'b', name: 'Käringön', kind: 'skerry', x: NAMESAKE_REACH_M + 60, z: 0 }, // a skerry of the same name, elsewhere
+    { id: 'c', name: 'Marstrand', kind: 'skerry', x: 100, z: 100 }, // the real Marstrand is 7 km away
+    { id: 'd', name: 'Marstrand', kind: 'skerry', x: 5000 + 30, z: 5000 }, // beside the real Marstrand: that IS the place
+    { id: 'e', name: 'Smögen', kind: 'skerry', x: 400, z: 400 }, // famous, no anchor given: hidden
+    { id: 'f', name: 'Svartskär', kind: 'skerry', x: 3, z: 3 }, // an ordinary name
+    { id: 'g', name: 'Käringön', kind: 'village', x: 9999, z: 9999 }, // not an island or a skerry: never touched by the rule
+    { id: 'h', name: 'Dammholmen', kind: 'skerry', x: 50, z: 50 }, // a small harbour name: not a major place
+  ];
+  const hidden = findFalseNamesakes(rows, anchors).map((r) => r.id).sort();
+  assert.deepEqual(hidden, ['b', 'c', 'e']);
+  assert.ok(FAMOUS_NAMES.includes('Marstrand') && FAMOUS_NAMES.includes('Fiskebäckskil'));
+  assert.deepEqual(findFalseNamesakes(rows, anchors, []).map((r) => r.id).sort(), ['b', 'c'], 'without the famous list only the anchored names count');
+});
+
+check('false namesakes, the real data: exactly the two OSM skerries named "Marstrand" are hidden, nothing else is lost, and no skerry or island named "Marstrand" is left', () => {
+  const read = (f) => JSON.parse(fs.readFileSync(new URL(f, import.meta.url), 'utf8'));
+  const names = read('../assets/coast/names.json');
+  const places = read('../assets/coast/places.json').places;
+  const settlements = read('../data/settlements-history.json').settlements;
+  const placeNames = read('../data/place-names.json');
+  const toGame = (lon, lat) => [(lon - 11.25) * 5869.378, -(lat - 58.085) * 11119.5];
+  const majorPlaces = places.filter((p) => p.kind === 'village' || p.kind === 'town');
+  let hidden = null;
+  const withRule = buildNameList({ names, villages: settlements, toGame, inside: () => true, placeNames, majorPlaces, onHidden: (h) => { hidden = h; } });
+  assert.deepEqual(hidden.map((e) => e.id).sort(), ['relation/10250151', 'relation/10250555']);
+  assert.ok(hidden.every((e) => e.name === 'Marstrand' && e.kind === 'skerry'));
+  assert.equal(withRule.some((e) => e.name === 'Marstrand' && e.kind !== 'village'), false, 'no skerry or island named Marstrand in the list (the village is the real place, outside the playable window)');
+  // the rule off (no anchors, no famous names): the same list plus exactly those two
+  const anchors = [...settlements, ...majorPlaces].map((p) => { const [x, z] = toGame(p.lon, p.lat); return { name: p.name, x, z }; });
+  const all = [...names.islands].map((i) => { const [x, z] = toGame(i.lon, i.lat); return { id: i.osm, name: i.name, kind: i.kind, x, z }; });
+  const hiddenRaw = findFalseNamesakes(all, anchors);
+  assert.deepEqual(hiddenRaw.map((e) => e.id).sort(), ['relation/10250151', 'relation/10250555'], 'of 2000+ OSM islands and skerries, only those two');
+  for (const keep of ['Gullholmen', 'Käringön', 'Härmanö']) assert.ok(withRule.some((e) => e.name === keep), `${keep} (the place itself) is kept`);
+  for (const harbour of ['Dammholmen', 'Danholmen', 'Kråkholmen']) assert.ok(withRule.some((e) => e.name === harbour), `${harbour} (a harbour of Felix's) is kept`);
 });
 
 console.log(`${passed} checks passed`);
