@@ -1235,3 +1235,9 @@ where the harbour menu, mooring and meeting people live.
 Close-up answers (Felix, 2026-11-06): you leave a close-up by sailing far enough out, and you're
 asked whether you want to go back to sea. A co-op friend sees the same close-up if they sail
 up. Order: Fiskebäckskil first, then Lysekil and Grundsund, then others close by.
+Close-up value (Felix, 2026-11-06): entering the close-up must add something. Sailing into a
+harbour on the normal map gives just a basic harbour menu (e.g. trade). Going into the
+close-up lets you sail around, talk to different people, get clues from them, and visit
+places like the fishery.
+
+**UI (Felix, 2026-11-06):** remove the Chart button; tapping the minimap opens the chart.
