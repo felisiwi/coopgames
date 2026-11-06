@@ -1225,3 +1225,10 @@ suggestions to decide later:
 - Lighthouse sectors are a mechanic: white = safe water, red/green = danger side (real feature).
 - Restored lighthouses are what make night sailing possible near them, so the first task pays
   off later.
+
+**Harbour close-ups (option C), Felix 2026-11-06:** later in the game, choosing "Moor here" or
+sailing into a harbour opens a more detailed, spacious view at near-true scale. In natural
+harbours ("gems" like Smörasken, Kråksundsgap) you can navigate them the way he remembers
+them. In village harbours you see more houses, docks, fishing nets drying and people. This is
+the answer for places the 1:10 map simplifies (small islets, narrow inlets), and it's also
+where the harbour menu, mooring and meeting people live.
