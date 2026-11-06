@@ -1,13 +1,14 @@
 # Last session
 
-**2026-11-06: Seamarks data** (branch `felix/windward-seamarks` on origin/main 8734bd5, NOT merged). New files
-only: real OSM shallows (`assets/coast/shoals.json`, 292) and sea-marks (`seamarks.json`, 206 marks + 12 leading
-lines + 24 harbours) for the region, built by `tools/fetch-seamarks.mjs`; check page `seamarks-lab.html`; test
-`src/seamarks.test.js`; findings, gaps and the 1d fill-in recommendation in `docs/seamarks/README.md`. Stage 1d
-reads these; game.js untouched. Main already has: stage 1b lure, Boat Lab (not yet in game.js), real coast (1a).
+**2026-11-06: Seamarks data + stage 1d kit** (branch `felix/windward-seamarks` on origin/main 8734bd5, NOT merged).
+New files only; game.js and existing src untouched. Real OSM shallows (`shoals.json`, 292) and sea-marks
+(`seamarks.json`: 206 real + 20 INVENTED harbour-mouth gate marks, `invented: true`, look the same in game, flagged
+only in chart/debug). Kit for 1d: `src/seamark-meshes.js` (buoys/beacons/lights, real rhythms, emissive only),
+`src/seamark-place.js` (+ tools/invent-harbour-marks.mjs), `src/shoal-look.js` (look + collision). Lab:
+`seamarks-lab.html` Map + 3D. Details, API and gaps: `docs/seamarks/README.md`. Credit OSM (ODbL) wherever shown.
 
 Where things are:
-- Seamarks: `assets/coast/shoals.json`, `seamarks.json`, `seamarks-lab.html`, `docs/seamarks/README.md`
+- Seamarks: `assets/coast/shoals.json`, `seamarks.json`, `seamarks-lab.html`, `docs/seamarks/README.md`; kit `src/seamark-meshes.js`, `seamark-place.js`, `shoal-look.js`
 - Boats: `src/boats.js` (+ test), `boat-lab.html`, `docs/boat-lab/`, brief `docs/BOAT-BRIEF.md`
 - Design: `games/windward/GAME-DESIGN.md`; look and labs: `DESIGN.md` ("Reference labs")
 - Look: `src/water.js`, `src/depthmap.js`, `src/island-look.js`, `src/config.js`
@@ -26,11 +27,12 @@ Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobb
 ## Today's sessions
 
 - Seamarks data: OSM shoals + marks + leading lines, lab page, test, gap report (this branch).
+- Seamarks kit: mark meshes + light rhythms, 10 invented harbour gates, shoal look/collision, 3D lab (this branch).
 
 ## Next
 
-0. Felix: open `seamarks-lab.html` (Grundsund / Fiskebäckskil / Käringön), decide how 1d fills the gaps (README).
-1. Stage 1d: render marks + shoals in game; generated leading marks at harbour mouths, flagged `invented`.
+0. Felix: open `seamarks-lab.html?view=3d` on the phone (Fiskebäckskil, Käringön); judge the gates, shoal radii, night visibility.
+1. Stage 1d: render marks + shoals in game from the kit (README "Stage 1d kit"); show the OSM credit.
 2. Felix: phone check of the preview (`?debug=1`): fps, collision feel, names; try the lure (LURE.md).
 3. Confirm the 7 unplaced harbours (candidates in `assets/coast/names.json`).
 4. Port Boat Lab + terrain look into game.js (stage 1c); blue-hour sky, edge fog + thunder.

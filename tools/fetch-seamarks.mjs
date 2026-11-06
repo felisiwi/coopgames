@@ -190,6 +190,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const head = {
     generated: new Date().toISOString().slice(0, 10),
     source: 'OpenStreetMap contributors, ODbL 1.0, via Overpass API (tools/fetch-seamarks.mjs)',
+    credit: '© OpenStreetMap contributors',
+    licence: 'ODbL 1.0',
+    licenceUrl: 'https://www.openstreetmap.org/copyright',
     osmDataTimestamp: timestamp,
     region: REGION,
   };

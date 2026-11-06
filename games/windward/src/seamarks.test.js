@@ -14,6 +14,7 @@ let passed = 0;
 function check(name, fn) { fn(); passed += 1; console.log(`ok - ${name}`); }
 const inside = (p) => p.lat >= REGION.s && p.lat <= REGION.n && p.lon >= REGION.w && p.lon <= REGION.e;
 const OSM_ID = /^(node|way|relation)\/\d+$/;
+const MARK_ID = /^((node|way|relation)\/\d+|invented\/[a-z0-9-]+)$/; // real OSM ids, or an invented gate mark
 
 check('region matches names.json (58.085-58.30 N, 11.25-11.50 E)', () => {
   const names = JSON.parse(readFileSync(dir + 'names.json', 'utf8'));
@@ -50,10 +51,13 @@ check('marks: every mark is in the region with a valid type, form and OSM id', (
     assert.ok(inside(m), `${m.id} outside region`);
     assert.ok(MARK_TYPES.includes(m.type), `${m.id} type ${m.type}`);
     assert.ok(['buoy', 'beacon', 'light'].includes(m.form), `${m.id} form ${m.form}`);
-    assert.match(m.id, OSM_ID);
+    assert.match(m.id, m.invented ? /^invented\/[a-z0-9-]+-(port|starboard)$/ : OSM_ID);
     assert.ok(!ids.has(m.id), 'duplicate ' + m.id); ids.add(m.id);
   }
   assert.equal(marksFile.counts.total, marks.length);
+  assert.equal(marksFile.counts.invented, marks.filter((m) => m.invented).length);
+  assert.equal(marksFile.counts.real + marksFile.counts.invented, marks.length);
+  for (const m of marks) assert.match(m.id, MARK_ID);
 });
 
 check('IALA A: red = port, green = starboard on every lateral mark; lit laterals use the same colour', () => {
@@ -120,6 +124,16 @@ check('build(): light text and sides come only from the OSM tags (synthetic inpu
   assert.equal(r.marks[0].lights[0].text, 'Q(6) W 15s');
   assert.equal(r.shoals.length, 1);
   assert.equal(r.shoals[0].level, 'submerged');
+});
+
+check('credit: both files carry the OSM credit and the ODbL licence, and the lab page shows it', () => {
+  for (const f of [shoalsFile, marksFile]) {
+    assert.match(f.credit, /OpenStreetMap contributors/);
+    assert.equal(f.licence, 'ODbL 1.0');
+    assert.match(f.licenceUrl, /openstreetmap\.org\/copyright/);
+  }
+  const lab = readFileSync(fileURLToPath(new URL('../seamarks-lab.html', import.meta.url)), 'utf8');
+  assert.match(lab, /id="credit"[^>]*>[^<]*©[^<]*<a[^>]*openstreetmap\.org\/copyright/i);
 });
 
 console.log(`\n${passed} checks passed`);

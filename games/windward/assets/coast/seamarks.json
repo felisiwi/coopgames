@@ -1,19 +1,24 @@
 {
  "generated": "2026-11-06",
  "source": "OpenStreetMap contributors, ODbL 1.0, via Overpass API (tools/fetch-seamarks.mjs)",
- "osmDataTimestamp": "2026-11-06T06:24:18Z",
+ "credit": "© OpenStreetMap contributors",
+ "licence": "ODbL 1.0",
+ "licenceUrl": "https://www.openstreetmap.org/copyright",
+ "osmDataTimestamp": "2026-11-06T06:58:18Z",
  "region": {
   "s": 58.085,
   "w": 11.25,
   "n": 58.3,
   "e": 11.5
  },
- "note": "IALA A (Sweden): red to port / green to starboard when entering from seaward. Cardinal colours: N black/yellow, E black/yellow/black, S yellow/black, W yellow/black/yellow. lights[].text is the standard abbreviation, e.g. \"Q(3) W 10s\".",
+ "note": "IALA A (Sweden): red to port / green to starboard when entering from seaward. Cardinal colours: N black/yellow, E black/yellow/black, S yellow/black, W yellow/black/yellow. lights[].text is the standard abbreviation, e.g. \"Q(3) W 10s\". Invented marks (invented: true) are generated harbour-mouth gates for harbours with no real mark nearby (tools/invent-harbour-marks.mjs): the game draws them like real ones, only the chart / debug view shows the flag. Invented marks (invented: true) are generated harbour-mouth gates for harbours with no real mark nearby (tools/invent-harbour-marks.mjs): the game draws them like real ones, only the chart / debug view shows the flag. Invented marks (invented: true) are generated harbour-mouth gates for harbours with no real mark nearby (tools/invent-harbour-marks.mjs): the game draws them like real ones, only the chart / debug view shows the flag.",
  "counts": {
-  "total": 206,
+  "total": 226,
+  "real": 206,
+  "invented": 20,
   "byType": {
    "cardinal": 10,
-   "lateral": 80,
+   "lateral": 100,
    "isolated_danger": 38,
    "light": 41,
    "special": 37
@@ -32,6 +37,20 @@
    "byType": {
     "isolated_danger": 1,
     "special": 1
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/langeviks-smabatshamn-port",
+     "invented/langeviks-smabatshamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.28557,
+     "lon": 11.43036
+    },
+    "enteringBearingDeg": 40,
+    "mouthWidthM": 285,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 153
    }
   },
   {
@@ -44,6 +63,20 @@
    "nearestMarkM": 941,
    "byType": {
     "special": 1
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/valbodalen-smabatshamn-port",
+     "invented/valbodalen-smabatshamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.29071,
+     "lon": 11.43464
+    },
+    "enteringBearingDeg": 180,
+    "mouthWidthM": 290,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 168
    }
   },
   {
@@ -59,6 +92,20 @@
     "cardinal": 2,
     "lateral": 1,
     "isolated_danger": 1
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/fiskebackskils-smabatshamn-port",
+     "invented/fiskebackskils-smabatshamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.2488,
+     "lon": 11.46212
+    },
+    "enteringBearingDeg": 180,
+    "mouthWidthM": 85,
+    "gateSpacingM": 53,
+    "mouthFromHarbourM": 745
    }
   },
   {
@@ -129,6 +176,20 @@
     "light": 4,
     "isolated_danger": 2,
     "lateral": 6
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/stockens-gasthamn-port",
+     "invented/stockens-gasthamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.14835,
+     "lon": 11.41555
+    },
+    "enteringBearingDeg": 351,
+    "mouthWidthM": 300,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 265
    }
   },
   {
@@ -143,6 +204,9 @@
     "light": 1,
     "isolated_danger": 1,
     "lateral": 4
+   },
+   "inventedGate": {
+    "sharedWith": "Hälleviksstrands Varvs Marina"
    }
   },
   {
@@ -188,6 +252,20 @@
     "isolated_danger": 2,
     "lateral": 1,
     "special": 2
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/hallevik-yacht-club-port",
+     "invented/hallevik-yacht-club-starboard"
+    ],
+    "mouth": {
+     "lat": 58.11548,
+     "lon": 11.4584
+    },
+    "enteringBearingDeg": 14,
+    "mouthWidthM": 325,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 165
    }
   },
   {
@@ -203,6 +281,20 @@
     "isolated_danger": 2,
     "lateral": 3,
     "special": 2
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/halleviksstrands-varvs-marina-port",
+     "invented/halleviksstrands-varvs-marina-starboard"
+    ],
+    "mouth": {
+     "lat": 58.11721,
+     "lon": 11.44321
+    },
+    "enteringBearingDeg": 34,
+    "mouthWidthM": 150,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 250
    }
   },
   {
@@ -217,6 +309,20 @@
     "isolated_danger": 3,
     "lateral": 3,
     "special": 2
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/edshultshalls-gasthamn-port",
+     "invented/edshultshalls-gasthamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.10635,
+     "lon": 11.46527
+    },
+    "enteringBearingDeg": 0,
+    "mouthWidthM": 525,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 168
    }
   },
   {
@@ -277,6 +383,9 @@
     "cardinal": 2,
     "lateral": 1,
     "isolated_danger": 1
+   },
+   "inventedGate": {
+    "sharedWith": "Fiskebäckskils småbåtshamn"
    }
   },
   {
@@ -290,6 +399,20 @@
    "byType": {
     "isolated_danger": 1,
     "lateral": 2
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/gaso-smabatshamn-port",
+     "invented/gaso-smabatshamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.23261,
+     "lon": 11.41343
+    },
+    "enteringBearingDeg": 322,
+    "mouthWidthM": 600,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 173
    }
   },
   {
@@ -317,6 +440,20 @@
    "nearestMarkM": 1355,
    "byType": {
     "isolated_danger": 1
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/stockeviks-smabatshamn-port",
+     "invented/stockeviks-smabatshamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.2351,
+     "lon": 11.42657
+    },
+    "enteringBearingDeg": 76,
+    "mouthWidthM": 525,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 165
    }
   },
   {
@@ -347,6 +484,20 @@
     "cardinal": 2,
     "lateral": 5,
     "special": 1
+   },
+   "inventedGate": {
+    "ids": [
+     "invented/karingon-fiskehamn-port",
+     "invented/karingon-fiskehamn-starboard"
+    ],
+    "mouth": {
+     "lat": 58.11462,
+     "lon": 11.36564
+    },
+    "enteringBearingDeg": 233,
+    "mouthWidthM": 300,
+    "gateSpacingM": 100,
+    "mouthFromHarbourM": 153
    }
   },
   {
@@ -788,6 +939,48 @@
    "nearHarbour": "Käringön fiskehamn"
   },
   {
+   "id": "invented/edshultshalls-gasthamn-port",
+   "lat": 58.10635,
+   "lon": 11.46442,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Edshultshalls gästhamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Edshultshalls gästhamn",
+    "mouthWidthM": 525,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
+  },
+  {
+   "id": "invented/edshultshalls-gasthamn-starboard",
+   "lat": 58.10635,
+   "lon": 11.46612,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Edshultshalls gästhamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Edshultshalls gästhamn",
+    "mouthWidthM": 525,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
+  },
+  {
    "id": "node/11413025626",
    "lat": 58.107,
    "lon": 11.44717,
@@ -994,6 +1187,27 @@
    "nearHarbour": "Käringön fiskehamn"
   },
   {
+   "id": "invented/karingon-fiskehamn-port",
+   "lat": 58.11426,
+   "lon": 11.36615,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Käringön fiskehamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Käringön fiskehamn",
+    "mouthWidthM": 300,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
+  },
+  {
    "id": "node/3667224389",
    "lat": 58.11434,
    "lon": 11.34696,
@@ -1025,6 +1239,69 @@
    "nearHarbour": "Käringön fiskehamn"
   },
   {
+   "id": "invented/karingon-fiskehamn-starboard",
+   "lat": 58.11498,
+   "lon": 11.36513,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Käringön fiskehamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Käringön fiskehamn",
+    "mouthWidthM": 300,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
+  },
+  {
+   "id": "invented/hallevik-yacht-club-starboard",
+   "lat": 58.11537,
+   "lon": 11.45923,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Hällevik Yacht Club",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Hällevik Yacht Club",
+    "mouthWidthM": 325,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
+  },
+  {
+   "id": "invented/hallevik-yacht-club-port",
+   "lat": 58.11559,
+   "lon": 11.45758,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Hällevik Yacht Club",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Hällevik Yacht Club",
+    "mouthWidthM": 325,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
+  },
+  {
    "id": "node/4022565831",
    "lat": 58.11623,
    "lon": 11.43153,
@@ -1039,6 +1316,27 @@
    "nearHarbour": "Hälleviksstrands Varvs Marina"
   },
   {
+   "id": "invented/halleviksstrands-varvs-marina-starboard",
+   "lat": 58.11696,
+   "lon": 11.44392,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Hälleviksstrands Varvs Marina",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Hälleviksstrands Varvs Marina",
+    "mouthWidthM": 150,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
+  },
+  {
    "id": "node/3667230980",
    "lat": 58.1172,
    "lon": 11.35043,
@@ -1049,6 +1347,27 @@
    ],
    "shape": "pile",
    "nearHarbour": "Käringöns gästhamn"
+  },
+  {
+   "id": "invented/halleviksstrands-varvs-marina-port",
+   "lat": 58.11746,
+   "lon": 11.4425,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Hälleviksstrands Varvs Marina",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Hälleviksstrands Varvs Marina",
+    "mouthWidthM": 150,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
   },
   {
    "id": "node/1531131750",
@@ -1668,6 +1987,48 @@
    "shape": "spar",
    "system": "iala-a",
    "nearHarbour": "Stockens gästhamn"
+  },
+  {
+   "id": "invented/stockens-gasthamn-port",
+   "lat": 58.14828,
+   "lon": 11.41471,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Stockens gästhamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Stockens gästhamn",
+    "mouthWidthM": 300,
+    "reachedOpenWater": false
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
+  },
+  {
+   "id": "invented/stockens-gasthamn-starboard",
+   "lat": 58.14843,
+   "lon": 11.41639,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Stockens gästhamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Stockens gästhamn",
+    "mouthWidthM": 300,
+    "reachedOpenWater": false
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
   },
   {
    "id": "node/3668257063",
@@ -3190,6 +3551,27 @@
    "system": "iala-a"
   },
   {
+   "id": "invented/gaso-smabatshamn-port",
+   "lat": 58.23234,
+   "lon": 11.41276,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Gåsö småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Gåsö småbåtshamn",
+    "mouthWidthM": 600,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
+  },
+  {
    "id": "node/4322350232",
    "lat": 58.23271,
    "lon": 11.48806,
@@ -3205,6 +3587,27 @@
     "shape": "cylinder",
     "colour": "red"
    }
+  },
+  {
+   "id": "invented/gaso-smabatshamn-starboard",
+   "lat": 58.23289,
+   "lon": 11.41411,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Gåsö småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Gåsö småbåtshamn",
+    "mouthWidthM": 600,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
   },
   {
    "id": "node/4322350005",
@@ -3231,6 +3634,27 @@
    ],
    "shape": "spar",
    "system": "iala-a"
+  },
+  {
+   "id": "invented/stockeviks-smabatshamn-starboard",
+   "lat": 58.23466,
+   "lon": 11.42677,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Stockeviks småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Stockeviks småbåtshamn",
+    "mouthWidthM": 525,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
   },
   {
    "id": "node/4277430389",
@@ -3273,6 +3697,27 @@
    ],
    "shape": "spar",
    "system": "iala-a"
+  },
+  {
+   "id": "invented/stockeviks-smabatshamn-port",
+   "lat": 58.23553,
+   "lon": 11.42636,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Stockeviks småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Stockeviks småbåtshamn",
+    "mouthWidthM": 525,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
   },
   {
    "id": "node/4322339711",
@@ -3376,6 +3821,48 @@
    ],
    "shape": "pile",
    "nearHarbour": "Gullmarsstrands småbåtshamn"
+  },
+  {
+   "id": "invented/fiskebackskils-smabatshamn-starboard",
+   "lat": 58.2488,
+   "lon": 11.46167,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Fiskebäckskils småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Fiskebäckskils småbåtshamn",
+    "mouthWidthM": 85,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
+  },
+  {
+   "id": "invented/fiskebackskils-smabatshamn-port",
+   "lat": 58.2488,
+   "lon": 11.46257,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Fiskebäckskils småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Fiskebäckskils småbåtshamn",
+    "mouthWidthM": 85,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
   },
   {
    "id": "node/4276740337",
@@ -4690,6 +5177,48 @@
    ]
   },
   {
+   "id": "invented/langeviks-smabatshamn-starboard",
+   "lat": 58.28528,
+   "lon": 11.43101,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Långeviks småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Långeviks småbåtshamn",
+    "mouthWidthM": 285,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
+  },
+  {
+   "id": "invented/langeviks-smabatshamn-port",
+   "lat": 58.28586,
+   "lon": 11.4297,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Långeviks småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Långeviks småbåtshamn",
+    "mouthWidthM": 285,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
+  },
+  {
    "id": "node/8625492195",
    "lat": 58.28615,
    "lon": 11.41952,
@@ -4750,6 +5279,48 @@
     "shape": "x-shape",
     "colour": "yellow"
    }
+  },
+  {
+   "id": "invented/valbodalen-smabatshamn-starboard",
+   "lat": 58.29071,
+   "lon": 11.43379,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Valbodalen småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Valbodalen småbåtshamn",
+    "mouthWidthM": 290,
+    "reachedOpenWater": true
+   },
+   "side": "starboard",
+   "colours": [
+    "green"
+   ]
+  },
+  {
+   "id": "invented/valbodalen-smabatshamn-port",
+   "lat": 58.29071,
+   "lon": 11.4355,
+   "type": "lateral",
+   "form": "buoy",
+   "shape": "spar",
+   "system": "iala-a",
+   "invented": true,
+   "nearHarbour": "Valbodalen småbåtshamn",
+   "basis": {
+    "rule": "harbour-mouth gate v1 (src/seamark-place.js)",
+    "harbour": "Valbodalen småbåtshamn",
+    "mouthWidthM": 290,
+    "reachedOpenWater": true
+   },
+   "side": "port",
+   "colours": [
+    "red"
+   ]
   },
   {
    "id": "node/11413072619",
