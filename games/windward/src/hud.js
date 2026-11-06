@@ -209,7 +209,7 @@ export function updateHud(hud, wind, trimRad, idealTrimRadValue, headingRad, boa
 
   hud.text.textContent =
     `wind ${String(windDeg).padStart(3, '0')}°\n` +
-    `${windMs.toFixed(1)} m/s / ${msToKnots(windMs).toFixed(1)} kn\n` +
+    `${msToKnots(windMs).toFixed(1)} kn wind\n` +
     `speed ${msToKnots(boatSpeedMS).toFixed(1)} kn\n` +
     trimHint(trimDeg, idealDeg) +
     (extras.foundText ? `\n${extras.foundText}` : '');

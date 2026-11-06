@@ -2,7 +2,7 @@
 // drawing parts need a real phone; these are the bits that can be silently wrong).
 import assert from 'node:assert/strict';
 import { CONFIG } from './config.js';
-import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, trimToY, yToTrim, ropeHit, ropeTrimAt, ROPE_HIT_HALF_W } from './phone.js';
+import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, ropeHit, ropeSlack, ropeSag, swipeTrim, SECOND_FINGER_SHEET, ROPE_HIT_HALF_W } from './phone.js';
 import { angleOffWind, leewardSign } from './sail.js';
 
 const DEG = Math.PI / 180;
@@ -67,37 +67,43 @@ check('ghost thumb sits opposite the steering finger, on screen, and well away f
   }
 });
 
-// ---- the rope control (1c phone test, option A)
+// ---- the rope control (1c phone test, refined: a small rope, swiped)
 const phoneGeom = ropeGeom(390, 844);
-check('rope: down = sheet in (trim 0 at the bottom), up = ease (full out at the top), and the two maps agree', () => {
-  assert.ok(trimToY(phoneGeom, CONFIG.TRIM_MIN) > trimToY(phoneGeom, CONFIG.TRIM_MAX), 'full in is lower on screen than full out');
-  assert.equal(trimToY(phoneGeom, CONFIG.TRIM_MIN), phoneGeom.y1);
-  assert.equal(trimToY(phoneGeom, CONFIG.TRIM_MAX), phoneGeom.y0);
-  for (const t of [CONFIG.TRIM_MIN, 0.3, 0.9, CONFIG.TRIM_MAX]) assert.ok(Math.abs(yToTrim(phoneGeom, trimToY(phoneGeom, t)) - t) < 1e-9);
-  assert.equal(yToTrim(phoneGeom, 5000), CONFIG.TRIM_MIN, 'dragged past the bottom: clamped to full in');
-  assert.equal(yToTrim(phoneGeom, -5000), CONFIG.TRIM_MAX, 'past the top: clamped to full out');
-  const a = ropeTrimAt(phoneGeom, 500, 0);
-  assert.ok(ropeTrimAt(phoneGeom, 520, 0) < a, 'moving the finger down sheets in');
+check('rope: swipe down = pull in (trim down), swipe up = let out, relative to where the trim is now', () => {
+  assert.ok(swipeTrim(0.8, 40, phoneGeom) < 0.8, 'down sheets in');
+  assert.ok(swipeTrim(0.8, -40, phoneGeom) > 0.8, 'up lets out');
+  assert.equal(swipeTrim(0.8, 0, phoneGeom), 0.8, 'no movement, no change: nothing jumps on touch');
+  const range = CONFIG.TRIM_MAX - CONFIG.TRIM_MIN;
+  assert.ok(Math.abs(swipeTrim(CONFIG.TRIM_MAX, phoneGeom.len, phoneGeom) - CONFIG.TRIM_MIN) < 1e-9, 'one rope length of swipe is the whole range');
+  assert.equal(swipeTrim(0.3, 5000, phoneGeom), CONFIG.TRIM_MIN, 'clamped at fully in');
+  assert.equal(swipeTrim(0.3, -5000, phoneGeom), CONFIG.TRIM_MAX, 'clamped at fully out');
+  assert.ok(Math.abs(swipeTrim(0.5, 10, phoneGeom) - swipeTrim(swipeTrim(0.5, 4, phoneGeom), 6, phoneGeom)) < 1e-9, 'a swipe adds up the same in parts');
+  assert.ok(range > 0);
 });
-check('rope: the handle never jumps when first touched, wherever on the handle or the rope the thumb lands', () => {
-  for (const trim of [0.2, 0.7, 1.2]) {
-    const handleY = trimToY(phoneGeom, trim);
-    for (const touchY of [handleY - 25, handleY, handleY + 25, phoneGeom.y0 + 5]) {
-      const off = handleY - touchY; // what onDown stores
-      assert.ok(Math.abs(ropeTrimAt(phoneGeom, touchY, off) - trim) < 1e-9, `landing at ${touchY} keeps trim ${trim}`);
-    }
-  }
+check('rope: it shows the trim by its shape: taut and straight when sheeted in, sagging when eased', () => {
+  assert.equal(ropeSag(CONFIG.TRIM_MIN, phoneGeom), 0, 'sheeted in: no sag');
+  assert.ok(ropeSag(CONFIG.TRIM_MAX, phoneGeom) > 20, 'eased right out: a deep curve');
+  assert.ok(ropeSag(CONFIG.TRIM_MAX, phoneGeom) < phoneGeom.len / 4, 'but still a rope, not a loop');
+  let last = -1;
+  for (let t = CONFIG.TRIM_MIN; t <= CONFIG.TRIM_MAX + 1e-9; t += 0.1) { const v = ropeSag(t, phoneGeom); assert.ok(v >= last); last = v; }
+  assert.equal(ropeSlack(CONFIG.TRIM_MIN), 0);
+  assert.equal(ropeSlack(CONFIG.TRIM_MAX), 1);
 });
-check('rope: a thumb-sized target at the bottom right, on screen on small and large phones; the left half is not the rope', () => {
+check('rope: small to look at, thumb-sized to touch, on screen on small and large phones; the rest of the screen is not the rope', () => {
   assert.ok(ROPE_HIT_HALF_W * 2 >= 80, 'at least 80 px wide to touch');
   for (const [W, H] of [[390, 844], [360, 640], [430, 932], [320, 568]]) {
     const g = ropeGeom(W, H);
-    assert.ok(g.x + ROPE_HIT_HALF_W <= W + 4 && g.y0 - 34 >= 0 && g.y1 + 34 <= H, `${W}x${H} fits`);
+    assert.ok(g.len <= 190 && g.len >= 140, 'a short rope: little screen space');
+    assert.ok(g.x + ROPE_HIT_HALF_W <= W + 1 && g.y0 - 34 >= 0 && g.y1 + 34 <= H, `${W}x${H} fits`);
     assert.ok(g.x > W * 0.7, 'bottom right');
     assert.equal(ropeHit(g, g.x, (g.y0 + g.y1) / 2), true);
+    assert.equal(ropeHit(g, g.x - 40, g.y1 + 20), true, 'a thumb a little off the thin line still has it');
     assert.equal(ropeHit(g, W / 2, (g.y0 + g.y1) / 2), false, 'steering anywhere else is steering');
     assert.equal(ropeHit(g, g.x, g.y0 - 80), false, 'above the rope is the water');
   }
+});
+check('the second-finger sheet is off for now (only the rope and the keyboard trim)', () => {
+  assert.equal(SECOND_FINGER_SHEET, false);
 });
 
 console.log(`\n${passed} passed`);

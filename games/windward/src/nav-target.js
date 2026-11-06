@@ -23,12 +23,15 @@ export function createNavTarget() {
   };
 }
 
-// "320 m", "1.4 km". Game metres.
+// Distances at sea are in nautical miles, on the same scale as the speed in knots (1 m/s = 1.944 kn, 1 nm = 1852 m), so
+// "0.4 nm at 6 kn" is about four minutes. Game metres in. "< 0.1 nm" when very close.
+export const METRES_PER_NM = 1852;
 export function formatDistance(m) {
   if (!(m >= 0)) return '';
-  if (m < 100) return `${Math.round(m / 5) * 5 || 5} m`;
-  if (m < 1000) return `${Math.round(m / 10) * 10} m`;
-  return `${(m / 1000).toFixed(1)} km`;
+  const nm = m / METRES_PER_NM;
+  if (nm < 0.1) return '< 0.1 nm';
+  if (nm < 10) return `${nm.toFixed(1)} nm`;
+  return `${Math.round(nm)} nm`;
 }
 
 // Where an edge tag goes: from the boat's screen point (bx, by), along the screen direction (dx, dy), to the edge of the

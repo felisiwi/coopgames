@@ -23,12 +23,16 @@ test('arriving clears the target once and reports it', () => {
   assert.equal(n.update(100, 0), null);
 });
 
-test('distances read as the HUD does: metres, then km', () => {
-  assert.equal(formatDistance(3), '5 m');
-  assert.equal(formatDistance(47), '45 m');
-  assert.equal(formatDistance(318), '320 m');
-  assert.equal(formatDistance(1440), '1.4 km');
+test('distances are in nautical miles on the speed scale: "0.4 nm", "< 0.1 nm" when very close', () => {
+  assert.equal(formatDistance(3), '< 0.1 nm');
+  assert.equal(formatDistance(185), '< 0.1 nm');
+  assert.equal(formatDistance(190), '0.1 nm');
+  assert.equal(formatDistance(741), '0.4 nm');
+  assert.equal(formatDistance(2223), '1.2 nm');
+  assert.equal(formatDistance(1852 * 12.4), '12 nm');
   assert.equal(formatDistance(NaN), '');
+  // time and distance stay consistent: 6 kn is 3.09 m/s, so 0.4 nm (741 m) takes four minutes
+  assert.ok(Math.abs(741 / (6 / 1.943844) / 60 - 4) < 0.01);
 });
 
 test('the edge spot lies on the inset border along the direction', () => {

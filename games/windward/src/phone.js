@@ -6,6 +6,8 @@
 //                  towards it (never into the no-go zone). The line to your
 //                  finger is coloured by how fast that heading is, with the
 //                  knots in a pill ABOVE the finger.
+//   the rope       bottom-right: swipe it down to pull in, up to let out (see ropeGeom below). The second-finger sheet below is OFF
+//                  for now (SECOND_FINGER_SHEET); the notes that follow describe it for when it comes back.
 //   second finger  the sheet. CONFIG.PHONE_SHEET picks the take:
 //                  'rope' — your thumb holds the end of the sheet: pull away
 //                           from the boat to haul in, back towards it to let
@@ -86,19 +88,24 @@ export function ghostSpot(bx, by, steerX, steerY, W, H) {
   ];
 }
 
-// ---- the rope control (1c phone test, option A): a static vertical rope bottom-right; the handle's height IS the trim ----
-// Full in (trim 0) at the bottom, full out at the top: drag down = sheet in, drag up = ease.
-export const ROPE_HIT_HALF_W = 42; // px each side of the rope: a thumb-sized target
+// ---- the rope control (1c phone test, refined): a small rope bottom-right, swiped like a real sheet ----
+// Swipe down on it = pull in (sheet in, trim down), swipe up = let out. Relative: the swipe moves the trim from where it is, so
+// nothing jumps on touch. The rope shows the trim by its shape: taut and straight when sheeted in, sagging when eased.
+// The sheet control from the first Control Lab (a second finger anywhere) is off for now; flip this to bring it back.
+export const SECOND_FINGER_SHEET = false;
+export const ROPE_HIT_HALF_W = 42; // px each side of the rope: a thumb-sized target, though the rope is drawn thin
 export function ropeGeom(W, H) {
-  const len = Math.round(Math.min(300, Math.max(190, H * 0.3)));
+  const len = Math.round(Math.min(190, Math.max(140, H * 0.22)));
   const y1 = H - 74; // clear of the speed line at the bottom
-  return { x: W - 46, y0: y1 - len, y1, len };
+  return { x: W - 42, y0: y1 - len, y1, len };
 }
-export const trimToY = (g, trim) => g.y1 - ((trim - CONFIG.TRIM_MIN) / (CONFIG.TRIM_MAX - CONFIG.TRIM_MIN)) * g.len;
-export const yToTrim = (g, y) => Math.min(CONFIG.TRIM_MAX, Math.max(CONFIG.TRIM_MIN, CONFIG.TRIM_MIN + ((g.y1 - y) / g.len) * (CONFIG.TRIM_MAX - CONFIG.TRIM_MIN)));
 export const ropeHit = (g, x, y) => Math.abs(x - g.x) <= ROPE_HIT_HALF_W && y >= g.y0 - 34 && y <= g.y1 + 34;
-// Dragging keeps the finger's gap to the handle from when it landed, so the handle never jumps under the thumb.
-export const ropeTrimAt = (g, touchY, grabOffset) => yToTrim(g, touchY + grabOffset);
+// 0 = sheeted in (taut), 1 = fully eased (slack)
+export const ropeSlack = (trim) => Math.min(1, Math.max(0, (trim - CONFIG.TRIM_MIN) / (CONFIG.TRIM_MAX - CONFIG.TRIM_MIN)));
+// How far the middle of the rope bows sideways, px: nothing when taut, a deep curve when eased.
+export const ropeSag = (trim, g) => ropeSlack(trim) * 0.17 * g.len;
+// A swipe of dy px (down is positive) from trim0: one rope length is the whole range.
+export const swipeTrim = (trim0, dy, g) => Math.min(CONFIG.TRIM_MAX, Math.max(CONFIG.TRIM_MIN, trim0 - (dy * (CONFIG.TRIM_MAX - CONFIG.TRIM_MIN)) / g.len));
 
 // The sail's world angle (heading convention), matching boat.js: the group
 // is rotated by heading and the sail pivot by leewardSign * trim, from aft.
@@ -203,11 +210,11 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     const rg = ropeGeom(W, H);
     if (ropeOn && ropeHit(rg, p.x, p.y) && ![...pointers.values()].some((q) => q.role === 'rope')) {
       p.role = 'rope'; // a finger on the rope is the rope: it never steers, so the other hand steers on its own
-      p.off = trimToY(rg, state.self.trim) - p.y; // the gap to the handle: no jump on first touch
+      p.trim0 = state.self.trim; // a swipe moves the trim from where it is now: nothing jumps on touch
       pointers.set(e.pointerId, p);
       return;
     }
-    if (steering()) p.role = 'sheet';
+    if (steering()) p.role = SECOND_FINGER_SHEET ? 'sheet' : 'ignore'; // the second-finger sheet is off for now
     else if (Math.hypot(p.x - bx, p.y - by) < 38) p.role = 'boat'; // maybe a ping tap
     else p.role = 'steer';
     if (p.role === 'sheet') p.d0 = Math.hypot(p.x - bx, p.y - by); // rope length when the thumb landed
@@ -222,7 +229,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     if (p.role === 'boat' && Math.hypot(p.x - p.x0, p.y - p.y0) > 14) p.role = 'steer';
     if (p.role === 'steer') aimAt(p.x, p.y);
     else if (p.role === 'sheet') sheetMove(p);
-    else if (p.role === 'rope') state.self.trim = ropeTrimAt(ropeGeom(W, H), p.y, p.off);
+    else if (p.role === 'rope') state.self.trim = swipeTrim(p.trim0, p.y - p.y0, ropeGeom(W, H));
     p.px = p.x;
     p.py = p.y;
   }
@@ -441,41 +448,56 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     ctx.fill();
   }
 
-  function drawRopeControl(self, wind, ideal, grabbed) {
+  // The rope: twisted strands, an eye at the top, a whipped end at the bottom. Its shape is the readout: taut when sheeted in,
+  // sagging when eased. When the sail is trimmed the whipping goes green and the rope glows a little (the dot by the boat is
+  // the main readout; this only echoes it).
+  function drawRopeControl(self, ideal, held) {
     const g = ropeGeom(W, H);
     const trimmed = Math.abs(self.trim - ideal) <= TRIM_WINDOW;
-    const hy = trimToY(g, self.trim);
+    const sag = ropeSag(self.trim, g);
+    const p0 = [g.x, g.y0];
+    const p2 = [g.x, g.y1];
+    const c = [g.x - 2 * sag, (g.y0 + g.y1) / 2]; // quadratic control: the middle bows by `sag`
+    const at = (t) => [(1 - t) * (1 - t) * p0[0] + 2 * (1 - t) * t * c[0] + t * t * p2[0], (1 - t) * (1 - t) * p0[1] + 2 * (1 - t) * t * c[1] + t * t * p2[1]];
+    const N = 56;
+    const pts = [];
+    for (let i = 0; i <= N; i++) pts.push(at(i / N));
+    const tang = (i) => { const a = pts[Math.max(0, i - 1)]; const b = pts[Math.min(N, i + 1)]; const dx = b[0] - a[0]; const dy = b[1] - a[1]; const l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+    const path = () => { ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); };
     ctx.save();
-    ctx.fillStyle = PANEL; // the track
-    ctx.beginPath(); ctx.roundRect(g.x - 16, g.y0 - 22, 32, g.len + 44, 16); ctx.fill();
-    // the sweet band: where the sail is trimmed
-    const bandTop = trimToY(g, Math.min(CONFIG.TRIM_MAX, ideal + TRIM_WINDOW * 1.3));
-    const bandBot = trimToY(g, Math.max(CONFIG.TRIM_MIN, ideal - TRIM_WINDOW * 1.3));
-    if (trimmed) { ctx.shadowColor = 'rgba(120,235,160,0.9)'; ctx.shadowBlur = 14; }
-    ctx.strokeStyle = trimmed ? 'rgba(120,235,160,1)' : 'rgba(120,220,150,0.8)';
-    ctx.lineWidth = trimmed ? 16 : 12; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(g.x, bandTop); ctx.lineTo(g.x, bandBot); ctx.stroke();
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(12,32,54,0.45)'; ctx.lineWidth = held ? 8.5 : 7.5; path(); ctx.stroke(); // a soft shadow so it reads on any water
+    if (trimmed) { ctx.shadowColor = 'rgba(120,235,160,0.8)'; ctx.shadowBlur = 8; }
+    ctx.strokeStyle = held ? '#f1e0b4' : '#dcc690'; ctx.lineWidth = 5; path(); ctx.stroke(); // the rope
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,240,200,0.9)'; // the rope itself
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(g.x, g.y0); ctx.lineTo(g.x, g.y1); ctx.stroke();
-    ctx.font = '700 10px ui-rounded, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(234,246,255,0.6)';
-    ctx.fillText('OUT', g.x, g.y0 - 32); ctx.fillText('IN', g.x, g.y1 + 32);
-    // the handle: gold; green with a white ring and a glow when trimmed
-    if (trimmed) { ctx.shadowColor = 'rgba(120,235,160,0.95)'; ctx.shadowBlur = 16; }
-    ctx.fillStyle = trimmed ? '#78dc96' : GOLD;
-    ctx.beginPath(); ctx.arc(g.x, hy, grabbed ? 20 : 18, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = trimmed ? '#ffffff' : 'rgba(12,32,54,0.6)'; ctx.lineWidth = trimmed ? 3 : 2;
-    ctx.stroke();
-    // words beside the handle, never under the thumb: what to do, or "trimmed"
-    const need = trimmed ? 0 : Math.sign(ideal - self.trim);
-    ctx.font = '800 13px ui-rounded, system-ui, sans-serif'; ctx.textAlign = 'right';
-    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(12,32,54,0.75)';
-    const word = trimmed ? 'trimmed' : need > 0 ? 'ease ▲' : 'sheet in ▼';
-    ctx.fillStyle = trimmed ? '#9af0b4' : GOLD;
-    ctx.strokeText(word, g.x - 28, hy); ctx.fillText(word, g.x - 28, hy);
+    for (let i = 1; i < N; i++) { // twisted strands: slanted ticks across the rope, a lighter and a darker strand
+      const [x, y] = pts[i];
+      const [tx, ty] = tang(i);
+      const nx = -ty;
+      const ny = tx;
+      ctx.strokeStyle = i % 2 ? 'rgba(96,66,34,0.8)' : 'rgba(255,244,212,0.55)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(x + nx * 2.4 - tx * 1.7, y + ny * 2.4 - ty * 1.7);
+      ctx.lineTo(x - nx * 2.4 + tx * 1.7, y - ny * 2.4 + ty * 1.7);
+      ctx.stroke();
+    }
+    // the eye at the top (where the sheet is made fast)
+    ctx.strokeStyle = '#c9b27c'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p0[0], p0[1] - 3, 4.5, 0, Math.PI * 2); ctx.stroke();
+    // the whipped end: tight turns of thread, then a frayed tip
+    const [ex, ey] = pts[N];
+    const [tx, ty] = tang(N);
+    const nx = -ty;
+    const ny = tx;
+    ctx.strokeStyle = trimmed ? '#78dc96' : '#6b4a2b';
+    ctx.lineWidth = 2;
+    for (let k = 0; k < 4; k++) {
+      const bx = ex - tx * (2 + k * 2.6);
+      const by = ey - ty * (2 + k * 2.6);
+      ctx.beginPath(); ctx.moveTo(bx + nx * 3.2, by + ny * 3.2); ctx.lineTo(bx - nx * 3.2, by - ny * 3.2); ctx.stroke();
+    }
+    ctx.strokeStyle = '#dcc690'; ctx.lineWidth = 1;
+    for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex + tx * 6 + nx * k * 2.2, ey + ty * 6 + ny * k * 2.2); ctx.stroke(); }
     ctx.restore();
   }
 
@@ -534,7 +556,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     // Ghost thumb: only once a first finger is steering, the sail has been
     // off a moment, and no thumb is on the sheet yet.
     const sheeting = [...pointers.values()].some((p) => p.role === 'sheet');
-    if (steering() && !sheeting && offSince > 1.2 && need !== 0) {
+    if (SECOND_FINGER_SHEET && steering() && !sheeting && offSince > 1.2 && need !== 0) {
       // Opposite the steering finger, through the boat: the rope hand and the
       // steering hand never land on each other (Felix 2026-11-05: a fixed spot
       // sat right under the steering finger when sailing south-east).
@@ -564,7 +586,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
       ctx.restore();
     }
 
-    if (ropeOn) drawRopeControl(self, wind, ideal, [...pointers.values()].some((q) => q.role === 'rope'));
+    if (ropeOn) drawRopeControl(self, ideal, [...pointers.values()].some((q) => q.role === 'rope'));
 
     if (extras.partner) edgeDot(extras.partner.x, extras.partner.z, '#66ccff', 7);
     for (const ping of extras.pings) if (ping.fromFriend) edgeDot(ping.x, ping.z, GOLD, 9);
