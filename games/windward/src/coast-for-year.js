@@ -16,7 +16,7 @@
 // The boats are not built here (ownBoats:false): the busy coast (src/busy-coast.js, driven by data/busy-eras.json) is the one source of traffic.
 import { loadRealCoast, findOpenWater, EDGE_FADE_M } from './coast-world.js';
 import { loadWorldFiles, buildWorldForSpec, shoreSpot } from './world-year-build.js';
-import { planWake } from './wake-plan.js';
+import { planWake, landConnectedTo } from './wake-plan.js';
 import { eraRowFor, worldAtYear } from './world-year.js';
 import { buildNameList } from './names.js';
 import { LIGHTHOUSES } from './lighthouses.js';
@@ -62,7 +62,10 @@ async function buildEraCoast(year, row, years, io, bytes, base, opts) {
   const [sx, sz] = world.toGame(...(opts.at || [files.names.spawn.lon, files.names.spawn.lat]));
   // 1950 starts on a beach on Skaftö (src/wake-plan.js): Svalan thrown up on the shore, the player in open water just off it. ?cat= (a testing start) skips it.
   const avoid = []; e.props.children.forEach((o) => { if (/^(house|boathouse|canning-factory|keeper-house)$/.test(o.name)) avoid.push({ x: o.position.x, z: o.position.z }); });
-  const wake = spec.era === '1950' && !opts.at && e.spawn ? planWake({ world, near: e.spawn, avoid, helpers: { shoreSpot, findOpenWater: (w, x, z, o) => findOpenWater(w, x, z, o) }, seed: opts.seed ?? 1 }) : null;
+  // The wreck lies on Skaftö's own shore (the ground joined to Grundsund village), near a place a boatbuilder could have a yard: Grundsund or Fiskebäckskil. Never a skerry.
+  const yardVillages = ['village:Grundsund', 'village:Fiskebäckskil'].map((id) => names.find((n) => n.id === id)).filter(Boolean).map((n) => ({ x: n.x, z: n.z }));
+  const onMainland = yardVillages.length ? landConnectedTo({ heightAt: world.heightAt, from: yardVillages[0] }) : null;
+  const wake = spec.era === '1950' && !opts.at && e.spawn ? planWake({ world, nears: yardVillages.length ? yardVillages : [e.spawn], onMainland, avoid, helpers: { shoreSpot, findOpenWater: (w, x, z, o) => findOpenWater(w, x, z, o) }, seed: opts.seed ?? 1 }) : null;
   const spawn = wake ? wake.spawn : opts.at ? findOpenWater(world, sx, sz) : e.spawn;
   const buildMs = now() - T0;
   const hard = e.shoalList.filter((s) => s.look.blocks).length; // the same rule as the shoal index (src/sea-truth.js)

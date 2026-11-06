@@ -11,7 +11,7 @@ import { eraStorage } from './era-storage.js';
 globalThis.fetch = async (u) => { const b = readFileSync(fileURLToPath(u)); return { text: async () => b.toString('utf8'), json: async () => JSON.parse(b.toString('utf8')), arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) }; };
 const { loadCoastForYear } = await import('./coast-for-year.js');
 const { createWakeScene, WAKE_SCENE } = await import('./wake-scene.js');
-const { WAKE } = await import('./wake-plan.js');
+const { WAKE, landConnectedTo } = await import('./wake-plan.js');
 
 let passed = 0;
 async function check(name, fn) { await fn(); passed += 1; console.log(`ok - ${name}`); }
@@ -39,7 +39,7 @@ await check('the cards: Britta replaces the old storm card; no grandma, no final
   assert.equal(WAKE_CARDS.length, 2);
   assert.ok(WAKE_CARDS[0].lines.some((l) => /Svalan/.test(l)) && WAKE_CARDS[1].lines.some((l) => /eka/i.test(l)), 'Svalan on the beach; the loan of the eka');
   assert.ok(WAKE_CARDS[1].title.toLowerCase().includes('boatbuilder'), 'young granddad is the boatbuilder’s son (design)');
-  assert.deepEqual(STORY_1950, { start: START_CARD_1950, wake: WAKE_CARDS });
+  assert.equal(STORY_1950.start, START_CARD_1950); assert.equal(STORY_1950.wake, WAKE_CARDS);
   const text = allText.join(' \n ');
   assert.ok(!/grandma/i.test(text), 'Britta is not grandma yet');
   assert.ok(!/After the storm/.test(text), 'the old storm card is gone from 1950');
@@ -90,8 +90,21 @@ await check('you wake on a real beach with open water off it, placed so Svalan i
     const dx = w.spawn.x - w.beach.x, dz = w.spawn.z - w.beach.z, L = Math.hypot(dx, dz);
     let blocked = 0; for (let d = 12; d < L; d += 4) if (h(w.beach.x + (dx / L) * d, w.beach.z + (dz / L) * d) > 0.3) blocked++;
     assert.ok(blocked <= 2, `seed ${seed}: land in the way (${blocked} samples)`);
+    // on Skaftö's own shore (joined to Grundsund's ground), within reach of Grundsund or Fiskebäckskil: never a skerry
+    const vill = ['village:Grundsund', 'village:Fiskebäckskil'].map((id) => c.names.find((n) => n.id === id));
+    const main = landConnectedTo({ heightAt: h, from: vill[0] });
+    assert.ok(main(w.beach.x, w.beach.z), `seed ${seed}: the wreck is on Skaftö's mainland shore`);
+    assert.ok(vill.some((v) => Math.hypot(v.x - w.beach.x, v.z - w.beach.z) < 400), `seed ${seed}: near a village where a boatbuilder could work`);
     for (const who of ['boatbuilder', 'britta']) assert.ok(Math.hypot(w.figures[who].x - w.beach.x, w.figures[who].z - w.beach.z) < 9, `${who} stands by Svalan`);
   }
+});
+
+await check('the mainland test is meaningful: Fiskebäckskil is on it, Måseskär\'s rock and a far island are not', () => {
+  const c = first, g = c.names.find((n) => n.id === 'village:Grundsund'), f = c.names.find((n) => n.id === 'village:Fiskebäckskil');
+  const main = landConnectedTo({ heightAt: c.heightAt, from: g });
+  assert.equal(main(f.x, f.z), true, 'Fiskebäckskil is on Skaftö');
+  assert.equal(main(2819, 9517), false, 'Måseskär is not');
+  assert.equal(landConnectedTo({ heightAt: () => -5, from: g })(g.x, g.z), false, 'all water: nothing is mainland');
 });
 
 await check('the beach is the same for both players (same seed, same place) and Today has none', async () => {
@@ -117,6 +130,9 @@ await check('the wake scene: Svalan wrecked (mast gone), a cradle, the boatbuild
   assert.equal(sc.hauled, true); assert.ok(Math.abs(sc.svalan.group.rotation.z) < 1e-6, 'upright'); assert.ok(Math.abs(sc.cradle.scale.x - 1) < 1e-6, 'on her cradle');
   const settled = createWakeScene({ plan: first.wake, heightAt: first.heightAt }); settled.settle();
   assert.equal(settled.hauled, true); assert.ok(Math.abs(settled.svalan.group.rotation.z) < 1e-6, 'a reload after the intro shows her already hauled');
+  assert.equal(sc.relaunched, false); sc.relaunch();
+  assert.equal(sc.relaunched, true); assert.equal(sc.svalan.group.visible, false, 'relaunched: Svalan has left the cradle (she is the boat you sail)');
+  assert.ok(sc.cradle.visible !== false && sc.boatbuilder.visible && sc.britta.visible, 'the empty cradle and the two people stay');
   let tris = 0; sc.group.traverse((o) => { if (o.isMesh) tris += o.geometry.index ? o.geometry.index.count / 3 : o.geometry.attributes.position.count / 3; });
   assert.ok(tris < 12000, `the beach scene is light: ${Math.round(tris)} triangles`);
 });

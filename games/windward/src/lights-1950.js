@@ -32,6 +32,16 @@ export const FYRKURAR_1950 = {
   },
 };
 
+// Kråksundsgap Södra as it stood in 1950: the small octagonal iron AGA lantern of 1941 (the 13 m white tower came in 1954: docs/PEOPLE-1950.md section 5). Position: the same point
+// the game already uses for the modern tower (src/lighthouses.js, Bråtö's NW point). Character: the 1941 dated entry "Bx(2) WRG 7 s" read as two flashes per 7 s; 1950 itself is not on
+// record, so it is flagged. The lantern is ~6 m focal height. In the story it is what you see first; the tall tower appears only in the glimpse (game.js).
+export const KRAKSUNDSGAP_1950 = {
+  name: 'Kråksundsgap Södra', built: 1941, station: 1911, realHeight: 6, area: 'Orust', lat: 58.1005563, lon: 11.4404817, model: 'fyrkur', characterUncertain: true, positionUncertain: false,
+  positionSource: 'src/lighthouses.js (the modern tower\'s position; Bråtö, NW point)',
+  description: 'Small octagonal iron lantern with an AGA light (exchanged 1 Nov 1941). The 13 m white tower replaced it in 1954.',
+  light: { pattern: 'two flashes every 7 s (Bx(2) WRG 7 s)', colour: WRG, kind: 'flash', count: 2, period: 7 },
+};
+
 // 1950 overrides for the lights that have a tower model: the character and the state then. By name.
 export const LIGHT_1950 = {
   'Måseskär': { light: { pattern: 'three white flashes every 30 s (Bx(3) W 30 s)', colour: 'white', kind: 'flash', count: 3, period: 30 }, note: 'Lit and manned in 1950: three keepers. White, NOT red (the fixed red light was 1865-1887). Electric lamp from 1950.', characterUncertain: true },
@@ -58,5 +68,6 @@ export function lightEntriesFor(spec, LIGHTHOUSES) {
       notDrawn.push({ id: l.id, name: l.name, why: l.lat == null ? 'stood in 1950 but the data has no position for it (never guessed)' : 'no model' });
     }
   }
+  if (spec.era === '1950') entries.push({ ...KRAKSUNDSGAP_1950, id: 'kraksundsgap_sodra', lit: true, manned: 'unmanned', keeperHouse: false, lightNote: 'Octagonal iron fyrkur, AGA light. Exchanged 1941; the white concrete tower came in 1954.', uncertain: true });
   return { entries, notDrawn };
 }

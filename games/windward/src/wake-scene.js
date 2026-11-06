@@ -57,6 +57,7 @@ export function createWakeScene({ plan, heightAt }) {
 
   let haulT = null;              // null: lying on the beach; 0..1: hauling; stays 1 after
   let hauled = false;
+  let relaunched = false;
   const pose = (u) => { // u 0 = thrown up on her side, 1 = upright on the cradle
     const k = ease(u);
     svalan.group.rotation.set(0.07 * (1 - k), along, WAKE_SCENE.rollRad * (1 - k));
@@ -71,6 +72,9 @@ export function createWakeScene({ plan, heightAt }) {
     get hauling() { return haulT !== null && !hauled; },
     haul() { if (haulT === null) haulT = 0; }, // "he takes her for repair": start the animation (once)
     settle() { haulT = 1; hauled = true; pose(1); }, // already hauled (a reload after the intro): no animation
+    // Svalan is relaunched (the reward): she is gone from the cradle (she is the boat you sail now); the empty cradle and the two people stay.
+    relaunch() { svalan.group.visible = false; relaunched = true; },
+    get relaunched() { return relaunched; },
     // per frame: the haul-up, and a little life in the two people (they shift their weight)
     update(dt, t) {
       if (haulT !== null && !hauled) {

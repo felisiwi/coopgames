@@ -154,14 +154,14 @@ await check('1950 villages: houses on land, sizes follow the data (people / 25, 
   assert.ok(e1950.report.cottages <= eToday.report.cottages + 60);
 });
 
-await check('1950 lights: five towers and two fyrkurar; Maseskar lit with a keeper and a red dwelling; Islandsberg and Stangehuvud dark; automatic ones lit without a keeper', async () => {
+await check('1950 lights: five towers and three fyrkurar; Maseskar lit with a keeper and a red dwelling; Islandsberg and Stangehuvud dark; automatic ones lit without a keeper', async () => {
   const lit = (name) => s1950.lighthouses.find((l) => l.name === name);
   // 5 hand-drawn towers (Maseskar, Islandsberg, Hattan, Gaven, Stangehuvud) + the generic fyrkur for the two small lights whose positions are sourced (Stangholmen, Fredagsholmen);
   // the other four fyrkurar of the data (Grotoe, Gulskaren, Oxskar, Hangdyn) have no position in it: reported, not drawn
-  assert.equal(e1950.report.lights, 7, '5 towers + 2 fyrkurar');
-  assert.equal(e1950.report.lightsLit, 5); assert.equal(e1950.report.lightsDark, 2);
-  assert.deepEqual(e1950.lights.map((l) => l.name).sort(), ['Fredagsholmen', 'Gäven', 'Hättan', 'Islandsberg', 'Måseskär', 'Stångehuvud', 'Stångholmen'].sort());
-  assert.equal(e1950.lights.filter((l) => l.entry.model === 'fyrkur').length, 2);
+  assert.equal(e1950.report.lights, 8, '5 towers + 3 fyrkurar (Stångholmen, Fredagsholmen and, from stage 1e, Kråksundsgap Södra\'s 1941 iron lantern)');
+  assert.equal(e1950.report.lightsLit, 6); assert.equal(e1950.report.lightsDark, 2);
+  assert.deepEqual(e1950.lights.map((l) => l.name).sort(), ['Fredagsholmen', 'Gäven', 'Hättan', 'Islandsberg', 'Kråksundsgap Södra', 'Måseskär', 'Stångehuvud', 'Stångholmen'].sort());
+  assert.equal(e1950.lights.filter((l) => l.entry.model === 'fyrkur').length, 3);
   for (const l of e1950.lights) { assert.ok(l.group && l.fx && typeof l.fx.setLit === 'function', `${l.name} has its group and lantern effect`); assert.equal(l.fx.lit, l.info.lit, `${l.name}: the lantern follows the era's state`); assert.ok(e1950.heightAt(l.x, l.z) >= 0.3, `${l.name} stands on land`); }
   assert.ok(e1950.lightsNotDrawn.length === 4 && e1950.lightsNotDrawn.every((n) => /no position/.test(n.why)), 'the four lights without a position are reported, never guessed');
   assert.ok(e1950.report.notes.some((n) => /Grötö.*no position/.test(n)), 'and the report says so');

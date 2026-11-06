@@ -68,9 +68,12 @@ await check('1950 has every field the game reads, and the same window as Today (
   assert.ok(Number.isFinite(c1950.report.terrain.fullTriangles) && Number.isFinite(c1950.report.bytesDownloadedByLoader));
 });
 
-await check('1950 lights: the seven that stood and can be placed, each with the lantern glow the game reuses; the list replaces today\'s', () => {
-  assert.equal(c1950.lights.length, 7);
-  assert.equal(c1950.lightList.length, 7);
+await check('1950 lights: the eight that stood and can be placed, each with the lantern glow the game reuses; the list replaces today\'s', () => {
+  assert.equal(c1950.lights.length, 8, 'seven from the data plus Kråksundsgap Södra\'s small iron lantern');
+  assert.equal(c1950.lightList.length, 8);
+  const kr = c1950.lightList.find((l) => l.name === 'Kråksundsgap Södra');
+  assert.ok(kr && kr.lit && kr.model === 'fyrkur' && kr.light.count === 2 && kr.light.period === 7, 'the 1941 iron lantern, two flashes every 7 s');
+  assert.ok(c1950.lights.find((l) => l.name === 'Kråksundsgap Södra').group, 'it is placed in the 1950 world');
   assert.ok(c1950.lights.every((l) => l.group && l.fx && typeof l.fx.setLit === 'function' && Number.isFinite(l.x)), 'group + lantern fx on each');
   const lightNames = c1950.names.filter((n) => n.kind === 'light').map((n) => n.name).sort();
   assert.deepEqual(lightNames, c1950.lightList.map((l) => l.name).sort(), 'the name list carries exactly the 1950 lights (id light:<name>)');

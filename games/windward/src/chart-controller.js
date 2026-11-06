@@ -69,7 +69,7 @@ export function chartSea(sea, toGame) {
   };
 }
 
-export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onLog = () => {}, onRelightDone = () => {}, granddadMarks = () => [], parent = document.body, assetsBase, storage = deviceStorage() }) {
+export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onLog = () => {}, onRelightDone = () => {}, onRelightTick = () => {}, granddadMarks = () => [], parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const eraLights = coast.lightList || LIGHTHOUSES; // the era's lights (1950: its own seven), else the game's list
   const lights = chartLights(coast.names, toGame, eraLights);
@@ -253,6 +253,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
         const r = state.relight;
         r.t += dt;
         const f = relightFrame(r.t);
+        onRelightTick(r.entry, r.t, f); // 1950: the steps of the relight, as short lines
         if (f.ignited && !r.lit) {
           r.lit = true;
           const res = onRelit(r.entry); // a toast text, or { message, glyph } (the flash pattern the card shows)

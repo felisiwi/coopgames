@@ -41,7 +41,7 @@ export const REPORT_CARD = {
 };
 
 // opts: { parent, onSetSail(), onSkip(), onReport(), onGrandma(), onStrange(), copy }. copy (optional, src/story-1950.js STORY_1950): { start: the start card's text,
-// wake: [cards shown before it] }; without it the Today game's START_CARD is used. Returns { showStart({ progress }), showWake({ onDone }), showReport(), showGrandma(),
+// wake: [cards shown before it] }; without it the Today game's START_CARD is used. Returns { showStart({ progress }), showWake({ onDone }), showReport(nudge?), showCards(list, { onDone }), showGrandma(),
 // showStrange(), showLog(rows), hide(), get visible }.
 export function createTaskUi({ parent = document.body, onSetSail = () => {}, onSkip = () => {}, onReport = () => {}, onGrandma = () => {}, onStrange = () => {}, copy = {} } = {}) {
   const startCard = copy.start || START_CARD;
@@ -69,7 +69,8 @@ export function createTaskUi({ parent = document.body, onSetSail = () => {}, onS
   };
   let mode = 'end';
   let wake = null; // the waking cards in progress: { next(), skip() }
-  btn.addEventListener('click', () => { hide(); setDusk(false); ({ start: onSetSail, report: onReport, grandma: onGrandma, strange: onStrange, wake: () => wake && wake.next() }[mode] || (() => {}))(); });
+  let cards = null; // a run of cards in progress (showCards): { next() }
+  btn.addEventListener('click', () => { hide(); setDusk(false); ({ start: onSetSail, report: onReport, grandma: onGrandma, strange: onStrange, wake: () => wake && wake.next(), cards: () => cards && cards.next() }[mode] || (() => {}))(); });
   skipBtn.addEventListener('click', () => { hide(); if (mode === 'wake' && wake) { wake.skip(); return; } onSkip(); });
   return {
     get visible() { return visible; },
@@ -108,14 +109,33 @@ export function createTaskUi({ parent = document.body, onSetSail = () => {}, onS
       wake = { next: () => { i += 1; if (i < cards.length) render(); else { wake = null; onDone(); } }, skip: () => { wake = null; onDone(); } };
       render();
     },
-    showReport() {
+    // A run of cards (Batch 3: the depot, the keeper, Britta). cards: [{ title, lines, button, quote?, dusk? }]. No Skip. onDone() after the last button.
+    showCards(list, { onDone = () => {} } = {}) {
+      if (!list || !list.length) { onDone(); return; }
+      let i = 0;
+      const render = () => {
+        const c = list[i];
+        mode = 'cards';
+        setDusk(!!c.dusk); title.style.cssText = TITLE_CSS;
+        title.textContent = c.title || '';
+        body.replaceChildren(...c.lines.map((t) => el('div', c.quote ? `margin:6px 4px 10px;font:italic 22px/1.3 Georgia,"Times New Roman",serif;color:#fbf0dc` : 'margin:6px 0', t)));
+        progress.style.display = 'none';
+        skipBtn.style.display = 'none';
+        btn.textContent = c.button || 'Next';
+        visible = true;
+        veil.style.display = 'flex';
+      };
+      cards = { next: () => { i += 1; if (i < list.length) render(); else { cards = null; onDone(); } } };
+      render();
+    },
+    showReport(nudge = REPORT_CARD) {
       mode = 'report';
       setDusk(false); title.style.cssText = TITLE_CSS;
       progress.style.display = 'none';
       skipBtn.style.display = 'none';
-      title.textContent = REPORT_CARD.title;
-      body.replaceChildren(...REPORT_CARD.lines.map((t) => el('div', 'margin:4px 0', t)));
-      btn.textContent = REPORT_CARD.button;
+      title.textContent = nudge.title;
+      body.replaceChildren(...nudge.lines.map((t) => el('div', 'margin:4px 0', t)));
+      btn.textContent = nudge.button;
       visible = true;
       veil.style.display = 'flex';
     },
