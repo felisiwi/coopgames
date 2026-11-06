@@ -1,0 +1,28 @@
+<!doctype html>
+<!-- TEST ONLY (coop check, 2026-11-06). Starts the real games/windward/game.js with a `net` object that follows the hub's
+     contract (send / onMessage / peerId / isHost) but rides a BroadcastChannel between two tabs instead of PeerJS.
+     ?role=host|guest&seed=N&room=x, plus any game params (?debug=1 ...). Not shipped, not used by the game. -->
+<html><head><meta charset="utf-8"><title>coop bridge (test)</title>
+<style>html,body{margin:0;height:100%;background:#0a1a2a}#game{display:block;width:100%;height:100%}</style></head>
+<body><canvas id="game"></canvas>
+<script type="module">
+  import start from '../../game.js';
+  const q = new URLSearchParams(location.search);
+  const role = q.get('role') === 'guest' ? 'guest' : 'host';
+  const ch = new BroadcastChannel('coop-' + (q.get('room') || 'x'));
+  const tag = Math.random().toString(36).slice(2);
+  const listeners = [];
+  const sent = []; window.__sent = sent; window.__recv = [];
+  ch.onmessage = (e) => { if (e.data.from === tag) return; window.__recv.push(e.data.msg); listeners.forEach((fn) => fn(e.data.msg)); };
+  // __out is injected by the test runner (Playwright exposeFunction) to relay between two SEPARATE browser contexts (separate localStorage,
+  // like two real players). Without it the two tabs talk over BroadcastChannel.
+  window.__in = (msg) => { window.__recv.push(msg); listeners.forEach((fn) => fn(msg)); };
+  const net = {
+    send(msg) { sent.push(msg); if (window.__out) window.__out(msg); else ch.postMessage({ from: tag, msg }); },
+    onMessage(fn) { listeners.push(fn); },
+    peerId: 'bridge-' + role, isHost: role === 'host',
+  };
+  const canvas = document.getElementById('game');
+  canvas.width = innerWidth; canvas.height = innerHeight;
+  start({ canvas, net, seed: Number(q.get('seed') || 424242), role, players: { min: 2, max: 2 } });
+</script></body></html>
