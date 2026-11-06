@@ -68,7 +68,7 @@ background ~2.5 s after the game starts, 1.1 MB).
 ## Phone checklist
 1. Load the preview with `?debug=1`. Sail from Grundsund: the round minimap top-left shows the sound, the harbour mouths (squares/rings), buoys, the way out in deeper blue.
 2. Zoom out with two fingers (both down at once). Past the boat view it unrolls into the chart; keep going to the whole coast; zoom back in to land on the boat.
-3. Try +/- and the Chart / Boat button. Check that steering (one finger) and the sheet (second finger, landing later) still work as before.
+3. Try +/- and the Chart / Boat button. Check that steering (one finger) still works, and trim with the rope (bottom-right, below).
 4. Gear: Round/Square/Off, North up / With the boat. Sail a bit with "With the boat".
 5. On the chart: red outline = granddad's sheet, the rest uncharted (tap one: a note). Fog lifts where you sailed; reload, the fog is still lifted.
 6. Tap a gold lighthouse on the chart or the minimap: the camera glides there, the boat stays; "Back to the boat". "Jump here (debug)" moves the boat.
@@ -82,9 +82,11 @@ background ~2.5 s after the game starts, 1.1 MB).
 - A lighthouse visit now puts its description/name label up in the world.
 Phone checklist additions: tap a discovered place on the chart -> Navigate here -> sail, watch the tag and distance, cross to cancel; sail past an island: a small faint name; trim the sail: the glow and "trimmed".
 
-## The rope (1c revision: three variants to compare, `?rope=a|b|c`, default a)
-Felix found the flat striped bar too yellow and detailed, and floating. All three now: soft warm-grey hemp (not yellow), flat shapes, anchored to something, and small yellow chevrons along the rope pointing the way to trim (down = sheet in, up = ease), which flow along it and fade out when trimmed. The chevrons are the only yellow; the dot and arc by the boat remain the main readout. Swipe behaviour, the 84 px touch zone, no-jump and two-handed use are unchanged; the strands (tone on tone) scroll as you swipe.
-- a: the rope runs down into a small navy block with a sheave. - b: a thin rope in a slim dark rounded track. - c: only the chevrons and a faint line with a foot dot at rest; the rope fades in while you swipe and out about half a second after.
-Code: `parseRopeVariant`, `ropeNeed`, `ropeGuideStep`, `ropeShowStep`, `drawRopeControl` in `src/phone.js`. The second-finger sheet stays off (`SECOND_FINGER_SHEET`).
+## The rope (final, Felix picked the block version after comparing three)
+Bottom-right on phones, for one-handed sailing. Soft warm-grey hemp (not yellow) running down into a small flat navy block with a sheave ring, so it reads as attached. Few details: faint tone-on-tone strand lines that run along the rope while you swipe (down when pulling in, up when letting out, at the swipe's speed, easing to a stop after you let go: `ropeScrollStep`, `ROPE_COAST_RATE`).
+- Swipe down on the rope to pull in, up to let out, relative to the current trim (one rope length = the whole range), so nothing jumps on touch. The touch zone is 84 px wide although the rope is thin; a finger on it never steers, so the other hand steers on its own.
+- Four small yellow chevrons flow along the rope the way to trim (down = sheet in, up = ease) and fade out when the sail is trimmed. They are the only yellow. The rope shows no trimmed cue of its own: the dot and arc by the boat (and the desktop trim bar) are the readout.
+- The second-finger sheet and its ghost hint are off (`SECOND_FINGER_SHEET` in `src/phone.js`); a second finger away from the rope is ignored. Keyboard trim unchanged; the rope is phone-only, hidden while the chart is up, and names keep clear of it.
+- Code: `ropeGeom`, `swipeTrim`, `ropeNeed`, `ropeGuideStep`, `ropeScrollStep`, `drawRopeControl` in `src/phone.js` (tests in `src/phone.test.js`).
 Units: knots for wind and boat speed (no m/s), nautical miles for distances ("0.4 nm", "< 0.1 nm"), 1 nm = 1852 m on the same scale as the knots, so 0.4 nm at 6 kn is four minutes.
-Phone checklist: touch the rope's edge without swiping, nothing changes; swipe down/up, the stripes run down/up with your finger and coast to a stop (headless runs at ~5 fps, so the run speed is only judged on a phone); open the three links and pick one; steer with one thumb and swipe with the other; a second finger on the water does nothing; Navigate here, the tag reads in nm.
+Rope checklist: touch the rope's edge without swiping, nothing changes; swipe down/up, the stripes run with your finger and coast to a stop; chevrons point the way to trim and fade when trimmed; steer with one thumb and swipe with the other; a second finger on the water does nothing; Navigate here, the tag reads in nm. (Headless runs at ~5 fps, so the stripe speed and easing are only judged on a phone.)

@@ -110,19 +110,10 @@ export function ropeScrollStep(offset, vel, dt, held) {
   const o = (((offset + v * dt) % ROPE_STRIPE_PERIOD) + ROPE_STRIPE_PERIOD) % ROPE_STRIPE_PERIOD;
   return { offset: o, vel: Math.abs(v) < 2 ? 0 : v };
 }
-// Three looks for the rope to compare on a phone: ?rope=a|b|c (a is the default). Only the drawing differs.
-//   a: the rope runs into a small block at its base       b: a thin rope in a slim dark track       c: a faint line; the rope shows while you swipe
-export const ROPE_VARIANTS = ['a', 'b', 'c'];
-export const parseRopeVariant = (search = '') => {
-  const v = new URLSearchParams(search).get('rope');
-  return ROPE_VARIANTS.includes(v) ? v : 'a';
-};
 // Which way to trim: +1 = let out (ease, up), -1 = pull in (sheet in, down), 0 = trimmed. Same window the arc by the boat uses.
 export const ropeNeed = (trim, ideal, window = TRIM_WINDOW) => (Math.abs(trim - ideal) <= window ? 0 : Math.sign(ideal - trim));
 // The guidance chevrons fade out when trimmed and back in when not. guide in [0, 1].
 export const ropeGuideStep = (guide, trimmed, dt) => Math.min(1, Math.max(0, guide + (trimmed ? -dt / 0.35 : dt / 0.25)));
-// Variant c: the rope shows while you swipe (and a moment after), then fades. show in [0, 1].
-export const ropeShowStep = (show, active, dt) => Math.min(1, Math.max(0, show + (active ? dt / 0.12 : -dt / 0.5)));
 
 // A swipe of dy px (down is positive) from trim0: one rope length is the whole range.
 export const swipeTrim = (trim0, dy, g) => Math.min(CONFIG.TRIM_MAX, Math.max(CONFIG.TRIM_MIN, trim0 - (dy * (CONFIG.TRIM_MAX - CONFIG.TRIM_MIN)) / g.len));
@@ -168,10 +159,8 @@ export function createPhoneControls({ canvas, camera, onPing }) {
   let ropeOffset = 0; // stripe scroll, px
   let ropeVel = 0; // px/s, positive = down
   let ropeMoveAt = 0; // when the rope finger last moved
-  const ropeVariant = parseRopeVariant(window.location.search);
   let ropeGuide = 1; // the yellow chevrons: 1 = shown (needs trimming), 0 = gone (trimmed)
   let ropeNeedLast = -1; // the direction they point, kept while they fade out
-  let ropeShow = 0; // variant c: how much of the rope is showing
 
   // --- projection helpers ---
   const v3 = new THREE.Vector3();
@@ -286,7 +275,6 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     const ropeHeld = [...pointers.values()].some((q) => q.role === 'rope');
     if (ropeHeld && performance.now() - ropeMoveAt > 120) ropeVel *= Math.exp(-14 * dt); // a thumb resting on the rope: the run stops
     ({ offset: ropeOffset, vel: ropeVel } = ropeScrollStep(ropeOffset, ropeVel, dt, ropeHeld));
-    ropeShow = ropeShowStep(ropeShow, ropeHeld || Math.abs(ropeVel) > 12, dt);
     // A held finger keeps pointing at the same spot on the water as the boat moves.
     for (const p of pointers.values()) if (p.role === 'steer') aimAt(p.x, p.y);
     if (aimHeading !== null) self.heading = turnTowards(self.heading, avoidNoGo(aimHeading, wind.dir), dt);
@@ -490,7 +478,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     ctx.fill();
   }
 
-  // The rope (three looks, see ROPE_VARIANTS). Soft hemp on a flat navy anchor, tone-on-tone strand lines that run as you swipe, and small
+  // The rope: soft hemp running down into a small flat navy block, tone-on-tone strand lines that run as you swipe, and small
   // yellow chevrons pointing the way to trim; they fade out when trimmed. The chevrons are the only yellow; the dot and arc by the boat
   // are still the main trim readout.
   const HEMP = '#b9ad98';
@@ -531,20 +519,10 @@ export function createPhoneControls({ canvas, camera, onPing }) {
   function drawRopeControl(nowS) {
     const g = ropeGeom(W, H);
     ctx.save();
-    if (ropeVariant === 'a') {
-      ropeBar(g.x, 8, g.y0, g.y1 - 6); // the rope runs down into a small block
-      ctx.fillStyle = ANCHOR; ctx.beginPath(); ctx.roundRect(g.x - 11, g.y1 - 12, 22, 20, 6); ctx.fill();
-      ctx.strokeStyle = HEMP; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(g.x, g.y1 - 2, 4, 0, Math.PI * 2); ctx.stroke(); // the sheave the rope runs through
-      ctx.fillStyle = HEMP; ctx.beginPath(); ctx.arc(g.x, g.y0 + 1, 2.2, 0, Math.PI * 2); ctx.fill();
-    } else if (ropeVariant === 'b') {
-      ctx.fillStyle = ANCHOR; ctx.beginPath(); ctx.roundRect(g.x - 11, g.y0 - 6, 22, g.len + 12, 11); ctx.fill(); // a slim dark track
-      ropeBar(g.x, 6, g.y0 + 2, g.y1 - 2);
-    } else {
-      ctx.strokeStyle = 'rgba(185,173,152,0.38)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; // a faint line, and a small anchor at its foot
-      ctx.beginPath(); ctx.moveTo(g.x, g.y0); ctx.lineTo(g.x, g.y1); ctx.stroke();
-      ctx.fillStyle = 'rgba(185,173,152,0.6)'; ctx.beginPath(); ctx.arc(g.x, g.y1 + 3, 3.4, 0, Math.PI * 2); ctx.fill();
-      if (ropeShow > 0.01) ropeBar(g.x, 8, g.y0, g.y1, ropeShow);
-    }
+    ropeBar(g.x, 8, g.y0, g.y1 - 6); // the rope runs down into a small block
+    ctx.fillStyle = ANCHOR; ctx.beginPath(); ctx.roundRect(g.x - 11, g.y1 - 12, 22, 20, 6); ctx.fill();
+    ctx.strokeStyle = HEMP; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(g.x, g.y1 - 2, 4, 0, Math.PI * 2); ctx.stroke(); // the sheave the rope runs through
+    ctx.fillStyle = HEMP; ctx.beginPath(); ctx.arc(g.x, g.y0 + 1, 2.2, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
     ropeChevrons(g, nowS);
   }
@@ -653,7 +631,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     draw,
     // The rope's box (for names to keep clear of) and whether it is shown (hidden while the chart covers the view).
     ropeRect() { const g = ropeGeom(W, H); return ropeOn ? { x: g.x - ROPE_HIT_HALF_W, y: g.y0 - 34, w: ROPE_HIT_HALF_W * 2, h: g.len + 68 } : null; },
-    ropeScroll: () => ({ offset: ropeOffset, vel: ropeVel, guide: ropeGuide, show: ropeShow, variant: ropeVariant }), // headless checks
+    ropeScroll: () => ({ offset: ropeOffset, vel: ropeVel, guide: ropeGuide }), // headless checks
     setRopeVisible(on) { if (on === ropeOn) return; ropeOn = on; if (!on) for (const [id, q] of pointers) if (q.role === 'rope') pointers.delete(id); },
     // Drop every finger the controls are tracking (a pinch-to-zoom began: those two fingers are zooming, not steering).
     interrupt() { pointers.clear(); aimHeading = null; },
