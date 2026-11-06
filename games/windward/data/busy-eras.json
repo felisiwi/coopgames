@@ -1,0 +1,556 @@
+{
+  "about": "Era profiles for the busy coast (src/busy-coast.js): which boats sail, how many, which ferry, how full the guest harbours are and how many cottages are summer houses, by year. The geometry (routes, ferry crossing, berths) is era-neutral and lives in data/busy-world.json. A profile names assets from a KIT (src/busy-kits.js); until a 1950s kit exists every profile uses the modern 'today' kit as a PLACEHOLDER (placeholderKit: true), so the 1950 and 1980 profiles look modern. Every number below is a design placeholder, not a historical count. TODO(felix): confirm each era's numbers when its kit is made.",
+  "generated": "2026-11-06",
+  "profiles": [
+    {
+      "id": "summer-guests-1950",
+      "label": "Summer guests, 1950-1979",
+      "from": 1950,
+      "to": 1979,
+      "kit": "today",
+      "placeholderKit": true,
+      "traffic": {
+        "routes": [
+          "grundsund-gullholmen",
+          "lysekil-grundsund",
+          "grundsund-fiskebackskil",
+          "lysekil-gullholmen",
+          "cruise-gaven",
+          "cruise-bonden",
+          "cruise-hattan",
+          "fish-2",
+          "fish-3"
+        ],
+        "maxBoats": 14,
+        "classes": {
+          "sail": {
+            "assets": [
+              {
+                "id": "sailboat",
+                "weight": 1,
+                "stripes": [
+                  "navy",
+                  "sand"
+                ],
+                "length": [
+                  7.4,
+                  8.8
+                ]
+              }
+            ],
+            "speed": [
+              2.8,
+              3.5
+            ],
+            "dwellS": [
+              4,
+              7
+            ]
+          },
+          "motor": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "sand",
+                  "sage"
+                ],
+                "length": [
+                  5.2,
+                  6.0
+                ]
+              }
+            ],
+            "speed": [
+              4.5,
+              5.5
+            ],
+            "dwellS": [
+              3,
+              5
+            ]
+          },
+          "fish": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "sand",
+                  "sage"
+                ],
+                "length": [
+                  5.0,
+                  5.8
+                ]
+              }
+            ],
+            "speed": [
+              1.0,
+              1.4
+            ],
+            "dwellS": [
+              0,
+              0
+            ]
+          }
+        },
+        "perRoute": {
+          "harbour": 2,
+          "cruise": 1,
+          "fish": 1
+        },
+        "ambient": {
+          "count": 4,
+          "mix": {
+            "sail": 0.6,
+            "motor": 0.4
+          },
+          "ring": [
+            90,
+            150
+          ],
+          "legM": [
+            170,
+            270
+          ],
+          "lateral": [
+            22,
+            60
+          ],
+          "despawnM": 280
+        }
+      },
+      "ferry": {
+        "enabled": true,
+        "asset": "ferry",
+        "speed": 4.2,
+        "dwellS": [
+          25,
+          25
+        ],
+        "note": "TODO(felix): did a ferry cross Lysekil-Fiskebäckskil in 1950, and was it this route and stop order?",
+        "lengthM": 14
+      },
+      "moorings": {
+        "fill": 0.4,
+        "maxPerHarbour": 5,
+        "classes": {
+          "sail": {
+            "assets": [
+              {
+                "id": "sailboat",
+                "weight": 1,
+                "stripes": [
+                  "navy",
+                  "sand"
+                ],
+                "length": [
+                  7.2,
+                  8.6
+                ]
+              }
+            ],
+            "litShare": 0.3
+          },
+          "motor": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "sand",
+                  "sage"
+                ],
+                "length": [
+                  5.2,
+                  5.8
+                ]
+              }
+            ],
+            "litShare": 0.3
+          }
+        }
+      },
+      "houses": {
+        "share": 0.15,
+        "asset": "summerhouse",
+        "colours": [
+          "cream",
+          "rose"
+        ],
+        "scale": 0.75,
+        "litShare": 0.4
+      },
+      "windows": "kit"
+    },
+    {
+      "id": "leisure-sailing-1980",
+      "label": "Leisure sailing, 1980-1999",
+      "from": 1980,
+      "to": 1999,
+      "kit": "today",
+      "placeholderKit": true,
+      "traffic": {
+        "routes": "all",
+        "maxBoats": 22,
+        "classes": {
+          "sail": {
+            "assets": [
+              {
+                "id": "sailboat",
+                "weight": 1,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  8.0,
+                  9.4
+                ]
+              }
+            ],
+            "speed": [
+              3.0,
+              3.8
+            ],
+            "dwellS": [
+              3,
+              6
+            ]
+          },
+          "motor": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "coral",
+                  "navy",
+                  "sand"
+                ],
+                "length": [
+                  5.4,
+                  6.2
+                ]
+              }
+            ],
+            "speed": [
+              5.5,
+              7.0
+            ],
+            "dwellS": [
+              2,
+              4
+            ]
+          },
+          "fish": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "coral",
+                  "sand",
+                  "sage"
+                ],
+                "length": [
+                  5.2,
+                  6.0
+                ]
+              }
+            ],
+            "speed": [
+              1.1,
+              1.6
+            ],
+            "dwellS": [
+              0,
+              0
+            ]
+          }
+        },
+        "perRoute": {
+          "harbour": 2,
+          "cruise": 1,
+          "fish": 1
+        },
+        "ambient": {
+          "count": 6,
+          "mix": {
+            "sail": 0.75,
+            "motor": 0.25
+          },
+          "ring": [
+            90,
+            150
+          ],
+          "legM": [
+            170,
+            270
+          ],
+          "lateral": [
+            22,
+            60
+          ],
+          "despawnM": 280
+        }
+      },
+      "ferry": {
+        "enabled": true,
+        "asset": "ferry",
+        "speed": 4.6,
+        "dwellS": [
+          22,
+          22
+        ],
+        "note": "placeholder",
+        "lengthM": 14
+      },
+      "moorings": {
+        "fill": 0.7,
+        "maxPerHarbour": 8,
+        "classes": {
+          "sail": {
+            "assets": [
+              {
+                "id": "sailboat",
+                "weight": 1,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  7.4,
+                  9.0
+                ]
+              }
+            ],
+            "litShare": 0.5
+          },
+          "motor": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "coral",
+                  "navy",
+                  "sand"
+                ],
+                "length": [
+                  5.2,
+                  6.0
+                ]
+              }
+            ],
+            "litShare": 0.5
+          }
+        }
+      },
+      "houses": {
+        "share": 0.3,
+        "asset": "summerhouse",
+        "colours": [
+          "cream",
+          "sky",
+          "rose",
+          "sage"
+        ],
+        "scale": 0.75,
+        "litShare": 0.5
+      },
+      "windows": "kit"
+    },
+    {
+      "id": "today",
+      "label": "Today, 2000-2026 (the final era)",
+      "from": 2000,
+      "to": 2026,
+      "kit": "today",
+      "placeholderKit": false,
+      "traffic": {
+        "routes": "all",
+        "maxBoats": 36,
+        "classes": {
+          "sail": {
+            "assets": [
+              {
+                "id": "sailboat",
+                "weight": 1,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  8.2,
+                  9.6
+                ]
+              }
+            ],
+            "speed": [
+              3.2,
+              4.0
+            ],
+            "dwellS": [
+              3,
+              6
+            ]
+          },
+          "motor": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "coral",
+                  "navy",
+                  "sand",
+                  "sage"
+                ],
+                "length": [
+                  5.6,
+                  6.6
+                ]
+              }
+            ],
+            "speed": [
+              6.0,
+              7.5
+            ],
+            "dwellS": [
+              2,
+              4
+            ]
+          },
+          "fish": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "coral",
+                  "navy",
+                  "sand",
+                  "sage"
+                ],
+                "length": [
+                  5.4,
+                  6.4
+                ]
+              }
+            ],
+            "speed": [
+              1.2,
+              1.8
+            ],
+            "dwellS": [
+              0,
+              0
+            ]
+          }
+        },
+        "perRoute": {
+          "harbour": 2,
+          "cruise": 2,
+          "fish": 1
+        },
+        "ambient": {
+          "count": 8,
+          "mix": {
+            "sail": 0.8,
+            "motor": 0.2
+          },
+          "ring": [
+            90,
+            150
+          ],
+          "legM": [
+            170,
+            270
+          ],
+          "lateral": [
+            22,
+            60
+          ],
+          "despawnM": 280
+        }
+      },
+      "ferry": {
+        "enabled": true,
+        "asset": "ferry",
+        "speed": 5.0,
+        "dwellS": [
+          20,
+          20
+        ],
+        "note": "A simple game loop, not the real Västtrafik timetable. TODO(felix): confirm the real timetable and the livery.",
+        "lengthM": 14
+      },
+      "moorings": {
+        "fill": 1.0,
+        "maxPerHarbour": 10,
+        "classes": {
+          "sail": {
+            "assets": [
+              {
+                "id": "sailboat",
+                "weight": 1,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  7.2,
+                  9.6
+                ]
+              }
+            ],
+            "litShare": 0.7
+          },
+          "motor": {
+            "assets": [
+              {
+                "id": "motorboat",
+                "weight": 1,
+                "stripes": [
+                  "coral",
+                  "navy",
+                  "sand",
+                  "sage"
+                ],
+                "length": [
+                  5.2,
+                  6.4
+                ]
+              }
+            ],
+            "litShare": 0.7
+          }
+        }
+      },
+      "houses": {
+        "share": 0.35,
+        "asset": "summerhouse",
+        "colours": [
+          "cream",
+          "sky",
+          "rose",
+          "sage"
+        ],
+        "scale": 0.75,
+        "litShare": 0.55
+      },
+      "windows": "kit"
+    }
+  ]
+}

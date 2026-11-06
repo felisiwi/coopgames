@@ -52,6 +52,8 @@ import { createLife } from './src/life.js';
 import { createShoalLayer } from './src/shoal-look.js';
 import { createSeamarkLayer } from './src/seamark-layer.js';
 import { createHarbourMoment } from './src/harbour-moment.js';
+import { createBusyCoast } from './src/busy-coast.js';
+import { profileForYear } from './src/busy-era.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
 // `seaHeightCPU` (src/water.js) is the JS mirror of the water shader's vertex
@@ -94,6 +96,10 @@ function approachSpeed(current, target, dt) {
 // a moment later; src/coast-world.js is only downloaded in that case. Messages from the other player that arrive
 // during the load are queued and replayed to the game, so nothing is dropped (the net contract has no way to
 // unsubscribe, so one listener stays attached and forwards).
+// The busy coast (src/busy-coast.js) is driven by an era profile chosen by YEAR (data/busy-eras.json). The game still opens on Today's coast, so the
+// default is 2015; ?year=1950 shows the 1950 profile (on the modern placeholder kit until a 1950s kit exists); ?busy=0 turns the busy coast off.
+const BUSY_DEFAULT_YEAR = 2015;
+
 export default function start(args) {
   const q = new URLSearchParams(window.location.search);
   if (q.get('coast') === 'proc') return startGame(args, null);
@@ -111,8 +117,17 @@ export default function start(args) {
     isHost: args.net.isHost,
   };
   const num = (k) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
-  return import('./src/coast-world.js')
-    .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, style: parseGameStyle(window.location.search), at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
+  // The era decides how many cottages become summer houses while the village is built, so the era data loads first. A missing file or a year
+  // with no profile only means no busy coast.
+  const jsonAt = async (rel) => (await fetch(new URL(rel, import.meta.url))).json();
+  const busyLoad = q.get('busy') === '0' ? Promise.resolve(null)
+    : Promise.all([jsonAt('./data/busy-eras.json'), jsonAt('./data/busy-world.json')])
+      .then(([eras, world]) => { const profile = profileForYear(eras, num('year') ?? BUSY_DEFAULT_YEAR); return profile ? { profile, world } : null; })
+      .catch((err) => { console.warn('busy coast data not loaded:', err); return null; });
+  return busyLoad
+    .then((busy) => import('./src/coast-world.js')
+      .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, style: parseGameStyle(window.location.search), at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined, summerShare: busy ? busy.profile.houses.share : 0 }))
+      .then((coast) => { coast.busy = busy; return coast; }))
     .then(async (coast) => { // granddad's chart (data/granddad-chart.json): opens with the chest; a missing file only means no extra marks
       try { coast.granddad = await (await fetch(new URL('./data/granddad-chart.json', import.meta.url))).json(); } catch { coast.granddad = null; }
       return coast;
@@ -404,6 +419,18 @@ function startGame({ canvas, net, seed, role }, coast) {
       marks: seamarkLayer ? seamarkLayer.perchMarks() : null, // gulls perch on the REAL marks; no decorative buoys
     })
     : null;
+  // The busy coast: boats, the ferry, moored boats, summer houses (era profile + kit), drawn in four meshes. ?night=1 lights the windows (the dusk hook).
+  const busy = coast && coast.busy
+    ? createBusyCoast({
+      world: coast.busy.world, profile: coast.busy.profile, toGame: coast.world.toGame, houses: coast.summerHouses,
+      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength),
+      blocked: (x, z) => isBlocked(coast.sailHeightAt, x, z), // the ambient boats stay in water the boat could really be in
+      night: new URLSearchParams(window.location.search).get('night') === '1',
+    })
+    : null;
+  if (busy) scene.add(busy.group);
+  if (busy && debugOverlay) window.__busy = busy;
+  let busyNextLine = 0;
   if (coast && debugOverlay) window.__wind = () => wind;
   if (coast && debugOverlay) window.__lureOn = lureOn;
   if (lureOn && debugOverlay) window.__lure = { arrivals, deck, moment, life, audio, names: coast.names }; // headless checks
@@ -804,6 +831,10 @@ function startGame({ canvas, net, seed, role }, coast) {
     if (lureOn) {
       moment.update(dt, nowS);
       life.update(self, dt, nowS);
+    }
+    if (busy) { // boats give way to both players
+      busy.update(dt, self, otherBoat && other.x !== null ? [self, other] : [self]);
+      if (debugOverlay && nowS >= busyNextLine) { busyNextLine = nowS + 0.5; const b = busy.stats(); debugOverlay.set('busy', `busy        ${b.profile}${b.placeholderKit ? ' (placeholder kit)' : ''}: ${b.boatsVisible}/${b.vessels} boats in range, ${b.moored} moored, ${b.houses} summer houses, ${b.meshes} meshes, ${b.staticTriangles}+${b.dynamicTriangles} tris`); }
     }
 
     // Stage 1: a partner who stops sending 'pos' has left (src/partner.js).

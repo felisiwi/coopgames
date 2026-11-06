@@ -1,0 +1,141 @@
+{
+ "about": "OpenStreetMap data for Vasttrafik ferry line 847 (Lysekil Sodra hamnen - Ostersidan - Fiskebackskil), fetched via the Overpass API on 2026-11-06 (relation/1970180, ways 145736849 and 145736848, the three stop nodes). Used by tools/plan-busy-today.mjs. Points are [lon, lat].",
+ "credit": "© OpenStreetMap contributors",
+ "licence": "ODbL 1.0",
+ "licenceUrl": "https://www.openstreetmap.org/copyright",
+ "osmDataTimestamp": "2026-11-06T10:51:36Z",
+ "relation": {
+  "id": "relation/1970180",
+  "name": "Lysekil Södra hamnen - Östersidan - Fiskebäckskil",
+  "ref": "847",
+  "network": "Västtrafik",
+  "stopOrder": [
+   "node/1590919910",
+   "node/1590919881",
+   "node/3489035897"
+  ]
+ },
+ "stops": [
+  {
+   "id": "node/1590919881",
+   "name": "Östersidans färjeläge",
+   "lat": 58.2496292,
+   "lon": 11.46376,
+   "ref": null
+  },
+  {
+   "id": "node/1590919910",
+   "name": "Lysekil Södra hamnen",
+   "lat": 58.2730405,
+   "lon": 11.4374422,
+   "ref": "C"
+  },
+  {
+   "id": "node/3489035897",
+   "name": "Fiskebäckskil brygga",
+   "lat": 58.2501889,
+   "lon": 11.4578269,
+   "ref": null
+  }
+ ],
+ "ways": [
+  {
+   "id": "way/145736849",
+   "name": "Lysekil - Fiskebäckskil",
+   "ref": "847",
+   "points": [
+    [
+     11.4374422,
+     58.2730405
+    ],
+    [
+     11.4379194,
+     58.2728162
+    ],
+    [
+     11.4552488,
+     58.2578584
+    ],
+    [
+     11.462638,
+     58.2518482
+    ],
+    [
+     11.4628781,
+     58.2504995
+    ],
+    [
+     11.4631382,
+     58.2500926
+    ],
+    [
+     11.46376,
+     58.2496292
+    ],
+    [
+     11.4622503,
+     58.2501996
+    ],
+    [
+     11.461859,
+     58.2503254
+    ],
+    [
+     11.4613731,
+     58.2504275
+    ],
+    [
+     11.460624,
+     58.2504733
+    ],
+    [
+     11.4597868,
+     58.2504661
+    ],
+    [
+     11.4590114,
+     58.2504223
+    ],
+    [
+     11.4578269,
+     58.2501889
+    ]
+   ]
+  },
+  {
+   "id": "way/145736848",
+   "name": "Lysekil - Fiskebäckskil (847)",
+   "ref": null,
+   "points": [
+    [
+     11.4578269,
+     58.2501889
+    ],
+    [
+     11.4580244,
+     58.2503328
+    ],
+    [
+     11.4580914,
+     58.2504122
+    ],
+    [
+     11.4581303,
+     58.2505314
+    ],
+    [
+     11.4517959,
+     58.2595444
+    ],
+    [
+     11.4377633,
+     58.2726664
+    ],
+    [
+     11.4374422,
+     58.2730405
+    ]
+   ]
+  }
+ ]
+}

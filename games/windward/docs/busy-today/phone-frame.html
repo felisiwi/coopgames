@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Phone frame (390x844)</title>
+<!-- Shows the game in an iframe of exactly 390x844 CSS px (an iPhone-sized viewport), scaled to fit a smaller browser window, for screenshots.
+     Same origin as the game, so a script can reach the game's debug hooks: document.getElementById('f').contentWindow.__self etc.
+     Use:  phone-frame.html?src=<game url, URL-encoded>&scale=0.88   e.g.  src=../../index.html%3Fdebug%3D1%26cat%3D11.4229%2C58.27617 -->
+<style>
+  html, body { margin: 0; background: #222; overflow: hidden; }
+  #w { width: 390px; height: 844px; transform-origin: 0 0; }
+  iframe { display: block; width: 390px; height: 844px; border: 0; background: #000; }
+</style>
+<div id="w"><iframe id="f" allow="autoplay"></iframe></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  document.getElementById('w').style.transform = `scale(${q.get('scale') || 0.88})`;
+  document.getElementById('f').src = q.get('src') || '../../index.html?debug=1';
+</script>
