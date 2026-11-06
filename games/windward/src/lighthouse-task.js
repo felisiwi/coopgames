@@ -33,6 +33,12 @@ export function taskStorage() {
 }
 
 // lights: name-list entries { id, name, x, z } of the lighthouses; the n nearest to the spawn are dark. Pure, stable order (nearest first).
+// Is a tower's lantern burning? A task light is lit exactly when restored, whatever the light data says (Islandsberg and Stångehuvud are dark in real life,
+// yet they start dark AND stay lit once restored, also after a reload). Any other tower follows the light data (`lit: false` = dark for decades). Pure.
+export function towerLit({ isTaskLight, restored, dataLit }) {
+  return isTaskLight ? !!restored : dataLit !== false;
+}
+
 export function pickTaskLights(lights, spawn, n = TASK_COUNT) {
   return [...lights].sort((a, b) => Math.hypot(a.x - spawn.x, a.z - spawn.z) - Math.hypot(b.x - spawn.x, b.z - spawn.z) || (a.id < b.id ? -1 : 1)).slice(0, n);
 }

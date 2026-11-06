@@ -72,3 +72,37 @@ A dimmed card over the live view the first time the game runs: **After the storm
 1. **After the fifth light** there is no end card: when the camera is back at the boat a short card says "All five lights are burning. Sail home to Fiskebäckskil and tell grandma." Its button ("Navigate to Fiskebäckskil") sets the Navigate target; nothing sets it before.
 2. **Arrival is entering the harbour, not a circle.** The old rule fired within 70 m of the village point, but Fiskebäckskil's village point is 45 game m from its harbour: of the sailable water within 70 m of it, 229 cells were NOT harbour and 71 were (measured). `src/harbour-water.js` finds the harbour water: the sailable water connected to the quay on the harbour side of the mouth gate, by a flood fill over the game's own collision on a 1 m grid (the carved channels are 6 m wide and the hull needs 2.5 m each side, so the free band for the boat's centre is about 1 m; a 3 m grid steps over it and finds an empty harbour). Fiskebäckskil's harbour water is 609 cells and reaches the mouth. **The boat can reach it from the start with the merged harbour carves** (a 1 m flood fill from the spawn: reachable, 214,802 cells, 280 ms). Inside the harbour and slow (`HARBOUR_ENTRY_MAX_SPEED` 3 m/s) starts the reward moment (for now the 1b harbour moment, TODO(felix): the reward details), the Navigate tag clears, and after `REWARD_DELAY_S` (4.5 s) the end card appears with "Carry on sailing". Slow in open water near the village does nothing; fast inside the harbour gives a quiet "Ease off to tie up" hint.
 3. **The 3.4 fps at the end card.** Evidence and cause: the figures in that overlay (3.4 fps avg, worst 2.6 / 383 ms, 299 draw calls, 407,640 triangles, 124.93 MB heap, 7.02 MB in 77 requests, first frame 1263 ms, names 28 / 271) are identical to the last digit to a frame of my own headless run (Chrome with software GL, SwiftShader, iPhone emulation): not a phone measurement. In that same environment, at the same pose: main with no card 9.6 fps, branch with no card 8.7, card with blur 9.1, card without blur 10.3, card hidden again 8.7 (10 one-second samples each; JS only about 2 ms per frame, so the game is raster-bound, not script-bound). So the card was not the cause and the scene is not slower without it; software GL just rasterises 345k triangles at about 9 fps for every state, main included. Still, a full-screen card over a live WebGL canvas is wasted work on a phone, so two cheap fixes: the card's backdrop blur is gone (a plain dim; a blur over a canvas is redone every frame) and the 3D render pauses a few frames after a card opens (the boat is held and the view is covered; the canvas keeps its last frame): the same software run now measures **34 fps with the card up**. Real-phone fps is still Felix's read: if his phone really shows 3.4 fps, send the overlay screenshot.
+
+## Batch B: the lights speak (chapter 1 ends)
+Read GAME-DESIGN.md "End of chapter 1: the lights speak". Screenshots (390x844, iPhone emulation, software GL): `docs/lighthouse-task/bb-*.png`.
+1. **Light log** (`src/light-glyph.js`, `src/light-log.js`). Relighting shows the lighthouse's real flash pattern from `lighthouses.js` as a glyph on the visit card
+   (● short, ▬ long, ○ per eclipse; e.g. Väcker `●●●● · 12s`, Hättan `●● · 6s`) and plays soft chimes in the same rhythm (`audio.lightChimes`). It is saved
+   (`windward.lightlog.v1`) and listed by the **Lights** button on the chart. A light with no characteristic on record (Islandsberg, Stångehuvud: the data has
+   `light: null`) shows `steady`, which is what the lantern really does; nothing is invented there. Shots: `bb-1`, `bb-2`.
+2. **Task lights vs real life.** Islandsberg and Stångehuvud are dark in reality (`lit: false`) but are task lights: they start dark, light up when restored and
+   stay lit after a reload (`towerLit()` in `lighthouse-task.js`, tested; checked in the browser run: all five dark at start, all five lit after a reload).
+   Other towers dark for decades (Böttö, Carlsten, Måseskär) now have dark glass (before, every non-task tower was drawn lit).
+3. **Grandma** (`task-ui.js`, `GRANDMA_CARD`): harbour entry -> the harbour moment -> a dusk-toned card: "He always said the lights talk, if you know how to listen."
+   / "She gives you granddad's sea chest." The chest is saved (`windward.chapter1.v1`) and appears in Svalan's third deck slot (empty until now). `bb-3`, `bb-4`.
+4. **Granddad's chart** (`data/granddad-chart.json`, `chart.js`): after the chest, 8 favourites inside the region from "Felix's favourite places" get a red ring and a
+   Navigate card (each is a real name-list entry), plus the strange mark (dashed ring, "?"). It wins a tap over the lighthouse marker under it. `bb-5`.
+5. **The strange mark** (`src/old-tower.js`): within 55 m of Måseskär's old 1865 tower (58.0938 N, 11.3302 E) with the chest open: a faint amber flash on the tower's
+   own lantern, one bell, the fog thickens round the boat (the existing `HAZE_*` values, tweened and restored exactly; checked: base == after), the camera drifts toward
+   the tower for the flash (at ~50 m it is off the top of the screen otherwise), then "That tower has been dark since 1978. But you saw it." Saved as chapter 1
+   complete; the tower is added to the light log. `bb-6`..`bb-8`.
+   - The flash frame (`bb-7`) was captured by holding the sequence clock inside the first flash (test only): a 0.6 s flash is shorter than a software-GL capture.
+   - Framing is a judgment: drift 0.7 shows the lantern at the top edge with the boat low; 0.5 and 0.65 crop the lantern. TODO(felix): look on a phone.
+   - A plain additive halo was invisible against pale fogged land; the ghost uses a warm amber halo with normal blending (`solidHalo`).
+
+### The old tower's light: what is documented, what is invented
+- **Documented** (IALA Heritage, https://heritage.iala.int/?p=47107; en/sv Wikipedia "Måseskär"): 1865 a fixed red light (2nd order Lepaute lens, three-wick oil lamp, red
+  glass, 12 nm); 1884 a four-wick kerosene lamp; 1887 a rotating 3rd order Fresnel lens (clockwork), white light; 1950 electricity; 31 Aug 1978 the old light was turned off
+  when the new fibreglass tower took over (the new light is Fl(3) WRG 30 s).
+- **Not documented: the old tower's final characteristic.** A rotating lens means it flashed, but no group or period is stated in any source I found.
+- **Invented, flagged** (`"invented": true` in the data, asserted by a test): two white flashes every 15 s (0.6 s each), chosen to differ from the new tower's Fl(3) 30 s.
+  Never presented as fact in the game beyond "Granddad's note". TODO(felix): confirm or replace.
+
+### Verified (browser run on a fresh profile, zero page errors) and not
+- Verified: all 47 test files pass; start card -> relight (glyph, log) -> Lights list -> all five lit -> harbour -> grandma -> chest on deck -> chart marks -> tap strange mark
+  (Navigate target set) -> Måseskär sequence (flash, bell, fog 1.18 -> 0.41 -> 1.18, card, saved) -> reload keeps the chest, tower seen, log, and all five lights lit.
+- Not verified: sound (chimes, bell) was not heard, only called; a real phone; the flash in the natural (unheld) run, whose capture lands after the 0.6 s flash.

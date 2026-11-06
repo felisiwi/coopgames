@@ -5,7 +5,7 @@ import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { RELIGHT, relightFrame, igniteTime, relightDuration, REVEAL_RADIUS_M } from './relight.js';
 import { createLighthouseTask, pickTaskLights, TASK_KEY, TASK_COUNT, MOOR_M, MOOR_MAX_SPEED, HINT_COOLDOWN_S, GRANDMA_ID, START_KEY, hasSeenStart, markStartSeen, resetStart, HARBOUR_ENTRY_MAX_SPEED, REWARD_DELAY_S } from './lighthouse-task.js';
-import { START_CARD, END_CARD, REPORT_CARD } from './task-ui.js';
+import { START_CARD, GRANDMA_CARD, REPORT_CARD } from './task-ui.js';
 import { createExplored } from './explored.js';
 import { fixedDirectionForYaw, updateFixedCamera } from './camera.js';
 import { createAudio, RELIGHT_SOUND } from './audio.js';
@@ -179,7 +179,6 @@ check('the start card says what Felix wrote (storm, five lighthouses, Svalan, br
   assert.ok(START_CARD.lines.every((l) => l.length <= 80), 'short lines for a phone');
   assert.equal(START_CARD.go, 'Set sail'); assert.equal(START_CARD.skip, 'Skip');
   assert.ok(START_CARD.title.length <= 20);
-  assert.ok(END_CARD.title && END_CARD.lines.length >= 1);
 });
 
 check('the start card is shown once: seen is saved on the device, a reset shows it again, blocked storage never throws', () => {
@@ -203,7 +202,27 @@ check('the card after the fifth light is a short nudge (Felix\'s words), not the
   assert.deepEqual(REPORT_CARD.lines, ['Sail home to Fiskebäckskil and tell grandma.']);
   assert.ok(/Fiskebäckskil/.test(REPORT_CARD.button) && /Navigate/i.test(REPORT_CARD.button));
   assert.ok(REPORT_CARD.lines.join(' ').length < 60, 'short');
-  assert.notEqual(REPORT_CARD.title, END_CARD.title, 'it is not the end card');
+  assert.notEqual(REPORT_CARD.title, GRANDMA_CARD.who, 'it is not grandma\'s card');
+});
+
+check('a tower\'s lantern: task lights are lit exactly when restored (even the two dark in reality, also after a reload); other towers follow the data', async () => {
+  const { towerLit } = await import('./lighthouse-task.js');
+  const { LIGHTHOUSES } = await import('./lighthouses.js');
+  for (const name of ['Islandsberg', 'Stångehuvud']) {
+    assert.equal(LIGHTHOUSES.find((e) => e.name === name).lit, false, `${name} is dark in the data`);
+    assert.equal(towerLit({ isTaskLight: true, restored: false, dataLit: false }), false, `${name}: starts dark`);
+    assert.equal(towerLit({ isTaskLight: true, restored: true, dataLit: false }), true, `${name}: restored -> lit, and a reload (restored again) keeps it lit`);
+  }
+  assert.equal(towerLit({ isTaskLight: false, restored: false, dataLit: false }), false, 'Böttö, Carlsten: dark stays dark');
+  assert.equal(towerLit({ isTaskLight: false, restored: false, dataLit: true }), true, 'a working tower burns');
+  assert.equal(towerLit({ isTaskLight: true, restored: false, dataLit: true }), false, 'a task light is dark until restored');
+});
+
+check('grandma\'s card: her line (Felix\'s words), the chest as the gift, one button to carry on', () => {
+  assert.equal(GRANDMA_CARD.line, 'He always said the lights talk, if you know how to listen.');
+  assert.ok(/sea chest/i.test(GRANDMA_CARD.gift) && /granddad/i.test(GRANDMA_CARD.gift));
+  assert.equal(GRANDMA_CARD.button, 'Carry on sailing');
+  assert.ok(GRANDMA_CARD.line.length < 80, 'short for a phone');
 });
 
 check('harbour entry: only when reporting, only INSIDE the harbour, and slow enough to tie up; too fast gets a hint at most every 25 s', () => {

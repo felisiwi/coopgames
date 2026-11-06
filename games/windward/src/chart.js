@@ -99,7 +99,7 @@ export function placeLabels(items, W, H) {
 // where the fog has lifted, from SEA_MIN_SCALE; invented marks only when showInvented (?debug=1), with a dashed magenta ring.
 // opts: { canvas, cfg (chart.json), toGame, entries (name list), isKnown(id), explored, seen(entry) (src/seen.js; defaults to the label point's fog), lights: [{ id, name, x, z, inWindow, entry }],
 //         baseUrl (folder of the pictures), makeCanvas, loadImage }
-export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, seen = (e) => explored.isExplored(e.x, e.z), lights, sea = null, showInvented = false, isDark = () => false, baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
+export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, seen = (e) => explored.isExplored(e.x, e.z), lights, sea = null, showInvented = false, isDark = () => false, granddadMarks = () => [], baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
   const ctx = canvas.getContext('2d');
   const detailRect = boundsRect(toGame, cfg.detail);
   const overRect = boundsRect(toGame, cfg.overview);
@@ -299,6 +299,21 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, s
         }
         ctx.restore();
       }
+      // Granddad's chart (his sea chest, batch B): a red-ink ring on each of his favourite places and a "?" on the strange mark. Drawn even under fog
+      // (they are his marks, not your discoveries); a tap opens the same card as any place, with Navigate here.
+      for (const g of granddadMarks()) {
+        const [gx, gy] = worldToScreen(view, W, H, g.x, g.z);
+        if (gx < -40 || gy < -40 || gx > W + 40 || gy > H + 40) continue;
+        ctx.save();
+        ctx.strokeStyle = '#b8432f'; ctx.fillStyle = '#b8432f'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.arc(gx, gy, g.strange ? 11 : 9, 0, Math.PI * 2); ctx.stroke();
+        if (g.strange) {
+          ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(gx, gy, 16, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+          ctx.font = 'italic 600 15px "IM Fell English", Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', gx, gy + 1);
+        } else { ctx.beginPath(); ctx.arc(gx, gy, 2.2, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore();
+        hits.push({ type: 'place', id: g.id, entry: g, x: gx, y: gy, r: 20 });
+      }
       if (labelA > 0.02) { // names, nearest the middle first, no overlaps
         const items = [];
         for (const d of drawn) {
@@ -351,6 +366,10 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, s
     // A tap at (sx, sy) CSS px: { type: 'light' | 'place', entry } | { type: 'section', section } | null. Lights first, then discovered places.
     hit(sx, sy, view, W, H) {
       let best = null;
+      for (const h of lastHits) { // granddad's strange mark sits on the old tower's lighthouse marker: it wins
+        if (!(h.entry && h.entry.strange)) continue;
+        if (Math.hypot(h.x - sx, h.y - sy) <= h.r) return { type: 'place', entry: h.entry };
+      }
       for (const h of lastHits) {
         if (h.type !== 'light') continue;
         const d = Math.hypot(h.x - sx, h.y - sy);

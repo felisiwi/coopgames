@@ -1,0 +1,36 @@
+{
+  "_about": "Granddad's chart (stage 1d, batch B): what his sea chest adds to the chart after you report to grandma. The favourites are Felix's Google Maps list 'Segling' (GAME-DESIGN.md \"Felix's favourite places\"), the ones inside the playable region, each matched to a name-list entry by id (so they are Navigate targets). Those outside the region (Hunnebostrand, Smögen, Marstrand, ...) wait for the map to grow. The strange mark is Måseskär's old 1865 tower.",
+  "favourites": [
+    { "id": "village:Lysekil", "note": "Lysekil" },
+    { "id": "harbour:Vrakevik", "note": "Felix's own pin (the name is his note)" },
+    { "id": "harbour:Vasholmarna", "note": "island group, in the Segling list" },
+    { "id": "harbour:Skarvesäter", "note": "island, in the Segling list" },
+    { "id": "harbour:Grundsunds hamn", "note": "Grundsunds fiskehamn & gästhamn, in the Segling list" },
+    { "id": "village:Gullholmen", "note": "Gullholmens Gästhamn, in the Segling list" },
+    { "id": "village:Käringön", "note": "in the Segling list" },
+    { "id": "harbour:Kråkholmen", "note": "Felix's own pin, Kråksundsgap, Kråkholmen" }
+  ],
+  "strange": {
+    "id": "strange:maseskar-old-tower",
+    "name": "Måseskär, the old tower",
+    "lat": 58.0938,
+    "lon": 11.3302,
+    "tower": "Måseskär",
+    "darkSince": "1978-08-31",
+    "light": {
+      "pattern": "two white flashes every 15 s (granddad's note on the chart)",
+      "colour": "white",
+      "kind": "flash",
+      "count": 2,
+      "period": 15,
+      "flashSeconds": 0.6,
+      "invented": true
+    },
+    "inventedWhy": "The old tower's final characteristic is NOT documented in any source found. Documented: 1865 a fixed red light (2nd order Lepaute lens, three-wick oil lamp, red glass, 12 nm); 1884 a four-wick kerosene lamp; 1887 a rotating 3rd order lens (clockwork), white light; 1950 electricity; 31 Aug 1978 the old light turned off when a new fibreglass tower took over (that new light is Fl(3) WRG 30 s). A rotating lens means it flashed, but no group or period is stated. So this pattern is a plausible one for a clockwork rotating lens, flagged invented, chosen to differ from the new tower's Fl(3) 30 s. TODO(felix): confirm or replace.",
+    "sources": [
+      "https://heritage.iala.int/?p=47107 (IALA Heritage: Måseskärs Lighthouse: history of the optic and lamp, 1865 to 1978)",
+      "https://en.wikipedia.org/wiki/Måseskär (1887 third order Fresnel lens with white light; current light Fl(3) WRG 30s; first lit 1978-08-31)",
+      "https://sv.wikipedia.org/wiki/Måseskär (the older lighthouse extinguished 1978; current light Fl(3) WRG 30s)"
+    ]
+  }
+}

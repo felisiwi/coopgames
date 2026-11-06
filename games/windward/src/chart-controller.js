@@ -50,7 +50,7 @@ export function chartLights(names, toGame, lights = LIGHTHOUSES) {
 }
 
 // What the card says for a place picked on the chart: its name, with what it is.
-const KIND_LINE = { village: 'Village', harbour: 'Natural harbour', island: 'Island', skerry: 'Skerry', light: 'Lighthouse' };
+const KIND_LINE = { village: 'Village', harbour: 'Natural harbour', island: 'Island', skerry: 'Skerry', light: 'Lighthouse', granddad: 'Granddad’s mark' };
 export function placeInfo(entry) {
   return { title: entry.name, sub: [entry.desc, KIND_LINE[entry.kind]].filter(Boolean).join(' · ') };
 }
@@ -69,7 +69,7 @@ export function chartSea(sea, toGame) {
   };
 }
 
-export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onRelightDone = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
+export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onLog = () => {}, onRelightDone = () => {}, granddadMarks = () => [], parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const lights = chartLights(coast.names, toGame);
   const lightList = [...lights.inWindow, ...lights.far];
@@ -84,6 +84,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     parent, debug,
     onChart: () => toggleChart(), // the Boat button (shown only while the chart is up)
     onTask: () => onTask(), // the Task button (also chart mode only): reopens the start card
+    onLog: () => onLog(), // the Lights button: the light log
     onZoomStep: (f) => zoomBy(f),
     onBack: () => { if (state.visit) endVisit(); else closeCard(); },
     onNavigate: () => onNavigatePressed(),
@@ -110,7 +111,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     setTimeout(() => state.chart && state.chart.ensureLoaded(), 2500); // fetch the pictures soon after load, so a quick zoom-out is never held up
     state.chart = createChart({
       canvas: ui.chartCanvas, cfg, toGame, entries: lightList.concat(coast.names.filter((e) => e.kind !== 'light')), isKnown: (id) => nameBook.isKnown(id),
-      explored: state.explored, seen: (e) => seen.isSeen(e), baseUrl: assetsBase, showInvented: debug, isDark,
+      explored: state.explored, seen: (e) => seen.isSeen(e), baseUrl: assetsBase, showInvented: debug, isDark, granddadMarks,
       sea: coast.sea ? chartSea(coast.sea, toGame) : null,
     });
   }).catch((err) => { console.warn('chart data failed to load', err); });
@@ -235,6 +236,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     setPhoneInterrupt(fn) { coastPhoneInterrupt = fn; },
     toggleChart, endVisit, setTarget, clearTarget,
     toast: (text, ms) => ui.toast(text, ms),
+    setLogAvailable: (v) => ui.setLogAvailable(v),
     relightById(id) { const e = lightList.find((l) => l.id === id); return e ? startRelight(e) : false; },
     get relighting() { return !!state.relight; },
     get target() { return nav.entry; },
@@ -252,7 +254,9 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
         const f = relightFrame(r.t);
         if (f.ignited && !r.lit) {
           r.lit = true;
-          const msg = onRelit(r.entry);
+          const res = onRelit(r.entry); // a toast text, or { message, glyph } (the flash pattern the card shows)
+          const msg = res && typeof res === 'object' ? res.message : res;
+          if (res && res.glyph) { const info = lightInfo(r.entry, nameBook.isKnown(r.entry.id), undefined, false); ui.showVisit({ title: info.title, sub: 'The lamp is burning again. Its light says:', glyph: res.glyph, nav: null, back: 'none' }); }
           if (msg) ui.toast(msg, 5600);
           if (nav.entry && nav.entry.id === r.entry.id) clearTarget();
         }

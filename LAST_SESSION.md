@@ -1,12 +1,11 @@
 # Last session
 
-**2026-11-06: stage 1d, the dark lighthouses** (branch `felix/windward-lighthouse-task` from e36b286; describes up to the storm card; NOT merged).
-Batch 1, the water tells the truth: passes carved (ship + harbour tiers), real shoals (hard rocks stop the boat, soft ones slow it), the 226 OSM
-sea-marks (invented gates look the same; the chart shows them only with ?debug=1), OSM credit. Batch 2, the task: the 5 lights nearest Grundsund
-are dark; moor close + slow, the camera circles, the light comes on mid-circle, the fog lifts, "lights 2/5" saved, goal grandma in Fiskebäckskil, end
-card. Batch 3, the storm card (once; the Task button on the chart reopens it). Also: skerries that only share a major place's name (the 2 OSM
-"Marstrand" skerries) show no name. Details, numbers, screenshots: `games/windward/docs/LIGHTHOUSE-TASK.md`. 1c (CHART.md), passes and seamarks
-data are merged to main, and so are the harbour approaches (16 harbour-tier carves following the real banks, docs/harbours/), now carved in the game.
+**2026-11-06: stage 1d, the dark lighthouses + chapter 1 ending** (branch `felix/windward-lighthouse-task`; describes the Batch B commit; NOT merged).
+Batch 1 water (passes, shoals, 226 OSM marks, credit), Batch 2 the task (5 dark lights nearest Grundsund: moor, circle, light on, fog lifts, saved), Batch 3 storm
+card, naming fix, Batch A (sail-home card; arrival = entering Fiskebäckskil's harbour; no card blur + render paused under cards). Batch B, the lights speak: relit
+lights show their real flash pattern as a glyph + chimes and go in a light log (chart "Lights" button); grandma's dusk card gives granddad's sea chest (Svalan's
+chest slot, saved); his chart adds 8 favourites + the strange mark; near Måseskär's old tower (dark since 1978) a faint flash, a bell, fog, "But you saw it."
+(its pattern is INVENTED, flagged). Details, citations, screenshots: `games/windward/docs/LIGHTHOUSE-TASK.md`. 1c, passes, seamarks, harbours are on main.
 
 Where things are:
 - Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`
@@ -22,9 +21,9 @@ harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connecti
 
 - Windward 1b lure, Boat Lab, 1c chart and its follow-ups: merged (see CHART.md, LURE.md, docs/boat-lab/).
 - Passes data and seamarks data: merged (docs/passes/, docs/seamarks/).
-- Stage 1d (this branch): shoals, marks, passes wired in, the dark-lighthouses task, the storm card, the Marstrand name fix.
+- Stage 1d (this branch): shoals, marks, passes, the dark-lighthouses task, storm card, Marstrand fix, Batch A fixes, Batch B (chapter 1 ending).
 
 ## Next
 
-1. Felix: phone check of 1d (checklist in the report and LIGHTHOUSE-TASK.md); then merge 1d.
+1. Felix: phone check of 1d (checklist in the report); sound unheard; Måseskär framing; confirm the invented pattern; `?lights=reset` replays chapter 1; then merge 1d.
 2. Confirm the unplaced harbours (`assets/coast/names.json`); Testholmen, Stora Kornö. Then: night navigation (hooks are in), harbour close-ups.

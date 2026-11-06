@@ -46,7 +46,9 @@ const DARK_GLASS = 0x3b4752; // a dull blue-grey: the storm has put the lamp out
 const DIM = 0.55; // a lit lantern between flashes still glows a little: you can tell it is burning
 
 // group: the THREE.Group from createLighthouse(name), already placed. entry: the LIGHTHOUSES entry (its `light` pattern).
-export function createLanternFx(group, entry) {
+// opts.beam: false for a faint ghost of a light (the old Måseskär tower): the glass and halo flash on the pattern, no sweeping beam.
+// opts.solidHalo: a warm amber halo with normal blending, not additive: additive light vanishes against pale fogged land, and the ghost is seen in fog.
+export function createLanternFx(group, entry, { beam: withBeam = true, solidHalo = false } = {}) {
   const glass = [];
   group.traverse((o) => { if (o.isMesh && /^lantern-glass/.test(o.name)) glass.push(o); });
   const darkMat = new THREE.MeshLambertMaterial({ color: DARK_GLASS, flatShading: true });
@@ -58,6 +60,7 @@ export function createLanternFx(group, entry) {
     group.worldToLocal(centre);
   } else centre.set(0, 8, 0);
   const haloMat = new THREE.SpriteMaterial({ map: getGlowTexture(), color: 0xffe8a8, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+  if (solidHalo) { haloMat.blending = THREE.NormalBlending; haloMat.color.setHex(0xffb830); }
   const halo = new THREE.Sprite(haloMat);
   halo.name = 'lantern-halo';
   halo.position.copy(centre);
@@ -72,13 +75,14 @@ export function createLanternFx(group, entry) {
   beam.name = 'lantern-beam';
   beam.position.copy(centre);
   beam.visible = false;
-  group.add(halo, beam);
-  const phase = (entry.name.length * 0.37) % 1;
+  group.add(halo);
+  if (withBeam) group.add(beam);
+  const phase0 = (entry.name.length * 0.37) % 1;
   let lit = false;
   const setGlass = (m) => { for (const g of glass) g.material = m; };
   setGlass(darkMat);
   const api = {
-    group, halo, beam, glass,
+    group, halo, beam, glass, dim: 1, haloMul: 1, phase: phase0, // dim scales the whole effect (the old tower is only a ghost of a light)
     get lit() { return lit; },
     // lit: the lamp is burning (restored, or never put out). Dark: unlit glass, no halo, no beam.
     setLit(on) {
@@ -90,13 +94,13 @@ export function createLanternFx(group, entry) {
     // t in seconds; level 0..1 scales the whole effect (the lamp warming up when the light comes back on)
     update(t, level = 1) {
       if (!lit) return;
-      const on = lightOnAt(entry.light, t + phase * (entry.light?.period ?? 0));
-      const k = (on ? 1 : DIM) * level;
+      const on = lightOnAt(entry.light, t + api.phase * (entry.light?.period ?? 0));
+      const k = (on ? 1 : DIM) * level * api.dim;
       litMat.color.setHex(GLASS).multiplyScalar(0.55 + 0.45 * k);
       haloMat.opacity = 0.9 * k * (on ? 1 : 0.45);
-      halo.scale.setScalar(7 + 4 * k);
-      beamMat.opacity = 0.2 * (on ? 1 : 0.25) * level; // faint by day
-      beam.rotation.y = t * 0.8 + phase * 6.28;
+      halo.scale.setScalar((7 + 4 * k) * api.haloMul);
+      beamMat.opacity = 0.2 * (on ? 1 : 0.25) * level * api.dim; // faint by day
+      beam.rotation.y = t * 0.8 + api.phase * 6.28;
     },
     dispose() { darkMat.dispose(); litMat.dispose(); haloMat.dispose(); beamMat.dispose(); beamGeo.dispose(); },
   };

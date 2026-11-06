@@ -12,6 +12,8 @@ export const HORN = { freqs: [98, 98.9, 147], attack: 0.1, hold: 0.55, release: 
 // One gull cry: pitch glides down-up while a fast vibrato wobbles it. cries: [start offset s, base Hz, length s]
 // The relight cue (stage 1d): a low, warm C-major chord that swells and fades, with two soft chimes (a fifth apart) as the lamp catches.
 export const RELIGHT_SOUND = { chord: [[130.8, 1], [196, 0.8], [261.6, 0.7], [329.6, 0.5]], attack: 1.1, hold: 1.4, release: 2.4, gain: 0.07, chimes: [[880, 0.9], [1318.5, 1.6]], chimeGain: 0.05 };
+// The light-pattern chimes (stage 1d, batch B): soft sines, one per flash.
+export const LIGHT_CHIME = { hz: 988, darkHz: 660, decay: 1.0, longDecay: 1.8, gain: 0.045, max: 8 };
 export const GULL = { vibratoHz: 24, vibratoDepth: 0.06, gain: 0.05 };
 
 export const MOMENT = {
@@ -142,6 +144,15 @@ export function createAudio(ContextClass = globalThis.AudioContext || globalThis
         const t = ctx.currentTime + delayS;
         for (const [f, g] of RELIGHT_SOUND.chord) tone('sine', f, t, RELIGHT_SOUND.attack, RELIGHT_SOUND.hold, RELIGHT_SOUND.release, RELIGHT_SOUND.gain * g * gain);
         RELIGHT_SOUND.chimes.forEach(([f, at]) => tone('sine', f, t + at, 0.01, 0, 2.2, RELIGHT_SOUND.chimeGain * gain));
+      } catch { /* sound must never break the game */ }
+    },
+    // A light's pattern as soft chimes in the same rhythm (stage 1d, batch B): one chime per flash (a lower one for each dark of an occulting light),
+    // longer flashes ring longer. flashes: src/light-glyph.js lightGlyph().flashes. At most 8, never loud.
+    lightChimes(flashes, delayS = 0, gain = 1) {
+      if (!live() || !flashes) return;
+      try {
+        const t = ctx.currentTime + delayS;
+        for (const f of flashes.slice(0, LIGHT_CHIME.max)) tone('sine', f.dark ? LIGHT_CHIME.darkHz : LIGHT_CHIME.hz, t + f.at, 0.01, 0, f.len >= 1.2 ? LIGHT_CHIME.longDecay : LIGHT_CHIME.decay, LIGHT_CHIME.gain * gain);
       } catch { /* sound must never break the game */ }
     },
     // The whole harbour moment's sound: bell (and horn for a village), then gulls in the background.
