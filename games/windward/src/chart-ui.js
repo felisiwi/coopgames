@@ -1,6 +1,7 @@
 // The chart and minimap controls (stage 1c): the minimap (top left, round, north up; tap it to open the chart),
 // a Boat button that shows only while the chart is up, zoom +/- (bottom left, away from the rope), the lighthouse visit card and a toast. Plain DOM in
 // the same quiet style as the HUD. No logic lives here: game.js passes callbacks.
+import { paperSurface, paperTitle, paperNote, paperQuote, paperButton, PAPER, SERIF } from './paper.js';
 const HUD_BG = 'rgba(20,34,48,0.78)';
 const LINE = '1px solid rgba(234,246,255,0.18)';
 const TEXT = '#eaf3f8';
@@ -54,20 +55,22 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   const credit = el('div', `position:fixed;z-index:6;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(44px + ${SAFE_BOTTOM});font:9px/1.2 system-ui,sans-serif;color:rgba(234,243,248,0.6);text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none`, '© OpenStreetMap contributors');
   parent.appendChild(credit);
 
-  const card = el('div', `position:fixed;z-index:8;left:50%;transform:translateX(-50%);bottom:calc(64px + ${SAFE_BOTTOM});display:none;min-width:220px;max-width:min(92vw,360px);background:${HUD_BG};border:${LINE};border-radius:14px;padding:12px 14px;color:${TEXT};font:${UI_FONT};text-align:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)`);
-  const cardTitle = el('div', 'font:italic 600 19px Georgia,"Times New Roman",serif;margin-bottom:2px');
-  const cardSub = el('div', 'font:12px system-ui,sans-serif;opacity:.75;margin-bottom:10px');
-  const cardGlyph = el('div', 'font:600 26px/1.1 ui-monospace,Menlo,monospace;letter-spacing:.12em;color:#f2c46d;margin:2px 0 8px;display:none');
+  // The visit card is a paper card like every other card in the game (src/paper.js).
+  const card = el('div', `${paperSurface({ shadow: true })};position:fixed;z-index:8;left:50%;transform:translateX(-50%);bottom:calc(64px + ${SAFE_BOTTOM});display:none;min-width:240px;max-width:min(92vw,360px);padding:14px 18px 14px;text-align:center;box-sizing:border-box`);
+  const cardTitle = el('div', paperTitle(21));
+  const cardSub = el('div', `${paperNote(15)};margin:-4px 0 10px`);
+  const cardGlyph = el('div', `font:600 26px/1.1 ${SERIF};letter-spacing:.12em;color:${PAPER.title};margin:2px 0 8px;display:none`);
   const cardRow = el('div', 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap');
-  const navBtn = button('Navigate here', 'Sail to this place: show it as a tag you can follow', `background:${GOLD};color:#1f2a33;border-color:transparent`);
-  const backBtn = button('Back to the boat', 'Return the view to your boat');
-  const jumpBtn = button('Jump here (debug)', 'Jump the boat to this lighthouse');
+  const paperBtn = (label, aria, primary) => { const b = el('button', paperButton({ primary }), label); b.type = 'button'; b.setAttribute('aria-label', aria); return b; };
+  const navBtn = paperBtn('Navigate here', 'Sail to this place: show it as a tag you can follow', true);
+  const backBtn = paperBtn('Back to the boat', 'Return the view to your boat', false);
+  const jumpBtn = paperBtn('Jump here (debug)', 'Jump the boat to this lighthouse', false);
   cardRow.append(navBtn, backBtn);
   if (debug) cardRow.append(jumpBtn);
   card.append(cardTitle, cardSub, cardGlyph, cardRow);
   parent.appendChild(card);
 
-  const toastEl = el('div', `position:fixed;z-index:9;left:50%;transform:translateX(-50%);top:calc(64px + ${SAFE_TOP});display:none;max-width:min(90vw,380px);background:#efe3c8;color:#3d3226;font:16px Georgia,serif;font-style:italic;padding:9px 16px;border-radius:5px;border:1px solid rgba(61,50,38,.35);box-shadow:0 4px 14px rgba(0,0,0,.25);text-align:center`);
+  const toastEl = el('div', `${paperSurface({ radius: 4, shadow: true })};${paperQuote(17)};position:fixed;z-index:9;left:50%;transform:translateX(-50%);top:calc(64px + ${SAFE_TOP});display:none;max-width:min(90vw,380px);padding:10px 18px;text-align:center;box-sizing:border-box`);
   parent.appendChild(toastEl);
 
   chartBtn.addEventListener('click', () => onChart());

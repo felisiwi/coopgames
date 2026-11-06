@@ -1,6 +1,6 @@
 // The opening's flags and timeline helpers (stage 1e, batch 2b). The opening itself is drawn by src/opening-stage.js in the game engine (the SVG cut-out scene of batch 2 is
 // gone). Shown once: the flags live on the device, per era (src/era-storage.js); a missing or blocked storage just means it plays again. Pure: no THREE, no DOM.
-import { OPENING_PLAN, OPENING_TOTAL_S } from './story-1950.js';
+import { OPENING_PLAN, OPENING_TOTAL_S, OPENING_DARK } from './story-1950.js';
 
 export const OPENING_KEY = 'windward.opening.v1'; // the opening has played (or was skipped)
 export const INTRO_KEY = 'windward.intro.v1';     // the whole first-minutes sequence (opening, dawn, the first story beats) has been through once
@@ -39,6 +39,15 @@ export function flashLevel(t, flashes) {
     best = Math.max(best, base * flicker);
   }
   return Math.min(1, best);
+}
+
+// How black the screen is at t (0..1): the dark after the lightning strike, from OPENING_DARK.from to .full (closing), holding to .until, opening again to .back.
+export function darkLevel(t, d = OPENING_DARK) {
+  if (t <= d.from || t >= d.back) return 0;
+  if (t < d.full) return (t - d.from) / (d.full - d.from);
+  if (t <= d.until) return 1;
+  const x = (t - d.until) / (d.back - d.until);
+  return 1 - x * x * (3 - 2 * x);
 }
 
 export { OPENING_TOTAL_S };

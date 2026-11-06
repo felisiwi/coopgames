@@ -54,13 +54,21 @@ export function rewindProgress(t, c = REWIND) {
   return d + v * w - (v / (2 * rest)) * w * w;
 }
 
-// t seconds into the run. row from layoutRow(). Returns { x (camera), year (shown, whole number), progress, done }.
+// Where the run lands: the newest tower still standing at `toYear` (Gäven, 1941, for 1950), so the camera stops with that tower centred in the frame.
+export function landingX(row, toYear = REWIND.toYear) {
+  const standingRow = row.filter((r) => r.built <= toYear);
+  return standingRow.length ? standingRow[standingRow.length - 1].x : xAtYear(row, toYear);
+}
+
+// t seconds into the run. row from layoutRow(). Returns { x (camera), year (shown, whole number), yearExact (what towers compare their build year with), progress, done }.
+// The year reaches `toYear` between two towers and then holds while the camera finishes its slide onto the landing tower, so the counter reads 1950 at the stop.
 export function rewindFrame(t, row, c = REWIND) {
   const x0 = row.length ? row[row.length - 1].x + c.startPadM : 0;
-  const x1 = xAtYear(row, c.toYear, c.fromYear);
+  const x1 = landingX(row, c.toYear);
   const p = rewindProgress(t, c);
   const x = x0 + (x1 - x0) * p;
-  return { x, year: Math.round(yearAtX(row, x, c.fromYear)), progress: p, done: t >= c.durationS };
+  const yearExact = yearAtX(row, Math.max(x, xAtYear(row, c.toYear, c.fromYear)), c.fromYear);
+  return { x, year: Math.round(yearExact), yearExact, progress: p, done: t >= c.durationS };
 }
 
 // Is the tower still standing in `year`? (Towers built after the current year wink out.)

@@ -18,25 +18,28 @@ import { isBlocked } from './shore.js';
 import { fogMoodValues } from './old-tower.js';
 import { wantsPhoneControls } from './phone.js';
 import { BLUE_HOUR, STORM_NIGHT, snapshotLook, blendLook, applyLook } from './dusk.js';
-import { layoutRow, rewindFrame, yearAtX, REWIND } from './rewind.js';
+import { layoutRow, rewindFrame, REWIND } from './rewind.js';
 import { OPENING_PLAN, OPENING_LINES, OPENING_FLASHES, OPENING_TOTAL_S, OPENING_SKIP } from './story-1950.js';
-import { phaseAt, flashLevel } from './opening.js';
+import { phaseAt, flashLevel, darkLevel } from './opening.js';
 import { pickSite, ferryClockFor, frameSite } from './opening-site.js';
 
 const smooth = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };
 const WOOD = 0xa07c52;
 const ROW_Z = -1500;      // the rewind row sits out in the open sea, far from the coast (the coast is hidden then)
 const ROW_CAM_DIST = 80;  // how far in front of the row the camera stands (a phone shows one or two towers)
-const WINK_S = 0.45;      // how long a tower takes to wink out
+const WINK_S = 0.45;
+// The rewind's sky and its faint distant lightning (seconds into the rewind; flashLevel() shapes each one).
+const REWIND_SKY = { zenith: 0x4a5c80, horizon: 0x93a4c0, glow: 0xdbe6fa };
+const REWIND_FLICKERS = [{ at: 0.9 }, { at: 1.1 }, { at: 3.4 }, { at: 5.6 }, { at: 5.8 }, { at: 8.2 }, { at: 10.7 }, { at: 10.9 }, { at: 12.6 }];
+const lerpHex = (a, b, k) => { const m = (sh) => Math.round(((a >> sh) & 255) + (((b >> sh) & 255) - ((a >> sh) & 255)) * k); return (m(16) << 16) | (m(8) << 8) | m(0); };      // how long a tower takes to wink out
 
 const CSS = `
 .ow-root{position:fixed;inset:0;z-index:25;pointer-events:none;font-family:Georgia,"Times New Roman",serif;color:#eaf3f8;-webkit-user-select:none;user-select:none}
 .ow-line{position:absolute;left:0;right:0;bottom:17%;padding:0 28px;text-align:center;font-style:italic;font-size:21px;line-height:1.35;text-shadow:0 2px 12px rgba(0,0,0,.85);opacity:0;transition:opacity .9s}
 .ow-year{position:absolute;left:0;right:0;top:7%;text-align:center;font:700 64px/1 system-ui,sans-serif;letter-spacing:.02em;color:#f2c46d;text-shadow:0 2px 14px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s}
-.ow-label{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font:12px/1.2 system-ui,sans-serif;color:#fff7e0;padding:2px 8px;background:rgba(10,26,42,.72);border-radius:10px}
 .ow-skip{position:absolute;right:14px;bottom:14px;pointer-events:auto;touch-action:manipulation;font:500 13px system-ui,sans-serif;color:#eaf3f8;background:rgba(10,20,30,.55);border:1px solid rgba(234,246,255,.28);border-radius:16px;padding:8px 16px;cursor:pointer}
 .ow-flash{position:absolute;inset:0;background:#dfe8ff;opacity:0}
-.ow-black{position:absolute;inset:0;background:#000;opacity:1;transition:opacity 1.2s}
+.ow-black{position:absolute;inset:0;background:#000;opacity:1}
 `;
 
 // coast: the Today coast built with summerShare 1 (every cottage is a lit-window house of the busy coast); busy: { profile, world } or null; village: { x, z }.
@@ -120,7 +123,6 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
   const blackEl = document.createElement('div'); blackEl.className = 'ow-black';
   const skipEl = document.createElement('button'); skipEl.className = 'ow-skip'; skipEl.type = 'button'; skipEl.textContent = OPENING_SKIP;
   root.append(flashEl, lineEl, yearEl, blackEl, skipEl);
-  const labels = towers.map((t) => { const el = document.createElement('div'); el.className = 'ow-label'; el.textContent = `${t.name} · ${t.built}`; el.style.display = 'none'; root.insertBefore(el, blackEl); return el; });
 
   // ---- sizing, camera, look ---------------------------------------------------------------------------------------------------------------------------
   let W = 1, H = 1;
@@ -142,7 +144,6 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
   // ---- the run ----------------------------------------------------------------------------------------------------------------------------------------------
   let t = 0, frozen = false, last = performance.now(), raf = 0, finished = false, thunderDone = new Set();
   let resolveDone; const done = new Promise((r) => { resolveDone = r; });
-  requestAnimationFrame(() => { blackEl.style.opacity = '0'; }); // fade in from black
   const rowCam = { x: 0 };
 
   function frame(now) {
@@ -157,7 +158,12 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
     // look: blue hour -> storm night (9..23 s); the rewind is a little lighter than the storm so the towers read; fog thickens 10..16 s and thins in the dark
     const k = smooth((t - 9) / 14);
     let look = blendLook(BLUE_HOUR, STORM_NIGHT, k);
-    if (inRewind) { look = blendLook(look, BLUE_HOUR, 0.32); look.SKY_HORIZON_COLOR = look.HAZE_COLOR; look.SKY_ZENITH_COLOR = blendLook({ ...look, SKY_ZENITH_COLOR: 0x0c1220 }, look, 0).SKY_ZENITH_COLOR; } // the sky meets the sea in the same haze: no hard horizon
+    if (inRewind) { // a stormy sky (not a dark band): cloud grey-blue, the sea haze the same colour as the horizon so they meet; faint lightning flickers in the clouds
+      look = blendLook(look, BLUE_HOUR, 0.32);
+      look = { ...look, SKY_ZENITH_COLOR: REWIND_SKY.zenith, SKY_HORIZON_COLOR: REWIND_SKY.horizon, HAZE_COLOR: REWIND_SKY.horizon };
+      const fl = flashLevel(t - 24, REWIND_FLICKERS) * 0.35;
+      if (fl > 0) look = { ...look, SKY_ZENITH_COLOR: lerpHex(look.SKY_ZENITH_COLOR, REWIND_SKY.glow, fl), SKY_HORIZON_COLOR: lerpHex(look.SKY_HORIZON_COLOR, REWIND_SKY.glow, fl), HAZE_COLOR: lerpHex(look.HAZE_COLOR, REWIND_SKY.glow, fl) };
+    }
     applyLook(look);
     const fogK = inRewind ? 0.55 : smooth((t - 10) / 6) * 0.85;
     const fog = fogMoodValues(savedHaze, fogK); delete fog.HAZE_COLOR; Object.assign(CONFIG, fog);
@@ -186,19 +192,13 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
       rowCam.x = f.x;
       view.set(f.x, 9, ROW_Z);
       camera.position.set(f.x, 17, ROW_Z + ROW_CAM_DIST); camera.lookAt(f.x, 8, ROW_Z);
-      const year = yearAtX(row, f.x);
       for (let i = 0; i < towers.length; i++) {
         const tw = towers[i];
-        if (tw.diedAt === null && year < tw.built) tw.diedAt = t; // built after the year now showing: it winks out
+        if (tw.diedAt === null && f.yearExact < tw.built) tw.diedAt = t; // built after the year now showing: it winks out
         const age = tw.diedAt === null ? -1 : (t - tw.diedAt) / WINK_S;
         const s = age < 0 ? 1 : age >= 1 ? 0 : 1 - smooth(age);
         tw.holder.visible = s > 0.002; tw.holder.scale.setScalar(Math.max(0.001, s * (age >= 0 ? 1 + 0.35 * Math.sin(Math.min(1, age) * Math.PI) : 1)));
         tw.fx?.update?.(t + i * 0.37, 1);
-        const lab = labels[i], dx = tw.x - f.x;
-        if (Math.abs(dx) < 34 && s > 0.05) {
-          const p = new THREE.Vector3(tw.x, 17 * Math.max(0.2, s), ROW_Z).project(camera);
-          lab.style.display = 'block'; lab.style.left = `${(p.x * 0.5 + 0.5) * W}px`; lab.style.top = `${(-p.y * 0.5 + 0.5) * H}px`; lab.style.opacity = String(s);
-        } else lab.style.display = 'none';
       }
       yearEl.textContent = String(f.year);
       waterFollow(view);
@@ -207,7 +207,10 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
     const camTo = camera.position.distanceTo(view);
     scene.fog.color.set(CONFIG.HAZE_COLOR); scene.fog.near = camTo * CONFIG.HAZE_MESH_NEAR_MUL; scene.fog.far = camTo * CONFIG.HAZE_MESH_FAR_MUL;
     setLights(flash);
-    flashEl.style.opacity = String(flash * 0.55);
+    // black: the fade in at the start, the dark after the strike, the veil at the very end
+    const fadeIn = 1 - smooth(t / 1.4), outVeil = ph && ph.id === 'out' ? smooth(ph.u) : 0;
+    blackEl.style.opacity = String(Math.max(fadeIn, darkLevel(t), outVeil));
+    flashEl.style.opacity = String(flash * (flash > 0.9 ? 0.85 : 0.55));
 
     // words and the year
     const line = OPENING_LINES.find((l) => t >= l.from && t < l.to);
@@ -216,7 +219,7 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
     // thunder, a little after each flash
     for (const f of OPENING_FLASHES) if (t >= f.at + f.thunderAfter && !thunderDone.has(f.at)) { thunderDone.add(f.at); audio?.thunder?.(0, 0.5 + 0.5 * Math.min(1, 1.2 - f.thunderAfter)); }
     // the end: a last flash and the veil closes over the stop at 1950
-    if (ph && ph.id === 'out') { flashEl.style.opacity = String(0.8 * (1 - ph.u)); blackEl.style.transition = 'none'; blackEl.style.opacity = String(smooth(ph.u)); }
+    if (ph && ph.id === 'out') flashEl.style.opacity = String(0.8 * (1 - ph.u));
     renderer.render(scene, camera);
   }
   function waterFollow(v) { water.update(waves, wind, v, 0.016, camera.position); }

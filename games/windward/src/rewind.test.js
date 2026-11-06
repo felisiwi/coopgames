@@ -1,6 +1,6 @@
 // node games/windward/src/rewind.test.js: the lighthouse rewind (src/rewind.js) and the dusk looks (src/dusk.js).
 import assert from 'node:assert/strict';
-import { layoutRow, yearAtX, xAtYear, rewindProgress, rewindFrame, standing, REWIND } from './rewind.js';
+import { layoutRow, yearAtX, xAtYear, rewindProgress, rewindFrame, landingX, standing, REWIND } from './rewind.js';
 import { LIGHTHOUSES } from './lighthouses.js';
 import { LOOK_KEYS, BLUE_HOUR, STORM_NIGHT, GREY_DAWN, snapshotLook, blendLook, applyLook } from './dusk.js';
 import { CONFIG } from './config.js';
@@ -23,6 +23,18 @@ check('the year: today at the start, counting down as the camera moves left, 195
   let lastYear = Infinity, lastX = Infinity;
   for (let t = 0; t <= REWIND.durationS; t += 0.25) { const f = rewindFrame(t, row); assert.ok(f.year <= lastYear, `year only goes down at t=${t}`); assert.ok(f.x <= lastX + 1e-9, 'the camera only moves left'); lastYear = f.year; lastX = f.x; }
   for (const y of [2020, 2000, 1977, 1960, 1950]) assert.ok(Math.abs(yearAtX(row, xAtYear(row, y)) - y) < 1e-6, `round trip ${y}`);
+});
+
+check('it lands with Gäven (the newest tower standing in 1950) centred in the frame, the counter reads 1950 at the stop, and no tower is built after 1950 at the landing', () => {
+  const g = row.find((r) => r.name === 'Gäven');
+  assert.equal(landingX(row), g.x);
+  const end = rewindFrame(REWIND.durationS, row);
+  assert.equal(end.x, g.x, 'the camera x is exactly Gäven\'s x: centred');
+  assert.equal(end.year, 1950); assert.equal(end.yearExact, 1950);
+  let prev = Infinity; for (let t = 0; t <= REWIND.durationS; t += 0.1) { const f = rewindFrame(t, row); assert.ok(f.yearExact <= prev + 1e-9, 'never counts back up'); prev = f.yearExact; assert.ok(f.x >= g.x - 1e-9); }
+  assert.ok(rewindFrame(REWIND.durationS - 0.5, row).year >= 1950 && rewindFrame(REWIND.durationS - 0.5, row).year <= 1952, 'the last half second still reads about 1950');
+  const k = row.find((r) => r.name === 'Kråksundsgap Södra');
+  assert.ok(end.yearExact < k.built && end.yearExact > g.built, '1950 is between Gäven and Kråksundsgap Södra: one stands, one is gone');
 });
 
 check('faster and faster, then slowing to a stop: speed peaks late, is zero at both ends, and the position never jumps', () => {
