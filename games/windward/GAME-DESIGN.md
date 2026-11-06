@@ -1342,3 +1342,12 @@ future one is close to the mission. There is: **Kråksundsgap Södra (built 1954
 light burns in its pattern on the bare rock where it will be built four years later. (It's one
 of today's five task lights, so the 1950 task list changes anyway.) Fallback if that doesn't
 work: Måseskär shows its old 1865 fixed red instead of its 1950 white ("That's not our light.").
+
+**Correction and decision: chapter 1 lights in 1950 (Felix, 2026-11-06).** Research
+(docs/WORLD-1950.md) shows only Måseskär had keepers in our window in 1950; the others were
+automatic AGA acetylene lights (Gustaf Dalén's sun valve, Nobel Prize 1912: the light switches
+itself on at dusk). New task: you carry gas tanks to four automatic lights and get each burning
+again yourself (keeps the relight moment); the fifth is Måseskär, where you deliver to the one
+real keeper, the character who hints about strange lights. The Kråksundsgap light from the
+future (built 1954) stays. 1950 sea marks are red/black by compass side (IALA A only from
+1980). Supersedes "five keepers" above.
