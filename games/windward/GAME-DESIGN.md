@@ -1336,3 +1336,9 @@ cut them off; you carry paraffin, lamp mantles or a spare lens part from the dep
 to each lighthouse, the keeper relights it, and you watch from the boat (supply boats really did
 this). Five keepers, five small characters. Which five lights: per the 1950 data (manned and
 standing then; Islandsberg was already dark from 1938).
+**The strange light in 1950 (Felix, 2026-11-06):** a light where no lighthouse stands yet, if a
+future one is close to the mission. There is: **Kråksundsgap Södra (built 1954, 58.1006 N,
+11.4405 E)**, by Felix's Kråkholmen / Kråksundsgap pin; in 1950 it doesn't exist. So at night a
+light burns in its pattern on the bare rock where it will be built four years later. (It's one
+of today's five task lights, so the 1950 task list changes anyway.) Fallback if that doesn't
+work: Måseskär shows its old 1865 fixed red instead of its 1950 white ("That's not our light.").
