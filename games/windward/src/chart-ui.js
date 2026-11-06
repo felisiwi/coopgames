@@ -1,5 +1,5 @@
-// The chart and minimap controls (stage 1c): the minimap (top left) with its Chart and settings buttons, zoom +/- (bottom
-// left, away from the sheet thumb), the minimap settings sheet, the lighthouse visit card and a small toast. Plain DOM in
+// The chart and minimap controls (stage 1c): the minimap (top left, round, north up) with its Chart button, zoom +/- (bottom
+// left, away from the rope), the lighthouse visit card and a small toast. Plain DOM in
 // the same quiet style as the HUD. No logic lives here: game.js passes callbacks.
 const HUD_BG = 'rgba(20,34,48,0.78)';
 const LINE = '1px solid rgba(234,246,255,0.18)';
@@ -22,22 +22,21 @@ function button(label, aria, css = '') {
   return b;
 }
 
-// opts: { parent, settings: { shape, rot }, debug, onSettings(settings), onChart(), onZoomStep(factor), onBack(), onNavigate(), onJump(), onMiniTap(px, py, size) }
-export function createChartUi({ parent = document.body, settings, debug = false, onSettings, onChart, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
+// opts: { parent, debug, onChart(), onZoomStep(factor), onBack(), onNavigate(), onJump(), onMiniTap(px, py, size) }
+export function createChartUi({ parent = document.body, debug = false, onChart, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
   // the chart's own canvas (drawn by src/chart.js), above the 3D view and the phone layer, below the controls
   const chartCanvas = el('canvas', 'position:fixed;inset:0;width:100%;height:100%;z-index:4;display:none;pointer-events:none;touch-action:none');
   chartCanvas.setAttribute('aria-label', "Granddad's chart of the west coast");
   parent.appendChild(chartCanvas);
 
   const top = el('div', `position:fixed;z-index:7;left:max(12px,env(safe-area-inset-left,0px));top:calc(12px + ${SAFE_TOP});display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none`);
-  const mini = el('canvas', 'width:132px;height:132px;border:2px solid rgba(244,246,242,0.85);box-shadow:0 2px 10px rgba(0,0,0,0.25);background:#4d7d9d;display:block;pointer-events:auto;touch-action:manipulation');
+  const mini = el('canvas', 'width:132px;height:132px;border:2px solid rgba(244,246,242,0.85);box-shadow:0 2px 10px rgba(0,0,0,0.25);background:#4d7d9d;display:block;pointer-events:auto;touch-action:manipulation;border-radius:50%');
   mini.width = 264; mini.height = 264;
   mini.setAttribute('aria-label', 'Minimap');
-  const caption = el('div', `font:600 10px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(234,243,248,0.7);text-shadow:0 1px 2px rgba(0,0,0,.5);width:132px;text-align:center`);
+  const caption = el('div', `font:600 10px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(234,243,248,0.7);text-shadow:0 1px 2px rgba(0,0,0,.5);width:132px;text-align:center`, 'North up');
   const row = el('div', 'display:flex;gap:8px;pointer-events:auto');
   const chartBtn = button('Chart', 'Open the chart');
-  const gearBtn = button('⚙', 'Map settings', 'width:42px;padding:9px 0;font-size:17px');
-  row.append(chartBtn, gearBtn);
+  row.append(chartBtn);
   top.append(mini, caption, row);
   parent.appendChild(top);
 
@@ -62,44 +61,7 @@ export function createChartUi({ parent = document.body, settings, debug = false,
   const toastEl = el('div', `position:fixed;z-index:9;left:50%;transform:translateX(-50%);top:calc(64px + ${SAFE_TOP});display:none;max-width:min(90vw,380px);background:#efe3c8;color:#3d3226;font:16px Georgia,serif;font-style:italic;padding:9px 16px;border-radius:5px;border:1px solid rgba(61,50,38,.35);box-shadow:0 4px 14px rgba(0,0,0,.25);text-align:center`);
   parent.appendChild(toastEl);
 
-  // settings sheet
-  const sheet = el('div', `position:fixed;z-index:15;left:0;right:0;bottom:0;display:none;background:rgba(15,26,37,0.96);border-top:${LINE};border-radius:16px 16px 0 0;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(16px + ${SAFE_BOTTOM}) max(16px,env(safe-area-inset-left,0px));color:${TEXT};font:${UI_FONT}`);
-  sheet.setAttribute('data-no-zoom', '');
-  const head = el('div', 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px');
-  head.append(el('div', 'font:700 15px system-ui,sans-serif', 'Map settings'));
-  const done = button('Done', 'Close map settings');
-  head.append(done);
-  sheet.append(head);
-  const segs = {};
-  function seg(key, label, options) {
-    const r = el('div', `display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:${LINE}`);
-    r.append(el('label', 'color:rgba(234,243,248,0.7)', label));
-    const g = el('div', `display:flex;border:${LINE};border-radius:9px;overflow:hidden`);
-    segs[key] = [];
-    for (const [v, text] of options) {
-      const b = el('button', `font:${UI_FONT};color:${TEXT};background:transparent;border:0;padding:9px 11px;cursor:pointer;touch-action:manipulation`, text);
-      b.type = 'button';
-      b.addEventListener('click', () => { settings[key] = v; refresh(); onSettings(settings); });
-      segs[key].push([v, b]);
-      g.append(b);
-    }
-    r.append(g);
-    sheet.append(r);
-  }
-  seg('shape', 'Minimap', [['round', 'Round'], ['square', 'Square'], ['off', 'Off']]);
-  seg('rot', 'Minimap turns', [['north', 'North up'], ['heading', 'With the boat']]);
-  parent.appendChild(sheet);
-  function refresh() {
-    for (const [key, list] of Object.entries(segs)) for (const [v, b] of list) { b.style.background = settings[key] === v ? GOLD : 'transparent'; b.style.color = settings[key] === v ? '#1f2a33' : TEXT; }
-    caption.textContent = settings.rot === 'north' ? 'North up' : 'Turns with boat';
-    caption.style.display = settings.shape === 'off' ? 'none' : 'block';
-    mini.style.borderRadius = settings.shape === 'square' ? '14px' : '50%';
-  }
-  refresh();
-
   chartBtn.addEventListener('click', () => onChart());
-  gearBtn.addEventListener('click', () => { sheet.style.display = 'block'; refresh(); });
-  done.addEventListener('click', () => { sheet.style.display = 'none'; });
   zin.addEventListener('click', () => onZoomStep(1 / 1.35));
   zout.addEventListener('click', () => onZoomStep(1.35));
   backBtn.addEventListener('click', () => onBack());
@@ -109,10 +71,10 @@ export function createChartUi({ parent = document.body, settings, debug = false,
 
   let toastTimer = 0;
   return {
-    chartCanvas, mini, elements: { top, zoomCol, card, sheet, chartBtn, navBtn, backBtn },
+    chartCanvas, mini, elements: { top, zoomCol, card, chartBtn, navBtn, backBtn },
     // Boxes the names must keep clear of (CSS px): the minimap column, zoom buttons, the visit card.
     rects() {
-      return [top, zoomCol, card, sheet].filter((e) => e.style.display !== 'none').map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0)
+      return [top, zoomCol, card].filter((e) => e.style.display !== 'none').map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0)
         .map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height }));
     },
     // info: { title, sub, nav: 'start' | 'stop' | null, back: 'boat' | 'close' } or null. A lighthouse visit says "Back to the boat",
@@ -142,6 +104,5 @@ export function createChartUi({ parent = document.body, settings, debug = false,
     },
     // the minimap is hidden (the chart is up): its caption goes with it
     setMiniHidden(h) { caption.style.visibility = h ? 'hidden' : 'visible'; },
-    refresh,
   };
 }

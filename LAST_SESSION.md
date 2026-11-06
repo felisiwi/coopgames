@@ -2,7 +2,7 @@
 
 **2026-11-05: stage 1c, the chart and the new look** (branch `felix/windward-chart`, based on aa4bdc0 + the terrain-style
 branch, NOT merged). New terrain look (crisp zones, granite on steep ground, trees keep off it), Svalan in the game (`?boat=eka`
-for the eka), zoom out 4x then a scale-matched crossfade into the chart, minimap (round/square, north-up/with boat), fogged chart
+for the eka), zoom out 4x then a scale-matched crossfade into the chart, minimap (round, north-up, fixed), fogged chart
 of the 7 sections (fog saved on the device), lighthouses on chart + minimap with a visit view (`?debug=1` adds "Jump here").
 Numbers, decisions, phone checklist: `games/windward/docs/CHART.md`. Before that: 1b (lure) and the Boat Lab merged to main.
 

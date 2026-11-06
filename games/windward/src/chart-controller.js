@@ -6,7 +6,7 @@
 // rebuilt when it changes and the chart is up, and the minimap is a few rows of height samples per frame.
 import { LIGHTHOUSES } from './lighthouses.js';
 import { createExplored } from './explored.js';
-import { createMinimap, loadMiniSettings, saveMiniSettings } from './minimap.js';
+import { createMinimap } from './minimap.js';
 import { createChart, boundsRect } from './chart.js';
 import { createChartUi } from './chart-ui.js';
 import { ZOOM_MIN, ZOOM_CHART_START, ZOOM_CHART_FULL, ZOOM_STEP, chartBlend, chartView, fitZoom, stepZoom, wheelFactor, screenToWorld, zoomForScale } from './zoom.js';
@@ -55,7 +55,6 @@ export function placeInfo(entry) {
 // (game.js shows that lighthouse's name label, so its description is up while you look at it).
 export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
-  const settings = loadMiniSettings(storage);
   const lights = chartLights(coast.names, toGame);
   const lightList = [...lights.inWindow, ...lights.far];
   const seen = createSeen({ heightAt: coast.heightAt }); // the fog gate for names (src/seen.js); the grid arrives with chart.json
@@ -66,21 +65,20 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   };
 
   const ui = createChartUi({
-    parent, settings, debug,
-    onSettings: (s) => saveMiniSettings(storage, s),
+    parent, debug,
     onChart: () => toggleChart(),
     onZoomStep: (f) => zoomBy(f),
     onBack: () => { if (state.visit) endVisit(); else closeCard(); },
     onNavigate: () => onNavigatePressed(),
     onJump: () => { if (state.visit) { onJump(state.visit.x, state.visit.z); endVisit(); } },
     onMiniTap: (px, py, size) => {
-      const hit = mini.hitLight(px, py, size, lastBoat, lastBoat.heading || 0);
+      const hit = mini.hitLight(px, py, size, lastBoat);
       if (hit) startVisit(hit.entry);
     },
   });
   let lastBoat = { x: 0, z: 0, heading: 0 };
   const mini = createMinimap({
-    canvas: ui.mini, heightAt: coast.heightAt, places: coast.names, settings,
+    canvas: ui.mini, heightAt: coast.heightAt, places: coast.names,
     lights: lights.inWindow.map((e) => ({ id: e.id, x: e.x, z: e.z, name: e.name, entry: e })),
     marks: [], // filled each frame from getMarks (the buoys exist once the life is built)
   });

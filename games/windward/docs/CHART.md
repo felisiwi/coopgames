@@ -20,8 +20,8 @@ shader's rule). Boats: `src/boats.js`; today = Svalan (koster, gaff + jib, deck 
 - Far sea: a coarse flat ring round the water tile (`farRingGeometry`, ~3k triangles), same shader, no waves, so the sea reaches the horizon at
   the new zoom without growing the 142k-triangle wave tile.
 - Minimap (`src/minimap.js`): about 320 m across, built from the game's own height field a few rows per frame: depth in four blues, awash rock hatched,
-  low rock vs land, coast line, buoys, harbours (square = village, ring = natural harbour), lighthouses. Round / square / off, north-up / turns with
-  the boat (the gear button, remembered on the device). Tap a lighthouse on it to visit.
+  low rock vs land, coast line, buoys, harbours (square = village, ring = natural harbour), lighthouses. Fixed look (Felix's pick): round and north up, no settings button
+  and nothing saved. Tap a lighthouse on it to visit.
 
 **Batch 3, the chart.**
 - Chart (`src/chart.js`): the Map Lab's two pictures (`assets/chart/`, extracted from `ref/map-lab.html`, geography in `chart.json`), the 7 sections
@@ -69,7 +69,7 @@ background ~2.5 s after the game starts, 1.1 MB).
 1. Load the preview with `?debug=1`. Sail from Grundsund: the round minimap top-left shows the sound, the harbour mouths (squares/rings), buoys, the way out in deeper blue.
 2. Zoom out with two fingers (both down at once). Past the boat view it unrolls into the chart; keep going to the whole coast; zoom back in to land on the boat.
 3. Try +/- and the Chart / Boat button. Check that steering (one finger) still works, and trim with the rope (bottom-right, below).
-4. Gear: Round/Square/Off, North up / With the boat. Sail a bit with "With the boat".
+4. The minimap is always round and north up (no gear button).
 5. On the chart: red outline = granddad's sheet, the rest uncharted (tap one: a note). Fog lifts where you sailed; reload, the fog is still lifted.
 6. Tap a gold lighthouse on the chart or the minimap: the camera glides there, the boat stays; "Back to the boat". "Jump here (debug)" moves the boat.
 7. `?boat=eka` for the 1700 eka. `?preset=current` for the old terrain look.
