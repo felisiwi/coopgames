@@ -7,17 +7,27 @@
 // Not said on purpose: Britta's finale line ("I've been waiting for you since 1950") stays for the finale. The year is not stated on a card: TODO(felix): say
 // "1950" out loud, or let the player work it out (the boats, the lights and the ferry are the clue)?
 
-// ---- the opening scene: today, ~30 s, not playable, skippable, shown once --------------------------------------------------------------------------------
-// scene: which picture src/opening.js draws (kitchen | jetty | storm | flash | dark). caption: one short line (empty = none). at/dur in seconds.
-export const OPENING_BEATS = [
-  { id: 'kitchen', at: 0, dur: 6, scene: 'kitchen', caption: 'Britta’s kitchen, Fiskebäckskil. Today.' },
-  { id: 'window', at: 6, dur: 5, scene: 'kitchen', caption: 'Through the window: granddad’s koster, Svalan, at the jetty.' },
-  { id: 'wind', at: 11, dur: 5, scene: 'jetty', caption: 'The wind is getting up.' },
-  { id: 'out', at: 16, dur: 5, scene: 'storm', caption: 'You go out to make her fast.' },
-  { id: 'wave', at: 21, dur: 5, scene: 'flash', caption: 'A wave. A flash.' },
-  { id: 'dark', at: 26, dur: 4, scene: 'dark', caption: '' },
+// ---- the opening: in the engine, ~42 s, not playable, skippable, shown once (batch 2b; replaces the SVG scene) ---------------------------------------------------
+// Dusk over today's Fiskebäckskil (the Today world: modern boats, the ferry with its lights, lit windows), the camera settles on one house by the water with Svalan
+// at its jetty; fog, thunder, darkness with flashes; then the lighthouse rewind in the dark (src/rewind.js); then it is 1950 and the game begins at dawn.
+// `at`/`dur` in seconds. The rewind's length is REWIND.durationS in src/rewind.js (15 s): keep the two in step (the test checks).
+export const OPENING_PLAN = [
+  { id: 'dusk', at: 0, dur: 10 },     // blue hour, the camera settles on the house
+  { id: 'fog', at: 10, dur: 6 },      // fog rolls in, the light goes
+  { id: 'storm', at: 16, dur: 8 },    // thunder, darkness with flashes
+  { id: 'rewind', at: 24, dur: 15 },  // the lighthouse rewind
+  { id: 'hold', at: 39, dur: 2 },     // stopped at 1950
+  { id: 'out', at: 41, dur: 1.5 },    // a last flash; the game takes over
 ];
-export const OPENING_TOTAL_S = OPENING_BEATS.reduce((t, b) => Math.max(t, b.at + b.dur), 0);
+export const OPENING_TOTAL_S = OPENING_PLAN.reduce((t, b) => Math.max(t, b.at + b.dur), 0);
+// Two or three minimal lines, no explanation of time travel (design). DRAFT: TODO(felix): confirm.
+export const OPENING_LINES = [
+  { from: 3, to: 9, text: 'Granddad’s koster, Svalan, at the jetty.' },
+  { from: 11, to: 15.5, text: 'The wind is getting up.' },
+  { from: 17, to: 23, text: 'You go out to make her fast.' },
+];
+// Lightning (seconds into the opening) and the thunder that follows each (seconds later, by distance).
+export const OPENING_FLASHES = [{ at: 17.2, thunderAfter: 1.6 }, { at: 18.7, thunderAfter: 0.9 }, { at: 19.1, thunderAfter: 0.7 }, { at: 21.4, thunderAfter: 0.4 }, { at: 22.6, thunderAfter: 0.3 }];
 export const OPENING_SKIP = 'Skip';
 
 // ---- waking: three short cards over the first view of 1950 -----------------------------------------------------------------------------------------------

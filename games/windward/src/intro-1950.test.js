@@ -4,8 +4,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { OPENING_BEATS, OPENING_TOTAL_S, WAKE_CARDS, START_CARD_1950, STORY_1950 } from './story-1950.js';
-import { beatAt, shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro, OPENING_KEY, INTRO_KEY } from './opening.js';
+import { OPENING_PLAN, OPENING_LINES, OPENING_FLASHES, OPENING_TOTAL_S, WAKE_CARDS, START_CARD_1950, STORY_1950 } from './story-1950.js';
+import { REWIND } from './rewind.js';
+import { phaseAt, flashLevel, shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro, OPENING_KEY, INTRO_KEY } from './opening.js';
 import { eraStorage } from './era-storage.js';
 
 globalThis.fetch = async (u) => { const b = readFileSync(fileURLToPath(u)); return { text: async () => b.toString('utf8'), json: async () => JSON.parse(b.toString('utf8')), arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) }; };
@@ -18,18 +19,33 @@ async function check(name, fn) { await fn(); passed += 1; console.log(`ok - ${na
 const memory = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), keys: () => [...m.keys()] }; };
 
 // ------------------------------------------------------------------------------------------------------------ the words
-const allText = [...OPENING_BEATS.map((b) => b.caption), ...WAKE_CARDS.flatMap((c) => [c.title, ...c.lines, c.button]), START_CARD_1950.title, ...START_CARD_1950.lines, START_CARD_1950.go, START_CARD_1950.skip];
+const allText = [...OPENING_LINES.map((l) => l.text), ...WAKE_CARDS.flatMap((c) => [c.title, ...c.lines, c.button]), START_CARD_1950.title, ...START_CARD_1950.lines, START_CARD_1950.go, START_CARD_1950.skip];
 
-await check('the opening: about 30 s, beats follow each other with no gap, every scene is one the picture can draw, it ends in the dark', () => {
-  assert.ok(OPENING_TOTAL_S >= 28 && OPENING_TOTAL_S <= 32, `total ${OPENING_TOTAL_S} s`);
+await check('the opening: dusk, fog, storm, the rewind, a hold at 1950, a last flash; the phases follow each other with no gap and the rewind lasts as long as src/rewind.js says', () => {
+  assert.deepEqual(OPENING_PLAN.map((p) => p.id), ['dusk', 'fog', 'storm', 'rewind', 'hold', 'out']);
   let t = 0;
-  for (const b of OPENING_BEATS) { assert.equal(b.at, t, `${b.id} starts where the last one ended`); t += b.dur; assert.ok(['kitchen', 'jetty', 'storm', 'flash', 'dark'].includes(b.scene), b.scene); assert.ok(b.dur >= 3, `${b.id} is long enough to read`); }
+  for (const p of OPENING_PLAN) { assert.equal(p.at, t, `${p.id} starts where the last one ended`); t += p.dur; }
   assert.equal(t, OPENING_TOTAL_S);
-  assert.equal(OPENING_BEATS.at(-1).scene, 'dark');
-  assert.equal(OPENING_BEATS.at(-1).caption, '');
-  assert.equal(OPENING_BEATS[0].scene, 'kitchen', 'it starts in Britta’s kitchen');
-  assert.ok(OPENING_BEATS.some((b) => /Svalan/.test(b.caption) && /jetty/.test(b.caption)), 'Svalan at the jetty');
-  assert.ok(OPENING_BEATS.some((b) => b.scene === 'storm') && OPENING_BEATS.some((b) => b.scene === 'flash'), 'a storm and a flash');
+  assert.ok(OPENING_TOTAL_S >= 35 && OPENING_TOTAL_S <= 50, `total ${OPENING_TOTAL_S} s`);
+  assert.equal(OPENING_PLAN.find((p) => p.id === 'rewind').dur, REWIND.durationS, 'the plan and the rewind agree on its length');
+  assert.equal(phaseAt(0).id, 'dusk'); assert.equal(phaseAt(9.99).id, 'dusk'); assert.equal(phaseAt(10).id, 'fog'); assert.equal(phaseAt(24).id, 'rewind');
+  assert.equal(phaseAt(OPENING_TOTAL_S - 0.01).id, 'out'); assert.equal(phaseAt(OPENING_TOTAL_S), null); assert.equal(phaseAt(-1), null);
+  assert.ok(Math.abs(phaseAt(27).u - 0.2) < 1e-9);
+});
+
+await check('two or three minimal lines, none during the rewind, no word about time travel; lightning only in the storm, with thunder after each flash', () => {
+  assert.ok(OPENING_LINES.length >= 2 && OPENING_LINES.length <= 3, `${OPENING_LINES.length} lines`);
+  const rewindAt = OPENING_PLAN.find((p) => p.id === 'rewind').at;
+  for (const l of OPENING_LINES) { assert.ok(l.from < l.to && l.to <= rewindAt, `"${l.text}" is over before the rewind`); assert.ok(l.to - l.from >= 4, `"${l.text}" stays long enough to read`); }
+  for (let i = 1; i < OPENING_LINES.length; i++) assert.ok(OPENING_LINES[i].from >= OPENING_LINES[i - 1].to, 'one line at a time');
+  assert.ok(OPENING_LINES.some((l) => /Svalan/.test(l.text)), 'Svalan at the jetty');
+  assert.ok(!/time|year|1950|travel|back/i.test(OPENING_LINES.map((l) => l.text).join(' ')), 'no explanation of time travel');
+  const storm = OPENING_PLAN.find((p) => p.id === 'storm');
+  for (const f of OPENING_FLASHES) { assert.ok(f.at >= storm.at && f.at < storm.at + storm.dur, `flash at ${f.at} is in the storm`); assert.ok(f.thunderAfter > 0 && f.thunderAfter < 3); }
+  assert.ok(OPENING_FLASHES.length >= 3);
+  assert.equal(flashLevel(10, OPENING_FLASHES), 0); assert.ok(flashLevel(OPENING_FLASHES[0].at + 0.06, OPENING_FLASHES) > 0.6, 'a flash is bright at its peak');
+  assert.ok(flashLevel(OPENING_FLASHES[0].at + 0.5, OPENING_FLASHES) < flashLevel(OPENING_FLASHES[0].at + 0.1, OPENING_FLASHES), 'and fades');
+  for (let x = 0; x < OPENING_TOTAL_S; x += 0.05) { const v = flashLevel(x, OPENING_FLASHES); assert.ok(v >= 0 && v <= 1); }
 });
 
 await check('the cards: Britta replaces the old storm card; no grandma, no finale line, short lines for a phone; the boy is not named', () => {
@@ -47,12 +63,7 @@ await check('the cards: Britta replaces the old storm card; no grandma, no final
   for (const t of allText) assert.ok(t.length <= 92, `too long for a phone card: ${t}`);
 });
 
-// ------------------------------------------------------------------------------------------------------------ timeline and flags
-await check('beatAt finds the beat at a time, and nothing after the end', () => {
-  assert.equal(beatAt(0).id, 'kitchen'); assert.equal(beatAt(5.99).id, 'kitchen'); assert.equal(beatAt(6).id, 'window');
-  assert.equal(beatAt(OPENING_TOTAL_S - 0.01).id, 'dark'); assert.equal(beatAt(OPENING_TOTAL_S), null); assert.equal(beatAt(-1), null);
-});
-
+// ------------------------------------------------------------------------------------------------------------ flags
 await check('shown once: only in the 1950 game, ?opening=0 never, ?opening=1 always; the flags are per era and survive blocked storage', () => {
   assert.equal(shouldShowOpening({ era: '1950', seen: false, param: null }), true);
   assert.equal(shouldShowOpening({ era: '1950', seen: true, param: null }), false);

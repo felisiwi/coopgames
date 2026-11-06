@@ -48,7 +48,8 @@ import { createHarbourWater } from './src/harbour-water.js';
 import { createTaskUi } from './src/task-ui.js';
 import { createWakeScene } from './src/wake-scene.js';
 import { STORY_1950, LIGHTS_1950, KEEPER_LIGHT, DEPOT, RELIGHT_STEPS, NO_GAS_HINT, EASE_OFF_DEPOT, GLOW_TOAST, FUTURE_CARD, FUTURE_LIGHT_NAME } from './src/story-1950.js';
-import { createOpening, shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro } from './src/opening.js';
+import { shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro } from './src/opening.js';
+import { GREY_DAWN, blendLook, snapshotLook, applyLook as applyLookValues } from './src/dusk.js';
 import { lightGlyph } from './src/light-glyph.js';
 import { createLightLog, logRows } from './src/light-log.js';
 import { createChapter1 } from './src/chapter1.js';
@@ -134,11 +135,37 @@ export default function start(args) {
     .then((busy) => import('./src/coast-for-year.js')
       .then((m) => m.loadCoastForYear(year, { vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, style: parseGameStyle(window.location.search), at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined, summerShare: busy ? busy.profile.houses.share : 0 }))
       .then((coast) => { coast.busy = busy; return coast; }))
-    .then((coast) => { note.remove(); window.__coastReport = coast.report; startGame({ ...args, net }, coast); })
+    .then(async (coast) => {
+      // 1950, the first time: the opening plays in the engine over TODAY's Fiskebäckskil (src/opening-stage.js), then the game begins at dawn on the 1950 coast.
+      let opening = null;
+      if (coast.era === '1950' && shouldShowOpening({ era: '1950', seen: hasSeenOpening(eraStorage('1950')), param: q.get('opening') })) {
+        try { opening = await loadOpeningWorld(args, q, num, jsonAt); } catch (err) { console.warn('the opening could not be built; starting without it:', err); }
+      }
+      note.remove();
+      if (opening) {
+        const audio = createAudio(); audio.armOnFirstGesture();
+        const run = opening.play({ audio });
+        window.__opening = run;
+        await run.done;
+        markOpeningSeen(eraStorage('1950'));
+      }
+      window.__coastReport = coast.report;
+      startGame({ ...args, net }, coast, { dawn: !!opening });
+    })
     .catch((err) => { note.textContent = `the coast failed to load: ${err && err.message}`; console.error(err); window.__coastError = String((err && err.stack) || err); });
 }
 
-function startGame({ canvas, net, seed, role }, coast) {
+// The Today coast and its busy coast for the opening (every cottage a house with lit windows: summerShare 1), built behind the loading note. Returns { play(opts) }.
+async function loadOpeningWorld(args, q, num, jsonAt) {
+  const [mod, stage, eras, busyWorld] = await Promise.all([import('./src/coast-for-year.js'), import('./src/opening-stage.js'), jsonAt('./data/busy-eras.json'), jsonAt('./data/busy-world.json')]);
+  const todayYear = 2015; // the Today world (data/world-years.json); the opening shows it at dusk
+  const coast = await mod.loadCoastForYear(todayYear, { seed: args.seed, style: parseGameStyle(window.location.search), summerShare: 1 });
+  const village = coast.names.find((n) => n.id === 'village:Fiskebäckskil');
+  const profile = profileForYear(eras, todayYear);
+  return { play: (extra) => stage.playOpening({ canvas: args.canvas, coast, busy: profile ? { profile, world: busyWorld } : null, village, seed: args.seed, ...extra }) };
+}
+
+function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // ?tune=1 (look pass 2): a link can carry look values (src/look-presets.js);
   // apply them over config.js BEFORE anything is built. Without tune=1 nothing
   // here runs and the panel never exists.
@@ -771,12 +798,33 @@ function startGame({ canvas, net, seed, role }, coast) {
   if (era1950 && task && chartCtl && hasSeenIntro(store) && (task.phase === 'gas' || task.phase === 'keeper')) guide(); // reloaded mid-job: the goal's tag is back
   // First time (and no progress yet): the storm card. Everything behind it keeps running, but the card takes every touch.
   // The first minutes (1950): the opening scene (once), the waking cards, then Britta's card. Anywhere else, the old storm card, once.
+  // Dawn (batch 2b): the opening ended in the dark at 1950; the game begins in the grey first light on the 1950 shore, the fog lifts and the sea warms over DAWN_S,
+  // then the first story cards. The look values come from src/dusk.js (GREY_DAWN blended into the game's own day look); the boat and the cards wait.
+  const DAWN_S = 9;
+  let dawn = null;
+  const dawnHaze = { HAZE_MESH_NEAR_MUL: CONFIG.HAZE_MESH_NEAR_MUL, HAZE_MESH_FAR_MUL: CONFIG.HAZE_MESH_FAR_MUL, HAZE_WATER_NEAR_MUL: CONFIG.HAZE_WATER_NEAR_MUL, HAZE_WATER_FAR_MUL: CONFIG.HAZE_WATER_FAR_MUL, HAZE_WATER_STRENGTH: CONFIG.HAZE_WATER_STRENGTH };
+  function stepDawn(dt) {
+    if (!dawn.paused) dawn.t += dt;
+    const x = Math.min(1, dawn.t / DAWN_S), k = x * x * (3 - 2 * x);
+    applyLookValues(blendLook(GREY_DAWN, dawn.base, k));
+    const fog = fogMoodValues(dawnHaze, (1 - k) * 0.9); delete fog.HAZE_COLOR; Object.assign(CONFIG, fog);
+    if (dawn.t >= DAWN_S) { Object.assign(CONFIG, dawnHaze); applyLookValues(dawn.base); const d = dawn; dawn = null; applyLook('DAWN'); d.onDone(); return; }
+    applyLook('DAWN');
+  }
+  if (opts.dawn) {
+    const veil = document.createElement('div'); // the opening ended on black: it lifts over the first moments
+    veil.style.cssText = 'position:fixed;inset:0;z-index:24;background:#000;opacity:1;transition:opacity 1.8s;pointer-events:none';
+    document.body.appendChild(veil);
+    requestAnimationFrame(() => requestAnimationFrame(() => { veil.style.opacity = '0'; setTimeout(() => veil.remove(), 2000); }));
+    dawn = { t: 0, base: snapshotLook(), onDone: () => {}, paused: !!debugOverlay && !!window.__holdDawn }; // ?debug=1 and window.__holdDawn = true before the opening ends: the dawn waits (screenshots)
+    if (debugOverlay) window.__dawn = dawn;
+    stepDawn(0);
+  }
   const qIntro = new URLSearchParams(window.location.search).get('opening');
   if (task && taskUi && (task.phase === 'lights' || task.phase === 'gas') && task.restoredCount === 0) {
-    if (coast.era === '1950' && (qIntro === '1' || !hasSeenIntro(store))) {
+    if (era1950 && (qIntro === '1' || !hasSeenIntro(store))) {
       const wakeCards = () => taskUi.showWake({ onDone: () => { wakeScene?.haul(); markIntroSeen(store); taskUi.showStart(); } }); // "he takes her for repair"
-      if (shouldShowOpening({ era: coast.era, seen: hasSeenOpening(store), param: qIntro })) createOpening({ onDone: () => { markOpeningSeen(store); wakeCards(); } });
-      else wakeCards();
+      if (dawn) dawn.onDone = wakeCards; else wakeCards(); // after the opening: the first light of 1950 comes up first, then the cards
     } else if (!hasSeenStart(store)) taskUi.showStart();
   }
   if (task && debugOverlay) window.__task = { task, depotEntry, keeperEntry, kr, momentEntry, futureTower, switchToSvalan, reportMoment1950, keeperMoment1950, depotMoment1950, get selfBoat() { return selfBoat; }, lanternFx, taskUi, grandma, harbourWater, chapter, lightLog, gdMarks, strangeEntry, get towerFx() { return towerFx; }, startStrange: () => startStrange(), selfBoat, CONFIG, get strange() { return strange; } };
@@ -853,7 +901,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       }
     }
 
-    const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible); // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
+    const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible) || !!dawn; // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
     if (!frozen) phone?.apply(self, wind, dt);
     if (!frozen && (input.left || input.right)) hasSteered = true;
     if (input.up || input.down) hasTrimmed = true;
@@ -923,6 +971,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     // the fog thickens round the boat for a moment (the haze values the game already has, tweened and put back), then the card.
     if ((gd || momentEntry) && towerFx && chartCtl && !strange && chapter.chartOpen && !chapter.towerSeen && !taskUi.visible && !chartCtl.visiting && Math.hypot(strangeEntry.x - self.x, strangeEntry.z - self.z) <= STRANGE_TRIGGER_M) startStrange();
     if (strange) stepStrange(dt);
+    if (dawn) stepDawn(dt);
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
     stepWaves(waves, dt, wind, self.x, self.z); // before anything samples the sea this frame
