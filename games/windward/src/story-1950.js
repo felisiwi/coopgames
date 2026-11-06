@@ -88,10 +88,11 @@ export const BRITTA_ENTRY = Object.freeze({ id: 'house:britta', name: 'Britta’
 export const BRITTA_CARDS = [
   { title: 'Britta', lines: ['“You’re the one who came ashore in the storm. The boy said you might come.”', '“I’m Britta.”'], button: 'Next' }, // INVENTED-DIALOGUE
   { title: 'Britta', lines: ['“My father tends the lights round here.”', '“He’s broken his arm, and the storm has put them all out.”'], button: 'Next' }, // INVENTED-DIALOGUE
-  { title: 'Britta', lines: ['“The gas tanks are in our shed. Four of them, one for each light.”', '“Will you take them out in the eka?”'], button: 'Next' }, // INVENTED-DIALOGUE
-  { title: 'Britta', lines: ['“There’s a sack of post for the keeper on Måseskär too.”', '“Tell me when they’re burning.”'], button: 'Load the eka' }, // INVENTED-DIALOGUE
+  { title: 'Britta', lines: ['“Will you light them for me?”', '“The gas tanks are in our shed. Four of them, one for each light.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'Britta', lines: ['“Take one out to Hättan, Gäven, Stångholmen and Fredagsholmen.”', '“Fit it, get the light burning again. They’re marked on your chart.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'Britta', lines: ['“And take this sack of post to the keeper on Måseskär.”', '“Then come back here and tell me when all four are burning.”'], button: 'Load the eka' }, // INVENTED-DIALOGUE
 ];
-export const TANKS_TOAST = 'Four tanks and a sack of post aboard · four lights to bring back';
+export const TANKS_TOAST = 'Four gas tanks and the post aboard · relight the four lights, then Måseskär';
 export const NO_GAS_HINT = 'No tanks yet. Britta’s shed holds them.';
 export const EASE_OFF_BRITTA = 'Ease off to tie up at Britta’s jetty';
 

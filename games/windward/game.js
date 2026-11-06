@@ -720,7 +720,9 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       return;
     }
     const p = task.phase;
-    const goal = era1950 ? (p === 'keeper' ? keeperEntry : p === 'report' ? brittaEntry : null) : (p === 'report' ? grandma : null);
+    // 1950, with the gas aboard: point at the nearest light still dark, so it is always clear where to sail next (Felix, 2026-11-06)
+    const nextDark = () => { let best = null, bd = Infinity; for (const l of task.lights) { if (!task.isDark(l.id)) continue; const d = Math.hypot(l.x - self.x, l.z - self.z); if (d < bd) { bd = d; best = l; } } return best && (lightEntries.find((e) => e.id === best.id) || best); };
+    const goal = era1950 ? (p === 'lights' ? nextDark() : p === 'keeper' ? keeperEntry : p === 'report' ? brittaEntry : null) : (p === 'report' ? grandma : null);
     if (goal) chartCtl.setTarget(goal); else if (era1950) chartCtl.clearTarget();
   }
   // The beats' moments (1950): the chandler at Grundsund, the boy at the yard, and the first sight of the beach.
@@ -774,6 +776,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   function onRelit(entry) {
     const r = task.restore(entry.id);
     lanternFx.get(entry.id)?.setLit(true);
+    if (era1950 && task.phase === 'lights') guide(); // the next dark light gets the Navigate tag
     if (era1950) audio?.pop(0); // the flasher's "pop"
     audio?.relight();
     const lh = lightList.find((x) => `light:${x.name}` === entry.id);
