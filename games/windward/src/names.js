@@ -26,6 +26,23 @@ export function deviceStorage() {
   }
 }
 
+// False namesakes (Felix, 2026-11-06): OSM has tiny skerries literally named "Marstrand" next to Islandsberg, a name that misleads beside the
+// real Marstrand. A skerry or islet whose name equals a MAJOR place (a village or town in places.json, a settlement, or one of the famous names
+// below) and which is not that place shows no name: it is dropped from the name list, so it is never announced, never on the chart, never found.
+// "Is that place" = within NAMESAKE_REACH_M of a village of that name (Gullholmen's island is 1 m from Gullholmen; the Marstrand skerries are
+// 2.7 km from the real Marstrand). Game metres: 150 = 1.5 km real. Small natural harbours are not major places (Dammholmen, Kråkholmen stay).
+export const FAMOUS_NAMES = ['Marstrand', 'Smögen', 'Lysekil', 'Käringön', 'Gullholmen', 'Grundsund', 'Fiskebäckskil'];
+export const NAMESAKE_REACH_M = 150;
+
+// entries: the name list rows { name, kind, x, z }; anchors: [{ name, x, z }] the major places (villages, towns). Returns the rows to hide.
+export function findFalseNamesakes(entries, anchors, famous = FAMOUS_NAMES) {
+  const byName = new Map();
+  for (const a of anchors) { if (!byName.has(a.name)) byName.set(a.name, []); byName.get(a.name).push(a); }
+  const major = new Set([...byName.keys(), ...famous]);
+  return entries.filter((e) => (e.kind === 'island' || e.kind === 'skerry') && major.has(e.name)
+    && !(byName.get(e.name) || []).some((a) => Math.hypot(a.x - e.x, a.z - e.z) <= NAMESAKE_REACH_M));
+}
+
 // names: assets/coast/names.json; villages: settlements-history.json's `settlements`;
 // toGame(lon, lat) -> [x, z]; inside(x, z) -> true when the point is in the playable region.
 // placeNames (optional): data/place-names.json, { descriptions: { name: 'the Hood' }, extraHarbours: [{ name, lat, lon }] }.
@@ -33,7 +50,8 @@ export function deviceStorage() {
 // A harbour that is also an OSM island/islet, or a village on a same-named skerry, appears once (SAME_PLACE_M).
 // lights (optional, stage 1c): [{ name, lat, lon }] (src/lighthouses.js LIGHTHOUSES): a lighthouse is a place too (id "light:<name>"),
 // and wins over a same-named skerry on its rock, so it is one entry with the lighthouse's own kind.
-export function buildNameList({ names, villages, toGame, inside, placeNames = {}, lights = [] }) {
+// majorPlaces (optional, stage 1d): places.json `places` of kind village / town: [{ name, lat, lon }], so a namesake of a place OUTSIDE the window is caught.
+export function buildNameList({ names, villages, toGame, inside, placeNames = {}, lights = [], majorPlaces = [], onHidden = null }) {
   const descriptions = placeNames.descriptions || {};
   const all = [];
   const add = (id, name, kind, lon, lat) => {
@@ -46,6 +64,11 @@ export function buildNameList({ names, villages, toGame, inside, placeNames = {}
   for (const h of placeNames.extraHarbours || []) add(`harbour:${h.name}`, h.name, 'harbour', h.lon, h.lat);
   for (const v of villages) add(`village:${v.name}`, v.name, 'village', v.lon, v.lat);
   for (const l of lights) add(`light:${l.name}`, l.name, 'light', l.lon, l.lat);
+  // A skerry named like a major place that it is not: no name at all (see findFalseNamesakes).
+  const anchors = [...villages, ...majorPlaces].filter((p) => typeof p.lon === 'number' && typeof p.lat === 'number').map((p) => { const [x, z] = toGame(p.lon, p.lat); return { name: p.name, x, z }; });
+  const hidden = new Set(findFalseNamesakes(all, anchors));
+  if (onHidden) onHidden([...hidden]); // so the game's load report can say which names the rule hid
+  if (hidden.size) for (let i = all.length - 1; i >= 0; i--) if (hidden.has(all[i])) all.splice(i, 1);
   // Most important kind first; a lesser entry of the same name close to a kept one is dropped.
   const kept = [];
   for (const e of [...all].sort((a, b) => (KIND_RANK[a.kind] ?? 9) - (KIND_RANK[b.kind] ?? 9))) {

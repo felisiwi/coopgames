@@ -31,7 +31,7 @@ import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
 import { createInputState } from '../../shared/input.js';
 import { createDebugOverlay } from './src/debug-overlay.js';
-import { stepAlongShore, shallowFactor, SHORE_BRAKE } from './src/shore.js';
+import { stepAlongShore, shallowFactor, isBlocked, SHORE_BRAKE } from './src/shore.js';
 import { createNameBook } from './src/names.js';
 import { createNameLabels } from './src/name-labels.js';
 import { createChartController } from './src/chart-controller.js';
@@ -39,7 +39,18 @@ import { parseGameStyle } from './src/terrain-style.js';
 import { createArrivals, giftFor } from './src/arrival.js';
 import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
+import { LIGHTHOUSES } from './src/lighthouses.js';
+import { createLanternFx, colourHex } from './src/lantern.js';
+import { createLighthouseTask, towerLit, GRANDMA_ID, REWARD_DELAY_S, hasSeenStart, markStartSeen, resetStart } from './src/lighthouse-task.js';
+import { createHarbourWater } from './src/harbour-water.js';
+import { createTaskUi } from './src/task-ui.js';
+import { lightGlyph } from './src/light-glyph.js';
+import { createLightLog, logRows } from './src/light-log.js';
+import { createChapter1 } from './src/chapter1.js';
+import { STRANGE, STRANGE_TRIGGER_M, STRANGE_LOOK_BIAS, STRANGE_FLASH_LEVEL, STRANGE_CARD, strangeFrame, fogMoodValues } from './src/old-tower.js';
 import { createLife } from './src/life.js';
+import { createShoalLayer } from './src/shoal-look.js';
+import { createSeamarkLayer } from './src/seamark-layer.js';
 import { createHarbourMoment } from './src/harbour-moment.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
@@ -102,6 +113,10 @@ export default function start(args) {
   const num = (k) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
   return import('./src/coast-world.js')
     .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, style: parseGameStyle(window.location.search), at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
+    .then(async (coast) => { // granddad's chart (data/granddad-chart.json): opens with the chest; a missing file only means no extra marks
+      try { coast.granddad = await (await fetch(new URL('./data/granddad-chart.json', import.meta.url))).json(); } catch { coast.granddad = null; }
+      return coast;
+    })
     .then((coast) => { note.remove(); window.__coastReport = coast.report; startGame({ ...args, net }, coast); })
     .catch((err) => { note.textContent = `the coast failed to load: ${err && err.message}`; console.error(err); window.__coastError = String((err && err.stack) || err); });
 }
@@ -275,6 +290,12 @@ function startGame({ canvas, net, seed, role }, coast) {
   }
 
   if (coast) scene.add(coast.group); // terrain, trees near the boat, villages, lighthouses
+  // Stage 1d: the water tells the truth: the real shoals (surf rings on solid rocks, faint dark water on submerged ones) and the real
+  // sea-marks (OpenStreetMap, ODbL). Invented harbour-mouth marks look exactly like real ones; only ?debug=1 rings them.
+  const shoalLayer = coast ? createShoalLayer(coast.sea.shoalList) : null;
+  if (shoalLayer) scene.add(shoalLayer.group);
+  const seamarkLayer = coast ? createSeamarkLayer({ marks: coast.sea.marks, toGame: coast.world.toGame, heightAt: coast.heightAt, debug: new URLSearchParams(window.location.search).get('debug') === '1' }) : null;
+  if (seamarkLayer) scene.add(seamarkLayer.group);
 
   // Stage 2: discoverables — seeded, identical on both peers, so only
   // "found" events cross the wire. Found only when BOTH boats are near
@@ -329,7 +350,12 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Boats (src/boats.js, docs/boat-lab/README.md): today = Svalan, granddad's koster (gaff + jib, deck items, wear 0.8: the
   // defaults). The player colour is the masthead pennant only. ?boat=eka = the ~1700 eka (rust sail) until the jump exists.
   const boatType = new URLSearchParams(window.location.search).get('boat') === 'eka' ? 'eka' : 'koster';
-  const boatOptions = boatType === 'eka' ? { type: 'eka', sailTone: 'rust' } : { type: 'koster' };
+  // Chapter 1 (stage 1d, batch B): granddad's sea chest is NOT on Svalan's deck until grandma gives it; the light log lists the lights you have heard.
+  const chapter = createChapter1();
+  const lightLog = createLightLog();
+  if (new URLSearchParams(window.location.search).get('lights') === 'reset') { chapter.reset(); lightLog.reset(); }
+  const deckFor = () => ['crate', 'barrel', chapter.chest ? 'chest' : null];
+  const boatOptions = boatType === 'eka' ? { type: 'eka', sailTone: 'rust' } : { type: 'koster', ...(coast ? { deck: deckFor() } : {}) };
   const selfBoat = createBoatMesh(selfColor, boatOptions);
   scene.add(selfBoat.group);
   const selfWake = createWake();
@@ -357,6 +383,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     window.__self = self;
     window.__labels = nameLabels;
     window.__coastStyle = coast.terrainStyle;
+    window.__sea = { coast, seamarks: seamarkLayer, shoals: shoalLayer }; // stage 1d headless checks
     window.__coastHeight = coast.heightAt;
   }
   // Stage 1b, the lure: arriving slowly in a harbour (a bell, a wave, a fish on deck), small life on the water.
@@ -374,13 +401,14 @@ function startGame({ canvas, net, seed, role }, coast) {
       seaY: (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength), // (waves / wind are set up below)
       inside: (x, z) => coast.world.inside(x, z, 100),
       onCry: () => audio.gull(0, 0.5),
+      marks: seamarkLayer ? seamarkLayer.perchMarks() : null, // gulls perch on the REAL marks; no decorative buoys
     })
     : null;
   if (coast && debugOverlay) window.__wind = () => wind;
   if (coast && debugOverlay) window.__lureOn = lureOn;
   if (lureOn && debugOverlay) window.__lure = { arrivals, deck, moment, life, audio, names: coast.names }; // headless checks
   // The HUD counter on the real coast: places you have named (there are no "finds" to count).
-  const progressText = () => (coast ? `places named ${nameBook.count()}` : `found ${found.size}/${discoverables.length}`);
+  const progressText = () => (coast ? `places named ${nameBook.count()}${task && task.progressText() ? ` · ${task.progressText()}` : ''}` : `found ${found.size}/${discoverables.length}`);
   const other = { x: null, z: null, heading: 0, speed: 0 };
   let otherLastPosAtS = null; // for partnerState() (src/partner.js)
   let partnerLeftAtS = null; // when the "friend left" notice started
@@ -536,10 +564,88 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Phone controls (src/phone.js): hold to aim, second-thumb sheet, arc,
   // wind at the boat. The corner HUD and keyboard legend are hidden there.
   const phone = isPhone ? createPhoneControls({ canvas, camera, onPing: () => doPing() }) : null;
+  // Stage 1d, the first task: the storm put the five lighthouses nearest the start out. Sail to each (close and slow: the boat moors, the camera
+  // circles, the light comes back on, the fog lifts), then report to grandma in Fiskebäckskil. Progress is saved on the device (?lights=reset forgets it).
+  const task = coast ? createLighthouseTask({ lights: coast.names.filter((e) => e.kind === 'light'), spawn: coast.spawn || { x: self.x, z: self.z } }) : null;
+  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(); }
+  const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
+  const gd = coast ? coast.granddad : null; // granddad's chart: { favourites, strange }
+  let towerFx = null; // Måseskär's old 1865 tower: dark since 1978, a faint ghost of a flash only in the strange moment
+  if (coast && task) {
+    for (const l of coast.lights) {
+      const entry = LIGHTHOUSES.find((x) => x.name === l.name);
+      if (!entry || !l.group) continue;
+      const ghost = !!gd && entry.name === gd.strange.tower;
+      const fx = ghost ? createLanternFx(l.group, { ...entry, light: gd.strange.light }, { beam: false, solidHalo: true, color: colourHex(gd.strange.light.colour) }) : createLanternFx(l.group, entry);
+      if (ghost) { fx.phase = 0; fx.dim = STRANGE_FLASH_LEVEL; fx.haloMul = 1.6; fx.setLit(false); towerFx = fx; continue; }
+      const taskLight = task.lights.some((t) => t.id === `light:${l.name}`);
+      // a task light is lit exactly when restored (Islandsberg and Stångehuvud are dark in real life but start dark AND stay lit once restored, also after a reload);
+      // any other tower follows the light data (Böttö, Carlsten stay dark)
+      fx.setLit(towerLit({ isTaskLight: taskLight, restored: !task.isDark(`light:${l.name}`), dataLit: entry.lit }));
+      lanternFx.set(`light:${l.name}`, fx);
+    }
+  }
+  // Granddad's marks on the chart (after the chest): his favourites in the region (each a real name-list entry, so a Navigate target) and the strange mark.
+  const strangeEntry = gd ? (() => { const [x, z] = coast.world.toGame(gd.strange.lon, gd.strange.lat); return { id: gd.strange.id, name: gd.strange.name, kind: 'granddad', desc: `Granddad’s note: ${gd.strange.light.pattern.replace(/\s*\(.*\)\s*$/, '')}`, x, z, strange: true }; })() : null;
+  const gdMarks = gd ? [...gd.favourites.map((f) => coast.names.find((e) => e.id === f.id)).filter(Boolean).map((e) => ({ ...e, granddad: true })), strangeEntry] : [];
+  const granddadMarks = () => (chapter.chartOpen ? gdMarks : []);
+  const lightLookup = (id) => {
+    if (gd && id === gd.strange.id) return { name: gd.strange.name, light: gd.strange.light };
+    const e = LIGHTHOUSES.find((x) => `light:${x.name}` === id);
+    return e ? { name: e.name, light: e.light } : null;
+  };
+  const grandma = coast ? coast.names.find((e) => e.id === GRANDMA_ID) : null;
+  // The start card (once, saved; Set sail or Skip both count) and the end card. The Task button on the chart reopens the start card with the progress.
+  const taskUi = task ? createTaskUi({
+    parent: document.body,
+    onSetSail: () => { markStartSeen(); if (chartCtl && chartCtl.state.t > 0.5) chartCtl.toggleChart(); }, // from the chart: back to the boat
+    onSkip: () => markStartSeen(),
+    onReport: () => { if (grandma) chartCtl?.setTarget(grandma); }, // the card after the fifth light: its button sets Navigate to Fiskebäckskil
+    onGrandma: () => chartCtl?.toast('The chest is on the deck. Granddad’s chart has new marks.', 5200),
+    onStrange: () => {},
+  }) : null;
+  // Grandma's moment (the harbour reward is over): the task is done, the chest is yours (saved), it appears in Svalan's chest slot, then her card.
+  function grandmaMoment() {
+    task.finish();
+    chapter.giveChest();
+    selfBoat.setDeck(deckFor());
+    taskUi.showGrandma();
+  }
+  const progressLine = () => (task.phase === 'done' ? 'The lights are all burning' : task.phase === 'report' ? 'All five lit: report to grandma' : `Lights restored: ${task.restoredCount} of ${task.total}`);
+  // The light came back on (the relight timeline says when): save it, light the lantern, the calm sound; after the fifth, the goal is grandma.
+  function onRelit(entry) {
+    const r = task.restore(entry.id);
+    lanternFx.get(entry.id)?.setLit(true);
+    audio?.relight();
+    const lh = LIGHTHOUSES.find((x) => `light:${x.name}` === entry.id);
+    const g = lh ? (lightGlyph(lh.light) || { text: 'steady', flashes: [{ at: 0, len: 2 }] }) : null; // its real flash pattern as a glyph (no characteristic on record: the lantern shows steady, so: steady), and the same rhythm as soft chimes
+    if (g) { lightLog.add(entry.id); audio?.lightChimes(g.flashes, 1.4); chartCtl?.setLogAvailable(true); }
+    const message = r ? `${entry.name} is lit again · ${r.count} of ${task.total} lights restored` : `${entry.name} is lit.`; // after the fifth the camera returns and the "sail home" card follows (onRelightDone)
+    return g ? { message, glyph: g.text } : message;
+  }
+  // Reporting to grandma: Fiskebäckskil's HARBOUR water (the inlet inside the mouth gate), not a circle round the village point (45 m from the harbour).
+  let harbourMemo;
+  const harbourWater = () => {
+    if (harbourMemo !== undefined) return harbourMemo;
+    const H = coast.sea.harbours.find((h) => h.name.startsWith('Fiskebäckskil'));
+    if (!H || !H.inventedGate || !H.inventedGate.mouth) return (harbourMemo = null);
+    const [qx, qz] = coast.world.toGame(H.lon, H.lat);
+    const [mx, mz] = coast.world.toGame(H.inventedGate.mouth.lon, H.inventedGate.mouth.lat);
+    return (harbourMemo = createHarbourWater({ blocked: (x, z) => isBlocked(coast.sailHeightAt, x, z), quay: { x: qx, z: qz }, mouth: { x: mx, z: mz }, bearingDeg: H.inventedGate.enteringBearingDeg }));
+  };
+  let cardFrames = 0; // frames a task card has been up (the 3D render pauses after a few)
+  let rewardAt = null; // when the boat entered the harbour: the moment plays, then the end card (REWARD_DELAY_S later)
   // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
   const chartCtl = coast
     ? createChartController({
-      canvas, coast, nameBook, getMarks: () => (life ? life.marks : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
+      isDark: (id) => !!task && task.isDark(id),
+      holdTarget: (entry) => !!task && (task.isDark(entry.id) || (task.phase === 'report' && entry.id === GRANDMA_ID)), // a dark light's tag stays until it is lit; grandma's until you are IN the harbour
+      onRelit,
+      onRelightDone: () => { if (task && task.phase === 'report') taskUi.showReport(); }, // the fifth light: no end card, a short "sail home" card
+      onTask: () => taskUi.showStart({ progress: progressLine() }),
+      onLog: () => taskUi.showLog(logRows(lightLog, lightLookup, lightGlyph)),
+      granddadMarks,
+      canvas, coast, nameBook, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
       onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
       // "Navigate here": the target's edge tag (src/name-labels.js); null clears it
       onTarget: (entry, titleFn) => nameLabels.setTarget(entry, entry ? Math.max(0, coast.heightAt(entry.x, entry.z)) + 8 : 0, titleFn),
@@ -551,6 +657,11 @@ function startGame({ canvas, net, seed, role }, coast) {
     })
     : null;
   chartCtl?.setPhoneInterrupt(() => phone?.interrupt());
+  chartCtl?.setLogAvailable(lightLog.count > 0);
+  if (task && chartCtl && grandma && task.phase === 'report') chartCtl.setTarget(grandma); // reloaded with all five lit: the goal is still grandma
+  // First time (and no progress yet): the storm card. Everything behind it keeps running, but the card takes every touch.
+  if (task && taskUi && !hasSeenStart() && task.phase === 'lights' && task.restoredCount === 0) taskUi.showStart();
+  if (task && debugOverlay) window.__task = { task, lanternFx, taskUi, grandma, harbourWater, chapter, lightLog, gdMarks, strangeEntry, get towerFx() { return towerFx; }, startStrange: () => startStrange(), selfBoat, CONFIG, get strange() { return strange; } };
   if (chartCtl && debugOverlay) window.__chart = chartCtl;
   if (phone && debugOverlay) window.__phoneCtl = phone;
   if (phone) {
@@ -567,6 +678,35 @@ function startGame({ canvas, net, seed, role }, coast) {
     snapFixedCamera(camera, selfBoat.group.position, zoom);
   } else {
     snapChaseCamera(camera, selfBoat.group.position, self.heading, zoom);
+  }
+
+  // The strange moment (src/old-tower.js has the timeline).
+  let strange = null; // { t, belled, carded, base }
+  function startStrange() {
+    strange = { t: 0, look: 0, belled: false, carded: false, base: { ...CONFIG } };
+    if (debugOverlay) window.__strange = strange;
+  }
+  function stepStrange(dt) {
+    strange.t += dt;
+    const f = strangeFrame(strange.t);
+    towerFx.setLit(f.flashing);
+    towerFx.update(strange.t - STRANGE.flashAtS, 1);
+    if (f.bell && !strange.belled) { strange.belled = true; audio?.bell(0, 0.8); }
+    strange.look = f.look;
+    Object.assign(CONFIG, fogMoodValues(strange.base, f.fog));
+    if (f.card && !strange.carded) {
+      strange.carded = true;
+      chapter.markTowerSeen();
+      lightLog.add(gd.strange.id);
+      chartCtl?.setLogAvailable(true);
+      taskUi.showStrange(STRANGE_CARD.lines, STRANGE_CARD.button);
+    }
+    if (f.done) { // the fog is back to the day's values
+      Object.assign(CONFIG, fogMoodValues(strange.base, 0));
+      towerFx.setLit(false);
+      strange = null;
+      if (debugOverlay) window.__strange = null;
+    }
   }
 
   let last = performance.now();
@@ -593,7 +733,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       }
     }
 
-    const frozen = !!(chartCtl && chartCtl.visiting); // a lighthouse visit: the camera goes, the boat stays put
+    const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible); // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
     if (!frozen) phone?.apply(self, wind, dt);
     if (!frozen && (input.left || input.right)) hasSteered = true;
     if (input.up || input.down) hasTrimmed = true;
@@ -607,8 +747,9 @@ function startGame({ canvas, net, seed, role }, coast) {
     if (coast) {
       // Real coast: very shallow water slows the boat a little; the shore is solid but gentle: the boat slides along
       // it and a head-on approach brakes softly (src/shore.js). No damage, no bounce.
-      const v = self.speed * shallowFactor(coast.heightAt, self.x, self.z);
-      const mv = stepAlongShore(coast.heightAt, self.x, self.z, Math.sin(self.heading) * v * dt, Math.cos(self.heading) * v * dt);
+      // the sailing height is the coast plus solid shoals (hard rocks are land to the hull); submerged ones slow the boat a little
+      const v = self.speed * shallowFactor(coast.sailHeightAt, self.x, self.z) * coast.shoalSlowAt(self.x, self.z);
+      const mv = stepAlongShore(coast.sailHeightAt, self.x, self.z, Math.sin(self.heading) * v * dt, Math.cos(self.heading) * v * dt);
       self.x = mv.x;
       self.z = mv.z;
       if (mv.contact > 0) self.speed = Math.max(0, self.speed - mv.contact * SHORE_BRAKE * dt);
@@ -631,6 +772,28 @@ function startGame({ canvas, net, seed, role }, coast) {
       self.z += Math.cos(self.heading) * self.speed * dt;
     }
 
+    // Stage 1d: moored at a dark lighthouse (close enough AND slow): the relight begins (the boat is held while the camera does the visit view).
+    if (task && chartCtl && !chartCtl.visiting && !task.done) {
+      const moored = task.arrival(self.x, self.z, self.speed);
+      if (moored) chartCtl.relightById(moored.id);
+      else if (task.hint(self.x, self.z, self.speed, nowS)) chartCtl.toast('Ease off to moor at the dark lighthouse', 3600);
+    }
+    // Stage 1d: reporting to grandma. Entering Fiskebäckskil's harbour water (slow enough to tie up) starts the reward moment; the end card follows it.
+    if (task && chartCtl && task.phase === 'report' && grandma && rewardAt === null && !taskUi.visible && !chartCtl.visiting) {
+      const hw = harbourWater();
+      const e = task.harbourEntry(!!hw && hw.contains(self.x, self.z), self.speed, nowS);
+      if (e === 'hint') chartCtl.toast('Ease off to tie up in Fiskebäckskil', 3600);
+      else if (e === 'enter') {
+        rewardAt = nowS;
+        chartCtl.clearTarget();
+        if (lureOn && moment) moment.trigger(grandma, giftFor(grandma), self, nowS); // TODO(felix): the reward moment (details to come): for now the harbour moment
+      }
+    }
+    if (rewardAt !== null && nowS - rewardAt >= REWARD_DELAY_S) { rewardAt = null; grandmaMoment(); }
+    // Stage 1d, batch B: the strange mark. With granddad's chest open, sail near Måseskär's old tower: it gives a faint flash in granddad's pattern, a bell,
+    // the fog thickens round the boat for a moment (the haze values the game already has, tweened and put back), then the card.
+    if (gd && towerFx && chartCtl && !strange && chapter.chartOpen && !chapter.towerSeen && !taskUi.visible && !chartCtl.visiting && Math.hypot(strangeEntry.x - self.x, strangeEntry.z - self.z) <= STRANGE_TRIGGER_M) startStrange();
+    if (strange) stepStrange(dt);
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
     stepWaves(waves, dt, wind, self.x, self.z); // before anything samples the sea this frame
@@ -704,9 +867,13 @@ function startGame({ canvas, net, seed, role }, coast) {
     ctlView = chartCtl
       ? chartCtl.update(dt, nowS, { x: self.x, z: self.z, heading: self.heading, speed: self.speed }, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, Math.min(window.devicePixelRatio || 1, 2), partnerPos ? [{ x: partnerPos.x, z: partnerPos.z, heading: partnerPos.heading }] : [])
       : null;
+    for (const [id, fx] of lanternFx) fx.update(nowS, ctlView && ctlView.relight && ctlView.relight.id === id ? ctlView.relight.lamp : 1); // lit lanterns flash their real pattern; the one being relit warms up
     const lookAt = ctlView ? ctlView.focus : self;
-    viewTarget.set(lookAt.x, ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z);
+    const drift = strange && strangeEntry ? STRANGE_LOOK_BIAS * strange.look : 0; // the strange moment: the view drifts toward the old tower so the flash is on screen
+    viewTarget.set(lookAt.x + (drift ? (strangeEntry.x - lookAt.x) * drift : 0), ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z + (drift ? (strangeEntry.z - lookAt.z) * drift : 0));
     water.update(waves, wind, viewTarget, dt, camera.position);
+    shoalLayer?.update(nowS);
+    seamarkLayer?.update(nowS, viewTarget, (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength)); // buoys ride the real waves
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {
@@ -717,7 +884,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     }
 
     if (isFixedCamera) {
-      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined);
+      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined, ctlView ? ctlView.yaw : 0);
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }
@@ -741,7 +908,11 @@ function startGame({ canvas, net, seed, role }, coast) {
       nameLabels.setHidden(!!ctlView && ctlView.t > 0.05); // the chart has its own names
       nameLabels.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS, ctlView ? ctlView.focus : self, hudRects);
     }
-    if (!(ctlView && ctlView.skip3D)) renderer.render(scene, camera); // the chart covers the whole view: skip the 3D render
+    // A full-screen card (storm, sail home, end) covers the view and the boat is held: nothing behind it needs drawing. Render a few frames so the
+    // card opens over a real picture, then stop (the canvas keeps its last frame): the card costs no GPU. (3.4 fps at the end card was a software-GL
+    // run, but a phone GPU should not draw 345k dimmed triangles under a card either.)
+    cardFrames = taskUi && taskUi.visible ? cardFrames + 1 : 0;
+    if (!(ctlView && ctlView.skip3D) && cardFrames <= 3) renderer.render(scene, camera); // the chart covers the whole view: skip the 3D render
     debugOverlay?.frame(now);
     phone?.setRopeVisible(!(ctlView && ctlView.t > 0.05)); // the chart covers the view: no rope
     phone?.draw(nowS, {

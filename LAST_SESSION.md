@@ -1,46 +1,29 @@
 # Last session
 
-**2026-11-06: stage 1c and the passes data are MERGED to main.** 1c: chart + fog, minimap (round, north-up),
-zoom-to-chart, terrain look, Svalan in game, rope A, knots/nm, Navigate here (docs/CHART.md). Follow-up also merged:
-north-up camera (azimuth 0, sun 30), minimap tap opens chart, round block rope, no settings button. Passes: assets/coast/passes.json + src/passes.js (applyPasses, ship tier = 5 light carves), not wired into
-the game yet (docs/passes/README.md). Seamarks merged too (assets/coast/seamarks.json, shoals.json, src/seamark-meshes.js, seamarks-lab.html);
-both feed stage 1d. Harbour approaches MERGED: 16 harbour-tier carves (follow real banks; Grundsund canal stays closed, both basins reachable), docs/harbours/, harbours-lab.html.
-
-**2026-11-05: stage 1c, the chart and the new look** (branch `felix/windward-chart`, based on aa4bdc0 + the terrain-style
-branch, NOT merged). New terrain look (crisp zones, granite on steep ground, trees keep off it), Svalan in the game (`?boat=eka`
-for the eka), zoom out 4x then a scale-matched crossfade into the chart, minimap (round, north-up, fixed), fogged chart
-of the 7 sections (fog saved on the device), lighthouses on chart + minimap with a visit view (`?debug=1` adds "Jump here").
-Numbers, decisions, phone checklist: `games/windward/docs/CHART.md`. Before that: 1b (lure) and the Boat Lab merged to main.
+**2026-11-06: stage 1d, the dark lighthouses + chapter 1 ending** (branch `felix/windward-lighthouse-task`; describes the Batch B commit; NOT merged).
+Batch 1 water (passes, shoals, 226 OSM marks, credit), Batch 2 the task (5 dark lights nearest Grundsund: moor, circle, light on, fog lifts, saved), Batch 3 storm
+card, naming fix, Batch A (sail-home card; arrival = entering Fiskebäckskil's harbour; no card blur + render paused under cards). Batch B, the lights speak: relit
+lights show their real flash pattern as a glyph + chimes and go in a light log (chart "Lights" button); grandma's dusk card gives granddad's sea chest (Svalan's
+chest slot, saved); his chart adds 8 favourites + the strange mark; near Måseskär's old tower (dark since 1978) a faint steady red glow (its documented 1865 fixed
+red light, IALA Heritage), a bell, fog, "But you saw it." Details, citations, screenshots: `games/windward/docs/LIGHTHOUSE-TASK.md`. 1c, passes, seamarks, harbours are on main.
 
 Where things are:
-- Boats: `src/boats.js` (+ test), `boat-lab.html`, `src/boat-lab.js`, `docs/boat-lab/`, brief `docs/BOAT-BRIEF.md`
-- Design: `games/windward/GAME-DESIGN.md`; look and labs: `DESIGN.md` ("Reference labs")
-- Look: `src/water.js`, `src/depthmap.js`, `src/island-look.js`, `src/config.js`
-- Lighthouses: `src/lighthouses.js`, `lighthouse-lab.html`, `LIGHTHOUSES.md`
-- Coast + history: `coast-lab.html`, `assets/coast/` (SOURCES.md), `data/`
-- Trial: `src/coast-world.js` (window, terrain, trees, villages), `src/debug-overlay.js`
+- Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`
+- Look: `src/water.js`, `src/depthmap.js`, `src/island-look.js`, `src/config.js`. Lighthouses: `src/lighthouses.js`, `LIGHTHOUSES.md`
+- Coast + data: `src/coast-world.js`, `assets/coast/` (SOURCES.md), `data/`, passes `docs/passes/`, seamarks `docs/seamarks/`
+- Chart, minimap, fog, rope: `src/chart*.js`, `src/minimap.js`, `src/phone.js`; the task: `src/lighthouse-task.js`, `relight.js`, `lantern.js`
 
-Open (TODO(felix)): `sun.shadow.normalBias = 0.25` is a guess; real phone GPU
-unchecked; ddb-restricted population rows need CEDAR OK before commercial use;
-NMD CC0 wording to confirm; title wording ("Honour and Life") unverified;
-Käringön harbour-mouth spawn is approximate; trial vertical scale 0.5 is a guess.
-Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobby`.
+Open (TODO(felix)): `sun.shadow.normalBias = 0.25` is a guess; real phone GPU unchecked; moor distance (45 m), fog radius (600 m),
+shoal radii are first guesses; ddb-restricted population rows need CEDAR OK before commercial use; NMD CC0 wording to confirm; Käringön
+harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobby`.
 
 ## Today's sessions
 
-- Windward: phone controls, new boat, wave-wobble fix, 3m facets (earlier merge).
-- Look: L1 port → Skagen palette (pass 2) → Skagen default + pond fix (pass 3).
-- Lighthouses: 12 → 29 towers, real looks, year slider, Play, flash patterns; game design /grill-me rounds 1–11 confirmed.
-- Real coast: R0 → passes 2–5 (Gottskär, Koster, population, west-Orust history, combined map + timeline).
-- Stage 1b lure: arrival, life, descriptive names (LURE.md), merged.
-- Real-coast trial (Pixel: 60 fps at 634k tris) → stage 1a: default coast, collision, skerries, names (COAST-TRIAL.md).
-- Boat Lab: koster (gaff+jib / sprit+jib / gaff) and eka, pennant, deck items, night lantern, wear; ~1k tris each.
-- Boat Lab revision 1 (Felix's picks): gaff + jib only, slimmer koster, eka sail tones, name board removed.
-- Stage 1c (this branch): terrain style, boats.js, zoom -> chart, minimap, fog, lighthouse visits (CHART.md).
-- 1c revision (2026-11-06, phone test): boat arrow, blank uncharted sections, fog-gated + quiet names, Navigate here, trimmed glow, seams. Rope control (option A) built.
+- Windward 1b lure, Boat Lab, 1c chart and its follow-ups: merged (see CHART.md, LURE.md, docs/boat-lab/).
+- Passes data and seamarks data: merged (docs/passes/, docs/seamarks/).
+- Stage 1d (this branch): shoals, marks, passes, the dark-lighthouses task, storm card, Marstrand fix, Batch A fixes, Batch B (chapter 1 ending).
 
 ## Next
 
-1. Felix: phone check of the 1c revision incl. the rope (CHART.md); then merge 1c.
-2. Confirm the 7 unplaced harbours (candidates in `assets/coast/names.json`); Testholmen, Stora Kornö.
-3. Then: merge 1c; blue-hour sky, edge fog + thunder; the jump to ~1700 (the eka exists behind `?boat=eka`).
+1. Felix: phone check of 1d (checklist in the report); sound unheard; Måseskär framing; `?lights=reset` replays chapter 1; then merge 1d.
+2. Confirm the unplaced harbours (`assets/coast/names.json`); Testholmen, Stora Kornö. Then: night navigation (hooks are in), harbour close-ups.

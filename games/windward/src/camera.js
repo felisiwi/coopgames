@@ -62,9 +62,20 @@ export function snapFixedCamera(camera, boatPosition, zoom = 1) {
   camera.lookAt(boatPosition);
 }
 
+// Where the camera sits for a yaw (radians) turned round the target from the fixed azimuth: yaw 0 is the north-up view; the lighthouse relight
+// (src/relight.js) turns it once round, slowly. Same distance and elevation, only the compass bearing changes.
+const _yawDirection = new THREE.Vector3();
+export function fixedDirectionForYaw(yaw, out = _yawDirection) {
+  if (!yaw) return out.copy(_fixedDirection);
+  const elevation = (CONFIG.FIXED_CAMERA_ELEVATION_DEG * Math.PI) / 180;
+  const azimuth = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180 + yaw;
+  return out.set(Math.sin(azimuth) * Math.cos(elevation), Math.sin(elevation), Math.cos(azimuth) * Math.cos(elevation));
+}
+
 // rate: how quickly the camera catches up (1/s). Faster while zooming, so the 3D view stays in step with the chart.
-export function updateFixedCamera(camera, boatPosition, dt, zoom = 1, rate = CONFIG.FIXED_CAMERA_DAMPING_RATE) {
-  _fixedDesired.copy(boatPosition).addScaledVector(_fixedDirection, CONFIG.FIXED_CAMERA_DISTANCE * zoom);
+// yaw: extra turn round the target in radians (0 = north-up), for the lighthouse relight's slow circle.
+export function updateFixedCamera(camera, boatPosition, dt, zoom = 1, rate = CONFIG.FIXED_CAMERA_DAMPING_RATE, yaw = 0) {
+  _fixedDesired.copy(boatPosition).addScaledVector(fixedDirectionForYaw(yaw), CONFIG.FIXED_CAMERA_DISTANCE * zoom);
   const smoothing = 1 - Math.exp(-rate * dt);
   camera.position.lerp(_fixedDesired, smoothing);
   camera.lookAt(boatPosition);

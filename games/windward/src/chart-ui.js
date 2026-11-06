@@ -1,4 +1,4 @@
-// The chart and minimap controls (stage 1c): the minimap (top left, round, north up; tap it to open the chart, a small badge says so),
+// The chart and minimap controls (stage 1c): the minimap (top left, round, north up; tap it to open the chart),
 // a Boat button that shows only while the chart is up, zoom +/- (bottom left, away from the rope), the lighthouse visit card and a toast. Plain DOM in
 // the same quiet style as the HUD. No logic lives here: game.js passes callbacks.
 const HUD_BG = 'rgba(20,34,48,0.78)';
@@ -22,8 +22,8 @@ function button(label, aria, css = '') {
   return b;
 }
 
-// opts: { parent, debug, onChart(), onZoomStep(factor), onBack(), onNavigate(), onJump(), onMiniTap(px, py, size) }
-export function createChartUi({ parent = document.body, debug = false, onChart, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
+// opts: { parent, debug, onChart(), onTask() (the Task button, chart mode only: reopens the start card), onLog() (the Lights button: the light log), onZoomStep(factor), onBack(), onNavigate(), onJump(), onMiniTap(px, py, size) }
+export function createChartUi({ parent = document.body, debug = false, onChart, onTask = () => {}, onLog = () => {}, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
   // the chart's own canvas (drawn by src/chart.js), above the 3D view and the phone layer, below the controls
   const chartCanvas = el('canvas', 'position:fixed;inset:0;width:100%;height:100%;z-index:4;display:none;pointer-events:none;touch-action:none');
   chartCanvas.setAttribute('aria-label', "Granddad's chart of the west coast");
@@ -37,14 +37,11 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   const caption = el('div', `font:600 10px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(234,243,248,0.7);text-shadow:0 1px 2px rgba(0,0,0,.5);width:132px;text-align:center`, 'North up');
   const row = el('div', 'display:flex;gap:8px;pointer-events:auto');
   const chartBtn = button('Boat', 'Back to the boat view', 'display:none'); // only while the chart is up
-  row.append(chartBtn);
-  // The minimap is the way into the chart: a tap opens it (or visits a lighthouse under the finger). A small expand badge on its edge
-  // says it is tappable; it takes no touches itself, so the tap goes to the map.
-  const miniWrap = el('div', 'position:relative;line-height:0');
-  const badge = el('div', `position:absolute;right:-5px;bottom:-5px;width:24px;height:24px;border-radius:8px;background:${HUD_BG};border:${LINE};display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.92`);
-  badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="${TEXT}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 1.5h3v3M10.5 1.5L7 5M4.5 10.5h-3v-3M1.5 10.5L5 7"/></svg>`;
-  miniWrap.append(mini, badge);
-  top.append(miniWrap, caption, row);
+  const taskBtn = button('Task', 'Show the task: what the storm did and what to do', 'display:none'); // chart mode only, beside Boat
+  const logBtn = button('Lights', 'Show the light log: the lights you have heard', 'display:none'); // chart mode only, once a light is relit
+  row.append(chartBtn, taskBtn, logBtn);
+  // The minimap is the way into the chart: a tap opens it (or visits a lighthouse under the finger). No badge: tapping it and zooming out are enough.
+  top.append(mini, caption, row);
   parent.appendChild(top);
 
   const zoomCol = el('div', `position:fixed;z-index:7;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(64px + ${SAFE_BOTTOM});display:flex;flex-direction:column;gap:8px`);
@@ -53,16 +50,21 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   zoomCol.append(zin, zout);
   parent.appendChild(zoomCol);
 
+  // OpenStreetMap credit (ODbL): the marks and shoals in the 3D view are OSM data. Tiny, above the speed line; the chart draws its own.
+  const credit = el('div', `position:fixed;z-index:6;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(44px + ${SAFE_BOTTOM});font:9px/1.2 system-ui,sans-serif;color:rgba(234,243,248,0.6);text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none`, '© OpenStreetMap contributors');
+  parent.appendChild(credit);
+
   const card = el('div', `position:fixed;z-index:8;left:50%;transform:translateX(-50%);bottom:calc(64px + ${SAFE_BOTTOM});display:none;min-width:220px;max-width:min(92vw,360px);background:${HUD_BG};border:${LINE};border-radius:14px;padding:12px 14px;color:${TEXT};font:${UI_FONT};text-align:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)`);
   const cardTitle = el('div', 'font:italic 600 19px Georgia,"Times New Roman",serif;margin-bottom:2px');
   const cardSub = el('div', 'font:12px system-ui,sans-serif;opacity:.75;margin-bottom:10px');
+  const cardGlyph = el('div', 'font:600 26px/1.1 ui-monospace,Menlo,monospace;letter-spacing:.12em;color:#f2c46d;margin:2px 0 8px;display:none');
   const cardRow = el('div', 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap');
   const navBtn = button('Navigate here', 'Sail to this place: show it as a tag you can follow', `background:${GOLD};color:#1f2a33;border-color:transparent`);
   const backBtn = button('Back to the boat', 'Return the view to your boat');
   const jumpBtn = button('Jump here (debug)', 'Jump the boat to this lighthouse');
   cardRow.append(navBtn, backBtn);
   if (debug) cardRow.append(jumpBtn);
-  card.append(cardTitle, cardSub, cardRow);
+  card.append(cardTitle, cardSub, cardGlyph, cardRow);
   parent.appendChild(card);
 
   const toastEl = el('div', `position:fixed;z-index:9;left:50%;transform:translateX(-50%);top:calc(64px + ${SAFE_TOP});display:none;max-width:min(90vw,380px);background:#efe3c8;color:#3d3226;font:16px Georgia,serif;font-style:italic;padding:9px 16px;border-radius:5px;border:1px solid rgba(61,50,38,.35);box-shadow:0 4px 14px rgba(0,0,0,.25);text-align:center`);
@@ -73,12 +75,16 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   zout.addEventListener('click', () => onZoomStep(1.35));
   backBtn.addEventListener('click', () => onBack());
   navBtn.addEventListener('click', () => onNavigate());
+  taskBtn.addEventListener('click', () => onTask());
+  logBtn.addEventListener('click', () => onLog());
   jumpBtn.addEventListener('click', () => onJump());
   mini.addEventListener('click', (e) => { const r = mini.getBoundingClientRect(); onMiniTap(e.clientX - r.left, e.clientY - r.top, r.width); });
 
   let toastTimer = 0;
+  let logShown = false; // the Lights button exists once there is a light in the log
   return {
-    chartCanvas, mini, elements: { top, zoomCol, card, boatBtn: chartBtn, navBtn, backBtn },
+    setLogAvailable(v) { logShown = !!v; if (v && taskBtn.style.display !== 'none') logBtn.style.display = 'inline-block'; },
+    chartCanvas, mini, elements: { top, zoomCol, card, boatBtn: chartBtn, taskBtn, logBtn, navBtn, backBtn, cardGlyph },
     // Boxes the names must keep clear of (CSS px): the minimap column, zoom buttons, the visit card.
     rects() {
       return [top, zoomCol, card].filter((e) => e.style.display !== 'none').map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0)
@@ -91,11 +97,14 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
       if (!info) return;
       cardTitle.textContent = info.title;
       cardSub.textContent = info.sub || '';
+      cardGlyph.style.display = info.glyph ? 'block' : 'none'; // a relit light shows its flash pattern here, as a glyph
+      cardGlyph.textContent = info.glyph || '';
       navBtn.style.display = info.nav ? 'inline-block' : 'none';
       navBtn.textContent = info.nav === 'stop' ? 'Stop navigating' : 'Navigate here';
+      backBtn.style.display = info.back === 'none' ? 'none' : 'inline-block'; // the relight: nothing to press, the camera returns by itself
       backBtn.textContent = info.back === 'close' ? 'Close' : 'Back to the boat';
       backBtn.setAttribute('aria-label', info.back === 'close' ? 'Close this card' : 'Return the view to your boat');
-      jumpBtn.style.display = info.back === 'close' ? 'none' : 'inline-block';
+      jumpBtn.style.display = info.back === 'close' || info.back === 'none' ? 'none' : 'inline-block';
     },
     toast(text, ms = 3200) {
       toastEl.textContent = text;
@@ -107,8 +116,11 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
     setChartMode(on) {
       chartCanvas.style.pointerEvents = on ? 'auto' : 'none';
       chartBtn.style.display = on ? 'inline-block' : 'none';
+      taskBtn.style.display = on ? 'inline-block' : 'none';
+      logBtn.style.display = on && logShown ? 'inline-block' : 'none';
+      credit.style.display = on ? 'none' : 'block';
     },
     // the minimap is hidden (the chart is up): its caption goes with it
-    setMiniHidden(h) { caption.style.visibility = h ? 'hidden' : 'visible'; badge.style.visibility = h ? 'hidden' : 'visible'; },
+    setMiniHidden(h) { caption.style.visibility = h ? 'hidden' : 'visible'; },
   };
 }

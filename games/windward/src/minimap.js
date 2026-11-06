@@ -78,7 +78,7 @@ export function worldToMini(x, z, size, boat, spanM = MINI.spanM) {
 
 // ---- the canvas part -----------------------------------------------------------------------------------------------
 // opts: { canvas, heightAt, inside(x, z), places: name-list entries, lights: [{ id, x, z, name }], marks: [{ x, z, kind }] }
-export function createMinimap({ canvas, heightAt, places = [], lights = [], marks = [], makeCanvas = () => document.createElement('canvas') }) {
+export function createMinimap({ canvas, heightAt, places = [], lights = [], marks = [], isDark = () => false, makeCanvas = () => document.createElement('canvas') }) {
   const ctx = canvas.getContext('2d');
   const side = MINI.rasterPx;
   const heights = new Float32Array(side * side);
@@ -89,7 +89,7 @@ export function createMinimap({ canvas, heightAt, places = [], lights = [], mark
   const raster = { cx: NaN, cz: NaN, ready: false };
   let job = null; // { cx, cz, row }
   const harbours = places.filter((p) => p.kind === 'village' || p.kind === 'harbour');
-  const COLORS = { red: '#c2493d', green: '#4f9a6a', yellow: '#e0b84c' };
+  const COLORS = { red: '#c2493d', green: '#4f9a6a', yellow: '#e0b84c', black: '#2d3640' }; // sea-marks: laterals, specials; cardinals and dangers black
 
   function advance(boat) {
     if (!job && (!raster.ready || Math.hypot(boat.x - raster.cx, boat.z - raster.cz) > MINI.rebuildM)) job = { cx: boat.x, cz: boat.z, row: 0 };
@@ -147,8 +147,9 @@ export function createMinimap({ canvas, heightAt, places = [], lights = [], mark
         const x = (l.x - boat.x) * k;
         const y = (l.z - boat.z) * k;
         if (Math.abs(x) > W || Math.abs(y) > W) continue;
-        ctx.fillStyle = '#f2c46d';
-        ctx.strokeStyle = '#3d3226';
+        const dark = isDark(l.id); // put out by the storm: a hollow grey triangle
+        ctx.fillStyle = dark ? 'rgba(160,160,160,0.35)' : '#f2c46d';
+        ctx.strokeStyle = dark ? 'rgba(61,50,38,0.8)' : '#3d3226';
         ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(x, y - 9); ctx.lineTo(x + 7, y + 6); ctx.lineTo(x - 7, y + 6); ctx.closePath(); ctx.fill(); ctx.stroke();
       }
