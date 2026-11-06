@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { loadCoast } from './coast-data.js';
 import { buildCoastWorld, EDGE_FADE_M } from './coast-world.js';
+import { LIGHTHOUSES } from './lighthouses.js';
 import { buildNameList, createNameBook, displayName, NAME_RADIUS_M, SIGHT_EXTRA_M } from './names.js';
 import { ARRIVAL, createArrivals } from './arrival.js';
 
@@ -29,9 +30,9 @@ const world = buildCoastWorld(coast, { skerries });
 const namesJson = json('assets/coast/names.json');
 const placeNames = json('data/place-names.json');
 const settlements = json('data/settlements-history.json').settlements;
-const list = buildNameList({ names: namesJson, villages: settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames });
+const list = buildNameList({ names: namesJson, villages: settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames, lights: LIGHTHOUSES });
 // Described in the Map Lab but with no place on today's chart (no OSM entry found / outside the playable window).
-const NO_PLACE_YET = ['Stångehuvud', 'Islandsberg', 'Stora Kornö'];
+const NO_PLACE_YET = ['Stora Kornö']; // (Stångehuvud and Islandsberg are placed since 1c: they are lighthouses)
 const byName = (n) => list.filter((e) => e.name === n);
 
 await check('Felix\'s confirmed near-matches and pins are all harbours on the chart', () => {
@@ -60,7 +61,7 @@ await check('a village and a skerry of the same name are one place (Käringön, 
   assert.equal(byName('Dammholmen').length, 1, 'harbour and skerry of the same name: once');
 });
 
-await check('every description lands on the place it names; the three without a place yet are listed, not lost', () => {
+await check('every description lands on the place it names; the one without a place yet is listed, not lost', () => {
   const described = list.filter((e) => e.desc).map((e) => `${e.name}=${e.desc}`).sort();
   const expected = Object.entries(placeNames.descriptions).filter(([n]) => !NO_PLACE_YET.includes(n)).map(([n, d]) => `${n}=${d}`).sort();
   assert.deepEqual(described, expected);
@@ -69,6 +70,15 @@ await check('every description lands on the place it names; the three without a 
   for (const [n, d] of [['Gåsö', 'Goose Isle'], ['Grundsund', 'the shallow sound'], ['Hättan', 'the Hood'], ['Måseskär', 'the Gull Skerry']]) {
     assert.equal(byName(n)[0].desc, d, n);
   }
+});
+
+await check('every lighthouse inside the window is one place of kind "light" (not also a skerry), with its description', () => {
+  const lights = list.filter((e) => e.kind === 'light');
+  assert.ok(lights.length >= 6, `${lights.length} lighthouses on the chart: ${lights.map((l) => l.name).join(', ')}`);
+  for (const l of lights) assert.equal(byName(l.name).length, 1, `${l.name} appears once`);
+  for (const n of ['Hättan', 'Måseskär', 'Gäven', 'Islandsberg', 'Stångehuvud']) assert.equal(byName(n)[0].kind, 'light', `${n} is a lighthouse`);
+  assert.equal(byName('Stångehuvud')[0].desc, 'the pole headland');
+  assert.equal(byName('Islandsberg')[0].desc, 'the island hill');
 });
 
 await check('descriptive name first, real name with the description underneath once discovered', () => {

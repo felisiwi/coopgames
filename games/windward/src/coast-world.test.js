@@ -5,7 +5,7 @@
 // water, and villages land on dry ground inside the window only.
 import assert from 'node:assert/strict';
 import { DEEP_M } from './depthmap.js';
-import { buildCoastWorld, findOpenWater, placeCoastVillages, createCoastTerrain, LAND_LIFT_M, EDGE_FADE_M, SKERRY_TOP_M, LOD0_R_M, LOD1_R_M } from './coast-world.js';
+import { buildCoastWorld, findOpenWater, placeCoastVillages, createCoastTerrain, createCoastTrees, LAND_LIFT_M, EDGE_FADE_M, SKERRY_TOP_M, LOD0_R_M, LOD1_R_M } from './coast-world.js';
 import { isBlocked } from './shore.js';
 
 let passed = 0;
@@ -105,6 +105,18 @@ check('skerries become solid low granite: collidable, bare rock, and skipped on 
   assert.ok(!isBlocked(w.heightAt, rx + 20, rz), 'but 20 m away is open water');
   assert.equal(w.classNameAt(rx, rz), 'bare_rock', 'painted granite; bare_rock has tree density 0, so no trees grow on it');
   assert.ok(w.depthMap.depth[Math.floor(rz / w.pxM - w.j0) * w.nx + Math.floor(rx / w.pxM - w.i0)] === 0, 'the water shader sees it as land');
+});
+
+check('trees keep off ground the style paints as granite (the skip rule)', () => {
+  const all = createCoastTrees(world, 1);
+  all.update(cx, cz);
+  assert.ok(all.stats.trees > 20, `forest island grows trees: ${all.stats.trees}`);
+  const none = createCoastTrees(world, 1, { skip: () => true });
+  none.update(cx, cz);
+  assert.equal(none.stats.trees, 0, 'skip everywhere: no trees');
+  const half = createCoastTrees(world, 1, { skip: (x) => x < cx });
+  half.update(cx, cz);
+  assert.ok(half.stats.trees > 0 && half.stats.trees < all.stats.trees, `only the east half grows: ${half.stats.trees} of ${all.stats.trees}`);
 });
 
 check('terrain is built in chunks and shown by distance: full near, coarse further, nothing far', () => {

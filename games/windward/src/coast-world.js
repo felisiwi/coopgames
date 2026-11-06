@@ -23,6 +23,7 @@ import { makeTreesNear } from './trees-near.js';
 import { createBuilding } from './props.js';
 import { createLighthouse, LIGHTHOUSES } from './lighthouses.js';
 import { buildNameList } from './names.js';
+import { attachTerrainStyle, STYLE_GAME } from './terrain-style.js';
 
 export const COAST_SCALE = 10; // 1:10
 // Region (Felix, stage 1a): Grundsund is the start; north to Fiskebäckskil and Lysekil, south to Gullholmen,
@@ -384,7 +385,8 @@ export function createCoastTerrain(world, step = 1) {
 
 const TRUNK_H = 1.6;
 const CANOPY_H = 3.2;
-export function createCoastTrees(world, seed = 1) {
+// opts.skip(x, z) -> true where a tree must not grow (painted granite: terrain-style.js makeGraniteTest).
+export function createCoastTrees(world, seed = 1, { skip = null } = {}) {
   const treesNear = makeTreesNear({ classAt: world.classNameAt, seed });
   const trunkMat = new THREE.MeshLambertMaterial({ flatShading: true });
   const coneMat = new THREE.MeshLambertMaterial({ flatShading: true });
@@ -418,6 +420,7 @@ export function createCoastTrees(world, seed = 1) {
       if (nT >= TREE_CAP) break;
       const h = world.heightAt(t.x, t.z);
       if (h < 0.9) continue;
+      if (skip && skip(t.x, t.z)) continue;
       const s = t.size;
       dummy.rotation.set(0, (t.x * 12.9898 + t.z * 78.233) % 6.283, 0);
       const broad = t.kind === 'birch' || t.kind === 'bush';
@@ -538,9 +541,13 @@ export async function loadRealCoast(opts = {}) {
   const t1 = now();
   const terrain = createCoastTerrain(world, opts.step ?? 1);
   T.terrainMs = now() - t1;
+  // Stage 1c: crisp zones, granite on the steepest ground (Felix's values, terrain-style.js STYLE_GAME; opts.style overrides).
+  const t1b = now();
+  const terrainStyle = attachTerrainStyle(terrain, world, opts.style ?? STYLE_GAME);
+  T.styleMs = now() - t1b;
 
   const t2 = now();
-  const trees = createCoastTrees(world, opts.seed ?? 1);
+  const trees = createCoastTrees(world, opts.seed ?? 1, { skip: terrainStyle.isGranite }); // no trees on painted granite
   const { buildings, villages } = placeCoastVillages(world, settlementsJson.settlements);
   const lightNames = LIGHTHOUSES.filter((l) => { const [x, z] = world.toGame(l.lon, l.lat); return world.inside(x, z, EDGE_FADE_M); }).map((l) => l.name);
   const lights = placeCoastLighthouses(world, lightNames);
@@ -553,7 +560,7 @@ export async function loadRealCoast(opts = {}) {
   // ?cat=lon,lat starts at the open water nearest another point (testing).
   const [sx, sz] = world.toGame(...(opts.at || [namesJson.spawn.lon, namesJson.spawn.lat]));
   const spawn = findOpenWater(world, sx, sz);
-  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames });
+  const names = buildNameList({ names: namesJson, villages: settlementsJson.settlements, toGame: world.toGame, inside: (x, z) => world.inside(x, z, EDGE_FADE_M), placeNames, lights: LIGHTHOUSES });
 
   const group = new THREE.Group();
   group.add(terrain.group, trees.group, props);
@@ -567,7 +574,8 @@ export async function loadRealCoast(opts = {}) {
   update(spawn ? spawn.x : sx, spawn ? spawn.z : sz);
   T.buildMs = now() - T.start;
   return {
-    world, group, depthMap: world.depthMap, spawn, trees, terrain, clamp, update, names,
+    world, group, depthMap: world.depthMap, spawn, trees, terrain, terrainStyle, clamp, update, names,
+    findOpenWater: (x, z, o) => findOpenWater(world, x, z, o), // for the debug jump to a lighthouse
     lights: lights.filter((l) => l.group).map((l) => ({ name: l.name, x: l.group.position.x, y: l.group.position.y, z: l.group.position.z })), // where gulls may perch (stage 1b)
     heightAt: world.heightAt,
     report: {

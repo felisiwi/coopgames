@@ -62,9 +62,10 @@ export function snapFixedCamera(camera, boatPosition, zoom = 1) {
   camera.lookAt(boatPosition);
 }
 
-export function updateFixedCamera(camera, boatPosition, dt, zoom = 1) {
+// rate: how quickly the camera catches up (1/s). Faster while zooming, so the 3D view stays in step with the chart.
+export function updateFixedCamera(camera, boatPosition, dt, zoom = 1, rate = CONFIG.FIXED_CAMERA_DAMPING_RATE) {
   _fixedDesired.copy(boatPosition).addScaledVector(_fixedDirection, CONFIG.FIXED_CAMERA_DISTANCE * zoom);
-  const smoothing = 1 - Math.exp(-CONFIG.FIXED_CAMERA_DAMPING_RATE * dt);
+  const smoothing = 1 - Math.exp(-rate * dt);
   camera.position.lerp(_fixedDesired, smoothing);
   camera.lookAt(boatPosition);
 }

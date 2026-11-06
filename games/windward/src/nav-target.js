@@ -1,0 +1,56 @@
+// "Navigate here" (stage 1c revision): one sail target at a time, shown as a sticky tag that follows the screen edge
+// towards it, with the distance, until you arrive or cancel. Pure helpers here (testable in node); the tag itself is drawn
+// by src/name-labels.js and the card that starts it by src/chart-ui.js.
+
+// How close counts as "arrived", game metres (the same units as the HUD's knots: 1 m/s = 1.94 kn).
+export const ARRIVE_M = { light: 60, village: 70, harbour: 45, island: 90, skerry: 50 };
+export const arriveDistance = (entry) => ARRIVE_M[entry.kind] ?? 60;
+
+export function createNavTarget() {
+  let entry = null;
+  return {
+    get entry() { return entry; },
+    set(e) { entry = e; },
+    clear() { entry = null; },
+    // Call every frame. Returns the target if the boat has just arrived (and clears it), else null.
+    update(x, z) {
+      if (!entry) return null;
+      if (Math.hypot(entry.x - x, entry.z - z) > arriveDistance(entry)) return null;
+      const done = entry;
+      entry = null;
+      return done;
+    },
+  };
+}
+
+// Distances at sea are in nautical miles, on the same scale as the speed in knots (1 m/s = 1.944 kn, 1 nm = 1852 m), so
+// "0.4 nm at 6 kn" is about four minutes. Game metres in. "< 0.1 nm" when very close.
+export const METRES_PER_NM = 1852;
+export function formatDistance(m) {
+  if (!(m >= 0)) return '';
+  const nm = m / METRES_PER_NM;
+  if (nm < 0.1) return '< 0.1 nm';
+  if (nm < 10) return `${nm.toFixed(1)} nm`;
+  return `${Math.round(nm)} nm`;
+}
+
+// Where an edge tag goes: from the boat's screen point (bx, by), along the screen direction (dx, dy), to the edge of the
+// box inset by (padX, padY) from the screen. Returns [x, y] (the tag's centre) or the boat point if the direction is zero.
+export function edgeSpot(bx, by, dx, dy, W, H, padX, padY, bottom = 0) {
+  const len = Math.hypot(dx, dy);
+  if (len < 1e-6) return [bx, by];
+  const ux = dx / len;
+  const uy = dy / len;
+  const maxX = W - padX;
+  const maxY = H - bottom - padY;
+  const tx = ux > 1e-6 ? (maxX - bx) / ux : ux < -1e-6 ? (padX - bx) / ux : Infinity;
+  const ty = uy > 1e-6 ? (maxY - by) / uy : uy < -1e-6 ? (padY - by) / uy : Infinity;
+  const t = Math.max(0, Math.min(tx, ty));
+  return [bx + ux * t, by + uy * t];
+}
+
+// The screen direction (y down) of a ground vector (gx, gz) from the camera's own right and up axes (world space), so it is
+// right for places behind the camera too, where projecting the point would flip it.
+export function screenDirection(gx, gz, right, up) {
+  return [gx * right[0] + gz * right[2], -(gx * up[0] + gz * up[2])];
+}

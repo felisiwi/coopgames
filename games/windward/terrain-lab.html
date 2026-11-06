@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windward Terrain Lab</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1a24; --panel: rgba(14, 26, 36, 0.92); --line: #2c4556; --text: #e6eef2; --dim: #9db3c0;
+    --accent: #6fd0d6; --on: #06222a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.35 system-ui, sans-serif; overflow: hidden; overscroll-behavior: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--dim); background: var(--bg); z-index: 5; }
+  #loading.err { color: #ffb4a8; white-space: pre-wrap; }
+
+  #panel { position: fixed; z-index: 4; left: calc(8px + env(safe-area-inset-left, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 440px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(6px); }
+  #head { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; background: none; color: inherit; font: 600 14px system-ui, sans-serif; text-align: left; cursor: pointer; }
+  #head .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #head .chev { transition: transform .15s; } #panel.open #head .chev { transform: rotate(180deg); }
+  #body { display: none; padding: 0 12px 12px; max-height: min(58vh, 520px); overflow: auto; -webkit-overflow-scrolling: touch; }
+  #panel.open #body { display: block; }
+  h2 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
+  button.chip, select, #copy { font: inherit; color: var(--text); background: #1c3140; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; min-height: 44px; cursor: pointer; }
+  button.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on); font-weight: 600; }
+  .tog { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+  .tog input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+  .tog span { flex: 1; }
+  .slider { display: grid; gap: 2px; padding: 4px 0; }
+  .slider .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .slider output { color: var(--dim); font-variant-numeric: tabular-nums; }
+  .slider input { width: 100%; height: 36px; margin: 0; accent-color: var(--accent); }
+  .slider .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); }
+  .dim { opacity: .4; pointer-events: none; }
+  select { width: 100%; }
+  .row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+  #copy { flex: none; }
+  #stats { margin-top: 10px; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .note { margin: 8px 0 0; font-size: 12px; color: var(--dim); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="loading">loading the coast…</div>
+<div id="panel">
+  <button id="head" type="button" aria-expanded="false" aria-controls="body"><span class="name" id="headname">Terrain style</span><span class="chev" aria-hidden="true">▲</span></button>
+  <div id="body">
+    <h2>Presets</h2>
+    <div class="presets" id="presets"></div>
+    <h2>Style</h2>
+    <div id="controls"></div>
+    <h2>Go to</h2>
+    <select id="places" aria-label="Go to"></select>
+    <div class="row"><button id="copy" type="button">Copy link</button><span class="note" style="margin:0">The address always holds your pick: send it back.</span></div>
+    <div id="stats"></div>
+    <p class="note">Drag to pan, pinch or scroll to zoom. “Current” is the game’s per-vertex paint.</p>
+  </div>
+</div>
+<script type="module" src="./src/terrain-lab.js"></script>
+</body>
+</html>

@@ -51,6 +51,13 @@ export const WAVE_SPEED = 1.2; // rad/s, dominant component's phase speed
 // water.test.js), not a visible facet size.
 export const SEG = 267; // plane subdivisions per side
 export const SIZE = 800; // metres per side — boat-centred moving tile (see createWater); sized so its edge never enters the fixed camera's frustum at any zoom/aspect, not to cover "the whole world"
+// The far sea (stage 1c, zoomed-out views): a coarse flat ring round the main tile, same shader and uniforms (depth map,
+// haze, colours: shallows and foam carry on) but no wave displacement, so it can be coarse without aliasing. 0.3 m
+// below the mean sea so it never shows through the main tile's wave troughs. FAR_CELLS * cell = FAR_SIZE; the hole is
+// the main tile, so nothing is drawn twice.
+export const FAR_SIZE = 6400;
+export const FAR_CELLS = 48;
+export const FAR_DROP_M = 0.3;
 export const WATER_COLOR = 0x2f7fd6; // legacy flat colour; the sea is coloured by depth in the shader now
 
 // Four summed sines, each at its own small angle off the wind axis (so crests
@@ -283,6 +290,7 @@ uniform vec4 uPhases;
 uniform float uWindDir;
 uniform float uWindStrength;
 uniform vec2 uPlaneOffset;
+uniform float uWaveScale; // 1 on the main tile; 0 on the far ring (flat, but still shaded by the analytic wave slope)
 varying vec3 vWorld;
 varying vec2 vGrad;
 ${SEA_HEIGHT_GLSL}
@@ -291,7 +299,7 @@ void main() {
   // The mesh only translates (to follow the boat); recover world x/z.
   float wx = position.x + uPlaneOffset.x;
   float wz = position.z + uPlaneOffset.y;
-  float h = seaHeight(wx, wz, uPhases, uWindDir, uWindStrength);
+  float h = seaHeight(wx, wz, uPhases, uWindDir, uWindStrength) * uWaveScale;
   vGrad = seaSlope(wx, wz, uPhases, uWindDir, uWindStrength);
   vWorld = vec3(wx, h, wz);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, h, position.z, 1.0);
@@ -390,6 +398,27 @@ const _hazeSrgb = { r: 0, g: 0, b: 0 };
 
 // `depthMap`: a bakeDepthMap() result, or null (island-lab: no islands baked,
 // the whole sea reads as deep).
+// A square grid FAR_SIZE wide with the cells that lie inside the main tile (|x|,|z| < SIZE/2) removed.
+export function farRingGeometry() {
+  const g = new THREE.PlaneGeometry(FAR_SIZE, FAR_SIZE, FAR_CELLS, FAR_CELLS);
+  g.rotateX(-Math.PI / 2);
+  const cell = FAR_SIZE / FAR_CELLS;
+  const index = g.getIndex().array;
+  const pos = g.getAttribute('position');
+  const keep = [];
+  for (let i = 0; i < index.length; i += 6) { // two triangles per cell
+    let cx = 0;
+    let cz = 0;
+    for (let k = 0; k < 6; k++) { cx += pos.getX(index[i + k]); cz += pos.getZ(index[i + k]); }
+    cx /= 6; cz /= 6;
+    if (Math.abs(cx) < SIZE / 2 && Math.abs(cz) < SIZE / 2) continue; // under the main tile
+    for (let k = 0; k < 6; k++) keep.push(index[i + k]);
+  }
+  g.setIndex(keep);
+  g.userData.cell = cell;
+  return g;
+}
+
 export function createWater(depthMap = null) {
   // Bake the flat-to-horizontal rotation into the geometry itself (not the
   // mesh transform), so `position.y` is already the height axis and
@@ -429,10 +458,19 @@ export function createWater(depthMap = null) {
     uFoam: { value: new THREE.Vector3() },
     uSeaBright: { value: 1 },
     uFoamK: { value: 1 },
+    uWaveScale: { value: 1 },
   };
   const material = new THREE.ShaderMaterial({ uniforms, vertexShader: WATER_VERTEX_GLSL, fragmentShader: WATER_FRAGMENT_GLSL });
 
   const mesh = new THREE.Mesh(geometry, material);
+  // The far ring: same uniforms by reference (so it is always in step), except no waves. A child, so it follows the tile.
+  const farMaterial = new THREE.ShaderMaterial({ uniforms: { ...uniforms, uWaveScale: { value: 0 } }, vertexShader: WATER_VERTEX_GLSL, fragmentShader: WATER_FRAGMENT_GLSL });
+  const far = new THREE.Mesh(farRingGeometry(), farMaterial);
+  far.position.y = -FAR_DROP_M;
+  far.receiveShadow = false;
+  far.frustumCulled = false; // a 6 km ring: always in view
+  far.name = 'sea-far-ring';
+  mesh.add(far);
   mesh.receiveShadow = false; // the painted sea takes no cast shadows (as in the lab)
 
   const spacing = SIZE / SEG;

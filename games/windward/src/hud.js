@@ -179,18 +179,22 @@ function drawTrimBar(ctx, trimDeg, idealDeg) {
   ctx.stroke();
 
   // Full-speed window around ideal, so "trimmed" reads as a zone, not a hairline.
-  ctx.strokeStyle = 'rgba(120,220,150,0.6)';
-  ctx.lineWidth = 4;
+  const inWindow = Math.abs(trimDeg - idealDeg) <= TRIM_FULL_WINDOW_DEG;
+  ctx.save();
+  if (inWindow) { ctx.shadowColor = 'rgba(120,235,160,0.9)'; ctx.shadowBlur = 8; } // trimmed: the zone glows, steadily
+  ctx.strokeStyle = inWindow ? 'rgba(120,235,160,1)' : 'rgba(120,220,150,0.6)';
+  ctx.lineWidth = inWindow ? 7 : 4;
   ctx.beginPath();
   ctx.moveTo(x(Math.max(minDeg, idealDeg - TRIM_FULL_WINDOW_DEG)), trackY);
   ctx.lineTo(x(Math.min(maxDeg, idealDeg + TRIM_FULL_WINDOW_DEG)), trackY);
   ctx.stroke();
+  ctx.restore();
 
-  const inWindow = Math.abs(trimDeg - idealDeg) <= TRIM_FULL_WINDOW_DEG;
   ctx.fillStyle = inWindow ? '#78dc96' : '#ffcc66';
   ctx.beginPath();
-  ctx.arc(x(Math.max(minDeg, Math.min(maxDeg, trimDeg))), trackY, 5, 0, Math.PI * 2);
+  ctx.arc(x(Math.max(minDeg, Math.min(maxDeg, trimDeg))), trackY, inWindow ? 7 : 5, 0, Math.PI * 2);
   ctx.fill();
+  if (inWindow) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke(); }
 }
 
 // extras (Stage 2, all optional):
@@ -205,7 +209,7 @@ export function updateHud(hud, wind, trimRad, idealTrimRadValue, headingRad, boa
 
   hud.text.textContent =
     `wind ${String(windDeg).padStart(3, '0')}°\n` +
-    `${windMs.toFixed(1)} m/s / ${msToKnots(windMs).toFixed(1)} kn\n` +
+    `${msToKnots(windMs).toFixed(1)} kn wind\n` +
     `speed ${msToKnots(boatSpeedMS).toFixed(1)} kn\n` +
     trimHint(trimDeg, idealDeg) +
     (extras.foundText ? `\n${extras.foundText}` : '');

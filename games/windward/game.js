@@ -9,7 +9,7 @@ import * as THREE from './vendor/three/three.module.js';
 import { CONFIG } from './src/config.js';
 import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './src/sail.js';
 import { initialWind, createWindController, stepWindController } from './src/wind.js';
-import { createBoatMesh, loadBoatModel } from './src/boat.js';
+import { createBoatMesh, loadBoatModel } from './src/boats.js';
 import { updateChaseCamera, snapChaseCamera, updateFixedCamera, snapFixedCamera } from './src/camera.js';
 import { createHud, updateHud, setLegendVisible, setNotice } from './src/hud.js';
 import { spawnPose } from './src/spawn.js';
@@ -34,6 +34,8 @@ import { createDebugOverlay } from './src/debug-overlay.js';
 import { stepAlongShore, shallowFactor, SHORE_BRAKE } from './src/shore.js';
 import { createNameBook } from './src/names.js';
 import { createNameLabels } from './src/name-labels.js';
+import { createChartController } from './src/chart-controller.js';
+import { parseGameStyle } from './src/terrain-style.js';
 import { createArrivals, giftFor } from './src/arrival.js';
 import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
@@ -99,7 +101,7 @@ export default function start(args) {
   };
   const num = (k) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : undefined);
   return import('./src/coast-world.js')
-    .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
+    .then((m) => m.loadRealCoast({ vex: num('cvex'), step: num('cstep'), smooth: num('csmooth'), seed: args.seed, style: parseGameStyle(window.location.search), at: q.has('cat') ? q.get('cat').split(',').map(Number) : undefined }))
     .then((coast) => { note.remove(); window.__coastReport = coast.report; startGame({ ...args, net }, coast); })
     .catch((err) => { note.textContent = `the coast failed to load: ${err && err.message}`; console.error(err); window.__coastError = String((err && err.stack) || err); });
 }
@@ -121,7 +123,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   const isPhone = wantsPhoneControls();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isPhone ? CONFIG.PHONE_MAX_PIXEL_RATIO : Infinity));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap; // PCFSoftShadowMap is deprecated in this three.js (it logged a warning and fell back to this)
 
   const scene = new THREE.Scene();
   const sky = createSky();
@@ -309,6 +311,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       clearTimeout(repaintTimer);
       repaintTimer = setTimeout(() => {
         refreshPalette();
+        coast?.terrainStyle.style.refreshPalette(); // the crisp-zone material reads the palette too
         for (const g of islandGroups) recolorTerrain(g.children[0]);
       }, 200);
     }
@@ -323,7 +326,11 @@ function startGame({ canvas, net, seed, role }, coast) {
   const selfColor = role === 'host' ? 0xffcc66 : 0x66ccff;
   const otherColor = role === 'host' ? 0x66ccff : 0xffcc66;
 
-  const selfBoat = createBoatMesh(selfColor);
+  // Boats (src/boats.js, docs/boat-lab/README.md): today = Svalan, granddad's koster (gaff + jib, deck items, wear 0.8: the
+  // defaults). The player colour is the masthead pennant only. ?boat=eka = the ~1700 eka (rust sail) until the jump exists.
+  const boatType = new URLSearchParams(window.location.search).get('boat') === 'eka' ? 'eka' : 'koster';
+  const boatOptions = boatType === 'eka' ? { type: 'eka', sailTone: 'rust' } : { type: 'koster' };
+  const selfBoat = createBoatMesh(selfColor, boatOptions);
   scene.add(selfBoat.group);
   const selfWake = createWake();
   scene.add(selfWake.group);
@@ -340,7 +347,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   }
   // Names are discovered (src/names.js): shown once when the boat is near, remembered on this device.
   const nameBook = coast ? createNameBook(coast.names) : null;
-  const nameLabels = coast ? createNameLabels() : null;
+  const nameLabels = coast ? createNameLabels(document.body, { onCancelTarget: () => chartCtl?.clearTarget() }) : null;
   // Names already known from an earlier session show again when you are near them (no announcement).
   if (coast) for (const e of coast.names) if (nameBook.isKnown(e.id)) nameLabels.track(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8);
   const namesLine = () => `names       ${nameBook.count()} / ${nameBook.total} discovered`;
@@ -349,6 +356,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     window.__names = nameBook; // headless checks
     window.__self = self;
     window.__labels = nameLabels;
+    window.__coastStyle = coast.terrainStyle;
     window.__coastHeight = coast.heightAt;
   }
   // Stage 1b, the lure: arriving slowly in a harbour (a bell, a wave, a fish on deck), small life on the water.
@@ -359,7 +367,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   audio?.armOnFirstGesture();
   const arrivals = lureOn ? createArrivals(coast.names) : null;
   const deck = lureOn ? createDeck() : null;
-  const moment = lureOn ? createHarbourMoment({ THREE, scene, boatGroup: selfBoat.group, heightAt: coast.heightAt, deck, audio }) : null;
+  const moment = lureOn ? createHarbourMoment({ THREE, scene, boatGroup: selfBoat.group, heightAt: coast.heightAt, deck, audio, boatType }) : null;
   const life = lureOn
     ? createLife({
       THREE, scene, heightAt: coast.heightAt, places: coast.names, lights: coast.lights,
@@ -447,7 +455,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       other.heading = msg.heading;
       other.speed = msg.speed;
       if (!otherBoat) {
-        otherBoat = createBoatMesh(otherColor);
+        otherBoat = createBoatMesh(otherColor, boatOptions);
         scene.add(otherBoat.group);
         otherWake = createWake();
         scene.add(otherWake.group);
@@ -483,12 +491,15 @@ function startGame({ canvas, net, seed, role }, coast) {
   }
   window.addEventListener('keydown', onKeyDown);
 
+  // Zoom. The procedural islands keep the old wheel zoom; the real coast has the new zoom + chart (src/chart-controller.js).
   let zoom = 1;
   function onWheel(e) {
     e.preventDefault();
     zoom = Math.min(CONFIG.ZOOM_MAX, Math.max(CONFIG.ZOOM_MIN, zoom + e.deltaY * CONFIG.ZOOM_WHEEL_SENSITIVITY));
   }
-  canvas.addEventListener('wheel', onWheel, { passive: false });
+  if (!coast) canvas.addEventListener('wheel', onWheel, { passive: false });
+  const viewTarget = new THREE.Vector3(); // where the camera, sun and sea follow: the boat, or a lighthouse on a visit
+  let ctlView = null;
 
   const posInterval = setInterval(() => {
     net.send({
@@ -513,8 +524,8 @@ function startGame({ canvas, net, seed, role }, coast) {
 
   const hud = createHud(canvas);
   // The HUD boxes that are on screen (compass, wind text, trim bar, notice, key legend): names keep clear of them.
-  const hudRects = () => [hud.rose, hud.text, hud.bar, hud.notice, hud.legend].filter((el) => el && el.style.display !== 'none')
-    .map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0).map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height }));
+  const hudRects = () => [...[hud.rose, hud.text, hud.bar, hud.notice, hud.legend].filter((el) => el && el.style.display !== 'none')
+    .map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0).map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height })), ...(chartCtl ? chartCtl.rects() : []), ...(phone && phone.ropeRect() ? [phone.ropeRect()] : [])];
   if (coast && debugOverlay) {
     const r = coast.report;
     const t = r.timings;
@@ -525,6 +536,23 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Phone controls (src/phone.js): hold to aim, second-thumb sheet, arc,
   // wind at the boat. The corner HUD and keyboard legend are hidden there.
   const phone = isPhone ? createPhoneControls({ canvas, camera, onPing: () => doPing() }) : null;
+  // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
+  const chartCtl = coast
+    ? createChartController({
+      canvas, coast, nameBook, getMarks: () => (life ? life.marks : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
+      onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
+      // "Navigate here": the target's edge tag (src/name-labels.js); null clears it
+      onTarget: (entry, titleFn) => nameLabels.setTarget(entry, entry ? Math.max(0, coast.heightAt(entry.x, entry.z)) + 8 : 0, titleFn),
+      // a lighthouse visit: its name label is up while you look at it (the real name if found, else its description)
+      onVisit: (entry) => {
+        const known = nameBook.isKnown(entry.id);
+        if (known || entry.desc) nameLabels.show(entry, Math.max(0, coast.heightAt(entry.x, entry.z)) + 8, performance.now() / 1000, !known);
+      },
+    })
+    : null;
+  chartCtl?.setPhoneInterrupt(() => phone?.interrupt());
+  if (chartCtl && debugOverlay) window.__chart = chartCtl;
+  if (phone && debugOverlay) window.__phoneCtl = phone;
   if (phone) {
     for (const el of [hud.rose, hud.text, hud.bar, hud.legend]) el.style.display = 'none';
     hud.notice.style.bottom = '44px';
@@ -533,6 +561,7 @@ function startGame({ canvas, net, seed, role }, coast) {
 
   selfBoat.group.position.set(self.x, 0, self.z);
   selfBoat.group.rotation.y = self.heading;
+  viewTarget.copy(selfBoat.group.position);
   updateSunPosition(selfBoat.group.position);
   if (isFixedCamera) {
     snapFixedCamera(camera, selfBoat.group.position, zoom);
@@ -564,16 +593,17 @@ function startGame({ canvas, net, seed, role }, coast) {
       }
     }
 
-    phone?.apply(self, wind, dt);
-    if (input.left || input.right) hasSteered = true;
+    const frozen = !!(chartCtl && chartCtl.visiting); // a lighthouse visit: the camera goes, the boat stays put
+    if (!frozen) phone?.apply(self, wind, dt);
+    if (!frozen && (input.left || input.right)) hasSteered = true;
     if (input.up || input.down) hasTrimmed = true;
-    if (input.left) self.heading -= CONFIG.TURN_RATE * dt;
-    if (input.right) self.heading += CONFIG.TURN_RATE * dt;
-    if (input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
-    if (input.down) self.trim = Math.min(CONFIG.TRIM_MAX, self.trim + CONFIG.TRIM_RATE * dt);
+    if (!frozen && input.left) self.heading -= CONFIG.TURN_RATE * dt;
+    if (!frozen && input.right) self.heading += CONFIG.TURN_RATE * dt;
+    if (!frozen && input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
+    if (!frozen && input.down) self.trim = Math.min(CONFIG.TRIM_MAX, self.trim + CONFIG.TRIM_RATE * dt);
 
     const targetSpeed = boatSpeed(self.heading, wind.dir, wind.strength, self.trim);
-    self.speed = approachSpeed(self.speed, targetSpeed, dt);
+    self.speed = frozen ? 0 : approachSpeed(self.speed, targetSpeed, dt);
     if (coast) {
       // Real coast: very shallow water slows the boat a little; the shore is solid but gentle: the boat slides along
       // it and a head-on approach brakes softly (src/shore.js). No damage, no bounce.
@@ -583,15 +613,17 @@ function startGame({ canvas, net, seed, role }, coast) {
       self.z = mv.z;
       if (mv.contact > 0) self.speed = Math.max(0, self.speed - mv.contact * SHORE_BRAKE * dt);
       coast.clamp(self); // the region has an edge; hold the boat just inside it
-      if (coast.update(self.x, self.z)) {
+      if (coast.update(ctlView ? ctlView.focus.x : self.x, ctlView ? ctlView.focus.z : self.z)) { // terrain and trees follow the view
         const s = coast.trees.stats;
         const t = coast.terrain.stats;
         debugOverlay?.set('trees', `trees       ${s.trees} near boat (query ${s.queryMs.toFixed(1)} ms) | chunks ${t.shownFull} full + ${t.shownCoarse} coarse of ${t.chunks}`);
       }
-      const discovered = nameBook.update(self.x, self.z);
+      // names need the land to be revealed by the fog first (src/seen.js, via the chart controller)
+      const canSee = (e) => !chartCtl || chartCtl.canSee(e);
+      const discovered = nameBook.update(self.x, self.z, canSee);
       for (const e of discovered) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS);
       // Approaching a described place that is not yet named: its descriptive name ("the Hood") first.
-      for (const e of nameBook.sight(self.x, self.z)) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS, true);
+      for (const e of nameBook.sight(self.x, self.z, canSee)) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS, true);
       if (discovered.length) debugOverlay?.set('names', namesLine());
       if (lureOn) for (const place of arrivals.update(self.x, self.z, self.speed, nowS)) moment.trigger(place, giftFor(place), self, nowS);
     } else {
@@ -605,7 +637,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, wind);
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
-    updateSunPosition(selfBoat.group.position);
+    updateSunPosition(viewTarget);
     if (lureOn) {
       moment.update(dt, nowS);
       life.update(self, dt, nowS);
@@ -668,7 +700,13 @@ function startGame({ canvas, net, seed, role }, coast) {
       otherWake.update(dt, otherBoat.group.position, other.heading, other.speed);
     }
 
-    water.update(waves, wind, selfBoat.group.position, dt, camera.position);
+    // Stage 1c: zoom, chart, minimap, visit (src/chart-controller.js). Where the camera looks is the boat unless on a visit.
+    ctlView = chartCtl
+      ? chartCtl.update(dt, nowS, { x: self.x, z: self.z, heading: self.heading, speed: self.speed }, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, Math.min(window.devicePixelRatio || 1, 2), partnerPos ? [{ x: partnerPos.x, z: partnerPos.z, heading: partnerPos.heading }] : [])
+      : null;
+    const lookAt = ctlView ? ctlView.focus : self;
+    viewTarget.set(lookAt.x, ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z);
+    water.update(waves, wind, viewTarget, dt, camera.position);
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {
@@ -679,12 +717,12 @@ function startGame({ canvas, net, seed, role }, coast) {
     }
 
     if (isFixedCamera) {
-      updateFixedCamera(camera, selfBoat.group.position, dt, zoom);
+      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined);
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }
     // Haze distances track the camera (after it moved, before it renders).
-    const camToBoat = camera.position.distanceTo(selfBoat.group.position);
+    const camToBoat = camera.position.distanceTo(viewTarget);
     scene.fog.color.set(CONFIG.HAZE_COLOR);
     scene.fog.near = camToBoat * CONFIG.HAZE_MESH_NEAR_MUL;
     scene.fog.far = camToBoat * CONFIG.HAZE_MESH_FAR_MUL;
@@ -699,9 +737,13 @@ function startGame({ canvas, net, seed, role }, coast) {
       pingBearing: friendPing ? bearingTo(friendPing.x, friendPing.z) : null,
     });
 
-    nameLabels?.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS, self, hudRects);
-    renderer.render(scene, camera);
+    if (nameLabels) {
+      nameLabels.setHidden(!!ctlView && ctlView.t > 0.05); // the chart has its own names
+      nameLabels.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS, ctlView ? ctlView.focus : self, hudRects);
+    }
+    if (!(ctlView && ctlView.skip3D)) renderer.render(scene, camera); // the chart covers the whole view: skip the 3D render
     debugOverlay?.frame(now);
+    phone?.setRopeVisible(!(ctlView && ctlView.t > 0.05)); // the chart covers the view: no rope
     phone?.draw(nowS, {
       partner: partnerPos,
       pings,

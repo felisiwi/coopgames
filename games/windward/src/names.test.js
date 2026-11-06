@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { buildNameList, createNameBook, displayName, NAME_RADIUS_M, SIGHT_EXTRA_M, SAME_PLACE_M, STORAGE_KEY } from './names.js';
-import { layoutLabels, createLabelQueue, keepDistance, labelScore, LABEL_MAX_SHOWN, LABEL_MAX_SHOWN_NARROW } from './name-labels.js';
+import { layoutLabels, createLabelQueue, keepDistance, labelScore, LABEL_MAX_SHOWN, LABEL_MAX_SHOWN_NARROW, isQuiet, wantsLabel, QUIET_OPACITY, QUIET_SCALE } from './name-labels.js';
 
 let passed = 0;
 function check(name, fn) {
@@ -247,6 +247,42 @@ check('names.json accounts for all 15 of Felix\'s harbours, and the spawn is Gru
   for (const u of data.unplaced) assert.ok(u.reason, `${u.name} has a reason`);
   assert.equal(data.spawn.name, 'Grundsunds hamn');
   assert.ok(data.islands.length > 200);
+});
+
+check('fog gate: a place is not named, or sighted, until its land has been seen; then it is, at once', () => {
+  const described = [{ id: 'h', name: 'Hättan', kind: 'island', x: 0, z: 0, radius: NAME_RADIUS_M.island, desc: 'the Hood' }];
+  const book = createNameBook(described, memoryStorage());
+  let seen = false;
+  const canSee = () => seen;
+  assert.deepEqual(book.sight(0, 300, canSee), [], 'in sighting range, but the fog still covers it: no descriptive name');
+  assert.deepEqual(book.update(0, 100, canSee), [], 'inside the reach, still covered: no name');
+  assert.equal(book.isKnown('h'), false);
+  seen = true;
+  assert.deepEqual(book.sight(0, 300, canSee).map((e) => e.name), ['Hättan'], 'the fog lifts: the descriptive name shows (it was not used up)');
+  assert.deepEqual(book.update(0, 100, canSee).map((e) => e.name), ['Hättan']);
+  assert.equal(book.isKnown('h'), true);
+});
+
+check('without a gate the book behaves as before', () => {
+  const book = createNameBook(entries, memoryStorage());
+  assert.deepEqual(book.update(210, 0).map((e) => e.name), ['Alpha']);
+});
+
+check('quiet names: islands and skerries go quiet once announced, villages, harbours and lights keep their sticky tags', () => {
+  for (const kind of ['island', 'skerry']) assert.equal(isQuiet({ kind }, false), true, kind);
+  for (const kind of ['village', 'harbour', 'light']) assert.equal(isQuiet({ kind }, false), false, kind);
+  assert.equal(isQuiet({ kind: 'island' }, true), false, 'a descriptive sighting is not quiet');
+  assert.ok(QUIET_OPACITY < 0.7 && QUIET_OPACITY > 0.3, 'low opacity, still readable');
+  assert.ok(QUIET_SCALE < 1 && QUIET_SCALE > 0.6, 'smaller, still readable');
+});
+
+check('quiet names only show with their island on screen; a village tag stays as an edge tag', () => {
+  const base = { announced: false, near: true };
+  assert.equal(wantsLabel({ ...base, quiet: true, onScreen: true }), true, 'passing an island: the quiet name shows');
+  assert.equal(wantsLabel({ ...base, quiet: true, onScreen: false }), false, 'island off-screen: no edge tag for a quiet name');
+  assert.equal(wantsLabel({ ...base, quiet: false, onScreen: false }), true, 'village off-screen: sticky edge tag stays');
+  assert.equal(wantsLabel({ announced: true, near: false, quiet: true, onScreen: false }), true, 'a fresh announcement shows wherever it is');
+  assert.equal(wantsLabel({ announced: false, near: false, quiet: false, onScreen: true }), false, 'far away: gone');
 });
 
 console.log(`${passed} checks passed`);

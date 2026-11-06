@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import {
   seaHeightCPU, SEA_HEIGHT_GLSL, glslFloat, WAVE_AMP, WAVE_LEN, WAVE_SPEED, SEG, SIZE, createWaveState, stepWaves,
   seaSlopeCPU, SEA_SLOPE_GLSL, WATER_VERTEX_GLSL, WATER_FRAGMENT_GLSL, createMarkState, stepMarks, markCoord, markDriftSpeed,
-  createWater, waterSunDirection, WATER_LIGHT_ELEVATION_DEG,
+  createWater, waterSunDirection, WATER_LIGHT_ELEVATION_DEG, farRingGeometry, FAR_SIZE, FAR_DROP_M,
 } from './water.js';
 import { CONFIG } from './config.js';
 
@@ -230,6 +230,33 @@ check('createWater builds in node, follows the boat in whole vertex steps, and s
   const lab = createWater(null);
   lab.update(waves, wind, { x: 0, y: 0, z: 0 });
   assert.equal(lab.mesh.material.uniforms.uHazeStrength.value, 0);
+});
+
+check('the far sea is a coarse flat ring with a hole the size of the main tile, sharing its uniforms but without waves', () => {
+  const g = farRingGeometry();
+  const idx = g.getIndex().array;
+  const pos = g.getAttribute('position');
+  assert.ok(idx.length / 3 < 6000, `coarse: ${idx.length / 3} triangles (the main tile is ${2 * SEG * SEG})`);
+  let minAbs = Infinity;
+  let reach = 0;
+  for (let i = 0; i < idx.length; i += 3) {
+    const cx = (pos.getX(idx[i]) + pos.getX(idx[i + 1]) + pos.getX(idx[i + 2])) / 3;
+    const cz = (pos.getZ(idx[i]) + pos.getZ(idx[i + 1]) + pos.getZ(idx[i + 2])) / 3;
+    minAbs = Math.min(minAbs, Math.max(Math.abs(cx), Math.abs(cz)));
+    reach = Math.max(reach, Math.abs(cx), Math.abs(cz));
+  }
+  assert.ok(minAbs >= SIZE / 2 - 1e-6, `no triangle under the main tile (nearest centre ${minAbs.toFixed(0)} m)`);
+  assert.ok(minAbs < SIZE / 2 + FAR_SIZE / 48 * 1.5, 'and no gap: the ring starts at the tile edge');
+  assert.ok(reach > FAR_SIZE / 2 - FAR_SIZE / 48, 'reaches the far edge');
+  const water = createWater(null);
+  const far = water.mesh.children.find((c) => c.name === 'sea-far-ring');
+  assert.ok(far, 'a child of the tile, so it follows the boat');
+  assert.equal(water.mesh.material.uniforms.uWaveScale.value, 1);
+  assert.equal(far.material.uniforms.uWaveScale.value, 0, 'no wave displacement on the far ring');
+  assert.equal(far.material.uniforms.uDepth, water.mesh.material.uniforms.uDepth, 'depth map shared, so shallows and foam carry on');
+  assert.equal(far.material.uniforms.uPlaneOffset, water.mesh.material.uniforms.uPlaneOffset, 'one lattice offset for both');
+  assert.ok(far.position.y === -FAR_DROP_M && FAR_DROP_M > 0.2, 'below the wave troughs');
+  assert.ok(WATER_VERTEX_GLSL.includes('uniform float uWaveScale') && WATER_VERTEX_GLSL.includes('* uWaveScale'));
 });
 
 console.log(`\n${passed}/${passed} assertions passed`);

@@ -1,0 +1,14 @@
+{
+  "_about": "Geography of the two chart images (stage 1c). Both were drawn for the approved Map Lab (ref/map-lab.html) from the same coast data as assets/coast (see assets/coast/SOURCES.md) and extracted here as files. detail.png: the shaded real-coast render at 20 m per pixel (= 2 game metres) round the start area; overview.png: a plain parchment land/sea map of the whole coast at 100 m per pixel. Positions convert with the same lon/lat -> game-metre projection as the coast (coast-data.js toPx).",
+  "detail": { "file": "detail.png", "S": 58.055, "N": 58.32, "W": 11.195, "E": 11.525, "w": 968, "h": 1473, "mpp": 20 },
+  "overview": { "file": "overview.png", "S": 57.33, "N": 58.95, "W": 10.85, "E": 12.1, "w": 733, "h": 1801, "mpp": 100, "metresPerDegLat": 111195, "metresPerDegLon": 58693.78170073166 },
+  "sections": [
+    { "id": "koster", "lore": "The Border Skerries", "name": "Koster & Strömstad", "S": 58.75, "N": 58.95 },
+    { "id": "fjall", "lore": "The Cliffy Coast", "name": "Fjällbacka & Hamburgsund", "S": 58.5, "N": 58.75 },
+    { "id": "smogen", "lore": "The Granite Fjord", "name": "Smögen & Lysekil", "S": 58.32, "N": 58.5 },
+    { "id": "start", "lore": "The Shallow Sounds", "name": "Grundsund & west Orust", "S": 58.055, "N": 58.32, "owned": true },
+    { "id": "tjorn", "lore": "The Crown’s Fortress", "name": "Tjörn & Marstrand", "S": 57.85, "N": 58.055 },
+    { "id": "gbg", "lore": "The Göta River Mouth", "name": "Göteborg skerries", "S": 57.55, "N": 57.85 },
+    { "id": "south", "lore": "Goose Inlet", "name": "Onsala & Gottskär", "S": 57.33, "N": 57.55 }
+  ]
+}
