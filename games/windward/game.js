@@ -41,7 +41,7 @@ import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
 import { LIGHTHOUSES } from './src/lighthouses.js';
 import { createLanternFx } from './src/lantern.js';
-import { createLighthouseTask, GRANDMA_ID } from './src/lighthouse-task.js';
+import { createLighthouseTask, GRANDMA_ID, hasSeenStart, markStartSeen, resetStart } from './src/lighthouse-task.js';
 import { createTaskUi } from './src/task-ui.js';
 import { createLife } from './src/life.js';
 import { createShoalLayer } from './src/shoal-look.js';
@@ -553,7 +553,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   // Stage 1d, the first task: the storm put the five lighthouses nearest the start out. Sail to each (close and slow: the boat moors, the camera
   // circles, the light comes back on, the fog lifts), then report to grandma in Fiskebäckskil. Progress is saved on the device (?lights=reset forgets it).
   const task = coast ? createLighthouseTask({ lights: coast.names.filter((e) => e.kind === 'light'), spawn: coast.spawn || { x: self.x, z: self.z } }) : null;
-  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') task.reset();
+  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(); }
   const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
   if (coast && task) {
     for (const l of coast.lights) {
@@ -565,7 +565,13 @@ function startGame({ canvas, net, seed, role }, coast) {
     }
   }
   const grandma = coast ? coast.names.find((e) => e.id === GRANDMA_ID) : null;
-  const taskUi = task ? createTaskUi({ parent: document.body }) : null;
+  // The start card (once, saved; Set sail or Skip both count) and the end card. The Task button on the chart reopens the start card with the progress.
+  const taskUi = task ? createTaskUi({
+    parent: document.body,
+    onSetSail: () => { markStartSeen(); if (chartCtl && chartCtl.state.t > 0.5) chartCtl.toggleChart(); }, // from the chart: back to the boat
+    onSkip: () => markStartSeen(),
+  }) : null;
+  const progressLine = () => (task.phase === 'done' ? 'The lights are all burning' : task.phase === 'report' ? 'All five lit: report to grandma' : `Lights restored: ${task.restoredCount} of ${task.total}`);
   // The light came back on (the relight timeline says when): save it, light the lantern, the calm sound; after the fifth, the goal is grandma.
   function onRelit(entry) {
     const r = task.restore(entry.id);
@@ -582,6 +588,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       holdTarget: (entry) => !!task && task.isDark(entry.id), // a dark light's tag stays until it is lit
       onRelit,
       onArrive: (entry) => { if (task && task.phase === 'report' && entry.id === GRANDMA_ID) { task.finish(); taskUi.showEnd(); } },
+      onTask: () => taskUi.showStart({ progress: progressLine() }),
       canvas, coast, nameBook, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
       onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
       // "Navigate here": the target's edge tag (src/name-labels.js); null clears it
@@ -595,6 +602,8 @@ function startGame({ canvas, net, seed, role }, coast) {
     : null;
   chartCtl?.setPhoneInterrupt(() => phone?.interrupt());
   if (task && chartCtl && grandma && task.phase === 'report') chartCtl.setTarget(grandma); // reloaded with all five lit: the goal is still grandma
+  // First time (and no progress yet): the storm card. Everything behind it keeps running, but the card takes every touch.
+  if (task && taskUi && !hasSeenStart() && task.phase === 'lights' && task.restoredCount === 0) taskUi.showStart();
   if (task && debugOverlay) window.__task = { task, lanternFx, taskUi, grandma };
   if (chartCtl && debugOverlay) window.__chart = chartCtl;
   if (phone && debugOverlay) window.__phoneCtl = phone;
@@ -638,7 +647,7 @@ function startGame({ canvas, net, seed, role }, coast) {
       }
     }
 
-    const frozen = !!(chartCtl && chartCtl.visiting); // a lighthouse visit: the camera goes, the boat stays put
+    const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible); // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
     if (!frozen) phone?.apply(self, wind, dt);
     if (!frozen && (input.left || input.right)) hasSteered = true;
     if (input.up || input.down) hasTrimmed = true;

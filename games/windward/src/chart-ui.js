@@ -22,8 +22,8 @@ function button(label, aria, css = '') {
   return b;
 }
 
-// opts: { parent, debug, onChart(), onZoomStep(factor), onBack(), onNavigate(), onJump(), onMiniTap(px, py, size) }
-export function createChartUi({ parent = document.body, debug = false, onChart, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
+// opts: { parent, debug, onChart(), onTask() (the Task button, chart mode only: reopens the start card), onZoomStep(factor), onBack(), onNavigate(), onJump(), onMiniTap(px, py, size) }
+export function createChartUi({ parent = document.body, debug = false, onChart, onTask = () => {}, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
   // the chart's own canvas (drawn by src/chart.js), above the 3D view and the phone layer, below the controls
   const chartCanvas = el('canvas', 'position:fixed;inset:0;width:100%;height:100%;z-index:4;display:none;pointer-events:none;touch-action:none');
   chartCanvas.setAttribute('aria-label', "Granddad's chart of the west coast");
@@ -37,7 +37,8 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   const caption = el('div', `font:600 10px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(234,243,248,0.7);text-shadow:0 1px 2px rgba(0,0,0,.5);width:132px;text-align:center`, 'North up');
   const row = el('div', 'display:flex;gap:8px;pointer-events:auto');
   const chartBtn = button('Boat', 'Back to the boat view', 'display:none'); // only while the chart is up
-  row.append(chartBtn);
+  const taskBtn = button('Task', 'Show the task: what the storm did and what to do', 'display:none'); // chart mode only, beside Boat
+  row.append(chartBtn, taskBtn);
   // The minimap is the way into the chart: a tap opens it (or visits a lighthouse under the finger). No badge: tapping it and zooming out are enough.
   top.append(mini, caption, row);
   parent.appendChild(top);
@@ -72,12 +73,13 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   zout.addEventListener('click', () => onZoomStep(1.35));
   backBtn.addEventListener('click', () => onBack());
   navBtn.addEventListener('click', () => onNavigate());
+  taskBtn.addEventListener('click', () => onTask());
   jumpBtn.addEventListener('click', () => onJump());
   mini.addEventListener('click', (e) => { const r = mini.getBoundingClientRect(); onMiniTap(e.clientX - r.left, e.clientY - r.top, r.width); });
 
   let toastTimer = 0;
   return {
-    chartCanvas, mini, elements: { top, zoomCol, card, boatBtn: chartBtn, navBtn, backBtn },
+    chartCanvas, mini, elements: { top, zoomCol, card, boatBtn: chartBtn, taskBtn, navBtn, backBtn },
     // Boxes the names must keep clear of (CSS px): the minimap column, zoom buttons, the visit card.
     rects() {
       return [top, zoomCol, card].filter((e) => e.style.display !== 'none').map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0)
@@ -107,6 +109,7 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
     setChartMode(on) {
       chartCanvas.style.pointerEvents = on ? 'auto' : 'none';
       chartBtn.style.display = on ? 'inline-block' : 'none';
+      taskBtn.style.display = on ? 'inline-block' : 'none';
       credit.style.display = on ? 'none' : 'block';
     },
     // the minimap is hidden (the chart is up): its caption goes with it

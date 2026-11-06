@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { RELIGHT, relightFrame, igniteTime, relightDuration, REVEAL_RADIUS_M } from './relight.js';
-import { createLighthouseTask, pickTaskLights, TASK_KEY, TASK_COUNT, MOOR_M, MOOR_MAX_SPEED, HINT_COOLDOWN_S, GRANDMA_ID } from './lighthouse-task.js';
+import { createLighthouseTask, pickTaskLights, TASK_KEY, TASK_COUNT, MOOR_M, MOOR_MAX_SPEED, HINT_COOLDOWN_S, GRANDMA_ID, START_KEY, hasSeenStart, markStartSeen, resetStart } from './lighthouse-task.js';
+import { START_CARD, END_CARD } from './task-ui.js';
 import { createExplored } from './explored.js';
 import { fixedDirectionForYaw, updateFixedCamera } from './camera.js';
 import { createAudio, RELIGHT_SOUND } from './audio.js';
@@ -169,6 +170,32 @@ check('the relight sound is calm and silent until audio is unlocked; it never th
   assert.ok(RELIGHT_SOUND.gain <= 0.1 && RELIGHT_SOUND.chimeGain <= 0.08, 'quiet');
   assert.ok(RELIGHT_SOUND.attack >= 0.8, 'a swell, not a strike');
   assert.doesNotThrow(() => createAudio(null).relight());
+});
+
+check('the start card says what Felix wrote (storm, five lighthouses, Svalan, bring the light back, report to grandma in Fiskebäckskil), in short lines, with Set sail and Skip', () => {
+  const text = START_CARD.lines.join(' ');
+  for (const must of ['storm has put out the five lighthouses nearest Grundsund', 'granddad\'s old koster, Svalan', 'sail to each one and bring its light back', 'report to grandma in Fiskebäckskil']) assert.ok(text.includes(must), `says "${must}"`);
+  assert.equal(START_CARD.lines.length, 3);
+  assert.ok(START_CARD.lines.every((l) => l.length <= 80), 'short lines for a phone');
+  assert.equal(START_CARD.go, 'Set sail'); assert.equal(START_CARD.skip, 'Skip');
+  assert.ok(START_CARD.title.length <= 20);
+  assert.ok(END_CARD.title && END_CARD.lines.length >= 1);
+});
+
+check('the start card is shown once: seen is saved on the device, a reset shows it again, blocked storage never throws', () => {
+  const store = memory();
+  assert.equal(hasSeenStart(store), false, 'a fresh device has not seen it');
+  markStartSeen(store);
+  assert.equal(hasSeenStart(store), true, 'Set sail or Skip: seen');
+  assert.equal(hasSeenStart(store), true, 'and it stays seen');
+  resetStart(store);
+  assert.equal(hasSeenStart(store), false, '?lights=reset shows it again');
+  store.setItem(START_KEY, 'nope');
+  assert.equal(hasSeenStart(store), false, 'junk reads as not seen');
+  const blocked = { getItem() { throw new Error('x'); }, setItem() { throw new Error('x'); }, removeItem() { throw new Error('x'); } };
+  assert.doesNotThrow(() => { markStartSeen(blocked); resetStart(blocked); });
+  assert.equal(hasSeenStart(blocked), false, 'blocked storage: shown each time, never a crash');
+  assert.equal(hasSeenStart(null), false);
 });
 
 console.log(`${passed} checks passed`);

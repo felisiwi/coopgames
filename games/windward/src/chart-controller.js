@@ -69,7 +69,7 @@ export function chartSea(sea, toGame) {
   };
 }
 
-export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
+export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const lights = chartLights(coast.names, toGame);
   const lightList = [...lights.inWindow, ...lights.far];
@@ -83,6 +83,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   const ui = createChartUi({
     parent, debug,
     onChart: () => toggleChart(), // the Boat button (shown only while the chart is up)
+    onTask: () => onTask(), // the Task button (also chart mode only): reopens the start card
     onZoomStep: (f) => zoomBy(f),
     onBack: () => { if (state.visit) endVisit(); else closeCard(); },
     onNavigate: () => onNavigatePressed(),

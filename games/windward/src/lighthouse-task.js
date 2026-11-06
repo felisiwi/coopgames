@@ -9,6 +9,18 @@ export const HINT_RANGE_M = 130; // near a dark light but going too fast: a quie
 export const HINT_COOLDOWN_S = 25;
 export const GRANDMA_ID = 'village:Fiskebäckskil';
 
+// The start screen is shown once: this flag lives on the device (a missing or blocked storage just means it is shown again).
+export const START_KEY = 'windward.start.v1';
+export function hasSeenStart(storage = taskStorage()) {
+  try { return !!(storage && JSON.parse(storage.getItem(START_KEY) || 'null')?.seen === true); } catch { return false; }
+}
+export function markStartSeen(storage = taskStorage()) {
+  try { storage?.setItem(START_KEY, JSON.stringify({ v: 1, seen: true })); } catch { /* blocked: carry on */ }
+}
+export function resetStart(storage = taskStorage()) {
+  try { storage?.removeItem?.(START_KEY); storage?.setItem(START_KEY, JSON.stringify({ v: 1, seen: false })); } catch { /* blocked */ }
+}
+
 export function taskStorage() {
   try {
     const s = globalThis.localStorage;
