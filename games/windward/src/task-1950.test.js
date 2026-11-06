@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createTask1950, TASK1950_KEY } from './task-1950.js';
-import { LIGHTS_1950, KEEPER_LIGHT, DEPOT_CARD, RELIGHT_STEPS, KEEPER_CARDS, REPORT_CARDS, KEEPER_NUDGE, FUTURE_CARD, START_CARD_1950, NO_GAS_HINT, STORY_1950 } from './story-1950.js';
+import { LIGHTS_1950, KEEPER_LIGHT, DEPOT_CARD, RELIGHT_STEPS, KEEPER_CARDS, REPORT_CARDS, KEEPER_NUDGE, FUTURE_CARD, NO_GAS_HINT, STORY_1950 } from './story-1950.js';
 import { eraStorage } from './era-storage.js';
 
 let passed = 0;
@@ -84,7 +84,7 @@ check('progress is saved per era and read back; a 1950 save never touches the To
 });
 
 check('the copy: short lines, no grandma, no real names for the keeper, the depot says what Felix said, invented lines are marked in the source', () => {
-  const all = [START_CARD_1950.lines, DEPOT_CARD.lines, RELIGHT_STEPS.map((s) => s.text), ...KEEPER_CARDS.map((c) => c.lines), ...REPORT_CARDS.map((c) => c.lines), KEEPER_NUDGE.lines, FUTURE_CARD.lines].flat();
+  const all = [DEPOT_CARD.lines, RELIGHT_STEPS.map((s) => s.text), ...KEEPER_CARDS.map((c) => c.lines), ...REPORT_CARDS.map((c) => c.lines), KEEPER_NUDGE.lines, FUTURE_CARD.lines].flat();
   for (const t of all) assert.ok(t.length <= 92, `too long for a phone card: ${t}`);
   const text = [...all, ...KEEPER_CARDS.map((c) => c.title), ...REPORT_CARDS.map((c) => c.title)].join('\n');
   assert.ok(!/grandma/i.test(text), 'no grandma in 1950');
@@ -100,7 +100,7 @@ check('the copy: short lines, no grandma, no real names for the keeper, the depo
   const src = readFileSync(new URL('./story-1950.js', import.meta.url), 'utf8');
   assert.ok((src.match(/INVENTED-DIALOGUE/g) || []).length >= 6, 'the invented lines are marked in the source');
   assert.ok(!/Nilén|Danielsson|Lundberg|Wässing|Hermansson|Anker Andersson/.test(src), 'no real keeper or memoir name is used for the invented keeper');
-  assert.deepEqual(Object.keys(STORY_1950).sort(), ['depot', 'keeper', 'keeperNudge', 'report', 'start', 'wake']);
+  assert.deepEqual(Object.keys(STORY_1950).sort(), ['depot', 'find', 'keeper', 'keeperNudge', 'parts', 'report', 'yard']);
 });
 
 console.log(`\n${passed} checks passed`);

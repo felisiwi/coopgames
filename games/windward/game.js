@@ -47,7 +47,8 @@ import { createLighthouseTask, towerLit, GRANDMA_ID, REWARD_DELAY_S, hasSeenStar
 import { createHarbourWater } from './src/harbour-water.js';
 import { createTaskUi } from './src/task-ui.js';
 import { createWakeScene } from './src/wake-scene.js';
-import { STORY_1950, LIGHTS_1950, KEEPER_LIGHT, DEPOT, RELIGHT_STEPS, NO_GAS_HINT, EASE_OFF_DEPOT, GLOW_TOAST, FUTURE_CARD, FUTURE_LIGHT_NAME } from './src/story-1950.js';
+import { createBeats } from './src/beats-1950.js';
+import { STORY_1950, OBJECTIVES, NOW_TITLE, EASE_OFF_GRUNDSUND, EASE_OFF_YARD, FITTINGS_TOAST, HELP_TOAST, YARD, LIGHTS_1950, KEEPER_LIGHT, DEPOT, RELIGHT_STEPS, NO_GAS_HINT, EASE_OFF_DEPOT, GLOW_TOAST, FUTURE_CARD, FUTURE_LIGHT_NAME } from './src/story-1950.js';
 import { shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro } from './src/opening.js';
 import { GREY_DAWN, blendLook, snapshotLook, applyLook as applyLookValues } from './src/dusk.js';
 import { lightGlyph } from './src/light-glyph.js';
@@ -476,7 +477,8 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   if (coast && debugOverlay) window.__lureOn = lureOn;
   if (lureOn && debugOverlay) window.__lure = { arrivals, deck, moment, life, audio, names: coast.names }; // headless checks
   // The HUD counter on the real coast: places you have named (there are no "finds" to count).
-  const progressText = () => (coast ? `places named ${nameBook.count()}${task && task.progressText() ? ` · ${task.progressText()}` : ''}` : `found ${found.size}/${discoverables.length}`);
+  const hudTask = () => { const t = era1950 && beats && !JOB_1950_LIVE ? OBJECTIVES[beats.phase].hud : task ? task.progressText() : ''; return t ? ` · ${t}` : ''; };
+  const progressText = () => (coast ? `places named ${nameBook.count()}${hudTask()}` : `found ${found.size}/${discoverables.length}`);
   const other = { x: null, z: null, heading: 0, speed: 0 };
   let otherLastPosAtS = null; // for partnerState() (src/partner.js)
   let partnerLeftAtS = null; // when the "friend left" notice started
@@ -644,7 +646,13 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   }
   const task = coast ? (era1950 ? createTask1950({ lights: lightEntries, lightNames: LIGHTS_1950, keeperName: KEEPER_LIGHT, depot: depotEntry, storage: store, spawn: coast.spawn }) : createLighthouseTask({ lights: lightEntries, spawn: coast.spawn || { x: self.x, z: self.z }, storage: store })) : null;
   const keeperEntry = era1950 ? lightEntries.find((e) => e.name === KEEPER_LIGHT) || null : null;
-  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(store); resetIntro(store); }
+  // 1950, the first story beats (src/beats-1950.js): the boy finds you, the errand to Grundsund, back at the yard. The gas / lights / keeper job (batch 3) is rebuilt on the revised story
+  // and stays dormant until then (JOB_1950_LIVE).
+  const JOB_1950_LIVE = false;
+  const grundsundEntry = era1950 ? coast.names.find((e) => e.id === 'harbour:Grundsunds hamn') || coast.names.find((e) => e.id === 'village:Grundsund') || null : null;
+  const yardEntry = era1950 && coast.wake ? { ...YARD, x: coast.wake.spawn.x, z: coast.wake.spawn.z } : null;
+  const beats = era1950 ? createBeats({ storage: store, grundsund: grundsundEntry, yard: yardEntry }) : null;
+  if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(store); resetIntro(store); beats?.reset(); }
   const lightList = coast ? coast.lightList : LIGHTHOUSES; // the era's lights (1950: seven; Today: the game's own list)
   const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
   const gd = coast ? coast.granddad : null; // granddad's chart: { favourites, strange }
@@ -691,7 +699,6 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // The start card (once, saved; Set sail or Skip both count) and the end card. The Task button on the chart reopens the start card with the progress.
   const taskUi = task ? createTaskUi({
     parent: document.body,
-    copy: coast.era === '1950' ? STORY_1950 : undefined, // Britta's card and the waking cards in 1950; Today keeps the old storm card
     onSetSail: () => { markStartSeen(store); if (chartCtl && chartCtl.state.t > 0.5) chartCtl.toggleChart(); guide(); }, // from the chart: back to the boat; 1950: the first goal gets its tag
     onSkip: () => markStartSeen(store),
     onReport: () => guide(), // the card after the last light: its button sets Navigate to the next goal (Today: Fiskebäckskil; 1950: Måseskär)
@@ -708,9 +715,26 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // The goal's tag on the sail view (Navigate): 1950: the depot, then Måseskär, then Fiskebäckskil; Today: Fiskebäckskil once all five are lit.
   function guide() {
     if (!chartCtl || !task) return;
+    if (era1950 && beats && beats.phase !== 'free') { // the first beats: Grundsund, then the yard
+      const g = beats.goal() ? (beats.phase === 'errand' ? grundsundEntry : yardEntry) : null;
+      if (g) chartCtl.setTarget(g); else chartCtl.clearTarget();
+      return;
+    }
     const p = task.phase;
-    const goal = era1950 ? (p === 'gas' ? depotEntry : p === 'keeper' ? keeperEntry : p === 'report' ? grandma : null) : (p === 'report' ? grandma : null);
+    const goal = era1950 ? (JOB_1950_LIVE ? (p === 'gas' ? depotEntry : p === 'keeper' ? keeperEntry : p === 'report' ? grandma : null) : grandma) : (p === 'report' ? grandma : null); // 1950, until batch 3: Fiskebäckskil ("someone was asking for help")
     if (goal) chartCtl.setTarget(goal); else if (era1950) chartCtl.clearTarget();
+  }
+  // The beats' moments (1950): the chandler at Grundsund, the boy at the yard, and the first sight of the beach.
+  function partsMoment() {
+    beats.advance(); // 'return': the fittings are aboard (saved at once, so the card cannot come twice)
+    taskUi.showCards([STORY_1950.parts], { onDone: () => { guide(); chartCtl?.toast(FITTINGS_TOAST, 5200); } });
+  }
+  function yardMoment() {
+    beats.advance(); // 'free'
+    taskUi.showCards(STORY_1950.yard, { onDone: () => { guide(); chartCtl?.toast(HELP_TOAST, 5600); } });
+  }
+  function findMoment() { // after the dawn: the boy finds you; his father will take Svalan (the haul); the eka is yours
+    taskUi.showCards(STORY_1950.find, { onDone: () => { wakeScene?.haul(); markIntroSeen(store); if (beats.phase === 'find') beats.advance(); guide(); } });
   }
   // 1950: Svalan relaunched. The player's boat becomes the koster (repaired, freshly painted); the same boat group is kept (other parts of the game hold it), its contents are swapped.
   function switchToSvalan() {
@@ -745,7 +769,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (relightStep.id !== entry.id) relightStep = { id: entry.id, i: -1 };
     for (let i = RELIGHT_STEPS.length - 1; i >= 0; i--) if (t >= RELIGHT_STEPS[i].at) { if (i > relightStep.i) { relightStep.i = i; chartCtl?.toast(RELIGHT_STEPS[i].text, 2300); } break; }
   }
-  const progressLine = () => era1950 ? ({ gas: 'Fetch the gas from the Lysekil quay', lights: `Lights restored: ${task.restoredCount} of ${task.total}`, keeper: 'Take the post to the keeper on Måseskär', report: 'Tell Britta in Fiskebäckskil', done: 'The lights are all burning' }[task.phase]) : (task.phase === 'done' ? 'The lights are all burning' : task.phase === 'report' ? 'All five lit: report to grandma' : `Lights restored: ${task.restoredCount} of ${task.total}`);
+  const progressLine = () => era1950 && beats && beats.phase !== 'free' ? OBJECTIVES[beats.phase].now : era1950 ? ({ gas: 'Fetch the gas from the Lysekil quay', lights: `Lights restored: ${task.restoredCount} of ${task.total}`, keeper: 'Take the post to the keeper on Måseskär', report: 'Tell Britta in Fiskebäckskil', done: 'The lights are all burning' }[task.phase]) : (task.phase === 'done' ? 'The lights are all burning' : task.phase === 'report' ? 'All five lit: report to grandma' : `Lights restored: ${task.restoredCount} of ${task.total}`);
   // The light came back on (the relight timeline says when): save it, light the lantern, the calm sound; after the fifth, the goal is grandma.
   function onRelit(entry) {
     const r = task.restore(entry.id);
@@ -774,11 +798,11 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const chartCtl = coast
     ? createChartController({
       isDark: (id) => !!task && task.isDark(id),
-      holdTarget: (entry) => !!task && (task.isDark(entry.id) || (task.phase === 'report' && entry.id === GRANDMA_ID) || (era1950 && ((task.phase === 'gas' && entry.id === DEPOT.id) || (task.phase === 'keeper' && keeperEntry && entry.id === keeperEntry.id)))), // a dark light's tag stays until it is lit; grandma's until you are IN the harbour
+      holdTarget: (entry) => !!task && (task.isDark(entry.id) || (task.phase === 'report' && entry.id === GRANDMA_ID) || (era1950 && beats && ((beats.phase === 'errand' && grundsundEntry && entry.id === grundsundEntry.id) || (beats.phase === 'return' && entry.id === YARD.id))) || (era1950 && ((task.phase === 'gas' && entry.id === DEPOT.id) || (task.phase === 'keeper' && keeperEntry && entry.id === keeperEntry.id)))), // a dark light's tag stays until it is lit; grandma's until you are IN the harbour
       onRelit,
       onRelightDone: () => { if (task && task.phase === 'report') taskUi.showReport(); else if (era1950 && task && task.phase === 'keeper') taskUi.showReport(STORY_1950.keeperNudge); }, // the last light: no end card, a short "sail home" card (1950: "sail out to Måseskär")
       onRelightTick,
-      onTask: () => taskUi.showStart({ progress: progressLine() }),
+      onTask: () => (era1950 && beats ? taskUi.showCards([{ title: NOW_TITLE, lines: [progressLine()], button: 'Close' }]) : taskUi.showStart({ progress: progressLine() })),
       onLog: () => taskUi.showLog(logRows(lightLog, lightLookup, lightGlyph)),
       granddadMarks,
       canvas, coast, nameBook, storage: store, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
@@ -795,7 +819,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   chartCtl?.setPhoneInterrupt(() => phone?.interrupt());
   chartCtl?.setLogAvailable(lightLog.count > 0);
   if (task && chartCtl && grandma && task.phase === 'report') chartCtl.setTarget(grandma); // reloaded with all five lit: the goal is still grandma
-  if (era1950 && task && chartCtl && hasSeenIntro(store) && (task.phase === 'gas' || task.phase === 'keeper')) guide(); // reloaded mid-job: the goal's tag is back
+  if (era1950 && task && chartCtl && beats && beats.phase !== 'find') guide(); // reloaded mid-story: the goal's tag is back
   // First time (and no progress yet): the storm card. Everything behind it keeps running, but the card takes every touch.
   // The first minutes (1950): the opening scene (once), the waking cards, then Britta's card. Anywhere else, the old storm card, once.
   // Dawn (batch 2b): the opening ended in the dark at 1950; the game begins in the grey first light on the 1950 shore, the fog lifts and the sea warms over DAWN_S,
@@ -821,13 +845,10 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     stepDawn(0);
   }
   const qIntro = new URLSearchParams(window.location.search).get('opening');
-  if (task && taskUi && (task.phase === 'lights' || task.phase === 'gas') && task.restoredCount === 0) {
-    if (era1950 && (qIntro === '1' || !hasSeenIntro(store))) {
-      const wakeCards = () => taskUi.showWake({ onDone: () => { wakeScene?.haul(); markIntroSeen(store); taskUi.showStart(); } }); // "he takes her for repair"
-      if (dawn) dawn.onDone = wakeCards; else wakeCards(); // after the opening: the first light of 1950 comes up first, then the cards
-    } else if (!hasSeenStart(store)) taskUi.showStart();
-  }
-  if (task && debugOverlay) window.__task = { task, depotEntry, keeperEntry, kr, momentEntry, futureTower, switchToSvalan, reportMoment1950, keeperMoment1950, depotMoment1950, get selfBoat() { return selfBoat; }, lanternFx, taskUi, grandma, harbourWater, chapter, lightLog, gdMarks, strangeEntry, get towerFx() { return towerFx; }, startStrange: () => startStrange(), selfBoat, CONFIG, get strange() { return strange; } };
+  if (era1950 && taskUi && beats) {
+    if (qIntro === '1' || beats.phase === 'find') { if (dawn) dawn.onDone = findMoment; else findMoment(); } // after the opening the first light of 1950 comes up first, then the boy
+  } else if (task && taskUi && (task.phase === 'lights' || task.phase === 'gas') && task.restoredCount === 0 && !hasSeenStart(store)) taskUi.showStart();
+  if (task && debugOverlay) window.__task = { task, beats, partsMoment, yardMoment, findMoment, grundsundEntry, yardEntry, depotEntry, keeperEntry, kr, momentEntry, futureTower, switchToSvalan, reportMoment1950, keeperMoment1950, depotMoment1950, get selfBoat() { return selfBoat; }, lanternFx, taskUi, grandma, harbourWater, chapter, lightLog, gdMarks, strangeEntry, get towerFx() { return towerFx; }, startStrange: () => startStrange(), selfBoat, CONFIG, get strange() { return strange; } };
   if (chartCtl && debugOverlay) window.__chart = chartCtl;
   if (phone && debugOverlay) window.__phoneCtl = phone;
   if (phone) {
@@ -945,11 +966,17 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (task && chartCtl && !chartCtl.visiting && !task.done) {
       const moored = task.arrival(self.x, self.z, self.speed);
       if (moored) chartCtl.relightById(moored.id);
-      else if (era1950 && task.gasHint(self.x, self.z, nowS)) chartCtl.toast(NO_GAS_HINT, 4600);
+      else if (era1950 && JOB_1950_LIVE && task.gasHint(self.x, self.z, nowS)) chartCtl.toast(NO_GAS_HINT, 4600);
       else if (task.hint(self.x, self.z, self.speed, nowS)) chartCtl.toast('Ease off to moor at the dark lighthouse', 3600);
     }
     // 1950: the depot on the Lysekil quay (gas) and the keeper on Måseskär (post): moor close and slow, as at a light.
-    if (era1950 && task && chartCtl && !chartCtl.visiting && !taskUi.visible && rewardAt === null) {
+    if (era1950 && beats && chartCtl && !chartCtl.visiting && !taskUi.visible && !dawn) {
+      const a = beats.errandArrival(self.x, self.z, self.speed, nowS);
+      if (a === 'arrive') partsMoment(); else if (a === 'hint') chartCtl.toast(EASE_OFF_GRUNDSUND, 3600);
+      const r = beats.returnArrival(self.x, self.z, self.speed, nowS);
+      if (r === 'arrive') yardMoment(); else if (r === 'hint') chartCtl.toast(EASE_OFF_YARD, 3600);
+    }
+    if (JOB_1950_LIVE && era1950 && task && chartCtl && !chartCtl.visiting && !taskUi.visible && rewardAt === null) {
       const d = task.depotArrival(self.x, self.z, self.speed, nowS);
       if (d === 'load') depotMoment1950(); else if (d === 'hint') chartCtl.toast(EASE_OFF_DEPOT, 3400);
       const k = task.keeperArrival(self.x, self.z, self.speed, nowS);

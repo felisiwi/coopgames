@@ -4,9 +4,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { OPENING_PLAN, OPENING_LINES, OPENING_FLASHES, OPENING_TOTAL_S, WAKE_CARDS, START_CARD_1950, STORY_1950 } from './story-1950.js';
+import { OPENING_PLAN, OPENING_LINES, OPENING_FLASHES, OPENING_DARK, OPENING_TOTAL_S, FIND_CARDS, PARTS_CARD, YARD_CARDS, OBJECTIVES, STORY_1950 } from './story-1950.js';
 import { REWIND } from './rewind.js';
-import { phaseAt, flashLevel, shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro, OPENING_KEY, INTRO_KEY } from './opening.js';
+import { phaseAt, flashLevel, darkLevel, shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro, OPENING_KEY, INTRO_KEY } from './opening.js';
 import { eraStorage } from './era-storage.js';
 
 globalThis.fetch = async (u) => { const b = readFileSync(fileURLToPath(u)); return { text: async () => b.toString('utf8'), json: async () => JSON.parse(b.toString('utf8')), arrayBuffer: async () => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) }; };
@@ -19,7 +19,8 @@ async function check(name, fn) { await fn(); passed += 1; console.log(`ok - ${na
 const memory = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), keys: () => [...m.keys()] }; };
 
 // ------------------------------------------------------------------------------------------------------------ the words
-const allText = [...OPENING_LINES.map((l) => l.text), ...WAKE_CARDS.flatMap((c) => [c.title, ...c.lines, c.button]), START_CARD_1950.title, ...START_CARD_1950.lines, START_CARD_1950.go, START_CARD_1950.skip];
+const beatCards = [...FIND_CARDS, PARTS_CARD, ...YARD_CARDS];
+const allText = [...OPENING_LINES.map((l) => l.text), ...beatCards.flatMap((c) => [c.title, ...c.lines, c.button]), ...Object.values(OBJECTIVES).flatMap((o) => [o.hud, o.now])];
 
 await check('the opening: dusk, fog, storm, the rewind, a hold at 1950, a last flash; the phases follow each other with no gap and the rewind lasts as long as src/rewind.js says', () => {
   assert.deepEqual(OPENING_PLAN.map((p) => p.id), ['dusk', 'fog', 'storm', 'rewind', 'hold', 'out']);
@@ -38,29 +39,39 @@ await check('two or three minimal lines, none during the rewind, no word about t
   const rewindAt = OPENING_PLAN.find((p) => p.id === 'rewind').at;
   for (const l of OPENING_LINES) { assert.ok(l.from < l.to && l.to <= rewindAt, `"${l.text}" is over before the rewind`); assert.ok(l.to - l.from >= 4, `"${l.text}" stays long enough to read`); }
   for (let i = 1; i < OPENING_LINES.length; i++) assert.ok(OPENING_LINES[i].from >= OPENING_LINES[i - 1].to, 'one line at a time');
-  assert.ok(OPENING_LINES.some((l) => /Svalan/.test(l.text)), 'Svalan at the jetty');
+  assert.deepEqual(OPENING_LINES.map((l) => [/Fiskebäckskil/.test(l.text) && /Grandma and Granddad/.test(l.text) && /Summer/.test(l.text) && /today/i.test(l.text), /fog/.test(l.text), /Svalan fast/.test(l.text)].filter(Boolean).length), [1, 1, 1], 'in this order: where and when (tied to today), the fog, going down to make Svalan fast');
+  assert.ok(OPENING_LINES.every((l) => l.text.length <= 70), 'short: one line at a time');
   assert.ok(!/time|year|1950|travel|back/i.test(OPENING_LINES.map((l) => l.text).join(' ')), 'no explanation of time travel');
   const storm = OPENING_PLAN.find((p) => p.id === 'storm');
   for (const f of OPENING_FLASHES) { assert.ok(f.at >= storm.at && f.at < storm.at + storm.dur, `flash at ${f.at} is in the storm`); assert.ok(f.thunderAfter > 0 && f.thunderAfter < 3); }
   assert.ok(OPENING_FLASHES.length >= 3);
+  const strike = OPENING_FLASHES.at(-1);
+  assert.equal(strike.strike, true, 'the last flash is the strike');
+  assert.ok(OPENING_LINES.every((l) => l.to <= strike.at), 'no words over the strike, the dark or the lighthouses');
+  assert.equal(darkLevel(strike.at), 0, 'the strike itself is light'); assert.ok(darkLevel(OPENING_DARK.full + 0.2) === 1 && darkLevel(OPENING_DARK.until) === 1, 'then it is black');
+  assert.ok(OPENING_DARK.from > strike.at && OPENING_DARK.full < OPENING_DARK.until && OPENING_DARK.back > OPENING_PLAN.find((p) => p.id === 'rewind').at, 'the lighthouses come up out of the dark just after the rewind begins');
+  assert.equal(darkLevel(OPENING_DARK.back), 0); assert.equal(darkLevel(0), 0);
+  let prevDark = 0; for (let x = OPENING_DARK.from; x <= OPENING_DARK.full; x += 0.02) { const v = darkLevel(x); assert.ok(v >= prevDark - 1e-9 && v <= 1); prevDark = v; }
   assert.equal(flashLevel(10, OPENING_FLASHES), 0); assert.ok(flashLevel(OPENING_FLASHES[0].at + 0.06, OPENING_FLASHES) > 0.6, 'a flash is bright at its peak');
   assert.ok(flashLevel(OPENING_FLASHES[0].at + 0.5, OPENING_FLASHES) < flashLevel(OPENING_FLASHES[0].at + 0.1, OPENING_FLASHES), 'and fades');
   for (let x = 0; x < OPENING_TOTAL_S; x += 0.05) { const v = flashLevel(x, OPENING_FLASHES); assert.ok(v >= 0 && v <= 1); }
 });
 
-await check('the cards: Britta replaces the old storm card; no grandma, no finale line, short lines for a phone; the boy is not named', () => {
-  assert.equal(START_CARD_1950.title, 'Britta');
-  assert.ok(START_CARD_1950.lines.some((l) => /Britta/.test(l)), 'she introduces herself');
-  assert.ok(START_CARD_1950.lines.some((l) => /eka/i.test(l)), 'the borrowed boat is the eka');
-  assert.equal(WAKE_CARDS.length, 2);
-  assert.ok(WAKE_CARDS[0].lines.some((l) => /Svalan/.test(l)) && WAKE_CARDS[1].lines.some((l) => /eka/i.test(l)), 'Svalan on the beach; the loan of the eka');
-  assert.ok(WAKE_CARDS[1].title.toLowerCase().includes('boatbuilder'), 'young granddad is the boatbuilder’s son (design)');
-  assert.equal(STORY_1950.start, START_CARD_1950); assert.equal(STORY_1950.wake, WAKE_CARDS);
+await check('the first story beats: the boy finds you, lends the eka, sends you to Grundsund; the chandler; the yard ("it\'ll be a while", the lights are out, someone in Fiskebäckskil); one speaker per card', () => {
+  const speakers = new Set(beatCards.map((c) => c.title));
+  assert.deepEqual([...speakers].sort(), ['The boy', 'The chandler'], 'two speakers in all, one at a time; the boy is not named, and Britta is not here yet');
+  for (const c of beatCards) { assert.ok(c.lines.length >= 1 && c.lines.length <= 2, `${c.title}: ${c.lines.length} lines`); assert.ok(c.lines.every((l) => /^“.*”$/.test(l)), `every line is the speaker's own words: ${c.lines}`); assert.ok(typeof c.button === 'string' && c.button.length < 16); }
+  const find = FIND_CARDS.flatMap((c) => c.lines).join(' '), yard = YARD_CARDS.flatMap((c) => c.lines).join(' ');
+  assert.ok(/father builds boats/.test(find) && /haul her up/.test(find), 'his father will take Svalan'); assert.ok(/Take our old eka/.test(find), 'he lends you the small boat'); assert.ok(/Grundsund/.test(find), 'the errand');
+  assert.ok(/fittings/.test(PARTS_CARD.lines.join(' ')), 'the chandler gives you the parts');
+  assert.ok(/It’ll be a while/.test(yard) && /lights have been out since the storm/.test(yard) && /Someone in Fiskebäckskil was asking for help/.test(yard), 'Felix\'s three sentences are all there, in the boy\'s mouth');
+  assert.equal(FIND_CARDS.at(-1).button, 'Set sail'); assert.equal(YARD_CARDS.at(-1).button, 'Set sail');
+  assert.ok(Object.keys(STORY_1950).every((k) => !['start', 'wake'].includes(k)), 'the old waking cards and Britta\'s start card are gone');
   const text = allText.join(' \n ');
-  assert.ok(!/grandma/i.test(text), 'Britta is not grandma yet');
-  assert.ok(!/After the storm/.test(text), 'the old storm card is gone from 1950');
-  assert.ok(!/waiting for you since/i.test(text), 'the finale line is kept for the finale');
+  assert.ok(!/I’m Britta|found you first|After the storm|waiting for you since/i.test(text), 'no old card text');
+  assert.ok(!/caulk/i.test(text));
   for (const t of allText) assert.ok(t.length <= 92, `too long for a phone card: ${t}`);
+  assert.deepEqual(Object.keys(OBJECTIVES), ['find', 'errand', 'return', 'free']);
 });
 
 // ------------------------------------------------------------------------------------------------------------ flags
@@ -106,7 +117,7 @@ await check('you wake on a real beach with open water off it, placed so Svalan i
     const main = landConnectedTo({ heightAt: h, from: vill[0] });
     assert.ok(main(w.beach.x, w.beach.z), `seed ${seed}: the wreck is on Skaftö's mainland shore`);
     assert.ok(vill.some((v) => Math.hypot(v.x - w.beach.x, v.z - w.beach.z) < 400), `seed ${seed}: near a village where a boatbuilder could work`);
-    for (const who of ['boatbuilder', 'britta']) assert.ok(Math.hypot(w.figures[who].x - w.beach.x, w.figures[who].z - w.beach.z) < 9, `${who} stands by Svalan`);
+    assert.ok(Math.hypot(w.figures.boatbuilder.x - w.beach.x, w.figures.boatbuilder.z - w.beach.z) < 9, 'the boy stands by Svalan'); assert.equal(w.figures.britta, undefined, 'Britta is in Fiskebäckskil, not on the beach');
   }
 });
 
@@ -125,10 +136,10 @@ await check('the beach is the same for both players (same seed, same place) and 
   assert.equal(today.wake ?? null, null);
 });
 
-await check('the wake scene: Svalan wrecked (mast gone), a cradle, the boatbuilder’s son and Britta; the haul rolls her upright onto the cradle, once', () => {
+await check('the wake scene: Svalan wrecked (mast gone), a cradle, the boatbuilder’s son (alone: Britta is in Fiskebäckskil); the haul rolls her upright onto the cradle, once', () => {
   const sc = createWakeScene({ plan: first.wake, heightAt: first.heightAt });
   const names = []; sc.group.traverse((o) => o.name && names.push(o.name));
-  for (const n of ['svalan-wrecked', 'cradle', 'boatbuilders-son', 'britta']) assert.ok(names.includes(n), n);
+  for (const n of ['svalan-wrecked', 'cradle', 'boatbuilders-son']) assert.ok(names.includes(n), n); assert.ok(!names.includes('britta'), 'Britta is not on the beach');
   assert.equal(sc.svalan.group.getObjectByName('rig').visible, false, 'her mast and sails are gone');
   assert.ok(Math.abs(sc.svalan.group.rotation.z - WAKE_SCENE.rollRad) < 1e-6, 'lying on her side');
   assert.ok(sc.cradle.scale.x < 0.01, 'no cradle yet');
@@ -143,7 +154,7 @@ await check('the wake scene: Svalan wrecked (mast gone), a cradle, the boatbuild
   assert.equal(settled.hauled, true); assert.ok(Math.abs(settled.svalan.group.rotation.z) < 1e-6, 'a reload after the intro shows her already hauled');
   assert.equal(sc.relaunched, false); sc.relaunch();
   assert.equal(sc.relaunched, true); assert.equal(sc.svalan.group.visible, false, 'relaunched: Svalan has left the cradle (she is the boat you sail)');
-  assert.ok(sc.cradle.visible !== false && sc.boatbuilder.visible && sc.britta.visible, 'the empty cradle and the two people stay');
+  assert.ok(sc.cradle.visible !== false && sc.boatbuilder.visible, 'the empty cradle and the boy stay');
   let tris = 0; sc.group.traverse((o) => { if (o.isMesh) tris += o.geometry.index ? o.geometry.index.count / 3 : o.geometry.attributes.position.count / 3; });
   assert.ok(tris < 12000, `the beach scene is light: ${Math.round(tris)} triangles`);
 });

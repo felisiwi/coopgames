@@ -2,7 +2,7 @@
 // the player starts in the borrowed eka. Pure: no THREE and no DOM; the helpers (shoreSpot, findOpenWater) are passed in so tests can run it on the real coast.
 //
 // beach: { x, y, z, facing } the spot where Svalan lies; facing = the way DOWNHILL, i.e. towards the water (water is at (sin facing, cos facing) from the beach).
-// spawn: { x, z } open water for the player.   figures: where the two people stand (the boatbuilder's son beside Svalan, Britta a few metres off, both looking at the sea).
+// spawn: { x, z } open water for the player.   figures: where the boatbuilder's son stands, beside Svalan, looking at the sea.
 // null if no beach is found (the game then falls back to the old start).
 const mulberry32 = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 
@@ -84,9 +84,9 @@ export function planWake({ world, near, nears = near ? [near] : [], onMainland =
   if (!best || best.violation > WAKE.maxViolationM) return null;
   const { beach, spawn, off } = best;
   const dir = [Math.sin(beach.facing), Math.cos(beach.facing)];
-  // the people: the boatbuilder's son beside Svalan's bow end, Britta a little way along the shore; both look out to sea
+  // the person: the boatbuilder's son beside Svalan's bow end, looking out to sea (Britta is in Fiskebäckskil: she is not on this beach)
   const along = [Math.cos(beach.facing), -Math.sin(beach.facing)]; // along the shore (perpendicular to downhill)
   const spot = (a, d) => { const x = beach.x + along[0] * a + dir[0] * d, z = beach.z + along[1] * a + dir[1] * d; return { x, z, y: world.heightAt(x, z) }; };
-  const figures = { boatbuilder: { ...spot(-4.5, 1.5), look: Math.atan2(spawn.x - (beach.x - along[0] * 4.5), spawn.z - (beach.z - along[1] * 4.5)) }, britta: { ...spot(5.5, 2.5), look: Math.atan2(spawn.x - (beach.x + along[0] * 5.5), spawn.z - (beach.z + along[1] * 5.5)) } };
+  const figures = { boatbuilder: { ...spot(-4.5, 1.5), look: Math.atan2(spawn.x - (beach.x - along[0] * 4.5), spawn.z - (beach.z - along[1] * 4.5)) } };
   return { beach, spawn: { x: spawn.x, z: spawn.z }, offshoreM: off, figures };
 }

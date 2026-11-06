@@ -1,4 +1,4 @@
-// The beach where you wake in 1950 (stage 1e, batch 2): Svalan thrown up on her side with her mast gone, the boatbuilder's son beside her, Britta a little way off.
+// The beach where you wake in 1950 (stage 1e, batch 2): Svalan thrown up on her side with her mast gone, the boatbuilder's son beside her.
 // haul() is "he takes her for repair": she rolls upright onto a wooden cradle and stays there, under repair, until chapter 1 is done (batch 3 relaunches her).
 // Pure scene building: the plan (src/wake-plan.js) says where, this file makes the meshes. No game state.
 import * as THREE from '../vendor/three/three.module.js';
@@ -53,7 +53,6 @@ export function createWakeScene({ plan, heightAt }) {
     return g;
   };
   const boatbuilder = figure('boy', figures.boatbuilder, 'boatbuilders-son');
-  const britta = figure('girl', figures.britta, 'britta');
 
   let haulT = null;              // null: lying on the beach; 0..1: hauling; stays 1 after
   let hauled = false;
@@ -67,7 +66,7 @@ export function createWakeScene({ plan, heightAt }) {
   pose(0);
 
   return {
-    group, svalan, boatbuilder, britta, cradle,
+    group, svalan, boatbuilder, cradle,
     get hauled() { return hauled; },
     get hauling() { return haulT !== null && !hauled; },
     haul() { if (haulT === null) haulT = 0; }, // "he takes her for repair": start the animation (once)
@@ -83,7 +82,6 @@ export function createWakeScene({ plan, heightAt }) {
         if (haulT >= 1) hauled = true;
       }
       boatbuilder.rotation.z = Math.sin(t * 1.3) * 0.03;
-      britta.rotation.z = Math.sin(t * 1.1 + 1.7) * 0.025;
       if (hauled) boatbuilder.rotation.y = figures.boatbuilder.look + Math.sin(t * 0.7) * 0.25; // he turns to look her over
     },
   };

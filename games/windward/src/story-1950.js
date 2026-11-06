@@ -20,53 +20,49 @@ export const OPENING_PLAN = [
   { id: 'out', at: 41, dur: 1.5 },    // a last flash; the game takes over
 ];
 export const OPENING_TOTAL_S = OPENING_PLAN.reduce((t, b) => Math.max(t, b.at + b.dur), 0);
-// Two or three minimal lines, no explanation of time travel (design). DRAFT: TODO(felix): confirm.
+// Three short lines, one at a time, in this order (Felix): where and when (tied to today), the fog, going down to the jetty. Then the lightning strikes, then dark, then
+// the lighthouses: no line over those. No explanation of time travel. DRAFT wording of (a) is Felix's with "today" added: TODO(felix): confirm.
 export const OPENING_LINES = [
-  { from: 3, to: 9, text: 'Granddad’s koster, Svalan, at the jetty.' },
-  { from: 11, to: 15.5, text: 'The wind is getting up.' },
-  { from: 17, to: 23, text: 'You go out to make her fast.' },
+  { from: 1.2, to: 7.2, text: 'Fiskebäckskil, today. Grandma and Granddad’s house. Summer.' },
+  { from: 10.4, to: 15.4, text: 'A strange fog is rolling in.' },
+  { from: 16.4, to: 21.8, text: 'You go down to make Svalan fast.' },
 ];
-// Lightning (seconds into the opening) and the thunder that follows each (seconds later, by distance).
-export const OPENING_FLASHES = [{ at: 17.2, thunderAfter: 1.6 }, { at: 18.7, thunderAfter: 0.9 }, { at: 19.1, thunderAfter: 0.7 }, { at: 21.4, thunderAfter: 0.4 }, { at: 22.6, thunderAfter: 0.3 }];
+// Lightning (seconds into the opening) and the thunder that follows each (seconds later). The last one is THE STRIKE: it is followed by the dark.
+export const OPENING_FLASHES = [{ at: 18.6, thunderAfter: 1.5 }, { at: 20.3, thunderAfter: 0.9 }, { at: 22.3, thunderAfter: 0.25, strike: true }];
+export const OPENING_DARK = { from: 22.55, full: 22.8, until: 23.9, back: 24.9 }; // after the strike the screen goes black; the lighthouses come up out of it at 24.9 (the rewind starts at 24)
 export const OPENING_SKIP = 'Skip';
 
-// ---- waking: three short cards over the first view of 1950 -----------------------------------------------------------------------------------------------
-// Card 1 and 2 have a Next button; the last card is Britta's (START_CARD_1950), which is also what the chart's Task button reopens later.
-export const WAKE_CARDS = [
-  {
-    title: 'Skaftö',
-    lines: [
-      'Gulls. Cold shingle under your cheek.',
-      'Svalan lies on her side a few metres up the beach, planking stove in, her mast gone.',
-    ],
-    button: 'Next',
-  },
-  {
-    title: 'The boatbuilder’s son',
-    lines: [
-      'A boy about your age is already walking round her, one hand on the planks.',
-      '“My father builds boats. We’ll haul her up and mend her.”', // INVENTED-DIALOGUE
-      '“You can’t go anywhere in that. Take our old eka until she’s ready.”', // INVENTED-DIALOGUE
-    ],
-    button: 'Next',
-  },
+// ---- chapter 1, the first story beats (batch 2c; replaces the waking cards and Britta's old start card) -------------------------------------------------
+// One speaker per card, no busy two-person cards. Every spoken line is INVENTED-DIALOGUE (no source says it). TODO(felix): confirm every line. The boy is the young granddad, a
+// boatbuilder's son; the player does not know that, so he is only "The boy" (the design does not name him). Britta is NOT here: she is in Fiskebäckskil (batch 3).
+//
+// Beat 1, on the beach at dawn: the boy finds you, his father will take Svalan, he lends you the small boat (the eka), and asks you for a first errand.
+export const FIND_CARDS = [
+  { title: 'The boy', lines: ['“You’re alive. That was some storm.”', '“I saw a wave throw you up on the shingle.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'The boy', lines: ['“Is that your boat? My father builds boats.”', '“He’ll haul her up and mend her.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'The boy', lines: ['“You can’t go anywhere in that. Take our old eka until she’s ready.”'], button: 'Next' }, // INVENTED-DIALOGUE (the loan: GAME-DESIGN.md)
+  { title: 'The boy', lines: ['“Father needs fittings from Grundsund for her.”', '“It’s a short sail south. Will you fetch them?”'], button: 'Set sail' }, // INVENTED-DIALOGUE (the errand: GAME-DESIGN.md)
 ];
-
-// Britta's card: replaces the old storm card ("After the storm"). Same job: what happened, what to do. In her voice, ~14, a fisherman's daughter on Skaftö.
-// Batch 3: the automatic (AGA) lights need new gas, which waits at the Lysekil quay ("gas from Erholmen, delivered to Lysekil": Felix).
-export const START_CARD_1950 = {
-  title: 'Britta',
-  lines: [
-    '“I’m Britta. I found you first.”', // INVENTED-DIALOGUE
-    '“The storm has put the gas lights out along the coast.”',
-    '“New gas from Erholmen is waiting on the quay in Lysekil.”', // INVENTED-DIALOGUE (the quay: Felix; her words: mine)
-    '“Take the eka, fetch it, and bring four lights back.”',
-    '“And Måseskär’s keeper is waiting for his post.”', // INVENTED-DIALOGUE
-    '“Then come and tell me, in Fiskebäckskil.”', // TODO(felix): confirm where Britta waits (Fiskebäckskil is also the report target in the code)
-  ],
-  go: 'Set sail',
-  skip: 'Skip',
+// Beat 2: at Grundsund. One speaker (an invented chandler; the quay, the trade and the line are mine). TODO(felix): confirm who gives you the parts.
+export const PARTS_CARD = { title: 'The chandler', lines: ['“For the boatbuilder? Here, a bundle of fittings.”', '“Mind they don’t go overboard.”'], button: 'Take the parts' }; // INVENTED-DIALOGUE
+// Beat 3: back at the yard on the beach: "It'll be a while. Careful, the lights are out since the storm. Someone in Fiskebäckskil was asking for help." (Felix's text, split by speaker turns)
+export const YARD_CARDS = [
+  { title: 'The boy', lines: ['“Good, that’s them. It’ll be a while before she’s ready.”', '“Careful out there. The lights have been out since the storm.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'The boy', lines: ['“Someone in Fiskebäckskil was asking for help.”', '“Go and see. Take the eka.”'], button: 'Set sail' }, // INVENTED-DIALOGUE
+];
+// What the "Now" card (the chart's Task button) says in each phase of the beats, and the one-line HUD text.
+export const OBJECTIVES = {
+  find: { hud: '', now: 'Someone is speaking to you.' },
+  errand: { hud: 'fittings from Grundsund', now: 'Sail to Grundsund and fetch the fittings for the boatbuilder.' },
+  return: { hud: 'back to the yard', now: 'Take the fittings back to the boatbuilder’s yard on Skaftö.' },
+  free: { hud: 'Fiskebäckskil', now: 'Someone in Fiskebäckskil was asking for help.' },
 };
+export const NOW_TITLE = 'Now';
+export const EASE_OFF_GRUNDSUND = 'Ease off to tie up at the quay in Grundsund';
+export const EASE_OFF_YARD = 'Ease off to come alongside the yard';
+export const FITTINGS_TOAST = 'Fittings aboard · back to the boatbuilder';
+export const HELP_TOAST = 'Fiskebäckskil: someone asked for help';
+export const YARD = { id: 'yard:boatbuilder', name: 'The boatbuilder’s yard', kind: 'yard', desc: 'The boatbuilder’s yard' };
 
 // ----------------------------------------------------------------------------------------------------------- batch 3: the job, in 1950
 // The stops, in order: the depot (gas), the four automatic lights, Måseskär's keeper, Britta in Fiskebäckskil. Names are the light names in src/lights-1950.js.
@@ -121,4 +117,4 @@ export const GLOW_TOAST = 'A glow out east, the keeper said. Kråksundsgap is ma
 export const FUTURE_CARD = { lines: ['That tower is not here yet.', 'But you saw it.'], button: 'Carry on sailing' };
 
 // What game.js hands to createTaskUi for the 1950 game.
-export const STORY_1950 = { start: START_CARD_1950, wake: WAKE_CARDS, depot: DEPOT_CARD, keeper: KEEPER_CARDS, report: REPORT_CARDS, keeperNudge: KEEPER_NUDGE };
+export const STORY_1950 = { find: FIND_CARDS, parts: PARTS_CARD, yard: YARD_CARDS, depot: DEPOT_CARD, keeper: KEEPER_CARDS, report: REPORT_CARDS, keeperNudge: KEEPER_NUDGE };
