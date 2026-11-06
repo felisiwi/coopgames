@@ -59,8 +59,10 @@ background ~2.5 s after the game starts, 1.1 MB).
 
 ## Known gaps / TODO(felix)
 - Real-phone fps is still Felix's read (the Pixel held 60 at 634k triangles; this is far under).
-- Hint labels ("the Hood") for a lighthouse show only when the boat is near it, not during a visit.
-- The overview picture (from the Map Lab) shows its source tile edges as thin rectangles; a redraw would need the whole coast raster.
+- The overview picture's tile seams are repainted by `tools/clean-chart-seams.py` (the cut edges of water bodies at the old tile borders stay straight: the data ends there).
+- Uncharted sections stay blank for now: there is no way to "sail there" and chart them yet (the whole playable window is inside the start section).
+- Lights outside the start section are not drawn on the chart any more (an uncharted section shows nothing).
+- Item 3, the rope control (one-handed sailing), waits for Felix's pick of an option.
 - Stora Kornö ("the barley isle") is still outside the playable edge. Gullholmens Gästhamn has no coordinate of its own.
 - Reveal radius (150 m) and minimap span (320 m) are first guesses: tune by feel (`REVEAL_M` in `src/explored.js`, `MINI.spanM` in `src/minimap.js`).
 
@@ -72,3 +74,11 @@ background ~2.5 s after the game starts, 1.1 MB).
 5. On the chart: red outline = granddad's sheet, the rest uncharted (tap one: a note). Fog lifts where you sailed; reload, the fog is still lifted.
 6. Tap a gold lighthouse on the chart or the minimap: the camera glides there, the boat stays; "Back to the boat". "Jump here (debug)" moves the boat.
 7. `?boat=eka` for the 1700 eka. `?preset=current` for the old terrain look.
+
+## 1c revision (phone test, 2026-11-06)
+- Chart: your boat is an arrow along its heading (a friend's is blue). Uncharted sections: plain parchment + big lore name + "UNCHARTED", no coast, no markers.
+- Names: nothing is named or sighted until the fog has lifted over some LAND of the place (`src/seen.js`; a big island's centre is inland, so any land within 150 m of its label point counts). After the announcement an island/skerry name goes quiet (small, 60% opacity, only while the island is on screen); villages, harbours and lights keep their sticky edge tags.
+- Navigate here: tap a lighthouse or a discovered place on the chart (or a lighthouse on the minimap) -> card -> "Navigate here". One target; a gold tag with distance (game metres, same scale as the knots) follows the screen edge towards it; arrival (45-90 m) or the cross clears it.
+- Trimmed: the sweet zone glows steadily, the dot grows a white ring, a small "trimmed" word sits by it (and the desktop trim bar does the same).
+- A lighthouse visit now puts its description/name label up in the world.
+Phone checklist additions: tap a discovered place on the chart -> Navigate here -> sail, watch the tag and distance, cross to cancel; sail past an island: a small faint name; trim the sail: the glow and "trimmed".

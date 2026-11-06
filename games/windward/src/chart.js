@@ -2,7 +2,8 @@
 // zoom out (src/zoom.js gives the view transform so the two line up), and keeps zooming out to the whole coast.
 //   - two pictures: the shaded detail round the start (assets/chart/detail.png) and the parchment overview of the
 //     whole coast (overview.png), both extracted from the approved Map Lab (see assets/chart/chart.json)
-//   - the 7 chart sections; only the start section is "granddad's", the rest are uncharted (greyed, named)
+//   - the 7 chart sections; only the start section is "granddad's"; the rest are uncharted: plain parchment and the section's
+//     big lore name, no coast, no markers, until you sail there (1c phone test)
 //   - fog over what you have not sailed (src/explored.js), lifted smoothly
 //   - names by the discovery rules: the real name (+ description) once discovered, the description alone for a place
 //     whose fog has lifted, nothing for an undescribed skerry you have not found. Lighthouses are always on the chart.
@@ -92,9 +93,9 @@ export function placeLabels(items, W, H) {
 }
 
 // ---- the canvas part -----------------------------------------------------------------------------------------------
-// opts: { canvas, cfg (chart.json), toGame, entries (name list), isKnown(id), explored, lights: [{ id, name, x, z, inWindow, entry }],
+// opts: { canvas, cfg (chart.json), toGame, entries (name list), isKnown(id), explored, seen(entry) (src/seen.js; defaults to the label point's fog), lights: [{ id, name, x, z, inWindow, entry }],
 //         baseUrl (folder of the pictures), makeCanvas, loadImage }
-export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, lights, baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
+export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, seen = (e) => explored.isExplored(e.x, e.z), lights, baseUrl, makeCanvas = () => document.createElement('canvas'), loadImage = (src) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }) }) {
   const ctx = canvas.getContext('2d');
   const detailRect = boundsRect(toGame, cfg.detail);
   const overRect = boundsRect(toGame, cfg.overview);
@@ -128,7 +129,7 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
   return {
     ensureLoaded, detailRect, overRect, bands,
     get loaded() { return !!images.detail; },
-    // view: zoom.js chartView(); W, H: CSS px; dpr; state: { boat: { x, z, heading }, visitId }
+    // view: zoom.js chartView(); W, H: CSS px; dpr; state: { boat: { x, z, heading }, friends: [{ x, z, heading }], visitId, target (entry|null) }
     draw(view, W, H, dpr, state) {
       canvas.style.opacity = String(view.alpha);
       canvas.style.display = view.alpha > 0.003 ? 'block' : 'none';
@@ -148,11 +149,14 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       if (images.overview) ctx.drawImage(images.overview, overRect.x0, overRect.z0, overRect.x1 - overRect.x0, overRect.z1 - overRect.z0);
-      for (const b of bands) { // uncharted sections: greyed out
-        if (b.owned) continue;
-        ctx.fillStyle = 'rgba(239,227,200,0.36)'; // light enough that the coast still reads; the section names say "uncharted"
-        ctx.fillRect(overRect.x0, b.z0, overRect.x1 - overRect.x0, b.z1 - b.z0);
-      }
+      const BIG = 1e6;
+      ctx.fillStyle = `rgb(${FOG_RGB.join(',')})`;
+      bands.forEach((b, i) => { // uncharted sections show NO chart: plain parchment, edge to edge (the first and last run on for ever)
+        if (b.owned) return;
+        const z0 = i === 0 ? -BIG : b.z0;
+        const z1 = i === bands.length - 1 ? BIG : b.z1;
+        ctx.fillRect(-BIG, z0, 2 * BIG, z1 - z0);
+      });
       if (images.detail) {
         ctx.drawImage(images.detail, detailRect.x0, detailRect.z0, detailRect.x1 - detailRect.x0, detailRect.z1 - detailRect.z0);
         ctx.fillStyle = 'rgba(239,227,200,0.16)';
@@ -160,12 +164,16 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
         buildFog();
         ctx.drawImage(fog.canvas, explored.rect.x0, explored.rect.z0, explored.cols * explored.cell, explored.rows * explored.cell);
       }
-      // section frames: a dashed line across the overview at every band edge, red round the owned one
+      // section frames: a dashed line along every band edge, a red frame round the owned one
+      ctx.strokeStyle = 'rgba(61,50,38,0.45)';
       ctx.lineWidth = 1 / s;
+      ctx.setLineDash([6 / s, 5 / s]);
+      ctx.beginPath();
+      for (const b of bands) { ctx.moveTo(-BIG, b.z0); ctx.lineTo(BIG, b.z0); }
+      ctx.stroke();
       for (const b of bands) {
-        ctx.strokeStyle = b.owned ? '#b8432f' : 'rgba(61,50,38,0.45)';
-        ctx.lineWidth = (b.owned ? 2.5 : 1) / s;
-        ctx.setLineDash(b.owned ? [] : [6 / s, 5 / s]);
+        if (!b.owned) continue;
+        ctx.strokeStyle = '#b8432f'; ctx.lineWidth = 2.5 / s; ctx.setLineDash([]);
         ctx.strokeRect(overRect.x0, b.z0, overRect.x1 - overRect.x0, b.z1 - b.z0);
       }
       ctx.setLineDash([]);
@@ -180,10 +188,29 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
         ctx.textAlign = 'right'; // against the right edge of the band, clear of the buttons on the left
         for (const b of bands) {
           const [sx, sy] = worldToScreen(view, W, H, overRect.x1, b.z0);
-          const x = Math.min(W - 8, sx - 8);
-          ctx.fillStyle = b.owned ? '#8a2f20' : 'rgba(61,50,38,0.78)';
-          ctx.fillText(b.lore + (b.owned ? '' : ' · uncharted'), x, sy + 18);
           hits.push({ type: 'section', id: b.id, section: b, x: W / 2, y: sy + 10, r: 0 });
+          if (b.owned) {
+            const x = Math.min(W - 8, sx - 8);
+            ctx.fillStyle = '#8a2f20';
+            ctx.fillText(b.lore, x, sy + 18);
+            continue;
+          }
+          // uncharted: the big lore name in the middle of the part of the band that is on screen
+          const [, y0] = worldToScreen(view, W, H, overRect.x0, b.z0);
+          const [, y1] = worldToScreen(view, W, H, overRect.x0, b.z1);
+          const top = Math.max(Math.min(y0, y1), 80); // clear of the Boat / settings buttons at the top left
+          const bot = Math.min(Math.max(y0, y1), H - 70);
+          if (bot - top < 36) continue;
+          const y = Math.min((top + bot) / 2, bot - 28); // short stretch (top band): keep the caption off the dashed edge
+          ctx.textAlign = 'center';
+          ctx.fillStyle = 'rgba(61,50,38,0.62)';
+          ctx.font = 'italic 27px "IM Fell English", Georgia, serif';
+          ctx.fillText(b.lore, W / 2, y);
+          ctx.font = '12px "IM Fell English SC", Georgia, serif';
+          ctx.fillStyle = 'rgba(61,50,38,0.5)';
+          ctx.fillText('UNCHARTED', W / 2, y + 20);
+          ctx.textAlign = 'right';
+          ctx.font = '15px "IM Fell English SC", Georgia, serif';
         }
         ctx.globalAlpha = 1;
       }
@@ -191,7 +218,9 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
       const drawn = [];
       for (const e of entries) {
         const known = isKnown(e.id);
-        const lab = chartLabel(e, known, explored.isExplored(e.x, e.z));
+        const sec = sectionAt(bands, e.z);
+        if (sec && !sec.owned) continue; // nothing of an uncharted section is on the chart
+        const lab = chartLabel(e, known, seen(e));
         if (!lab) continue;
         const [sx, sy] = worldToScreen(view, W, H, e.x, e.z);
         if (sx < -40 || sy < -40 || sx > W + 40 || sy > H + 40) continue;
@@ -210,8 +239,10 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
           if (state.visitId === d.e.id) { ctx.strokeStyle = '#b8432f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.stroke(); }
           hits.push({ type: 'light', id: d.e.id, entry: d.e, x: sx, y: sy, r: Math.max(16, 24 * m) });
         } else if (d.e.kind === 'village' || d.e.kind === 'harbour') {
+          if (d.known && labelA > 0.3) hits.push({ type: 'place', id: d.e.id, entry: d.e, x: sx, y: sy, r: 18 });
           ctx.fillStyle = lab.faded ? 'rgba(61,50,38,0.45)' : INK; ctx.fillRect(sx - 4, sy - 4, 8, 8);
         } else {
+          if (d.known && labelA > 0.3) hits.push({ type: 'place', id: d.e.id, entry: d.e, x: sx, y: sy, r: 18 });
           ctx.fillStyle = lab.faded ? 'rgba(61,50,38,0.4)' : '#8a7a6a'; ctx.beginPath(); ctx.moveTo(sx, sy - 4); ctx.lineTo(sx + 4, sy); ctx.lineTo(sx, sy + 4); ctx.lineTo(sx - 4, sy); ctx.closePath(); ctx.fill();
         }
         ctx.restore();
@@ -236,16 +267,36 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
         }
         ctx.globalAlpha = 1;
       }
-      // the boat
+      // the sail target: a ring and a dashed line from the boat
       const [bx, by] = worldToScreen(view, W, H, state.boat.x, state.boat.z);
-      ctx.save();
-      ctx.translate(bx, by);
-      ctx.fillStyle = '#b8432f'; ctx.strokeStyle = '#fff6e0'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.restore();
+      if (state.target) {
+        const [tx, ty] = worldToScreen(view, W, H, state.target.x, state.target.z);
+        ctx.save();
+        ctx.strokeStyle = 'rgba(184,67,47,0.75)'; ctx.lineWidth = 1.6; ctx.setLineDash([5, 5]);
+        ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
+        ctx.setLineDash([]); ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.arc(tx, ty, 15, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      }
+      // boats: a small arrow pointing the way each is heading (your friend's in blue)
+      const arrow = (b, fill) => {
+        const [x, y] = worldToScreen(view, W, H, b.x, b.z);
+        const d = Math.min(400, Math.max(2, 24 / s)); // far enough that the screen direction is clear at any zoom
+        const [fx, fy] = worldToScreen(view, W, H, b.x + Math.sin(b.heading || 0) * d, b.z + Math.cos(b.heading || 0) * d);
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.atan2(fy - y, fx - x)); // the arrow is drawn pointing along +x: the bow
+        ctx.fillStyle = 'rgba(255,246,224,0.55)'; ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill(); // a pale halo so it reads on any ground
+        ctx.fillStyle = fill; ctx.strokeStyle = '#fff6e0'; ctx.lineWidth = 1.6; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(-7, 6.5); ctx.lineTo(-3, 0); ctx.lineTo(-7, -6.5); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+      };
+      for (const f of state.friends || []) arrow(f, '#2f7fa8');
+      arrow(state.boat, '#b8432f');
       lastHits = hits;
     },
-    // A tap at (sx, sy) CSS px: { type: 'light', entry } | { type: 'section', section } | null. Lights first.
+    // A tap at (sx, sy) CSS px: { type: 'light' | 'place', entry } | { type: 'section', section } | null. Lights first, then discovered places.
     hit(sx, sy, view, W, H) {
       let best = null;
       for (const h of lastHits) {
@@ -254,6 +305,12 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, l
         if (d <= h.r && (!best || d < best.d)) best = { d, h };
       }
       if (best) return { type: 'light', entry: best.h.entry };
+      for (const h of lastHits) { // a discovered place
+        if (h.type !== 'place') continue;
+        const d = Math.hypot(h.x - sx, h.y - sy);
+        if (d <= h.r && (!best || d < best.d)) best = { d, h };
+      }
+      if (best) return { type: 'place', entry: best.h.entry };
       if (view.scale < SECTION_MAX_SCALE) {
         const z = (sy - H / 2) / (view.scale * view.sq); // used only to find the band: undo the squash, and the turn (rot = 0 here)
         const world = view.cz + z;

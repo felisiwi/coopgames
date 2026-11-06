@@ -12,6 +12,8 @@ import { createChartUi } from './chart-ui.js';
 import { ZOOM_MIN, ZOOM_CHART_START, ZOOM_CHART_FULL, ZOOM_STEP, chartBlend, chartView, fitZoom, stepZoom, wheelFactor, screenToWorld, zoomForScale } from './zoom.js';
 import { attachZoomInput } from './zoom-input.js';
 import { deviceStorage } from './names.js';
+import { createSeen } from './seen.js';
+import { createNavTarget } from './nav-target.js';
 
 export const VISIT_ZOOM = 0.8; // close enough to look at the lighthouse
 export const ZOOM_EASE = 9; // 1/s: how fast the shown zoom follows the target
@@ -43,14 +45,24 @@ export function chartLights(names, toGame, lights = LIGHTHOUSES) {
   return { inWindow, far };
 }
 
-export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
+// What the card says for a place picked on the chart: its name, with what it is.
+const KIND_LINE = { village: 'Village', harbour: 'Natural harbour', island: 'Island', skerry: 'Skerry', light: 'Lighthouse' };
+export function placeInfo(entry) {
+  return { title: entry.name, sub: [entry.desc, KIND_LINE[entry.kind]].filter(Boolean).join(' · ') };
+}
+
+// onTarget(entry | null, titleFn): the sail target changed (game.js shows its edge tag). onVisit(entry): a lighthouse visit began
+// (game.js shows that lighthouse's name label, so its description is up while you look at it).
+export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const settings = loadMiniSettings(storage);
   const lights = chartLights(coast.names, toGame);
   const lightList = [...lights.inWindow, ...lights.far];
+  const seen = createSeen({ heightAt: coast.heightAt }); // the fog gate for names (src/seen.js); the grid arrives with chart.json
+  const nav = createNavTarget();
   const state = {
     zoom: 1, zoomTarget: 1, returnZoom: 1, pan: { x: 0, z: 0 }, focus: { x: NaN, z: NaN },
-    visit: null, explored: null, chart: null, cfg: null, W: 390, H: 844, dpr: 1, view: null, t: 0, drag: null, zooming: false, lastSave: 0,
+    visit: null, card: null, explored: null, chart: null, cfg: null, W: 390, H: 844, dpr: 1, view: null, t: 0, drag: null, zooming: false, lastSave: 0,
   };
 
   const ui = createChartUi({
@@ -58,7 +70,8 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     onSettings: (s) => saveMiniSettings(storage, s),
     onChart: () => toggleChart(),
     onZoomStep: (f) => zoomBy(f),
-    onBack: () => endVisit(),
+    onBack: () => { if (state.visit) endVisit(); else closeCard(); },
+    onNavigate: () => onNavigatePressed(),
     onJump: () => { if (state.visit) { onJump(state.visit.x, state.visit.z); endVisit(); } },
     onMiniTap: (px, py, size) => {
       const hit = mini.hitLight(px, py, size, lastBoat, lastBoat.heading || 0);
@@ -77,10 +90,11 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   fetch(assetsBase + 'chart.json').then((r) => r.json()).then((cfg) => {
     state.cfg = cfg;
     state.explored = createExplored(boundsRect(toGame, cfg.detail), { storage });
+    seen.setExplored(state.explored);
     setTimeout(() => state.chart && state.chart.ensureLoaded(), 2500); // fetch the pictures soon after load, so a quick zoom-out is never held up
     state.chart = createChart({
       canvas: ui.chartCanvas, cfg, toGame, entries: lightList.concat(coast.names.filter((e) => e.kind !== 'light')), isKnown: (id) => nameBook.isKnown(id),
-      explored: state.explored, baseUrl: assetsBase,
+      explored: state.explored, seen: (e) => seen.isSeen(e), baseUrl: assetsBase,
     });
   }).catch((err) => { console.warn('chart data failed to load', err); });
 
@@ -97,14 +111,44 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     if (state.zoomTarget >= ZOOM_CHART_START) { state.zoomTarget = state.returnZoom; state.pan = { x: 0, z: 0 }; }
     else { state.returnZoom = Math.max(ZOOM_MIN, state.zoomTarget); state.chart?.ensureLoaded(); state.zoomTarget = maxZoom(); }
   }
+  // ---- the sail target ("Navigate here"): one at a time
+  const navTitle = (e) => (e.kind === 'light' ? lightInfo(e, nameBook.isKnown(e.id)).title : (nameBook.isKnown(e.id) ? e.name : (e.desc || e.name)));
+  function setTarget(entry) { nav.set(entry); onTarget(entry, () => navTitle(entry)); }
+  function clearTarget() { if (!nav.entry) return; nav.clear(); onTarget(null, null); }
+  const cardFor = (entry, back) => ({ ...(entry.kind === 'light' ? lightInfo(entry, nameBook.isKnown(entry.id)) : placeInfo(entry)), nav: entry.outside ? null : (nav.entry && nav.entry.id === entry.id ? 'stop' : 'start'), back });
+  function closeCard() { state.card = null; ui.showVisit(null); }
+  function onNavigatePressed() {
+    const entry = state.visit ? state.visit.entry : state.card;
+    if (!entry) return;
+    if (nav.entry && nav.entry.id === entry.id) { // already sailing there: stop
+      clearTarget();
+      ui.toast('Stopped navigating.', 1800);
+      ui.showVisit(cardFor(entry, state.visit ? 'boat' : 'close'));
+      return;
+    }
+    setTarget(entry);
+    ui.toast(`Sailing for ${navTitle(entry)}`, 2600);
+    state.card = null;
+    if (state.visit) endVisit(); // back to the boat, with the tag to follow
+    else {
+      ui.showVisit(null);
+      if (state.zoomTarget >= ZOOM_CHART_START) { state.zoomTarget = Math.min(state.returnZoom, ZOOM_CHART_START - 0.5); state.pan = { x: 0, z: 0 }; }
+    }
+  }
   function startVisit(entry) {
     if (entry.outside) { ui.toast('That light is beyond your chart, for now.'); return; }
     if (!state.visit && state.zoomTarget < ZOOM_CHART_START) state.returnZoom = state.zoomTarget;
     else if (!state.visit) state.returnZoom = 1;
+    state.card = null;
     state.visit = { entry, x: entry.x, z: entry.z };
     state.zoomTarget = VISIT_ZOOM;
     state.pan = { x: 0, z: 0 };
-    ui.showVisit(lightInfo(entry, nameBook.isKnown(entry.id)));
+    ui.showVisit(cardFor(entry, 'boat'));
+    onVisit(entry);
+  }
+  function openPlace(entry) {
+    state.card = entry;
+    ui.showVisit(cardFor(entry, 'close'));
   }
   function endVisit() {
     state.visit = null;
@@ -141,6 +185,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     const hit = state.chart.hit(e.clientX, e.clientY, state.view, state.W, state.H);
     if (!hit) return;
     if (hit.type === 'light') startVisit(hit.entry);
+    else if (hit.type === 'place') openPlace(hit.entry);
     else if (hit.section.owned) { // zoom to the sheet: the detail picture fills the view
       const r = state.chart.detailRect;
       state.zoomTarget = Math.max(ZOOM_CHART_FULL, fitZoom(r.x1 - r.x0, r.z1 - r.z0, state.W, state.H, 0.96));
@@ -155,12 +200,16 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     ui, mini, state,
     get visiting() { return !!state.visit; },
     setPhoneInterrupt(fn) { coastPhoneInterrupt = fn; },
-    toggleChart, endVisit,
+    toggleChart, endVisit, setTarget, clearTarget,
+    get target() { return nav.entry; },
+    canSee: (entry) => seen.isSeen(entry),
     visitById(id) { const e = lightList.find((l) => l.id === id); if (e) startVisit(e); return !!e; },
     rects: () => ui.rects(),
     // Once a frame. boat: { x, z, heading, speed }. Returns what the camera and renderer should do.
-    update(dt, nowS, boat, W, H, dpr) {
+    update(dt, nowS, boat, W, H, dpr, friends = []) {
       lastBoat = boat;
+      const arrived = nav.update(boat.x, boat.z);
+      if (arrived) { onTarget(null, null); ui.toast(`Arrived at ${navTitle(arrived)}`, 3200); }
       state.W = W; state.H = H; state.dpr = dpr;
       if (!marksSet) { const m = getMarks(); if (m && m.length) { mini.marks.push(...m); marksSet = true; } }
       if (Number.isNaN(state.focus.x)) { state.focus.x = boat.x; state.focus.z = boat.z; }
@@ -194,9 +243,10 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
       const view = chartView(state.zoom, H, state.focus, pan);
       state.view = view;
       if (state.chart && (t > 0 || state.chartShown)) {
-        state.chart.draw(view, W, H, dpr, { boat, visitId: state.visit ? state.visit.entry.id : null });
+        state.chart.draw(view, W, H, dpr, { boat, friends, visitId: state.visit ? state.visit.entry.id : null, target: nav.entry });
         state.chartShown = t > 0;
       }
+      if (state.card && t < 0.5) closeCard(); // zoomed back into the boat view: a place card from the chart goes with it
       ui.setChartMode(t >= 0.98);
       mini.update(boat, boat.heading || 0, { hidden: t > 0.35 });
       ui.setMiniHidden(t > 0.35);

@@ -22,8 +22,8 @@ function button(label, aria, css = '') {
   return b;
 }
 
-// opts: { parent, settings: { shape, rot }, debug, onSettings(settings), onChart(), onZoomStep(factor), onBack(), onJump(), onMiniTap(px, py, size) }
-export function createChartUi({ parent = document.body, settings, debug = false, onSettings, onChart, onZoomStep, onBack, onJump, onMiniTap }) {
+// opts: { parent, settings: { shape, rot }, debug, onSettings(settings), onChart(), onZoomStep(factor), onBack(), onNavigate(), onJump(), onMiniTap(px, py, size) }
+export function createChartUi({ parent = document.body, settings, debug = false, onSettings, onChart, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
   // the chart's own canvas (drawn by src/chart.js), above the 3D view and the phone layer, below the controls
   const chartCanvas = el('canvas', 'position:fixed;inset:0;width:100%;height:100%;z-index:4;display:none;pointer-events:none;touch-action:none');
   chartCanvas.setAttribute('aria-label', "Granddad's chart of the west coast");
@@ -51,9 +51,10 @@ export function createChartUi({ parent = document.body, settings, debug = false,
   const cardTitle = el('div', 'font:italic 600 19px Georgia,"Times New Roman",serif;margin-bottom:2px');
   const cardSub = el('div', 'font:12px system-ui,sans-serif;opacity:.75;margin-bottom:10px');
   const cardRow = el('div', 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap');
-  const backBtn = button('Back to the boat', 'Return the view to your boat', `background:${GOLD};color:#1f2a33;border-color:transparent`);
+  const navBtn = button('Navigate here', 'Sail to this place: show it as a tag you can follow', `background:${GOLD};color:#1f2a33;border-color:transparent`);
+  const backBtn = button('Back to the boat', 'Return the view to your boat');
   const jumpBtn = button('Jump here (debug)', 'Jump the boat to this lighthouse');
-  cardRow.append(backBtn);
+  cardRow.append(navBtn, backBtn);
   if (debug) cardRow.append(jumpBtn);
   card.append(cardTitle, cardSub, cardRow);
   parent.appendChild(card);
@@ -102,21 +103,30 @@ export function createChartUi({ parent = document.body, settings, debug = false,
   zin.addEventListener('click', () => onZoomStep(1 / 1.35));
   zout.addEventListener('click', () => onZoomStep(1.35));
   backBtn.addEventListener('click', () => onBack());
+  navBtn.addEventListener('click', () => onNavigate());
   jumpBtn.addEventListener('click', () => onJump());
   mini.addEventListener('click', (e) => { const r = mini.getBoundingClientRect(); onMiniTap(e.clientX - r.left, e.clientY - r.top, r.width); });
 
   let toastTimer = 0;
   return {
-    chartCanvas, mini, elements: { top, zoomCol, card, sheet, chartBtn },
+    chartCanvas, mini, elements: { top, zoomCol, card, sheet, chartBtn, navBtn, backBtn },
     // Boxes the names must keep clear of (CSS px): the minimap column, zoom buttons, the visit card.
     rects() {
       return [top, zoomCol, card, sheet].filter((e) => e.style.display !== 'none').map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0)
         .map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height }));
     },
-    // info: { title, sub } or null
+    // info: { title, sub, nav: 'start' | 'stop' | null, back: 'boat' | 'close' } or null. A lighthouse visit says "Back to the boat",
+    // a place picked on the chart says "Close"; the gold button starts (or stops) sailing there.
     showVisit(info) {
       card.style.display = info ? 'block' : 'none';
-      if (info) { cardTitle.textContent = info.title; cardSub.textContent = info.sub || ''; }
+      if (!info) return;
+      cardTitle.textContent = info.title;
+      cardSub.textContent = info.sub || '';
+      navBtn.style.display = info.nav ? 'inline-block' : 'none';
+      navBtn.textContent = info.nav === 'stop' ? 'Stop navigating' : 'Navigate here';
+      backBtn.textContent = info.back === 'close' ? 'Close' : 'Back to the boat';
+      backBtn.setAttribute('aria-label', info.back === 'close' ? 'Close this card' : 'Return the view to your boat');
+      jumpBtn.style.display = info.back === 'close' ? 'none' : 'inline-block';
     },
     toast(text, ms = 3200) {
       toastEl.textContent = text;

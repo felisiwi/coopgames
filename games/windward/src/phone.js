@@ -304,13 +304,36 @@ export function createPhoneControls({ canvas, camera, onPing }) {
       }
       ctx.stroke();
     };
+    const trimmed = Math.abs(self.trim - ideal) <= TRIM_WINDOW;
     trace(CONFIG.TRIM_MIN, CONFIG.TRIM_MAX, 3, 'rgba(234,246,255,0.18)'); // where the sail can swing
-    trace(Math.max(0, ideal - TRIM_WINDOW * 1.3), Math.min(CONFIG.TRIM_MAX, ideal + TRIM_WINDOW * 1.3), 7, 'rgba(120,220,150,0.85)');
+    ctx.save();
+    if (trimmed) { ctx.shadowColor = 'rgba(120,235,160,0.9)'; ctx.shadowBlur = 14; } // trimmed: the sweet zone glows, steadily
+    trace(Math.max(0, ideal - TRIM_WINDOW * 1.3), Math.min(CONFIG.TRIM_MAX, ideal + TRIM_WINDOW * 1.3), trimmed ? 11 : 7, trimmed ? 'rgba(120,235,160,1)' : 'rgba(120,220,150,0.85)');
+    ctx.restore();
     const [dx, dy] = arcPoint(boomAngle(self.heading, wind.dir, self.trim), R);
-    ctx.fillStyle = Math.abs(self.trim - ideal) <= TRIM_WINDOW ? '#78dc96' : GOLD;
+    ctx.fillStyle = trimmed ? '#78dc96' : GOLD;
     ctx.beginPath();
-    ctx.arc(dx, dy, 6, 0, Math.PI * 2);
+    ctx.arc(dx, dy, trimmed ? 8.5 : 6, 0, Math.PI * 2);
     ctx.fill();
+    if (trimmed) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(dx, dy, 8.5, 0, Math.PI * 2);
+      ctx.stroke();
+      const [bx, by] = boatScreen(); // a small word just outside the dot, away from the boat
+      const ox = dx - bx;
+      const oy = dy - by;
+      const ol = Math.hypot(ox, oy) || 1;
+      ctx.font = '800 12px ui-rounded, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(12,32,54,0.75)';
+      ctx.fillStyle = '#9af0b4';
+      ctx.strokeText('trimmed', dx + (ox / ol) * 34, dy + (oy / ol) * 22);
+      ctx.fillText('trimmed', dx + (ox / ol) * 34, dy + (oy / ol) * 22);
+    }
   }
 
   function drawRope(x, y, trim, dashed) {

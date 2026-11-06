@@ -82,28 +82,30 @@ export function createNameBook(entries, storage = deviceStorage()) {
     total: entries.length,
     // Descriptive names to show now: places with a description, not yet discovered, that the boat is
     // approaching (SIGHT_EXTRA_M beyond the discovery reach). Each is returned once per session.
-    sight(x, z) {
+    // canSee(entry) (optional, src/seen.js): the place's land must be revealed by the fog first; until then nothing shows.
+    sight(x, z, canSee = null) {
       let seen = null;
       for (const e of entries) {
         if (!e.desc || known.has(e.id) || sighted.has(e.id)) continue;
         const reach = e.radius + SIGHT_EXTRA_M;
         const dx = e.x - x;
         const dz = e.z - z;
-        if (dx * dx + dz * dz <= reach * reach) {
+        if (dx * dx + dz * dz <= reach * reach && (!canSee || canSee(e))) {
           sighted.add(e.id);
           (seen ||= []).push(e);
         }
       }
       return seen || [];
     },
-    // Call with the boat position each frame. Returns the entries discovered by THIS call.
-    update(x, z) {
+    // Call with the boat position each frame. Returns the entries discovered by THIS call. canSee as for sight():
+    // a place the boat is near but whose land the fog still covers is not named yet; it is, the moment the fog lifts.
+    update(x, z, canSee = null) {
       let found = null;
       for (const e of entries) {
         if (known.has(e.id)) continue;
         const dx = e.x - x;
         const dz = e.z - z;
-        if (dx * dx + dz * dz <= e.radius * e.radius) {
+        if (dx * dx + dz * dz <= e.radius * e.radius && (!canSee || canSee(e))) {
           known.add(e.id);
           (found ||= []).push(e);
         }

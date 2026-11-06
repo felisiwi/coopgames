@@ -118,11 +118,14 @@ function recorder() {
   assert.equal(canvas.style.display, 'none', 'zoomed in: the chart is not shown');
   assert.equal(rec.images, 0);
   await chart.ensureLoaded();
-  const full = chartView(250, 844, { x: gx, z: gz });
+  const oc = { x: (chart.overRect.x0 + chart.overRect.x1) / 2, z: (chart.overRect.z0 + chart.overRect.z1) / 2 };
+  const full = chartView(300, 844, oc); // the whole coast on screen, as the real chart's limit
   chart.draw(full, 390, 844, 2, state);
   assert.equal(canvas.style.display, 'block');
   assert.ok(rec.texts.some((t) => /Shallow Sounds/.test(t)), 'the owned section is named');
-  assert.ok(rec.texts.some((t) => /Uncharted|uncharted/.test(t)), 'the others are uncharted');
+  assert.ok(rec.texts.some((t) => /^UNCHARTED$/.test(t)), 'the others are uncharted');
+  assert.ok(rec.texts.includes('The Granite Fjord') && rec.texts.includes('The Border Skerries'), 'each uncharted section shows its big lore name');
+  assert.ok(!rec.texts.some((t) => /Smögen|Koster|Tjörn/.test(t)), 'and only the lore name: no real place names of an uncharted section');
   assert.ok(!rec.texts.includes('Grundsund'), 'no place names at the full chart');
   rec.texts.length = 0;
   const near = chartView(20, 844, { x: gx, z: gz });
@@ -162,10 +165,72 @@ function recorder() {
     assert.ok(Math.abs(px - sx0) < 1e-6, `picture corner at ${px}, marker maths say ${sx0}`);
     assert.ok(Math.abs(overDraw[3].sx - v.scale) < 1e-9, 'one world metre = scale px, for the pictures too');
   }
+  // 1c phone test: an uncharted section shows no chart at all. Its band is filled edge to edge with parchment AFTER the overview
+  // picture, and nothing inside it (a far lighthouse, a place) is marked or tappable.
+  {
+    const bands = chart.bands;
+    const fjord = bands.find((b) => b.id === 'smogen');
+    const [fx] = [gx];
+    const fz = (fjord.z0 + fjord.z1) / 2;
+    const far = { id: 'light:Far', name: 'Far', kind: 'light', desc: null, x: fx, z: fz, outside: true };
+    const log = [];
+    const probeCtx = new Proxy({}, { get: (t, k) => {
+      if (k === 'drawImage') return () => log.push('image');
+      if (k === 'fillRect') return (x, z, w, h) => log.push(['fillRect', z, h, w]);
+      if (k === 'measureText') return (t2) => ({ width: t2.length * 7 });
+      if (k === 'createImageData') return (a, b) => ({ data: new Uint8ClampedArray(a * b * 4) });
+      return t[k] ?? (() => {});
+    }, set: (t, k, v) => { t[k] = v; return true; } });
+    const c3 = createChart({ canvas: { width: 0, height: 0, style: {}, getContext: () => probeCtx }, cfg, toGame, entries: [far], isKnown: () => true, explored: exp, baseUrl: '', makeCanvas: () => recorder().canvas, loadImage: async () => img });
+    await c3.ensureLoaded();
+    const v3 = chartView(250, 844, { x: gx, z: fz });
+    c3.draw(v3, 390, 844, 1, state);
+    const firstImage = log.indexOf('image');
+    const cover = log.findIndex((l) => Array.isArray(l) && l[0] === 'fillRect' && l[1] <= fjord.z0 && l[1] + l[2] >= fjord.z1 && l[3] > 1e5);
+    assert.ok(firstImage >= 0 && cover > firstImage, 'parchment covers the uncharted band after the overview picture, edge to edge');
+    assert.equal(c3.hits.filter((h) => h.type === 'light').length, 0, 'a light inside an uncharted section is not on the chart');
+  }
+
+  // the boat is an arrow that points the way it is heading (at the full chart the picture is north-up, so screen angle = heading's)
+  {
+    const angles = [];
+    const mk = (heading) => {
+      const rots = [];
+      const c = new Proxy({}, { get: (t, k) => {
+        if (k === 'rotate') return (a) => rots.push(a);
+        if (k === 'measureText') return (t2) => ({ width: t2.length * 7 });
+        if (k === 'createImageData') return (a, b) => ({ data: new Uint8ClampedArray(a * b * 4) });
+        return t[k] ?? (() => {});
+      }, set: (t, k, v) => { t[k] = v; return true; } });
+      const ch = createChart({ canvas: { width: 0, height: 0, style: {}, getContext: () => c }, cfg, toGame, entries: [], isKnown: () => false, explored: exp, baseUrl: '', makeCanvas: () => recorder().canvas, loadImage: async () => img });
+      return ch.ensureLoaded().then(() => {
+        ch.draw(chartView(250, 844, { x: gx, z: gz }), 390, 844, 1, { boat: { x: gx, z: gz, heading }, friends: [], visitId: null, target: null });
+        return rots[rots.length - 1]; // the arrow is the last thing drawn
+      });
+    };
+    const south = await mk(0); // heading 0 = +z = south = down the screen
+    const east = await mk(Math.PI / 2); // +x = east = right
+    const north = await mk(Math.PI);
+    angles.push(south, east, north);
+    assert.ok(Math.abs(south - Math.PI / 2) < 0.02, `heading south points down the screen (${south})`);
+    assert.ok(Math.abs(east) < 0.02, `heading east points right (${east})`);
+    assert.ok(Math.abs(Math.abs(north) - Math.PI / 2) < 0.02 && north < 0, `heading north points up the screen (${north})`);
+  }
+
+  // a discovered place can be tapped (to offer "Navigate here"); an undiscovered one cannot; the target gets a ring
+  {
+    chart.draw(near, 390, 844, 2, { ...state, target: entries[0] });
+    const place = chart.hits.find((h) => h.type === 'place');
+    assert.ok(place && place.id === 'v', 'the discovered village is tappable');
+    assert.equal(chart.hit(place.x + 2, place.y + 2, near, 390, 844).type, 'place');
+    assert.ok(!chart.hits.some((h) => h.type === 'place' && h.id === 's'), 'an undiscovered skerry is not');
+  }
+  chart.draw(near, 390, 844, 2, state);
   const light = chart.hits.find((h) => h.type === 'light');
   assert.ok(light, 'the lighthouse can be tapped');
   assert.equal(chart.hit(light.x + 3, light.y - 2, near, 390, 844).entry.id, 'l');
   assert.equal(chart.hit(10, 10, near, 390, 844), null);
+  chart.draw(full, 390, 844, 2, state);
   const secHit = chart.hit(195, 422, full, 390, 844);
   assert.ok(secHit && secHit.type === 'section', 'at the full chart a tap lands on a section');
   passed += 1;

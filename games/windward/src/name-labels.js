@@ -3,6 +3,7 @@
 // texture), pointer-events off so it never blocks the controls.
 import * as THREE from '../vendor/three/three.module.js';
 import { displayName } from './names.js';
+import { edgeSpot, screenDirection, formatDistance } from './nav-target.js';
 
 // How long a name stays, and where (bug fix, 2026-11-05: names used to live on a 6.5 s timer, so one faded away while
 // you sat next to its island, and several off-screen names piled up on the same screen edge, under the compass).
@@ -25,6 +26,17 @@ export const DESCRIBED_BONUS_M = 60;
 export const labelScore = (entry, dist) => dist - (IMPORTANCE_BONUS_M[entry.kind] ?? 0) - (entry.desc ? DESCRIBED_BONUS_M : 0);
 export const EDGE_KEEP_EXTRA_M = 60; // an edge tag (place off-screen) is kept for this long instead
 export const keepDistance = (entry, onScreen = true) => entry.radius + (onScreen ? KEEP_EXTRA_M : EDGE_KEEP_EXTRA_M);
+
+// Quiet names (1c phone test): once an island or skerry has been announced, its name settles into a small, low-opacity label that
+// shows only while the island is on screen as you sail past. Villages, harbours and lighthouses keep their sticky edge tags.
+export const QUIET_KINDS = new Set(['island', 'skerry']);
+export const QUIET_OPACITY = 0.6;
+export const QUIET_SCALE = 0.78;
+export const QUIET_PENALTY_M = 150; // a quiet name yields its screen spot to a place that matters more
+export const isQuiet = (entry, hint) => QUIET_KINDS.has(entry.kind) && !hint;
+// Should a label be up now? announced: still in its first seconds; near: within keepDistance; onScreen: its place is in view.
+// A quiet label needs its place on screen (no edge tag); anything else stays while near, on screen or not.
+export const wantsLabel = ({ quiet, announced, near, onScreen }) => announced || (quiet ? near && onScreen : near);
 
 // Layout, pure so it can be tested. items: [{ id, x, y, w, h }] in the order of importance (the caller puts the
 // nearest, and the ones already showing, first); (x, y) is where the label wants its CENTRE; W, H the screen;
@@ -94,7 +106,7 @@ export function createLabelQueue({ max = LABEL_MAX_ACTIVE, gapS = LABEL_GAP_S, s
 const KIND_NOTE = { island: 'island', skerry: 'skerry', harbour: 'natural harbour', village: '', light: 'lighthouse' };
 const BOTTOM_STRIP_PX = 44; // the phone's speed / places line
 
-export function createNameLabels(container = document.body) {
+export function createNameLabels(container = document.body, { onCancelTarget = () => {} } = {}) {
   const labels = new Map(); // id -> { entry, wy, hint, el, w, h, born, fade, vis, placed }   (el null = not on screen now)
   const queue = createLabelQueue();
   const v = new THREE.Vector3();
@@ -102,8 +114,10 @@ export function createNameLabels(container = document.body) {
   let hidden = false; // the chart is up: it draws its own names
   let reservedAt = -Infinity;
   let reservedRects = [];
+  const v2 = new THREE.Vector3();
+  let target = null; // the 'Navigate here' tag: { entry, wy, titleFn, el, textEl, arrowEl, distEl, w, h, placed, vis, fade, isTarget }
 
-  function build(l, nowS) {
+  function build(l, nowS, announce = true) {
     const { entry, hint } = l;
     const el = document.createElement('div');
     el.style.cssText = 'position:fixed;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;z-index:6;opacity:0;'
@@ -115,6 +129,7 @@ export function createNameLabels(container = document.body) {
     const note = hint ? '' : sub || KIND_NOTE[entry.kind];
     if (note) {
       const s = document.createElement('div');
+      s.dataset.note = '1';
       s.style.cssText = 'font:11px/1.2 system-ui,sans-serif;font-style:normal;font-weight:500;opacity:.8;letter-spacing:.08em;text-transform:uppercase';
       s.textContent = note;
       el.appendChild(s);
@@ -124,7 +139,8 @@ export function createNameLabels(container = document.body) {
     l.el = el;
     l.w = el.offsetWidth;
     l.h = el.offsetHeight;
-    l.born = nowS;
+    l.born = announce ? nowS : nowS - LABEL_MIN_SHOW_S; // met again later (not just discovered): no announcement
+    l.q = announce ? 0 : 1;
     l.fade = 0;
     l.vis = 0;
     l.placed = false;
@@ -135,9 +151,14 @@ export function createNameLabels(container = document.body) {
     const old = labels.get(entry.id);
     if (old && old.hint === hint) { old.wy = wy; return old; }
     if (old) drop(old); // a sighting is replaced by the real name (never both on one island)
-    const l = { entry, wy, hint, el: null, w: 0, h: 0, born: 0, fade: 0, vis: 0, placed: false };
+    const l = { entry, wy, hint, el: null, w: 0, h: 0, born: 0, fade: 0, vis: 0, placed: false, q: 0 };
     labels.set(entry.id, l);
     return l;
+  }
+
+  function textOfTarget() {
+    const t = target.titleFn();
+    if (target.textEl.textContent !== t) target.textEl.textContent = t;
   }
 
   return {
@@ -149,11 +170,40 @@ export function createNameLabels(container = document.body) {
     },
     // A place already known from an earlier session: no announcement, but its name is shown when you are near it.
     track(entry, wy) { register(entry, wy, false); },
+    // The 'Navigate here' tag: one target at a time (null clears it). titleFn() gives the name as the discovery rules allow.
+    setTarget(entry, wy, titleFn = () => entry.name) {
+      if (target) { target.el.remove(); target = null; }
+      if (!entry) return;
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;left:0;top:0;transform:translate(-50%,-50%);z-index:6;opacity:0;pointer-events:none;text-align:center;'
+        + 'font:italic 600 18px/1.15 Georgia,"Times New Roman",serif;color:#f2c46d;letter-spacing:.02em;white-space:nowrap;'
+        + 'text-shadow:0 1px 3px rgba(12,28,44,.9),0 0 10px rgba(12,28,44,.6)';
+      const textEl = document.createElement('span');
+      const sub = document.createElement('div');
+      sub.style.cssText = 'font:600 12px/1.3 system-ui,sans-serif;font-style:normal;letter-spacing:.08em;color:#fbf3e2;display:flex;align-items:center;justify-content:center;gap:6px';
+      const arrowEl = document.createElement('span');
+      arrowEl.textContent = '➤';
+      arrowEl.style.cssText = 'display:inline-block;font-size:13px;color:#f2c46d';
+      const distEl = document.createElement('span');
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.textContent = '✕';
+      cancel.setAttribute('aria-label', 'Stop navigating');
+      cancel.style.cssText = 'pointer-events:auto;touch-action:manipulation;font:600 12px system-ui,sans-serif;color:#fbf3e2;background:rgba(20,34,48,0.7);border:1px solid rgba(234,246,255,.3);border-radius:10px;padding:3px 8px;margin-left:4px;cursor:pointer';
+      cancel.addEventListener('click', (ev) => { ev.stopPropagation(); onCancelTarget(); });
+      sub.append(arrowEl, distEl, cancel);
+      el.append(textEl, sub);
+      container.appendChild(el);
+      el.style.visibility = hidden ? 'hidden' : 'visible';
+      target = { entry, wy, titleFn, el, textEl, arrowEl, distEl, w: 0, h: 0, placed: false, vis: 0, fade: 0, q: 0, isTarget: true };
+      textOfTarget(0);
+    },
     // Hide / show every name (the chart covers the view). Cheap: only does work when it changes.
     setHidden(h) {
       if (h === hidden) return;
       hidden = h;
       for (const l of labels.values()) if (l.el) l.el.style.visibility = h ? 'hidden' : 'visible';
+      if (target) target.el.style.visibility = h ? 'hidden' : 'visible';
     },
     // Call every frame after the camera moved. boat: { x, z }; reserved(): [{ x, y, w, h }] HUD boxes (asked ~2x a second).
     update(camera, width, height, nowS, boat, reserved = () => []) {
@@ -174,19 +224,49 @@ export function createNameLabels(container = document.body) {
         const sx = ((v.z > 1 ? 0 : v.x) + 1) / 2 * width;
         const sy = (1 - (v.z > 1 ? -1 : v.y)) / 2 * height;
         const onScreen = v.z <= 1 && sx > 24 && sx < width - 24 && sy > 24 && sy < height - BOTTOM_STRIP_PX;
+        if (target && target.entry.id === e.id) { if (l.el) l.el.style.opacity = '0'; continue; } // the navigate tag carries this name
+        const quiet = isQuiet(e, l.hint);
         const near = dist < keepDistance(e, onScreen);
-        if (!l.el && near) build(l, nowS); // back near it: its name shows again (over the island, or as an edge tag)
+        if (!l.el && near && (!quiet || onScreen)) build(l, nowS, false); // met again: its name shows (quietly, or as an edge tag)
         if (!l.el) continue;
         const announced = nowS - l.born < LABEL_MIN_SHOW_S;
-        const wanted = announced || near;
-        l.dbg = { sx: Math.round(sx), sy: Math.round(sy), onScreen, near, announced, wanted, dist: Math.round(dist), fade: +l.fade.toFixed(2), vis: +l.vis.toFixed(2) };
+        const wanted = wantsLabel({ quiet, announced, near, onScreen });
+        l.dbg = { sx: Math.round(sx), sy: Math.round(sy), onScreen, near, announced, wanted, quiet, dist: Math.round(dist), fade: +l.fade.toFixed(2), vis: +l.vis.toFixed(2) };
         l.fade = Math.max(0, Math.min(1, l.fade + (wanted ? dt / 0.4 : -dt / LABEL_FADE_S)));
         if (!wanted && l.fade <= 0) { drop(l); continue; }
-        items.push({ l, id: e.id, x: sx, y: sy, w: l.w, h: l.h, score: labelScore(e, dist) });
+        // after its announcement a quiet name settles: smaller, fainter, no note line (l.q eases 0 -> 1)
+        l.q = Math.max(0, Math.min(1, l.q + (quiet && !announced ? dt / 1.2 : -dt / 0.4)));
+        const k = 1 - (1 - QUIET_SCALE) * l.q;
+        items.push({ l, id: e.id, x: sx, y: sy, w: l.w * k, h: l.h * k, score: labelScore(e, dist) + (l.q > 0.5 ? QUIET_PENALTY_M : 0) });
+      }
+      if (target) { // the navigate tag: always up, first in line, on the edge towards the place when it is out of view
+        const e = target.entry;
+        const dx = e.x - boat.x;
+        const dz = e.z - boat.z;
+        v.set(e.x, target.wy, e.z).project(camera);
+        const sx = (v.x + 1) / 2 * width;
+        const sy = (1 - v.y) / 2 * height;
+        const inFront = v.z <= 1;
+        const onScreen = inFront && sx > 24 && sx < width - 24 && sy > 24 && sy < height - BOTTOM_STRIP_PX;
+        const me = camera.matrixWorld.elements;
+        const [ddx, ddy] = screenDirection(dx, dz, [me[0], me[1], me[2]], [me[4], me[5], me[6]]);
+        textOfTarget(nowS);
+        target.arrowEl.style.display = onScreen ? 'none' : 'inline-block';
+        target.arrowEl.style.transform = `rotate(${Math.atan2(ddy, ddx)}rad)`;
+        target.distEl.textContent = formatDistance(Math.hypot(dx, dz));
+        target.w = target.el.offsetWidth; target.h = target.el.offsetHeight;
+        let x = sx;
+        let y = sy;
+        if (!onScreen) {
+          v2.set(boat.x, 0.5, boat.z).project(camera);
+          [x, y] = edgeSpot((v2.x + 1) / 2 * width, (1 - v2.y) / 2 * height, ddx, ddy, width, height, target.w / 2 + 10, target.h / 2 + 10, BOTTOM_STRIP_PX);
+        }
+        target.fade = Math.min(1, target.fade + dt / 0.4);
+        items.push({ l: target, id: '__target', x, y, w: target.w, h: target.h, score: -1e9 });
       }
       // nearest first (labelScore: places that matter count as nearer), but a label already showing keeps its place
       // over a newcomer, so two names do not swap in and out as their distances cross
-      items.sort((a, b) => (b.l.placed ? 1 : 0) - (a.l.placed ? 1 : 0) || a.score - b.score);
+      items.sort((a, b) => (b.l.isTarget ? 1 : 0) - (a.l.isTarget ? 1 : 0) || (b.l.placed ? 1 : 0) - (a.l.placed ? 1 : 0) || a.score - b.score);
       const rects = [...reservedRects, { x: 0, y: height - BOTTOM_STRIP_PX, w: width, h: BOTTOM_STRIP_PX }];
       const spots = layoutLabels(items, width, height, rects, { maxShown: width < NARROW_PX ? LABEL_MAX_SHOWN_NARROW : LABEL_MAX_SHOWN });
       for (const it of items) {
@@ -196,11 +276,17 @@ export function createNameLabels(container = document.body) {
         l.vis = Math.max(0, Math.min(1, l.vis + (spot.hidden ? -dt / 0.35 : dt / 0.35)));
         l.el.style.left = `${spot.x}px`;
         l.el.style.top = `${spot.y}px`;
-        l.el.style.opacity = String(Math.min(l.fade, l.vis));
+        if (l.isTarget) { l.el.style.opacity = String(Math.min(l.fade, l.vis)); continue; }
+        const k = 1 - (1 - QUIET_SCALE) * l.q;
+        l.el.style.transform = `translate(-50%,-50%) scale(${k.toFixed(3)})`;
+        l.el.style.opacity = String(Math.min(l.fade, l.vis) * (1 - (1 - QUIET_OPACITY) * l.q));
+        const note = l.el.firstElementChild;
+        if (note) note.style.opacity = String(0.8 * (1 - l.q));
       }
     },
     // What each label is doing (headless checks): where its place projects, and why it stays or goes.
     debug: () => [...labels.values()].filter((l) => l.el).map((l) => ({ name: l.entry.name, w: l.w, h: l.h, ...l.dbg })),
     get activeCount() { return [...labels.values()].filter((l) => l.el).length; },
+    get target() { return target ? target.entry : null; },
   };
 }

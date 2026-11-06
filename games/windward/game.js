@@ -347,7 +347,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   }
   // Names are discovered (src/names.js): shown once when the boat is near, remembered on this device.
   const nameBook = coast ? createNameBook(coast.names) : null;
-  const nameLabels = coast ? createNameLabels() : null;
+  const nameLabels = coast ? createNameLabels(document.body, { onCancelTarget: () => chartCtl?.clearTarget() }) : null;
   // Names already known from an earlier session show again when you are near them (no announcement).
   if (coast) for (const e of coast.names) if (nameBook.isKnown(e.id)) nameLabels.track(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8);
   const namesLine = () => `names       ${nameBook.count()} / ${nameBook.total} discovered`;
@@ -541,6 +541,13 @@ function startGame({ canvas, net, seed, role }, coast) {
     ? createChartController({
       canvas, coast, nameBook, getMarks: () => (life ? life.marks : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
       onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
+      // "Navigate here": the target's edge tag (src/name-labels.js); null clears it
+      onTarget: (entry, titleFn) => nameLabels.setTarget(entry, entry ? Math.max(0, coast.heightAt(entry.x, entry.z)) + 8 : 0, titleFn),
+      // a lighthouse visit: its name label is up while you look at it (the real name if found, else its description)
+      onVisit: (entry) => {
+        const known = nameBook.isKnown(entry.id);
+        if (known || entry.desc) nameLabels.show(entry, Math.max(0, coast.heightAt(entry.x, entry.z)) + 8, performance.now() / 1000, !known);
+      },
     })
     : null;
   chartCtl?.setPhoneInterrupt(() => phone?.interrupt());
@@ -610,10 +617,12 @@ function startGame({ canvas, net, seed, role }, coast) {
         const t = coast.terrain.stats;
         debugOverlay?.set('trees', `trees       ${s.trees} near boat (query ${s.queryMs.toFixed(1)} ms) | chunks ${t.shownFull} full + ${t.shownCoarse} coarse of ${t.chunks}`);
       }
-      const discovered = nameBook.update(self.x, self.z);
+      // names need the land to be revealed by the fog first (src/seen.js, via the chart controller)
+      const canSee = (e) => !chartCtl || chartCtl.canSee(e);
+      const discovered = nameBook.update(self.x, self.z, canSee);
       for (const e of discovered) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS);
       // Approaching a described place that is not yet named: its descriptive name ("the Hood") first.
-      for (const e of nameBook.sight(self.x, self.z)) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS, true);
+      for (const e of nameBook.sight(self.x, self.z, canSee)) nameLabels.show(e, Math.max(0, coast.heightAt(e.x, e.z)) + 8, nowS, true);
       if (discovered.length) debugOverlay?.set('names', namesLine());
       if (lureOn) for (const place of arrivals.update(self.x, self.z, self.speed, nowS)) moment.trigger(place, giftFor(place), self, nowS);
     } else {
@@ -692,7 +701,7 @@ function startGame({ canvas, net, seed, role }, coast) {
 
     // Stage 1c: zoom, chart, minimap, visit (src/chart-controller.js). Where the camera looks is the boat unless on a visit.
     ctlView = chartCtl
-      ? chartCtl.update(dt, nowS, { x: self.x, z: self.z, heading: self.heading, speed: self.speed }, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, Math.min(window.devicePixelRatio || 1, 2))
+      ? chartCtl.update(dt, nowS, { x: self.x, z: self.z, heading: self.heading, speed: self.speed }, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, Math.min(window.devicePixelRatio || 1, 2), partnerPos ? [{ x: partnerPos.x, z: partnerPos.z, heading: partnerPos.heading }] : [])
       : null;
     const lookAt = ctlView ? ctlView.focus : self;
     viewTarget.set(lookAt.x, ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z);
