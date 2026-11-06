@@ -1,10 +1,6 @@
-// The first task's screens (stage 1d): the start card (the storm, once, reopenable from the chart), the sail-home card, grandma's card (the end of
-// the task: she gives you granddad's sea chest), the old-tower card (the end of chapter 1) and the light log.
-// Plain DOM in the same quiet style as the chart UI; no logic lives here, game.js decides when to show them.
-const HUD_BG = 'rgba(20,34,48,0.92)';
-const LINE = '1px solid rgba(234,246,255,0.2)';
-const TEXT = '#eaf3f8';
-const GOLD = '#f2c46d';
+// The cards of the game (stage 1d, restyled in stage 1e as old paper: src/paper.js): the start card (Today), the sail-home card, grandma's card (Today), the old-tower card, the light log,
+// and showCards(), the run of one-speaker cards the 1950 story beats use (src/story-1950.js). Plain DOM; no logic lives here, game.js decides when to show them.
+import { paperSurface, paperTitle, paperBody, paperQuote, paperNote, paperButton, paperLink, PAPER, SERIF } from './paper.js';
 
 function el(tag, css, text) {
   const e = document.createElement(tag);
@@ -13,131 +9,139 @@ function el(tag, css, text) {
   return e;
 }
 
-// Grandma's card (Felix, 2026-11-06): a short card with a dusk feel. Her line, then the gift. (Replaces the old "end card".)
+// Grandma's card (Felix, 2026-11-06): a short card with a dusk feel. Her line, then the gift. (Today only; in 1950 the boatbuilder's son and Britta say this in person.)
 export const GRANDMA_CARD = {
   who: 'Grandma',
   line: 'He always said the lights talk, if you know how to listen.',
-  gift: 'She gives you granddad\'s sea chest.',
+  gift: 'She gives you Grandpa\'s sea chest.',
   button: 'Carry on sailing',
 };
 
-// The start card copy (Felix's text, split into short lines for a phone). Buttons: Set sail / Skip.
+// The start card copy of the Today game (Felix's text, split into short lines for a phone). Buttons: Set sail / Skip. (The 1950 game has no start card: its story beats are cards.)
 export const START_CARD = {
   title: 'After the storm',
   lines: [
     'A storm has put out the five lighthouses nearest Grundsund.',
-    'Take granddad\'s old koster, Svalan, sail to each one and bring its light back.',
+    'Take Grandpa\'s old koster, Svalan, sail to each one and bring its light back.',
     'Then report to grandma in Fiskebäckskil.',
   ],
   go: 'Set sail',
   skip: 'Skip',
 };
 
-// The card after the fifth light (Felix, 2026-11-06): a short nudge, not the ending. Its button sets the Navigate target to Fiskebäckskil.
+// The card after the last light (Felix, 2026-11-06): a short nudge, not the ending. Its button sets the Navigate target to Fiskebäckskil.
 export const REPORT_CARD = {
   title: 'All five lights are burning.',
   lines: ['Sail home to Fiskebäckskil and tell grandma.'],
   button: 'Navigate to Fiskebäckskil',
 };
 
-// opts: { parent, onSetSail(), onSkip(), onReport(), onGrandma(), onStrange() }. Returns { showStart({ progress }), showReport(), showGrandma(), showStrange(),
-// showLog(rows), hide(), get visible }.
-export function createTaskUi({ parent = document.body, onSetSail = () => {}, onSkip = () => {}, onReport = () => {}, onGrandma = () => {}, onStrange = () => {} } = {}) {
-  const veil = el('div', 'position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(10,20,30,0.62);padding:24px'); // a plain dim, no backdrop blur: a blur over a live WebGL canvas is re-done every frame, and the card does not need it
+// opts: { parent, onSetSail(), onSkip(), onReport(), onGrandma(), onStrange(), copy }. copy.start (optional) replaces the Today start card's text.
+// Returns { showStart({ progress }), showCards(list, { onDone }), showReport(nudge?), showGrandma(), showStrange(lines, button), showLog(rows), hide(), get visible }.
+export function createTaskUi({ parent = document.body, onSetSail = () => {}, onSkip = () => {}, onReport = () => {}, onGrandma = () => {}, onStrange = () => {}, copy = {} } = {}) {
+  const startCard = copy.start || START_CARD;
+  const veil = el('div', `position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:${PAPER.dim};padding:24px`); // a plain dim, no backdrop blur: a blur over a live WebGL canvas is re-done every frame
   veil.setAttribute('data-no-zoom', '');
-  const card = el('div', `max-width:340px;width:100%;background:${HUD_BG};border:${LINE};border-radius:16px;padding:22px 20px 18px;color:${TEXT};text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4)`);
-  const TITLE_CSS = `font:italic 600 26px Georgia,"Times New Roman",serif;color:${GOLD};margin-bottom:10px`;
-  const title = el('div', TITLE_CSS);
-  const body = el('div', 'font:15px/1.45 system-ui,-apple-system,sans-serif;opacity:.92;margin-bottom:16px');
-  const btn = el('button', `font:600 15px system-ui,sans-serif;color:#1f2a33;background:${GOLD};border:0;border-radius:10px;padding:11px 20px;cursor:pointer;touch-action:manipulation`);
+  const card = el('div', `${paperSurface()};max-width:352px;width:100%;padding:26px 24px 20px;text-align:center;box-sizing:border-box;max-height:calc(100vh - 48px);overflow-y:auto`);
+  const title = el('div', paperTitle(26));
+  const body = el('div', paperBody());
+  const btn = el('button', paperButton());
   btn.type = 'button';
-  const progress = el('div', `font:600 12px system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:${GOLD};opacity:.85;margin:-6px 0 14px;display:none`);
-  const skipBtn = el('button', `display:none;margin:12px auto 0;font:500 13px system-ui,sans-serif;color:${TEXT};opacity:.7;background:transparent;border:0;padding:6px 12px;cursor:pointer;touch-action:manipulation;text-decoration:underline`, START_CARD.skip);
+  const progress = el('div', `${paperNote(14)};margin:-2px 0 14px;display:none`);
+  const skipBtn = el('button', `${paperLink()};display:none;margin:10px auto 0`, startCard.skip);
   skipBtn.type = 'button';
   card.append(title, body, progress, btn, skipBtn);
   veil.appendChild(card);
   parent.appendChild(veil);
   let visible = false;
   const hide = () => { visible = false; veil.style.display = 'none'; };
-  // grandma's card: dusk. A warm amber glow over indigo behind the card, a deep indigo card with a warm edge.
+  // The dusk card: the same paper by lamplight, with a warm dim behind it.
   const setDusk = (on) => {
-    veil.style.background = on ? 'linear-gradient(180deg, rgba(34,26,60,0.80), rgba(168,92,58,0.58))' : 'rgba(10,20,30,0.62)';
-    card.style.background = on ? 'rgba(30,24,52,0.94)' : HUD_BG;
-    card.style.borderColor = on ? 'rgba(242,196,109,0.35)' : 'rgba(234,246,255,0.2)';
+    veil.style.background = on ? 'linear-gradient(180deg, rgba(34,26,60,0.74), rgba(120,64,36,0.62))' : PAPER.dim;
+    card.style.cssText = `${paperSurface({ tone: on ? 'dusk' : 'paper' })};max-width:352px;width:100%;padding:26px 24px 20px;text-align:center;box-sizing:border-box;max-height:calc(100vh - 48px);overflow-y:auto`;
   };
+  const setTitle = (text, size = 26) => { title.style.cssText = paperTitle(size); title.textContent = text; };
+  const lineEls = (lines, css = paperBody()) => lines.map((t) => el('div', `${css};margin:8px 0`, t));
+  const show = () => { visible = true; veil.style.display = 'flex'; };
   let mode = 'end';
-  btn.addEventListener('click', () => { hide(); setDusk(false); ({ start: onSetSail, report: onReport, grandma: onGrandma, strange: onStrange }[mode] || (() => {}))(); });
+  let cards = null; // a run of cards in progress (showCards): { next() }
+  btn.addEventListener('click', () => { hide(); setDusk(false); ({ start: onSetSail, report: onReport, grandma: onGrandma, strange: onStrange, cards: () => cards && cards.next() }[mode] || (() => {}))(); });
   skipBtn.addEventListener('click', () => { hide(); onSkip(); });
   return {
     get visible() { return visible; },
     hide,
-    // The storm, and what to do. progress (optional): a line such as "Lights restored: 2 of 5" when it is reopened from the chart.
+    // The Today game's storm card, and what to do. progress (optional): a line such as "Lights restored: 2 of 5" when it is reopened from the chart.
     showStart({ progress: line = '' } = {}) {
       mode = 'start';
-      setDusk(false); title.style.cssText = TITLE_CSS;
-      title.textContent = START_CARD.title;
-      body.replaceChildren(...START_CARD.lines.map((t) => el('div', 'margin:6px 0', t)));
+      setDusk(false); setTitle(startCard.title);
+      body.replaceChildren(...lineEls(startCard.lines));
       progress.textContent = line;
       progress.style.display = line ? 'block' : 'none';
-      btn.textContent = START_CARD.go;
+      btn.textContent = startCard.go;
+      skipBtn.textContent = startCard.skip;
       skipBtn.style.display = 'block';
-      visible = true;
-      veil.style.display = 'flex';
+      show();
     },
-    showReport() {
+    // A run of cards, one speaker each (the 1950 story beats and the "Now" card). cards: [{ title, lines, button, quote?, dusk? }]. No Skip. onDone() after the last button.
+    showCards(list, { onDone = () => {} } = {}) {
+      if (!list || !list.length) { onDone(); return; }
+      let i = 0;
+      const render = () => {
+        const c = list[i];
+        mode = 'cards';
+        setDusk(!!c.dusk); setTitle(c.title || '');
+        body.replaceChildren(...lineEls(c.lines, c.quote ? paperQuote(21) : paperBody()));
+        progress.style.display = 'none';
+        skipBtn.style.display = 'none';
+        btn.textContent = c.button || 'Next';
+        show();
+      };
+      cards = { next: () => { i += 1; if (i < list.length) render(); else { cards = null; onDone(); } } };
+      render();
+    },
+    showReport(nudge = REPORT_CARD) {
       mode = 'report';
-      setDusk(false); title.style.cssText = TITLE_CSS;
+      setDusk(false); setTitle(nudge.title);
       progress.style.display = 'none';
       skipBtn.style.display = 'none';
-      title.textContent = REPORT_CARD.title;
-      body.replaceChildren(...REPORT_CARD.lines.map((t) => el('div', 'margin:4px 0', t)));
-      btn.textContent = REPORT_CARD.button;
-      visible = true;
-      veil.style.display = 'flex';
+      body.replaceChildren(...lineEls(nudge.lines));
+      btn.textContent = nudge.button;
+      show();
     },
-    // Grandma's moment: a dusk card. Her line, the gift, one button. The chest appears on the deck when it is dismissed (game.js).
+    // Grandma's moment (Today): a dusk card. Her line, the gift, one button. The chest appears on the deck when it is dismissed (game.js).
     showGrandma() {
       mode = 'grandma';
       progress.style.display = 'none';
       skipBtn.style.display = 'none';
-      setDusk(true);
-      title.textContent = GRANDMA_CARD.who;
-      title.style.cssText = `font:600 13px system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:${GOLD};margin-bottom:12px`;
-      const quote = el('div', 'font:italic 22px/1.3 Georgia,"Times New Roman",serif;color:#fbf0dc;margin:0 4px 14px', `\u201c${GRANDMA_CARD.line}\u201d`);
-      const gift = el('div', 'font:15px/1.4 system-ui,sans-serif;opacity:.9', GRANDMA_CARD.gift);
-      body.replaceChildren(quote, gift);
+      setDusk(true); setTitle(GRANDMA_CARD.who, 22);
+      body.replaceChildren(el('div', `${paperQuote(23)};margin:2px 4px 14px`, `“${GRANDMA_CARD.line}”`), el('div', paperBody(), GRANDMA_CARD.gift));
       btn.textContent = GRANDMA_CARD.button;
-      visible = true;
-      veil.style.display = 'flex';
+      show();
     },
-    // The end of chapter 1: "That tower has been dark since 1978. But you saw it."
+    // The end of chapter 1: "That tower has been dark since 1978. But you saw it." (1950: "That tower is not here yet.")
     showStrange(lines, button) {
       mode = 'strange';
       progress.style.display = 'none';
       skipBtn.style.display = 'none';
-      title.textContent = '';
-      title.style.cssText = 'height:2px';
-      body.replaceChildren(...lines.map((t, i) => el('div', i ? `margin:8px 0 0;font:italic 22px/1.3 Georgia,serif;color:${GOLD}` : 'font:italic 20px/1.35 Georgia,serif;color:#fbf0dc', t)));
+      setDusk(true); setTitle('', 2);
+      body.replaceChildren(...lines.map((t, i) => el('div', `${paperQuote(i ? 23 : 21)};margin:${i ? 10 : 2}px 0 0;${i ? `color:${PAPER.title}` : ''}`, t)));
       btn.textContent = button;
-      visible = true;
-      veil.style.display = 'flex';
+      show();
     },
     // The light log (the chart's Lights button): rows [{ name, glyph, text }]. One Close button.
     showLog(rows) {
       mode = 'log';
       progress.style.display = 'none';
       skipBtn.style.display = 'none';
-      title.textContent = 'Light log';
-      title.style.cssText = `font:italic 600 24px Georgia,serif;color:${GOLD};margin-bottom:10px`;
-      if (!rows.length) body.replaceChildren(el('div', 'opacity:.8', 'No lights relit yet. Each one you bring back is listed here with its pattern.'));
+      setDusk(false); setTitle('Light log', 24);
+      if (!rows.length) body.replaceChildren(el('div', paperNote(16), 'No lights relit yet. Each one you bring back is listed here with its pattern.'));
       else body.replaceChildren(...rows.map((r) => {
-        const row = el('div', 'display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:7px 0;border-bottom:1px solid rgba(234,246,255,0.12);text-align:left');
-        row.append(el('span', 'font:italic 17px Georgia,serif', r.name), el('span', `font:600 15px ui-monospace,Menlo,monospace;color:${GOLD};white-space:nowrap`, r.text));
+        const row = el('div', `display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:8px 0;border-bottom:1px solid ${PAPER.rule};text-align:left`);
+        row.append(el('span', `font:italic 18px ${SERIF};color:${PAPER.ink}`, r.name), el('span', `font:600 15px ${SERIF};color:${PAPER.title};white-space:nowrap`, r.text));
         return row;
       }));
       btn.textContent = 'Close';
-      visible = true;
-      veil.style.display = 'flex';
+      show();
     },
     elements: { veil, card, btn, skipBtn },
   };

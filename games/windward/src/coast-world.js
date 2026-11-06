@@ -517,10 +517,11 @@ export function placeCoastVillages(world, settlements, { summerShare = 0 } = {})
 
 // Real lighthouses (src/lighthouses.js) at their real lat/lon. A lighthouse islet can be smaller than a
 // 20 m raster pixel; if the spot is not land the tower is moved to the nearest land and the move is reported.
-export function placeCoastLighthouses(world, names) {
+// list: the entries to look names up in (default LIGHTHOUSES; an era passes its own).
+export function placeCoastLighthouses(world, names, list = LIGHTHOUSES) {
   const out = [];
   for (const name of names) {
-    const entry = LIGHTHOUSES.find((l) => l.name === name);
+    const entry = list.find((l) => l.name === name);
     if (!entry) { out.push({ name, error: 'not in LIGHTHOUSES' }); continue; }
     const [gx, gz] = world.toGame(entry.lon, entry.lat);
     if (!world.inside(gx, gz, EDGE_FADE_M)) { out.push({ name, error: 'outside the window' }); continue; }

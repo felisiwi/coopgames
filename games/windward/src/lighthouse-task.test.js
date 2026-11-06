@@ -174,7 +174,7 @@ check('the relight sound is calm and silent until audio is unlocked; it never th
 
 check('the start card says what Felix wrote (storm, five lighthouses, Svalan, bring the light back, report to grandma in Fiskebäckskil), in short lines, with Set sail and Skip', () => {
   const text = START_CARD.lines.join(' ');
-  for (const must of ['storm has put out the five lighthouses nearest Grundsund', 'granddad\'s old koster, Svalan', 'sail to each one and bring its light back', 'report to grandma in Fiskebäckskil']) assert.ok(text.includes(must), `says "${must}"`);
+  for (const must of ['storm has put out the five lighthouses nearest Grundsund', 'Grandpa\'s old koster, Svalan', 'sail to each one and bring its light back', 'report to grandma in Fiskebäckskil']) assert.ok(text.includes(must), `says "${must}"`);
   assert.equal(START_CARD.lines.length, 3);
   assert.ok(START_CARD.lines.every((l) => l.length <= 80), 'short lines for a phone');
   assert.equal(START_CARD.go, 'Set sail'); assert.equal(START_CARD.skip, 'Skip');
@@ -220,7 +220,7 @@ check('a tower\'s lantern: task lights are lit exactly when restored (even the t
 
 check('grandma\'s card: her line (Felix\'s words), the chest as the gift, one button to carry on', () => {
   assert.equal(GRANDMA_CARD.line, 'He always said the lights talk, if you know how to listen.');
-  assert.ok(/sea chest/i.test(GRANDMA_CARD.gift) && /granddad/i.test(GRANDMA_CARD.gift));
+  assert.ok(/sea chest/i.test(GRANDMA_CARD.gift) && /grandpa/i.test(GRANDMA_CARD.gift));
   assert.equal(GRANDMA_CARD.button, 'Carry on sailing');
   assert.ok(GRANDMA_CARD.line.length < 80, 'short for a phone');
 });

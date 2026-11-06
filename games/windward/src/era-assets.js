@@ -795,6 +795,55 @@ export function addKeeperHouse(S, G, { wall = 'red', lit = true } = {}) {
     S.tri([-4.2, 7.2, 3.5], [-4.2, 6.5, 3.5], [-5.3, 6.85, 3.5], 0x3b78b8); S.tri([-4.2, 6.85, 3.5], [-4.2, 6.5, 3.5], [-5.3, 6.7, 3.5], 0xe8c04f);
   });
 }
+// A fyrkur: the small automatic light of the AGA / Dalén kind (docs/WORLD-1950.md B: Stångholmen 1940, Fredagsholmen 1942 are described as white sheet-metal
+// fyrkurar). A low base, a white octagonal body, a black gallery ring, a lantern room and a black cap. ~5 m. The lantern GLASS is not stamped here: createFyrkur1950()
+// adds a mesh named `lantern-glass` so the game's lantern glow (src/lantern.js) finds the lamp. Proportions are the designer's choice: no drawing was read.
+export function addFyrkur1950(S, G, { lit = true } = {}) {
+  S.box(0, 0.55, 0, 2.7, 1.1, 2.7, F50.grey); // concrete base
+  S.tube([0, 1.1, 0], [0, 4.2, 0], 1.0, 0.82, 8, F50.white); // the octagonal sheet-metal body, a little tapered
+  S.drum(0, 4.2, 0, 1.25, 0.16, 8, F50.black); // gallery ring
+  S.drum(0, 4.36, 0, 0.78, 0.22, 8, F50.white); // lantern foot
+  S.drum(0, 5.5, 0, 0.9, 0.12, 8, F50.black); // lantern head
+  S.pyramid(0, 5.62, 0, 0.95, 0.7, 8, F50.black); // cap
+  void G; void lit;
+}
+// A person for the 1950 story, ~1.5 m, blocky like the rest of the kit: legs, a jersey (or skirt), arms, a head with a flat cap (boy) or hair and a headscarf (girl).
+// Two looks: 'boy' (the boatbuilder's son, young granddad) and 'girl' (Britta). Clothes are plain working clothes of the time; the colours are a design choice, not a
+// documented outfit (TODO(felix): confirm the look). Feet at y = 0, facing +z.
+export const FIGURE_LOOKS = {
+  boy: { trousers: 0x4a4f5c, top: 0x6f8aa0, skin: 0xe0b896, cap: 0x3d4048 },
+  girl: { skirt: F50.falu, top: F50.hullCream, skin: 0xe6c2a2, hair: 0x7a5a3a, scarf: F50.ochre, legs: 0x8a7d70 },
+};
+export function addFigure1950(S, G, { variant = 'boy' } = {}) {
+  const L = FIGURE_LOOKS[variant] || FIGURE_LOOKS.boy;
+  const girl = variant === 'girl';
+  for (const sx of [-1, 1]) S.box(sx * 0.09, 0.37, 0, 0.15, 0.74, 0.17, girl ? L.legs : L.trousers); // legs
+  if (girl) S.tube([0, 0.95, 0], [0, 0.4, 0], 0.19, 0.31, 8, L.skirt); // a skirt, wider at the hem
+  S.box(0, 1.04, 0, 0.4, 0.56, 0.22, L.top); // torso
+  for (const sx of [-1, 1]) { // arms, hanging a little forward, with a hand at the end
+    S.tube([sx * 0.23, 1.27, 0], [sx * 0.27, 0.84, 0.07], 0.06, 0.05, 5, L.top);
+    S.box(sx * 0.27, 0.8, 0.08, 0.08, 0.1, 0.08, L.skin);
+  }
+  S.drum(0, 1.32, 0, 0.115, 0.2, 8, L.skin); // head
+  if (girl) {
+    S.box(0, 1.38, -0.1, 0.24, 0.24, 0.08, L.hair); // hair down the back
+    S.drum(0, 1.46, 0, 0.125, 0.07, 8, L.scarf); // headscarf
+  } else {
+    S.drum(0, 1.46, 0, 0.135, 0.06, 8, L.cap); // flat cap
+    S.box(0, 1.47, 0.14, 0.2, 0.02, 0.1, L.cap); // its peak
+  }
+  void G;
+}
+// The group for the game: the stamped fyrkur plus its lantern glass (a mesh named `lantern-glass`, centred on the lamp).
+export function createFyrkur1950({ night = false } = {}) {
+  const a = createAsset('fyrkur1950', { night });
+  const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 1.1, 8), new THREE.MeshBasicMaterial({ color: GLASS.y1950.off }));
+  glass.name = 'lantern-glass';
+  glass.position.set(0, 4.92, 0);
+  a.group.add(glass);
+  a.group.name = 'fyrkur1950';
+  return a;
+}
 // A fish-canning factory (konservfabrik) at the waterfront: a long two-storey hall, a boiler house with a tall brick chimney, a loading pier
 // with a crane, barrels. Looks: see docs/WORLD-1950.md; designer's choice where not documented.
 export function addCanningFactory(S, G, { wall = F50.brickPale, lit = true } = {}) {
@@ -857,6 +906,8 @@ export const ASSETS = {
   house1950: { era: '1950', label: 'Village house', variants: Object.keys(HOUSE_1950_COLOURS), frame: 6, maxTris: 800, fill: (S, G, o) => addHouse1950(S, G, { colour: o.variant }) },
   sjobod1950: { era: '1950', label: 'Sea-shed', variants: Object.keys(SJOBOD_COLOURS), frame: 6, maxTris: 800, fill: (S, G, o) => addSjobod1950(S, G, { colour: o.variant }) },
   keeper: { era: '1950', label: 'Keeper\'s house', variants: ['red', 'white'], frame: 7, maxTris: 800, fill: (S, G, o) => addKeeperHouse(S, G, { wall: o.variant }) },
+  figure1950: { era: '1950', label: 'Figure (the boatbuilder\'s son / Britta)', variants: ['boy', 'girl'], frame: 1.5, maxTris: 800, fill: (S, G, o) => addFigure1950(S, G, { variant: o.variant }) },
+  fyrkur1950: { era: '1950', label: 'Fyrkur (small automatic light)', variants: [], frame: 4, maxTris: 800, fill: (S, G) => addFyrkur1950(S, G, {}) },
   canning: { era: '1950', label: 'Canning factory', variants: [], frame: 12, maxTris: 3000, fill: (S, G) => addCanningFactory(S, G, {}) },
   buoy1950: { era: '1950', label: 'Sea marks', variants: Object.keys(BUOYS_1950), frame: 3, maxTris: 800, fill: (S, G, o) => addBuoy1950(S, G, { variant: o.variant }) },
   harbourToday: { era: 'scene', label: 'Today harbour', variants: [], frame: 40, maxTris: 12000, fill: (S, G) => addHarbourToday(S, G) },

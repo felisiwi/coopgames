@@ -10,6 +10,7 @@
 // pill (index.html's #waiting-overlay, hub.css) is top:12px right:12px, and
 // this HUD used to start at top:8px through the hub (not the solo dev entry,
 // which has no such pill) so the two overlapped.
+import { paperSurface } from './paper.js';
 import { TRIM_FULL_WINDOW_DEG } from './sail.js';
 import { CONFIG } from './config.js';
 
@@ -91,8 +92,8 @@ export function createHud(canvas) {
   const notice = document.createElement('div');
   notice.style.cssText = [
     'position:fixed', 'left:50%', 'bottom:12px', 'transform:translateX(-50%)',
-    'font:13px monospace', 'color:#eaf6ff', 'background:rgba(10,26,42,0.7)',
-    'padding:6px 10px', 'border-radius:4px', 'pointer-events:none',
+    paperSurface({ radius: 4, shadow: true }), 'font:italic 16px Georgia,"Times New Roman",serif',
+    'padding:8px 16px', 'pointer-events:none', 'z-index:7', 'max-width:min(90vw,380px)', 'text-align:center', 'box-sizing:border-box',
     'opacity:0', 'transition:opacity 1.2s',
   ].join(';');
   parent.appendChild(notice);

@@ -1,9 +1,10 @@
 # Last session
 
-**2026-11-06: the busy coast, era-driven, after Felix's phone test** (branch `felix/windward-busy-today`, describes `67eddc3`; NOT merged). Ferry (847) now 14 m (1.75 x Svalan,
-era data) and docked slightly off its quay in clear water (skips Östersidan); 36 scheduled boats (20 sail: harbour routes, 8 cruising loops, 4 fishing circles) + an ambient pool
-(8, local) that always sails past you; era profiles by year over era-neutral geometry (`data/busy-eras.json`, `data/busy-world.json`, `node tools/plan-busy-coast.mjs`); the modern
-kit is a placeholder for 1950 and 1980. `?year=`, `?busy=0`, `?night=1`. Fiskebäckskil: 191 -> 160 draw calls. What an era must supply, perf, shots, checklist: `docs/busy-today/README.md`.
+**2026-11-06: Windward stage 1e, chapter 1 in 1950, REVISED plan: all three batches built** (branch `felix/windward-chapter1-1950`, describes the commit this file is in; pushed, NOT merged).
+The game builds from `worldAtYear(1950)` (`?year=2015` is Today, untouched). Order of play: the opening in the engine (`src/opening-stage.js`: dusk over today's Fiskebäckskil, storm, lighthouse
+rewind `rewind.js` landing on Gäven, `dusk.js`) -> dawn on the mainland shore -> the boy, the eka (`beats-1950.js`) -> fittings from Grundsund -> the yard -> Britta's jetty (`britta-house.js`,
+her shed = the depot) -> four AGA lights + Måseskär's keeper (`task-1950.js`) -> the Kråksundsgap glimpse -> report at her jetty -> Svalan relaunched. Cards are old paper (`paper.js`);
+"Grandpa" everywhere (`grandpa-text.test.js`). `?opening=1` replays, `?lights=reset` restarts. All copy is draft: every spoken line is INVENTED-DIALOGUE / TODO(felix) in `story-1950.js`.
 
 Where things are:
 - Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`
@@ -21,9 +22,9 @@ harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connecti
 - Windward 1b lure, Boat Lab, 1c chart and its follow-ups: merged (see CHART.md, LURE.md, docs/boat-lab/).
 - Passes data and seamarks data: merged (docs/passes/, docs/seamarks/).
 - Stage 1d: shoals, marks, passes, the dark-lighthouses task, chapter 1 ending: merged. Era assets + era 1700 data: merged.
-- Busy coast (era-driven traffic, ferry, moorings, summer houses): `felix/windward-busy-today`, pushed, not merged.
+- Busy coast: merged. Stage 1e chapter 1 in 1950 (batches 1-3): `felix/windward-chapter1-1950`, pushed, not merged.
 
 ## Next
 
-1. Felix: phone check of the busy coast (checklist in `docs/busy-today/README.md`); then merge. A 1950s kit is next (what an era supplies is in that README).
-2. Confirm the unplaced harbours (`assets/coast/names.json`); Testholmen, Stora Kornö. Then: night navigation (hooks are in), harbour close-ups.
+1. Felix: phone check of the whole chapter (batch 3 report); settle the draft copy and the open choices; then merge.
+2. Open data TODOs: Bx/B/K light readings, Stångholmen position, the four undrawn fyrkurar, 1950 buoy colour, ferry timetable. Then: night navigation, harbour close-ups.

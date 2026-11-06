@@ -159,7 +159,7 @@ function main() {
     refreshPanel(); writeUrl();
   }));
   refreshers.push(chips($('light'), [['0', 'Day'], ['1', 'Night']], (id) => String(S.night) === id, (id) => { S.night = Number(id); applyLight(); refreshPanel(); writeUrl(); }));
-  const itemLabels = { crate: 'Fish crate', barrel: 'Barrel', chest: 'Granddad’s chest' };
+  const itemLabels = { crate: 'Fish crate', barrel: 'Barrel', chest: 'Grandpa’s chest' };
   const itemBoxes = {};
   for (const item of DECK_ITEMS) {
     const l = document.createElement('label'); l.className = 'tog';

@@ -7,8 +7,8 @@
       "label": "Summer guests, 1950-1979",
       "from": 1950,
       "to": 1979,
-      "kit": "today",
-      "placeholderKit": true,
+      "kit": "1950",
+      "placeholderKit": false,
       "traffic": {
         "routes": [
           "grundsund-gullholmen",
@@ -26,11 +26,10 @@
           "sail": {
             "assets": [
               {
-                "id": "sailboat",
+                "id": "sailboat1950",
                 "weight": 1,
                 "stripes": [
-                  "navy",
-                  "sand"
+                  "white"
                 ],
                 "length": [
                   7.4,
@@ -50,15 +49,16 @@
           "motor": {
             "assets": [
               {
-                "id": "motorboat",
+                "id": "snipa1950",
                 "weight": 1,
                 "stripes": [
-                  "sand",
-                  "sage"
+                  "white",
+                  "green",
+                  "blue"
                 ],
                 "length": [
-                  5.2,
-                  6.0
+                  5.6,
+                  6.8
                 ]
               }
             ],
@@ -74,15 +74,16 @@
           "fish": {
             "assets": [
               {
-                "id": "motorboat",
+                "id": "fishboat1950",
                 "weight": 1,
                 "stripes": [
-                  "sand",
-                  "sage"
+                  "white",
+                  "dark",
+                  "green"
                 ],
                 "length": [
-                  5.0,
-                  5.8
+                  8.5,
+                  10.0
                 ]
               }
             ],
@@ -124,7 +125,7 @@
       },
       "ferry": {
         "enabled": true,
-        "asset": "ferry",
+        "asset": "ferry1950",
         "speed": 4.2,
         "dwellS": [
           25,
@@ -140,11 +141,10 @@
           "sail": {
             "assets": [
               {
-                "id": "sailboat",
+                "id": "sailboat1950",
                 "weight": 1,
                 "stripes": [
-                  "navy",
-                  "sand"
+                  "white"
                 ],
                 "length": [
                   7.2,
@@ -157,15 +157,16 @@
           "motor": {
             "assets": [
               {
-                "id": "motorboat",
+                "id": "snipa1950",
                 "weight": 1,
                 "stripes": [
-                  "sand",
-                  "sage"
+                  "white",
+                  "green",
+                  "blue"
                 ],
                 "length": [
-                  5.2,
-                  5.8
+                  5.6,
+                  6.6
                 ]
               }
             ],
@@ -174,11 +175,12 @@
         }
       },
       "houses": {
-        "share": 0.15,
-        "asset": "summerhouse",
+        "share": 0,
+        "asset": "house1950",
         "colours": [
-          "cream",
-          "rose"
+          "red",
+          "white",
+          "ochre"
         ],
         "scale": 0.75,
         "litShare": 0.4

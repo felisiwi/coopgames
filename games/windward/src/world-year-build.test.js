@@ -154,10 +154,18 @@ await check('1950 villages: houses on land, sizes follow the data (people / 25, 
   assert.ok(e1950.report.cottages <= eToday.report.cottages + 60);
 });
 
-await check('1950 lights: only those with a tower model; Maseskar lit with a keeper and a red dwelling; Islandsberg and Stangehuvud dark; automatic ones lit without a keeper', async () => {
+await check('1950 lights: five towers and three fyrkurar; Maseskar lit with a keeper and a red dwelling; Islandsberg and Stangehuvud dark; automatic ones lit without a keeper', async () => {
   const lit = (name) => s1950.lighthouses.find((l) => l.name === name);
-  assert.equal(e1950.report.lights, 5, 'Maseskar, Islandsberg, Hattan, Gaven, Stangehuvud: the 11 lights in the window, of which 5 have a hand-drawn tower');
-  assert.equal(e1950.report.lightsLit, 3); assert.equal(e1950.report.lightsDark, 2);
+  // 5 hand-drawn towers (Maseskar, Islandsberg, Hattan, Gaven, Stangehuvud) + the generic fyrkur for the two small lights whose positions are sourced (Stangholmen, Fredagsholmen);
+  // the other four fyrkurar of the data (Grotoe, Gulskaren, Oxskar, Hangdyn) have no position in it: reported, not drawn
+  assert.equal(e1950.report.lights, 8, '5 towers + 3 fyrkurar (Stångholmen, Fredagsholmen and, from stage 1e, Kråksundsgap Södra\'s 1941 iron lantern)');
+  assert.equal(e1950.report.lightsLit, 6); assert.equal(e1950.report.lightsDark, 2);
+  assert.deepEqual(e1950.lights.map((l) => l.name).sort(), ['Fredagsholmen', 'Gäven', 'Hättan', 'Islandsberg', 'Kråksundsgap Södra', 'Måseskär', 'Stångehuvud', 'Stångholmen'].sort());
+  assert.equal(e1950.lights.filter((l) => l.entry.model === 'fyrkur').length, 3);
+  for (const l of e1950.lights) { assert.ok(l.group && l.fx && typeof l.fx.setLit === 'function', `${l.name} has its group and lantern effect`); assert.equal(l.fx.lit, l.info.lit, `${l.name}: the lantern follows the era's state`); assert.ok(e1950.heightAt(l.x, l.z) >= 0.3, `${l.name} stands on land`); }
+  assert.ok(e1950.lightsNotDrawn.length === 4 && e1950.lightsNotDrawn.every((n) => /no position/.test(n.why)), 'the four lights without a position are reported, never guessed');
+  assert.ok(e1950.report.notes.some((n) => /Grötö.*no position/.test(n)), 'and the report says so');
+  assert.ok(e1950.lightEntries.find((e) => e.name === 'Hättan').light.period === 15 && e1950.lightEntries.find((e) => e.name === 'Måseskär').light.count === 3, 'the 1950 characters, not today\'s');
   assert.equal(lit('Måseskär').manned, 'keepers'); assert.equal(lit('Måseskär').lit, true);
   assert.equal(lit('Islandsberg').lit, false, 'the old 1883 house light: dark since 1938'); assert.equal(lit('Stångehuvud').lit, false);
   assert.equal(lit('Hättan').manned, 'automatic');
@@ -167,7 +175,7 @@ await check('1950 lights: only those with a tower model; Maseskar lit with a kee
   assert.ok(e1950.heightAt(keepers[0].position.x, keepers[0].position.z) >= 0.3, 'the keeper\'s house stands on rock');
   assert.ok(e1950.report.notes.some((n) => /1 of 11 lights/.test(n)), 'the report says how few had keepers');
   assert.ok(e1950.labels.some((l) => l.id === 'light-maseskar' && l.text === 'Måseskär'), 'lights are named on the coast');
-  assert.ok(eToday.report.lights >= e1950.report.lights && eToday.report.lightsDark === 0, 'today every light is lit');
+  assert.ok(eToday.report.lights >= 5 && eToday.report.lightsDark === 0, 'today every light is lit');
 });
 
 await check('1950 sea marks: no modern IALA layer; only mark types that existed, in the data\'s colours and shapes; the ferry is on its route or at its quay', async () => {

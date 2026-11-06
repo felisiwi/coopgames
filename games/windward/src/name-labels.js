@@ -180,7 +180,7 @@ export function createNameLabels(container = document.body, { onCancelTarget = (
         + 'text-shadow:0 1px 3px rgba(12,28,44,.9),0 0 10px rgba(12,28,44,.6)';
       const textEl = document.createElement('span');
       const sub = document.createElement('div');
-      sub.style.cssText = 'font:600 12px/1.3 system-ui,sans-serif;font-style:normal;letter-spacing:.08em;color:#fbf3e2;display:flex;align-items:center;justify-content:center;gap:6px';
+      sub.style.cssText = 'font:italic 600 14px/1.3 Georgia,"Times New Roman",serif;letter-spacing:.03em;color:#fbf3e2;display:flex;align-items:center;justify-content:center;gap:6px';
       const arrowEl = document.createElement('span');
       arrowEl.textContent = '➤';
       arrowEl.style.cssText = 'display:inline-block;font-size:13px;color:#f2c46d';
@@ -189,7 +189,7 @@ export function createNameLabels(container = document.body, { onCancelTarget = (
       cancel.type = 'button';
       cancel.textContent = '✕';
       cancel.setAttribute('aria-label', 'Stop navigating');
-      cancel.style.cssText = 'pointer-events:auto;touch-action:manipulation;font:600 12px system-ui,sans-serif;color:#fbf3e2;background:rgba(20,34,48,0.7);border:1px solid rgba(234,246,255,.3);border-radius:10px;padding:3px 8px;margin-left:4px;cursor:pointer';
+      cancel.style.cssText = 'pointer-events:auto;touch-action:manipulation;font:600 14px Georgia,"Times New Roman",serif;color:#f3e6c8;background:#3a2a1a;border:1px solid #3a2a1a;border-radius:4px;padding:3px 9px;margin-left:4px;cursor:pointer';
       cancel.addEventListener('click', (ev) => { ev.stopPropagation(); onCancelTarget(); });
       sub.append(arrowEl, distEl, cancel);
       el.append(textEl, sub);

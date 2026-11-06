@@ -146,6 +146,25 @@ export function createAudio(ContextClass = globalThis.AudioContext || globalThis
         RELIGHT_SOUND.chimes.forEach(([f, at]) => tone('sine', f, t + at, 0.01, 0, 2.2, RELIGHT_SOUND.chimeGain * gain));
       } catch { /* sound must never break the game */ }
     },
+    // Thunder (the opening's storm): a low rumble of filtered noise that cracks, rolls and fades over about three seconds. Synthesised; silent until the first tap unlocks audio.
+    thunder(delayS = 0, gain = 1) {
+      if (!live()) return;
+      try {
+        const t = ctx.currentTime + delayS, len = 3.4, n = Math.floor(ctx.sampleRate * len);
+        const buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) { const k = i / n; d[i] = (Math.random() * 2 - 1) * (k < 0.04 ? k / 0.04 : Math.pow(1 - k, 1.6)) * (0.7 + 0.3 * Math.sin(i / ctx.sampleRate * 9)); }
+        const src = ctx.createBufferSource(); src.buffer = buf;
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(520, t); lp.frequency.exponentialRampToValueAtTime(70, t + len);
+        const g = ctx.createGain(); g.gain.value = 0.9 * gain;
+        src.connect(lp).connect(g).connect(master);
+        src.start(t);
+      } catch { /* sound must never break the game */ }
+    },
+    // The flasher's "pop" (1950 relight; the only sound of the AGA apparatus the sources name: docs/PEOPLE-1950.md section 2): one short, dry click.
+    pop(delayS = 0, gain = 1) {
+      if (!live()) return;
+      try { const t = ctx.currentTime + delayS; tone('triangle', 180, t, 0.002, 0, 0.09, 0.22 * gain); tone('square', 900, t, 0.001, 0, 0.03, 0.05 * gain); } catch { /* sound must never break the game */ }
+    },
     // A light's pattern as soft chimes in the same rhythm (stage 1d, batch B): one chime per flash (a lower one for each dark of an occulting light),
     // longer flashes ring longer. flashes: src/light-glyph.js lightGlyph().flashes. At most 8, never loud.
     lightChimes(flashes, delayS = 0, gain = 1) {
