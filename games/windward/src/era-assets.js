@@ -22,7 +22,8 @@ const C = {
   navy: 0x6f8fb3, coral: 0xe39a8a, sage: 0x9fbf9c, sand: 0xe0c48e, grey: 0xdfe3e6, charcoal: 0x4a4d57, orange: 0xea9a68,
   silver: 0xd9dcd8, wood: 0xb8a183, woodDark: 0x8c7658, rail: 0xeadfc8,
   granite: 0xe3c9c1, graniteDk: 0xb7a3b3, granitePale: 0xf1e1db, wet: 0x8e8197, meadow: 0xb9cf8f, meadow2: 0x9fbf7a, stone: 0xa89ca6,
-  slate: 0x7b7a8c, tile: 0xb4685a, turf: 0x879a68, turf2: 0x9aaa72, timber: 0x9b958a, tar: 0x54453b, tar2: 0x4b3d34, tar3: 0x3a2f27,
+  slate: 0x7b7a8c, tile: 0x7f736b, // tile: old, mossed grey-brown clay tile (was a bright red 0xb4685a: poor 1700 cottages were bare grey timber, nothing painted red)
+   turf: 0x879a68, turf2: 0x9aaa72, timber: 0x9b958a, tar: 0x54453b, tar2: 0x4b3d34, tar3: 0x3a2f27,
   door: 0x5f4d3e, chest: 0x7d5b3f, net: 0x7d8a7a, fishA: 0xcdd2cf, fishB: 0xb5a888, paint: 0xf6f1e6,
 };
 const GLASS = {

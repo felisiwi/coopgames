@@ -1,0 +1,47 @@
+{
+  "about": "The world-by-year table (felix/windward-1700-preview). One row per era the game can show the real coast in. src/world-year.js turns a year into a plain description of that world (water level, which rocks are hidden, which settlements and how big, which marks, names, boats); src/world-year-build.js turns the description into a scene. Adding an era (1905, say) is a new row here plus its data file, not new code. game.js does not read this yet.",
+  "defaultYear": 2025,
+  "eras": [
+    {
+      "id": "1700",
+      "label": "1700",
+      "year": 1700,
+      "from": 1658,
+      "to": 1705,
+      "epoch": "New border (data/epochs.json)",
+      "source": "world-1700.json",
+      "kit": "1700",
+      "waterOffset": { "from": "source", "path": "waterLevel.offsetM", "note": "the sea stood this many real metres higher against the land than today (our arithmetic on SMHI's rate, range 0.45-0.70; docs/WORLD-1700.md section 3)" },
+      "hiddenRocks": { "from": "source", "path": "shoals.list", "where": { "in1700": "just-under" }, "note": "rocks awash today are just under the surface in 1700: still solid for a keel, no longer plainly visible" },
+      "lights": false,
+      "seaMarks": { "modern": false, "kinds": ["cairn", "painted-rock-mark"], "note": "only cairns and painted rocks are drawn; the one spar mark (Hattan, invented) has no model yet and is not drawn" },
+      "settlements": {
+        "from": "source",
+        "path": "settlements",
+        "showIf": ["yes", "probable", "uncertain"],
+        "householdsPerCottage": 2,
+        "cottagesBySizeClass": { "hamlet": 4, "farm-and-fishing": 3, "fishing-village": 12, "small-fishing-village": 10, "unknown": 2 },
+        "note": "a cottage stands for about two households (poor strandsittare shared small plots); a size class with no count uses the table; the table is OUR bracket between the two nearest documented counts, not a source figure"
+      },
+      "names": { "from": "source", "path": "names", "note": "only documented old forms are used; a place with none shows no name" },
+      "boats": { "kit": "eka", "moored": 5, "sailing": 2, "note": "quiet coast (docs/WORLD-1700.md section 5): few boats, one or two aboard each" }
+    },
+    {
+      "id": "today",
+      "label": "Today",
+      "year": 2025,
+      "from": 1990,
+      "to": 2100,
+      "epoch": "Today (the lure)",
+      "source": null,
+      "kit": "today",
+      "waterOffset": { "from": "value", "value": 0 },
+      "hiddenRocks": null,
+      "lights": true,
+      "seaMarks": { "modern": true, "kinds": [] },
+      "settlements": { "from": "game", "note": "the game's own village placement (src/coast-world.js placeCoastVillages), unchanged" },
+      "names": { "from": "game", "note": "modern names" },
+      "boats": { "kit": "koster", "moored": 0, "sailing": 0 }
+    }
+  ]
+}
