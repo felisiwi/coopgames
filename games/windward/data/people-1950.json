@@ -1,0 +1,1513 @@
+{
+  "about": "Sourced story details for the 1950 home base (docs/PEOPLE-1950.md). Items carry confidence (documented | derived | inferred | invented), an uncertain flag, source ids (A.. lights, B.. people, \"WORLD-1950 Sxx\" earlier project sources) and a useFor note. INVENTED items are suggestions, not history. Read 2026-11-06.",
+  "generated": "2026-11-06",
+  "sources": {
+    "A01": {
+      "title": "fyrwiki: Måseskär",
+      "url": "https://wiki.fyr.org/index.php/M%c3%a5sesk%c3%a4r",
+      "type": "primary",
+      "read": true,
+      "note": "Includes Våra fyrar 1944 and 1940/50s stencil notes"
+    },
+    "A02": {
+      "title": "fyrwiki: Kråksundsgap",
+      "url": "https://wiki.fyr.org/index.php/Kr%C3%A5ksundsgap",
+      "type": "primary",
+      "read": true,
+      "note": "Station history 1890-1956; conflates Högholmen and Bråtö lights"
+    },
+    "A03": {
+      "title": "fyrwiki: Kråksundsgap södra",
+      "url": "https://wiki.fyr.org/index.php/Kr%C3%A5ksundsgap_s%C3%B6dra",
+      "type": "primary",
+      "read": true,
+      "note": "Position 58 06.1 N 11 26.5 E; 1941 entry; roundabout lantern"
+    },
+    "A04": {
+      "title": "fyrwiki: Kråksundsgap Norra",
+      "url": "https://wiki.fyr.org/index.php/Kr%C3%A5ksundsgap_Norra",
+      "type": "primary",
+      "read": true,
+      "note": "Says 1941; main page says 1956"
+    },
+    "A05": {
+      "title": "Blänket 2012:4 Elsby: Kråksundsgap / Högholmen och Tenholmen",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2012Extract/KraksundsgapHogholmen.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "1911 AGA on Bråtö, lantern replaced 1941, 1954 tower"
+    },
+    "A06": {
+      "title": "Blänket 2011:3 Havstam: Lysekil får en marin prägel - fyr i rondellen",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2011Extract/LysekilFarEnMarinPragel.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "Old iron lantern in use since 1 Nov 1941"
+    },
+    "A07": {
+      "title": "Lighthouse Directory ibiblio: Central Bohuslän",
+      "url": "https://ibiblio.org/lighthouse/swbohuc.htm",
+      "type": "secondary",
+      "read": true,
+      "note": "Kråksundsgap Södra 1954 (station 1941); NW point of Bråtö"
+    },
+    "A08": {
+      "title": "fyrwiki: Erholmen",
+      "url": "https://wiki.fyr.org/index.php/Erholmen",
+      "type": "primary",
+      "read": true,
+      "note": "Gas station 1918-1965, tube changing"
+    },
+    "A09": {
+      "title": "Blänket 2008:2 Hermansson: Erholmens gasstation",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2008Extract/ErholmensGasstationEnEpok.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "First-person, served Erholmen 1946-51"
+    },
+    "A10": {
+      "title": "Blänket 2013:3 V. Andersson: Tillsyn och underhåll av fyrar i norra Bohuslän",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2013Extract/TillsynOchUnderhallAvFyrar.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "Supervisor Anker Andersson 1937-c1970"
+    },
+    "A11": {
+      "title": "fyrwiki: AGA-ljus",
+      "url": "https://wiki.fyr.org/index.php/AGA-ljus",
+      "type": "primary",
+      "read": true,
+      "note": ""
+    },
+    "A12": {
+      "title": "fyrwiki: Solventil",
+      "url": "https://wiki.fyr.org/index.php/Solventil",
+      "type": "primary",
+      "read": true,
+      "note": ""
+    },
+    "A13": {
+      "title": "fyrwiki: Klippventil",
+      "url": "https://wiki.fyr.org/index.php/Klippventil",
+      "type": "primary",
+      "read": true,
+      "note": ""
+    },
+    "A14": {
+      "title": "fyrwiki: Gasackumulator",
+      "url": "https://wiki.fyr.org/index.php/Gasackumulator",
+      "type": "primary",
+      "read": true,
+      "note": "AK-25 61 kg, AK-50 118 kg"
+    },
+    "A15": {
+      "title": "fyrwiki: Acetylen",
+      "url": "https://wiki.fyr.org/index.php/Acetylen",
+      "type": "primary",
+      "read": true,
+      "note": "Faint garlic-like smell; explosion range"
+    },
+    "A16": {
+      "title": "fyrwiki: Dalén",
+      "url": "https://wiki.fyr.org/index.php/Dal%C3%A9n",
+      "type": "primary",
+      "read": true,
+      "note": "Nobel 1912, accident dated 1912; nobelprize.org returned 403"
+    },
+    "A17": {
+      "title": "US Coast Guard Aids to Navigation Manual ch.20 Acetylene Apparatus (1955 scan hosted on fyrwiki)",
+      "url": "https://wiki.fyr.org/wiki-files/Manual/US_Coast_Guard_Manual_1953.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "US practice, same AGA apparatus; read pp.20-83, 20-87 and contents as images; not Swedish practice"
+    },
+    "A18": {
+      "title": "Blänket 2012:4 Wässing: Ett litet Fyrminne",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2012Extract/EttLitetFyrminneWassing.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "Christmas 1941 at Måseskär"
+    },
+    "A19": {
+      "title": "Blänket 2010:3 Carlsson-Lénart: Fyrvaktarna från Ödsmål",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2010Extract/FyrvaktarnaFranOdsmal.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "Danielsson drowned 1912; Nilén 1912-25"
+    },
+    "A20": {
+      "title": "Blänket 2016:2 Ström: Stormtrollen på Västkusten",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2016Extract/StormtrollenPaVastkusten.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "Storm petrel lore, Måseskär ringing"
+    },
+    "A21": {
+      "title": "Bohusläns museum Kunskapsbanken: Måseskärs fyrplats",
+      "url": "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/fyren-pa-maseskar/",
+      "type": "primary",
+      "read": true,
+      "note": "Read via WebFetch summary"
+    },
+    "A22": {
+      "title": "Stiftelsen Måseskär: Att leva på en fyrplats",
+      "url": "http://maseskarsfyr.se/om-fyrplatsen/att-leva-pa-en-fyr/",
+      "type": "secondary",
+      "read": true,
+      "note": "Read via WebFetch summary"
+    },
+    "A23": {
+      "title": "sv.wikipedia: Lyktgubbe",
+      "url": "https://sv.wikipedia.org/wiki/Lyktgubbe",
+      "type": "secondary",
+      "read": true,
+      "note": "Read via WebFetch summary; no sea or Bohuslän mention"
+    },
+    "A24": {
+      "title": "Blänket 2010:2 Simonsson: Blenda Johansson-Waldner (Väderöbod comparison)",
+      "url": "https://wiki.fyr.org/wiki-files/Blanket2011Extract/BlendaJohanssonWaldnerLararinna.pdf",
+      "type": "primary",
+      "read": true,
+      "note": "Other station: supplies 4 trips a month"
+    },
+    "A25": {
+      "title": "fyrwiki: Gäven",
+      "url": "https://wiki.fyr.org/index.php/G%C3%A4ven",
+      "type": "primary",
+      "read": true,
+      "note": "Partial: line on Erholmen staff changing tubes after 1920"
+    },
+    "A26": {
+      "title": "fyrwiki: Livet",
+      "url": "https://wiki.fyr.org/index.php/Livet",
+      "type": "primary",
+      "read": true,
+      "note": "Index of accounts only"
+    },
+    "A27": {
+      "title": "Search summaries only (Sveriges Radio 'Måseskär - fyren med nio liv', SVT arsenic, fyrwiki oral-history names)",
+      "url": "search results, no page opened",
+      "type": "secondary",
+      "read": "search-summary",
+      "note": "Weak; not used for facts"
+    },
+    "B01": {
+      "title": "Konservfabriken Fyrtornet på Gullholmen (Prisma Västra Götaland)",
+      "url": "https://www.prismavg.se/exhibits/show/konservfabriken-fyrtornet-p---/sid-a",
+      "type": "primary",
+      "read": true,
+      "note": "Regional museum-run exhibit (Västarvet partnership). Dates 1864/1898/1938-39 and 1950-52 rebuild/1962/1965 closure; women's jobs; internal inconsistencies noted by the page itself (1856 vs 1864)."
+    },
+    "B02": {
+      "title": "Hugo Hallgrens Konservfabrik, Ellös (Bohusläns museum record)",
+      "url": "https://digitaltmuseum.se/011014464538/hugo-hallgrens-konservfabrik-ellos",
+      "type": "primary",
+      "read": true,
+      "note": "Ellös cannery (outside window, Orust). Founded 1901, later Skandiakonserv/Foodia, closed 1989."
+    },
+    "B03": {
+      "title": "Slåtthagen på Skaftö, 1930 (Bohusläns museum, C.G. Bernhardson family)",
+      "url": "https://digitaltmuseum.se/011014497837/slatthagen-pa-skafto",
+      "type": "primary",
+      "read": true,
+      "note": "Biography of folk-life painter Carl Gustaf Bernhardson (1915-1998, born Grundsund): fisher-smallholder family, women's burden, winter storytelling."
+    },
+    "B04": {
+      "title": "Ensam fiskare [painting], C.G. Bernhardson (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044500255/ensam-fiskare-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Back-text: lone ice-fisherman 1947; biography."
+    },
+    "B05": {
+      "title": "Strandseddare på hemväg med makrellkarver [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044500091/strandseddare-pa-hemvag-med-makrellkarver-strandsittare-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Fishing-farmers of Skaftö, vadlag, 1920s scene; superstition about meeting a woman on the way to fishing."
+    },
+    "B06": {
+      "title": "Winterfiske [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044499654/winterfiske-vinterfiske-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Skaftö, 'Tidsbild 1945': frozen nets in the garnback."
+    },
+    "B07": {
+      "title": "Barnlek i månsken [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044499728/barnlek-i-mansken-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Skaftö children's play 'rutebåt' with salt tubs, 1920s scene."
+    },
+    "B08": {
+      "title": "Kvinnor vid en brunn [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044499919/kvinnor-vid-en-brunn-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Skaftö women carrying water with yoke, 1930s scene; dialect terms."
+    },
+    "B09": {
+      "title": "Vrag (Vrak) [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044499858/vrag-vrak-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Skaftö, rationing and blockade; salvaged fat in the sjöbod. Year not given (war inferred)."
+    },
+    "B10": {
+      "title": "Vinterbränne (Vinterbränsle) [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044499664/vinterbranne-vinterbransle-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Fuel shortage, coal from a sunken wreck over the ice; Morlanda parish, undated."
+    },
+    "B11": {
+      "title": "Varna! (Varsel) [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044499678/varna-varsel-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Skaftö, 1940s ice-crack omen."
+    },
+    "B12": {
+      "title": "Gastarna skria i kustnatt [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044500048/gastarna-skria-i-kustnatt-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Dead calm ('blegg') with ghost cries then storm; c.1900 scene."
+    },
+    "B13": {
+      "title": "Storbackefiske [painting] (Bohusläns museum)",
+      "url": "https://digitaltmuseum.se/011044499708/storbackefeske-storbackefiske-malning",
+      "type": "primary",
+      "read": true,
+      "note": "Long-line fishing (storbacka), Shetland; 1870s/1890s scene; small-boat crews often lost."
+    },
+    "B14": {
+      "title": "Vette (eider decoy) made on Islandsberg, Skaftö (Bohusläns museum UM031105)",
+      "url": "https://digitaltmuseum.org/011024287138",
+      "type": "primary",
+      "read": true,
+      "note": "Names real fisherman Erik Benjaminsson (1904-1963), drowned 1963 in ice."
+    },
+    "B15": {
+      "title": "Sandö LL 158 (Bohusläns museum UMFS000200)",
+      "url": "https://digitaltmuseum.se/011025429787/bat",
+      "type": "primary",
+      "read": true,
+      "note": "Built 1948 V & T Löfbergs Slip och Båtvarv, Rönnäng; carvel oak; Munktell engine. Another museum record seen only as a search snippet says built for Klädesholmen and bought by Grundsund fishermen from Käringön in 1972: conflict."
+    },
+    "B16": {
+      "title": "Trollpacka, boatbuilder Gösta Johansson, Kungsviken (Bohusläns museum UMFA54149:0082)",
+      "url": "https://digitaltmuseum.org/011014424928/trollpacka",
+      "type": "primary",
+      "read": true,
+      "note": "Angle tool for clinker plank bevels; photographed 1978."
+    },
+    "B17": {
+      "title": "Allmags varv, Allmag, Orust (Bohusläns museum UMFA54149:0092)",
+      "url": "https://digitaltmuseum.se/011014424945/motivbeskrivning-allmags-varv-allmag-orust-interior-fran-batbyggarverkstaden",
+      "type": "primary",
+      "read": true,
+      "note": "1980 fieldwork photo; names Olle Andersson. A viewer comment about templates is not museum text."
+    },
+    "B18": {
+      "title": "Segelsällskap - Konstruktörer - Båtbyggare - Varv (julleregister.se, Orust/Bohuslän boatbuilding history PDF)",
+      "url": "http://www.julleregister.se/manus_pdf/manus_langedragsjullar_33-57.pdf",
+      "type": "secondary",
+      "read": true,
+      "note": "Local-history manuscript on Långedrag-jolle builders (author not identified in the file). Orust/Dragsmark/Kungsviken, not Skaftö. Oral-history style: builders' children, post-war boom, steaming planks, riveting, launches, prices."
+    },
+    "B19": {
+      "title": "Gammal klenod till Kungsviken (Tidningen Västsverige)",
+      "url": "https://www.tidningenvastsverige.se/artikel/gammal-klenod-till-kungsviken/",
+      "type": "secondary",
+      "read": true,
+      "note": "About 12 yards in Kungsviken in the 1950s."
+    },
+    "B20": {
+      "title": "Kosterbåt (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Kosterb%C3%A5t",
+      "type": "secondary",
+      "read": true,
+      "note": "Type history, clinker, gaff, 10-12 m original fishing boats; named builders (not Skaftö)."
+    },
+    "B21": {
+      "title": "Klinkbyggd (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Klinkbyggd",
+      "type": "secondary",
+      "read": true,
+      "note": "Build order: stems/keel, planking from the sambord, frames after planking."
+    },
+    "B22": {
+      "title": "Kalfatring / drevning (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Kalfatring",
+      "type": "secondary",
+      "read": true,
+      "note": "Caulking: used on carvel hulls and decks; drevgarn, tjärbeck, drevjärn, träklubba, beckhöna."
+    },
+    "B23": {
+      "title": "Spant (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Spant",
+      "type": "secondary",
+      "read": true,
+      "note": "Oak/elm/ash frames, steam-bent frames fitted after planking in clinker boats."
+    },
+    "B24": {
+      "title": "Linoljefärg (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Linoljef%C3%A4rg",
+      "type": "secondary",
+      "read": true,
+      "note": "Linseed paint dries about two days; alkyd paints appeared 1930s and spread in the 1950s. No boat or tar content."
+    },
+    "B25": {
+      "title": "Skandiaverken (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Skandiaverken",
+      "type": "secondary",
+      "read": true,
+      "note": "Lysekil 1899 (Lars Laurin, Karl Forsström); fishermen wary of the noise; hot-bulb to 1966."
+    },
+    "B26": {
+      "title": "Folkskola (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Folkskola",
+      "type": "secondary",
+      "read": true,
+      "note": "Seven years compulsory in the 1930s; eight years in the 1950s; enhetsskola trials from 1949/50. No hours."
+    },
+    "B27": {
+      "title": "Grundsund (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Grundsund",
+      "type": "secondary",
+      "read": true,
+      "note": "Fishing, Bovik mackerel cannery, raincoat factory; Terje Fredh documentary books; Anders Olsson books."
+    },
+    "B28": {
+      "title": "Fiskebäckskil (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskil",
+      "type": "secondary",
+      "read": true,
+      "note": "Population 370 in 1950 (excl. Östersidan); municipalsamhälle to 31 Dec 1951; no yard info."
+    },
+    "B29": {
+      "title": "Skaftö.com Fakta page (Företagare på Skaftö)",
+      "url": "https://www.skafto.com/section.php?c=8",
+      "type": "tourism",
+      "read": true,
+      "note": "Fiskebäckskil church votive ships, Grundsund canal, Östersidan works; claims Lars Laurin was a Grundsund fisherman's son (single source). Names 'Lyckans Slip' only as a place."
+    },
+    "B30": {
+      "title": "Rågårdsvik (Destination Skaftö / vastsverige.com)",
+      "url": "https://www.vastsverige.com/lysekil/produkter/skafto-ragardsvik/",
+      "type": "tourism",
+      "read": true,
+      "note": "Rågårdsviks Pensionat opened 1926; 1920s sea-air pensions for children."
+    },
+    "B31": {
+      "title": "Intressanta platser: Grundsund (kulturbilder blog)",
+      "url": "https://kulturbilder.wordpress.com/2013/07/16/intressanta-platser-grundsund/",
+      "type": "tourism",
+      "read": true,
+      "note": "Blog; Grundsund c.1907 had post, telephone station and telegraph; population c.1,200 in 1920 (vastsverige says 1,350)."
+    },
+    "B32": {
+      "title": "Kosterbåtsregister: Kennedy (Sjörosen), 1949-50",
+      "url": "https://www.kosterbatregister.com/import-3-1/kennedy",
+      "type": "secondary",
+      "read": true,
+      "note": "Koster built 1949-50 by Holger Eliasson from Laurin design, hull at Färjenäs, finished in his garden. CAUTION: 'Fiskebäcks Båtvarv' is Gothenburg's Fiskebäck, NOT Fiskebäckskil."
+    },
+    "B33": {
+      "title": "Bobo Röysson, Grundsund (vastsverige.com)",
+      "url": "https://www.vastsverige.com/skafto/artiklar/bobo-roysson/",
+      "type": "tourism",
+      "read": true,
+      "note": "Modern fishing family in Grundsund; Grundsund Bohuslän's largest fishing village in 1920 with 1,350 inhabitants."
+    },
+    "B34": {
+      "title": "Lyckans Slip i ny regi (vastsverige.com, 2018)",
+      "url": "https://www.vastsverige.com/skafto/artiklar/lyckans-slip-i-ny-regi/",
+      "type": "tourism",
+      "read": true,
+      "note": "Current marina/varv in Fiskebäckskil. No history given."
+    },
+    "B35": {
+      "title": "Klinkbygd (lokalhistoriewiki.no, Norwegian)",
+      "url": "https://lokalhistoriewiki.no/wiki/Klinkbygd",
+      "type": "secondary",
+      "read": true,
+      "note": "Norwegian local-history wiki: shell first, inner framing after, clinch nails, copper nails."
+    },
+    "B36": {
+      "title": "Stormar i Sverige (SMHI)",
+      "url": "https://www.smhi.se/kunskapsbanken/meteorologi/stormar-i-sverige",
+      "type": "primary",
+      "read": true,
+      "note": "Table lists only the snow storm of 3 Jan 1954 between 1930 and 1960; nothing for 1950; absence is not proof of no local storm."
+    },
+    "B37": {
+      "title": "SMHI i årtal (storm warning stations on the west coast)",
+      "url": "https://www.smhi.se/kunskapsbanken/fran-datid-till-nutid/historisk-aterblick/smhi-i-artal",
+      "type": "primary",
+      "read": "search-summary",
+      "note": "Search snippet only (page fetch blocked): storm signal stations on the west coast, signalling ended in the early 1950s. Weak."
+    },
+    "B38": {
+      "title": "Vituddens Båtvarv listing / Biltema boat-care guide (search snippets)",
+      "url": "https://www.biltema.se/bat/batvard/batfarger/travard/",
+      "type": "tourism",
+      "read": "search-summary",
+      "note": "Modern. Only used to flag 'smell of tar and linseed oil' as modern, unsourced for 1950. Weak."
+    },
+    "B39": {
+      "title": "Båtbyggnad / damaged-part replacement, lex.dk (search snippet)",
+      "url": "https://lex.dk/b%C3%A5debygning",
+      "type": "secondary",
+      "read": "search-summary",
+      "note": "Danish encyclopedia snippet: damaged parts are cut out and replaced with new pieces fixed to sound neighbours. Weak."
+    }
+  },
+  "items": [
+    {
+      "id": "M01",
+      "topic": "maseskar",
+      "text": "Staff 1943-44: fyrmästare, fyrvaktare, fyrbiträde plus a summer relief; class I station; dwellings 3 rooms+kitchen (Fm) and 2 rooms+kitchen (Fv, Fb), no amenities.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A01",
+        "WORLD-1950 S02"
+      ],
+      "useFor": "Cast: three families; keeper's house interior",
+      "part": "lights"
+    },
+    {
+      "id": "M02",
+      "topic": "maseskar",
+      "text": "No source names any keeper serving in 1950. Named other years: Alfred Nilén (fyrmästare 1912-1925), Holm (1924), Anders Danielsson (1901-12), Gunnar Lundberg (1960s, clock-repair hobby). All real persons.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A01",
+        "A19",
+        "A22"
+      ],
+      "useFor": "Do not name the 1950 keeper; Lundberg-style clock hobby could be an invented-but-flagged trait",
+      "part": "lights"
+    },
+    {
+      "id": "M03",
+      "topic": "maseskar",
+      "text": "Supplies 1944: 4 trips a month April-September, 3 October-March, by the service motor boat to Käringön (post, shop, school, about 2 nm). Wartime Christmas 1941: motor boat only once a week; newspapers over a week old; battery radio reserved for weather report.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A01",
+        "A18"
+      ],
+      "useFor": "Keeper's gratitude when the player brings supplies; radio and weather",
+      "part": "lights"
+    },
+    {
+      "id": "M04",
+      "topic": "maseskar",
+      "text": "1950 electrification: cable laid, Lux paraffin lamp replaced by electric bulb (280,000 Hefner), engine house rebuilt, siren replaced by tyfon (2 blasts per 30 s). 1953 new keyer and boat crane; 1955/1957 clockwork replaced by electric motor.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A01"
+      ],
+      "useFor": "The year the keeper's routine changes; clockwork still winding in 1950 if 1955 is right",
+      "part": "lights"
+    },
+    {
+      "id": "M05",
+      "topic": "maseskar",
+      "text": "Light pattern three flashes per 30 s: fyrwiki says since 1887; a stencil note says changed to this in 1950. Conflict between two passages of the same page; 1941 memoir recalls a three-flash light.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A01",
+        "A18"
+      ],
+      "useFor": "Keep Bx(3) W 30 s for 1950",
+      "part": "lights"
+    },
+    {
+      "id": "M06",
+      "topic": "maseskar",
+      "text": "Routines: fill and trim the lamp, polish the lens, wind the lens weight (c.115 kg, 40 m line), keep fog signal ready, weather journal, maintain buildings and boats; vegetable plots in round stone-walled beds with imported soil.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A21",
+        "A22",
+        "A01"
+      ],
+      "useFor": "Keeper's dialogue and idle animations",
+      "part": "lights"
+    },
+    {
+      "id": "M07",
+      "topic": "maseskar",
+      "text": "Pilot school in an attic room (teacher also lived there): fyrwiki says 1881-1910; Bohusläns museum says closed 1917. In 1944 pupils went to the Käringön folkskola.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A01",
+        "A21"
+      ],
+      "useFor": "Children if any: they go to school on Käringön",
+      "part": "lights"
+    },
+    {
+      "id": "M08",
+      "topic": "maseskar",
+      "text": "Keeper Anders Danielsson (1901-12, real) drowned June 1912 when his boat capsized off Käringön coming home from fishing; his 13-year-old son was rescued.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A19"
+      ],
+      "useFor": "Sea danger; keeper's superstition about the water",
+      "part": "lights"
+    },
+    {
+      "id": "M09",
+      "topic": "maseskar",
+      "text": "1927: order to move the last mist cannon to Vinga was stalled by staff's white lie about its weight; the cannon still stands.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A01"
+      ],
+      "useFor": "Humour: keeper jokes about the cannon",
+      "part": "lights"
+    },
+    {
+      "id": "M10",
+      "topic": "maseskar",
+      "text": "Storm petrels (Käringön names 'sjöpink', 'stormtrollet') were believed to foretell storm and carry dead sailors' souls; they are drawn to lighthouse lights at night; more were ringed on Måseskär than anywhere else on the west coast.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A20"
+      ],
+      "useFor": "Grounds keeper line about strange lights at night",
+      "part": "lights"
+    },
+    {
+      "id": "M11",
+      "topic": "maseskar",
+      "text": "Lyktgubbe (will-o'-the-wisp) lore: lights thought to be souls of the dead; a lantern figure who leads a lost traveller home for a coin. Land-based; no sea or Bohuslän mention in the source read.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A23"
+      ],
+      "useFor": "Grounds one keeper line; label as general Swedish folklore",
+      "part": "lights"
+    },
+    {
+      "id": "M12",
+      "topic": "maseskar",
+      "text": "INVENTED-DIALOGUE: 'The Käringön folk call the little black birds that circle my lamp in a blow stormtrollet. They say every one carries a drowned man's soul. Tonight there were more of them than I like. And there's a glow out east I can't put a name to.'",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "A20"
+      ],
+      "useFor": "Keeper line 1 about strange lights",
+      "part": "lights"
+    },
+    {
+      "id": "M13",
+      "topic": "maseskar",
+      "text": "INVENTED-DIALOGUE: 'My mother would say lyktgubbe, the lantern-man who leads you astray for a coin. But a lyktgubbe doesn't keep time. This one flashes twice and waits, like a proper light.'",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "A23"
+      ],
+      "useFor": "Keeper line 2",
+      "part": "lights"
+    },
+    {
+      "id": "M14",
+      "topic": "maseskar",
+      "text": "INVENTED-DIALOGUE: 'Three flashes in thirty seconds is Måseskär and nobody else may say it. A light that flashes a pattern that isn't in the Lots book is worse than no light at all.' (maxim from A17: no aid is better than a false aid)",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "A01",
+        "A17"
+      ],
+      "useFor": "Keeper line 3",
+      "part": "lights"
+    },
+    {
+      "id": "M15",
+      "topic": "maseskar",
+      "text": "No documented Bohuslän ghost-ship or phantom-light tale and no Måseskär shipwreck rescue was found despite several searches.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A27"
+      ],
+      "useFor": "Do not present any ghost story as local history",
+      "part": "lights"
+    },
+    {
+      "id": "G01",
+      "topic": "aga",
+      "text": "Service of Västra Lotsdistriktet's unmanned acetylene lights came from the Erholmen gas station (1918-1965): 4 staff, work boat 'Erholmsjakten', tubes rowed ashore in a towed eka, carried on stretchers if the sea was rough; 1-12 tubes per light; 18 lights at the start, just over 150 by the early 1950s. Gäven: Erholmen staff changed tubes after 1920.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A08",
+        "A09",
+        "A25"
+      ],
+      "useFor": "Who delivers the gas; service boat",
+      "part": "lights"
+    },
+    {
+      "id": "G02",
+      "topic": "aga",
+      "text": "Tube weight/size: about 120 kg including 9 kg gas (Hermansson); about 100 kg, two batteries of six (V. Andersson); AK-25 61 kg and AK-50 118 kg were the usual lighthouse sizes (fyrwiki).",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A09",
+        "A10",
+        "A14"
+      ],
+      "useFor": "Heavy carry mechanic; use 'very heavy, two people'",
+      "part": "lights"
+    },
+    {
+      "id": "G03",
+      "topic": "aga",
+      "text": "Visit interval: 1-2 times a year (fyrwiki AGA-ljus) vs tubes changed every 2nd-3rd year with checks in between (A. Andersson, N. Bohuslän). Visit duration not found.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A11",
+        "A10"
+      ],
+      "useFor": "Time pressure: none documented",
+      "part": "lights"
+    },
+    {
+      "id": "G04",
+      "topic": "aga",
+      "text": "Sun valve (1907): equal metal rods, one dull black; light heats the black rod more, it lengthens a little and a lever closes the gas valve by day; when light fades the spring valve opens and the light starts; magnetised seat for a clear snap; saves up to 93 % of the gas with the flasher.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A12",
+        "A16"
+      ],
+      "useFor": "Dusk trigger for the relight moment",
+      "part": "lights"
+    },
+    {
+      "id": "G05",
+      "topic": "aga",
+      "text": "Flasher valve (klippventil, 1905): gas-pressure-driven leather diaphragm and lever armature; character changed by filler pieces or ratchet wheel; pilot flame (evighetslåga) burns permanently; pilot checked in daylight by a match held over it; must not burn yellow.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A13",
+        "A17"
+      ],
+      "useFor": "Mini-game: check the pilot",
+      "part": "lights"
+    },
+    {
+      "id": "G06",
+      "topic": "aga",
+      "text": "Two-jet burner: gas jets collide, mix with air, burn as a clear fish-tail flame without soot.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A13",
+        "A11"
+      ],
+      "useFor": "Flame visual",
+      "part": "lights"
+    },
+    {
+      "id": "G07",
+      "topic": "aga",
+      "text": "Relighting: if a light went out the supervisor went out and lit it again; causes named: pilot flame out, or all mantles in the automatic changer used up (mantle lights).",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A10"
+      ],
+      "useFor": "Why the player is needed",
+      "part": "lights"
+    },
+    {
+      "id": "G08",
+      "topic": "aga",
+      "text": "Procedure (US manual 1955, same apparatus): close line shut-off and cylinder valves, unscrew fittings, fit blind plugs; hoist with a special cap or sling; connect with new aluminium washer, hand-start the nut then wrench; open valve gently, gauge and leak test; ventilate the lantern before relighting; log serial numbers; leave caps neatly at the cylinder base. A light 'pop' is heard each time the flasher functions.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A17"
+      ],
+      "useFor": "Step list for the relight sequence; sound cue 'pop'",
+      "part": "lights"
+    },
+    {
+      "id": "G09",
+      "topic": "aga",
+      "text": "Acetylene is nearly odourless with a faint garlic-like smell; hissing, ticking and clicking are not documented in any source read.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A15"
+      ],
+      "useFor": "Do not claim a hiss or tick as documented",
+      "part": "lights"
+    },
+    {
+      "id": "G10",
+      "topic": "aga",
+      "text": "Hazards: spontaneous explosion possible from 3 bar, explosive range 2-82 % in air; two bad explosions at Erholmen in the early 1920s; slippery skerries and swell; no life jackets issued; hazardous landings at Väcker and Ramskär.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A15",
+        "A09",
+        "A10"
+      ],
+      "useFor": "Danger cues without gore",
+      "part": "lights"
+    },
+    {
+      "id": "G11",
+      "topic": "aga",
+      "text": "Dalén (1869-1937): flasher 1905, AGA-massa 1906, sun valve 1907; Nobel Prize in Physics 1912; serious explosion accident cost him his sight, dated 1912 by fyrwiki (the brief said 1913). German patent office convinced by a dark-curtain demonstration.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A16"
+      ],
+      "useFor": "Short Dalén plaque or Britta's story",
+      "part": "lights"
+    },
+    {
+      "id": "G12",
+      "topic": "aga",
+      "text": "INVENTED simplified relight verbs: carry cylinder, close and unscrew old, connect new with washer, open valve, check the blue pilot, wait for dusk and the 'pop' of the first flash. Cover/uncover the sun-valve rod to test it is an invention.",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "A17",
+        "A12",
+        "A13"
+      ],
+      "useFor": "Core relight interaction",
+      "part": "lights"
+    },
+    {
+      "id": "K01",
+      "topic": "kraksundsgap",
+      "text": "A working unmanned AGA light existed at Kråksundsgap Södra long before 1954: octagonal iron fyrkur with AGA light built 1911 on Bråtö (Södra), lantern exchanged for another in 1941 (iron lantern in service since 1 Nov 1941). So in 1950 a light WAS burning there. The design premise (nothing stands there) is wrong.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A05",
+        "A06",
+        "A03",
+        "A02"
+      ],
+      "useFor": "Re-think the 'light from the future' beat",
+      "part": "lights"
+    },
+    {
+      "id": "K02",
+      "topic": "kraksundsgap",
+      "text": "1954: a 13 m concrete tower with octagonal lantern was built near the water and replaced the former lantern; the light got its present sector division in 1954.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A02",
+        "A05",
+        "A03"
+      ],
+      "useFor": "What actually changes between 1950 and later",
+      "part": "lights"
+    },
+    {
+      "id": "K03",
+      "topic": "kraksundsgap",
+      "text": "Position: fyrwiki 58 06.1 N, 11 26.5 E (58.1017, 11.4417); ibiblio: NW point of Bråtö, 1.6 km S of Hälleviksstrand, boat access only. Felix's pin 58.1006, 11.4405 is about 140 m away (derived).",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A03",
+        "A07"
+      ],
+      "useFor": "Place the tower",
+      "part": "lights"
+    },
+    {
+      "id": "K04",
+      "topic": "kraksundsgap",
+      "text": "Today: 13 m round white concrete tower (fyrwiki: black conical base; ibiblio: entirely white) with lantern and gallery; Fl(2) WRG 6 s 8.0 M, focal height 13.0 m; solar powered; 1968 data Bx(2) WRG 6 s 8 M, W 480 cd, R 120, G 60; lantern replaced c.2010 with a plastic one, old iron lantern now stands in a roundabout at Lysekil.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A02",
+        "A03",
+        "A07",
+        "A06"
+      ],
+      "useFor": "Exact look for the 'future' tower",
+      "part": "lights"
+    },
+    {
+      "id": "K05",
+      "topic": "kraksundsgap",
+      "text": "1950 characteristic not found. Candidates: 1911 'K WRG 4 s 11 M' (focal 16.5 m; sectors green 33-43, white 43-46, red 46-50) and a 1941 entry Bx(2) WRG 7 s 8 M, focal 6 m. Best guess for 1950 is two flashes per 7 s, uncertain.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A02",
+        "A03"
+      ],
+      "useFor": "Make the 1950 pattern distinct from the future light only if the data is accepted",
+      "part": "lights"
+    },
+    {
+      "id": "K06",
+      "topic": "kraksundsgap",
+      "text": "Alternatives for a documented 'nothing there yet' light inside the window: Släggabåden (established 1961) and Brandskärsflak / Dynabrott sea towers (1974).",
+      "confidence": "derived",
+      "uncertain": true,
+      "sources": [
+        "WORLD-1950 S15",
+        "A07"
+      ],
+      "useFor": "Fallback for the strange light beat",
+      "part": "lights"
+    },
+    {
+      "id": "K07",
+      "topic": "kraksundsgap",
+      "text": "Kråksundsgap Norra: fyrwiki main page says 1956; its own page and Blänket say 1941. Probably burned in 1950 as a small unmanned AGA light on a white hut (Sx W 4 M, 4.5 m).",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A02",
+        "A04",
+        "A05"
+      ],
+      "useFor": "Small light close to Södra on the north side",
+      "part": "lights"
+    },
+    {
+      "id": "P01",
+      "topic": "boatbuilding",
+      "text": "No boatyard (varv/båtbyggeri) on Skaftö, in Fiskebäckskil or in Grundsund that was active in 1950 could be named from any source read. The only yard name found in Fiskebäckskil is Lyckans Slip, a present-day marina and varv with no founding date or history in the page. Result: null for named Skaftö yards.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B34",
+        "B29",
+        "B28"
+      ],
+      "useFor": "Do not name a real Skaftö yard. Keep granddad's family yard fictional and unnamed, or call it 'the yard' (INVENTED).",
+      "part": "people"
+    },
+    {
+      "id": "P02",
+      "topic": "boatbuilding",
+      "text": "Skaftö's trade in 1950 was fishing, freight and (Fiskebäckskil) summer guests; no source read describes boatbuilding there. Bigger fishing boats registered at Grundsund were built elsewhere: the wooden Sandö (LL 158) came from V & T Löfbergs yard in Rönnäng, Tjörn, launched 1948, 24.6 m carvel oak, oiled Norrland-pine deck, 225 hp June Munktell. Real firm and real boat, sourced from a Bohusläns museum record. Conflict: another museum record (search snippet only) says Sandö was built for Klädesholmen and was bought by Grundsund fishermen from Käringön in 1972.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B15",
+        "WORLD-1950 S48"
+      ],
+      "useFor": "A boatbuilder's son on Skaftö is plausible but the big boats came from Orust/Tjörn yards; keeps the family yard small (repairs, snipor).",
+      "part": "people"
+    },
+    {
+      "id": "P03",
+      "topic": "boatbuilding",
+      "text": "Orust's Kungsviken was the boatbuilding centre of northern Orust: about 12 yards at once in the 1950s, building jullar, snipor, 'Andungar' and Folkbåtar. A local-history manuscript describes yards in barns where men were farmers in summer and boatbuilders in winter, with a wife and seven children at home.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B19",
+        "B18"
+      ],
+      "useFor": "The nearest sourced model of a family yard; use as the pattern for granddad's family (INVENTED mapping onto Skaftö).",
+      "part": "people"
+    },
+    {
+      "id": "P04",
+      "topic": "boatbuilding",
+      "text": "Yard children: as soon as the children came home from school they went down to the yard; a builder's child could be used as 'mothåll' (counter-hold) when riveting, which the children found boring and ran from. The tool that held the rivet from inside was an iron cone called 'skam'. Orust/Dragsmark family, source says children had great freedom (1960s example).",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B18"
+      ],
+      "useFor": "Granddad's childhood: after school to the yard, held the dolly for riveting; the 'skam' is a lovely word.",
+      "part": "people"
+    },
+    {
+      "id": "P05",
+      "topic": "boatbuilding",
+      "text": "Builder work pace after the war: huge demand for boats because motor boats had lain ashore through the war and suffered; brothers at one Dragsmark yard sometimes worked 16 hours a day, stopping at midnight and up again at 7. A yard building J10 jollar sold them at 1,225 kronor each including sails (war years). Ironwork froze to the hand on cold outdoor jobs at Donsö in the 1940s.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B18"
+      ],
+      "useFor": "Winter/evening work, the hammer that freezes to your hand, frugal builders.",
+      "part": "people"
+    },
+    {
+      "id": "P06",
+      "topic": "boatbuilding",
+      "text": "Plank work at a Kungsviken yard (photo captions): planks are marked out with moulds ('mallas') and sawn, 'basas' (steamed) in a steam box ('bastrumma') and handled hot and wet with gloves, clamped, and a wooden wedge ('trätving') driven in. A 'bordfyllare' travelled between yards helping fit planks, with the axe 'Hjärtumyxan' in the crook of the arm, and used the axe, never a saw. Holger Johansson, who started at 13, could build two ekor a week or a motor jolle in a month.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B18"
+      ],
+      "useFor": "Sounds and sights of planking; apprenticeship starting at 13.",
+      "part": "people"
+    },
+    {
+      "id": "P07",
+      "topic": "boatbuilding",
+      "text": "Clinker build order (Swedish and Norwegian sources): keel and stems first, planking from the plank next to the keel (sambord) upward with overlapping lands, and the frames (spant) fitted after the planking. Steam-bent oak or ash frames are fitted after planking in clinker boats; older clinker boats were built without moulds, or with only a midship frame; in carvel boats the frames are set first. Plank-to-frame fastening: treenails combined with nails or screws; modern boats copper nails and roves riveted over.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B21",
+        "B23",
+        "B35"
+      ],
+      "useFor": "Basis for the repair steps and the boat lab (frame ribs show through inside).",
+      "part": "people"
+    },
+    {
+      "id": "P08",
+      "topic": "boatbuilding",
+      "text": "Koster boat: original fishing boats 10-12 m, clinker, gaff rig with bowsprit, broad and round above the waterline, sharp deep underbody, flared sides. Decked drift-net boats in middle and north Bohuslän in the 1800s. Fishermen who adopted hot-bulb engines around 1900 ordered new kosters with wider sterns for the engines and sold the old sailing kosters, which could not carry heavy motors; city workers rebuilt old kosters with decks and deckhouse. Svalan at ~8 m with a gaff rig is a small koster/yacht-size boat, not the 10-12 m fishing original.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B20",
+        "B18",
+        "WORLD-1950 S50"
+      ],
+      "useFor": "Svalan as a rebuilt old sailing koster is historically plausible; flag size difference.",
+      "part": "people"
+    },
+    {
+      "id": "P09",
+      "topic": "boatbuilding",
+      "text": "Koster builders named by Wikipedia (real historical people, sourced there): Tomas i Kile, Hans Henriksson, Karl Hansson, Sander Andersson (Tjärnö), Anders Persson (Brevik, Koster), Carl Stjern (Galtö), Johan Harald Seldén (Buvenäs, Orust, about 50 modern kosters c.1880-1916), Carl Andersson (Nötesund). None is tied to Skaftö.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B20"
+      ],
+      "useFor": "Background only; do not attach to granddad.",
+      "part": "people"
+    },
+    {
+      "id": "P10",
+      "topic": "boatbuilding",
+      "text": "A koster of the 1949-50 era in the register: Kennedy, 7.20 x 2.52 m, 25 m2 sail, clinker, designed by A. Laurin and built by Holger Eliasson, hull started at Färjenäs and finished in his garden (deckhouse and interior), from the same moulds as earlier 'lottbåtar'. 'Fiskebäcks Båtvarv' in this register is in Gothenburg (Fiskebäck), not Fiskebäckskil; do not confuse.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B32"
+      ],
+      "useFor": "Shows a small koster being built privately in a garden around 1950; Svalan's size is close.",
+      "part": "people"
+    },
+    {
+      "id": "P11",
+      "topic": "boatbuilding",
+      "text": "Engines: Skandia hot-bulb engines were made in Lysekil (company founded 1899 by Lars Laurin and Karl Forsström, renamed Skandiaverken 1920; hot-bulb built until 1966, diesel from 1933). Fishermen were at first wary of the noise; Laurin got the Smögen crew 'Korpen' to test an engine free in 1903. Skaftö.com claims Lars Laurin was a Grundsund fisherman's son (single tourism source). A Bolinder service branch existed at Bastholmen (now Bassholmen) per the yard manuscript, and Bolinder engines are named for Hållö's launches in 1944.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B25",
+        "B29",
+        "B18",
+        "WORLD-1950 S53",
+        "WORLD-1950 S03"
+      ],
+      "useFor": "The Skandia works is 10 km away in Lysekil: granddad's engine can be Skandia (INVENTED choice); sound 'dunk-dunk'.",
+      "part": "people"
+    },
+    {
+      "id": "P12",
+      "topic": "boatbuilding",
+      "text": "Materials: oak for frames and planking on large carvel boats, oiled Norrland pine for decks (Sandö); oak/elm/ash for frames generally. Larch for planking: not found in any source read. Pine planking on small clinker boats: not found.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B15",
+        "B23"
+      ],
+      "useFor": "Do not claim larch/pine for Svalan's planking from these sources.",
+      "part": "people"
+    },
+    {
+      "id": "P13",
+      "topic": "boatbuilding",
+      "text": "Paint: Sandö had white linseed-oil paint above the waterline, a red stripe, red copper bottom and black registration (one boat, 1948). Linseed oil paint dries about two days; alkyd paint appeared in the 1930s and spread widely in the 1950s, so in 1950 linseed paint was still normal for boats. Honey-coloured clinker planking: no source; oiled/varnished wood is a design choice.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B15",
+        "B24",
+        "WORLD-1950 S48"
+      ],
+      "useFor": "Svalan's honey planking should be explained as oiled/varnished (INVENTED) not as period paint.",
+      "part": "people"
+    },
+    {
+      "id": "P14",
+      "topic": "repair",
+      "text": "Caulking ('driva'/drevning) is documented for carvel hulls and decks: old caulking removed, drev yarn (tarred linen/hemp) driven seam by seam with irons and wooden mallet, then pitch poured from a 'beckhöna'. A clinker koster like Svalan normally is NOT caulked between lands this way, so 'driva' applies to her deck, a carvel patch or the keel/stem joints at most. Surprise for the design notes' step list.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B22",
+        "B21"
+      ],
+      "useFor": "Do not put 'caulk the planking' on Svalan's job list; use 'rivets and fresh tar/linseed on the lands' instead (INVENTED).",
+      "part": "people"
+    },
+    {
+      "id": "P15",
+      "topic": "repair",
+      "text": "Replacing a damaged part: damaged planks or frames are cut out and replaced by new pieces fastened to the sound neighbours (Danish encyclopedia snippet, weak). A haul-out repair list (plank replacement, fasteners, caulking, frame repair) comes from a boat-festival listing, modern and snippet-only.",
+      "confidence": "inferred",
+      "uncertain": true,
+      "sources": [
+        "B39",
+        "B38"
+      ],
+      "useFor": "General shape of the job; not Bohuslän-specific.",
+      "part": "people"
+    },
+    {
+      "id": "P16",
+      "topic": "repair",
+      "text": "No document read states the timescale or cost of repairing a storm-damaged koster in 1950. For scale: one Orust builder could make a motor jolle in a month and two ekor in a week; new J10 jollar sold at 1,225 kr including sails (war years).",
+      "confidence": "derived",
+      "uncertain": true,
+      "sources": [
+        "B18"
+      ],
+      "useFor": "Timescale in game: a few weeks of story time (INVENTED), tied to the five lights.",
+      "part": "people"
+    },
+    {
+      "id": "P17",
+      "topic": "repair",
+      "text": "Smell and sound of a yard: sourced sound details are the steam box, hot wet planks, the clinking of riveting with an iron 'skam' as counter-hold, axes (not saws) for plank fitting, drev yarn being beaten in with irons, and the hot-bulb 'dunk-dunk' of engines. 'Smell of tar and linseed oil' appears only on a modern marina listing (weak); the smell is a safe designer's inference.",
+      "confidence": "inferred",
+      "uncertain": true,
+      "sources": [
+        "B18",
+        "B22",
+        "B38",
+        "WORLD-1950 S52"
+      ],
+      "useFor": "Audio palette for the yard scene.",
+      "part": "people"
+    },
+    {
+      "id": "P18",
+      "topic": "boatbuilding",
+      "text": "Tools documented: trollpacka (angle board with pendulum to check the bevel of each plank land in clinker building, photographed 1978 at Gösta Johansson's yard, Kungsviken), båtvater, skorer and klemmer (shores and clamps), drevjärn, träklubba, drevkrok, beckhöna, adze for fitting frames, mallar (moulds), steam box. A viewer comment, not museum text, mentions wooden fixtures in a workshop ceiling for holding templates.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B16",
+        "B35",
+        "B22",
+        "B23",
+        "B18"
+      ],
+      "useFor": "Props for the yard: trollpacka as a find-it object.",
+      "part": "people"
+    },
+    {
+      "id": "P19",
+      "topic": "boatbuilding",
+      "text": "Launching without a slip: small boats were launched by horse on an unshod sledge; larger ones on a cradle rolled down on logs (Dragsmark/Kungsviken manuscript). Moulds and spant stood in the workshop.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B18"
+      ],
+      "useFor": "Launch scene with a cradle on logs; Svalan relaunched.",
+      "part": "people"
+    },
+    {
+      "id": "R01",
+      "topic": "repair",
+      "text": "Survey: look over the wrecked koster where she lay, tap and probe planks, sistering frames and the keel/stem; decide what is salvageable. Documented basis: only the general cut-out-and-replace principle.",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "B39",
+        "B21"
+      ],
+      "useFor": "Step 1 (INVENTED simplification).",
+      "part": "people"
+    },
+    {
+      "id": "R02",
+      "topic": "repair",
+      "text": "Haul out ('ta upp'): move the boat ashore on a cradle and rollers/logs, chocked upright. Documented basis: launching/cradle on logs at Orust yards (reverse for hauling).",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "B18"
+      ],
+      "useFor": "Step 2 (INVENTED simplification from documented launching).",
+      "part": "people"
+    },
+    {
+      "id": "R03",
+      "topic": "repair",
+      "text": "Strip back to sound wood; saw out broken planks and cracked frames. Replace broken planks with new planks, steamed and clamped (steam box, hot wet planks, gloves, clamps, wooden wedges), lands fitted and checked with the trollpacka, rivets set with a counter-hold. Documented: steaming, clamps, trollpacka, riveting with dolly.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B18",
+        "B16",
+        "B23",
+        "B21"
+      ],
+      "useFor": "Step 3 (documented techniques, invented sequence for this boat).",
+      "part": "people"
+    },
+    {
+      "id": "R04",
+      "topic": "repair",
+      "text": "Replace broken frames (spant): steamed or sawn oak/ash ribs fitted after the planking is in place in a clinker boat. Documented.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B23",
+        "B21"
+      ],
+      "useFor": "Step 4.",
+      "part": "people"
+    },
+    {
+      "id": "R05",
+      "topic": "repair",
+      "text": "Deck and any carvel parts: caulking ('driva') with tarred yarn and pitch applies here, not to the clinker lands. Documented technique, invented application.",
+      "confidence": "derived",
+      "uncertain": true,
+      "sources": [
+        "B22"
+      ],
+      "useFor": "Step 5.",
+      "part": "people"
+    },
+    {
+      "id": "R06",
+      "topic": "repair",
+      "text": "Finish: linseed-oil paint above the waterline (dries about two days per coat), tar/bottom paint below, oiled/varnished honey planking (design choice).",
+      "confidence": "derived",
+      "uncertain": true,
+      "sources": [
+        "B24",
+        "B15"
+      ],
+      "useFor": "Step 6, the 'freshly painted' reward.",
+      "part": "people"
+    },
+    {
+      "id": "R07",
+      "topic": "repair",
+      "text": "Mast, gaff, bowsprit and rigging: no source read gives the 1950 rigging work for a koster beyond type facts (gaff rig, bowsprit). Details are INVENTED.",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "B20"
+      ],
+      "useFor": "Step 7: re-step the mast, set up the rigging, bend on sails.",
+      "part": "people"
+    },
+    {
+      "id": "R08",
+      "topic": "repair",
+      "text": "Relaunch: roll the cradle down on logs or with a horse-drawn slide; first fire of the engine if she has one; Svalan relaunch is the chapter 1 reward. Documented only for the launching method.",
+      "confidence": "derived",
+      "uncertain": true,
+      "sources": [
+        "B18"
+      ],
+      "useFor": "Step 8.",
+      "part": "people"
+    },
+    {
+      "id": "Q01",
+      "topic": "britta",
+      "text": "Folkskola: compulsory schooling was seven years in the 1930s and was extended to eight years in the 1950s; enhetsskola trials started 1949/50 in some municipalities. A girl born 1936 who started at 7 in 1943 would finish the seven-year folkskola about spring 1950, i.e. age 13-14 (our arithmetic). School hours, the schoolhouse and teachers on Skaftö: not found.",
+      "confidence": "derived",
+      "uncertain": true,
+      "sources": [
+        "B26"
+      ],
+      "useFor": "Britta has just left school or is in her last term: free to wander, expected to help and soon earn.",
+      "part": "people"
+    },
+    {
+      "id": "Q02",
+      "topic": "britta",
+      "text": "Cannery work for girls: at the Gullholmen cannery girls began after confirmation as 'småtöser' doing helper work (e.g. putting bay leaf and onion on), after some years on piece rate as 'styckare', a higher position; women gutted anchovy and cut herring and filled and sealed tins ('inläggerskor'); men moved goods and made tin cans. Told from an author's memory ('Min barndom på Gullholmen'), age of confirmation not stated.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B01"
+      ],
+      "useFor": "Britta's future job and her friends' jobs; she is at the threshold.",
+      "part": "people"
+    },
+    {
+      "id": "Q03",
+      "topic": "britta",
+      "text": "The Gullholmen cannery (J.J. Hallgren, later AB Fyrtornet, SFK) was rebuilt in 1938-39 and again 1950-52, renamed AB Fyrtornet in the 1950s, merged into Abba-Fyrtornet in 1962, and closed 1965. So it was operating in 1950 (the Länsstyrelsen note in WORLD-1950 that it closed after WWI is wrong or about another stage). The cannery at Hälleviksstrand ran 1934-1976 (WORLD-1950 S39). Grundsund had a Bovik mackerel-in-tomato cannery (undated).",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B01",
+        "B27",
+        "WORLD-1950 S39",
+        "WORLD-1950 S41"
+      ],
+      "useFor": "Fixes a WORLD-1950 conflict.",
+      "part": "people"
+    },
+    {
+      "id": "Q04",
+      "topic": "britta",
+      "text": "Household reality from Bernhardson's texts (born Grundsund 1915, so earlier decades): families lived from both sea and small farming; women raised large families with shortages of fuel and water, did heavy farm and fishing work, and carried the shared worry and waiting while men were away; poor widows were helped by authorities but more often by other women. Mother ill when he was three, grandparents raised him. Winter evenings: stories of hardship, shipwrecks and the supernatural.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B03",
+        "B04"
+      ],
+      "useFor": "Britta's mother/neighbours; the evening story-telling is a scene.",
+      "part": "people"
+    },
+    {
+      "id": "Q05",
+      "topic": "britta",
+      "text": "Water: women met at the well in winter and carried water with a yoke ('ok') and buckets with 'skvalpeträ' (crossed wood to stop splashing); the text says Skaftö had six or seven different well-carrying traditions. A 1930s scene. Thick shawls 'reveschalar' worn crosswise.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B08"
+      ],
+      "useFor": "Chore: carrying water; dialect word.",
+      "part": "people"
+    },
+    {
+      "id": "Q06",
+      "topic": "britta",
+      "text": "Children's play: 'rutebåt' with a big salt tub rolled into the sea and used as a ferry between piers, forbidden, mothers in despair; 'saltkar', 'gorma' (grumble). A 1920s scene.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B07"
+      ],
+      "useFor": "Games: the salt-tub ferry as a mini-game (INVENTED use).",
+      "part": "people"
+    },
+    {
+      "id": "Q07",
+      "topic": "britta",
+      "text": "Superstition: meeting a woman on the way to fishing was considered very unlucky (not when coming home with full baskets). A 1920s fishing-farmer scene. Omens: a man crossing the ice senses a presence and sees an open crack, 1940s Skaftö; ghosts' voices over a dead calm ('blegg') followed by a storm ('ovôrna'): crew told to double the mooring lines.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B05",
+        "B11",
+        "B12"
+      ],
+      "useFor": "Lore Britta can quote; her own relation to the 'woman unlucky' rule is a character beat (INVENTED).",
+      "part": "people"
+    },
+    {
+      "id": "Q08",
+      "topic": "britta",
+      "text": "Hardship during the war: under rationing and blockade everything was used, and a wreck's fat (300 kg 'fint fett') was hoisted into a boathouse and sold at a good price; coal hauled over the ice from a wreck in a fuel shortage (Morlanda). Years not stated; war inferred.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B09",
+        "B10"
+      ],
+      "useFor": "Britta's childhood memory of wartime scarcity.",
+      "part": "people"
+    },
+    {
+      "id": "Q09",
+      "topic": "britta",
+      "text": "Winters: nets froze stiff in the net box and men with clumsy cold hands tried to untangle them ('Tidsbild 1945'); a lone ice fisherman heading home at 20:00 in moonlight, 1947. Real fisherman Erik Benjaminsson (1904-1963) of Islandsberg, bachelor, fisherman and stone labourer, made eider decoys and drowned in 1963 when his boat was trapped in ice (real person, sourced from Bohusläns museum).",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B06",
+        "B04",
+        "B14"
+      ],
+      "useFor": "Cold, hard winters; Islandsberg neighbour (use only if a fictional neighbour is clearly fictional).",
+      "part": "people"
+    },
+    {
+      "id": "Q10",
+      "topic": "britta",
+      "text": "Summer guests: Fiskebäckskil was a bath resort from the late 1800s and mainly a summer resort during the 1900s; in the 1920s sea-air pensions opened for children; Rågårdsviks Pensionat opened 1926 and is still family-run (sourced from tourism text). Locals rented rooms (WORLD-1950 S54).",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B30",
+        "B28",
+        "WORLD-1950 S54"
+      ],
+      "useFor": "Britta's family could rent a room to summer guests (INVENTED).",
+      "part": "people"
+    },
+    {
+      "id": "Q11",
+      "topic": "britta",
+      "text": "Telephone: Grundsund had a post and telephone station and a telegraph office around 1907 (blog). Electricity reaching Skaftö households, private telephones and radio in the 1940s: not found. Måseskär was electrified in 1950 (WORLD-1950).",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B31"
+      ],
+      "useFor": "Do not state a date for Britta's house getting electricity.",
+      "part": "people"
+    },
+    {
+      "id": "Q12",
+      "topic": "britta",
+      "text": "Church: Fiskebäckskil church dates from 1772 and holds two votive ships (1700s and 1860s); Grundsund church opened 1799 with tower 1818 (rebuilt as a cross church 1893 per the blog), and before that people rowed to Morlanda church on Orust; a memorial stone for drowned seamen stands at the Grundsund church.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B29",
+        "B31"
+      ],
+      "useFor": "Sunday scene; the votive ship is a prop.",
+      "part": "people"
+    },
+    {
+      "id": "Q13",
+      "topic": "britta",
+      "text": "Population: Grundsund was Bohuslän's largest fishing village in 1920 (1,350 per vastsverige; about 1,200 per the blog); 983 in 1950 (WORLD-1950); Fiskebäckskil 370 (535 with Östersidan).",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B33",
+        "B31",
+        "B28",
+        "WORLD-1950 S33"
+      ],
+      "useFor": "Scale of Britta's world.",
+      "part": "people"
+    },
+    {
+      "id": "Q14",
+      "topic": "britta",
+      "text": "Not found for 1950: how people travelled to Lysekil (ferry), the ferry's name, a documented 1950s storm with lost boats, whether girls fished, whether fishermen could swim, knot and wind names, a named school or teacher on Skaftö, food and clothing specifics, radio. SMHI's storm table lists only the 3 Jan 1954 snowstorm in 1930-60 and nothing for 1950.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B36",
+        "B37"
+      ],
+      "useFor": "Honest gaps: use INVENTED labels in the game text where needed.",
+      "part": "people"
+    },
+    {
+      "id": "Q15",
+      "topic": "britta",
+      "text": "Dialect and word list (all from Bohusläns museum glossaries): vrag (wreck goods), smult (rendered fat), ulka (haul up with a mussel rake), ok (yoke), skvalpeträ, reveschalar, rutebåt, saltkar, gorma, blegg (dead calm), ovôrna (storm), gastar (ghosts), storbacka (long-line), skebbåden (the small boat), ta in slacken (haul in the slack), vadlag (seine crew), garnback (net box), sätter (a sea that heaves sharply). Pronunciation not given.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B07",
+        "B08",
+        "B09",
+        "B10",
+        "B12",
+        "B13",
+        "B05"
+      ],
+      "useFor": "Britta's speech colour.",
+      "part": "people"
+    },
+    {
+      "id": "Q16",
+      "topic": "britta",
+      "text": "Britta plausibly knew (INVENTED, grounded in B03-B13): rowing and handling a small boat; not fishing herself on the big boats but baiting and mending (baiting 'beta' lines and mending nets are standard fisher-household chores but no source read states them for 1950 Skaftö); omen lore; wells and wood; the cold; rationing childhood.",
+      "confidence": "invented",
+      "uncertain": true,
+      "sources": [
+        "B03",
+        "B05",
+        "B07",
+        "B08",
+        "B09",
+        "B11",
+        "B12"
+      ],
+      "useFor": "Guide skills and voice.",
+      "part": "people"
+    },
+    {
+      "id": "Q17",
+      "topic": "britta",
+      "text": "Long-line fishing (storbacka): set from the small boat while the big boat lay at anchor on the bank; crews of small boats often died when they could not row back to the big boat in bad weather; Shetland fishing by Skaftö men since the 1870s and Sandö on the great bank near Shetland from 1949 (43 seasons).",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B13",
+        "B15"
+      ],
+      "useFor": "Danger lore: why Britta fears for the boats.",
+      "part": "people"
+    },
+    {
+      "id": "Q18",
+      "topic": "britta",
+      "text": "Further reading that exists but was not read: Terje Fredh's documentary books on Grundsund seafarers and fishermen (1983-1999), Anders Olsson's books on Skaftö and Gåsö sailing ships (2004-2007), Lennart Grundborn's Grundsunds hamnbyggnad (2001), Bohusläns museum 1982 report on boatbuilding and 1985 report on fishing (project 'Bohusläns samhälls- och näringsliv'), ~70 boatbuilder interviews in the museum archive; C.G. Bernhardson's Bohuslänsk sed och folktro (1982) and Bohuslänskt folkliv.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B27",
+        "B03",
+        "B13"
+      ],
+      "useFor": "Where to get real oral history in a later pass.",
+      "part": "people"
+    }
+  ]
+}

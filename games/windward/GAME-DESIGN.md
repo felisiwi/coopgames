@@ -1351,3 +1351,12 @@ again yourself (keeps the relight moment); the fifth is Måseskär, where you de
 real keeper, the character who hints about strange lights. The Kråksundsgap light from the
 future (built 1954) stays. 1950 sea marks are red/black by compass side (IALA A only from
 1980). Supersedes "five keepers" above.
+
+**Correction and decision: the light from the future (Felix, 2026-11-06).** Kråksundsgap Södra
+already had a light in 1950: an unmanned AGA light (from 1911; station 1941, Bx(2) WRG 7 s, 6 m
+focal height; docs/PEOPLE-1950.md). Only the 13 m white concrete tower and its new sector split
+are from 1954. Decided: keep Kråksundsgap. At night, for a moment, the small iron lantern on
+the rock becomes the tall white 1954 tower shining with its new sectors, then it's gone: you
+glimpse the light's future self. Finale easter egg: the restored 1941 lantern stands today in a
+roundabout in Lysekil. The Måseskär keeper is invented (no named 1950 keeper found; don't use
+real people's names).
