@@ -1331,3 +1331,8 @@ slider can show her repaired, newer self.)
 **While Svalan is repaired (Felix, 2026-11-06):** granddad's family lends you a small boat (an
 old snipa or eka), and you do chapter 1's lighthouse task in it. When the five lights burn,
 Svalan is ready, repaired and freshly painted: that's the chapter 1 reward.
+**At the lighthouses in 1950 (Felix, 2026-11-06):** you bring what the keepers need. The storm
+cut them off; you carry paraffin, lamp mantles or a spare lens part from the depot in Lysekil
+to each lighthouse, the keeper relights it, and you watch from the boat (supply boats really did
+this). Five keepers, five small characters. Which five lights: per the 1950 data (manned and
+standing then; Islandsberg was already dark from 1938).
