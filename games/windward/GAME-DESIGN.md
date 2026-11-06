@@ -1360,3 +1360,10 @@ the rock becomes the tall white 1954 tower shining with its new sectors, then it
 glimpse the light's future self. Finale easter egg: the restored 1941 lantern stands today in a
 roundabout in Lysekil. The Måseskär keeper is invented (no named 1950 keeper found; don't use
 real people's names).
+
+**Day and night (Felix, 2026-11-06):** some quests are bound to day and some to night, giving
+two layers to the game. Outside quests, time drifts slowly between day and night, and you can
+moor at an island or in a harbour to pass time until it's day (or night) again.
+Mission control's notes to decide when building: the AGA sun valve gives a natural rule (the
+automatic lights switch themselves on at dusk); in co-op, skipping time needs both players
+moored or the friend's consent (same pattern as crossing to another era).
