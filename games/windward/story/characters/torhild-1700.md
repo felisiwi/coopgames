@@ -47,4 +47,4 @@ later (a cross-era echo).
 - Her look, her boat, how she talks.
 
 (Decided by Felix in an interactive session, 2026-11-05; on 2026-11-06 Felix made her Torhild,
-the pilot's daughter. The name Brita belongs to grandma today: see brita-today.md.)
+the pilot's daughter. The name Britta belongs to grandma today: see britta-today.md.)

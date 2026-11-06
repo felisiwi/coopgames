@@ -1280,7 +1280,7 @@ flash patterns become clues/codes later in the game).
 
 **Characters settled (Felix, 2026-11-06):** **Torhild** is the friend you meet in 1700, the
 **pilot's daughter** (story/characters/torhild-1700.md, formerly the Brita-1700 draft).
-**Brita** is your **grandma** in Fiskebäckskil today (story/characters/brita-today.md).
+**Britta** is your **grandma** in Fiskebäckskil today (story/characters/britta-today.md).
 
 **Tordenskiold (later, not now):** Felix cleaned up his coat of arms (ref/tordenskiold-arms.png).
 Idea: an asset of his ship with his flag, seen now and then at sea in his era, as friend or
