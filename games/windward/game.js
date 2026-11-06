@@ -31,7 +31,7 @@ import { createSky } from './src/sky.js';
 import { createSunGlow } from './src/sunGlow.js';
 import { createInputState } from '../../shared/input.js';
 import { createDebugOverlay } from './src/debug-overlay.js';
-import { stepAlongShore, shallowFactor, SHORE_BRAKE } from './src/shore.js';
+import { stepAlongShore, shallowFactor, isBlocked, SHORE_BRAKE } from './src/shore.js';
 import { createNameBook } from './src/names.js';
 import { createNameLabels } from './src/name-labels.js';
 import { createChartController } from './src/chart-controller.js';
@@ -41,7 +41,8 @@ import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
 import { LIGHTHOUSES } from './src/lighthouses.js';
 import { createLanternFx } from './src/lantern.js';
-import { createLighthouseTask, GRANDMA_ID, hasSeenStart, markStartSeen, resetStart } from './src/lighthouse-task.js';
+import { createLighthouseTask, GRANDMA_ID, REWARD_DELAY_S, hasSeenStart, markStartSeen, resetStart } from './src/lighthouse-task.js';
+import { createHarbourWater } from './src/harbour-water.js';
 import { createTaskUi } from './src/task-ui.js';
 import { createLife } from './src/life.js';
 import { createShoalLayer } from './src/shoal-look.js';
@@ -570,6 +571,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     parent: document.body,
     onSetSail: () => { markStartSeen(); if (chartCtl && chartCtl.state.t > 0.5) chartCtl.toggleChart(); }, // from the chart: back to the boat
     onSkip: () => markStartSeen(),
+    onReport: () => { if (grandma) chartCtl?.setTarget(grandma); }, // the card after the fifth light: its button sets Navigate to Fiskebäckskil
   }) : null;
   const progressLine = () => (task.phase === 'done' ? 'The lights are all burning' : task.phase === 'report' ? 'All five lit: report to grandma' : `Lights restored: ${task.restoredCount} of ${task.total}`);
   // The light came back on (the relight timeline says when): save it, light the lantern, the calm sound; after the fifth, the goal is grandma.
@@ -577,17 +579,28 @@ function startGame({ canvas, net, seed, role }, coast) {
     const r = task.restore(entry.id);
     lanternFx.get(entry.id)?.setLit(true);
     audio?.relight();
-    if (r && r.all && grandma) chartCtl?.setTarget(grandma);
     if (!r) return `${entry.name} is lit.`;
-    return r.all ? `${entry.name} is lit. All ${task.total} lights burn again: report to grandma in Fiskebäckskil.` : `${entry.name} is lit again · ${r.count} of ${task.total} lights restored`;
+    return `${entry.name} is lit again · ${r.count} of ${task.total} lights restored`; // after the fifth the camera returns and the "sail home" card follows (onRelightDone)
   }
+  // Reporting to grandma: Fiskebäckskil's HARBOUR water (the inlet inside the mouth gate), not a circle round the village point (45 m from the harbour).
+  let harbourMemo;
+  const harbourWater = () => {
+    if (harbourMemo !== undefined) return harbourMemo;
+    const H = coast.sea.harbours.find((h) => h.name.startsWith('Fiskebäckskil'));
+    if (!H || !H.inventedGate || !H.inventedGate.mouth) return (harbourMemo = null);
+    const [qx, qz] = coast.world.toGame(H.lon, H.lat);
+    const [mx, mz] = coast.world.toGame(H.inventedGate.mouth.lon, H.inventedGate.mouth.lat);
+    return (harbourMemo = createHarbourWater({ blocked: (x, z) => isBlocked(coast.sailHeightAt, x, z), quay: { x: qx, z: qz }, mouth: { x: mx, z: mz }, bearingDeg: H.inventedGate.enteringBearingDeg }));
+  };
+  let cardFrames = 0; // frames a task card has been up (the 3D render pauses after a few)
+  let rewardAt = null; // when the boat entered the harbour: the moment plays, then the end card (REWARD_DELAY_S later)
   // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
   const chartCtl = coast
     ? createChartController({
       isDark: (id) => !!task && task.isDark(id),
-      holdTarget: (entry) => !!task && task.isDark(entry.id), // a dark light's tag stays until it is lit
+      holdTarget: (entry) => !!task && (task.isDark(entry.id) || (task.phase === 'report' && entry.id === GRANDMA_ID)), // a dark light's tag stays until it is lit; grandma's until you are IN the harbour
       onRelit,
-      onArrive: (entry) => { if (task && task.phase === 'report' && entry.id === GRANDMA_ID) { task.finish(); taskUi.showEnd(); } },
+      onRelightDone: () => { if (task && task.phase === 'report') taskUi.showReport(); }, // the fifth light: no end card, a short "sail home" card
       onTask: () => taskUi.showStart({ progress: progressLine() }),
       canvas, coast, nameBook, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
       onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
@@ -604,7 +617,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   if (task && chartCtl && grandma && task.phase === 'report') chartCtl.setTarget(grandma); // reloaded with all five lit: the goal is still grandma
   // First time (and no progress yet): the storm card. Everything behind it keeps running, but the card takes every touch.
   if (task && taskUi && !hasSeenStart() && task.phase === 'lights' && task.restoredCount === 0) taskUi.showStart();
-  if (task && debugOverlay) window.__task = { task, lanternFx, taskUi, grandma };
+  if (task && debugOverlay) window.__task = { task, lanternFx, taskUi, grandma, harbourWater };
   if (chartCtl && debugOverlay) window.__chart = chartCtl;
   if (phone && debugOverlay) window.__phoneCtl = phone;
   if (phone) {
@@ -692,6 +705,18 @@ function startGame({ canvas, net, seed, role }, coast) {
       if (moored) chartCtl.relightById(moored.id);
       else if (task.hint(self.x, self.z, self.speed, nowS)) chartCtl.toast('Ease off to moor at the dark lighthouse', 3600);
     }
+    // Stage 1d: reporting to grandma. Entering Fiskebäckskil's harbour water (slow enough to tie up) starts the reward moment; the end card follows it.
+    if (task && chartCtl && task.phase === 'report' && grandma && rewardAt === null && !taskUi.visible && !chartCtl.visiting) {
+      const hw = harbourWater();
+      const e = task.harbourEntry(!!hw && hw.contains(self.x, self.z), self.speed, nowS);
+      if (e === 'hint') chartCtl.toast('Ease off to tie up in Fiskebäckskil', 3600);
+      else if (e === 'enter') {
+        rewardAt = nowS;
+        chartCtl.clearTarget();
+        if (lureOn && moment) moment.trigger(grandma, giftFor(grandma), self, nowS); // TODO(felix): the reward moment (details to come): for now the harbour moment
+      }
+    }
+    if (rewardAt !== null && nowS - rewardAt >= REWARD_DELAY_S) { rewardAt = null; task.finish(); taskUi.showEnd(); }
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
     stepWaves(waves, dt, wind, self.x, self.z); // before anything samples the sea this frame
@@ -805,7 +830,11 @@ function startGame({ canvas, net, seed, role }, coast) {
       nameLabels.setHidden(!!ctlView && ctlView.t > 0.05); // the chart has its own names
       nameLabels.update(camera, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, nowS, ctlView ? ctlView.focus : self, hudRects);
     }
-    if (!(ctlView && ctlView.skip3D)) renderer.render(scene, camera); // the chart covers the whole view: skip the 3D render
+    // A full-screen card (storm, sail home, end) covers the view and the boat is held: nothing behind it needs drawing. Render a few frames so the
+    // card opens over a real picture, then stop (the canvas keeps its last frame): the card costs no GPU. (3.4 fps at the end card was a software-GL
+    // run, but a phone GPU should not draw 345k dimmed triangles under a card either.)
+    cardFrames = taskUi && taskUi.visible ? cardFrames + 1 : 0;
+    if (!(ctlView && ctlView.skip3D) && cardFrames <= 3) renderer.render(scene, camera); // the chart covers the whole view: skip the 3D render
     debugOverlay?.frame(now);
     phone?.setRopeVisible(!(ctlView && ctlView.t > 0.05)); // the chart covers the view: no rope
     phone?.draw(nowS, {

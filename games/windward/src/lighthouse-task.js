@@ -8,6 +8,8 @@ export const MOOR_MAX_SPEED = 3; // m/s: slow enough (the same "easing in" as ar
 export const HINT_RANGE_M = 130; // near a dark light but going too fast: a quiet hint
 export const HINT_COOLDOWN_S = 25;
 export const GRANDMA_ID = 'village:Fiskebäckskil';
+export const HARBOUR_ENTRY_MAX_SPEED = 3; // m/s: tie up gently, like mooring at a lighthouse (and like a village arrival, src/arrival.js)
+export const REWARD_DELAY_S = 4.5; // from entering the harbour to the end card: the reward moment plays in between (TODO(felix): the reward details)
 
 // The start screen is shown once: this flag lives on the device (a missing or blocked storage just means it is shown again).
 export const START_KEY = 'windward.start.v1';
@@ -48,6 +50,7 @@ export function createLighthouseTask({ lights, spawn, storage = taskStorage(), c
   } catch { /* unreadable: start fresh */ }
   const save = () => { try { storage?.setItem(TASK_KEY, JSON.stringify({ v: 1, restored: [...restored], done })); } catch { /* blocked: carry on */ } };
   let lastHintAt = -Infinity;
+  let lastEntryHintAt = -Infinity;
   const api = {
     ids, lights: picked, total: picked.length,
     get restoredCount() { return restored.size; },
@@ -79,6 +82,14 @@ export function createLighthouseTask({ lights, spawn, storage = taskStorage(), c
         const d = Math.hypot(l.x - x, l.z - z);
         if (!restored.has(l.id) && d <= HINT_RANGE_M) { lastHintAt = nowS; return l; } // also inside the moor distance: that is exactly when you arrive too fast
       }
+      return null;
+    },
+    // Reporting to grandma (phase 'report'): is the boat IN the harbour (the water inside the mouth, src/harbour-water.js), and slow enough to tie up?
+    // 'enter' = the reward moment starts; 'hint' = inside but too fast (at most every HINT_COOLDOWN_S); null otherwise.
+    harbourEntry(inHarbour, speed, nowS) {
+      if (api.phase !== 'report' || !inHarbour) return null;
+      if (speed <= HARBOUR_ENTRY_MAX_SPEED) return 'enter';
+      if (nowS - lastEntryHintAt >= HINT_COOLDOWN_S) { lastEntryHintAt = nowS; return 'hint'; }
       return null;
     },
     // The subtle HUD line: "lights 2/5" while there are lights to restore, "report to grandma" after the last one, nothing when done.

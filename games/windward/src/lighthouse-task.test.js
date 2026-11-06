@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { RELIGHT, relightFrame, igniteTime, relightDuration, REVEAL_RADIUS_M } from './relight.js';
-import { createLighthouseTask, pickTaskLights, TASK_KEY, TASK_COUNT, MOOR_M, MOOR_MAX_SPEED, HINT_COOLDOWN_S, GRANDMA_ID, START_KEY, hasSeenStart, markStartSeen, resetStart } from './lighthouse-task.js';
-import { START_CARD, END_CARD } from './task-ui.js';
+import { createLighthouseTask, pickTaskLights, TASK_KEY, TASK_COUNT, MOOR_M, MOOR_MAX_SPEED, HINT_COOLDOWN_S, GRANDMA_ID, START_KEY, hasSeenStart, markStartSeen, resetStart, HARBOUR_ENTRY_MAX_SPEED, REWARD_DELAY_S } from './lighthouse-task.js';
+import { START_CARD, END_CARD, REPORT_CARD } from './task-ui.js';
 import { createExplored } from './explored.js';
 import { fixedDirectionForYaw, updateFixedCamera } from './camera.js';
 import { createAudio, RELIGHT_SOUND } from './audio.js';
@@ -196,6 +196,29 @@ check('the start card is shown once: seen is saved on the device, a reset shows 
   assert.doesNotThrow(() => { markStartSeen(blocked); resetStart(blocked); });
   assert.equal(hasSeenStart(blocked), false, 'blocked storage: shown each time, never a crash');
   assert.equal(hasSeenStart(null), false);
+});
+
+check('the card after the fifth light is a short nudge (Felix\'s words), not the ending; its button navigates to Fiskebäckskil', () => {
+  assert.equal(REPORT_CARD.title, 'All five lights are burning.');
+  assert.deepEqual(REPORT_CARD.lines, ['Sail home to Fiskebäckskil and tell grandma.']);
+  assert.ok(/Fiskebäckskil/.test(REPORT_CARD.button) && /Navigate/i.test(REPORT_CARD.button));
+  assert.ok(REPORT_CARD.lines.join(' ').length < 60, 'short');
+  assert.notEqual(REPORT_CARD.title, END_CARD.title, 'it is not the end card');
+});
+
+check('harbour entry: only when reporting, only INSIDE the harbour, and slow enough to tie up; too fast gets a hint at most every 25 s', () => {
+  const t = createLighthouseTask({ lights, spawn, storage: memory() });
+  assert.equal(t.harbourEntry(true, 1, 0), null, 'not reporting yet (lights left): nothing');
+  for (const l of t.lights) t.restore(l.id);
+  assert.equal(t.phase, 'report');
+  assert.equal(t.harbourEntry(false, 1, 0), null, 'slow but outside the harbour: nothing (not a circle round a village point)');
+  assert.equal(t.harbourEntry(true, HARBOUR_ENTRY_MAX_SPEED + 2, 10), 'hint', 'in the harbour but too fast: a hint');
+  assert.equal(t.harbourEntry(true, HARBOUR_ENTRY_MAX_SPEED + 2, 20), null, 'not again so soon');
+  assert.equal(t.harbourEntry(true, HARBOUR_ENTRY_MAX_SPEED + 2, 10 + HINT_COOLDOWN_S + 1), 'hint');
+  assert.equal(t.harbourEntry(true, HARBOUR_ENTRY_MAX_SPEED, 99), 'enter', 'in the harbour and slow: the reward moment');
+  t.finish();
+  assert.equal(t.harbourEntry(true, 1, 200), null, 'done: it does not fire again');
+  assert.ok(REWARD_DELAY_S >= 3 && REWARD_DELAY_S <= 8, 'the moment has time to play before the end card');
 });
 
 console.log(`${passed} checks passed`);

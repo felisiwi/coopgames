@@ -69,7 +69,7 @@ export function chartSea(sea, toGame) {
   };
 }
 
-export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
+export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onRelightDone = () => {}, parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const lights = chartLights(coast.names, toGame);
   const lightList = [...lights.inWindow, ...lights.far];
@@ -258,7 +258,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
         }
         if (state.explored && f.revealFrac > 0) state.explored.reveal(r.entry.x, r.entry.z, REVEAL_RADIUS_M * f.revealFrac);
         relightOut = { id: r.entry.id, lamp: f.lamp, lit: r.lit, yaw: f.yaw };
-        if (f.done) { state.explored?.save(true); endVisit(); relightOut = { ...relightOut, yaw: 0, done: true }; }
+        if (f.done) { state.explored?.save(true); endVisit(); relightOut = { ...relightOut, yaw: 0, done: true }; onRelightDone(r.entry); } // the camera is back at the boat
       }
       const arrived = nav.entry && holdTarget(nav.entry) ? null : nav.update(boat.x, boat.z);
       if (arrived) { onTarget(null, null); ui.toast(`Arrived at ${navTitle(arrived)}`, 3200); onArrive(arrived); }

@@ -34,9 +34,16 @@ export const START_CARD = {
   skip: 'Skip',
 };
 
-// opts: { parent, onSetSail(), onSkip(), onContinue() }. Returns { showStart({ progress }), showEnd(), hide(), get visible }.
-export function createTaskUi({ parent = document.body, onContinue = () => {}, onSetSail = () => {}, onSkip = () => {} } = {}) {
-  const veil = el('div', 'position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(10,20,30,0.45);padding:24px;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)');
+// The card after the fifth light (Felix, 2026-11-06): a short nudge, not the ending. Its button sets the Navigate target to Fiskebäckskil.
+export const REPORT_CARD = {
+  title: 'All five lights are burning.',
+  lines: ['Sail home to Fiskebäckskil and tell grandma.'],
+  button: 'Navigate to Fiskebäckskil',
+};
+
+// opts: { parent, onSetSail(), onSkip(), onContinue(), onReport() }. Returns { showStart({ progress }), showReport(), showEnd(), hide(), get visible }.
+export function createTaskUi({ parent = document.body, onContinue = () => {}, onSetSail = () => {}, onSkip = () => {}, onReport = () => {} } = {}) {
+  const veil = el('div', 'position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(10,20,30,0.62);padding:24px'); // a plain dim, no backdrop blur: a blur over a live WebGL canvas is re-done every frame, and the card does not need it
   veil.setAttribute('data-no-zoom', '');
   const card = el('div', `max-width:340px;width:100%;background:${HUD_BG};border:${LINE};border-radius:16px;padding:22px 20px 18px;color:${TEXT};text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4)`);
   const title = el('div', `font:italic 600 26px Georgia,"Times New Roman",serif;color:${GOLD};margin-bottom:10px`);
@@ -52,7 +59,7 @@ export function createTaskUi({ parent = document.body, onContinue = () => {}, on
   let visible = false;
   const hide = () => { visible = false; veil.style.display = 'none'; };
   let mode = 'end';
-  btn.addEventListener('click', () => { hide(); (mode === 'start' ? onSetSail : onContinue)(); });
+  btn.addEventListener('click', () => { hide(); (mode === 'start' ? onSetSail : mode === 'report' ? onReport : onContinue)(); });
   skipBtn.addEventListener('click', () => { hide(); onSkip(); });
   return {
     get visible() { return visible; },
@@ -66,6 +73,16 @@ export function createTaskUi({ parent = document.body, onContinue = () => {}, on
       progress.style.display = line ? 'block' : 'none';
       btn.textContent = START_CARD.go;
       skipBtn.style.display = 'block';
+      visible = true;
+      veil.style.display = 'flex';
+    },
+    showReport() {
+      mode = 'report';
+      progress.style.display = 'none';
+      skipBtn.style.display = 'none';
+      title.textContent = REPORT_CARD.title;
+      body.replaceChildren(...REPORT_CARD.lines.map((t) => el('div', 'margin:4px 0', t)));
+      btn.textContent = REPORT_CARD.button;
       visible = true;
       veil.style.display = 'flex';
     },
