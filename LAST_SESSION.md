@@ -1,5 +1,11 @@
 # Last session
 
+**2026-11-06: stage 1c and the passes data are MERGED to main.** 1c: chart + fog, minimap (round, north-up),
+zoom-to-chart, terrain look, Svalan in game, rope A, knots/nm, Navigate here (docs/CHART.md). Agent 1 follow-up
+still on felix/windward-chart: round block at top, minimap/direction bug (root cause first), remove the settings
+button. Passes: assets/coast/passes.json + src/passes.js (applyPasses, ship tier = 5 light carves), not wired into
+the game yet (docs/passes/README.md). Seamarks (felix/windward-seamarks) not merged yet; both feed stage 1d.
+
 **2026-11-05: stage 1c, the chart and the new look** (branch `felix/windward-chart`, based on aa4bdc0 + the terrain-style
 branch, NOT merged). New terrain look (crisp zones, granite on steep ground, trees keep off it), Svalan in the game (`?boat=eka`
 for the eka), zoom out 4x then a scale-matched crossfade into the chart, minimap (round/square, north-up/with boat), fogged chart

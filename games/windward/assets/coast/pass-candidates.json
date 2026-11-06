@@ -1,0 +1,878 @@
+{
+ "generated": "2026-11-06",
+ "source": "OpenStreetMap contributors, ODbL 1.0; Felix's favourites from GAME-DESIGN.md",
+ "credit": "© OpenStreetMap contributors",
+ "licence": "ODbL 1.0",
+ "licenceUrl": "https://www.openstreetmap.org/copyright",
+ "region": {
+  "s": 58.085,
+  "w": 11.25,
+  "n": 58.3,
+  "e": 11.5
+ },
+ "note": "today = what the game raster allows now with the boat's hull (src/shore.js): open, or closed. For a sound, realWidthM is the narrowest real water along it; lengthM the OSM strait line where it has one. passes = the carve passes (passes.json) within 350 m (500 m for places).",
+ "counts": {
+  "total": 73,
+  "open": 32,
+  "closed": 36
+ },
+ "candidates": [
+  {
+   "name": "Kråksundsgap (Felix)",
+   "kind": "favourite",
+   "favourite": true,
+   "lat": 58.10443,
+   "lon": 11.43913,
+   "today": "closed",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "krakesunds-gap"
+   ]
+  },
+  {
+   "name": "Vrakevik (Felix)",
+   "kind": "favourite",
+   "favourite": true,
+   "lat": 58.23871,
+   "lon": 11.38506,
+   "today": "closed",
+   "approachM": 160,
+   "realWidthM": 31,
+   "passes": [
+    "trindhalet"
+   ]
+  },
+  {
+   "name": "Vasholmarna",
+   "kind": "harbour",
+   "favourite": true,
+   "lat": 58.21673,
+   "lon": 11.37445,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 59,
+   "passes": []
+  },
+  {
+   "name": "Jonsborg",
+   "kind": "harbour",
+   "lat": 58.19593,
+   "lon": 11.42289,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "arsundet-2"
+   ]
+  },
+  {
+   "name": "Assholmen",
+   "kind": "harbour",
+   "lat": 58.14559,
+   "lon": 11.40071,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 103,
+   "passes": [
+    "stenskar",
+    "stockestrom-2"
+   ]
+  },
+  {
+   "name": "Kråkesundsgap",
+   "kind": "harbour",
+   "lat": 58.10179,
+   "lon": 11.44111,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "krakesunds-gap"
+   ]
+  },
+  {
+   "name": "Porsholmen",
+   "kind": "harbour",
+   "lat": 58.22777,
+   "lon": 11.39847,
+   "today": "closed",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "gaso-sund-3",
+    "gaso-sund-2"
+   ]
+  },
+  {
+   "name": "Usholmen",
+   "kind": "harbour",
+   "lat": 58.20116,
+   "lon": 11.4401,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 87,
+   "passes": [
+    "trangesund"
+   ]
+  },
+  {
+   "name": "Skarvesäter",
+   "kind": "harbour",
+   "favourite": true,
+   "lat": 58.23965,
+   "lon": 11.36713,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 45,
+   "passes": []
+  },
+  {
+   "name": "Bredholmen",
+   "kind": "harbour",
+   "lat": 58.24468,
+   "lon": 11.36574,
+   "today": "closed",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Fröjdendals småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.19681,
+   "lon": 11.49136,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Grundsunds hamn",
+   "kind": "harbour",
+   "favourite": true,
+   "lat": 58.216,
+   "lon": 11.41577,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "osoholmesund",
+    "osoholmesund-2",
+    "osoholmesund-3"
+   ]
+  },
+  {
+   "name": "Stockeviks småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.23555,
+   "lon": 11.43032,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Gullholmens gästhamn",
+   "kind": "harbour",
+   "favourite": true,
+   "lat": 58.17695,
+   "lon": 11.40476,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Gåsö småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.23394,
+   "lon": 11.4121,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Lyckans slip Marina",
+   "kind": "harbour",
+   "lat": 58.24355,
+   "lon": 11.46113,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "ankerskar-2"
+   ]
+  },
+  {
+   "name": "Gullmarsstrands småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.24988,
+   "lon": 11.45782,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "ankerskar",
+    "langgaps-hal"
+   ]
+  },
+  {
+   "name": "Fiskhamnens gästhamn",
+   "kind": "harbour",
+   "lat": 58.27471,
+   "lon": 11.44157,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Stångholmesunds småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.26762,
+   "lon": 11.42104,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 73,
+   "passes": [
+    "stangeholme-sund-2",
+    "stangeholme-sund"
+   ]
+  },
+  {
+   "name": "Edshultshalls gästhamn",
+   "kind": "harbour",
+   "lat": 58.10785,
+   "lon": 11.46554,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Hälleviksstrands Varvs Marina",
+   "kind": "harbour",
+   "lat": 58.1187,
+   "lon": 11.44647,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "lilla-ryttaren",
+    "kattepannan-2"
+   ]
+  },
+  {
+   "name": "Hällevik Yacht Club",
+   "kind": "harbour",
+   "lat": 58.11701,
+   "lon": 11.45811,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.12091,
+   "lon": 11.44477,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 84,
+   "passes": [
+    "kattepannan",
+    "lilla-ryttaren",
+    "kattepannan-2"
+   ]
+  },
+  {
+   "name": "Käringöns gästhamn",
+   "kind": "harbour",
+   "favourite": true,
+   "lat": 58.11327,
+   "lon": 11.36333,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Norra Hamnens gästhamn",
+   "kind": "harbour",
+   "lat": 58.27617,
+   "lon": 11.4229,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Hälleviksstrands Hamn",
+   "kind": "harbour",
+   "lat": 58.1224,
+   "lon": 11.44234,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "vannholmen",
+    "kattepannan",
+    "lilla-ryttaren",
+    "kattepannan-2"
+   ]
+  },
+  {
+   "name": "Stockens gästhamn",
+   "kind": "harbour",
+   "lat": 58.15037,
+   "lon": 11.41344,
+   "today": "closed",
+   "approachM": 180,
+   "realWidthM": 15,
+   "passes": [
+    "stockestrom",
+    "stockestrom-3"
+   ]
+  },
+  {
+   "name": "Ellös gästhamn",
+   "kind": "harbour",
+   "lat": 58.18473,
+   "lon": 11.46599,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Havsbadets gästhamn",
+   "kind": "harbour",
+   "lat": 58.26988,
+   "lon": 11.43736,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Småbåtshamn Kolholmarna/Grötö",
+   "kind": "harbour",
+   "lat": 58.27407,
+   "lon": 11.45129,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Grundsunds Marina",
+   "kind": "harbour",
+   "favourite": true,
+   "lat": 58.20887,
+   "lon": 11.42192,
+   "today": "closed (no real water route)",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "osoholmesund-3"
+   ]
+  },
+  {
+   "name": "Fiskebäckskils småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.24241,
+   "lon": 11.46113,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "ankerskar-2"
+   ]
+  },
+  {
+   "name": "Valbodalen småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.28931,
+   "lon": 11.43442,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "salto-fjord"
+   ]
+  },
+  {
+   "name": "Långeviks småbåtshamn",
+   "kind": "harbour",
+   "lat": 58.28668,
+   "lon": 11.43151,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "salto-fjord"
+   ]
+  },
+  {
+   "name": "Härmanö",
+   "kind": "place",
+   "lat": 58.16015,
+   "lon": 11.37571,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 45,
+   "passes": [
+    "harmano"
+   ]
+  },
+  {
+   "name": "Storön",
+   "kind": "place",
+   "lat": 58.23793,
+   "lon": 11.38678,
+   "today": "closed",
+   "approachM": 180,
+   "realWidthM": 36,
+   "passes": [
+    "trindhalet"
+   ]
+  },
+  {
+   "name": "Gåsö",
+   "kind": "place",
+   "lat": 58.23589,
+   "lon": 11.40587,
+   "today": "closed (no real water route)",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "gaso",
+    "gaso-2"
+   ]
+  },
+  {
+   "name": "Kornö",
+   "kind": "place",
+   "lat": 58.29776,
+   "lon": 11.37783,
+   "today": "open",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Hälleviksstrand",
+   "kind": "place",
+   "lat": 58.12329,
+   "lon": 11.4454,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 62,
+   "passes": [
+    "lilla-ryttaren",
+    "kattepannan-2"
+   ]
+  },
+  {
+   "name": "Käringön",
+   "kind": "place",
+   "favourite": true,
+   "lat": 58.10985,
+   "lon": 11.36359,
+   "today": "closed (no real water route)",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Gullholmen",
+   "kind": "place",
+   "favourite": true,
+   "lat": 58.17993,
+   "lon": 11.40585,
+   "today": "closed",
+   "approachM": 20,
+   "realWidthM": 73,
+   "passes": []
+  },
+  {
+   "name": "Grundsund",
+   "kind": "place",
+   "favourite": true,
+   "lat": 58.21336,
+   "lon": 11.41924,
+   "today": "closed (no real water route)",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "osoholmesund",
+    "osoholmesund-2",
+    "osoholmesund-3"
+   ]
+  },
+  {
+   "name": "Fiskebäckskil",
+   "kind": "place",
+   "favourite": true,
+   "lat": 58.24565,
+   "lon": 11.45663,
+   "today": "closed (no real water route)",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": [
+    "langgaps-hal",
+    "ankerskar-2"
+   ]
+  },
+  {
+   "name": "Lysekil",
+   "kind": "place",
+   "favourite": true,
+   "lat": 58.27717,
+   "lon": 11.4431,
+   "today": "closed (no real water route)",
+   "approachM": 0,
+   "realWidthM": null,
+   "passes": []
+  },
+  {
+   "name": "Getevikssund",
+   "kind": "sound",
+   "osm": "way/1080553983",
+   "lat": 58.25536,
+   "lon": 11.50177,
+   "realWidthM": 374,
+   "lengthM": 1092,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Saltö fjord",
+   "kind": "sound",
+   "osm": "way/799199970",
+   "lat": 58.28529,
+   "lon": 11.41066,
+   "realWidthM": 406,
+   "lengthM": 3800,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Kråkesund",
+   "kind": "sound",
+   "osm": "way/723868322",
+   "lat": 58.10965,
+   "lon": 11.44067,
+   "realWidthM": 475,
+   "lengthM": 1584,
+   "today": "closed",
+   "passes": [
+    "krakesunds-gap"
+   ]
+  },
+  {
+   "name": "Arsundet",
+   "kind": "sound",
+   "osm": "way/723868321",
+   "lat": 58.19803,
+   "lon": 11.41585,
+   "realWidthM": 56,
+   "lengthM": 405,
+   "today": "closed",
+   "passes": [
+    "arsundet",
+    "arsundet-2"
+   ]
+  },
+  {
+   "name": "Galtesund",
+   "kind": "sound",
+   "osm": "way/723868319",
+   "lat": 58.19243,
+   "lon": 11.41936,
+   "realWidthM": 94,
+   "lengthM": 270,
+   "today": "partly open",
+   "passes": []
+  },
+  {
+   "name": "Ösöholmesund",
+   "kind": "sound",
+   "osm": "way/723868318",
+   "lat": 58.21498,
+   "lon": 11.41017,
+   "realWidthM": 95,
+   "lengthM": 106,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  },
+  {
+   "name": "Trindhålet",
+   "kind": "sound",
+   "osm": "way/723868316",
+   "lat": 58.24051,
+   "lon": 11.37988,
+   "realWidthM": 97,
+   "lengthM": 75,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  },
+  {
+   "name": "Gåsö sund",
+   "kind": "sound",
+   "osm": "way/723868315",
+   "lat": 58.23103,
+   "lon": 11.38317,
+   "realWidthM": 120,
+   "lengthM": 767,
+   "today": "closed",
+   "passes": [
+    "gaso-sund"
+   ]
+  },
+  {
+   "name": "Tångesund",
+   "kind": "sound",
+   "osm": "way/723270607",
+   "lat": 58.08814,
+   "lon": 11.49507,
+   "realWidthM": 239,
+   "lengthM": 2144,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Viggholms sund",
+   "kind": "sound",
+   "osm": "way/723270606",
+   "lat": 58.12742,
+   "lon": 11.41684,
+   "realWidthM": 267,
+   "lengthM": 432,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Smalsund",
+   "kind": "sound",
+   "osm": "way/723270605",
+   "lat": 58.2486,
+   "lon": 11.43942,
+   "realWidthM": 77,
+   "lengthM": 192,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  },
+  {
+   "name": "Långgaps hål",
+   "kind": "sound",
+   "osm": "way/723270604",
+   "lat": 58.25376,
+   "lon": 11.44585,
+   "realWidthM": 107,
+   "lengthM": 132,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  },
+  {
+   "name": "Vägeröd ränna",
+   "kind": "sound",
+   "osm": "way/722813733",
+   "lat": 58.24125,
+   "lon": 11.49084,
+   "realWidthM": 66,
+   "lengthM": 710,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Kalvsundet",
+   "kind": "sound",
+   "osm": "way/722813057",
+   "lat": 58.28991,
+   "lon": 11.38497,
+   "realWidthM": 89,
+   "lengthM": 278,
+   "today": "partly open",
+   "passes": []
+  },
+  {
+   "name": "Tjuvsund",
+   "kind": "sound",
+   "osm": "way/722631462",
+   "lat": 58.26433,
+   "lon": 11.48895,
+   "realWidthM": 49,
+   "lengthM": 202,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  },
+  {
+   "name": "Knappesund",
+   "kind": "sound",
+   "osm": "way/722623274",
+   "lat": 58.13591,
+   "lon": 11.35727,
+   "realWidthM": 95,
+   "lengthM": 77,
+   "today": "partly open",
+   "passes": []
+  },
+  {
+   "name": "Vallerö sund",
+   "kind": "sound",
+   "osm": "way/722623273",
+   "lat": 58.13215,
+   "lon": 11.3544,
+   "realWidthM": 226,
+   "lengthM": 2083,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Kosen",
+   "kind": "sound",
+   "osm": "way/722623272",
+   "lat": 58.10969,
+   "lon": 11.35586,
+   "realWidthM": 134,
+   "lengthM": 1485,
+   "today": "partly open",
+   "passes": []
+  },
+  {
+   "name": "Gapet",
+   "kind": "sound",
+   "osm": "way/722614590",
+   "lat": 58.27668,
+   "lon": 11.41609,
+   "realWidthM": 157,
+   "lengthM": 864,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Stångeholme sund",
+   "kind": "sound",
+   "osm": "way/722614589",
+   "lat": 58.26737,
+   "lon": 11.42064,
+   "realWidthM": 66,
+   "lengthM": 837,
+   "today": "closed",
+   "passes": [
+    "stangeholme-sund-2",
+    "stangeholme-sund"
+   ]
+  },
+  {
+   "name": "Malö strömmar",
+   "kind": "sound",
+   "osm": "way/722614588",
+   "lat": 58.19625,
+   "lon": 11.48757,
+   "realWidthM": 192,
+   "lengthM": 1975,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Stockesund",
+   "kind": "sound",
+   "osm": "way/722614587",
+   "lat": 58.1591,
+   "lon": 11.40961,
+   "realWidthM": 127,
+   "lengthM": 1675,
+   "today": "partly open",
+   "passes": []
+  },
+  {
+   "name": "Stockeström",
+   "kind": "sound",
+   "osm": "way/722614586",
+   "lat": 58.15036,
+   "lon": 11.41069,
+   "realWidthM": 80,
+   "lengthM": 823,
+   "today": "closed",
+   "passes": [
+    "stockestrom",
+    "stockestrom-3"
+   ]
+  },
+  {
+   "name": "Skutloppet",
+   "kind": "sound",
+   "osm": "way/722614585",
+   "lat": 58.11262,
+   "lon": 11.42247,
+   "realWidthM": 108,
+   "lengthM": 749,
+   "today": "closed",
+   "passes": [
+    "skutloppet-2"
+   ]
+  },
+  {
+   "name": "Kråkesunds gap",
+   "kind": "sound",
+   "osm": "way/722614584",
+   "lat": 58.10193,
+   "lon": 11.44087,
+   "realWidthM": 221,
+   "lengthM": 1584,
+   "today": "closed",
+   "passes": [
+    "krakesunds-gap"
+   ]
+  },
+  {
+   "name": "Lilla Ström",
+   "kind": "sound",
+   "osm": "way/686309820",
+   "lat": 58.20988,
+   "lon": 11.47918,
+   "realWidthM": 45,
+   "lengthM": 268,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  },
+  {
+   "name": "Stora Ström",
+   "kind": "sound",
+   "osm": "way/686309819",
+   "lat": 58.20868,
+   "lon": 11.47778,
+   "realWidthM": 36,
+   "lengthM": 268,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  },
+  {
+   "name": "Gåsöfjorden",
+   "kind": "sound",
+   "osm": "way/397613357",
+   "lat": 58.23148,
+   "lon": 11.41733,
+   "realWidthM": 479,
+   "lengthM": 3061,
+   "today": "open",
+   "passes": []
+  },
+  {
+   "name": "Trångesund",
+   "kind": "sound",
+   "osm": "way/342748582",
+   "lat": 58.20513,
+   "lon": 11.43573,
+   "realWidthM": 52,
+   "lengthM": 360,
+   "today": "closed (dead end, on no trip)",
+   "passes": []
+  }
+ ]
+}

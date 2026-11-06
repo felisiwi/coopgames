@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windward Passes Lab</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1a24; --panel: rgba(14, 26, 36, 0.95); --line: #2c4556; --text: #e6eef2; --dim: #9db3c0;
+    --accent: #6fd0d6; --on: #06222a; --warn: #ffb36b; --carve: #ff3fb8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font: 14px/1.35 system-ui, sans-serif; }
+  body { padding: 8px 8px 150px; }
+  h1 { font-size: 15px; margin: 4px 2px 6px; font-weight: 600; }
+  #views { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  @media (min-width: 820px) { #views { grid-template-columns: 1fr 1fr; } body { padding-bottom: 12px; } }
+  .view { background: #0a141c; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; position: relative; }
+  .view h2 { margin: 0; padding: 7px 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); display: flex; justify-content: space-between; gap: 8px; }
+  .view h2 b { text-transform: none; letter-spacing: 0; font-weight: 600; }
+  .bad { color: #ff9a8a; } .good { color: #8be0a3; }
+  canvas { display: block; width: 100%; height: auto; }
+  #info { margin: 8px 2px; font-size: 13px; line-height: 1.45; }
+  #info b { font-size: 15px; } #info .dim { color: var(--dim); } #info .warn { color: var(--warn); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11.5px; color: var(--dim); margin: 2px 2px 6px; }
+  .legend span::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--c); border: 1px solid rgba(255,255,255,.25); }
+  #panel { position: fixed; z-index: 4; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 560px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(6px); }
+  @media (min-width: 820px) { #panel { position: static; max-width: none; margin-top: 8px; } }
+  #head { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; background: none; color: inherit; font: 600 14px system-ui, sans-serif; text-align: left; cursor: pointer; }
+  #head .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #body { display: none; padding: 0 12px 12px; max-height: min(62vh, 560px); overflow: auto; }
+  #panel.open #body { display: block; }
+  @media (min-width: 820px) { #body { display: block; max-height: none; } #head .chev { display: none; } }
+  h3 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  button.chip { font: inherit; color: var(--text); background: #1c3140; border: 1px solid var(--line); border-radius: 10px; padding: 0 11px; min-height: 44px; cursor: pointer; }
+  button.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on); font-weight: 600; }
+  button.chip small { opacity: .75; margin-left: 4px; }
+  button.chip.eye { border-style: dashed; border-color: #8a6a3a; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--dim); z-index: 6; padding: 24px; text-align: center; white-space: pre-wrap; }
+  #credit { font-size: 11px; color: var(--dim); margin: 8px 2px; } #credit a { color: inherit; }
+</style>
+</head>
+<body>
+<h1>Passes Lab: the real sounds the 1:10 raster closes</h1>
+<div class="legend">
+  <span style="--c:#a9b378">land</span><span style="--c:#3b78be">sea the boat can sail</span><span style="--c:#9fd3e0">sea too tight for the hull</span><span style="--c:#ff3fb8">carve outline</span><span style="--c:#fff5d6">boat (8 × 2.4 m) + its 2.5 m collision circle</span>
+</div>
+<div id="views">
+  <div class="view"><h2><span>Today</span><b id="beforeState"></b></h2><canvas id="before"></canvas></div>
+  <div class="view"><h2><span id="afterTitle">After the carve</span><b id="afterState"></b></h2><canvas id="after"></canvas></div>
+</div>
+<div id="info"></div>
+<div id="panel">
+  <button id="head" type="button" aria-expanded="false" aria-controls="body"><span class="name" id="headname">Passes</span><span class="chev" aria-hidden="true">▲</span></button>
+  <div id="body">
+    <h3>Carve</h3><div class="chips" id="modes"></div>
+    <h3>Ship: the first batch (light carves, at most 2× the real width)</h3><div class="chips" id="ship"></div>
+    <h3>Later: light carves, after the first batch</h3><div class="chips" id="later"></div>
+    <h3>Needs Felix's eye: widened more than 2× (not shipped)</h3><div class="chips" id="eye"></div>
+  </div>
+</div>
+<div id="credit">Carve shapes derive from OpenStreetMap's coastline, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL). Land cover and height: the game's coast raster.</div>
+<div id="loading">loading the coast…</div>
+<script type="module">
+import { loadCoast } from './src/coast-data.js';
+import { buildCoastWorld, COAST_TILES } from './src/coast-world.js';
+import { applyPasses, resetPasses, findRoute, passEnds } from './src/passes.js';
+import { isBlocked, HULL_RADIUS_M } from './src/shore.js';
+
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+let world, file, H0, CL0;
+const state = { id: params.get('pass'), mode: params.get('apply') === 'ship' ? 'ship' : 'one' };
+
+async function load() {
+  const base = './assets/coast/';
+  const [passes, skerries] = await Promise.all([fetch(base + 'passes.json').then((r) => r.json()), fetch(base + 'skerries.json').then((r) => r.json())]);
+  const coast = await loadCoast(base, undefined, COAST_TILES);
+  world = buildCoastWorld(coast, { skerries: skerries.skerries });
+  file = passes; H0 = world.H.slice(); CL0 = world.CL.slice();
+}
+const reset = () => { world.H.set(H0); world.CL.set(CL0); resetPasses(world); };
+const lenGame = (p) => { let t = 0; for (let i = 1; i < p.line.length; i++) { const a = world.toGame(...p.line[i - 1]), b = world.toGame(...p.line[i]); t += Math.hypot(a[0] - b[0], a[1] - b[1]); } return t; };
+
+// ---- drawing ----
+function windowOf(p) {
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (const r of p.polygon) for (const [lon, lat] of r) { const [x, z] = world.toGame(lon, lat); x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+  const pad = 26, w = Math.max(100, x1 - x0 + 2 * pad), h = Math.max(100, z1 - z0 + 2 * pad), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  const side = Math.max(w, h * 0.8); // keep both views the same shape: wide-ish
+  return { x0: cx - side / 2, z0: cz - side * 0.8 / 2, w: side, h: side * 0.8 };
+}
+function drawPanel(canvas, win, p, { outline, route, boatAt }) {
+  const dpr = Math.min(2, devicePixelRatio || 1), cssW = canvas.parentElement.clientWidth || 380;
+  canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssW * dpr * (win.h / win.w));
+  const ctx = canvas.getContext('2d'), k = canvas.width / win.w; // px per game metre
+  const cell = world.pxM, a0 = Math.floor((win.x0 - world.x0) / cell), a1 = Math.ceil((win.x0 + win.w - world.x0) / cell), b0 = Math.floor((win.z0 - world.z0) / cell), b1 = Math.ceil((win.z0 + win.h - world.z0) / cell);
+  for (let b = b0; b <= b1; b++) for (let a = a0; a <= a1; a++) {
+    const x = world.x0 + (a + 0.5) * cell, z = world.z0 + (b + 0.5) * cell, h = world.heightAt(x, z);
+    let c;
+    if (h > 0) { const t = Math.min(1, Math.max(0, (h - 0.4) / 9)); c = [168 - 40 * t, 176 - 30 * t, 120 + 10 * t]; }
+    else if (isBlocked(world.heightAt, x, z)) c = [159, 211, 224];
+    else { const d = Math.min(1, Math.max(0, (-h - 1) / 5)); c = [70 - 20 * d, 135 - 35 * d, 200 - 30 * d]; }
+    ctx.fillStyle = `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`;
+    ctx.fillRect((x - cell / 2 - win.x0) * k, (z - cell / 2 - win.z0) * k, cell * k + 0.6, cell * k + 0.6);
+  }
+  const sx = (x) => (x - win.x0) * k, sz = (z) => (z - win.z0) * k;
+  // the carve outline
+  ctx.save(); ctx.lineWidth = Math.max(1.5, dpr * 1.2); ctx.strokeStyle = '#ff3fb8'; if (outline === 'dashed') ctx.setLineDash([6 * dpr, 4 * dpr]);
+  for (const ring of p.polygon) { ctx.beginPath(); ring.forEach(([lon, lat], i) => { const [x, z] = world.toGame(lon, lat); i ? ctx.lineTo(sx(x), sz(z)) : ctx.moveTo(sx(x), sz(z)); }); ctx.closePath(); ctx.stroke(); }
+  ctx.restore();
+  // the route the boat can take (white dots), if there is one
+  if (route?.ok) { ctx.save(); ctx.strokeStyle = '#fff'; ctx.lineWidth = dpr * 1.6; ctx.setLineDash([2 * dpr, 5 * dpr]); ctx.beginPath(); route.path.forEach(([x, z], i) => (i ? ctx.lineTo(sx(x), sz(z)) : ctx.moveTo(sx(x), sz(z)))); ctx.stroke(); ctx.restore(); }
+  // boats to scale: a koster is 8 game m long and 2.4 m wide; the dashed circle is the collision hull (2.5 game m)
+  for (const { x, z, ang, ghost } of boatAt) {
+    ctx.save(); ctx.translate(sx(x), sz(z)); ctx.rotate(ang);
+    ctx.globalAlpha = ghost ? 0.7 : 1; ctx.fillStyle = '#fff5d6'; ctx.strokeStyle = '#3a2a10'; ctx.lineWidth = dpr;
+    const L = 4 * k, B = 1.2 * k; // half length, half beam
+    ctx.beginPath(); ctx.moveTo(L, 0); ctx.quadraticCurveTo(L * 0.35, B * 1.25, -L, B * 0.8); ctx.lineTo(-L, -B * 0.8); ctx.quadraticCurveTo(L * 0.35, -B * 1.25, L, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.setLineDash([3 * dpr, 3 * dpr]); ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, HULL_RADIUS_M * k, 0, 7); ctx.stroke();
+    ctx.restore();
+  }
+  // scale bar: 100 real metres = 10 game metres
+  ctx.fillStyle = 'rgba(8,16,22,.8)'; ctx.fillRect(8 * dpr, canvas.height - 26 * dpr, 10 * k + 70 * dpr, 20 * dpr);
+  ctx.fillStyle = '#fff'; ctx.fillRect(14 * dpr, canvas.height - 16 * dpr, 10 * k, 2 * dpr); ctx.font = `${11 * dpr}px system-ui`; ctx.fillText('100 m real', 14 * dpr + 10 * k + 6 * dpr, canvas.height - 12 * dpr);
+}
+
+// boats along a route: start, middle, end, pointing along the route
+function boatsFor(route, A, B) {
+  if (!route?.ok) { const ang = Math.atan2(B[1] - A[1], B[0] - A[0]); return [{ x: A[0], z: A[1], ang, ghost: false }]; }
+  const P = route.path, at = (f) => { const i = Math.min(P.length - 2, Math.max(0, Math.floor(f * (P.length - 1)))); const [x, z] = P[i], [x2, z2] = P[i + 1]; return { x, z, ang: Math.atan2(z2 - z, x2 - x), ghost: f > 0 }; };
+  return [at(0), at(0.5), at(0.97)];
+}
+
+// ---- show one pass (or the whole ship batch) ----
+function show(id) {
+  const p = file.passes.find((q) => q.id === id) ?? file.passes[0];
+  state.id = p.id;
+  const win = windowOf(p), [A, B] = passEnds(world, p), L = lenGame(p);
+  const route = (label) => { const r = findRoute(world, A, B, { margin: 40 + L }); return r.ok && r.length <= 1.35 * L + 25 ? r : { ok: false }; };
+  reset(); const rb = route();
+  drawPanel($('before'), win, p, { outline: 'dashed', route: rb, boatAt: boatsFor(rb, A, B) });
+  const ids = state.mode === 'ship' ? null : [p.id];
+  const rep = applyPasses(world, file, ids ? { ids, depth: false } : { tiers: ['ship'], depth: false });
+  const ra = route();
+  drawPanel($('after'), win, p, { outline: 'solid', route: ra, boatAt: boatsFor(ra, A, B) });
+  const applied = rep.carved.map((c) => c.id);
+  reset();
+  $('beforeState').innerHTML = rb.ok ? '<span class="good">open already</span>' : '<span class="bad">closed to the boat</span>';
+  $('afterState').innerHTML = ra.ok ? `<span class="good">open: ${Math.round(ra.length * 10)} m route</span>` : '<span class="bad">still closed</span>';
+  $('afterTitle').textContent = state.mode === 'ship' ? 'After the ship batch' : 'After this carve';
+  const eye = p.tier === 'eye';
+  $('info').innerHTML = `<b>${p.name}</b> <span class="dim">(${p.id}, tier ${p.tier}${p.rank ? `, ship #${p.rank}` : ''})</span><br>
+    Real channel <b>${p.realWidthM} m</b> wide, <b>${p.lengthM} m</b> long. Carved to <b>${p.carveWidthM} m</b> (<b>${eye ? '<span class="warn">' : ''}×${p.widenFactor}${eye ? '</span>' : ''}</b> the real width). Land turned to water: ${p.landRemovedM2.toLocaleString('en')} m².<br>
+    ${p.marginalKm !== undefined ? `In the ship batch it saves a combined <b>${p.marginalKm} km</b> of sailing across all pairs of places (${p.aloneKm} km on its own)` : p.aloneKm > 0 ? `On its own it saves a combined <b>${p.aloneKm} km</b> of sailing across all pairs of places` : 'No measurable saving between the 44 places (it opens a pocket, not a route)'}. ${p.finiteTrips} trips shortened, ${p.unlockTrips} places un-trapped.
+    ${p.example ? `<br><span class="dim">e.g. ${p.example}</span>` : ''}${p.nearFelixPin ? `<br><span class="warn">next to Felix's pin: ${p.nearFelixPin}</span>` : ''}${p.eyeReason ? `<br><span class="warn">needs Felix's eye: ${p.eyeReason}</span>` : ''}${state.mode === 'ship' ? `<br><span class="dim">Showing the whole ship batch carved together (${applied.length} passes).</span>` : ''}`;
+  $('headname').textContent = `${p.name}: ×${p.widenFactor}`;
+  for (const [tier, host] of Object.entries({ ship: $('ship'), later: $('later'), eye: $('eye') })) for (const b of host.children) b.classList.toggle('on', b.dataset.id === p.id);
+  const q = new URLSearchParams(location.search); q.set('pass', p.id); if (state.mode === 'ship') q.set('apply', 'ship'); else q.delete('apply');
+  history.replaceState(null, '', location.pathname + '?' + q);
+  return { beforeOpen: rb.ok, afterOpen: ra.ok, afterLength: ra.length };
+}
+
+function buildPanel() {
+  const modes = $('modes');
+  for (const [m, label] of [['one', 'This pass only'], ['ship', 'The whole ship batch']]) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = label; b.dataset.mode = m;
+    b.onclick = () => { state.mode = m; for (const c of modes.children) c.classList.toggle('on', c.dataset.mode === m); show(state.id); };
+    modes.append(b);
+  }
+  for (const c of modes.children) c.classList.toggle('on', c.dataset.mode === state.mode);
+  for (const p of file.passes) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (p.tier === 'eye' ? ' eye' : ''); b.dataset.id = p.id;
+    b.innerHTML = `${p.name}<small>×${p.widenFactor}</small>`;
+    b.onclick = () => { show(p.id); $('panel').classList.remove('open'); scrollTo(0, 0); };
+    $(p.tier).append(b);
+  }
+  $('head').onclick = () => { const o = $('panel').classList.toggle('open'); $('head').setAttribute('aria-expanded', o); };
+  $('ship').previousElementSibling.textContent = `Ship: the first batch (${file.counts.ship} light carves, at most 2× the real width)`;
+  $('later').previousElementSibling.textContent = `Later: ${file.counts.later} more light carves`;
+  $('eye').previousElementSibling.textContent = `Needs Felix's eye: ${file.counts.eye} widened more than 2× (not shipped)`;
+}
+
+try {
+  await load(); buildPanel();
+  $('loading').remove();
+  if (params.get('panel') === 'open') $('panel').classList.add('open');
+  if (params.get('bare') === '1') $('panel').style.display = 'none'; // clean screenshots
+  const out = show(state.id ?? file.passes[0].id);
+  addEventListener('resize', () => show(state.id));
+  window.__passesLab = { ready: true, count: file.passes.length, show, first: out, ids: file.passes.map((p) => p.id), tiers: file.counts };
+} catch (err) {
+  console.error(err); $('loading').textContent = 'could not load: ' + (err.stack || err); window.__passesLabError = String(err.stack || err);
+}
+</script>
+</body>
+</html>
