@@ -1161,3 +1161,35 @@ trees should obey the same slope rule (no trees on painted granite).
 - **Leading marks in and out of harbours, time-appropriate:** Today = the real buoyage
   (lateral red/green, cardinals, lit beacons). Old eras = cairns (kummel), painted rock
   marks, spar marks and leading lines, the marks the "sea marks before 1840" idea already uses.
+
+## Felix's 1c phone test (2026-11-06)
+Loved it: the lighthouses, the camera glide back to the boat, the sounds, the minimap ("minimal
+feels good"), sticky edge names for big places (Fiskebäckskil, Lysekil).
+
+Changes he asked for:
+- **Chart:** show your boat on the chart as a little miniature/arrow pointing your heading.
+  Uncharted sections must NOT show the chart, only their big lore/descriptive name until you
+  sail there.
+- **"Navigate here":** tapping a lighthouse (or place) on the chart offers "Navigate here",
+  which shows it as a distant edge name/tag you can follow, so the sail there is the fun part.
+- **One-handed sailing:** a static rope bottom-right that you pull in or let out to trim,
+  while the other finger points/holds the course as now.
+- **"Trimmed" UI:** the colour is great but should stand out more.
+- **Names:** don't show a name before you can see that land; names appear when it's revealed.
+  Subtly show the names of explored islands as you sail past.
+- **Shallows:** mark grund and grynnor (shoals) where they really exist, and they stop the
+  boat (no sailing over them).
+- **Harbour marks:** clearer red and green lateral marks leading into harbours, plus
+  cardinal marks (reference: ref/cardinal-marks.png, IALA cardinal marks with their light
+  rhythms).
+- **Harbour menu:** he tried to sail into a harbour and open a menu; not built yet (later).
+
+**First task (Today's coast): the dark lighthouses.** A recent storm put the 5 lighthouses
+nearest the start out of action. A lightweight start screen tells you this: restore them,
+then return to **grandma in Fiskebäckskil** to report. Lightweight version: sail to each one;
+close enough, the boat moors, the camera does the lighthouse-visit view, slowly circles, and
+the light comes back on. Meeting the lighthouse keeper comes later. (Fits "lighthouses as a
+tutorial" and the storm/thunder that leads to the first jump.)
+
+**Name idea:** Torhild (Torild), from Þórr (thunder) + hildr (battle): "thunder fight" /
+"storm battle". Felix: a good name "for my friend".
