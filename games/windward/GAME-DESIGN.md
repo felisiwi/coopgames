@@ -1211,3 +1211,17 @@ Local shoal words here are båd/både and flut (e.g. Sverkerbådan, Smedjeflut),
 - **Rope:** smaller and looks like a real rope: slack (curved) when eased, taut when sheeted
   in; swipe up/down on it to let out/pull in. The trim indicator by the boat stays; the rope
   needs no big indicator of its own. The old sheet control is hidden for now.
+
+**Lighthouse task, the win (Felix, 2026-11-06):** reaching a dark lighthouse (e.g. via
+"Navigate here") should feel like a win: the light comes back on, and the fog lifts on the
+chart in a wide circle around it.
+
+**Night navigation (later, after 1d; not decided yet).** Felix: night should be harder, so you
+rely on marks and lighthouses (maybe no minimap or chart, or less detail). Mission control's
+suggestions to decide later:
+- Your position isn't shown on the chart at night: you can read the chart by lantern, but you
+  find yourself by lit marks and lighthouses.
+- The minimap shows only what your lantern reaches, plus lit marks and the light beams.
+- Lighthouse sectors are a mechanic: white = safe water, red/green = danger side (real feature).
+- Restored lighthouses are what make night sailing possible near them, so the first task pays
+  off later.
