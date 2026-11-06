@@ -1,9 +1,9 @@
 # Last session
 
-**2026-11-06: the busy coast, era-driven** (branch `felix/windward-busy-today`, describes `346b9ac`; NOT merged). Traffic, the Lysekil-Fiskebäckskil ferry (847),
-moored boats, summer houses and dusk windows, all driven by era profiles by year (`data/busy-eras.json`) over era-neutral geometry (`data/busy-world.json`, re-plan
-with `node tools/plan-busy-coast.mjs`); the modern kit is a placeholder for 1950 and 1980 (`src/busy-kits.js`). `?year=`, `?busy=0`, `?night=1`. Draw calls at
-Fiskebäckskil 193 -> 162. What an era must supply, perf, screenshots, phone checklist: `games/windward/docs/busy-today/README.md`.
+**2026-11-06: the busy coast, era-driven, after Felix's phone test** (branch `felix/windward-busy-today`, describes `67eddc3`; NOT merged). Ferry (847) now 14 m (1.75 x Svalan,
+era data) and docked slightly off its quay in clear water (skips Östersidan); 36 scheduled boats (20 sail: harbour routes, 8 cruising loops, 4 fishing circles) + an ambient pool
+(8, local) that always sails past you; era profiles by year over era-neutral geometry (`data/busy-eras.json`, `data/busy-world.json`, `node tools/plan-busy-coast.mjs`); the modern
+kit is a placeholder for 1950 and 1980. `?year=`, `?busy=0`, `?night=1`. Fiskebäckskil: 191 -> 160 draw calls. What an era must supply, perf, shots, checklist: `docs/busy-today/README.md`.
 
 Where things are:
 - Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`
