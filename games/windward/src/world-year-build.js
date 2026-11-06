@@ -19,7 +19,8 @@ import { attachTerrainStyle, STYLE_GAME } from './terrain-style.js';
 import { createSeamarkLayer } from './seamark-layer.js';
 import { createBuilding } from './props.js';
 import { LIGHTHOUSES } from './lighthouses.js';
-import { createAsset } from './era-assets.js';
+import { createLanternFx } from './lantern.js';
+import { createAsset, BUOY_COLOURS } from './era-assets.js';
 import { createBoatMesh } from './boats.js';
 import { createWater } from './water.js';
 import { coastAtWaterLevel, shoalsInEra } from './world-year.js';
@@ -31,13 +32,13 @@ export async function loadWorldFiles({ coastUrl, dataUrl, chartUrl, io } = {}) {
   dataUrl ??= new URL('../data/', import.meta.url).href;
   chartUrl ??= new URL('../assets/chart/', import.meta.url).href;
   io ??= { json: async (u) => (await fetch(u)).json(), bytes: async (u) => new Uint8Array(await (await fetch(u)).arrayBuffer()) };
-  const [coast, settlements, skerries, names, passes, shoals, seamarks, world1700, years] = await Promise.all([
+  const [coast, settlements, skerries, names, passes, shoals, seamarks, world1700, world1950, years] = await Promise.all([
     loadCoast(coastUrl, io, COAST_TILES), io.json(dataUrl + 'settlements-history.json'), io.json(coastUrl + 'skerries.json'), io.json(coastUrl + 'names.json'),
-    io.json(coastUrl + 'passes.json'), io.json(coastUrl + 'shoals.json'), io.json(coastUrl + 'seamarks.json'), io.json(dataUrl + 'world-1700.json'), io.json(dataUrl + 'world-years.json'),
+    io.json(coastUrl + 'passes.json'), io.json(coastUrl + 'shoals.json'), io.json(coastUrl + 'seamarks.json'), io.json(dataUrl + 'world-1700.json'), io.json(dataUrl + 'world-1950.json'), io.json(dataUrl + 'world-years.json'),
   ]);
   let chartCfg = null; // the game's chart config: gives the fog grid's extent, so the lab can read a saved Today chart. Optional.
   try { chartCfg = await io.json(chartUrl + 'chart.json'); } catch { chartCfg = null; }
-  return { coast, settlements, skerries, names, passes, shoals, seamarks, years, sources: { 'world-1700.json': world1700 }, chartCfg };
+  return { coast, settlements, skerries, names, passes, shoals, seamarks, years, sources: { 'world-1700.json': world1700, 'world-1950.json': world1950 }, chartCfg };
 }
 
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -66,10 +67,11 @@ function waterNear(world, x, z, rand, { minR = 18, maxR = 80, depth = 1.2, tries
   return null;
 }
 
-// ---- 1700 settlements ----------------------------------------------------------------------------------------
-// One cluster per settlement in the description: `cottages` of them (the data decides the size), a sea-shed and drying racks in the bigger
-// ones. Same placement rules as the game's villages (land high enough, not too steep, spaced), facing downhill = towards the sea.
-export function placeVillages1700(world, settlements, seed = 7) {
+// ---- settlements ----------------------------------------------------------------------------------------------
+// One cluster per settlement in the description: `cottages` of them (the data decides the size), a sea-shed in the bigger ones, and for
+// the 1700 kit drying racks. Same placement rules as the game's villages (land high enough, not too steep, spaced), facing downhill =
+// towards the sea. opts: { racks: true|false, radiusOf(settlement) }.
+export function placeVillages(world, settlements, seed = 7, { racks: wantRacks = true, radiusOf = (s) => (s.cottages >= 8 ? 62 : 40), sizeOf = () => 1 } = {}) {
   const rand = mulberry32(seed);
   const buildings = [], villages = [];
   for (const s of settlements) {
@@ -77,10 +79,9 @@ export function placeVillages1700(world, settlements, seed = 7) {
     if (!world.inside(gx, gz, EDGE_FADE_M)) { villages.push({ id: s.id, name: s.name, placed: 0, wanted: s.cottages, note: 'outside the window' }); continue; }
     const c = nearestLand(world, gx, gz);
     if (!c) { villages.push({ id: s.id, name: s.name, placed: 0, wanted: s.cottages, note: 'no land within 140 m' }); continue; }
-    const radius = s.cottages >= 8 ? 62 : 40;
-    const mine = [];
+    const radius = radiusOf(s);
     let placed = 0, shed = false, racks = false;
-    for (let attempt = 0; attempt < 700 && (placed < s.cottages || (s.cottages >= 6 && !shed) || (s.cottages >= 8 && !racks)); attempt++) {
+    for (let attempt = 0; attempt < 900 && (placed < s.cottages || (s.cottages >= 6 && !shed) || (wantRacks && s.cottages >= 8 && !racks)); attempt++) {
       const ang = rand() * Math.PI * 2, r = Math.sqrt(rand()) * radius;
       const x = c.x + Math.sin(ang) * r, z = c.z + Math.cos(ang) * r;
       const y = world.heightAt(x, z);
@@ -88,19 +89,36 @@ export function placeVillages1700(world, settlements, seed = 7) {
       const shore = y >= 0.5 && y < 1.5;
       let kind = null;
       if (s.cottages >= 6 && !shed && shore && deg < 25) kind = 'boathouse';
-      else if (s.cottages >= 8 && !racks && shore && deg < 25) kind = 'racks';
+      else if (wantRacks && s.cottages >= 8 && !racks && shore && deg < 25) kind = 'racks';
       else if (placed < s.cottages && y >= 0.9 && deg <= CONFIG.SETTLEMENT_MAX_SLOPE_DEG) kind = 'cottage';
       if (!kind) continue;
-      const gap = kind === 'racks' ? 12 : CONFIG.SETTLEMENT_SPACING;
+      const gap = (kind === 'racks' ? 12 : CONFIG.SETTLEMENT_SPACING) * sizeOf(kind);
       if (buildings.some((b) => Math.hypot(b.x - x, b.z - z) < gap)) continue;
       const roll = rand();
-      buildings.push({ kind, variant: kind === 'cottage' ? (roll < 0.5 ? 'a' : roll < 0.75 ? 'b' : 'c') : '', x, z, y: Math.max(0, y), facing: facing + (rand() - 0.5) * 0.5, village: s.id });
-      mine.push(buildings[buildings.length - 1]);
+      buildings.push({ kind, variant: kind === 'cottage' ? (roll < 0.5 ? 'a' : roll < 0.75 ? 'b' : 'c') : '', roll, x, z, y: Math.max(0, y), facing: facing + (rand() - 0.5) * 0.5, village: s.id });
       if (kind === 'boathouse') shed = true; else if (kind === 'racks') racks = true; else placed++;
     }
     villages.push({ id: s.id, name: s.name, placed, wanted: s.cottages, boathouse: shed, racks, uncertain: s.uncertain, at: { x: c.x, z: c.z } });
   }
   return { buildings, villages };
+}
+export const placeVillages1700 = (world, settlements, seed = 7) => placeVillages(world, settlements, seed, {});
+
+// A spot on the shore near a point where a bigger building can stand: land 0.5-1.6 high, gentle, clear of the given buildings.
+export function shoreSpot(world, near, avoid, { minR = 0, maxR = 110, clear = 16, rand = Math.random, yMin = 0.5, yMax = 1.6, maxSlope = 12 } = {}) {
+  let best = null;
+  for (let i = 0; i < 600; i++) {
+    const a = rand() * Math.PI * 2, r = minR + Math.sqrt(rand()) * (maxR - minR);
+    const x = near.x + Math.sin(a) * r, z = near.z + Math.cos(a) * r;
+    const y = world.heightAt(x, z);
+    if (y < yMin || y > yMax) continue;
+    const { deg, facing } = slopeDeg(world, x, z);
+    if (deg > maxSlope || avoid.some((b) => Math.hypot(b.x - x, b.z - z) < clear)) continue;
+    // the nearer the sea the better: score by distance to water downhill
+    const score = Math.hypot(x - near.x, z - near.z) + (y - 0.5) * 10;
+    if (!best || score < best.score) best = { x, z, y, facing, score };
+  }
+  return best;
 }
 
 // ---- hidden rocks ------------------------------------------------------------------------------------------------
@@ -170,7 +188,7 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
   group.add(terrain.group, trees.group);
   const props = new THREE.Group();
   props.name = 'props';
-  const report = { era: spec.era, cottages: 0, boathouses: 0, racks: 0, marks: 0, lights: 0, mooredEkas: 0, sailingEkas: 0, hiddenRocks: 0, villages: [], notes: [...spec.notes] };
+  const report = { era: spec.era, cottages: 0, boathouses: 0, racks: 0, marks: 0, lights: 0, lightsLit: 0, lightsDark: 0, keepers: 0, factories: 0, mooredEkas: 0, sailingEkas: 0, mooredBoats: 0, sailingBoats: 0, ferry: 'none', buoys: 0, hiddenRocks: 0, villages: [], notes: [...spec.notes] };
   const labels = [];
   const animated = []; // { update(dt, t, seaAt) }
   let hiddenLayer = null, shoalLayer = null, seamarkLayer = null;
@@ -192,12 +210,43 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
     return g;
   };
 
+  const lanterns = []; // { fx } the lit lanterns of the lighthouses (a glow on the real flash pattern, emissive only: no lights)
+  const clearLine = (a, b) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 6); for (let i = 0; i <= n; i++) { const x = lerp(a.x, b.x, i / n), z = lerp(a.z, b.z, i / n); if (sailHeightAt(x, z) > -2.5) return false; } return true; };
+  // a stamped boat that goes to and fro along a straight clear line, resting `dwell` seconds at each end
+  const patrol = (g, a, b, speed, { dwell = 0, offset = 0 } = {}) => {
+    const leg = Math.hypot(b.x - a.x, b.z - a.z) / speed, cycle = 2 * (leg + dwell), st = { t: offset % cycle };
+    animated.push({ update: (dt, t, seaAt) => {
+      st.t = (st.t + dt) % cycle;
+      const u = st.t;
+      const fwd = u < leg + dwell;
+      const f = u < leg ? u / leg : u < leg + dwell ? 1 : u < 2 * leg + dwell ? 1 - (u - leg - dwell) / leg : 0;
+      const x = lerp(a.x, b.x, f), z = lerp(a.z, b.z, f);
+      g.position.set(x, seaAt(x, z) - 0.05, z);
+      g.rotation.y = Math.atan2((b.x - a.x) * (fwd ? 1 : -1), (b.z - a.z) * (fwd ? 1 : -1));
+    } });
+  };
+  const lightTowers = (towers, lookup) => { // place hand-drawn towers (src/lighthouses.js) and give each a lantern that glows if it is lit
+    const names = towers.map((l) => l.name).filter((n) => LIGHTHOUSES.some((e) => e.name === n));
+    const out = [];
+    for (const pl of placeCoastLighthouses(world, names)) {
+      if (!pl.group) continue;
+      props.add(pl.group);
+      const entry = LIGHTHOUSES.find((e) => e.name === pl.name);
+      const info = lookup(pl.name);
+      const fx = createLanternFx(pl.group, entry);
+      fx.setLit(info.lit);
+      lanterns.push({ fx, lit: info.lit });
+      report.lights++; if (info.lit) report.lightsLit++; else report.lightsDark++;
+      out.push({ ...pl, info, entry });
+    }
+    return out;
+  };
+
   if (spec.era === 'today') {
     // the game's own villages and lighthouses, unchanged
     const { buildings, villages } = placeCoastVillages(world, files.settlements.settlements);
     for (const b of buildings) props.add(createBuilding(b));
-    const names = LIGHTHOUSES.filter((l) => { const [x, z] = world.toGame(l.lon, l.lat); return inWindow(x, z); }).map((l) => l.name);
-    for (const l of placeCoastLighthouses(world, names)) if (l.group) { props.add(l.group); report.lights++; }
+    lightTowers(LIGHTHOUSES.filter((l) => { const [x, z] = world.toGame(l.lon, l.lat); return inWindow(x, z); }), () => ({ lit: true })); // today every light is lit
     report.cottages = buildings.filter((b) => b.kind === 'cottage').length;
     report.boathouses = buildings.filter((b) => b.kind === 'boathouse').length;
     report.villages = villages;
@@ -210,8 +259,8 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
     seamarkLayer = createSeamarkLayer({ marks: files.seamarks.marks, toGame: world.toGame, heightAt: world.heightAt });
     group.add(shoalLayer.group, seamarkLayer.group);
     report.hiddenRocks = 0;
-  } else {
-    const { buildings, villages } = placeVillages1700(world, spec.settlements, seed + 6);
+  } else if (spec.kit === '1700') {
+    const { buildings, villages } = placeVillages(world, spec.settlements, seed + 6, {});
     for (const b of buildings) {
       if (b.kind === 'cottage') { stamp('cottage', b.variant, b.x, b.y, b.z, b.facing, 'cottage'); report.cottages++; }
       else if (b.kind === 'boathouse') { stamp('boathouse', '', b.x, b.y, b.z, b.facing, 'boathouse'); report.boathouses++; }
@@ -250,7 +299,6 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
     }
     report.mooredEkas = moored;
     // working ekas: sail back and forth along a clear line of open water near the start
-    const clearLine = (a, b) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 6); for (let i = 0; i <= n; i++) { const x = lerp(a.x, b.x, i / n), z = lerp(a.z, b.z, i / n); if (sailHeightAt(x, z) > -2.5) return false; } return true; };
     for (let k = 0; k < spec.boats.sailing && spawn; k++) {
       for (let tries = 0; tries < 300; tries++) {
         const a0 = rand() * Math.PI * 2, r0 = 90 + rand() * 260;
@@ -282,6 +330,105 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
     group.add(shoalLayer.group, hiddenLayer.group);
     report.hiddenRocks = hidden.length;
     report.hiddenRockList = hidden.map((s) => ({ id: s.shoal.id, x: s.x, z: s.z }));
+  } else if (spec.kit === '1950') {
+    // ---- villages: painted timber houses and sea-sheds; the data decides how many (people / 25, capped) ----
+    const { buildings, villages } = placeVillages(world, spec.settlements, seed + 5, { racks: false, radiusOf: (s) => (s.cottages >= 18 ? 88 : s.cottages >= 9 ? 62 : 42), sizeOf: () => 1.5 });
+    const mix = Object.entries(spec.houseColours || { falu: 1 });
+    const pickColour = (roll) => { let acc = 0; for (const [k, v] of mix) { acc += v; if (roll < acc) return k; } return mix[0][0]; };
+    for (const b of buildings) {
+      if (b.kind === 'cottage') { stamp('house1950', pickColour(b.roll), b.x, b.y, b.z, b.facing, 'house'); report.cottages++; }
+      else if (b.kind === 'boathouse') { stamp('sjobod1950', '', b.x, b.y, b.z, b.facing, 'boathouse'); report.boathouses++; }
+    }
+    report.villages = villages;
+    const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const villageOf = (key) => villages.find((v) => v.at && (norm(v.id) === norm(key) || norm(v.name) === norm(key)));
+    // ---- the canning factories that stood in 1950 (named only where the data names them) ----
+    for (const f of spec.industry) {
+      let at = null;
+      if (f.lon != null && f.lat != null) { const [fx, fz] = world.toGame(f.lon, f.lat); at = nearestLand(world, fx, fz, 90, 0.5); }
+      else { const v = villageOf(f.place); at = v ? v.at : null; }
+      const spot = at && (shoreSpot(world, at, buildings, { rand, clear: 18, maxR: 130 }) || shoreSpot(world, at, buildings, { rand, clear: 18, maxR: 240, yMax: 2.6, maxSlope: 17 })); // a steep coast: look further and accept a gentle slope
+      if (!spot) { report.notes.push(`no flat shore found for the canning factory at ${f.place}: not drawn`); continue; }
+      stamp('canning', '', spot.x, spot.y, spot.z, spot.facing, 'canning-factory');
+      buildings.push({ x: spot.x, z: spot.z });
+      report.factories++;
+    }
+    // ---- the lighthouses standing in 1950: lit or dark, with a keeper's house where the data says there was one ----
+    const towers = lightTowers(spec.lighthouses || [], (name) => { const l = spec.lighthouses.find((x) => x.name === name); return { lit: l.lit && l.manned !== 'dark', ...l }; });
+    for (const t of towers) {
+      if (!t.info.keeperHouse) continue;
+      const base = { x: t.group.position.x, z: t.group.position.z };
+      const spot = shoreSpot(world, base, [], { minR: 9, maxR: 55, clear: 0, rand, yMin: 0.3, yMax: 9, maxSlope: 25 });
+      if (!spot) { report.notes.push(`${t.name}: no room for the keeper's house on its islet: not drawn`); continue; }
+      stamp('keeper', t.info.keeperWall === 'red' ? 'red' : 'white', spot.x, spot.y, spot.z, spot.facing, 'keeper-house');
+      report.keepers++;
+    }
+    for (const t of spec.lighthouses || []) { const [lx, lz] = world.toGame(t.lon, t.lat); if (inWindow(lx, lz)) labels.push({ id: `light-${t.id}`, x: lx, z: lz, text: t.name, year: null, uncertain: !!t.uncertain, documented: true }); }
+    // ---- period sea marks: which of today's mark types existed, drawn in the colours and shapes of the time ----
+    const pm = spec.periodMarks;
+    const hashOf = (id) => { let h = 2166136261; for (const ch of String(id)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; };
+    const pickOf = (list, id) => list[Math.floor(hashOf(id) * 7919) % list.length];
+    if (pm) {
+      for (const m of files.seamarks.marks) {
+        const rule = pm.existed[m.type];
+        if (!rule || (rule === 'partly' && hashOf(m.id) >= 0.5)) continue;
+        const [x, z] = world.toGame(m.lon, m.lat);
+        if (!inWindow(x, z)) continue;
+        let variant = null, buoy = false;
+        const map = pm.map || {};
+        if (m.type === 'lateral') { const list = map.lateral && map.lateral[m.side]; if (!list) continue; variant = pickOf(list, m.id); buoy = !/spar/.test(variant); }
+        else if (m.type === 'isolated_danger') { const list = map.isolated_danger; if (!list) continue; variant = pickOf(list, m.id); } // the red-and-black banded pole, on a rock
+        if (!variant) continue; // special, cardinal and the small lights: not drawn in 1950
+        const g = stamp('buoy1950', variant, x, buoy ? 0 : /spar/.test(variant) && m.type === 'lateral' ? 0 : Math.max(0.2, world.heightAt(x, z)), z, 0, buoy ? 'buoy' : 'beacon');
+        if (buoy) animated.push({ update: (dt, t, seaAt) => { g.position.y = seaAt(x, z) - 0.05; } });
+        report.marks++; if (buoy) report.buoys++;
+      }
+    }
+    // ---- boats: wooden, moored near the villages, a few working, and the ferry on its route ----
+    const moorKinds = [['snipa1950', 'white'], ['snipa1950', 'green'], ['fishboat1950', 'dark'], ['sailboat1950', ''], ['snipa1950', 'blue'], ['fishboat1950', 'green'], ['snipa1950', 'white'], ['sailboat1950', '']];
+    const sorted = [...villages].filter((v) => v.at).sort((a, b) => b.placed - a.placed);
+    for (let round = 0; report.mooredBoats < spec.boats.moored && round < 4 && sorted.length; round++) {
+      for (const v of sorted) {
+        if (report.mooredBoats >= spec.boats.moored) break;
+        const w = waterNear(world, v.at.x, v.at.z, rand, { minR: 20, maxR: 90 });
+        if (!w) continue;
+        const [id, variant] = moorKinds[report.mooredBoats % moorKinds.length];
+        const g = stamp(id, variant, w.x, 0, w.z, rand() * Math.PI * 2, 'boat-moored');
+        animated.push({ update: (dt, t, seaAt) => { g.position.y = seaAt(w.x, w.z) - 0.05; } });
+        report.mooredBoats++;
+      }
+    }
+    for (let k = 0; k < spec.boats.sailing && spawn; k++) { // working fishing boats on a clear line near the start
+      for (let tries = 0; tries < 300; tries++) {
+        const a0 = rand() * Math.PI * 2, r0 = 90 + rand() * 300;
+        const a = { x: spawn.x + Math.sin(a0) * r0, z: spawn.z + Math.cos(a0) * r0 };
+        const a1 = rand() * Math.PI * 2, len = 260 + rand() * 220;
+        const b = { x: a.x + Math.sin(a1) * len, z: a.z + Math.cos(a1) * len };
+        if (!inWindow(a.x, a.z) || !inWindow(b.x, b.z) || !clearLine(a, b)) continue;
+        patrol(stamp('fishboat1950', k % 2 ? 'green' : 'dark', a.x, 0, a.z, 0, 'boat-sailing'), a, b, 2.2 + rand() * 0.8, { offset: rand() * 200 });
+        report.sailingBoats++;
+        break;
+      }
+    }
+    if (spec.boats.ferry) { // the Lysekil - Fiskebäckskil ferry: across the water between the two harbours if a clear line exists, else at the Fiskebäckskil quay
+      const fb = villageOf('fiskebackskil'), ly = villageOf('lysekil');
+      // the ends of the route: water near each harbour. Lysekil sits on a peninsula with harbours on both sides, so the end is the water
+      // point round Lysekil NEAREST Fiskebäckskil that a straight clear line reaches (the real boat crosses to the south harbour).
+      const cands = (v, n = 160) => { const out = []; for (let i = 0; i < n; i++) { const w = waterNear(world, v.at.x, v.at.z, rand, { minR: 25, maxR: 260, depth: 2, tries: 1 }); if (w) out.push(w); } return out; };
+      let route = null;
+      if (fb && ly) {
+        const A = cands(fb).sort((p, q) => Math.hypot(p.x - fb.at.x, p.z - fb.at.z) - Math.hypot(q.x - fb.at.x, q.z - fb.at.z)).slice(0, 12);
+        const Bc = cands(ly, 300);
+        let bestLen = Infinity;
+        for (const a of A) for (const b of Bc) { const len = Math.hypot(a.x - b.x, a.z - b.z); if (len < bestLen && len > 120 && clearLine(a, b)) { bestLen = len; route = [a, b]; } }
+      }
+      const wa = route ? route[0] : fb && waterNear(world, fb.at.x, fb.at.z, rand, { minR: 30, maxR: 140, depth: 2 });
+      if (route) { patrol(stamp('ferry1950', '', wa.x, 0, wa.z, 0, 'ferry'), route[0], route[1], 4, { dwell: 14 }); report.ferry = 'route'; report.ferryLengthM = Math.round(Math.hypot(route[0].x - route[1].x, route[0].z - route[1].z)); }
+      else if (wa) { const g = stamp('ferry1950', '', wa.x, 0, wa.z, rand() * 6, 'ferry'); animated.push({ update: (dt, t, seaAt) => { g.position.y = seaAt(wa.x, wa.z) - 0.05; } }); report.ferry = 'moored'; report.notes.push('no clear line between the two harbours: the ferry lies at the Fiskebäckskil quay'); }
+    }
+    for (const l of spec.labels) { const [lx, lz] = world.toGame(l.lon, l.lat); if (inWindow(lx, lz)) labels.push({ ...l, x: lx, z: lz }); }
+    shoalLayer = createShoalLayer(shoalList); // rocks awash are as today (a few centimetres of sea level change nothing)
+    group.add(shoalLayer.group);
   }
   group.add(props);
   const water = createWater(world.depthMap);
@@ -302,8 +449,11 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
       for (const a of animated) a.update(dt, t, seaAt);
       shoalLayer?.update(t);
       hiddenLayer?.update(t);
+      for (const l of lanterns) l.fx.update(t, 1);
       return rebuilt;
     },
+    // the windows of every stamped house, factory and keeper's house go warm at dusk (emissive glass, no lights)
+    setNight(on) { for (const t of templates.values()) t.setNight(!!on); },
     buildMs: (typeof performance !== 'undefined' ? performance.now() : Date.now()) - T0,
     dispose() { group.traverse((o) => o.geometry?.dispose?.()); water.mesh.geometry?.dispose?.(); },
   };

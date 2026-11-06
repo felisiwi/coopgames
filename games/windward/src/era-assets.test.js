@@ -94,6 +94,42 @@ check('no red on a 1700 cottage (bare grey timber; roofs turf or old grey-brown 
   }
 });
 
+check('1950 kit: wooden boats of the right size, the documented colours, painted timber houses under red tile, period buoys, no plastic', () => {
+  const len = (id, v = '') => { const b = bbox(createAsset(id, { variant: v }).group).getSize(new THREE.Vector3()); return Math.max(b.x, b.z); };
+  const has = (id, v, test) => { const col = solidOf(createAsset(id, { variant: v })).geometry.attributes.color; for (let i = 0; i < col.count; i++) if (test(col.getX(i), col.getY(i), col.getZ(i))) return true; return false; };
+  const red = (r, g) => r > 0.25 && r > 2 * g; // linear values
+  assert.ok(len('snipa1950', 'white') > 6 && len('snipa1950', 'white') < 7.6, 'a snipa is 4-8 m (WORLD-1950.md D)');
+  assert.ok(len('fishboat1950', 'white') > 10.5 && len('fishboat1950', 'white') < 13, 'a fishing boat ~11.5 m');
+  assert.ok(len('sailboat1950') > 7.4 && len('sailboat1950') < 9, 'a folkbat-like boat, 7.64 m');
+  assert.ok(len('ferry1950') > 15.5 && len('ferry1950') < 19, 'a small passenger boat, not the 24 m ferry of today');
+  assert.ok(len('ferry1950') < len('ferry') * 0.8, 'the 1950 ferry is smaller than today\'s');
+  assert.equal(ASSETS.fishboat1950.variants[0], 'white', 'white above the waterline is the documented fishing boat');
+  assert.ok(has('fishboat1950', 'white', red), 'a red stripe and a red bottom (S48/S49)');
+  assert.ok(has('house1950', 'white', red), 'red clay tile on the roof');
+  assert.deepEqual(ASSETS.house1950.variants.slice().sort(), ['ochre', 'red', 'white'], 'white, ochre, English red (not falu red)');
+  assert.ok(ASSETS.sjobod1950.variants.includes('red') && ASSETS.sjobod1950.variants.includes('wood'), 'sea-sheds are red, ochre or bare wood');
+  assert.ok(ASSETS.buoy1950.variants.includes('red-cone') && ASSETS.buoy1950.variants.includes('black-cone') && ASSETS.buoy1950.variants.includes('redblack-spar'), 'red (N/E) and black (S/W) marks and the banded danger pole');
+  assert.ok(has('buoy1950', 'redblack-spar', red) && has('buoy1950', 'redblack-spar', (r, g, b) => r < 0.05 && g < 0.05 && b < 0.05), 'banded red and black');
+  const win = (id, v) => createAsset(id, { variant: v }).describe().windows;
+  for (const [id, v] of [['house1950', 'red'], ['keeper', 'red'], ['canning', ''], ['ferry1950', ''], ['fishboat1950', 'white'], ['snipa1950', 'white']]) assert.ok(win(id, v) > 0, `${id} has windows (lit at dusk)`);
+  assert.ok(len('canning') > 14, 'the cannery is a big building'); assert.ok(createAsset('canning').describe().triangles <= 3000);
+  const fifties = ASSET_IDS.filter((i) => ASSETS[i].era === '1950');
+  assert.ok(fifties.length >= 9 && LAB_ORDER.indexOf(fifties[0]) > LAB_ORDER.indexOf('summerhouse') && LAB_ORDER.indexOf(fifties[0]) < LAB_ORDER.indexOf('cottage'), 'the lab lists 1950 between Today and 1700');
+});
+
+check('1950 windows go warm at dusk with no new lights, and the dusk colours differ from the other eras', () => {
+  for (const [id, v] of [['house1950', 'red'], ['keeper', 'red'], ['canning', ''], ['ferry1950', '']]) {
+    const a = createAsset(id, { variant: v });
+    const glass = a.group.children.filter((c) => c.name.startsWith('windows'));
+    const day = glass.map((g) => g.material.color.getHex());
+    a.setNight(true);
+    assert.notDeepEqual(glass.map((g) => g.material.color.getHex()), day, `${id}: dusk changed nothing`);
+    assert.equal(lights(a), 0);
+  }
+  const lit = (id, v) => createAsset(id, { variant: v, night: true }).group.children.find((c) => c.name === 'windows-on').material.color.getHex();
+  assert.notEqual(lit('house1950', 'red'), lit('cottage', 'a'), 'paraffin / early electric light is not tallow'); assert.notEqual(lit('house1950', 'red'), lit('summerhouse', 'cream'));
+});
+
 check('windows: houses and the ferry have glass; dusk turns it warm with no new lights; day turns it back', () => {
   for (const [id, v] of [['summerhouse', 'cream'], ['cottage', 'a'], ['ferry', ''], ['sailboat', 'navy'], ['harbourToday', ''], ['harbour1700', '']]) {
     const a = createAsset(id, { variant: v });

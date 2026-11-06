@@ -18,8 +18,10 @@ async function check(name, fn) { await fn(); passed += 1; console.log(`ok - ${na
 const files = await loadWorldFiles({ coastUrl: new URL('../assets/coast/', import.meta.url).href, dataUrl: new URL('../data/', import.meta.url).href, chartUrl: new URL('../assets/chart/', import.meta.url).href, io });
 const s1700 = worldAtYear(files.years, files.sources, 1700);
 const sToday = worldAtYear(files.years, files.sources, 2025);
+const s1950 = worldAtYear(files.years, files.sources, 1950);
 const e1700 = buildWorldForSpec(files, s1700);
 const eToday = buildWorldForSpec(files, sToday);
+const e1950 = buildWorldForSpec(files, s1950);
 // every named object in the scene; a boat's own parts (its little deck lantern, unlit by day) are not scenery, so boat subtrees are skipped
 const names = (era) => { const out = []; const walk = (o) => { if (o.name) out.push(o.name); if (o.name === 'eka-sailing') return; o.children.forEach(walk); }; walk(era.group); return out; };
 
@@ -125,6 +127,79 @@ await check('placement helpers: nearestLand finds land, a hidden-rock layer has 
   layer.update(1.7); assert.ok(layer.rings.every((r) => r.mat.opacity >= 0 && r.mat.opacity <= 0.6));
   const a = placeVillages1700(e1700.world, s1700.settlements, 3), b = placeVillages1700(e1700.world, s1700.settlements, 3);
   assert.deepEqual(a.buildings.map((x) => [x.kind, Math.round(x.x), Math.round(x.z)]), b.buildings.map((x) => [x.kind, Math.round(x.x), Math.round(x.z)]), 'seeded: the same every time');
+});
+
+// ---- 1950, built from the real data/world-1950.json ----
+await check('1950: the water is a few centimetres higher; the coast is today\'s, not 1700\'s', async () => {
+  assert.ok(s1950.waterOffsetM > 0 && s1950.waterOffsetM < 0.3, `offset ${s1950.waterOffsetM}`);
+  let flipped = 0, higher = 0, n = 0;
+  for (let k = 0; k < eToday.world.H.length; k += 7) { n++; if (eToday.world.H[k] > 0.2 && e1950.world.H[k] <= 0.2) flipped++; if (e1950.world.H[k] > eToday.world.H[k] + 1e-4) higher++; }
+  let flipped1700 = 0, landToday = 0;
+  for (let k = 0; k < eToday.world.H.length; k += 7) { if (eToday.world.H[k] > 0.2) landToday++; if (eToday.world.H[k] > 0.2 && e1700.world.H[k] <= 0.2) flipped1700++; }
+  assert.ok(flipped < flipped1700 * 0.55 && flipped < landToday * 0.02, `13 cm drowns far less land than 55 cm (${flipped} vs ${flipped1700} of ${landToday} land cells)`);
+  console.log(`   land cells drowned: 1950 ${flipped}, 1700 ${flipped1700}, of ${landToday}`);
+  assert.ok(higher < n * 0.005);
+  assert.equal(e1950.report.hiddenRocks, 0, 'no rock hides at 1950 sea level');
+});
+
+await check('1950 villages: houses on land, sizes follow the data (people / 25, capped), bigger places have more', async () => {
+  const v = Object.fromEntries(e1950.report.villages.map((x) => [x.id, x]));
+  assert.equal(Object.keys(v).length, s1950.settlements.length);
+  for (const s of s1950.settlements) { assert.ok(v[s.id].placed <= s.cottages); assert.ok(v[s.id].placed >= Math.ceil(s.cottages * 0.6), `${s.name}: ${v[s.id].placed} of ${s.cottages}`); }
+  let onLand = 0, total = 0;
+  e1950.props.traverse((o) => { if (['house', 'boathouse', 'canning-factory'].includes(o.name)) { total++; if (e1950.heightAt(o.position.x, o.position.z) >= 0.3) onLand++; } });
+  assert.equal(onLand, total, 'every building stands on land');
+  assert.equal(e1950.report.cottages, Object.values(v).reduce((n, x) => n + x.placed, 0));
+  assert.ok(e1950.report.cottages > e1700.report.cottages, 'a 1950 coast has more houses than 1700');
+  assert.ok(e1950.report.cottages <= eToday.report.cottages + 60);
+});
+
+await check('1950 lights: only those with a tower model; Maseskar lit with a keeper and a red dwelling; Islandsberg and Stangehuvud dark; automatic ones lit without a keeper', async () => {
+  const lit = (name) => s1950.lighthouses.find((l) => l.name === name);
+  assert.equal(e1950.report.lights, 5, 'Maseskar, Islandsberg, Hattan, Gaven, Stangehuvud: the 11 lights in the window, of which 5 have a hand-drawn tower');
+  assert.equal(e1950.report.lightsLit, 3); assert.equal(e1950.report.lightsDark, 2);
+  assert.equal(lit('Måseskär').manned, 'keepers'); assert.equal(lit('Måseskär').lit, true);
+  assert.equal(lit('Islandsberg').lit, false, 'the old 1883 house light: dark since 1938'); assert.equal(lit('Stångehuvud').lit, false);
+  assert.equal(lit('Hättan').manned, 'automatic');
+  assert.equal(e1950.report.keepers, 1, 'only Maseskar had keepers (and Hallo, outside the window)');
+  const keepers = []; e1950.props.traverse((o) => { if (o.name === 'keeper-house') keepers.push(o); });
+  assert.equal(keepers.length, 1);
+  assert.ok(e1950.heightAt(keepers[0].position.x, keepers[0].position.z) >= 0.3, 'the keeper\'s house stands on rock');
+  assert.ok(e1950.report.notes.some((n) => /1 of 11 lights/.test(n)), 'the report says how few had keepers');
+  assert.ok(e1950.labels.some((l) => l.id === 'light-maseskar' && l.text === 'Måseskär'), 'lights are named on the coast');
+  assert.ok(eToday.report.lights >= e1950.report.lights && eToday.report.lightsDark === 0, 'today every light is lit');
+});
+
+await check('1950 sea marks: no modern IALA layer; only mark types that existed, in the data\'s colours and shapes; the ferry is on its route or at its quay', async () => {
+  assert.equal(e1950.seamarkLayer, null);
+  assert.equal(e1950.group.getObjectByName('seamarks'), undefined);
+  const existed = s1950.periodMarks.existed;
+  const canDraw = files.seamarks.marks.filter((m) => (m.type === 'lateral' || m.type === 'isolated_danger') && existed[m.type]).length;
+  assert.ok(e1950.report.marks <= canDraw && e1950.report.marks > 20, `marks drawn: ${e1950.report.marks} of at most ${canDraw}`);
+  assert.ok(e1950.report.buoys > 5, 'lateral buoys in the colours of the time');
+  assert.ok(e1950.report.factories === 2, `both canning factories with a dated operation are drawn (${e1950.report.factories})`);
+  if (!existed.cardinal) assert.ok(!e1950.props.children.some((o) => o.name === 'cardinal'), 'no cardinal marks before IALA');
+  assert.ok(['route', 'moored'].includes(e1950.report.ferry), `ferry: ${e1950.report.ferry}`);
+  assert.ok(e1950.report.mooredBoats >= 3, 'wooden boats at their moorings');
+});
+
+await check('1950: dusk lights the windows of its buildings with no new lights; lanterns of lit towers exist', async () => {
+  const glass = []; e1950.props.traverse((o) => { if (o.name === 'windows-on' && !glass.includes(o.material)) glass.push(o.material); });
+  assert.ok(glass.length >= 1, 'houses have window glass');
+  const day = glass.map((g) => g.color.getHex());
+  e1950.setNight(true);
+  assert.notDeepEqual(glass.map((g) => g.color.getHex()), day, 'dusk changed the glass');
+  let lights = 0; e1950.group.traverse((o) => { if (o.isLight) lights++; });
+  assert.equal(lights, 0, 'no light objects');
+  e1950.setNight(false);
+  assert.deepEqual(glass.map((g) => g.color.getHex()), day);
+});
+
+await check('1950 animation: boats at work and the ferry move; moored boats ride the sea', async () => {
+  const mv = []; e1950.props.traverse((o) => { if (o.name === 'boat-sailing' || o.name === 'ferry') mv.push(o); });
+  const p0 = mv.map((o) => o.position.clone());
+  for (let i = 0; i < 40; i++) e1950.update(e1950.spawn.x, e1950.spawn.z, 0.5, i * 0.5, () => 0.1);
+  assert.ok(mv.length === 0 || mv.some((o, i) => o.position.distanceTo(p0[i]) > 3), 'something moved');
 });
 
 console.log(`\n${passed} checks passed`);

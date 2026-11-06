@@ -6,8 +6,8 @@
 // it reuses the game's sea, sky, light, camera, sailing physics and shore rules, and never touches the game's saved progress (the 1700
 // chart is inked into its own storage key; the game's saved chart is read, never written).
 //
-// URL: ?era=1700|today  ?ghost=saved|demo|full  ?chart=1  ?rock=N (start beside the Nth-nearest hidden rock)  ?at=lon,lat
-//      ?zoom=<n> (camera distance, 1 = the game's)  ?touch=1|0 (phone controls)  ?inkroute=1 (ink the first part of the demo route)  ?inkreset=1  ?breaker=<s>|all (freeze the breaker clock / hold every breaker on)
+// URL: ?era=1700|1950|today  ?ghost=saved|demo|full  ?chart=1  ?rock=N (start beside the Nth-nearest hidden rock)  ?at=lon,lat
+//      ?near=<settlement or light id> (start in the nearest open water to it, facing it)  ?zoom=<n> (camera distance, 1 = the game's)  ?touch=1|0 (phone controls)  ?inkroute=1 (ink the first part of the demo route)  ?inkreset=1  ?breaker=<s>|all (freeze the breaker clock / hold every breaker on)
 import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { boatSpeed, leewardSign, idealTrimRad, angleOffWind } from './sail.js';
@@ -23,11 +23,12 @@ import { createInputState } from '../../../shared/input.js';
 import { createHud, updateHud } from './hud.js';
 import { stepAlongShore, shallowFactor, SHORE_BRAKE } from './shore.js';
 import { createExplored, exploredStorage, EXPLORED_KEY } from './explored.js';
+import { createSeen } from './seen.js';
 import { boundsRect } from './chart.js';
 import { findOpenWater } from './coast-world.js';
 import { loadWorldFiles, buildWorldForSpec } from './world-year-build.js';
 import { worldAtYear, yearOfEra } from './world-year.js';
-import { createGhostChart, drawGhostChart, fitView, exploredBounds, readOnlyStorage, demoExplored, fullExplored, INK_EXPLORED_KEY } from './ghost-chart.js';
+import { createGhostChart, drawGhostChart, fitView, exploredBounds, revealedLabels, readOnlyStorage, demoExplored, fullExplored, INK_EXPLORED_KEY } from './ghost-chart.js';
 
 const $ = (id) => document.getElementById(id);
 const loading = $('loading');
@@ -56,7 +57,8 @@ async function main() {
   const sky = createSky();
   scene.add(sky.mesh);
   const camera = new THREE.PerspectiveCamera(CONFIG.FIXED_CAMERA_FOV_DEG, 1, CONFIG.CAMERA_NEAR, 2000);
-  scene.add(new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY));
+  const hemi = new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY);
+  scene.add(hemi);
   const sun = new THREE.DirectionalLight(CONFIG.SUN_COLOR, CONFIG.SUN_INTENSITY);
   const laz = CONFIG.LIGHT_AZIMUTH_DEG * DEG, lel = CONFIG.LIGHT_ELEVATION_DEG * DEG;
   const sunOffset = new THREE.Vector3(Math.sin(laz) * Math.cos(lel), Math.sin(lel), Math.cos(laz) * Math.cos(lel)).multiplyScalar(20);
@@ -70,15 +72,22 @@ async function main() {
   // ---- the data and both worlds (built up front: the toggle is then instant) ----
   loading.textContent = 'loading the coast and the 1700 data…';
   const files = await loadWorldFiles();
-  const first = Q.get('era') === 'today' ? 'today' : '1700';
-  const order = [first, first === '1700' ? 'today' : '1700'];
+  const ERA_IDS = files.years.eras.map((e) => e.id);
+  const first = ERA_IDS.includes(Q.get('era')) ? Q.get('era') : '1700';
+  const order = [first, ...ERA_IDS.filter((id) => id !== first)];
   const specs = {}, eras = {};
   for (const id of order) {
-    loading.textContent = `building the coast of ${id === 'today' ? 'today' : '1700'}…`;
+    loading.textContent = `building the coast of ${id === 'today' ? 'today' : id}…`;
     await tick();
     specs[id] = worldAtYear(files.years, files.sources, yearOfEra(files.years, id));
     eras[id] = buildWorldForSpec(files, specs[id]);
   }
+
+  // Dusk = a blue-hour evening (ART.md: never grim): dim cool light, a darker sea and sky; lit windows and lighthouses show. Day = config.js as it is.
+  const NIGHT = { SUN_COLOR: 0xaab8e8, SUN_INTENSITY: 0.85, HEMI_SKY_COLOR: 0x92a2d4, HEMI_GROUND_COLOR: 0x544c78, HEMI_INTENSITY: 1.5, SKY_HORIZON_COLOR: 0x4a5a8c, SKY_ZENITH_COLOR: 0x1c2650, HAZE_COLOR: 0x34406c, LOOK_SEA_BRIGHTNESS: 0.62 };
+  const DAY = Object.fromEntries(Object.keys(NIGHT).map((k) => [k, CONFIG[k]]));
+  let night = Q.get('night') === '1' ? 1 : 0;
+  const applyLight = () => { Object.assign(CONFIG, night ? NIGHT : DAY); hemi.color.set(CONFIG.HEMI_SKY_COLOR); hemi.groundColor.set(CONFIG.HEMI_GROUND_COLOR); hemi.intensity = CONFIG.HEMI_INTENSITY; sun.color.set(CONFIG.SUN_COLOR); sun.intensity = CONFIG.SUN_INTENSITY; era?.setNight?.(!!night); $('dusk').textContent = night ? 'Dusk' : 'Day'; $('dusk').classList.toggle('on', !!night); $('dusk').setAttribute('aria-pressed', String(!!night)); };
 
   // ---- the boat, the wind, the sea ----
   const self = { ...spawnPose(1, 'host'), speed: 0 };
@@ -116,6 +125,7 @@ async function main() {
   const inkExplored = createExplored(rect, { storage: store, key: INK_EXPLORED_KEY });
   if (Q.get('inkreset') === '1') inkExplored.reset();
   if (Q.get('inkroute') === '1') { const pts = routePts.slice(0, 3); for (let i = 0; i < pts.length - 1; i++) for (let k = 0; k <= 30; k++) inkExplored.reveal(pts[i].x + ((pts[i + 1].x - pts[i].x) * k) / 30, pts[i].z + ((pts[i + 1].z - pts[i].z) * k) / 30, 150); }
+  const seen = createSeen({ explored: inkExplored, heightAt: eras['1700'].heightAt }); // the game's rule for revealing a name (src/seen.js): revealed land within 150 m
   const ghost = createGhostChart({ today: eras.today, era: eras['1700'], todayExplored, inkExplored, source: ghostSource });
 
   // ---- which era is on screen ----
@@ -141,23 +151,27 @@ async function main() {
     for (const l of era.labels) if (l.text) { const el = document.createElement('div'); el.className = `plabel${l.uncertain ? ' uncertain' : ''}`; el.textContent = l.text; if (l.year && id !== 'today') { const s = document.createElement('small'); s.textContent = String(l.year); el.appendChild(s); } el.style.display = 'none'; labelHost.appendChild(el); labelEls.set(l.id, el); }
     for (const b of document.querySelectorAll('#era button')) b.classList.toggle('on', b.dataset.era === id);
     $('chartBtn').hidden = id !== '1700';
-    $('year').textContent = id === 'today' ? 'Today · the game\'s coast' : `around ${era.spec.year} · sea ${era.spec.waterOffsetM} m higher`;
-    document.title = `Windward World ${id === 'today' ? 'Today' : '1700'} Lab`;
+    $('year').textContent = id === 'today' ? 'Today · the game\'s coast' : `around ${era.spec.year} · sea ${era.spec.waterOffsetM} m higher${id === '1950' ? ' (a few cm)' : ''}`;
+    document.title = `Windward World Lab: ${era.spec.label}`;
     fillInfo();
-    if (announce) toast(id === 'today' ? 'Today: lights, buoys and red cottages' : `1700: no lights, ${era.report.hiddenRocks} rocks just under the surface`);
+    applyLight();
+    if (announce) toast(id === 'today' ? 'Today: lights, buoys and red cottages' : id === '1950' ? `1950: ${era.report.lightsLit} lights lit, ${era.report.keepers} keepers' houses, wooden boats` : `1700: no lights, ${era.report.hiddenRocks} rocks just under the surface`);
     const u = new URL(window.location.href); u.searchParams.set('era', id); window.history.replaceState(null, '', u);
   }
   function fillInfo() {
     const r = era.report, sp = era.spec;
     const li = (t) => `<li>${t}</li>`;
-    let h = `<h3>${sp.label}</h3><ul>${li(`sea ${sp.waterOffsetM} m ${sp.waterOffsetM ? 'higher than today (our arithmetic on SMHI, uncertain)' : 'as today'}`)}${li(`${r.lights} lighthouses${sp.modernMarks ? ', modern buoys and beacons' : ', no modern marks'}`)}${li(`${r.cottages} cottages, ${r.boathouses} sea-sheds${r.racks ? `, ${r.racks} drying racks` : ''}`)}${r.marks ? li(`${r.marks} cairns and painted rocks`) : ''}${r.mooredEkas + r.sailingEkas ? li(`${r.mooredEkas} ekas moored, ${r.sailingEkas} sailing`) : ''}${r.hiddenRocks ? li(`<b>${r.hiddenRocks}</b> rocks just under the surface in this window: a pale patch, an odd breaker`) : ''}</ul>`;
+    const level = sp.waterOffsetM ? `sea ${sp.waterOffsetM} m higher than today (our arithmetic on SMHI${sp.era === '1700' ? ', uncertain' : ': a few centimetres'})` : 'sea as today';
+    const lightsLine = sp.era === '1950' ? `${r.lights} lighthouses: ${r.lightsLit} lit, ${r.lightsDark} dark, ${r.keepers} keepers' houses` : `${r.lights} lighthouses${sp.modernMarks ? ', modern buoys and beacons' : ', no modern marks'}`;
+    let h = `<h3>${sp.label}</h3><ul>${li(level)}${li(lightsLine)}${li(`${r.cottages} ${sp.era === '1950' ? 'houses' : 'cottages'}, ${r.boathouses} sea-sheds${r.racks ? `, ${r.racks} drying racks` : ''}${r.factories ? `, ${r.factories} canning factories` : ''}`)}${r.marks ? li(sp.era === '1950' ? `${r.buoys} buoys and ${r.marks - r.buoys} beacons in the marks of the time` : `${r.marks} cairns and painted rocks`) : ''}${r.mooredEkas + r.sailingEkas ? li(`${r.mooredEkas} ekas moored, ${r.sailingEkas} sailing`) : ''}${r.mooredBoats + r.sailingBoats ? li(`${r.mooredBoats} wooden boats moored, ${r.sailingBoats} fishing boats at work, ferry: ${r.ferry}`) : ''}${r.hiddenRocks ? li(`<b>${r.hiddenRocks}</b> rocks just under the surface in this window: a pale patch, an odd breaker`) : ''}</ul>`;
     if (sp.era !== 'today') {
-      h += `<h3>Settlements (sizes from the data)</h3><ul>${r.villages.map((v) => li(`${v.name}: ${v.placed} of ${v.wanted} cottages${v.uncertain ? ' <i>(doubtful in 1700)</i>' : ''}${v.note ? ` <i>(${v.note})</i>` : ''}`)).join('')}</ul>`;
-      h += `<h3>Names in 1700</h3><ul>${sp.labels.map((l) => li(`${l.modern}: ${l.text ? `${l.text} <i>(${l.year}${l.uncertain ? ', uncertain' : ''})</i>` : '<i>no documented form: no name shown</i>'}`)).join('')}</ul>`;
-      h += `<h3>Honest notes</h3><ul>${sp.notes.map(li).join('')}${li('boats: type of the c.1700 eka is a design choice (BOAT-BRIEF); the quiet coast is a recommendation')}</ul>`;
+      h += `<h3>Settlements (sizes from the data)</h3><ul>${r.villages.map((v) => li(`${v.name}: ${v.placed} of ${v.wanted} ${sp.era === '1950' ? 'houses' : 'cottages'}${v.uncertain ? ' <i>(doubtful for this year)</i>' : ''}${v.note ? ` <i>(${v.note})</i>` : ''}`)).join('')}</ul>`;
+      if (sp.era === '1700') h += `<h3>Names in 1700</h3><ul>${sp.labels.map((l) => li(`${l.modern}: ${l.text ? `${l.text} <i>(${l.year}${l.uncertain ? ', uncertain' : ''})</i>` : '<i>no documented form: no name shown</i>'}`)).join('')}</ul>`;
+      if (sp.era === '1950' && sp.lighthouses) h += `<h3>Lights in 1950</h3><ul>${sp.lighthouses.map((l) => li(`${l.name}: ${l.lit && l.manned !== 'dark' ? 'lit' : 'dark'}, ${l.manned}${l.keeperHouse ? ', keeper\'s house' : ''}`)).join('')}</ul>`;
+      h += `<h3>Honest notes</h3><ul>${[...sp.notes, ...r.notes.filter((n) => !sp.notes.includes(n))].map(li).join('')}${sp.era === '1700' ? li('boats: type of the c.1700 eka is a design choice (BOAT-BRIEF); the quiet coast is a recommendation') : li('boat counts and the house scale (one house per ~25 people, capped) are ours; see docs/WORLD-1950.md')}</ul>`;
     }
     $('infoBody').innerHTML = h;
-    $('infoName').textContent = `${sp.label}: ${r.cottages} cottages · ${r.lights} lights${r.hiddenRocks ? ` · ${r.hiddenRocks} hidden rocks` : ''}`;
+    $('infoName').textContent = `${sp.label}: ${r.cottages} ${sp.era === '1950' ? 'houses' : 'cottages'} · ${r.lights} lights${r.hiddenRocks ? ` · ${r.hiddenRocks} hidden rocks` : ''}`;
   }
 
   // ---- the chart overlay ----
@@ -174,12 +188,12 @@ async function main() {
     const pic = ghost.ink();
     if (pic.version !== inkVersion) { inkCanvas.width = pic.w; inkCanvas.height = pic.h; inkCanvas.getContext('2d').putImageData(new ImageData(pic.rgba, pic.w, pic.h), 0, 0); inkVersion = pic.version; }
     cctx.setTransform(d, 0, 0, d, 0, 0);
-    drawGhostChart(cctx, w, h, view, ghost, { x: self.x, z: self.z, heading: self.heading }, inkCanvas);
+    drawGhostChart(cctx, w, h, view, ghost, { x: self.x, z: self.z, heading: self.heading }, inkCanvas, revealedLabels(eras['1700'].labels.filter((l) => l.chartName !== false), seen)); // old names only where the ink has reached and a name is documented
   }
   const openChart = (on) => { chartOpen = on; chartEl.classList.toggle('on', on); if (on) { view = null; $('chartSource').textContent = `Old chart: ${ghost.source}.`; drawChart(); } phone?.setRopeVisible(!on); };
   $('chartBtn').addEventListener('click', () => openChart(true));
   $('chartClose').addEventListener('click', () => openChart(false));
-  $('chartReset').addEventListener('click', () => { inkExplored.reset(); drawChart(); toast('The 1700 chart is blank again; the pencil stays'); });
+  $('chartReset').addEventListener('click', () => { inkExplored.reset(); seen.setExplored(inkExplored); drawChart(); toast('The 1700 chart is blank again; the pencil stays'); });
   chartCanvas.addEventListener('pointerdown', (e) => { chartCanvas.setPointerCapture(e.pointerId); chartPointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); });
   const endChart = (e) => chartPointers.delete(e.pointerId);
   chartCanvas.addEventListener('pointerup', endChart); chartCanvas.addEventListener('pointercancel', endChart);
@@ -196,6 +210,7 @@ async function main() {
 
   // ---- panel, toggle ----
   for (const b of document.querySelectorAll('#era button')) b.addEventListener('click', () => setEra(b.dataset.era));
+  $('dusk').addEventListener('click', () => { night = night ? 0 : 1; applyLight(); const u = new URL(window.location.href); if (night) u.searchParams.set('night', '1'); else u.searchParams.delete('night'); window.history.replaceState(null, '', u); });
   $('infoHead').addEventListener('click', () => { const open = $('info').classList.toggle('open'); $('infoHead').setAttribute('aria-expanded', String(open)); });
   if (Q.get('info') === '1') $('info').classList.add('open');
 
@@ -208,6 +223,18 @@ async function main() {
     for (let k = 0; k < 24; k++) {
       const a = k * Math.PI / 12, x = rock.x + Math.sin(a) * 28, z = rock.z + Math.cos(a) * 28;
       if (E.sailHeightAt(x, z) < -3 && E.sailHeightAt(rock.x + Math.sin(a) * 14, rock.z + Math.cos(a) * 14) < -2) { self.x = x; self.z = z; self.heading = Math.atan2(rock.x - x, rock.z - z); break; }
+    }
+  }
+  // ?near=grundsund | fiskebackskil | maseskar ...: start in the nearest open water to a settlement or light of the era on screen, facing it
+  if (Q.has('near')) {
+    const id = Q.get('near');
+    const v = era.report.villages.find((x) => x.id === id && x.at);
+    const l = era.labels.find((x) => x.id === `light-${id}` || x.id === id);
+    const c = v ? v.at : l ? { x: l.x, z: l.z } : null;
+    if (c) {
+      let best = null;
+      for (let r = 6; r <= 200 && !best; r += 3) for (let k = 0; k < 48 && !best; k++) { const a = k / 48 * Math.PI * 2, x = c.x + Math.sin(a) * r, z = c.z + Math.cos(a) * r; if (era.sailHeightAt(x, z) < -2.2 && era.heightAt(x, z) < -2.2) best = { x, z }; }
+      if (best) { self.x = best.x; self.z = best.z; self.heading = Math.atan2(c.x - best.x, c.z - best.z); }
     }
   }
   const viewTarget = new THREE.Vector3(self.x, 0, self.z);

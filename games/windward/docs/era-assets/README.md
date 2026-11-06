@@ -56,6 +56,22 @@ Try it: `era-asset-lab.html` (opens on the Today vs 1700 comparison), or `?asset
   a bike rack on the foredeck, a coral waterline stripe and a pastel-navy lower hull. **TODO(felix): confirm the real colours
   (a photo or the Vasttrafik livery); the code has the same TODO.**
 
+## 1950 kit (added 2026-11-06; sources and "not documented: designer's choice" in `docs/WORLD-1950.md`, "Looks for the kit")
+
+| asset | triangles | budget | look |
+|---|---|---|---|
+| Snipa with inboard (3 hull colours) | 233 | 800 | clinker, pointed bow and slightly rounded pointed stern, ~6.6 m, an engine box, a wheel shelter, a thin exhaust. Hull colour is the designer's choice |
+| Fishing boat (white / dark / green) | 316 | 3000 | ~11.5 m; **white above the waterline, a red stripe, a red bottom** (the documented Sandö look); wheelhouse, funnel, mast with a small tanned sail, orange floats. Wheelhouse shape: designer's choice |
+| Wooden sailboat | 180 | 800 | folkbåt-like, ~8 m, cotton (cream, panelled) sails, varnished mast |
+| Ferry (1950s) | 295 | 3000 | ~17 m: the real 1950 Lysekil-Fiskebäckskil ferry is **not identified in any source read**, so this is a small passenger boat of the type (saloon, wheelhouse, black funnel, open aft deck with benches and an awning). Everything about it is the designer's choice |
+| Village house (white / ochre / English red) | 118 | 800 | 1.5 storeys, painted vertical timber, white corner boards, green window frames, red clay tile roof |
+| Sea-shed (red / ochre / bare wood) | 92 | 800 | gable to the water, white-trimmed double doors, a short timber landing |
+| Keeper's house | 130 | 800 | red dwelling (red in 1865; 1950 colour not documented), slate roof, a store, a brick siren house, a flagstaff |
+| Canning factory | 356 | 3000 | a long two-storey hall, a boiler house with a tall brick chimney, a loading pier and crane, barrels. Brick or wood, size, colour: designer's choice |
+| Sea marks (colour-shape variants) | 14-78 | 800 | red (N/E side) and black (S/W side) cone buoys and poles with a broom or cone on top, and the red-and-black banded danger pole (S27/S28) |
+
+Windows warm at dusk like the other kits (a paraffin tone). `world-year-build.js` places these in the 1950 world.
+
 ## 1700 kit
 
 - **Cottages**: small (about 3-4 m by 4-6 m, walls under 2 m), unpainted weathered grey timber in horizontal bands, one tiny
