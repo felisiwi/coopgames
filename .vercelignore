@@ -1,0 +1,4 @@
+# Keep Vercel deployments small (Felix, 2026-11-06): agents' reports, screenshots and research
+# docs are for the repo, not the live site. Nothing at runtime loads them.
+games/*/docs/
+.claude/
