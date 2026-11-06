@@ -75,7 +75,7 @@ await check('the first story beats: the boy finds you, lends the eka, sends you 
   assert.ok(!/I’m Britta|found you first|After the storm|waiting for you since/i.test(text), 'no old card text');
   assert.ok(!/caulk/i.test(text));
   for (const t of allText) assert.ok(t.length <= 92, `too long for a phone card: ${t}`);
-  assert.deepEqual(Object.keys(OBJECTIVES), ['find', 'errand', 'return', 'free']);
+  assert.deepEqual(Object.keys(OBJECTIVES), ['find', 'errand', 'return', 'help', 'free']);
 });
 
 // ------------------------------------------------------------------------------------------------------------ flags

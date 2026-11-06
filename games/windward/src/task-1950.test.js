@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createTask1950, TASK1950_KEY } from './task-1950.js';
-import { LIGHTS_1950, KEEPER_LIGHT, DEPOT_CARD, RELIGHT_STEPS, KEEPER_CARDS, REPORT_CARDS, KEEPER_NUDGE, FUTURE_CARD, NO_GAS_HINT, STORY_1950 } from './story-1950.js';
+import { LIGHTS_1950, KEEPER_LIGHT, BRITTA_CARDS, RELIGHT_STEPS, KEEPER_CARDS, REPORT_CARDS, KEEPER_NUDGE, FUTURE_CARD, NO_GAS_HINT, STORY_1950 } from './story-1950.js';
 import { eraStorage } from './era-storage.js';
 
 let passed = 0;
@@ -28,7 +28,7 @@ check('without gas you cannot moor at a dark light; the hint says fetch the gas 
   assert.equal(t.arrival(100, 10, 1), null, 'at Hättan, slow, but no gas');
   assert.equal(t.gasHint(100, 40, 10), true); assert.equal(t.gasHint(100, 40, 12), false, 'once per cooldown');
   assert.equal(t.gasHint(0, -300, 100), false, 'not near a dark light');
-  assert.ok(/gas/i.test(NO_GAS_HINT) && /Lysekil/.test(NO_GAS_HINT));
+  assert.ok(/tanks/i.test(NO_GAS_HINT) && /Britta/.test(NO_GAS_HINT));
 });
 
 check('the depot: close and slow loads the gas; too fast gives one hint; far away does nothing', () => {
@@ -84,14 +84,19 @@ check('progress is saved per era and read back; a 1950 save never touches the To
 });
 
 check('the copy: short lines, no grandma, no real names for the keeper, the depot says what Felix said, invented lines are marked in the source', () => {
-  const all = [DEPOT_CARD.lines, RELIGHT_STEPS.map((s) => s.text), ...KEEPER_CARDS.map((c) => c.lines), ...REPORT_CARDS.map((c) => c.lines), KEEPER_NUDGE.lines, FUTURE_CARD.lines].flat();
+  const all = [...BRITTA_CARDS.flatMap((c) => c.lines), RELIGHT_STEPS.map((s) => s.text), ...KEEPER_CARDS.map((c) => c.lines), ...REPORT_CARDS.map((c) => c.lines), KEEPER_NUDGE.lines, FUTURE_CARD.lines].flat();
   for (const t of all) assert.ok(t.length <= 92, `too long for a phone card: ${t}`);
   const text = [...all, ...KEEPER_CARDS.map((c) => c.title), ...REPORT_CARDS.map((c) => c.title)].join('\n');
   assert.ok(!/grandma/i.test(text), 'no grandma in 1950');
-  assert.ok(DEPOT_CARD.lines.some((l) => /gas from Erholmen, delivered to Lysekil/i.test(l)));
+  assert.ok(BRITTA_CARDS.every((c) => c.title === 'Britta'), 'one speaker: Britta');
+  const brittaText = BRITTA_CARDS.flatMap((c) => c.lines).join(' ');
+  assert.ok(/broken his arm/.test(brittaText) && /tends the lights/.test(brittaText), 'her father normally tends the lights and has broken his arm');
+  assert.ok(/gas tanks are in our shed/.test(brittaText) && /Four of them/.test(brittaText), 'the shed holds the tanks: that is the depot');
+  assert.ok(/Måseskär/.test(brittaText) && /post/.test(brittaText), 'the keeper\'s post');
+  assert.ok(!/Lysekil|Erholmen/.test(text + brittaText), 'the depot is Britta\'s shed, not Lysekil');
   assert.ok(/Måseskär/.test(KEEPER_CARDS[0].title) && KEEPER_CARDS.slice(1).every((c) => c.title === 'The keeper'), 'the keeper is "the keeper": unnamed');
   assert.ok(KEEPER_CARDS.some((c) => c.lines.some((l) => /glow out east/.test(l))), 'the line about the strange light');
-  assert.ok(REPORT_CARDS.some((c) => c.lines.some((l) => /lights talk/.test(l))), '"the lights talk", said in person');
+  assert.ok(REPORT_CARDS.some((c) => c.title === 'The boy' && c.lines.some((l) => /lights talk/.test(l))), '"the lights talk", said in person by the boy');
   assert.ok(REPORT_CARDS.some((c) => /Svalan/.test(c.title) && c.lines.some((l) => /freshly painted/.test(l))), 'Svalan relaunched, repaired, freshly painted');
   assert.ok(!/caulk/i.test(text), 'a clinker hull is not caulked');
   assert.ok(!/waiting for you since/i.test(text), 'no finale line');
@@ -100,7 +105,7 @@ check('the copy: short lines, no grandma, no real names for the keeper, the depo
   const src = readFileSync(new URL('./story-1950.js', import.meta.url), 'utf8');
   assert.ok((src.match(/INVENTED-DIALOGUE/g) || []).length >= 6, 'the invented lines are marked in the source');
   assert.ok(!/Nilén|Danielsson|Lundberg|Wässing|Hermansson|Anker Andersson/.test(src), 'no real keeper or memoir name is used for the invented keeper');
-  assert.deepEqual(Object.keys(STORY_1950).sort(), ['depot', 'find', 'keeper', 'keeperNudge', 'parts', 'report', 'yard']);
+  assert.deepEqual(Object.keys(STORY_1950).sort(), ['britta', 'find', 'keeper', 'keeperNudge', 'parts', 'report', 'yard']);
 });
 
 console.log(`\n${passed} checks passed`);

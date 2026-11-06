@@ -6,13 +6,13 @@ import { eraStorage } from './era-storage.js';
 let passed = 0;
 function check(name, fn) { fn(); passed += 1; console.log(`ok - ${name}`); }
 const memory = () => { const m = new Map(); return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), keys: () => [...m.keys()] }; };
-const G = { id: 'harbour:Grundsunds hamn', x: 100, z: 500 }, Y = { id: 'yard:boatbuilder', x: -50, z: 20 };
-const make = (st = null) => createBeats({ storage: st, grundsund: G, yard: Y });
+const G = { id: 'harbour:Grundsunds hamn', x: 100, z: 500 }, Y = { id: 'yard:boatbuilder', x: -50, z: 20 }, R = { id: 'house:britta', x: 20, z: -300 };
+const make = (st = null) => createBeats({ storage: st, grundsund: G, yard: Y, britta: R });
 
 check('the order: find, errand, return, free; advance moves one step and stops at free', () => {
-  assert.deepEqual(PHASES, ['find', 'errand', 'return', 'free']);
+  assert.deepEqual(PHASES, ['find', 'errand', 'return', 'help', 'free']);
   const b = make(); assert.equal(b.phase, 'find'); assert.equal(b.done, false);
-  assert.equal(b.advance(), 'errand'); assert.equal(b.advance(), 'return'); assert.equal(b.advance(), 'free');
+  assert.equal(b.advance(), 'errand'); assert.equal(b.advance(), 'return'); assert.equal(b.advance(), 'help'); assert.equal(b.advance(), 'free');
   assert.equal(b.advance(), 'free', 'stays free'); assert.equal(b.done, true);
 });
 
@@ -28,10 +28,15 @@ check('the errand: only at Grundsund, only in the errand; close and slow arrives
   assert.equal(b.errandArrival(G.x, G.z, 0, 300), null, 'the parts are only taken once');
   assert.equal(b.returnArrival(Y.x + 5, Y.z, 1, 300), 'arrive');
   b.advance(); assert.equal(b.returnArrival(Y.x, Y.z, 0, 400), null);
+  assert.equal(b.phase, 'help');
+  assert.equal(b.helpArrival(R.x, R.z + 200, 0, 500), null, 'too far from Britta\'s jetty');
+  assert.equal(b.helpArrival(R.x + 4, R.z, 8, 600), 'hint');
+  assert.equal(b.helpArrival(R.x + 4, R.z, 1, 700), 'arrive');
+  b.advance(); assert.equal(b.helpArrival(R.x, R.z, 0, 800), null, 'her cards come once');
 });
 
-check('the Navigate tag points at Grundsund in the errand and at the yard on the way back, and nowhere else', () => {
-  const b = make(); assert.equal(b.goal(), null); b.advance(); assert.equal(b.goal(), G); b.advance(); assert.equal(b.goal(), Y); b.advance(); assert.equal(b.goal(), null);
+check('the Navigate tag points at Grundsund in the errand, the yard on the way back, Britta\'s jetty after that, and nowhere else', () => {
+  const b = make(); assert.equal(b.goal(), null); b.advance(); assert.equal(b.goal(), G); b.advance(); assert.equal(b.goal(), Y); b.advance(); assert.equal(b.goal(), R); b.advance(); assert.equal(b.goal(), null);
 });
 
 check('saved per era and read back; reset goes back to the start; blocked or broken storage is safe', () => {

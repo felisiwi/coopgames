@@ -55,7 +55,8 @@ export const OBJECTIVES = {
   find: { hud: '', now: 'Someone is speaking to you.' },
   errand: { hud: 'fittings from Grundsund', now: 'Sail to Grundsund and fetch the fittings for the boatbuilder.' },
   return: { hud: 'back to the yard', now: 'Take the fittings back to the boatbuilder’s yard on Skaftö.' },
-  free: { hud: 'Fiskebäckskil', now: 'Someone in Fiskebäckskil was asking for help.' },
+  help: { hud: 'Fiskebäckskil', now: 'Someone in Fiskebäckskil was asking for help. Tie up at the white house with the jetty.' },
+  free: { hud: '', now: '' },
 };
 export const NOW_TITLE = 'Now';
 export const EASE_OFF_GRUNDSUND = 'Ease off to tie up at the quay in Grundsund';
@@ -69,22 +70,30 @@ export const YARD = { id: 'yard:boatbuilder', name: 'The boatbuilder’s yard', 
 export const LIGHTS_1950 = ['Hättan', 'Gäven', 'Stångholmen', 'Fredagsholmen']; // the four AGA lights you relight (Felix, stage 1e)
 export const KEEPER_LIGHT = 'Måseskär';
 export const FUTURE_LIGHT_NAME = 'Kråksundsgap Södra'; // the small 1941 iron lantern; in the glimpse it is the 1954 tower
-export const DEPOT = {
-  id: 'depot:Lysekil', name: 'Gas depot, Lysekil quay', desc: 'Gas from Erholmen, delivered to Lysekil.',
-  village: 'village:Lysekil', // where the quay is looked for: the water off Lysekil's village point
-};
+// Britta's house (Felix, 2026-11-06 revision): the house from the opening ("Grandma and Grandpa's house"), by the water in Fiskebäckskil. In the 1950 world a white house, her
+// family's gas shed and a jetty stand there; the quay in front of the jetty is where you tie up (the depot: "her family's shed holds the gas tanks"), and where you report back.
+// These numbers are what src/opening-site.js picks on the Today coast (opening-site.test.js checks they still agree), so the house you leave in the opening is the one you return to.
+export const BRITTA_HOUSE = Object.freeze({
+  house: { x: 3507.270309624426, z: 7825.390864335655 },
+  dir: Math.PI,       // the jetty runs from the house straight towards the water (due north on the phone screen)
+  waterM: 16,         // the sea starts this far from the house, along dir
+  jetty: { from: { x: 3507.270309624426, z: 7812.390864335655 }, to: { x: 3507.270309624426, z: 7798.390864335655 }, width: 1.8, y: 0.42 },
+  shed: { x: 3502.2, z: 7815.4 }, // beside the jetty's land end, up the shore
+  quay: { x: 3507.270309624426, z: 7792.4 }, // open water just off the jetty's end: where the eka ties up
+});
+export const BRITTA_ENTRY = Object.freeze({ id: 'house:britta', name: 'Britta’s house', kind: 'house', desc: 'Britta’s house' });
 
-export const DEPOT_CARD = {
-  title: 'Lysekil quay',
-  lines: [
-    'Gas from Erholmen, delivered to Lysekil.', // Felix's wording
-    'Four heavy tubes go into the eka, one for each light.', // the tubes: docs/PEOPLE-1950.md (about 100-120 kg each)
-    'On top, a sack of post and old newspapers for the keeper on Måseskär.', // INVENTED (grounded: keepers' families prized post and newspapers, PEOPLE-1950.md section 1)
-  ],
-  button: 'Cast off',
-};
-export const NO_GAS_HINT = 'No gas yet. Fetch the tubes from the quay in Lysekil.';
-export const EASE_OFF_DEPOT = 'Ease off to tie up at the quay';
+// Beat 4, at Britta's quay: Britta (about 17) asks for help. One speaker. Her father normally tends the lights and has broken his arm (invented but plausible: in reality staff from
+// Marstrand serviced them, docs/PEOPLE-1950.md); the shed holds the gas tanks (the depot). Every line INVENTED-DIALOGUE. TODO(felix): confirm.
+export const BRITTA_CARDS = [
+  { title: 'Britta', lines: ['“You’re the one who came ashore in the storm. The boy said you might come.”', '“I’m Britta.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'Britta', lines: ['“My father tends the lights round here.”', '“He’s broken his arm, and the storm has put them all out.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'Britta', lines: ['“The gas tanks are in our shed. Four of them, one for each light.”', '“Will you take them out in the eka?”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'Britta', lines: ['“There’s a sack of post for the keeper on Måseskär too.”', '“Tell me when they’re burning.”'], button: 'Load the eka' }, // INVENTED-DIALOGUE
+];
+export const TANKS_TOAST = 'Four tanks and a sack of post aboard · four lights to bring back';
+export const NO_GAS_HINT = 'No tanks yet. Britta’s shed holds them.';
+export const EASE_OFF_BRITTA = 'Ease off to tie up at Britta’s jetty';
 
 // What you do at an automatic light, as short lines while the camera circles it (the steps are the documented AGA routine: land the tubes, fit a full one, open the valve
 // slowly, check the pilot flame; docs/PEOPLE-1950.md section 2). `at` = seconds after mooring (the lamp catches at 6.6 s: src/relight.js). The "pop" is the flasher.
@@ -103,10 +112,10 @@ export const KEEPER_CARDS = [
   { title: 'The keeper', lines: ['“And there is a glow out east I can’t put a name to.”', '“It flashes twice and waits, like a proper light.”'], button: 'Sail on' },
 ];
 
-// Back in Fiskebäckskil: Britta, then the boatbuilder's son (the lights talk, in person), then Svalan. Replaces grandma's card and the chest.
+// Back at Britta's jetty: Britta, then the boy (Svalan is ready; "the lights talk, in person"), then Svalan. One speaker per card. Replaces grandma's card and the chest.
 export const REPORT_CARDS = [
-  { title: 'Britta', lines: ['“I watched them come on, one by one.”', '“Even Måseskär has its post.”'], button: 'Next' }, // INVENTED-DIALOGUE
-  { title: 'The boatbuilder’s son', lines: ['“The lights talk, if you know how to listen.”'], quote: true, dusk: true, button: 'Next' }, // INVENTED-DIALOGUE (the line is Felix's, from grandma's card)
+  { title: 'Britta', lines: ['“I watched them come on, one by one, from the window.”', '“Father says thank you.”'], button: 'Next' }, // INVENTED-DIALOGUE
+  { title: 'The boy', lines: ['“Svalan’s ready. They say the lights talk, if you know how to listen.”'], quote: true, dusk: true, button: 'Next' }, // INVENTED-DIALOGUE (the lights-talk line is Felix's)
   { title: 'Svalan', lines: ['She is back in the water, mended and freshly painted.', 'The eka goes home. Svalan is yours to sail.'], button: 'Carry on sailing' },
 ];
 // After the fourth light: a short nudge (not the ending): the keeper is still waiting. Its button sets Navigate to Måseskär.
@@ -117,4 +126,4 @@ export const GLOW_TOAST = 'A glow out east, the keeper said. Kråksundsgap is ma
 export const FUTURE_CARD = { lines: ['That tower is not here yet.', 'But you saw it.'], button: 'Carry on sailing' };
 
 // What game.js hands to createTaskUi for the 1950 game.
-export const STORY_1950 = { find: FIND_CARDS, parts: PARTS_CARD, yard: YARD_CARDS, depot: DEPOT_CARD, keeper: KEEPER_CARDS, report: REPORT_CARDS, keeperNudge: KEEPER_NUDGE };
+export const STORY_1950 = { find: FIND_CARDS, parts: PARTS_CARD, yard: YARD_CARDS, britta: BRITTA_CARDS, keeper: KEEPER_CARDS, report: REPORT_CARDS, keeperNudge: KEEPER_NUDGE };

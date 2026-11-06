@@ -22,9 +22,9 @@ import { layoutRow, rewindFrame, REWIND } from './rewind.js';
 import { OPENING_PLAN, OPENING_LINES, OPENING_FLASHES, OPENING_TOTAL_S, OPENING_SKIP } from './story-1950.js';
 import { phaseAt, flashLevel, darkLevel } from './opening.js';
 import { pickSite, ferryClockFor, frameSite } from './opening-site.js';
+import { createJetty } from './jetty.js';
 
 const smooth = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };
-const WOOD = 0xa07c52;
 const ROW_Z = -1500;      // the rewind row sits out in the open sea, far from the coast (the coast is hidden then)
 const ROW_CAM_DIST = 80;  // how far in front of the row the camera stands (a phone shows one or two towers)
 const WINK_S = 0.45;
@@ -84,19 +84,7 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
   svalan.group.name = 'svalan-at-jetty';
   const jetty = new THREE.Group(); jetty.name = 'jetty';
   if (site) {
-    const { from, to, width, y } = site.jetty;
-    const len = Math.hypot(to.x - from.x, to.z - from.z), wood = new THREE.MeshLambertMaterial({ color: WOOD, emissive: 0x2e2012, flatShading: true });
-    const mx = (from.x + to.x) / 2, mz = (from.z + to.z) / 2;
-    // A low, flat boardwalk at the height of the sea (not at the height of the ground under it): one thin deck, a plank-edge rail either side, posts at the corners.
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(width, 0.12, len), wood);
-    deck.position.set(mx, y, mz); deck.rotation.y = site.dir; jetty.add(deck);
-    const px = Math.cos(site.dir), pz = -Math.sin(site.dir), sx = Math.sin(site.dir), sz = Math.cos(site.dir);
-    for (let k = 0; k <= 5; k++) { // short posts, barely above the deck, down both sides
-      const t = k / 5, cx = from.x + (to.x - from.x) * t, cz = from.z + (to.z - from.z) * t;
-      for (const sd of [-1, 1]) { const post = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 0.16), wood); post.position.set(cx + px * sd * (width / 2), y + 0.12, cz + pz * sd * (width / 2)); jetty.add(post); }
-    }
-    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffc878 })); // a lamp on the last post: the warmest thing on the water
-    lamp.position.set(to.x + px * (width / 2), y + 0.85, to.z + pz * (width / 2)); jetty.add(lamp);
+    jetty.add(createJetty(site));
     world.add(jetty);
     svalan.group.position.set(site.boat.x, 0, site.boat.z); svalan.group.rotation.y = site.boat.heading;
     world.add(svalan.group);
