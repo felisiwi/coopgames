@@ -1193,3 +1193,9 @@ tutorial" and the storm/thunder that leads to the first jump.)
 
 **Name idea:** Torhild (Torild), from Þórr (thunder) + hildr (battle): "thunder fight" /
 "storm battle". Felix: a good name "for my friend".
+
+**Decisions (2026-11-06):** rope control = option A (absolute rope: handle position is the trim,
+green sweet band, glows when trimmed). Generated harbour-mouth marks (where OSM has none) look
+the same as real ones in the game; only the chart/debug view tells them apart (`invented: true`).
+**Torhild** is the friend you meet in 1700 (whether she joins Brita or takes her place is open).
+Local shoal words here are båd/både and flut (e.g. Sverkerbådan, Smedjeflut), not grund/grynna.
