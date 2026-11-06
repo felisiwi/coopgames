@@ -1,5 +1,5 @@
-// The chart and minimap controls (stage 1c): the minimap (top left, round, north up) with its Chart button, zoom +/- (bottom
-// left, away from the rope), the lighthouse visit card and a small toast. Plain DOM in
+// The chart and minimap controls (stage 1c): the minimap (top left, round, north up; tap it to open the chart, a small badge says so),
+// a Boat button that shows only while the chart is up, zoom +/- (bottom left, away from the rope), the lighthouse visit card and a toast. Plain DOM in
 // the same quiet style as the HUD. No logic lives here: game.js passes callbacks.
 const HUD_BG = 'rgba(20,34,48,0.78)';
 const LINE = '1px solid rgba(234,246,255,0.18)';
@@ -32,12 +32,19 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
   const top = el('div', `position:fixed;z-index:7;left:max(12px,env(safe-area-inset-left,0px));top:calc(12px + ${SAFE_TOP});display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none`);
   const mini = el('canvas', 'width:132px;height:132px;border:2px solid rgba(244,246,242,0.85);box-shadow:0 2px 10px rgba(0,0,0,0.25);background:#4d7d9d;display:block;pointer-events:auto;touch-action:manipulation;border-radius:50%');
   mini.width = 264; mini.height = 264;
-  mini.setAttribute('aria-label', 'Minimap');
+  mini.setAttribute('aria-label', 'Minimap: tap to open the chart');
+  mini.style.cursor = 'pointer';
   const caption = el('div', `font:600 10px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(234,243,248,0.7);text-shadow:0 1px 2px rgba(0,0,0,.5);width:132px;text-align:center`, 'North up');
   const row = el('div', 'display:flex;gap:8px;pointer-events:auto');
-  const chartBtn = button('Chart', 'Open the chart');
+  const chartBtn = button('Boat', 'Back to the boat view', 'display:none'); // only while the chart is up
   row.append(chartBtn);
-  top.append(mini, caption, row);
+  // The minimap is the way into the chart: a tap opens it (or visits a lighthouse under the finger). A small expand badge on its edge
+  // says it is tappable; it takes no touches itself, so the tap goes to the map.
+  const miniWrap = el('div', 'position:relative;line-height:0');
+  const badge = el('div', `position:absolute;right:-5px;bottom:-5px;width:24px;height:24px;border-radius:8px;background:${HUD_BG};border:${LINE};display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.92`);
+  badge.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="${TEXT}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.5 1.5h3v3M10.5 1.5L7 5M4.5 10.5h-3v-3M1.5 10.5L5 7"/></svg>`;
+  miniWrap.append(mini, badge);
+  top.append(miniWrap, caption, row);
   parent.appendChild(top);
 
   const zoomCol = el('div', `position:fixed;z-index:7;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(64px + ${SAFE_BOTTOM});display:flex;flex-direction:column;gap:8px`);
@@ -71,7 +78,7 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
 
   let toastTimer = 0;
   return {
-    chartCanvas, mini, elements: { top, zoomCol, card, chartBtn, navBtn, backBtn },
+    chartCanvas, mini, elements: { top, zoomCol, card, boatBtn: chartBtn, navBtn, backBtn },
     // Boxes the names must keep clear of (CSS px): the minimap column, zoom buttons, the visit card.
     rects() {
       return [top, zoomCol, card].filter((e) => e.style.display !== 'none').map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0)
@@ -99,10 +106,9 @@ export function createChartUi({ parent = document.body, debug = false, onChart, 
     // the chart is up: it takes the touches (drag to pan, tap a lighthouse) and the Chart button becomes "Boat"
     setChartMode(on) {
       chartCanvas.style.pointerEvents = on ? 'auto' : 'none';
-      chartBtn.textContent = on ? 'Boat' : 'Chart';
-      chartBtn.setAttribute('aria-label', on ? 'Back to the boat view' : 'Open the chart');
+      chartBtn.style.display = on ? 'inline-block' : 'none';
     },
     // the minimap is hidden (the chart is up): its caption goes with it
-    setMiniHidden(h) { caption.style.visibility = h ? 'hidden' : 'visible'; },
+    setMiniHidden(h) { caption.style.visibility = h ? 'hidden' : 'visible'; badge.style.visibility = h ? 'hidden' : 'visible'; },
   };
 }

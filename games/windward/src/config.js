@@ -45,7 +45,7 @@ export const CONFIG = {
   CAMERA_MODE: 'fixed',
 
   FIXED_CAMERA_ELEVATION_DEG: 52,
-  FIXED_CAMERA_AZIMUTH_DEG: 45, // constant compass bearing from boat to camera
+  FIXED_CAMERA_AZIMUTH_DEG: 0, // constant compass bearing from boat to camera: 0 = the camera is south of the boat looking north, so north is up on screen (matches the minimap, chart, tags). Was 45 until the 1c direction fix
   FIXED_CAMERA_FOV_DEG: 30, // narrow => reads almost isometric
   // Straight-line camera-to-boat distance. At 30deg vertical FOV / 16:9 this
   // puts ~120m across the screen at the boat's position (120 / (2*tan(hFOV/2))).
@@ -126,7 +126,7 @@ export const CONFIG = {
   // values ("Before") are kept in src/look-presets.js.
   SUN_COLOR: 0xfff1e0, // soft warm white (was gold 0xffd9a6)
   SUN_INTENSITY: 2.4, // (was 1.4). three.js r155+ no longer multiplies light by pi, so a diffuse surface receives intensity/pi of its colour: ~2.4 is what brings a flat top to ~0.2 of the colour from the sun
-  LIGHT_AZIMUTH_DEG: 50, // matches FIXED_CAMERA_AZIMUTH_DEG-ish so grazing light rakes toward the camera
+  LIGHT_AZIMUTH_DEG: 30, // the sun is on the camera's side (south) but a little to the east, so shadows fall up and to the left and slopes read. Was 50 with the camera at 45; with the north-up camera (azimuth 0) 5 looked flat (sun straight behind the camera), 30 and 50 modelled the islands; 30 chosen by eye at Grundsund and Hättan
   LIGHT_ELEVATION_DEG: 18, // still low enough for long soft shadows (was 10)
   SUN_SHADOW_BIAS: -0.0008, // reduce acne; loosened from -0.0005 for the lower elevation above
 

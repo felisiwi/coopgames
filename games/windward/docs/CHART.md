@@ -13,7 +13,7 @@ shader's rule). Boats: `src/boats.js`; today = Svalan (koster, gaff + jib, deck 
 
 **Batch 2, zoom and minimap.**
 - Zoom out to 4x (was 2.5x) in the boat view, then it turns into the chart; keeps zooming to the whole coast (zoom ~286 at 390x844).
-  One gesture both ways. `src/zoom.js` (the maths: the chart is drawn tilt-, turn- and scale-matched to the 3D camera, tested against a real
+  One gesture both ways. `src/zoom.js` (the maths: the chart is drawn tilt- and scale-matched to the 3D camera, which looks due north, so it never turns; tested against a real
   perspective camera), `src/chart-controller.js` (state), `src/zoom-input.js` (wheel, pinch).
 - Pinch only counts when both fingers land within 150 ms (the phone's second finger is the sheet, so a later second finger never zooms).
   +/- buttons (bottom left, away from the sheet thumb) and the wheel also zoom.
@@ -21,7 +21,7 @@ shader's rule). Boats: `src/boats.js`; today = Svalan (koster, gaff + jib, deck 
   the new zoom without growing the 142k-triangle wave tile.
 - Minimap (`src/minimap.js`): about 320 m across, built from the game's own height field a few rows per frame: depth in four blues, awash rock hatched,
   low rock vs land, coast line, buoys, harbours (square = village, ring = natural harbour), lighthouses. Fixed look (Felix's pick): round and north up, no settings button
-  and nothing saved. Tap a lighthouse on it to visit.
+  and nothing saved. Tap a lighthouse on it to visit; tap anywhere else on it to open the chart (a small expand badge on its edge says so). There is no Chart button; a Boat button shows only while the chart is up (pinch-in and the +/- buttons also go back).
 
 **Batch 3, the chart.**
 - Chart (`src/chart.js`): the Map Lab's two pictures (`assets/chart/`, extracted from `ref/map-lab.html`, geography in `chart.json`), the 7 sections
@@ -35,7 +35,7 @@ shader's rule). Boats: `src/boats.js`; today = Svalan (koster, gaff + jib, deck 
 - Islandsberg and Stångehuvud finally have a place (they are the lighthouses), so their descriptions attach.
 
 ## Decisions (Felix: change any of these)
-1. **Zoom-to-chart = scale-matched crossfade** (not a Chart-button-only overlay, not a 3D pull-back). The Chart button exists too.
+1. **Zoom-to-chart = scale-matched crossfade** (not a button-only overlay, not a 3D pull-back). Tapping the minimap opens it too.
 2. **Pinch** needs both fingers down within 150 ms; otherwise the second finger is the sheet. Buttons are the fallback.
 3. The 3D render is paused once the chart fully covers the view.
 4. Descriptions for lights come from `place-names.json`; "built <year>" on the card is from `LIGHTHOUSES.md`.
@@ -68,7 +68,7 @@ background ~2.5 s after the game starts, 1.1 MB).
 ## Phone checklist
 1. Load the preview with `?debug=1`. Sail from Grundsund: the round minimap top-left shows the sound, the harbour mouths (squares/rings), buoys, the way out in deeper blue.
 2. Zoom out with two fingers (both down at once). Past the boat view it unrolls into the chart; keep going to the whole coast; zoom back in to land on the boat.
-3. Try +/- and the Chart / Boat button. Check that steering (one finger) still works, and trim with the rope (bottom-right, below).
+3. Tap the minimap: the chart opens; tap Boat (top left) to come back. Try +/- too. Check that steering (one finger) still works, and trim with the rope (bottom-right, below).
 4. The minimap is always round and north up (no gear button).
 5. On the chart: red outline = granddad's sheet, the rest uncharted (tap one: a note). Fog lifts where you sailed; reload, the fog is still lifted.
 6. Tap a gold lighthouse on the chart or the minimap: the camera glides there, the boat stays; "Back to the boat". "Jump here (debug)" moves the boat.
@@ -90,3 +90,7 @@ Bottom-right on phones, for one-handed sailing. Soft warm-grey hemp (not yellow)
 - Code: `ropeGeom`, `swipeTrim`, `ropeNeed`, `ropeGuideStep`, `ropeScrollStep`, `drawRopeControl` in `src/phone.js` (tests in `src/phone.test.js`).
 Units: knots for wind and boat speed (no m/s), nautical miles for distances ("0.4 nm", "< 0.1 nm"), 1 nm = 1852 m on the same scale as the knots, so 0.4 nm at 6 kn is four minutes.
 Rope checklist: touch the rope's edge without swiping, nothing changes; swipe down/up, the stripes run with your finger and coast to a stop; chevrons point the way to trim and fade when trimmed; steer with one thumb and swipe with the other; a second finger on the water does nothing; Navigate here, the tag reads in nm. (Headless runs at ~5 fps, so the stripe speed and easing are only judged on a phone.)
+
+## Direction fix: the camera is north-up (2026-11-06)
+Felix saw the boat point left in 3D while the minimap arrow pointed right, and the edge tag disagree with the minimap. Root cause: not a flipped sign. The 3D camera sat at a 45 degree azimuth (south-east, looking north-west) while the minimap and chart are true north-up, so every direction differed by 45 degrees (north was up-and-right in 3D) and the chart un-rotated during the zoom-out blend. Measured at one pose: camera look heading -135 degrees at every zoom, chart rotation 45 -> 24 -> 0 across the blend, tag arrow = the 3D screen direction.
+Fix (option A): `FIXED_CAMERA_AZIMUTH_DEG: 0`, so the camera looks due north and north is up on screen at every zoom; minimap, chart, edge tags, the compass and the 3D view all agree. The chart view lost its rotation (`chartView` has no `rot`); the blend only fades and un-tilts (the tilt squash stays, the 3D view is tilted 52 degrees). `LIGHT_AZIMUTH_DEG` 50 -> 30: with the camera turned, a sun at 5 looked flat (straight behind the camera), 30 and 50 modelled the islands; 30 chosen by eye. The starter-island bearing of the old procedural island world is pinned at 45 degrees (`STARTER_BEARING_DEG`) so seeded layouts do not change.

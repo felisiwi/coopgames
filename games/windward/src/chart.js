@@ -143,8 +143,7 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, s
       // --- the pictures, in world space
       ctx.save();
       ctx.translate(W / 2, H / 2);
-      ctx.scale(s, s * view.sq); // metres -> px (the zoom), and the 3D view's tilt squash on the vertical
-      ctx.rotate(view.rot);
+      ctx.scale(s, s * view.sq); // metres -> px (the zoom), and the 3D view's tilt squash on the vertical (north is up: no turn)
       ctx.translate(-view.cx, -view.cz);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
@@ -312,7 +311,7 @@ export function createChart({ canvas, cfg, toGame, entries, isKnown, explored, s
       }
       if (best) return { type: 'place', entry: best.h.entry };
       if (view.scale < SECTION_MAX_SCALE) {
-        const z = (sy - H / 2) / (view.scale * view.sq); // used only to find the band: undo the squash, and the turn (rot = 0 here)
+        const z = (sy - H / 2) / (view.scale * view.sq); // used only to find the band: undo the squash (north is up, there is no turn)
         const world = view.cz + z;
         const b = sectionAt(bands, world);
         if (b) return { type: 'section', section: b };

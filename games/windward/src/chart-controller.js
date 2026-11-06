@@ -66,7 +66,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
 
   const ui = createChartUi({
     parent, debug,
-    onChart: () => toggleChart(),
+    onChart: () => toggleChart(), // the Boat button (shown only while the chart is up)
     onZoomStep: (f) => zoomBy(f),
     onBack: () => { if (state.visit) endVisit(); else closeCard(); },
     onNavigate: () => onNavigatePressed(),
@@ -74,6 +74,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     onMiniTap: (px, py, size) => {
       const hit = mini.hitLight(px, py, size, lastBoat);
       if (hit) startVisit(hit.entry);
+      else if (!state.visit && state.zoomTarget < ZOOM_CHART_START) toggleChart(); // a tap on the map itself opens the chart
     },
   });
   let lastBoat = { x: 0, z: 0, heading: 0 };

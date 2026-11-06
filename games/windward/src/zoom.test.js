@@ -1,6 +1,7 @@
 // node games/windward/src/zoom.test.js — guards zoom and the hand-over to the chart (src/zoom.js) and the fog (src/explored.js).
 // The key check: at the start of the blend the chart's pixel positions match a REAL three.js camera's, so the crossfade
-// has nothing to hide (a wrong rotation direction or scale would show up here as the chart sliding sideways).
+// has nothing to hide (a wrong scale, tilt or mirror would show up here as the chart sliding sideways). The camera looks due north
+// (azimuth 0), so north is up in the 3D view and the chart never turns.
 import assert from 'node:assert/strict';
 import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
@@ -68,17 +69,38 @@ check('the chart view at the start of the blend lines up with a REAL perspective
   near(direct[0], viaChart[0], 1e-6); near(direct[1], viaChart[1], 1e-6);
 });
 
-check('over the blend the chart unrolls to a flat north-up map: no turn, no squash', () => {
+check('the camera looks due north: north is up and east is right in the 3D view at every zoom', () => {
+  assert.equal(CONFIG.FIXED_CAMERA_AZIMUTH_DEG, 0, 'north-up camera (the 1c direction fix)');
+  const boat = { x: 500, z: 800 };
+  for (const zoom of [0.5, 1, 2.5, 4]) {
+    const cam = new THREE.PerspectiveCamera(CONFIG.FIXED_CAMERA_FOV_DEG, W / H, 1, 5000);
+    const el = (CONFIG.FIXED_CAMERA_ELEVATION_DEG * Math.PI) / 180;
+    const az = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180;
+    const d = CONFIG.FIXED_CAMERA_DISTANCE * zoom;
+    cam.position.set(boat.x + Math.sin(az) * Math.cos(el) * d, Math.sin(el) * d, boat.z + Math.cos(az) * Math.cos(el) * d);
+    cam.lookAt(boat.x, 0, boat.z);
+    cam.updateMatrixWorld(true);
+    const at = (dx, dz) => { const p = new THREE.Vector3(boat.x + dx, 0, boat.z + dz).project(cam); return [(p.x + 1) / 2 * W, (1 - p.y) / 2 * H]; };
+    const c = at(0, 0);
+    const n = at(0, -30); const e = at(30, 0);
+    near(n[0], c[0], 1e-3); assert.ok(n[1] < c[1], `zoom ${zoom}: north (-z) is straight up`);
+    near(e[1], c[1], 1e-3); assert.ok(e[0] > c[0], `zoom ${zoom}: east (+x) is straight right`);
+  }
+});
+
+check('over the blend the chart only un-tilts: it never turns, north is up and east is right at every zoom', () => {
   const start = chartView(ZOOM_CHART_START, H, { x: 0, z: 0 });
   const full = chartView(ZOOM_CHART_FULL, H, { x: 0, z: 0 });
-  near(start.rot, (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180, 1e-9);
-  assert.equal(full.rot, 0);
+  assert.equal(start.rot, undefined, 'there is no rotation in the view any more');
   assert.equal(full.sq, 1);
-  assert.ok(start.sq < 0.85);
-  const [sx, sy] = worldToScreen(full, W, H, 0, -100); // 100 m north
-  near(sx, W / 2, 1e-6); assert.ok(sy < H / 2, 'north is up');
-  const [ex] = worldToScreen(full, W, H, 100, 0);
-  assert.ok(ex > W / 2, 'east is right');
+  assert.ok(start.sq < 0.85, 'the tilt squash is what the blend removes');
+  for (const z of [1, ZOOM_CHART_START, 5.2, ZOOM_CHART_FULL, 40]) {
+    const v = chartView(z, H, { x: 0, z: 0 });
+    const [sx, sy] = worldToScreen(v, W, H, 0, -100); // 100 m north
+    near(sx, W / 2, 1e-6); assert.ok(sy < H / 2, `zoom ${z}: north is up`);
+    const [ex, ey] = worldToScreen(v, W, H, 100, 0);
+    assert.ok(ex > W / 2, `zoom ${z}: east is right`); near(ey, H / 2, 1e-6);
+  }
 });
 
 check('world <-> screen is a round trip at every zoom, with a pan', () => {
