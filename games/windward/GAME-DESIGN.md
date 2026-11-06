@@ -1407,3 +1407,13 @@ Britta born ~1933 (17 in 1950, ~93 in the finale).
   personal souvenirs (discovered names, light log). Fix first: a host session message on join
   (clock offset and era), and game options through the hub's launch message (touches the shared
   hub: tell Kenny).
+
+## Next run (Felix, 2026-11-06 end of day)
+1. **Pause:** a proper pause when the app is hidden or minimised (sound stopped, a "tap to
+   continue" paper card). Today the game just freezes; traffic and the ferry run on the real clock.
+2. **The first errand is easy and quick:** the wind blows **downwind** from the yard to
+   Grundsund, then turns so the sail back is downwind too (scripted wind for the opening beats).
+3. **Light winds feel REALLY slow:** give the boat a sensible minimum speed / better light-air
+   performance so low wind never feels stuck.
+Then: merge chapter 1 (after agent 1's rewind fixes), co-op stage 2 ("visit the host's world"),
+and day/night (reuse dusk.js).
