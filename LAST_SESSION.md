@@ -1,46 +1,37 @@
 # Last session
 
-**2026-11-06: stage 1c and the passes data are MERGED to main.** 1c: chart + fog, minimap (round, north-up),
-zoom-to-chart, terrain look, Svalan in game, rope A, knots/nm, Navigate here (docs/CHART.md). Agent 1 follow-up
-still on felix/windward-chart: round block at top, minimap/direction bug (root cause first), remove the settings
-button. Passes: assets/coast/passes.json + src/passes.js (applyPasses, ship tier = 5 light carves), not wired into
-the game yet (docs/passes/README.md). Seamarks (felix/windward-seamarks) not merged yet; both feed stage 1d.
-
-**2026-11-05: stage 1c, the chart and the new look** (branch `felix/windward-chart`, based on aa4bdc0 + the terrain-style
-branch, NOT merged). New terrain look (crisp zones, granite on steep ground, trees keep off it), Svalan in the game (`?boat=eka`
-for the eka), zoom out 4x then a scale-matched crossfade into the chart, minimap (round/square, north-up/with boat), fogged chart
-of the 7 sections (fog saved on the device), lighthouses on chart + minimap with a visit view (`?debug=1` adds "Jump here").
-Numbers, decisions, phone checklist: `games/windward/docs/CHART.md`. Before that: 1b (lure) and the Boat Lab merged to main.
+**2026-11-06: Harbour approaches** (branch `felix/windward-harbour-approaches` on origin/main 4f840b6, NOT merged). New files plus
+passes data; `shore.js` untouched (Felix: no oriented hull, no smaller circle: narrow water is the close-ups' job). Audit of all 49
+harbours / villages (the arrival's name list + every OSM harbour / marina + Felix's pins): can the boat's centre get within 60 m of the
+quay water from open sea? 33 open, 16 blocked and carved as tier `harbour` in `assets/coast/passes.json` (default `applyPasses` tiers are
+now ship + harbour). Rule: reach each harbour BASIN; narrow inner channels stay closed (Grundsund's canal through the village; its south
+basin is carved from the south-west entrance, 65 m wide, x6.5). `harbour-audit.json`, `src/harbour-approach.js` (+ test),
+`tools/build-harbours.mjs`, `harbours-lab.html`, `docs/harbours/README.md` (numbers, the oriented-hull study, 49 screenshots).
+Existing files touched: `passes.js` (tier list, default tiers), `passes.test.js`, `passes-lab.html`. Main also has 1c (chart, minimap,
+Svalan, rope) and the passes data (ship tier: 5 light carves); applyPasses is not wired into the game yet (stage 1d).
 
 Where things are:
-- Boats: `src/boats.js` (+ test), `boat-lab.html`, `src/boat-lab.js`, `docs/boat-lab/`, brief `docs/BOAT-BRIEF.md`
+- Harbours: `docs/harbours/README.md`, `harbours-lab.html`, `src/harbour-approach.js`, `assets/coast/harbour-audit.json`
+- Passes: `docs/passes/README.md`, `src/passes.js`, `passes-lab.html`, `assets/coast/passes.json`
+- Boats: `src/boats.js` (+ test), `boat-lab.html`, `docs/boat-lab/`, brief `docs/BOAT-BRIEF.md`
 - Design: `games/windward/GAME-DESIGN.md`; look and labs: `DESIGN.md` ("Reference labs")
 - Look: `src/water.js`, `src/depthmap.js`, `src/island-look.js`, `src/config.js`
-- Lighthouses: `src/lighthouses.js`, `lighthouse-lab.html`, `LIGHTHOUSES.md`
-- Coast + history: `coast-lab.html`, `assets/coast/` (SOURCES.md), `data/`
-- Trial: `src/coast-world.js` (window, terrain, trees, villages), `src/debug-overlay.js`
+- Coast + history: `coast-lab.html`, `assets/coast/` (SOURCES.md), `data/`; chart + minimap: `docs/CHART.md`
+- Lighthouses: `src/lighthouses.js`, `lighthouse-lab.html`, `LIGHTHOUSES.md`; trial: `src/coast-world.js`
 
-Open (TODO(felix)): `sun.shadow.normalBias = 0.25` is a guess; real phone GPU
-unchecked; ddb-restricted population rows need CEDAR OK before commercial use;
-NMD CC0 wording to confirm; title wording ("Honour and Life") unverified;
-Käringön harbour-mouth spawn is approximate; trial vertical scale 0.5 is a guess.
-Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobby`.
+Open (TODO(felix)): the two big carves by eye on the phone (Grundsund south basin x6.5, Härmanö x3.5); real phone GPU unchecked;
+`sun.shadow.normalBias = 0.25` is a guess; ddb-restricted population rows need CEDAR OK before commercial use; NMD CC0 wording to
+confirm; Käringön harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobby`.
 
 ## Today's sessions
 
-- Windward: phone controls, new boat, wave-wobble fix, 3m facets (earlier merge).
-- Look: L1 port → Skagen palette (pass 2) → Skagen default + pond fix (pass 3).
-- Lighthouses: 12 → 29 towers, real looks, year slider, Play, flash patterns; game design /grill-me rounds 1–11 confirmed.
-- Real coast: R0 → passes 2–5 (Gottskär, Koster, population, west-Orust history, combined map + timeline).
-- Stage 1b lure: arrival, life, descriptive names (LURE.md), merged.
-- Real-coast trial (Pixel: 60 fps at 634k tris) → stage 1a: default coast, collision, skerries, names (COAST-TRIAL.md).
-- Boat Lab: koster (gaff+jib / sprit+jib / gaff) and eka, pennant, deck items, night lantern, wear; ~1k tris each.
-- Boat Lab revision 1 (Felix's picks): gaff + jib only, slimmer koster, eka sail tones, name board removed.
-- Stage 1c (this branch): terrain style, boats.js, zoom -> chart, minimap, fog, lighthouse visits (CHART.md).
-- 1c revision (2026-11-06, phone test): boat arrow, blank uncharted sections, fog-gated + quiet names, Navigate here, trimmed glow, seams. Rope control (option A) built.
+- Windward 1b/1c merged (lure, chart, minimap, Svalan, rope); Boat Lab; real coast; lighthouses; look passes (see git).
+- Passes data merged: 5 light carves ship tier; 15 heavy ones on the "needs Felix's eye" list.
+- Seamarks data + stage 1d kit (branch felix/windward-seamarks, not merged).
+- Harbour approaches (this branch): audit of 49 harbours, 16 carved, Grundsund south basin, collision-shape study (no change).
 
 ## Next
 
-1. Felix: phone check of the 1c revision incl. the rope (CHART.md); then merge 1c.
-2. Confirm the 7 unplaced harbours (candidates in `assets/coast/names.json`); Testholmen, Stora Kornö.
-3. Then: merge 1c; blue-hour sky, edge fog + thunder; the jump to ~1700 (the eka exists behind `?boat=eka`).
+1. Felix: open `harbours-lab.html` on the phone (Grundsund south basin first); judge the x6.5 and x3.5 carves.
+2. Stage 1d: `applyPasses(world, passes)` (ship + harbour) before `createCoastTerrain`; OSM credit; seamarks + shoals.
+3. Close-ups (later): the Grundsund canal, through-routes (Usholmen, Porsholmen, Danholmen, Stångholmesund), finer collision.

@@ -18,7 +18,7 @@
 import { BLOCK_H, HULL_RADIUS_M, isBlocked } from './shore.js';
 import { DEEP_M, depthAndShoreFromSigned } from './depthmap.js';
 
-export const PASS_TIERS = ['ship', 'later', 'eye']; // eye = widened more than 2x: never carved by default, needs Felix's eye
+export const PASS_TIERS = ['ship', 'harbour', 'later', 'eye']; // harbour = an approach into a harbour (carved WITH ship, may be wider than x1.7); eye = widened more than 2x: never carved by default
 export const LAND_LIFT_M = 0.4; // the coast's land lift (coast-world.js): the carved shore uses the same base
 export const CARVE_MIN_DEPTH_M = 1.8; // at the edge of a carved pass the sea is this deep (the boat is blocked above 0.9)
 export const CARVE_MAX_DEPTH_M = 4.0; // ...and deepens toward the middle, so the pass looks like a channel, not a ditch
@@ -66,7 +66,7 @@ export const resetPasses = (world) => { world.carvedPasses?.clear(); };
 // passes: the parsed assets/coast/passes.json (or just its `passes` array).
 // options: { tiers: ['ship'] (which tiers to carve), ids: null (or a list: overrides tiers), depth: true (refresh the water's depth map) }
 // Returns { carved: [{ id, cells, lowered }], changedCells, depthMs }.
-export function applyPasses(world, passes, { tiers = ['ship'], ids = null, depth = true } = {}) {
+export function applyPasses(world, passes, { tiers = ['ship', 'harbour'], ids = null, depth = true } = {}) {
   // each pass is carved at most once per world (the bank blend is relative to the current ground, so a repeat would lower it again)
   const done = (world.carvedPasses ??= new Set());
   const list = (Array.isArray(passes) ? passes : passes.passes).filter((p) => (ids ? ids.includes(p.id) : tiers.includes(p.tier)) && !done.has(p.id));

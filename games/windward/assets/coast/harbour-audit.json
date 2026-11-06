@@ -1,0 +1,1419 @@
+{
+ "generated": "2026-11-06",
+ "source": "OpenStreetMap contributors, ODbL 1.0; the places the arrival uses (src/names.js), Felix's pins; tools/build-harbours.mjs",
+ "credit": "© OpenStreetMap contributors",
+ "licence": "ODbL 1.0",
+ "licenceUrl": "https://www.openstreetmap.org/copyright",
+ "region": {
+  "s": 58.085,
+  "w": 11.25,
+  "n": 58.3,
+  "e": 11.5
+ },
+ "note": "reach = how close (m real) the boat's centre can get to the quay water from the open sea with the hull rule (shore.js isBlocked). \"In the harbour\" = within 60 m. reachRawM = the raster as it is today; reachShipM = with the ship tier carved; reachAfterM = with ship + harbour. confidence: quay water = the target sits on real water (within 70 m); point on land = an islet centre or village origin, so the quay is approximate.",
+ "counts": {
+  "targets": 49,
+  "openRaw": 30,
+  "openAfter": 49,
+  "harbourPasses": 16
+ },
+ "harbours": [
+  {
+   "name": "Grundsunds hamn",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.216,
+   "lon": 11.41577,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 51,
+   "reachShipM": 51,
+   "reachAfterM": 51,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.216,
+    "lon": 11.41578
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Grundsund",
+   "kind": "village",
+   "source": "name-list (arrival)",
+   "lat": 58.21336,
+   "lon": 11.41924,
+   "via": "Grundsunds hamn",
+   "confidence": "via the guest-harbour basin (the canal stays closed)",
+   "anchorOffsetM": 0,
+   "reachRawM": 377,
+   "reachShipM": 377,
+   "reachAfterM": 51,
+   "passes": [],
+   "topology": {
+    "topology": "through-route",
+    "firstMouth": {
+     "lat": 58.2166,
+     "lon": 11.41514,
+     "lengthM": 378
+    },
+    "secondMouth": {
+     "lat": 58.21049,
+     "lon": 11.42161,
+     "lengthM": 363,
+     "narrowestM": 5
+    },
+    "note": "a second way out exists (363 m, narrowest 5 m): left to the harbour close-up, not carved"
+   },
+   "quay": {
+    "lat": 58.216,
+    "lon": 11.41578
+   },
+   "status": "open (via Grundsunds hamn)",
+   "finalOpen": true
+  },
+  {
+   "name": "Grundsunds Marina",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.20887,
+   "lon": 11.42192,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": null,
+   "reachShipM": null,
+   "reachAfterM": 4,
+   "passes": [
+    "harbour-grundsunds-marina"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.20885,
+    "lon": 11.42191
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.20806,
+    "lon": 11.41786,
+    "cells": null,
+    "lengthM": 578,
+    "narrowestM": 5
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Fiskebäckskil",
+   "kind": "village",
+   "source": "name-list (arrival)",
+   "lat": 58.24565,
+   "lon": 11.45663,
+   "via": "Lyckans slip Marina",
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 4,
+   "reachShipM": 4,
+   "reachAfterM": 4,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.24356,
+    "lon": 11.4611
+   },
+   "status": "open (via Lyckans slip Marina)",
+   "finalOpen": true
+  },
+  {
+   "name": "Fiskebäckskils småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.24241,
+   "lon": 11.46113,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.24239,
+    "lon": 11.4611
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Lyckans slip Marina",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.24355,
+   "lon": 11.46113,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 4,
+   "reachShipM": 4,
+   "reachAfterM": 4,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.24356,
+    "lon": 11.4611
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Käringön",
+   "kind": "village",
+   "source": "name-list (arrival)",
+   "lat": 58.10985,
+   "lon": 11.36359,
+   "via": "harbour",
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 46,
+   "reachShipM": 46,
+   "reachAfterM": 46,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.11284,
+    "lon": 11.36645
+   },
+   "status": "open (via harbour)",
+   "finalOpen": true
+  },
+  {
+   "name": "Käringöns gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.11327,
+   "lon": 11.36333,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.11325,
+    "lon": 11.3633
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "harbour",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.11285,
+   "lon": 11.36646,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 46,
+   "reachShipM": 46,
+   "reachAfterM": 46,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.11284,
+    "lon": 11.36645
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Gullholmen",
+   "kind": "village",
+   "source": "name-list (arrival)",
+   "lat": 58.17993,
+   "lon": 11.40585,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 60,
+   "reachRawM": 68,
+   "reachShipM": 68,
+   "reachAfterM": 48,
+   "passes": [
+    "harbour-gullholmen"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.17993,
+    "lon": 11.40683
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.17991,
+    "lon": 11.40764,
+    "cells": 1,
+    "lengthM": 20,
+    "narrowestM": 76
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Gullholmens gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.17695,
+   "lon": 11.40476,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 30,
+   "reachShipM": 30,
+   "reachAfterM": 30,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.17697,
+    "lon": 11.40479
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Lysekil",
+   "kind": "village",
+   "source": "name-list (arrival)",
+   "lat": 58.27717,
+   "lon": 11.4431,
+   "via": "Fiskhamnens gästhamn",
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.27472,
+    "lon": 11.44159
+   },
+   "status": "open (via Fiskhamnens gästhamn)",
+   "finalOpen": true
+  },
+  {
+   "name": "Fiskhamnens gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.27471,
+   "lon": 11.44157,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.27472,
+    "lon": 11.44159
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Norra Hamnens gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.27617,
+   "lon": 11.4229,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 4,
+   "reachShipM": 4,
+   "reachAfterM": 4,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.27616,
+    "lon": 11.42293
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Hälleviksstrand",
+   "kind": "village",
+   "source": "name-list (arrival)",
+   "lat": 58.12329,
+   "lon": 11.4454,
+   "via": "Hälleviksstrands Hamn",
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.12242,
+    "lon": 11.44235
+   },
+   "status": "open (via Hälleviksstrands Hamn)",
+   "finalOpen": true
+  },
+  {
+   "name": "Hälleviksstrands Hamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.1224,
+   "lon": 11.44234,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.12242,
+    "lon": 11.44235
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Bredholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.24468,
+   "lon": 11.36574,
+   "via": null,
+   "confidence": "point on land (islet / village origin)",
+   "anchorOffsetM": 114,
+   "reachRawM": 71,
+   "reachShipM": 71,
+   "reachAfterM": 43,
+   "passes": [
+    "harbour-bredholmen"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.24442,
+    "lon": 11.36764
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.24412,
+    "lon": 11.36811,
+    "cells": 1,
+    "lengthM": 20,
+    "narrowestM": 65
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Skarvesäter",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.23965,
+   "lon": 11.36713,
+   "via": null,
+   "confidence": "point on land (islet / village origin)",
+   "anchorOffsetM": 78,
+   "reachRawM": 51,
+   "reachShipM": 51,
+   "reachAfterM": 51,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.23915,
+    "lon": 11.36807
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Usholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.20116,
+   "lon": 11.4401,
+   "via": null,
+   "confidence": "point on land (islet / village origin)",
+   "anchorOffsetM": 106,
+   "reachRawM": 115,
+   "reachShipM": 115,
+   "reachAfterM": 30,
+   "passes": [
+    "harbour-usholmen"
+   ],
+   "topology": {
+    "topology": "through-route",
+    "firstMouth": {
+     "lat": 58.19916,
+     "lon": 11.43831,
+     "lengthM": 145
+    },
+    "secondMouth": {
+     "lat": 58.20132,
+     "lon": 11.43558,
+     "lengthM": 165,
+     "narrowestM": 15
+    },
+    "note": "a second way out exists (165 m, narrowest 15 m): left to the harbour close-up, not carved"
+   },
+   "quay": {
+    "lat": 58.20053,
+    "lon": 11.43878
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.20006,
+    "lon": 11.43763,
+    "cells": 3,
+    "lengthM": 60,
+    "narrowestM": 40
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Porsholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.22777,
+   "lon": 11.39847,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 68,
+   "reachRawM": 97,
+   "reachShipM": 97,
+   "reachAfterM": 53,
+   "passes": [
+    "harbour-porsholmen"
+   ],
+   "topology": {
+    "topology": "through-route",
+    "firstMouth": {
+     "lat": 58.22901,
+     "lon": 11.3964,
+     "lengthM": 157
+    },
+    "secondMouth": {
+     "lat": 58.22578,
+     "lon": 11.39708,
+     "lengthM": 160,
+     "narrowestM": 5
+    },
+    "note": "a second way out exists (160 m, narrowest 5 m): left to the harbour close-up, not carved"
+   },
+   "quay": {
+    "lat": 58.2276,
+    "lon": 11.39737
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.22794,
+    "lon": 11.3964,
+    "cells": 2,
+    "lengthM": 40,
+    "narrowestM": 31
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Kråkesundsgap",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.10179,
+   "lon": 11.44111,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.10178,
+    "lon": 11.44108
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Assholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.14559,
+   "lon": 11.40071,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 5,
+   "reachRawM": 124,
+   "reachShipM": 124,
+   "reachAfterM": 29,
+   "passes": [
+    "harbour-assholmen"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.14562,
+    "lon": 11.4007
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.14502,
+    "lon": 11.40185,
+    "cells": 2,
+    "lengthM": 40,
+    "narrowestM": 45
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Jonsborg",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.19593,
+   "lon": 11.42289,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 38,
+   "reachShipM": 38,
+   "reachAfterM": 38,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.19594,
+    "lon": 11.42293
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Vasholmarna",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.21673,
+   "lon": 11.37445,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 10,
+   "reachRawM": 79,
+   "reachShipM": 79,
+   "reachAfterM": 36,
+   "passes": [
+    "harbour-vasholmarna"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.21672,
+    "lon": 11.37429
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.21714,
+    "lon": 11.37391,
+    "cells": 1,
+    "lengthM": 20,
+    "narrowestM": 53
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Testholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.22653,
+   "lon": 11.37554,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 10,
+   "reachRawM": 65,
+   "reachShipM": 65,
+   "reachAfterM": 37,
+   "passes": [
+    "harbour-testholmen"
+   ],
+   "topology": {
+    "topology": "dead end",
+    "firstMouth": {
+     "lat": 58.22578,
+     "lon": 11.37425,
+     "lengthM": 105
+    },
+    "note": "a second way out exists but is a 60 m detour (first mouth 105 m)"
+   },
+   "quay": {
+    "lat": 58.22643,
+    "lon": 11.37557
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.22614,
+    "lon": 11.37527,
+    "cells": 1,
+    "lengthM": 20,
+    "narrowestM": 68
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Dammholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.23486,
+   "lon": 11.37083,
+   "via": null,
+   "confidence": "point on land (islet / village origin)",
+   "anchorOffsetM": 95,
+   "reachRawM": 74,
+   "reachShipM": 74,
+   "reachAfterM": 35,
+   "passes": [
+    "harbour-dammholmen"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.23574,
+    "lon": 11.37071
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.23621,
+    "lon": 11.3705,
+    "cells": 2,
+    "lengthM": 40,
+    "narrowestM": 59
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Danholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.10913,
+   "lon": 11.42811,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 178,
+   "reachShipM": 178,
+   "reachAfterM": 33,
+   "passes": [
+    "harbour-danholmen"
+   ],
+   "topology": {
+    "topology": "through-route",
+    "firstMouth": {
+     "lat": 58.1103,
+     "lon": 11.43081,
+     "lengthM": 250
+    },
+    "secondMouth": {
+     "lat": 58.10725,
+     "lon": 11.43013,
+     "lengthM": 205,
+     "narrowestM": 5
+    },
+    "note": "a second way out exists (205 m, narrowest 5 m): left to the harbour close-up, not carved"
+   },
+   "quay": {
+    "lat": 58.10911,
+    "lon": 11.42813
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.10976,
+    "lon": 11.42945,
+    "cells": 5,
+    "lengthM": 100,
+    "narrowestM": 35
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Vrakevik",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.23871,
+   "lon": 11.38506,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 333,
+   "reachShipM": 19,
+   "reachAfterM": 19,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.2387,
+    "lon": 11.38502
+   },
+   "status": "open (after the ship batch)",
+   "finalOpen": true
+  },
+  {
+   "name": "Kråkholmen",
+   "kind": "harbour",
+   "source": "name-list (arrival)",
+   "lat": 58.10443,
+   "lon": 11.43913,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 25,
+   "reachRawM": 138,
+   "reachShipM": 138,
+   "reachAfterM": 40,
+   "passes": [
+    "harbour-krakholmen"
+   ],
+   "topology": {
+    "topology": "dead end",
+    "firstMouth": {
+     "lat": 58.10455,
+     "lon": 11.44206,
+     "lengthM": 128
+    }
+   },
+   "quay": {
+    "lat": 58.10462,
+    "lon": 11.43937
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.10473,
+    "lon": 11.44069,
+    "cells": 5,
+    "lengthM": 100,
+    "narrowestM": 27
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Härmanö",
+   "kind": "village",
+   "source": "name-list (arrival)",
+   "lat": 58.16015,
+   "lon": 11.37571,
+   "via": null,
+   "confidence": "point on land (islet / village origin)",
+   "anchorOffsetM": 125,
+   "reachRawM": 98,
+   "reachShipM": 98,
+   "reachAfterM": 53,
+   "passes": [
+    "harbour-harmano"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.16069,
+    "lon": 11.37386
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.16103,
+    "lon": 11.37288,
+    "cells": 3,
+    "lengthM": 60,
+    "narrowestM": 17
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Långeviks småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.28668,
+   "lon": 11.43151,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.28668,
+    "lon": 11.43154
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Valbodalen småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.28931,
+   "lon": 11.43442,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.28929,
+    "lon": 11.43443
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Småbåtshamn Kolholmarna/Grötö",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.27407,
+   "lon": 11.45129,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.27409,
+    "lon": 11.4513
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Havsbadets gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.26988,
+   "lon": 11.43736,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 4,
+   "reachShipM": 4,
+   "reachAfterM": 4,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.26987,
+    "lon": 11.43733
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Ellös gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.18473,
+   "lon": 11.46599,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 4,
+   "reachShipM": 4,
+   "reachAfterM": 4,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.18475,
+    "lon": 11.46595
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Stockens gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.15037,
+   "lon": 11.41344,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 299,
+   "reachShipM": 299,
+   "reachAfterM": 4,
+   "passes": [
+    "harbour-stockens-gasthamn"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.15039,
+    "lon": 11.41348
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.14987,
+    "lon": 11.40968,
+    "cells": 6,
+    "lengthM": 120,
+    "narrowestM": 31
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.12091,
+   "lon": 11.44477,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 138,
+   "reachShipM": 138,
+   "reachAfterM": 41,
+   "passes": [
+    "harbour-smabatshamn"
+   ],
+   "topology": {
+    "topology": "dead end",
+    "firstMouth": {
+     "lat": 58.11966,
+     "lon": 11.44342,
+     "lengthM": 137
+    }
+   },
+   "quay": {
+    "lat": 58.12089,
+    "lon": 11.44474
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.1202,
+    "lon": 11.44444,
+    "cells": 5,
+    "lengthM": 100,
+    "narrowestM": 45
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Hällevik Yacht Club",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.11701,
+   "lon": 11.45811,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 24,
+   "reachShipM": 24,
+   "reachAfterM": 24,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.11703,
+    "lon": 11.45811
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Hälleviksstrands Varvs Marina",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.1187,
+   "lon": 11.44647,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 38,
+   "reachShipM": 38,
+   "reachAfterM": 38,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.11869,
+    "lon": 11.44644
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Edshultshalls gästhamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.10785,
+   "lon": 11.46554,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.10785,
+    "lon": 11.46553
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.10602,
+   "lon": 11.47127,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 43,
+   "reachShipM": 43,
+   "reachAfterM": 43,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.10601,
+    "lon": 11.47123
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.13076,
+   "lon": 11.42193,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 243,
+   "reachShipM": 243,
+   "reachAfterM": 8,
+   "passes": [
+    "harbour-smabatshamn-2"
+   ],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.13074,
+    "lon": 11.42191
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.12937,
+    "lon": 11.42059,
+    "cells": 6,
+    "lengthM": 120,
+    "narrowestM": 49
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Stångholmesunds småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.26762,
+   "lon": 11.42104,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 161,
+   "reachShipM": 11,
+   "reachAfterM": 11,
+   "passes": [],
+   "topology": {
+    "topology": "through-route",
+    "firstMouth": {
+     "lat": 58.26733,
+     "lon": 11.42434,
+     "lengthM": 217
+    },
+    "secondMouth": {
+     "lat": 58.26787,
+     "lon": 11.41718,
+     "lengthM": 245,
+     "narrowestM": 46
+    },
+    "note": "a second way out exists (245 m, narrowest 46 m): left to the harbour close-up, not carved"
+   },
+   "quay": {
+    "lat": 58.26762,
+    "lon": 11.42106
+   },
+   "status": "open (after the ship batch)",
+   "finalOpen": true
+  },
+  {
+   "name": "Gullmarsstrands småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.24988,
+   "lon": 11.45782,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 65,
+   "reachShipM": 65,
+   "reachAfterM": 37,
+   "passes": [
+    "harbour-gullmarsstrands-smabatshamn"
+   ],
+   "topology": {
+    "topology": "dead end",
+    "firstMouth": {
+     "lat": 58.25024,
+     "lon": 11.45977,
+     "lengthM": 117
+    },
+    "note": "a second way out exists but is a 57 m detour (first mouth 117 m)"
+   },
+   "quay": {
+    "lat": 58.2499,
+    "lon": 11.45786
+   },
+   "status": "blocked, carved",
+   "blockedAt": {
+    "lat": 58.25006,
+    "lon": 11.45841,
+    "cells": 1,
+    "lengthM": 20,
+    "narrowestM": 77
+   },
+   "finalOpen": true
+  },
+  {
+   "name": "Gåsö småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.23394,
+   "lon": 11.4121,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.23394,
+    "lon": 11.41211
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Stockeviks småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.23555,
+   "lon": 11.43032,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 33,
+   "reachShipM": 33,
+   "reachAfterM": 33,
+   "passes": [],
+   "topology": {
+    "topology": "dead end",
+    "firstMouth": {
+     "lat": 58.23513,
+     "lon": 11.42877,
+     "lengthM": 117
+    }
+   },
+   "quay": {
+    "lat": 58.23556,
+    "lon": 11.43034
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.17803,
+   "lon": 11.41973,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 30,
+   "reachShipM": 30,
+   "reachAfterM": 30,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.17805,
+    "lon": 11.41969
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.19265,
+   "lon": 11.4832,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 4,
+   "reachShipM": 4,
+   "reachAfterM": 4,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.19266,
+    "lon": 11.48324
+   },
+   "status": "open",
+   "finalOpen": true
+  },
+  {
+   "name": "Fröjdendals småbåtshamn",
+   "kind": "quay",
+   "source": "OSM harbour / marina",
+   "lat": 58.19681,
+   "lon": 11.49136,
+   "via": null,
+   "confidence": "quay water",
+   "anchorOffsetM": 0,
+   "reachRawM": 8,
+   "reachShipM": 8,
+   "reachAfterM": 8,
+   "passes": [],
+   "topology": {
+    "topology": "open coast",
+    "note": "the quay water is on (or within 100 m of) open water: no channel"
+   },
+   "quay": {
+    "lat": 58.1968,
+    "lon": 11.49134
+   },
+   "status": "open",
+   "finalOpen": true
+  }
+ ]
+}

@@ -57,6 +57,7 @@
   <div id="body">
     <h3>Carve</h3><div class="chips" id="modes"></div>
     <h3>Ship: the first batch (light carves, at most 2× the real width)</h3><div class="chips" id="ship"></div>
+    <h3>Harbour approaches (carved with the ship tier)</h3><div class="chips" id="harbour"></div>
     <h3>Later: light carves, after the first batch</h3><div class="chips" id="later"></div>
     <h3>Needs Felix's eye: widened more than 2× (not shipped)</h3><div class="chips" id="eye"></div>
   </div>
@@ -157,7 +158,7 @@ function show(id) {
     ${p.marginalKm !== undefined ? `In the ship batch it saves a combined <b>${p.marginalKm} km</b> of sailing across all pairs of places (${p.aloneKm} km on its own)` : p.aloneKm > 0 ? `On its own it saves a combined <b>${p.aloneKm} km</b> of sailing across all pairs of places` : 'No measurable saving between the 44 places (it opens a pocket, not a route)'}. ${p.finiteTrips} trips shortened, ${p.unlockTrips} places un-trapped.
     ${p.example ? `<br><span class="dim">e.g. ${p.example}</span>` : ''}${p.nearFelixPin ? `<br><span class="warn">next to Felix's pin: ${p.nearFelixPin}</span>` : ''}${p.eyeReason ? `<br><span class="warn">needs Felix's eye: ${p.eyeReason}</span>` : ''}${state.mode === 'ship' ? `<br><span class="dim">Showing the whole ship batch carved together (${applied.length} passes).</span>` : ''}`;
   $('headname').textContent = `${p.name}: ×${p.widenFactor}`;
-  for (const [tier, host] of Object.entries({ ship: $('ship'), later: $('later'), eye: $('eye') })) for (const b of host.children) b.classList.toggle('on', b.dataset.id === p.id);
+  for (const [tier, host] of Object.entries({ ship: $('ship'), harbour: $('harbour'), later: $('later'), eye: $('eye') })) for (const b of host.children) b.classList.toggle('on', b.dataset.id === p.id);
   const q = new URLSearchParams(location.search); q.set('pass', p.id); if (state.mode === 'ship') q.set('apply', 'ship'); else q.delete('apply');
   history.replaceState(null, '', location.pathname + '?' + q);
   return { beforeOpen: rb.ok, afterOpen: ra.ok, afterLength: ra.length };
@@ -175,10 +176,11 @@ function buildPanel() {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'chip' + (p.tier === 'eye' ? ' eye' : ''); b.dataset.id = p.id;
     b.innerHTML = `${p.name}<small>×${p.widenFactor}</small>`;
     b.onclick = () => { show(p.id); $('panel').classList.remove('open'); scrollTo(0, 0); };
-    $(p.tier).append(b);
+    ($(p.tier) ?? $('later')).append(b);
   }
   $('head').onclick = () => { const o = $('panel').classList.toggle('open'); $('head').setAttribute('aria-expanded', o); };
   $('ship').previousElementSibling.textContent = `Ship: the first batch (${file.counts.ship} light carves, at most 2× the real width)`;
+  $('harbour').previousElementSibling.textContent = `Harbour approaches (${file.counts.harbour ?? 0}, carved with the ship tier: see harbours-lab.html)`;
   $('later').previousElementSibling.textContent = `Later: ${file.counts.later} more light carves`;
   $('eye').previousElementSibling.textContent = `Needs Felix's eye: ${file.counts.eye} widened more than 2× (not shipped)`;
 }

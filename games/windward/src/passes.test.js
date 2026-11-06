@@ -65,7 +65,7 @@ await check('synthetic: idempotent, deterministic, only the chosen tiers, and th
   const a = synthetic(), b = synthetic();
   const passes = [{ id: 'ship1', tier: 'ship', polygon: tube(81, 6) }, { id: 'eye1', tier: 'eye', polygon: [[[10, 10], [20, 10], [20, 20], [10, 20]]] }];
   const r1 = applyPasses(a, passes);
-  assert.deepEqual(r1.carved.map((c) => c.id), ['ship1'], 'default = ship tier only');
+  assert.deepEqual(r1.carved.map((c) => c.id), ['ship1'], 'default = the ship and harbour tiers (never eye)');
   const snap = a.H.slice();
   applyPasses(a, passes);
   assert.deepEqual([...a.H], [...snap], 'running it twice changes nothing more');
@@ -112,7 +112,8 @@ await check('passes.json: schema, region, credit, tiers (ship <= 2x and short; e
     assert.ok(p.polygon.length >= 1 && p.polygon.every((r) => r.length >= 3 && r.every(([lon, lat]) => lat >= file.region.s - 0.01 && lat <= file.region.n + 0.01 && lon >= file.region.w - 0.01 && lon <= file.region.e + 0.01)), `${p.id} polygon`);
     assert.ok(p.realWidthM > 0 && p.lengthM > 0 && p.carveWidthM >= p.realWidthM && p.widenFactor >= 1, p.id);
     if (p.tier === 'ship' || p.tier === 'later') assert.ok(p.widenFactor <= 2.0 && !p.eyeReason, `${p.id} x${p.widenFactor} should be on the eye list`);
-    if (p.widenFactor > 2.0 || p.realWidthM < 20) assert.equal(p.tier, 'eye', `${p.id} x${p.widenFactor} must not ship`);
+    // a harbour approach is the exception (Felix: harbours matter most): it may be widened more than x2 and is carved with the ship tier
+    if ((p.widenFactor > 2.0 || p.realWidthM < 20) && p.tier !== 'harbour') assert.equal(p.tier, 'eye', `${p.id} x${p.widenFactor} must not ship`);
     if (p.tier === 'eye') assert.ok(p.eyeReason, p.id);
     if (p.tier === 'ship') { assert.ok(p.lengthM <= 300 && p.rank >= 1 && p.marginalKm >= 50, `${p.id} ship rank/gain`); }
   }
@@ -127,7 +128,8 @@ await check('every pass in the file is navigable end to end with the current hul
   assert.equal(HULL_RADIUS_M, 2.5);
   for (const p of file.passes) {
     reset();
-    applyPasses(world, [p], { ids: [p.id], depth: false });
+    const deps = (p.dependsOn ?? []).map((id) => file.passes.find((q) => q.id === id)); // a harbour approach that continues an earlier one
+    applyPasses(world, [...deps, p], { ids: [...deps.map((q) => q.id), p.id], depth: false });
     const [A, B] = passEnds(world, p), L = lenGame(p);
     const route = findRoute(world, A, B, { margin: 40 + L });
     assert.ok(route.ok, `${p.id}: no route after the carve (${route.reason})`);
@@ -151,7 +153,7 @@ await check('the whole ship batch together: all navigable at once, only ship pol
   reset();
   const before = world.H.slice();
   const ship = file.passes.filter((p) => p.tier === 'ship');
-  const rep = applyPasses(world, file, { depth: false }); // default = ship tier
+  const rep = applyPasses(world, file, { tiers: ['ship'], depth: false });
   assert.deepEqual(rep.carved.map((c) => c.id).sort(), ship.map((p) => p.id).sort());
   for (const p of ship) { const [A, B] = passEnds(world, p), L = lenGame(p); assert.ok(findRoute(world, A, B, { margin: 40 + L }).ok, p.id); }
   // changes stay inside the ship passes' boxes
@@ -168,7 +170,7 @@ await check('the whole ship batch together: all navigable at once, only ship pol
   const landCells = before.reduce((n, v) => n + (v > 0 ? 1 : 0), 0);
   assert.ok(landLost / landCells < 0.0005, `the ship batch turns ${((landLost / landCells) * 100).toFixed(3)}% of the land into water`);
   // idempotent on the real coast too
-  const snap = world.H.slice(); applyPasses(world, file, { depth: false }); assert.deepEqual([...world.H], [...snap]);
+  const snap = world.H.slice(); applyPasses(world, file, { tiers: ['ship'], depth: false }); assert.deepEqual([...world.H], [...snap]);
   reset();
 });
 
