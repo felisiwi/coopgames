@@ -1,0 +1,2097 @@
+{
+ "generated": "2026-11-06",
+ "source": "OpenStreetMap contributors, ODbL 1.0, via Overpass API (tools/fetch-seamarks.mjs)",
+ "credit": "© OpenStreetMap contributors",
+ "licence": "ODbL 1.0",
+ "licenceUrl": "https://www.openstreetmap.org/copyright",
+ "osmDataTimestamp": "2026-11-06T06:58:18Z",
+ "region": {
+  "s": 58.085,
+  "w": 11.25,
+  "n": 58.3,
+  "e": 11.5
+ },
+ "note": "Real OSM positions only. kind=rock has level dry|awash|covers|submerged|unknown (Swedish chart wording). kind=named_shoal are shoals OSM names (-båd/-flu/-grund words) with a radiusM where OSM has an outline. No -grund/-grynna names exist in this box in OSM.",
+ "counts": {
+  "total": 292,
+  "byKind": {
+   "rock": 281,
+   "named_shoal": 9,
+   "wreck": 1,
+   "obstruction": 1
+  },
+  "rockByLevel": {
+   "awash": 200,
+   "unknown": 39,
+   "submerged": 39,
+   "dry": 1,
+   "covers": 2
+  }
+ },
+ "shoals": [
+  {
+   "id": "node/3703696361",
+   "lat": 58.08513,
+   "lon": 11.4557,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703694241",
+   "lat": 58.08522,
+   "lon": 11.46506,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703696362",
+   "lat": 58.08536,
+   "lon": 11.45553,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675752097",
+   "lat": 58.08553,
+   "lon": 11.45103,
+   "kind": "rock",
+   "level": "unknown",
+   "depthM": 6.8
+  },
+  {
+   "id": "node/3703696382",
+   "lat": 58.08625,
+   "lon": 11.46213,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703696384",
+   "lat": 58.0864,
+   "lon": 11.46054,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675760078",
+   "lat": 58.08689,
+   "lon": 11.44087,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4023031437",
+   "lat": 58.08714,
+   "lon": 11.44553,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703696385",
+   "lat": 58.0873,
+   "lon": 11.46071,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3703694289",
+   "lat": 58.08824,
+   "lon": 11.46719,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703694288",
+   "lat": 58.08824,
+   "lon": 11.46791,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703694293",
+   "lat": 58.08839,
+   "lon": 11.4672,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703694294",
+   "lat": 58.0884,
+   "lon": 11.4677,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703694295",
+   "lat": 58.08847,
+   "lon": 11.46677,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3703694296",
+   "lat": 58.08854,
+   "lon": 11.46713,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708051",
+   "lat": 58.08952,
+   "lon": 11.45419,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708052",
+   "lat": 58.0897,
+   "lon": 11.45402,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708746",
+   "lat": 58.09043,
+   "lon": 11.43538,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3703708053",
+   "lat": 58.09053,
+   "lon": 11.45541,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708054",
+   "lat": 58.09065,
+   "lon": 11.42913,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708055",
+   "lat": 58.09067,
+   "lon": 11.45532,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708056",
+   "lat": 58.09082,
+   "lon": 11.42732,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708747",
+   "lat": 58.09137,
+   "lon": 11.4325,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708748",
+   "lat": 58.09138,
+   "lon": 11.43345,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708749",
+   "lat": 58.09139,
+   "lon": 11.43293,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708750",
+   "lat": 58.09145,
+   "lon": 11.43225,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708751",
+   "lat": 58.09159,
+   "lon": 11.433,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708752",
+   "lat": 58.0917,
+   "lon": 11.43279,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708753",
+   "lat": 58.09173,
+   "lon": 11.43241,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703708764",
+   "lat": 58.09189,
+   "lon": 11.43238,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675762444",
+   "lat": 58.09246,
+   "lon": 11.44555,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675749832",
+   "lat": 58.09275,
+   "lon": 11.44533,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4675750343",
+   "lat": 58.09297,
+   "lon": 11.44633,
+   "kind": "rock",
+   "level": "unknown",
+   "depthM": 7.1
+  },
+  {
+   "id": "node/4943154702",
+   "lat": 58.09593,
+   "lon": 11.47691,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943154701",
+   "lat": 58.09597,
+   "lon": 11.47708,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943154703",
+   "lat": 58.09602,
+   "lon": 11.47737,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943154704",
+   "lat": 58.09604,
+   "lon": 11.47763,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943154700",
+   "lat": 58.09725,
+   "lon": 11.48759,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3703708057",
+   "lat": 58.09904,
+   "lon": 11.44196,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3703708058",
+   "lat": 58.09947,
+   "lon": 11.4431,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161414",
+   "lat": 58.10108,
+   "lon": 11.45751,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161413",
+   "lat": 58.10135,
+   "lon": 11.45712,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161412",
+   "lat": 58.10137,
+   "lon": 11.45408,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161415",
+   "lat": 58.10158,
+   "lon": 11.45741,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4943161418",
+   "lat": 58.10176,
+   "lon": 11.46375,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161417",
+   "lat": 58.10203,
+   "lon": 11.46188,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943111182",
+   "lat": 58.10226,
+   "lon": 11.43038,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943111183",
+   "lat": 58.10236,
+   "lon": 11.43011,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943111184",
+   "lat": 58.10238,
+   "lon": 11.42976,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943111186",
+   "lat": 58.10245,
+   "lon": 11.43024,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943111187",
+   "lat": 58.10246,
+   "lon": 11.43065,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943111185",
+   "lat": 58.10247,
+   "lon": 11.43001,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161416",
+   "lat": 58.10276,
+   "lon": 11.4606,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713877",
+   "lat": 58.10292,
+   "lon": 11.4369,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713878",
+   "lat": 58.10296,
+   "lon": 11.43643,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161419",
+   "lat": 58.10305,
+   "lon": 11.46257,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/7972730147",
+   "lat": 58.10311,
+   "lon": 11.35729,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7972730146",
+   "lat": 58.10329,
+   "lon": 11.35751,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713879",
+   "lat": 58.10333,
+   "lon": 11.43732,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713880",
+   "lat": 58.10395,
+   "lon": 11.43377,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022535058",
+   "lat": 58.10399,
+   "lon": 11.46024,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713881",
+   "lat": 58.10406,
+   "lon": 11.43367,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713882",
+   "lat": 58.1042,
+   "lon": 11.43358,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7972730143",
+   "lat": 58.10432,
+   "lon": 11.36039,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943130891",
+   "lat": 58.10464,
+   "lon": 11.433,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7972730145",
+   "lat": 58.1047,
+   "lon": 11.35468,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7972730142",
+   "lat": 58.10471,
+   "lon": 11.36379,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022421081",
+   "lat": 58.10554,
+   "lon": 11.47136,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7972730144",
+   "lat": 58.10567,
+   "lon": 11.35661,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713909",
+   "lat": 58.1057,
+   "lon": 11.42923,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703713910",
+   "lat": 58.1058,
+   "lon": 11.44195,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022529677",
+   "lat": 58.10673,
+   "lon": 11.45808,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022421072",
+   "lat": 58.10809,
+   "lon": 11.46221,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4022529678",
+   "lat": 58.1083,
+   "lon": 11.45966,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/5706518872",
+   "lat": 58.10843,
+   "lon": 11.36775,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4022421077",
+   "lat": 58.1087,
+   "lon": 11.46338,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4022549629",
+   "lat": 58.10894,
+   "lon": 11.45184,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022549630",
+   "lat": 58.10906,
+   "lon": 11.45066,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022549631",
+   "lat": 58.10915,
+   "lon": 11.45195,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "relation/10249725",
+   "lat": 58.10967,
+   "lon": 11.41649,
+   "kind": "named_shoal",
+   "name": "Tors både",
+   "how": "OSM bare_rock relation",
+   "radiusM": 12
+  },
+  {
+   "id": "node/7972730141",
+   "lat": 58.10983,
+   "lon": 11.3753,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7972730139",
+   "lat": 58.10986,
+   "lon": 11.37169,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7972730148",
+   "lat": 58.10994,
+   "lon": 11.35793,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/5706518880",
+   "lat": 58.10998,
+   "lon": 11.37178,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022549632",
+   "lat": 58.1102,
+   "lon": 11.45243,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/7972730140",
+   "lat": 58.11046,
+   "lon": 11.37349,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022549633",
+   "lat": 58.11086,
+   "lon": 11.44334,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022549634",
+   "lat": 58.11093,
+   "lon": 11.44354,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/6427276380",
+   "lat": 58.11205,
+   "lon": 11.38561,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4943161408",
+   "lat": 58.11208,
+   "lon": 11.46443,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161407",
+   "lat": 58.11214,
+   "lon": 11.46472,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161406",
+   "lat": 58.11252,
+   "lon": 11.46528,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "relation/11021067",
+   "lat": 58.11333,
+   "lon": 11.35736,
+   "kind": "named_shoal",
+   "name": "Bytebåden",
+   "how": "OSM bare_rock relation",
+   "radiusM": 23
+  },
+  {
+   "id": "node/4536963147",
+   "lat": 58.1134,
+   "lon": 11.35111,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4943161397",
+   "lat": 58.11376,
+   "lon": 11.46158,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943161384",
+   "lat": 58.11451,
+   "lon": 11.4653,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "relation/10249727",
+   "lat": 58.11489,
+   "lon": 11.38988,
+   "kind": "named_shoal",
+   "name": "Hästebåden",
+   "how": "OSM bare_rock relation",
+   "radiusM": 13
+  },
+  {
+   "id": "node/6427276382",
+   "lat": 58.11525,
+   "lon": 11.38711,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/6427276381",
+   "lat": 58.1153,
+   "lon": 11.38748,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4022561153",
+   "lat": 58.11638,
+   "lon": 11.44424,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4022557498",
+   "lat": 58.11638,
+   "lon": 11.44756,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022557499",
+   "lat": 58.11647,
+   "lon": 11.4456,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022557500",
+   "lat": 58.11649,
+   "lon": 11.44465,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4022561154",
+   "lat": 58.11677,
+   "lon": 11.44392,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4022547987",
+   "lat": 58.11761,
+   "lon": 11.44616,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4022558420",
+   "lat": 58.11789,
+   "lon": 11.44588,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/9901780770",
+   "lat": 58.11806,
+   "lon": 11.37133,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4022578769",
+   "lat": 58.11847,
+   "lon": 11.43212,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022558476",
+   "lat": 58.11855,
+   "lon": 11.44136,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943166928",
+   "lat": 58.1206,
+   "lon": 11.43796,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943166929",
+   "lat": 58.1207,
+   "lon": 11.43785,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943166930",
+   "lat": 58.1221,
+   "lon": 11.43744,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943122719",
+   "lat": 58.12227,
+   "lon": 11.39509,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740346",
+   "lat": 58.12231,
+   "lon": 11.42137,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943122720",
+   "lat": 58.12239,
+   "lon": 11.39942,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173770",
+   "lat": 58.12298,
+   "lon": 11.43777,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173771",
+   "lat": 58.12315,
+   "lon": 11.43779,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022595413",
+   "lat": 58.12344,
+   "lon": 11.4227,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740347",
+   "lat": 58.12344,
+   "lon": 11.42271,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755678",
+   "lat": 58.12346,
+   "lon": 11.4323,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755679",
+   "lat": 58.12359,
+   "lon": 11.43225,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740365",
+   "lat": 58.12398,
+   "lon": 11.41735,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740366",
+   "lat": 58.12399,
+   "lon": 11.41657,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740371",
+   "lat": 58.12399,
+   "lon": 11.41737,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943122718",
+   "lat": 58.12409,
+   "lon": 11.40446,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740388",
+   "lat": 58.12423,
+   "lon": 11.41829,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740384",
+   "lat": 58.12431,
+   "lon": 11.41676,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703740400",
+   "lat": 58.1248,
+   "lon": 11.41877,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755696",
+   "lat": 58.12783,
+   "lon": 11.42133,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675698507",
+   "lat": 58.12789,
+   "lon": 11.37844,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755709",
+   "lat": 58.12806,
+   "lon": 11.41574,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755711",
+   "lat": 58.12808,
+   "lon": 11.41536,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173748",
+   "lat": 58.12808,
+   "lon": 11.42085,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755718",
+   "lat": 58.1282,
+   "lon": 11.42193,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755721",
+   "lat": 58.12824,
+   "lon": 11.42179,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755724",
+   "lat": 58.1284,
+   "lon": 11.4153,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4022611028",
+   "lat": 58.12891,
+   "lon": 11.41646,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4675697907",
+   "lat": 58.12995,
+   "lon": 11.37804,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4675697906",
+   "lat": 58.13019,
+   "lon": 11.3784,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022618330",
+   "lat": 58.13053,
+   "lon": 11.42155,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/14239347783",
+   "lat": 58.13092,
+   "lon": 11.35957,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/14239347782",
+   "lat": 58.13117,
+   "lon": 11.35968,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3703755268",
+   "lat": 58.13171,
+   "lon": 11.39979,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/14239347790",
+   "lat": 58.13268,
+   "lon": 11.35601,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675700142",
+   "lat": 58.13312,
+   "lon": 11.39407,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4022660356",
+   "lat": 58.13345,
+   "lon": 11.41265,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3703756735",
+   "lat": 58.13348,
+   "lon": 11.41133,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3667068404",
+   "lat": 58.13351,
+   "lon": 11.3951,
+   "kind": "named_shoal",
+   "name": "Sverkerbådan",
+   "how": "marked by beacon_isolated_danger"
+  },
+  {
+   "id": "node/4943173727",
+   "lat": 58.13452,
+   "lon": 11.41939,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173728",
+   "lat": 58.13467,
+   "lon": 11.41976,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173730",
+   "lat": 58.13475,
+   "lon": 11.41949,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173729",
+   "lat": 58.13477,
+   "lon": 11.41959,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173705",
+   "lat": 58.13517,
+   "lon": 11.42029,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173678",
+   "lat": 58.13608,
+   "lon": 11.41787,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173645",
+   "lat": 58.13648,
+   "lon": 11.41844,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943173655",
+   "lat": 58.13656,
+   "lon": 11.41809,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675709923",
+   "lat": 58.13799,
+   "lon": 11.39803,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675709924",
+   "lat": 58.13863,
+   "lon": 11.39785,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675703421",
+   "lat": 58.13929,
+   "lon": 11.39531,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675690234",
+   "lat": 58.13942,
+   "lon": 11.37126,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675703687",
+   "lat": 58.13943,
+   "lon": 11.39739,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675703420",
+   "lat": 58.13958,
+   "lon": 11.39515,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675690235",
+   "lat": 58.1398,
+   "lon": 11.37084,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675680439",
+   "lat": 58.13993,
+   "lon": 11.37566,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4675667501",
+   "lat": 58.14106,
+   "lon": 11.38416,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675677615",
+   "lat": 58.1418,
+   "lon": 11.37665,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675664086",
+   "lat": 58.14182,
+   "lon": 11.38232,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675664084",
+   "lat": 58.14192,
+   "lon": 11.38245,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675664085",
+   "lat": 58.14192,
+   "lon": 11.38266,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675664083",
+   "lat": 58.14198,
+   "lon": 11.38227,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675664087",
+   "lat": 58.14212,
+   "lon": 11.38204,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675664088",
+   "lat": 58.14231,
+   "lon": 11.38212,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675664082",
+   "lat": 58.14244,
+   "lon": 11.38355,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675652989",
+   "lat": 58.14498,
+   "lon": 11.38185,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710240399",
+   "lat": 58.14969,
+   "lon": 11.39745,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/14239277356",
+   "lat": 58.15003,
+   "lon": 11.41202,
+   "kind": "rock",
+   "level": "dry"
+  },
+  {
+   "id": "node/3570343134",
+   "lat": 58.15015,
+   "lon": 11.41017,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3570344298",
+   "lat": 58.15025,
+   "lon": 11.41035,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710240400",
+   "lat": 58.1506,
+   "lon": 11.39909,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3710240401",
+   "lat": 58.15063,
+   "lon": 11.39867,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710238271",
+   "lat": 58.15109,
+   "lon": 11.39882,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3710238092",
+   "lat": 58.15163,
+   "lon": 11.39732,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710238093",
+   "lat": 58.15169,
+   "lon": 11.39756,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710238094",
+   "lat": 58.15236,
+   "lon": 11.3981,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3710238095",
+   "lat": 58.15256,
+   "lon": 11.39861,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710238096",
+   "lat": 58.15261,
+   "lon": 11.39825,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3710238097",
+   "lat": 58.15267,
+   "lon": 11.39875,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710239067",
+   "lat": 58.15272,
+   "lon": 11.39534,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3710239068",
+   "lat": 58.15272,
+   "lon": 11.39593,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3710239069",
+   "lat": 58.15275,
+   "lon": 11.3961,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710239070",
+   "lat": 58.15279,
+   "lon": 11.39562,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710239071",
+   "lat": 58.15286,
+   "lon": 11.39612,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3710239072",
+   "lat": 58.15293,
+   "lon": 11.39616,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "way/1319915607",
+   "lat": 58.15294,
+   "lon": 11.42073,
+   "kind": "wreck",
+   "name": "Pråmiss",
+   "radiusM": 9
+  },
+  {
+   "id": "node/3710235264",
+   "lat": 58.16031,
+   "lon": 11.39603,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3710235265",
+   "lat": 58.16044,
+   "lon": 11.39586,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3710235266",
+   "lat": 58.161,
+   "lon": 11.3977,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3710235267",
+   "lat": 58.16106,
+   "lon": 11.39784,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3710235268",
+   "lat": 58.16144,
+   "lon": 11.39601,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/3710235269",
+   "lat": 58.16146,
+   "lon": 11.39553,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4675237695",
+   "lat": 58.1718,
+   "lon": 11.33776,
+   "kind": "rock",
+   "level": "unknown",
+   "depthM": 6.4
+  },
+  {
+   "id": "node/5022738054",
+   "lat": 58.17318,
+   "lon": 11.45458,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/5022738053",
+   "lat": 58.17323,
+   "lon": 11.45425,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4536963148",
+   "lat": 58.17389,
+   "lon": 11.37594,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/5022601351",
+   "lat": 58.17401,
+   "lon": 11.40973,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4536963149",
+   "lat": 58.17412,
+   "lon": 11.37619,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4536963150",
+   "lat": 58.17413,
+   "lon": 11.37456,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/5022733923",
+   "lat": 58.17474,
+   "lon": 11.45515,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4674746042",
+   "lat": 58.1783,
+   "lon": 11.40898,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4674784670",
+   "lat": 58.17897,
+   "lon": 11.41355,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/5022733926",
+   "lat": 58.17901,
+   "lon": 11.42844,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/5022733925",
+   "lat": 58.17901,
+   "lon": 11.42856,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/5022733924",
+   "lat": 58.17901,
+   "lon": 11.42871,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/5022733927",
+   "lat": 58.17902,
+   "lon": 11.42831,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4674784672",
+   "lat": 58.1804,
+   "lon": 11.41194,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4675234490",
+   "lat": 58.1812,
+   "lon": 11.32545,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943209483",
+   "lat": 58.1815,
+   "lon": 11.4192,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4674767183",
+   "lat": 58.18168,
+   "lon": 11.40969,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4674777226",
+   "lat": 58.18176,
+   "lon": 11.41413,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4674777227",
+   "lat": 58.18207,
+   "lon": 11.4134,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943207098",
+   "lat": 58.18218,
+   "lon": 11.42072,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4674767184",
+   "lat": 58.18225,
+   "lon": 11.40939,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943207096",
+   "lat": 58.1824,
+   "lon": 11.42115,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943207099",
+   "lat": 58.18248,
+   "lon": 11.42022,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943207097",
+   "lat": 58.18252,
+   "lon": 11.42108,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675318146",
+   "lat": 58.18267,
+   "lon": 11.3927,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4674777228",
+   "lat": 58.18276,
+   "lon": 11.41342,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675318147",
+   "lat": 58.18278,
+   "lon": 11.39194,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943209484",
+   "lat": 58.18297,
+   "lon": 11.42062,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943209485",
+   "lat": 58.18316,
+   "lon": 11.41964,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943209486",
+   "lat": 58.1833,
+   "lon": 11.41997,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675315960",
+   "lat": 58.18356,
+   "lon": 11.39218,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4675315961",
+   "lat": 58.18371,
+   "lon": 11.39125,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4943209487",
+   "lat": 58.18438,
+   "lon": 11.42077,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4674966311",
+   "lat": 58.18448,
+   "lon": 11.40452,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4675282045",
+   "lat": 58.18482,
+   "lon": 11.39927,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675282046",
+   "lat": 58.18521,
+   "lon": 11.39915,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675279670",
+   "lat": 58.18525,
+   "lon": 11.40113,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675282047",
+   "lat": 58.18549,
+   "lon": 11.39781,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675282048",
+   "lat": 58.18563,
+   "lon": 11.39704,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675284543",
+   "lat": 58.18613,
+   "lon": 11.40006,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4675284542",
+   "lat": 58.18614,
+   "lon": 11.3998,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4675287369",
+   "lat": 58.18688,
+   "lon": 11.39962,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4675287368",
+   "lat": 58.1871,
+   "lon": 11.40085,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4675288133",
+   "lat": 58.18725,
+   "lon": 11.40049,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4536912705",
+   "lat": 58.18778,
+   "lon": 11.40591,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675202351",
+   "lat": 58.19069,
+   "lon": 11.42301,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4675313906",
+   "lat": 58.19201,
+   "lon": 11.38729,
+   "kind": "rock",
+   "level": "unknown",
+   "depthM": 3.8
+  },
+  {
+   "id": "node/4675312308",
+   "lat": 58.19391,
+   "lon": 11.38896,
+   "kind": "rock",
+   "level": "awash",
+   "name": "Norman"
+  },
+  {
+   "id": "node/4536926702",
+   "lat": 58.19948,
+   "lon": 11.46194,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943203469",
+   "lat": 58.20332,
+   "lon": 11.48712,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4943203467",
+   "lat": 58.20334,
+   "lon": 11.48674,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4943203468",
+   "lat": 58.20343,
+   "lon": 11.48698,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943203656",
+   "lat": 58.20485,
+   "lon": 11.49175,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4943203655",
+   "lat": 58.20524,
+   "lon": 11.49384,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4536871413",
+   "lat": 58.20703,
+   "lon": 11.41344,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/9872988479",
+   "lat": 58.21217,
+   "lon": 11.26167,
+   "kind": "obstruction"
+  },
+  {
+   "id": "node/6427276379",
+   "lat": 58.21382,
+   "lon": 11.37221,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4536867274",
+   "lat": 58.21391,
+   "lon": 11.40512,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4536880130",
+   "lat": 58.2162,
+   "lon": 11.41368,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4536880132",
+   "lat": 58.21666,
+   "lon": 11.41055,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4536880131",
+   "lat": 58.21668,
+   "lon": 11.41138,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4536887917",
+   "lat": 58.22573,
+   "lon": 11.4151,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/4536887941",
+   "lat": 58.22665,
+   "lon": 11.41443,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/9904288242",
+   "lat": 58.24293,
+   "lon": 11.36242,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3545829810",
+   "lat": 58.24909,
+   "lon": 11.45383,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3545829822",
+   "lat": 58.24922,
+   "lon": 11.45433,
+   "kind": "rock",
+   "level": "covers"
+  },
+  {
+   "id": "node/3545846979",
+   "lat": 58.25401,
+   "lon": 11.44758,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3545846987",
+   "lat": 58.25406,
+   "lon": 11.44768,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "relation/10250495",
+   "lat": 58.25451,
+   "lon": 11.44335,
+   "kind": "named_shoal",
+   "name": "Långgaps både",
+   "how": "OSM bare_rock relation",
+   "radiusM": 3
+  },
+  {
+   "id": "relation/10250158",
+   "lat": 58.25659,
+   "lon": 11.36479,
+   "kind": "named_shoal",
+   "name": "Smedjeflut",
+   "how": "OSM bare_rock relation",
+   "radiusM": 18
+  },
+  {
+   "id": "relation/10250159",
+   "lat": 58.25671,
+   "lon": 11.36387,
+   "kind": "named_shoal",
+   "name": "Smedjeflut",
+   "how": "OSM bare_rock relation",
+   "radiusM": 28
+  },
+  {
+   "id": "node/4536892854",
+   "lat": 58.25787,
+   "lon": 11.42094,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3545868668",
+   "lat": 58.26115,
+   "lon": 11.47539,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3545868696",
+   "lat": 58.26143,
+   "lon": 11.47399,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4536895478",
+   "lat": 58.26257,
+   "lon": 11.41595,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3545868716",
+   "lat": 58.26342,
+   "lon": 11.47292,
+   "kind": "rock",
+   "level": "covers"
+  },
+  {
+   "id": "node/5071047535",
+   "lat": 58.2638,
+   "lon": 11.38555,
+   "kind": "named_shoal",
+   "name": "Jämningsbådan",
+   "how": "marked by buoy_lateral"
+  },
+  {
+   "id": "node/3668662063",
+   "lat": 58.2656,
+   "lon": 11.38915,
+   "kind": "named_shoal",
+   "name": "Jämningsbådan",
+   "how": "marked by beacon_isolated_danger"
+  },
+  {
+   "id": "node/4536902890",
+   "lat": 58.26579,
+   "lon": 11.42286,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4536902889",
+   "lat": 58.2667,
+   "lon": 11.41749,
+   "kind": "rock",
+   "level": "unknown"
+  },
+  {
+   "id": "node/4536902923",
+   "lat": 58.26752,
+   "lon": 11.42441,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3587407555",
+   "lat": 58.26779,
+   "lon": 11.45227,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/4536902924",
+   "lat": 58.26785,
+   "lon": 11.43753,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/3587411276",
+   "lat": 58.27577,
+   "lon": 11.45093,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3587411277",
+   "lat": 58.27594,
+   "lon": 11.4507,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/3587411278",
+   "lat": 58.27597,
+   "lon": 11.45055,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7756689157",
+   "lat": 58.28034,
+   "lon": 11.34154,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/7756702503",
+   "lat": 58.28209,
+   "lon": 11.34371,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/6427276378",
+   "lat": 58.28841,
+   "lon": 11.37385,
+   "kind": "rock",
+   "level": "submerged"
+  },
+  {
+   "id": "node/7756684075",
+   "lat": 58.28885,
+   "lon": 11.34644,
+   "kind": "rock",
+   "level": "awash"
+  },
+  {
+   "id": "node/6427276377",
+   "lat": 58.28907,
+   "lon": 11.37362,
+   "kind": "rock",
+   "level": "submerged"
+  }
+ ]
+}

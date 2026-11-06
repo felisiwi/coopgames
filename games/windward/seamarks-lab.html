@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windward Seamarks Lab</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1a24; --panel: rgba(14, 26, 36, 0.94); --line: #2c4556; --text: #e6eef2; --dim: #9db3c0;
+    --accent: #6fd0d6; --on: #06222a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.35 system-ui, sans-serif; overflow: hidden; overscroll-behavior: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #c3 { display: none; }
+  #credit { position: fixed; z-index: 3; top: calc(8px + env(safe-area-inset-top, 0px)); right: 8px; max-width: 46vw; padding: 3px 8px; border-radius: 999px; background: rgba(14, 26, 36, 0.8); color: var(--dim); font-size: 11px; text-align: right; }
+  #credit a { color: inherit; }
+  .only3d { display: none; } body.m3d .only3d { display: block; } body.m3d .only2d { display: none; }
+  input[type=range] { width: 100%; accent-color: var(--accent); height: 36px; margin: 0; }
+  #badge { position: fixed; z-index: 3; top: calc(8px + env(safe-area-inset-top, 0px)); left: 8px; padding: 4px 9px; border-radius: 999px; background: rgba(14, 26, 36, 0.85); color: var(--dim); font-size: 12px; pointer-events: none; font-variant-numeric: tabular-nums; }
+  #panel { position: fixed; z-index: 4; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 460px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(6px); }
+  #head { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; background: none; color: inherit; font: 600 14px system-ui, sans-serif; text-align: left; cursor: pointer; }
+  #head .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #head .chev { transition: transform .15s; } #panel.open #head .chev { transform: rotate(180deg); }
+  #body { display: none; padding: 0 12px 12px; max-height: min(58vh, 520px); overflow: auto; -webkit-overflow-scrolling: touch; }
+  #panel.open #body { display: block; }
+  h2 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  button.chip { font: inherit; color: var(--text); background: #1c3140; border: 1px solid var(--line); border-radius: 10px; padding: 0 11px; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+  button.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on); font-weight: 600; }
+  button.chip.layer:not(.on) { opacity: .55; }
+  .sym { width: 16px; height: 16px; flex: none; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 12px; color: var(--dim); }
+  .legend span { display: flex; align-items: center; gap: 7px; min-height: 22px; }
+  #info { position: fixed; z-index: 4; top: calc(40px + env(safe-area-inset-top, 0px)); left: 8px; right: 8px; max-width: 360px; padding: 9px 12px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; display: none; }
+  #info b { font-size: 14px; } #info .dim { color: var(--dim); }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--dim); z-index: 6; padding: 24px; text-align: center; }
+  .note { font-size: 12px; color: var(--dim); margin: 8px 0 0; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<canvas id="c3"></canvas>
+<div id="credit">Marks &amp; shoals © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a> (ODbL)</div>
+<div id="badge"></div>
+<div id="info"></div>
+<div id="loading">loading the coast and the marks…</div>
+<div id="panel">
+  <button id="head" type="button" aria-expanded="false" aria-controls="body"><span class="name" id="headname">Seamarks Lab</span><span class="chev" aria-hidden="true">▲</span></button>
+  <div id="body">
+    <h2>View</h2><div class="chips" id="views"></div>
+    <div class="only3d">
+      <h2>Light</h2><div class="chips" id="light3d"></div>
+      <h2>Show</h2><div class="chips" id="show3d"></div>
+      <h2>Zoom (distance at the game angle)</h2><input id="zoom3d" type="range" min="0.1" max="3" step="0.01" aria-label="3D zoom">
+      <p class="note">Invented marks look exactly like real ones in the game. “Debug” rings them in magenta so you can find them. Drag to pan, pinch or scroll to zoom.</p>
+    </div>
+    <h2>Go to a harbour</h2><div class="chips" id="harbours"></div>
+    <div class="only2d"><h2>Layers</h2><div class="chips" id="layers"></div></div>
+    <div class="only2d"><h2>Legend</h2><div class="legend" id="legend"></div></div>
+    <p class="note">Drag to pan, pinch or scroll to zoom, tap a symbol for its OSM details. The dashed ring around a harbour is 1.5 km: the area counted as “marks near this harbour”. Data: © OpenStreetMap contributors (ODbL). Land cover: NMD 2018 classes.</p>
+  </div>
+</div>
+<script type="module">
+const REGION = { s: 58.085, w: 11.25, n: 58.30, e: 11.50 };
+const $ = (id) => document.getElementById(id);
+const canvas = $('c'), ctx = canvas.getContext('2d');
+const params = new URLSearchParams(location.search);
+const qs = (k, d) => params.get(k) ?? d;
+
+// ------------------------------------------------------------------ data
+let meta, shoals, marks, harbours, lines, base; // base = offscreen canvas of the land cover, 1 px = mpp metres
+async function load() {
+  const base_ = './assets/coast/';
+  const j = (f) => fetch(base_ + f).then((r) => { if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); });
+  const [m, s, k] = await Promise.all([j('meta.json'), j('shoals.json'), j('seamarks.json')]);
+  meta = m; shoals = s.shoals; marks = k.marks; harbours = k.harbours; lines = k.lines;
+  const tile = meta.tiles.find((t) => t.id === 'north');
+  const img = new Image(); img.src = base_ + tile.files.classes;
+  await img.decode();
+  // region -> plane pixels (see SOURCES.md): lon = bbox.w + x*mpp/mLon, lat = bbox.n - y*mpp/mLat
+  const mpp = meta.metersPerPixelReal, P = meta.projection;
+  const px = (lon) => (lon - meta.bbox.w) * P.metersPerDegLon / mpp, py = (lat) => (meta.bbox.n - lat) * P.metersPerDegLat / mpp;
+  const x0 = Math.floor(px(REGION.w)), y0 = Math.floor(py(REGION.n)), x1 = Math.ceil(px(REGION.e)), y1 = Math.ceil(py(REGION.s));
+  base = document.createElement('canvas'); base.width = x1 - x0; base.height = y1 - y0;
+  const b = base.getContext('2d');
+  b.drawImage(img, x0 - tile.x0, y0 - tile.y0, base.width, base.height, 0, 0, base.width, base.height);
+  const d = b.getImageData(0, 0, base.width, base.height), a = d.data;
+  // class 0 water, 1 bare rock, 2 heath, 3 meadow, 4 scrub, 5 forest, 6 village  (meta.json "classes")
+  const PAL = [[26, 52, 74], [150, 148, 138], [138, 122, 90], [156, 168, 98], [96, 124, 78], [58, 94, 64], [196, 120, 92]];
+  for (let i = 0; i < a.length; i += 4) { const c = PAL[Math.min(6, a[i])]; a[i] = c[0]; a[i + 1] = c[1]; a[i + 2] = c[2]; a[i + 3] = 255; }
+  b.putImageData(d, 0, 0);
+  base.origin = { x0, y0 }; base.px = (lon) => px(lon) - x0; base.py = (lat) => py(lat) - y0;
+}
+
+// ------------------------------------------------------------------ view (pan / zoom)
+const view = { cx: 0, cy: 0, k: 1 }; // centre in base pixels, k = screen px per base px
+let W = 0, H = 0, dpr = 1;
+function resize() {
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = innerWidth; H = innerHeight;
+  canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+  draw();
+}
+const toScreen = (bx, by) => [(bx - view.cx) * view.k + W / 2, (by - view.cy) * view.k + H / 2];
+const toBase = (sx, sy) => [(sx - W / 2) / view.k + view.cx, (sy - H / 2) / view.k + view.cy];
+function fitAll() { view.k = Math.min(W / base.width, H / base.height) * 0.98; view.cx = base.width / 2; view.cy = base.height / 2; }
+function gotoLatLon(lat, lon, metresAcross) {
+  view.cx = base.px(lon); view.cy = base.py(lat);
+  view.k = Math.min(W, H) / (metresAcross / meta.metersPerPixelReal);
+}
+const clampK = () => { view.k = Math.max(0.3, Math.min(view.k, 40)); };
+
+// ------------------------------------------------------------------ layers + symbols
+const LAYERS = [
+  { id: 'rocks', label: 'Rocks', on: true, n: () => shoals.filter((s) => s.kind === 'rock').length },
+  { id: 'named', label: 'Named shoals', on: true, n: () => shoals.filter((s) => s.kind === 'named_shoal').length },
+  { id: 'wrecks', label: 'Wreck / obstruction', on: true, n: () => shoals.filter((s) => s.kind === 'wreck' || s.kind === 'obstruction').length },
+  { id: 'invented', label: 'Invented gates', on: true, n: () => marks.filter((m) => m.invented).length },
+  { id: 'lateral', label: 'Lateral', on: true, n: () => marks.filter((m) => m.type === 'lateral').length },
+  { id: 'cardinal', label: 'Cardinal', on: true, n: () => marks.filter((m) => m.type === 'cardinal').length },
+  { id: 'danger', label: 'Isolated danger', on: true, n: () => marks.filter((m) => m.type === 'isolated_danger').length },
+  { id: 'special', label: 'Special (yellow)', on: true, n: () => marks.filter((m) => m.type === 'special').length },
+  { id: 'light', label: 'Lights', on: true, n: () => marks.filter((m) => m.type === 'light').length },
+  { id: 'lines', label: 'Leading lines', on: true, n: () => lines.length },
+  { id: 'rings', label: 'Harbour 1.5 km rings', on: true, n: () => harbours.length },
+];
+const layerOn = Object.fromEntries(LAYERS.map((l) => [l.id, l.on]));
+const hiddenParam = (qs('hide', '') || '').split(',').filter(Boolean);
+for (const h of hiddenParam) layerOn[h] = false;
+
+const C = { port: '#e0463c', stbd: '#2fae5a', yellow: '#f2c230', black: '#16181a', white: '#f4f1e6', rockAwash: '#ff8a3d', rockSub: '#ffd3a8', rockUnk: '#b9c4cc', named: '#ff5fb0' };
+function path(fn) { ctx.beginPath(); fn(); }
+function drawSymbol(kind, x, y, r, m) {
+  ctx.lineWidth = Math.max(1, r * 0.22); ctx.lineJoin = 'round';
+  switch (kind) {
+    case 'rock-awash': path(() => { ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.moveTo(x, y - r); ctx.lineTo(x, y + r); }); ctx.strokeStyle = C.rockAwash; ctx.lineWidth = r * 0.42; ctx.stroke(); break;
+    case 'rock-sub': path(() => { ctx.arc(x, y, r * 0.8, 0, 7); }); ctx.strokeStyle = C.rockSub; ctx.lineWidth = r * 0.3; ctx.stroke(); break;
+    case 'rock-unk': path(() => { ctx.arc(x, y, r * 0.7, 0, 7); }); ctx.fillStyle = C.rockUnk; ctx.fill(); break;
+    case 'named': path(() => { ctx.moveTo(x, y - r * 1.5); ctx.lineTo(x + r * 1.5, y); ctx.lineTo(x, y + r * 1.5); ctx.lineTo(x - r * 1.5, y); ctx.closePath(); }); ctx.fillStyle = C.named; ctx.fill(); ctx.strokeStyle = C.white; ctx.stroke(); break;
+    case 'wreck': path(() => { ctx.moveTo(x - r, y - r); ctx.lineTo(x + r, y + r); ctx.moveTo(x + r, y - r); ctx.lineTo(x - r, y + r); }); ctx.strokeStyle = C.black; ctx.lineWidth = r * 0.55; ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = r * 0.25; ctx.stroke(); break;
+    case 'port': path(() => ctx.rect(x - r, y - r, r * 2, r * 2)); ctx.fillStyle = C.port; ctx.fill(); ctx.strokeStyle = C.white; ctx.stroke(); break; // can
+    case 'stbd': path(() => { ctx.moveTo(x, y - r * 1.25); ctx.lineTo(x + r * 1.1, y + r * 0.9); ctx.lineTo(x - r * 1.1, y + r * 0.9); ctx.closePath(); }); ctx.fillStyle = C.stbd; ctx.fill(); ctx.strokeStyle = C.white; ctx.stroke(); break; // cone
+    case 'danger': path(() => ctx.arc(x, y, r, 0, 7)); ctx.fillStyle = C.black; ctx.fill(); ctx.strokeStyle = C.port; ctx.lineWidth = r * 0.35; ctx.stroke(); break;
+    case 'special': path(() => { ctx.moveTo(x - r, y - r); ctx.lineTo(x + r, y + r); ctx.moveTo(x + r, y - r); ctx.lineTo(x - r, y + r); }); ctx.strokeStyle = C.yellow; ctx.lineWidth = r * 0.5; ctx.stroke(); break;
+    case 'light': { path(() => { for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.5 : r * 1.3; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); }); ctx.fillStyle = '#fff6b0'; ctx.fill(); ctx.strokeStyle = '#7a5d00'; ctx.stroke(); break; }
+    case 'cardinal': {
+      // top/bottom halves coloured as the band order of the mark: N black over yellow, S yellow over black,
+      // E black / yellow / black bands, W yellow / black / yellow bands.
+      const dir = m.direction, cols = m.colours.map((c) => (c === 'black' ? C.black : C.yellow));
+      const bands = cols.length === 2 ? [cols[0], cols[1]] : [cols[0], cols[1], cols[2]];
+      ctx.save(); path(() => ctx.arc(x, y, r * 1.35, 0, 7)); ctx.clip();
+      const h = r * 2.7 / bands.length;
+      bands.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(x - r * 1.4, y - r * 1.35 + i * h, r * 2.8, h + 0.5); });
+      ctx.restore(); path(() => ctx.arc(x, y, r * 1.35, 0, 7)); ctx.strokeStyle = C.white; ctx.stroke();
+      if (r > 4) { ctx.fillStyle = C.white; ctx.strokeStyle = C.black; ctx.lineWidth = 3; ctx.font = `700 ${Math.round(r * 1.5)}px system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const t = dir[0].toUpperCase(); ctx.strokeText(t, x, y - r * 2.2); ctx.fillText(t, x, y - r * 2.2); }
+      break; }
+  }
+}
+const symbolFor = (it) => it.kind === 'rock' ? (it.level === 'awash' || it.level === 'dry' ? 'rock-awash' : it.level === 'unknown' ? 'rock-unk' : 'rock-sub')
+  : it.kind === 'named_shoal' ? 'named' : it.kind ? 'wreck'
+  : it.type === 'lateral' ? (it.side === 'port' ? 'port' : 'stbd') : it.type === 'isolated_danger' ? 'danger' : it.type;
+const layerOf = (it) => it.invented ? 'invented' : it.kind === 'rock' ? 'rocks' : it.kind === 'named_shoal' ? 'named' : it.kind ? 'wrecks'
+  : it.type === 'isolated_danger' ? 'danger' : it.type;
+
+// the things that can be drawn and tapped, built once
+let items = [];
+function buildItems() {
+  items = [...shoals, ...marks].map((it) => ({ it, bx: base.px(it.lon), by: base.py(it.lat), layer: layerOf(it), sym: symbolFor(it) }));
+  // draw order: rocks underneath, marks over them
+  const order = { rocks: 0, wrecks: 1, named: 2, special: 3, danger: 4, lateral: 5, invented: 5, cardinal: 6, light: 7 };
+  items.sort((a, b) => order[a.layer] - order[b.layer]);
+}
+
+// ------------------------------------------------------------------ draw
+let selected = null;
+function draw() {
+  if (!base) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = '#0e1a24'; ctx.fillRect(0, 0, W, H);
+  ctx.imageSmoothingEnabled = view.k < 1.2;
+  const [sx, sy] = toScreen(0, 0);
+  ctx.drawImage(base, sx, sy, base.width * view.k, base.height * view.k);
+  // region frame
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.setLineDash([6, 5]); ctx.strokeRect(sx, sy, base.width * view.k, base.height * view.k); ctx.setLineDash([]);
+
+  const mpp = meta.metersPerPixelReal;
+  if (layerOn.rings) for (const h of harbours) {
+    const [x, y] = toScreen(base.px(h.lon), base.py(h.lat)), rad = 1500 / mpp * view.k;
+    ctx.strokeStyle = 'rgba(111,208,214,.85)'; ctx.setLineDash([5, 5]); ctx.lineWidth = 1.5; path(() => ctx.arc(x, y, rad, 0, 7)); ctx.stroke(); ctx.setLineDash([]);
+  }
+  if (layerOn.lines) {
+    ctx.save(); ctx.beginPath(); ctx.rect(sx, sy, base.width * view.k, base.height * view.k); ctx.clip();
+    ctx.lineWidth = 2; ctx.setLineDash([8, 5]);
+    for (const l of lines) {
+      ctx.strokeStyle = l.category === 'clearing' ? '#ffb25c' : '#ffffff';
+      path(() => l.points.forEach(([lon, lat], i) => { const [x, y] = toScreen(base.px(lon), base.py(lat)); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }));
+      ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.restore();
+  }
+  const r = Math.max(3.2, Math.min(9, 2.2 + view.k * 0.9));
+  for (const o of items) {
+    if (!layerOn[o.layer]) continue;
+    if (o.layer === 'rocks' && view.k < 0.9) { // too many at overview zoom: keep them readable as dots
+      const [x, y] = toScreen(o.bx, o.by); if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
+      drawSymbol(o.sym, x, y, r * 0.7, o.it); continue;
+    }
+    const [x, y] = toScreen(o.bx, o.by);
+    if (x < -30 || y < -30 || x > W + 30 || y > H + 30) continue;
+    drawSymbol(o.sym, x, y, r, o.it);
+    if (o.it.invented) { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = '#ff3fb8'; ctx.lineWidth = 2; path(() => ctx.arc(x, y, r * 1.9, 0, 7)); ctx.stroke(); ctx.restore(); }
+    if (o === selected) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; path(() => ctx.arc(x, y, r * 2.4, 0, 7)); ctx.stroke(); }
+  }
+  // labels: harbours always, named shoals when zoomed in
+  ctx.font = '600 12px system-ui'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(8,16,22,.95)';
+  const label = (t, x, y, col) => { ctx.strokeText(t, x, y); ctx.fillStyle = col; ctx.fillText(t, x, y); };
+  for (const h of harbours) {
+    const [x, y] = toScreen(base.px(h.lon), base.py(h.lat));
+    path(() => ctx.arc(x, y, 5, 0, 7)); ctx.fillStyle = '#6fd0d6'; ctx.fill(); ctx.strokeStyle = '#06222a'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(8,16,22,.95)';
+    if (view.k > 0.8 || /Grundsunds hamn|Käringöns|Fiskebäckskils/.test(h.name)) { const t = h.name.replace(/ (småbåtshamn|gästhamn)$/i, ''); const w = ctx.measureText(t).width; if (x + 8 + w > W - 4) { ctx.textAlign = 'right'; label(t, x - 8, y - 10, '#bff3f5'); ctx.textAlign = 'left'; } else label(t, x + 8, y - 10, '#bff3f5'); }
+  }
+  if (layerOn.named && view.k > 1.5) for (const o of items) if (o.layer === 'named') { const [x, y] = toScreen(o.bx, o.by); label(o.it.name, x + 10, y + 10, '#ffc2e0'); }
+  if (layerOn.lateral && view.k > 3) for (const o of items) if (o.layer === 'lateral' && o.it.lights?.length) { const [x, y] = toScreen(o.bx, o.by); label(o.it.lights[0].text, x + 9, y + 9, '#fff'); }
+  if (layerOn.cardinal && view.k > 2) for (const o of items) if (o.layer === 'cardinal' && o.it.lights?.length) { const [x, y] = toScreen(o.bx, o.by); label(o.it.lights[0].text, x + 11, y + 11, '#ffe9a0'); }
+  $('badge').textContent = `${Math.round(mpp / view.k)} m per px · ${Math.round(W * mpp / view.k / 100) / 10} km across`;
+}
+
+// ------------------------------------------------------------------ interaction
+const pointers = new Map();
+let dragMoved = 0, pinch0 = null;
+canvas.addEventListener('pointerdown', (e) => { canvas.setPointerCapture?.(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); dragMoved = 0; pinch0 = null; });
+canvas.addEventListener('pointermove', (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  const prev = pointers.get(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pointers.size === 1) { view.cx -= (e.clientX - prev[0]) / view.k; view.cy -= (e.clientY - prev[1]) / view.k; dragMoved += Math.abs(e.clientX - prev[0]) + Math.abs(e.clientY - prev[1]); }
+  else if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    if (pinch0) { const before = toBase(mx, my); view.k *= d / pinch0; clampK(); const after = toBase(mx, my); view.cx += before[0] - after[0]; view.cy += before[1] - after[1]; }
+    pinch0 = d; dragMoved = 99;
+  }
+  draw();
+});
+const up = (e) => {
+  if (pointers.size === 1 && dragMoved < 6) tap(e.clientX, e.clientY);
+  pointers.delete(e.pointerId); pinch0 = null;
+};
+canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', (e) => { pointers.delete(e.pointerId); pinch0 = null; });
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault(); const before = toBase(e.clientX, e.clientY);
+  view.k *= Math.exp(-e.deltaY * 0.0015); clampK();
+  const after = toBase(e.clientX, e.clientY); view.cx += before[0] - after[0]; view.cy += before[1] - after[1]; draw();
+}, { passive: false });
+
+function tap(x, y) {
+  let best = null, bd = 22;
+  for (const o of items) {
+    if (!layerOn[o.layer]) continue;
+    const [sx, sy] = toScreen(o.bx, o.by), d = Math.hypot(sx - x, sy - y);
+    if (d < bd) { bd = d; best = o; }
+  }
+  for (const h of harbours) { const [sx, sy] = toScreen(base.px(h.lon), base.py(h.lat)); if (Math.hypot(sx - x, sy - y) < Math.min(bd, 18)) { best = { harbour: h }; bd = 0; } }
+  selected = best && !best.harbour ? best : null;
+  showInfo(best); draw();
+}
+function showInfo(o) {
+  const box = $('info');
+  if (!o) { box.style.display = 'none'; return; }
+  const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  let html;
+  if (o.harbour) {
+    const h = o.harbour;
+    html = `<b>${esc(h.name)}</b><br><span class="dim">harbour (OSM ${esc(h.id)})</span><br>${h.within1500m} marks within 1.5 km, nearest ${h.nearestMarkM} m<br><span class="dim">${esc(Object.entries(h.byType).map(([k, v]) => `${v} ${k}`).join(', ') || 'none')}</span>`;
+  } else {
+    const it = o.it;
+    const what = it.kind ? (it.kind === 'rock' ? `rock, ${it.level}` : it.kind.replace('_', ' ')) : `${it.type}${it.side ? ' ' + it.side : ''}${it.direction ? ' ' + it.direction : ''} (${it.form})`;
+    html = `<b>${esc(it.name ?? what)}</b>${it.name ? `<br><span class="dim">${esc(what)}</span>` : ''}`;
+    if (it.colours) html += `<br>${esc(it.colours.join(' / '))}${it.shape ? ', ' + esc(it.shape) : ''}`;
+    if (it.lights?.length) html += `<br>light: ${it.lights.slice(0, 3).map((l) => esc(l.text)).join(' · ')}${it.lights.length > 3 ? ` (+${it.lights.length - 3} sectors)` : ''}`;
+    if (it.how) html += `<br><span class="dim">${esc(it.how)}</span>`;
+    if (it.invented) html += `<br><b style="color:#ff7fcf">invented</b> <span class="dim">generated gate at the harbour mouth, ${esc(it.basis?.mouthWidthM ?? '?')} m wide; looks like a real mark in the game</span>`;
+    if (it.nearHarbour) html += `<br><span class="dim">near ${esc(it.nearHarbour)}</span>`;
+    html += `<br><span class="dim">OSM ${esc(it.id)} · ${it.lat.toFixed(5)}, ${it.lon.toFixed(5)}</span>`;
+  }
+  box.innerHTML = html; box.style.display = 'block';
+}
+
+// ------------------------------------------------------------------ panel
+const svg = (inner) => `<svg class="sym" viewBox="-10 -10 20 20" aria-hidden="true">${inner}</svg>`;
+const LEG = {
+  rocks: svg('<path d="M-7 0H7M0 -7V7" stroke="#ff8a3d" stroke-width="3.2"/>'),
+  named: svg('<path d="M0 -9L9 0L0 9L-9 0Z" fill="#ff5fb0" stroke="#fff"/>'),
+  wrecks: svg('<path d="M-6 -6L6 6M6 -6L-6 6" stroke="#fff" stroke-width="3"/>'),
+  lateral: svg('<rect x="-8" y="-8" width="7" height="7" fill="#e0463c" stroke="#fff"/><path d="M4 -8L9 1H-1Z" transform="translate(0,2)" fill="#2fae5a" stroke="#fff"/>'),
+  cardinal: svg('<clipPath id="cc"><circle r="8"/></clipPath><g clip-path="url(#cc)"><rect x="-9" y="-9" width="18" height="9" fill="#16181a"/><rect x="-9" y="0" width="18" height="9" fill="#f2c230"/></g><circle r="8" fill="none" stroke="#fff"/>'),
+  danger: svg('<circle r="6" fill="#16181a" stroke="#e0463c" stroke-width="2.5"/>'),
+  special: svg('<path d="M-6 -6L6 6M6 -6L-6 6" stroke="#f2c230" stroke-width="3.5"/>'),
+  light: svg('<path d="M0 -9L2.5 -3L9 -3L4 1.5L6 8L0 4.5L-6 8L-4 1.5L-9 -3L-2.5 -3Z" fill="#fff6b0" stroke="#7a5d00"/>'),
+  lines: svg('<path d="M-9 0H9" stroke="#fff" stroke-width="2.5" stroke-dasharray="4 3"/>'),
+  invented: svg('<circle r="7" fill="none" stroke="#ff3fb8" stroke-width="2" stroke-dasharray="3 2"/>'),
+  rings: svg('<circle r="7" fill="none" stroke="#6fd0d6" stroke-width="2" stroke-dasharray="3 3"/>'),
+};
+function buildPanel() {
+  $('layers').innerHTML = '';
+  for (const l of LAYERS) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip layer' + (layerOn[l.id] ? ' on' : '');
+    b.innerHTML = `${LEG[l.id]}${l.label} <span style="opacity:.75">${l.n()}</span>`;
+    b.onclick = () => { layerOn[l.id] = !layerOn[l.id]; b.classList.toggle('on', layerOn[l.id]); draw(); };
+    $('layers').append(b);
+  }
+  $('legend').innerHTML = [
+    ['Rock awash / dry', LEG.rocks], ['Rock submerged (ring) / unknown (dot)', svg('<circle r="6" fill="none" stroke="#ffd3a8" stroke-width="2.5"/>')],
+    ['Port mark: red can', svg('<rect x="-7" y="-7" width="14" height="14" fill="#e0463c" stroke="#fff"/>')], ['Starboard mark: green cone', svg('<path d="M0 -9L8 7H-8Z" fill="#2fae5a" stroke="#fff"/>')],
+    ['Cardinal (bands + letter)', LEG.cardinal], ['Isolated danger', LEG.danger], ['Special purpose', LEG.special], ['Light', LEG.light],
+    ['Named shoal (båd, flu)', LEG.named], ['Wreck / obstruction', LEG.wrecks], ['Leading line (clearing: orange)', LEG.lines], ['Harbour', svg('<circle r="5" fill="#6fd0d6"/>')], ['Invented gate mark (dashed ring)', svg('<circle r="7" fill="none" stroke="#ff3fb8" stroke-width="2" stroke-dasharray="3 2"/>')],
+  ].map(([t, s]) => `<span>${s}${t}</span>`).join('');
+  // harbour jump chips: the three Felix named first, then the rest alphabetically
+  const first = [['Grundsund', 'Grundsunds hamn'], ['Fiskebäckskil', 'Fiskebäckskils småbåtshamn'], ['Käringön', 'Käringön fiskehamn']];
+  const box = $('harbours'); box.innerHTML = '';
+  const all = $('harbours');
+  const mk = (label, h) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = label; b.onclick = () => { jumpTo(h); $('panel').classList.remove('open'); }; all.append(b); };
+  for (const [label, name] of first) { const h = harbours.find((x) => x.name === name); if (h) mk(label, h); }
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = 'Whole region'; b.onclick = () => { fitAll(); draw(); }; all.append(b);
+  $('head').onclick = () => { const o = $('panel').classList.toggle('open'); $('head').setAttribute('aria-expanded', o); };
+}
+
+// ------------------------------------------------------------------ 3D view (loaded on demand)
+let mode = 'map', view3d = null, current = null; // current = the harbour the 3D view is on
+const state3d = { night: qs('night', '0') === '1', debug: qs('debug', '0') === '1', shoals: qs('shoals', '1') !== '0', boat: qs('boat', '1') !== '0', sampler: qs('types', '0') === '1', zoom: Number(qs('zoom', '1')) };
+function targetFor(h) { // where the camera goes for a harbour: its invented mouth gate if it has (or shares) one
+  const g = h.inventedGate?.mouth ? h : h.inventedGate?.sharedWith ? harbours.find((x) => x.name === h.inventedGate.sharedWith) : null;
+  if (g) return { lat: g.inventedGate.mouth.lat, lon: g.inventedGate.mouth.lon, bearingDeg: g.inventedGate.enteringBearingDeg };
+  return { lat: h.lat, lon: h.lon };
+}
+function llTarget() { const v = qs('ll', null); if (!v) return null; const [lat, lon] = v.split(',').map(Number); return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null; }
+function jumpTo(h) {
+  current = h;
+  if (mode === '3d' && view3d) view3d.focusOn(targetFor(h));
+  else { gotoLatLon(h.lat, h.lon, 3600); selected = null; showInfo({ harbour: h }); draw(); }
+  writeUrl();
+}
+function writeUrl() {
+  const q = new URLSearchParams(location.search);
+  const set = (k, v, d) => (String(v) === String(d) ? q.delete(k) : q.set(k, v));
+  set('view', mode, 'map');
+  if (current) q.set('h', current.name.split(' ')[0]); 
+  if (mode === '3d') { set('night', state3d.night ? 1 : 0, 0); set('debug', state3d.debug ? 1 : 0, 0); set('shoals', state3d.shoals ? 1 : 0, 1); set('boat', state3d.boat ? 1 : 0, 1); set('types', state3d.sampler ? 1 : 0, 0); set('zoom', state3d.zoom.toFixed(2), '1.00'); }
+  history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : ''));
+}
+async function setMode(m) {
+  mode = m;
+  document.body.classList.toggle('m3d', m === '3d');
+  $('c').style.display = m === '3d' ? 'none' : 'block';
+  $('c3').style.display = m === '3d' ? 'block' : 'none';
+  if (m === '3d') {
+    if (!view3d) {
+      $('headname').textContent = 'Loading the 3D coast…';
+      const lab = $('loading3') ?? Object.assign(document.createElement('div'), { id: 'loading3' });
+      lab.id = 'loading'; lab.textContent = 'loading the real coast in 3D…'; document.body.append(lab);
+      try {
+        const { createLab3D } = await import('./src/seamarks-lab-3d.js');
+        const h0 = current ?? harbours.find((x) => x.name.startsWith(qs('h', 'Fiskebäckskils'))) ?? harbours[0];
+        current = h0;
+        view3d = await createLab3D({ canvas: $('c3'), shoals, marks, harbours, initial: { ...state3d, target: llTarget() ?? targetFor(h0), focus: llTarget() ? [llTarget().lon, llTarget().lat] : [h0.lon, h0.lat], t: qs('t', null) === null ? null : Number(qs('t')), flash: qs('flash', '0') === '1' }, onStatus: (t) => { lab.textContent = t; } });
+        view3d.onZoom = (z) => { state3d.zoom = z; $('zoom3d').value = z; };
+        view3d.onStats = (s) => { $('badge').textContent = `${s.marks} marks near · ${s.lit} flashing · ${s.fps.toFixed(0)} fps`; };
+        view3d.setZoom(state3d.zoom); view3d.setSampler(state3d.sampler);
+        window.__seamarks3d = view3d;
+        lab.remove();
+      } catch (err) {
+        console.error(err); lab.className = 'err'; lab.textContent = 'could not start 3D: ' + (err.stack || err); window.__seamarksLabError = String(err.stack || err); return;
+      }
+    } else if (current) view3d.focusOn(targetFor(current));
+    view3d.start();
+    $('headname').textContent = `Seamarks Lab 3D · ${current?.name ?? ''}`;
+  } else {
+    view3d?.stop();
+    $('headname').textContent = `Seamarks Lab · ${shoals.length} shoals · ${marks.length} marks`;
+    draw();
+  }
+  refreshViewChips(); writeUrl();
+}
+let refreshViewChips = () => {};
+function buildViewPanel() {
+  const chip = (host, label, on, click) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = label; b.onclick = click; host.append(b); return (v) => b.classList.toggle('on', v ?? on()); };
+  const sync = [];
+  sync.push(chip($('views'), 'Map', () => mode === 'map', () => setMode('map')));
+  sync.push(chip($('views'), '3D', () => mode === '3d', () => setMode('3d')));
+  sync.push(chip($('light3d'), 'Day', () => !state3d.night, () => { state3d.night = false; view3d?.setNight(false); refreshViewChips(); writeUrl(); }));
+  sync.push(chip($('light3d'), 'Night', () => state3d.night, () => { state3d.night = true; view3d?.setNight(true); refreshViewChips(); writeUrl(); }));
+  sync.push(chip($('show3d'), 'Shoals', () => state3d.shoals, () => { state3d.shoals = !state3d.shoals; view3d?.setShoals(state3d.shoals); refreshViewChips(); writeUrl(); }));
+  sync.push(chip($('show3d'), 'Boat', () => state3d.boat, () => { state3d.boat = !state3d.boat; view3d?.setBoat(state3d.boat); refreshViewChips(); writeUrl(); }));
+  sync.push(chip($('show3d'), 'All mark types', () => state3d.sampler, () => { state3d.sampler = !state3d.sampler; view3d?.setSampler(state3d.sampler); refreshViewChips(); writeUrl(); }));
+  sync.push(chip($('show3d'), 'Debug: ring invented marks', () => state3d.debug, () => { state3d.debug = !state3d.debug; view3d?.setDebug(state3d.debug); refreshViewChips(); writeUrl(); }));
+  refreshViewChips = () => sync.forEach((f) => f());
+  $('zoom3d').value = state3d.zoom;
+  $('zoom3d').oninput = (e) => { state3d.zoom = Number(e.target.value); view3d?.setZoom(state3d.zoom); writeUrl(); };
+  refreshViewChips();
+}
+
+// ------------------------------------------------------------------ start
+try {
+  await load(); buildItems(); resize(); buildPanel();
+  addEventListener('resize', resize);
+  const h = qs('h', '');
+  if (h) { const t = harbours.find((x) => x.name.toLowerCase().startsWith(h.toLowerCase())); if (t) { current = t; gotoLatLon(t.lat, t.lon, Number(qs('m', 3600))); } else fitAll(); }
+  else fitAll();
+  if (qs('panel', '') === 'open') { $('panel').classList.add('open'); }
+  buildViewPanel();
+  if (qs('view', 'map') === '3d') await setMode('3d');
+  $('headname').textContent = `Seamarks Lab · ${shoals.length} shoals · ${marks.length} marks`;
+  $('loading').remove(); draw();
+  window.__seamarksLab = { ready: true, shoals: shoals.length, marks: marks.length, harbours: harbours.length, view, draw, gotoLatLon };
+} catch (err) {
+  $('loading').textContent = 'Could not load: ' + err.message; window.__seamarksLabError = String(err);
+}
+</script>
+</body>
+</html>
