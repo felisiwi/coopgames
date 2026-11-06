@@ -37,6 +37,7 @@ const lerpHex = (a, b, k) => { const m = (sh) => Math.round(((a >> sh) & 255) + 
 const CSS = `
 .ow-root{position:fixed;inset:0;z-index:25;pointer-events:none;font-family:Georgia,"Times New Roman",serif;color:#eaf3f8;-webkit-user-select:none;user-select:none}
 .ow-line{white-space:pre-line;position:absolute;left:0;right:0;bottom:17%;padding:0 28px;text-align:center;font-style:italic;font-size:21px;line-height:1.35;text-shadow:0 2px 12px rgba(0,0,0,.85);opacity:0;transition:opacity .9s}
+.ow-label{position:absolute;transform:translate(-50%,0);white-space:nowrap;font:600 13px/1.2 Georgia,"Times New Roman",serif;letter-spacing:.04em;color:#f4ecd8;text-shadow:0 1px 3px rgba(0,0,0,.85),0 0 8px rgba(0,0,0,.6);pointer-events:none}
 .ow-year{position:absolute;left:0;right:0;top:7%;text-align:center;font:700 64px/1 system-ui,sans-serif;letter-spacing:.02em;color:#f2c46d;text-shadow:0 2px 14px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s}
 .ow-skip{position:absolute;right:14px;bottom:14px;pointer-events:auto;touch-action:manipulation;font:500 13px system-ui,sans-serif;color:#eaf3f8;background:rgba(10,20,30,.55);border:1px solid rgba(234,246,255,.28);border-radius:16px;padding:8px 16px;cursor:pointer}
 .ow-flash{position:absolute;inset:0;background:#dfe8ff;opacity:0}
@@ -113,6 +114,8 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
   const blackEl = document.createElement('div'); blackEl.className = 'ow-black';
   const skipEl = document.createElement('button'); skipEl.className = 'ow-skip'; skipEl.type = 'button'; skipEl.textContent = OPENING_SKIP;
   root.append(flashEl, lineEl, yearEl, blackEl, skipEl);
+  // each lighthouse's NAME below it (small, readable); never its year: the big year in the middle is the only year
+  const labels = towers.map((t) => { const el = document.createElement('div'); el.className = 'ow-label'; el.textContent = t.name; el.style.display = 'none'; root.insertBefore(el, blackEl); return el; });
 
   // ---- sizing, camera, look ---------------------------------------------------------------------------------------------------------------------------
   let W = 1, H = 1;
@@ -185,11 +188,16 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
       camera.position.set(f.x, 17, ROW_Z + ROW_CAM_DIST); camera.lookAt(f.x, 8, ROW_Z);
       for (let i = 0; i < towers.length; i++) {
         const tw = towers[i];
-        if (tw.diedAt === null && f.yearExact < tw.built) tw.diedAt = t; // built after the year now showing: it winks out
+        if (tw.diedAt === null && f.yearExact < tw.effBuilt) tw.diedAt = t; // built after the year now showing: it winks out
         const age = tw.diedAt === null ? -1 : (t - tw.diedAt) / WINK_S;
         const s = age < 0 ? 1 : age >= 1 ? 0 : 1 - smooth(age);
         tw.holder.visible = s > 0.002; tw.holder.scale.setScalar(Math.max(0.001, s * (age >= 0 ? 1 + 0.35 * Math.sin(Math.min(1, age) * Math.PI) : 1)));
         tw.fx?.update?.(t + i * 0.37, 1);
+        const lab = labels[i];
+        if (Math.abs(tw.x - f.x) < 30 && s > 0.05) { // below the tower: under its rock, where the sea starts
+          const p = new THREE.Vector3(tw.x, -1.6, ROW_Z).project(camera);
+          lab.style.display = 'block'; lab.style.left = `${(p.x * 0.5 + 0.5) * W}px`; lab.style.top = `${(-p.y * 0.5 + 0.5) * H + 6}px`; lab.style.opacity = String(s);
+        } else lab.style.display = 'none';
       }
       yearEl.textContent = String(f.year);
       waterFollow(view);

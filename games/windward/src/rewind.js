@@ -11,21 +11,30 @@ export const REWIND = Object.freeze({
   startPadM: 30,    // the camera starts this far to the right of the newest tower (the year there is `fromYear`)
 });
 
-// lights: [{ name, built }] (any order). The row: oldest first, x = i * spacing. Returns [{ name, built, x }].
+// lights: [{ name, built }] (any order). The row: oldest first, x = i * spacing. Returns [{ name, built, effBuilt, x }].
+// effBuilt is the year the camera's counter compares with: the build year, except that towers sharing a year are spread across that year (the last of n keeps it, the one before
+// is n-1 ths of a year earlier ...), so the counter never holds flat across them and each tower winks out exactly as the camera passes it. (Three towers were built in 1974:
+// compared with the plain year they all went at once, when the camera reached the leftmost, and the middle one stood on while the counter went by.)
 export function layoutRow(lights, { spacingM = REWIND.spacingM } = {}) {
-  return [...lights].sort((a, b) => a.built - b.built || (a.name < b.name ? -1 : 1)).map((l, i) => ({ name: l.name, built: l.built, x: i * spacingM }));
+  const sorted = [...lights].sort((a, b) => a.built - b.built || (a.name < b.name ? -1 : 1));
+  const groupSize = new Map(), seen = new Map();
+  for (const l of sorted) groupSize.set(l.built, (groupSize.get(l.built) || 0) + 1);
+  return sorted.map((l, i) => {
+    const n = groupSize.get(l.built), j = seen.get(l.built) || 0; seen.set(l.built, j + 1);
+    return { name: l.name, built: l.built, effBuilt: l.built - (n - 1 - j) / n, x: i * spacingM };
+  });
 }
 
 // The year shown with the camera at x: between two towers the year runs between their years, right of the newest it is `fromYear`, left of the oldest it is that tower's year.
 export function yearAtX(row, x, fromYear = REWIND.fromYear) {
   if (!row.length) return fromYear;
   const last = row[row.length - 1];
-  if (x >= last.x) return last.built + Math.min(1, (x - last.x) / REWIND.startPadM) * (fromYear - last.built); // right of the newest tower: 2020 at it, today at the start
-  if (x <= row[0].x) return row[0].built;
+  if (x >= last.x) return last.effBuilt + Math.min(1, (x - last.x) / REWIND.startPadM) * (fromYear - last.effBuilt); // right of the newest tower: 2020 at it, today at the start
+  if (x <= row[0].x) return row[0].effBuilt;
   for (let i = row.length - 1; i > 0; i--) {
-    if (x >= row[i - 1].x) { const k = (x - row[i - 1].x) / (row[i].x - row[i - 1].x); return row[i - 1].built + (row[i].built - row[i - 1].built) * k; }
+    if (x >= row[i - 1].x) { const k = (x - row[i - 1].x) / (row[i].x - row[i - 1].x); return row[i - 1].effBuilt + (row[i].effBuilt - row[i - 1].effBuilt) * k; }
   }
-  return row[0].built;
+  return row[0].effBuilt;
 }
 
 // The camera x at which the year reads `year` (the inverse of yearAtX on the way down). Used for where the run stops (1950).
@@ -33,10 +42,10 @@ export function xAtYear(row, year, fromYear = REWIND.fromYear) {
   if (!row.length) return 0;
   const last = row[row.length - 1];
   if (year >= fromYear) return last.x + REWIND.startPadM;
-  if (year >= last.built) return last.x + ((year - last.built) / Math.max(1, fromYear - last.built)) * REWIND.startPadM; // between the newest tower and the start
+  if (year >= last.effBuilt) return last.x + ((year - last.effBuilt) / Math.max(1, fromYear - last.effBuilt)) * REWIND.startPadM; // between the newest tower and the start
   for (let i = row.length - 1; i > 0; i--) {
     const a = row[i - 1], b = row[i];
-    if (year >= a.built && year <= b.built) return b.built === a.built ? b.x : a.x + ((year - a.built) / (b.built - a.built)) * (b.x - a.x);
+    if (year >= a.effBuilt && year <= b.effBuilt) return b.effBuilt === a.effBuilt ? b.x : a.x + ((year - a.effBuilt) / (b.effBuilt - a.effBuilt)) * (b.x - a.x);
   }
   return row[0].x;
 }

@@ -54,8 +54,24 @@ check('towers built after the current year wink out on the way: Kr책ksundsgap S�
   assert.ok(!gone.includes('M책sesk채r') && !gone.includes('G채ven') && !gone.includes('H채ttan'));
   assert.equal(gone.length, 8);
   // and each one vanishes just as the camera passes it: its year is the year the counter shows at its x
-  for (const r of row) assert.ok(Math.abs(yearAtX(row, r.x) - r.built) < 1e-9);
+  for (const r of row) assert.ok(Math.abs(yearAtX(row, r.x) - r.effBuilt) < 1e-9);
   assert.equal(standing(1954, 1954), true); assert.equal(standing(1954, 1953), false);
+});
+
+check('every tower built after 1950 winks out exactly as the camera passes it, in order, never together: the three built in 1974 (Lindholmen, Brandsk채rsflak, Dynabrott) included', () => {
+  const trio = row.filter((r) => r.built === 1974).map((r) => r.name).sort();
+  assert.deepEqual(trio, ['Brandsk채rsflak', 'Dynabrott', 'Lindholmen'], 'three towers share 1974');
+  const eff = row.filter((r) => r.built === 1974).map((r) => r.effBuilt);
+  assert.equal(new Set(eff).size, 3, 'spread across the year, so the counter never holds flat across them'); assert.ok(eff.every((e) => e > 1973 && e <= 1974));
+  assert.ok(row.every((r, i) => i === 0 || r.effBuilt > row[i - 1].effBuilt), 'the compared year strictly rises along the row: no plateau anywhere');
+  const died = {};
+  for (let t = 0; t <= REWIND.durationS + 0.01; t += 1 / 120) { const f = rewindFrame(t, row); for (const r of row) if (died[r.name] === undefined && f.yearExact < r.effBuilt) died[r.name] = { t, off: Math.abs(f.x - r.x) }; }
+  const gone = row.filter((r) => r.built > REWIND.toYear);
+  assert.equal(gone.length, 8);
+  for (const r of gone) { assert.ok(died[r.name], `${r.name} winks out`); assert.ok(died[r.name].off < 1.2, `${r.name} goes with the camera ${died[r.name].off.toFixed(2)} m from it (it was ${'14.2 / 28.2'} m for two of the 1974 trio before)`); }
+  for (const r of row.filter((x) => x.built <= REWIND.toYear)) assert.equal(died[r.name], undefined, `${r.name} stays`);
+  const times = gone.map((r) => died[r.name].t); assert.equal(new Set(times.map((x) => x.toFixed(3))).size, gone.length, 'all different moments');
+  for (let i = 1; i < gone.length; i++) assert.ok(died[gone[i].name].t < died[gone[i - 1].name].t, 'the newest goes first: right to left as the camera moves left');
 });
 
 check('dusk looks: every key set in all three looks, blending is exact at the ends and in between, colours blend per channel, CONFIG is only changed by applyLook', () => {
