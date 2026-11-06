@@ -7,10 +7,10 @@ place: skafto
 role: your friend and guide in 1950; she finds you after the storm
 relation: first friend (home base)
 status: alive
-born: ~1936        # invented (story): ~14 in 1950, ~90 today
+born: ~1933        # invented (story): ~17 in 1950, ~93 today
 origin: invented
 traits: []         # not yet decided
-summary: A fisherman's daughter on Skaftö, about 14 in 1950, who finds you washed up after the storm, keeps your strange story, and grows up to be your grandma.
+summary: A fisherman's daughter on Skaftö, about 17 in 1950, who finds you washed up after the storm, keeps your strange story, and grows up to be your grandma.
 ---
 
 ## Story
