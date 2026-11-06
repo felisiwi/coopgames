@@ -1,34 +1,19 @@
 // The minimap (stage 1c), tuned for short hops: the next few hundred metres. Harbour mouths, nearby rocks and the way
-// out stay readable. Like the Map Lab: round or square, north-up or turning with the boat, or off.
+// out stay readable. Fixed look (Felix's pick): a round map, north up.
 //
 // The picture comes from the game's own height field, not an image: depth in four shades of blue (so a channel reads),
 // awash rocks hatched, land in parchment with low rock a shade darker, a dark coast line. It is built a few rows per
 // frame into an off-screen canvas and re-built when the boat has moved 45 m, so sailing never hitches. The per-frame
 // cost is one small drawImage plus a few dozen dots. Pure helpers first (testable in node), then the canvas part.
-export const MINI_KEY = 'windward.minimap.v1';
 export const MINI = {
-  spanM: 320, // the circle (or square) shows this many metres across
+  spanM: 320, // the circle shows this many metres across
   rasterPx: 192, // height samples per side of the off-screen picture
   rowsPerFrame: 24,
   rebuildM: 45, // re-centre the picture when the boat is this far from its centre
   markRangeM: 200,
 };
-// The picture must cover the circle at ANY rotation: its side is the span times the square root of two.
+// The picture must cover the circle plus the rebuildM the boat may drift before it re-centres (with spare).
 export const RASTER_M = MINI.spanM * Math.SQRT2;
-
-export const MINI_DEFAULTS = { shape: 'round', rot: 'north' }; // shape: round | square | off; rot: north | heading
-export function loadMiniSettings(storage = null) {
-  const out = { ...MINI_DEFAULTS };
-  try {
-    const d = JSON.parse((storage && storage.getItem(MINI_KEY)) || 'null');
-    if (d && ['round', 'square', 'off'].includes(d.shape)) out.shape = d.shape;
-    if (d && ['north', 'heading'].includes(d.rot)) out.rot = d.rot;
-  } catch { /* unreadable: defaults */ }
-  return out;
-}
-export function saveMiniSettings(storage, s) {
-  try { storage?.setItem(MINI_KEY, JSON.stringify({ shape: s.shape, rot: s.rot })); } catch { /* blocked: carry on */ }
-}
 
 // Colour (r, g, b) for a sea-floor / land height (game metres: negative = depth, positive = above the sea).
 export const MINI_COLORS = {
@@ -77,40 +62,23 @@ export function colorize(heights, side, rgba = new Uint8ClampedArray(side * side
   return rgba;
 }
 
-// Heading-up: rotate the north-up picture so the bow points up the screen. (Heading: the bow is (sin h, cos h) in
-// (x east, z south); on screen, y is down.) And the boat arrow's angle when the map stays north-up.
-export const headingRotation = (heading) => heading - Math.PI;
+// The boat arrow's angle on the north-up map. (Heading: the bow is (sin h, cos h) in (x east, z south); on screen, y is down; the
+// arrow is drawn pointing up, so it is turned by pi - h.)
 export const arrowAngle = (heading) => Math.PI - heading;
 
-// Screen px inside the minimap (size px square) to the world point, for taps. boat: { x, z }.
-export function miniToWorld(px, py, size, boat, heading, rot, spanM = MINI.spanM) {
+// Screen px inside the minimap (size px square) to the world point, for taps, and back. north-up, so no turn. boat: { x, z }.
+export function miniToWorld(px, py, size, boat, spanM = MINI.spanM) {
   const k = size / spanM;
-  let dx = (px - size / 2) / k;
-  let dz = (py - size / 2) / k;
-  if (rot === 'heading') { // undo the rotation of the picture
-    const a = -headingRotation(heading);
-    const c = Math.cos(a);
-    const s = Math.sin(a);
-    [dx, dz] = [dx * c - dz * s, dx * s + dz * c];
-  }
-  return [boat.x + dx, boat.z + dz];
+  return [boat.x + (px - size / 2) / k, boat.z + (py - size / 2) / k];
 }
-export function worldToMini(x, z, size, boat, heading, rot, spanM = MINI.spanM) {
+export function worldToMini(x, z, size, boat, spanM = MINI.spanM) {
   const k = size / spanM;
-  let dx = (x - boat.x) * k;
-  let dz = (z - boat.z) * k;
-  if (rot === 'heading') {
-    const a = headingRotation(heading);
-    const c = Math.cos(a);
-    const s = Math.sin(a);
-    [dx, dz] = [dx * c - dz * s, dx * s + dz * c];
-  }
-  return [size / 2 + dx, size / 2 + dz];
+  return [size / 2 + (x - boat.x) * k, size / 2 + (z - boat.z) * k];
 }
 
 // ---- the canvas part -----------------------------------------------------------------------------------------------
-// opts: { canvas, heightAt, inside(x, z), places: name-list entries, lights: [{ id, x, z, name }], marks: [{ x, z, kind }], settings }
-export function createMinimap({ canvas, heightAt, places = [], lights = [], marks = [], settings = { ...MINI_DEFAULTS }, makeCanvas = () => document.createElement('canvas') }) {
+// opts: { canvas, heightAt, inside(x, z), places: name-list entries, lights: [{ id, x, z, name }], marks: [{ x, z, kind }] }
+export function createMinimap({ canvas, heightAt, places = [], lights = [], marks = [], makeCanvas = () => document.createElement('canvas') }) {
   const ctx = canvas.getContext('2d');
   const side = MINI.rasterPx;
   const heights = new Float32Array(side * side);
@@ -138,15 +106,11 @@ export function createMinimap({ canvas, heightAt, places = [], lights = [], mark
   }
 
   return {
-    settings,
     marks, // the buoy list: the controller fills it once the life system has placed them
-    get visible() { return settings.shape !== 'off'; },
-    // Call every frame. boat: { x, z }, heading in radians. Draws nothing when the minimap is off or hidden.
+    // Call every frame. boat: { x, z }, heading in radians. Draws nothing when hidden (the chart is up).
     update(boat, heading, { hidden = false } = {}) {
-      const show = settings.shape !== 'off' && !hidden;
-      canvas.style.display = show ? 'block' : 'none';
-      canvas.style.borderRadius = settings.shape === 'square' ? '14px' : '50%';
-      if (!show) return;
+      canvas.style.display = hidden ? 'none' : 'block';
+      if (hidden) return;
       advance(boat);
       const W = canvas.width;
       const k = W / MINI.spanM;
@@ -155,7 +119,6 @@ export function createMinimap({ canvas, heightAt, places = [], lights = [], mark
       ctx.fillRect(0, 0, W, W);
       ctx.save();
       ctx.translate(W / 2, W / 2);
-      if (settings.rot === 'heading') ctx.rotate(headingRotation(heading));
       if (raster.ready) {
         ctx.imageSmoothingEnabled = true;
         ctx.drawImage(off, (raster.cx - boat.x) * k - (RASTER_M * k) / 2, (raster.cz - boat.z) * k - (RASTER_M * k) / 2, RASTER_M * k, RASTER_M * k);
@@ -192,7 +155,7 @@ export function createMinimap({ canvas, heightAt, places = [], lights = [], mark
       ctx.restore();
       ctx.save(); // the boat, always in the middle
       ctx.translate(W / 2, W / 2);
-      ctx.rotate(settings.rot === 'heading' ? 0 : arrowAngle(heading));
+      ctx.rotate(arrowAngle(heading));
       ctx.fillStyle = '#ffcc66';
       ctx.strokeStyle = '#14222f';
       ctx.lineWidth = 2;
@@ -200,9 +163,9 @@ export function createMinimap({ canvas, heightAt, places = [], lights = [], mark
       ctx.restore();
     },
     // A tap on the minimap (CSS px inside it): the lighthouse under the finger, or null.
-    hitLight(px, py, cssSize, boat, heading) {
+    hitLight(px, py, cssSize, boat) {
       for (const l of lights) {
-        const [x, y] = worldToMini(l.x, l.z, cssSize, boat, heading, settings.rot);
+        const [x, y] = worldToMini(l.x, l.z, cssSize, boat);
         if (Math.hypot(x - px, y - py) <= 20) return l;
       }
       return null;

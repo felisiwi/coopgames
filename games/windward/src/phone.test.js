@@ -2,7 +2,7 @@
 // drawing parts need a real phone; these are the bits that can be silently wrong).
 import assert from 'node:assert/strict';
 import { CONFIG } from './config.js';
-import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, ropeHit, swipeTrim, ropeScrollStep, ROPE_STRIPE_PERIOD, ropeNeed, ropeGuideStep, SECOND_FINGER_SHEET, ROPE_HIT_HALF_W } from './phone.js';
+import { headingTo, avoidNoGo, turnTowards, ropeTrim, boomAngle, wrapPi, ghostSpot, ropeGeom, ropeHit, swipeTrim, ropeScrollStep, ROPE_STRIPE_PERIOD, ropeNeed, ropeGuideStep, sheaveStep, SHEAVE_R, SECOND_FINGER_SHEET, ROPE_HIT_HALF_W } from './phone.js';
 import { angleOffWind, leewardSign } from './sail.js';
 
 const DEG = Math.PI / 180;
@@ -127,4 +127,18 @@ check('rope guidance: the arrows say which way to trim, and are gone when trimme
   for (let i = 0; i < 40; i++) g = ropeGuideStep(g, false, 0.016);
   assert.equal(g, 1, 'and back when the sail drifts off the trim');
 });
+check('rope sheave: turns with the rope (clockwise pulling in, the other way letting out) and stops with it', () => {
+  assert.ok(sheaveStep(0, 200, 0.1) > 0, 'pulling in (stripes run down): clockwise');
+  assert.ok(sheaveStep(0, -200, 0.1) < 0, 'letting out: the other way');
+  assert.equal(sheaveStep(1.5, 0, 0.5), 1.5, 'rope still, wheel still');
+  assert.ok(Math.abs(sheaveStep(0, 200, 0.1) - (200 * 0.1) / SHEAVE_R) < 1e-12, 'the rope travel over the wheel radius: no slipping');
+  // driven by the same run as the stripes, so it coasts to a stop with them
+  let o = 0; let v = 400; let a = 0;
+  for (let i = 0; i < 300; i++) { ({ offset: o, vel: v } = ropeScrollStep(o, v, 0.016, false)); a = sheaveStep(a, v, 0.016); }
+  assert.equal(v, 0);
+  const stopped = a;
+  for (let i = 0; i < 30; i++) a = sheaveStep(a, v, 0.016);
+  assert.equal(a, stopped, 'and it stays stopped');
+});
+
 console.log(`\n${passed} passed`);

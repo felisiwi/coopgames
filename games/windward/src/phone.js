@@ -110,6 +110,10 @@ export function ropeScrollStep(offset, vel, dt, held) {
   const o = (((offset + v * dt) % ROPE_STRIPE_PERIOD) + ROPE_STRIPE_PERIOD) % ROPE_STRIPE_PERIOD;
   return { offset: o, vel: Math.abs(v) < 2 ? 0 : v };
 }
+// The sheave in the block at the top of the rope turns with the rope: the rope's travel (vel * dt px) over the wheel's radius. Pulling in
+// (stripes run down) turns it clockwise, letting out the other way; it stops when the rope does, because it is driven by the same velocity.
+export const SHEAVE_R = 8; // px
+export const sheaveStep = (angle, vel, dt, radius = SHEAVE_R) => angle + (vel * dt) / radius;
 // Which way to trim: +1 = let out (ease, up), -1 = pull in (sheet in, down), 0 = trimmed. Same window the arc by the boat uses.
 export const ropeNeed = (trim, ideal, window = TRIM_WINDOW) => (Math.abs(trim - ideal) <= window ? 0 : Math.sign(ideal - trim));
 // The guidance chevrons fade out when trimmed and back in when not. guide in [0, 1].
@@ -158,6 +162,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
   let ropeOn = true; // hidden while the chart covers the view
   let ropeOffset = 0; // stripe scroll, px
   let ropeVel = 0; // px/s, positive = down
+  let sheaveAngle = 0; // rad, the pulley block's wheel
   let ropeMoveAt = 0; // when the rope finger last moved
   let ropeGuide = 1; // the yellow chevrons: 1 = shown (needs trimming), 0 = gone (trimmed)
   let ropeNeedLast = -1; // the direction they point, kept while they fade out
@@ -224,7 +229,8 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     const p = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, t0: performance.now(), trim0: state.self.trim };
     const [bx, by] = boatScreen();
     const rg = ropeGeom(W, H);
-    if (ropeOn && ropeHit(rg, p.x, p.y) && ![...pointers.values()].some((q) => q.role === 'rope')) {
+    if (ropeOn && ropeHit(rg, p.x, p.y)) {
+      for (const [id, q] of pointers) if (q.role === 'rope') pointers.delete(id); // a new finger takes the rope over: a lift that was never seen must not leave it dead
       p.role = 'rope'; // a finger on the rope is the rope: it never steers, so the other hand steers on its own
       p.trim0 = state.self.trim; // a swipe moves the trim from where it is now: nothing jumps on touch
       pointers.set(e.pointerId, p);
@@ -275,6 +281,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     const ropeHeld = [...pointers.values()].some((q) => q.role === 'rope');
     if (ropeHeld && performance.now() - ropeMoveAt > 120) ropeVel *= Math.exp(-14 * dt); // a thumb resting on the rope: the run stops
     ({ offset: ropeOffset, vel: ropeVel } = ropeScrollStep(ropeOffset, ropeVel, dt, ropeHeld));
+    sheaveAngle = sheaveStep(sheaveAngle, ropeVel, dt);
     // A held finger keeps pointing at the same spot on the water as the boat moves.
     for (const p of pointers.values()) if (p.role === 'steer') aimAt(p.x, p.y);
     if (aimHeading !== null) self.heading = turnTowards(self.heading, avoidNoGo(aimHeading, wind.dir), dt);
@@ -505,7 +512,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     for (let k = 0; k < n; k++) {
       const t = (k + phase) / n; // 0..1 along the way to trim: they flow in the direction to pull
-      const y = dir > 0 ? g.y0 + 14 + t * (g.len - 40) : g.y1 - 26 - t * (g.len - 40);
+      const y = dir > 0 ? g.y0 + 36 + t * (g.len - 54) : g.y1 - 14 - t * (g.len - 54); // clear of the block at the top
       const a = Math.sin(Math.PI * t) * ropeGuide;
       const sz = 5.5;
       ctx.globalAlpha = a;
@@ -518,11 +525,20 @@ export function createPhoneControls({ canvas, camera, onPing }) {
   }
   function drawRopeControl(nowS) {
     const g = ropeGeom(W, H);
+    const cy = g.y0 + 13; // the block hangs at the top, as from the boom; the rope comes down from it and you pull the tail
     ctx.save();
-    ropeBar(g.x, 8, g.y0, g.y1 - 6); // the rope runs down into a small block
-    ctx.fillStyle = ANCHOR; ctx.beginPath(); ctx.roundRect(g.x - 11, g.y1 - 12, 22, 20, 6); ctx.fill();
-    ctx.strokeStyle = HEMP; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(g.x, g.y1 - 2, 4, 0, Math.PI * 2); ctx.stroke(); // the sheave the rope runs through
-    ctx.fillStyle = HEMP; ctx.beginPath(); ctx.arc(g.x, g.y0 + 1, 2.2, 0, Math.PI * 2); ctx.fill();
+    ropeBar(g.x, 8, cy, g.y1);
+    ctx.fillStyle = ANCHOR; ctx.beginPath(); ctx.arc(g.x, cy, 13, 0, Math.PI * 2); ctx.fill(); // a round pulley block
+    ctx.save();
+    ctx.translate(g.x, cy);
+    ctx.rotate(sheaveAngle); // the sheave turns with the rope
+    ctx.strokeStyle = HEMP; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(0, 0, SHEAVE_R, 0, Math.PI * 2); ctx.stroke(); // the wheel's rim
+    ctx.lineWidth = 1.6; ctx.beginPath();
+    for (let k = 0; k < 3; k++) { const a = (k * 2 * Math.PI) / 3; ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * SHEAVE_R, Math.sin(a) * SHEAVE_R); } // three spokes, so the turning shows
+    ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = HEMP; ctx.beginPath(); ctx.arc(g.x, cy, 2.4, 0, Math.PI * 2); ctx.fill(); // the hub
     ctx.restore();
     ropeChevrons(g, nowS);
   }
@@ -631,7 +647,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     draw,
     // The rope's box (for names to keep clear of) and whether it is shown (hidden while the chart covers the view).
     ropeRect() { const g = ropeGeom(W, H); return ropeOn ? { x: g.x - ROPE_HIT_HALF_W, y: g.y0 - 34, w: ROPE_HIT_HALF_W * 2, h: g.len + 68 } : null; },
-    ropeScroll: () => ({ offset: ropeOffset, vel: ropeVel, guide: ropeGuide }), // headless checks
+    ropeScroll: () => ({ offset: ropeOffset, vel: ropeVel, guide: ropeGuide, sheave: sheaveAngle }), // headless checks
     setRopeVisible(on) { if (on === ropeOn) return; ropeOn = on; if (!on) for (const [id, q] of pointers) if (q.role === 'rope') pointers.delete(id); },
     // Drop every finger the controls are tracking (a pinch-to-zoom began: those two fingers are zooming, not steering).
     interrupt() { pointers.clear(); aimHeading = null; },

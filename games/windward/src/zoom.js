@@ -5,9 +5,9 @@
 //   ZOOM_CHART_START .. _FULL      the chart fades in over the 3D view, scale-matched so it is one continuous zoom
 //   above ZOOM_CHART_FULL          only the chart (the 3D render is paused: free frame time), zooming on out
 //                                  until the whole coast fits (maxZoom).
-// The chart is drawn so that at the start of the blend it looks like the 3D view from above: same scale, same
-// tilt (a vertical squash by sin(elevation)) and the same turn (the camera looks along a 45 degree bearing), and over
-// the blend it unrolls to a flat north-up map. So the crossfade has almost nothing to hide.
+// The 3D camera looks due north (azimuth 0), so north is up on the screen at every zoom and the chart never turns: it is drawn
+// at the start of the blend with the same scale and the same tilt (a vertical squash by sin(elevation)) as the 3D view, and over
+// the blend it only un-tilts to a flat map. So the crossfade has almost nothing to hide.
 import { CONFIG } from './config.js';
 
 export const ZOOM_MIN = CONFIG.ZOOM_MIN;
@@ -17,7 +17,6 @@ export const ZOOM_STEP = 1.35; // a +/- button press, as in the Map Lab
 
 const DEG = Math.PI / 180;
 const TAN_HALF_FOV = Math.tan((CONFIG.FIXED_CAMERA_FOV_DEG * DEG) / 2);
-const AZIMUTH = CONFIG.FIXED_CAMERA_AZIMUTH_DEG * DEG;
 const SIN_ELEV = Math.sin(CONFIG.FIXED_CAMERA_ELEVATION_DEG * DEG);
 
 export const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
@@ -49,14 +48,13 @@ export const wheelFactor = (deltaY) => Math.exp(deltaY * CONFIG.ZOOM_WHEEL_SENSI
 
 // The chart's view for this zoom. centre: the world point at the screen centre (the boat, or the lighthouse on a visit);
 // pan: extra offset in game metres from dragging, which eases away as the chart fades back into the boat view.
-// Returns { cx, cz, scale, rot, sq, t, alpha }: screen = (W/2, H/2) + diag(1, sq) * R(rot) * (p - c) * scale.
+// Returns { cx, cz, scale, sq, t, alpha }: screen = (W/2, H/2) + diag(1, sq) * (p - c) * scale. North is up; there is no turn.
 export function chartView(zoom, viewH, centre, pan = { x: 0, z: 0 }) {
   const t = chartBlend(zoom);
   return {
     cx: centre.x + pan.x * t,
     cz: centre.z + pan.z * t,
     scale: pxPerMetre(zoom, viewH),
-    rot: AZIMUTH * (1 - t),
     sq: lerp(SIN_ELEV, 1, t),
     t,
     alpha: t,
@@ -65,27 +63,15 @@ export function chartView(zoom, viewH, centre, pan = { x: 0, z: 0 }) {
 
 // World (x, z) to screen px, and back, for a chartView() and the view size.
 export function worldToScreen(v, W, H, x, z) {
-  const dx = x - v.cx;
-  const dz = z - v.cz;
-  const c = Math.cos(v.rot);
-  const s = Math.sin(v.rot);
-  return [W / 2 + (dx * c - dz * s) * v.scale, H / 2 + (dx * s + dz * c) * v.scale * v.sq];
+  return [W / 2 + (x - v.cx) * v.scale, H / 2 + (z - v.cz) * v.scale * v.sq];
 }
 export function screenToWorld(v, W, H, sx, sy) {
-  const rx = (sx - W / 2) / v.scale;
-  const rz = (sy - H / 2) / (v.scale * v.sq);
-  const c = Math.cos(v.rot);
-  const s = Math.sin(v.rot);
-  return [v.cx + rx * c + rz * s, v.cz - rx * s + rz * c];
+  return [v.cx + (sx - W / 2) / v.scale, v.cz + (sy - H / 2) / (v.scale * v.sq)];
 }
 
-// Where the 3D fixed camera puts a ground point on screen, to compare with the chart at t = 0 (tests): the camera looks
-// along (-sin az, -cos az) on the ground, so screen-right is (cos az, -sin az) and ground-up is (-sin az, -cos az).
+// Where the 3D fixed camera puts a ground point on screen, to compare with the chart at t = 0 (tests): the camera looks due
+// north, so screen-right is +x (east) and ground-up is -z (north).
 export function cameraGroundToScreen(zoom, viewH, W, H, boat, x, z) {
   const scale = pxPerMetre(zoom, viewH);
-  const dx = x - boat.x;
-  const dz = z - boat.z;
-  const right = dx * Math.cos(AZIMUTH) - dz * Math.sin(AZIMUTH);
-  const up = -dx * Math.sin(AZIMUTH) - dz * Math.cos(AZIMUTH);
-  return [W / 2 + right * scale, H / 2 - up * scale * SIN_ELEV];
+  return [W / 2 + (x - boat.x) * scale, H / 2 + (z - boat.z) * scale * SIN_ELEV];
 }

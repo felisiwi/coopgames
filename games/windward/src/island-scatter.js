@@ -138,13 +138,14 @@ const ASSUMED_ASPECT = 16 / 9;
 // spawns and wave bob perturbing the boat's exact position slightly.
 export const STARTER_NEAR_EDGE_DISTANCE_M = 30;
 
-// The world-space direction, from spawn, that's actually inside the fixed
-// camera's frame — i.e. "away from camera", the same direction the camera
-// looks. camera.js's `_fixedDirection` points from boat TO camera
-// (sin(az), cos(az)); what's visible in frame beyond the boat continues
-// further in the opposite direction, so this is that vector negated.
+// The world-space direction, from spawn, where the starter island is put: the bearing the fixed camera looked along when these
+// layouts were tuned (45 degrees: camera.js's `_fixedDirection` pointed from boat TO camera at (sin 45, cos 45), and what is
+// visible beyond the boat continues the opposite way, so this is that vector negated). It is pinned here, no longer read from
+// CONFIG.FIXED_CAMERA_AZIMUTH_DEG, so that turning the camera (north-up, 2026-11-06) does not reshuffle the seeded
+// island layouts (seeds, lab presets and the depth-map tests refer to them). The real coast does not use it.
+export const STARTER_BEARING_DEG = 45;
 export function starterBearing() {
-  const az = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180;
+  const az = (STARTER_BEARING_DEG * Math.PI) / 180;
   return { x: -Math.sin(az), z: -Math.cos(az) };
 }
 

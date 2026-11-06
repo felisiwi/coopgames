@@ -1,10 +1,10 @@
 // node games/windward/src/minimap.test.js — guards the minimap (src/minimap.js): depth reads as bands, rocks and the coast
-// are marked, heading-up puts the bow at the top, the world <-> minimap mapping round-trips, the picture is built a few
-// rows per frame and re-centres as you sail, and settings are remembered.
+// are marked, the north-up world <-> minimap mapping round-trips, the arrow turns to the heading, and the picture is built a few
+// rows per frame and re-centres as you sail. The look is fixed: round, north up.
 import assert from 'node:assert/strict';
 import {
-  MINI, RASTER_M, MINI_COLORS, miniColor, isLandHeight, bakeHeights, colorize, headingRotation, arrowAngle, miniToWorld, worldToMini,
-  loadMiniSettings, saveMiniSettings, createMinimap, MINI_KEY,
+  MINI, RASTER_M, MINI_COLORS, miniColor, isLandHeight, bakeHeights, colorize, arrowAngle, miniToWorld, worldToMini,
+  createMinimap,
 } from './minimap.js';
 
 let passed = 0;
@@ -43,53 +43,30 @@ check('the picture: a 40 m island in 8 m deep water gets a dark coast line, a ha
   assert.ok(hatch > 10, `the awash ring is hatched (${hatch} px)`);
 });
 
-check('heading-up: the bow points to the top of the screen, whichever way the boat heads', () => {
+check('north-up: a point ahead of the boat is where it really is, whichever way the boat heads (the map does not turn)', () => {
   for (const h of [0, 0.7, Math.PI / 2, Math.PI, -2.2, 5]) {
     const size = 132;
     const boat = { x: 100, z: 200 };
-    const bow = [boat.x + Math.sin(h) * 50, boat.z + Math.cos(h) * 50]; // 50 m ahead
-    const [x, y] = worldToMini(bow[0], bow[1], size, boat, h, 'heading');
-    near(x, size / 2, 1e-6);
-    assert.ok(y < size / 2, `heading ${h}: ahead is up`);
-    const [nx, ny] = worldToMini(bow[0], bow[1], size, boat, h, 'north'); // north-up: ahead is where it really is
-    near(nx, size / 2 + Math.sin(h) * 50 * size / MINI.spanM, 1e-6); near(ny, size / 2 + Math.cos(h) * 50 * size / MINI.spanM, 1e-6);
+    const [x, y] = worldToMini(boat.x + Math.sin(h) * 50, boat.z + Math.cos(h) * 50, size, boat); // 50 m ahead
+    near(x, size / 2 + Math.sin(h) * 50 * size / MINI.spanM, 1e-6); near(y, size / 2 + Math.cos(h) * 50 * size / MINI.spanM, 1e-6);
   }
-  near(headingRotation(Math.PI), 0, 1e-12); // heading north (bow = -z): no rotation
 });
 
 check('north-up: north is up and east is right; the boat arrow turns to the heading', () => {
   const size = 132;
   const boat = { x: 0, z: 0 };
-  assert.ok(worldToMini(0, -50, size, boat, 1, 'north')[1] < size / 2, 'north (-z) is up');
-  assert.ok(worldToMini(50, 0, size, boat, 1, 'north')[0] > size / 2, 'east (+x) is right');
+  assert.ok(worldToMini(0, -50, size, boat)[1] < size / 2, 'north (-z) is up');
+  assert.ok(worldToMini(50, 0, size, boat)[0] > size / 2, 'east (+x) is right');
   near(arrowAngle(Math.PI), 0, 1e-12);
   const a = arrowAngle(Math.PI / 2); // heading east (bow = +x): an up-pointing arrow turned clockwise 90 degrees points right
   near(Math.sin(a), 1, 1e-12);
 });
 
-check('a tap on the minimap maps to the world and back, rotated or not', () => {
-  for (const rot of ['north', 'heading']) {
-    for (const h of [0, 1.3, -2.5]) {
-      const [wx, wz] = miniToWorld(40, 90, 132, { x: 500, z: -300 }, h, rot);
-      const [px, py] = worldToMini(wx, wz, 132, { x: 500, z: -300 }, h, rot);
-      near(px, 40, 1e-9); near(py, 90, 1e-9);
-    }
-  }
-  assert.ok(RASTER_M >= MINI.spanM * Math.SQRT2 - 1e-9, 'the picture covers the circle at any rotation');
-});
-
-check('settings are remembered on the device; junk or blocked storage gives the defaults', () => {
-  const m = new Map();
-  const store = { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, v) };
-  assert.deepEqual(loadMiniSettings(store), { shape: 'round', rot: 'north' });
-  saveMiniSettings(store, { shape: 'square', rot: 'heading' });
-  assert.deepEqual(loadMiniSettings(store), { shape: 'square', rot: 'heading' });
-  store.setItem(MINI_KEY, '{"shape":"triangle","rot":7}');
-  assert.deepEqual(loadMiniSettings(store), { shape: 'round', rot: 'north' });
-  store.setItem(MINI_KEY, 'nope');
-  assert.deepEqual(loadMiniSettings(store), { shape: 'round', rot: 'north' });
-  assert.deepEqual(loadMiniSettings({ getItem() { throw new Error('x'); } }), { shape: 'round', rot: 'north' });
-  assert.doesNotThrow(() => saveMiniSettings({ setItem() { throw new Error('x'); } }, { shape: 'off', rot: 'north' }));
+check('a tap on the minimap maps to the world and back', () => {
+  const [wx, wz] = miniToWorld(40, 90, 132, { x: 500, z: -300 });
+  const [px, py] = worldToMini(wx, wz, 132, { x: 500, z: -300 });
+  near(px, 40, 1e-9); near(py, 90, 1e-9);
+  assert.ok(RASTER_M >= MINI.spanM + 2 * MINI.rebuildM, 'the picture covers the circle plus the drift before it re-centres');
 });
 
 // a fake 2D canvas context that counts what is drawn
@@ -128,14 +105,12 @@ check('the picture is built a few rows per frame, re-centred as you sail, and co
   assert.equal(evals, MINI.rasterPx * MINI.rasterPx);
   mini.update({ x: MINI.rebuildM + 5, z: 0 }, 0); // sailed on: a new picture starts
   assert.ok(evals > MINI.rasterPx * MINI.rasterPx, 're-centring starts');
-  mini.settings.shape = 'off';
+  mini.update(boat, 0, { hidden: true });
+  assert.equal(canvas.style.display, 'none', 'the chart is up: hidden');
   mini.update(boat, 0);
-  assert.equal(canvas.style.display, 'none', 'off: hidden');
-  mini.settings.shape = 'square';
-  mini.update(boat, 0);
-  assert.equal(canvas.style.borderRadius, '14px');
-  assert.equal(mini.hitLight(132 / 2 + (50 * 132) / MINI.spanM, 132 / 2, 132, boat, 0).id, 'l', 'a tap on the lighthouse finds it');
-  assert.equal(mini.hitLight(5, 5, 132, boat, 0), null);
+  assert.equal(canvas.style.display, 'block');
+  assert.equal(mini.hitLight(132 / 2 + (50 * 132) / MINI.spanM, 132 / 2, 132, boat).id, 'l', 'a tap on the lighthouse finds it');
+  assert.equal(mini.hitLight(5, 5, 132, boat), null);
   assert.ok(Array.isArray(mini.marks) && mini.marks.length === 1, 'the buoy list is exposed (the controller adds to it later)');
 });
 
