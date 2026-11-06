@@ -1232,3 +1232,6 @@ harbours ("gems" like Smörasken, Kråksundsgap) you can navigate them the way h
 them. In village harbours you see more houses, docks, fishing nets drying and people. This is
 the answer for places the 1:10 map simplifies (small islets, narrow inlets), and it's also
 where the harbour menu, mooring and meeting people live.
+Close-up answers (Felix, 2026-11-06): you leave a close-up by sailing far enough out, and you're
+asked whether you want to go back to sea. A co-op friend sees the same close-up if they sail
+up. Order: Fiskebäckskil first, then Lysekil and Grundsund, then others close by.
