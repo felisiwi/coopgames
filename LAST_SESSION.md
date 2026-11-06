@@ -4,7 +4,7 @@
 zoom-to-chart, terrain look, Svalan in game, rope A, knots/nm, Navigate here (docs/CHART.md). Follow-up also merged:
 north-up camera (azimuth 0, sun 30), minimap tap opens chart, round block rope, no settings button. Passes: assets/coast/passes.json + src/passes.js (applyPasses, ship tier = 5 light carves), not wired into
 the game yet (docs/passes/README.md). Seamarks merged too (assets/coast/seamarks.json, shoals.json, src/seamark-meshes.js, seamarks-lab.html);
-both feed stage 1d. Harbour approaches (Grundsund through-channel) in progress on felix/windward-harbour-approaches.
+both feed stage 1d. Harbour approaches MERGED: 16 harbour-tier carves (follow real banks; Grundsund canal stays closed, both basins reachable), docs/harbours/, harbours-lab.html.
 
 **2026-11-05: stage 1c, the chart and the new look** (branch `felix/windward-chart`, based on aa4bdc0 + the terrain-style
 branch, NOT merged). New terrain look (crisp zones, granite on steep ground, trees keep off it), Svalan in the game (`?boat=eka`
