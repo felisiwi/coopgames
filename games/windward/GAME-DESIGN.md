@@ -1360,3 +1360,38 @@ the rock becomes the tall white 1954 tower shining with its new sectors, then it
 glimpse the light's future self. Finale easter egg: the restored 1941 lantern stands today in a
 roundabout in Lysekil. The Måseskär keeper is invented (no named 1950 keeper found; don't use
 real people's names).
+
+**Day and night (Felix, 2026-11-06):** some quests are bound to day and some to night, giving
+two layers to the game. Outside quests, time drifts slowly between day and night, and you can
+moor at an island or in a harbour to pass time until it's day (or night) again.
+Mission control's notes to decide when building: the AGA sun valve gives a natural rule (the
+automatic lights switch themselves on at dusk); in co-op, skipping time needs both players
+moored or the friend's consent (same pattern as crossing to another era).
+
+## Opening and chapter 1 story, revised (Felix, 2026-11-06 afternoon; supersedes the SVG opening and the first cards)
+**Opening (in the game engine, not cut-outs):**
+1. Dusk / blue hour over today's Fiskebäckskil: modern lit windows, the ferry coming in with its
+   lights, modern boats. The camera settles on one house by the water, with Svalan moored at its
+   jetty. (It is Britta's house; the game doesn't say so yet.)
+2. Fog rolls in, thunder, darkness with flashes. Two or three minimal lines of text over it,
+   no explanation of time travel.
+3. **The lighthouse rewind:** in the dark, the lighthouse row from the lighthouse timeline
+   (ref/lighthouse-timeline-play.html), with the year counting down from today. The camera moves
+   left past the lights with their years, faster and faster, and towers built after the current
+   year wink out, until it slows and stops at 1950. (Kråksundsgap Södra's 1954 tower vanishes
+   here, the setup for glimpsing it again in chapter 1.)
+4. Dawn: the fog lifts on 1950. You lie washed up with battered Svalan on Skaftö's MAINLAND shore,
+   away from town.
+**Story order:**
+1. The boy (young granddad, a boatbuilder's son) finds you; his father will take Svalan; he
+   lends you the small boat.
+2. First errand: sail to Grundsund for repair parts (a short, safe trip that teaches sailing).
+3. Back at the yard: "It'll be a while. Careful, the lights are out since the storm. Someone in
+   Fiskebäckskil was asking for help."
+4. Fiskebäckskil: Britta, about 17, whose father normally tends the nearby lights (invented but
+   plausible; in reality staff from Marstrand serviced them) and has broken his arm. She asks you
+   to relight them; her family's shed holds the gas tanks (the depot).
+5. The lights (four AGA lights plus Måseskär's keeper; the Kråksundsgap glimpse), then report back
+   at her house, the house from the opening.
+**You're the reason your grandparents meet:** the boy sends you to Britta.
+Britta born ~1933 (17 in 1950, ~93 in the finale).
