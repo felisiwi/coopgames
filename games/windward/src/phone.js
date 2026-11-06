@@ -86,6 +86,20 @@ export function ghostSpot(bx, by, steerX, steerY, W, H) {
   ];
 }
 
+// ---- the rope control (1c phone test, option A): a static vertical rope bottom-right; the handle's height IS the trim ----
+// Full in (trim 0) at the bottom, full out at the top: drag down = sheet in, drag up = ease.
+export const ROPE_HIT_HALF_W = 42; // px each side of the rope: a thumb-sized target
+export function ropeGeom(W, H) {
+  const len = Math.round(Math.min(300, Math.max(190, H * 0.3)));
+  const y1 = H - 74; // clear of the speed line at the bottom
+  return { x: W - 46, y0: y1 - len, y1, len };
+}
+export const trimToY = (g, trim) => g.y1 - ((trim - CONFIG.TRIM_MIN) / (CONFIG.TRIM_MAX - CONFIG.TRIM_MIN)) * g.len;
+export const yToTrim = (g, y) => Math.min(CONFIG.TRIM_MAX, Math.max(CONFIG.TRIM_MIN, CONFIG.TRIM_MIN + ((g.y1 - y) / g.len) * (CONFIG.TRIM_MAX - CONFIG.TRIM_MIN)));
+export const ropeHit = (g, x, y) => Math.abs(x - g.x) <= ROPE_HIT_HALF_W && y >= g.y0 - 34 && y <= g.y1 + 34;
+// Dragging keeps the finger's gap to the handle from when it landed, so the handle never jumps under the thumb.
+export const ropeTrimAt = (g, touchY, grabOffset) => yToTrim(g, touchY + grabOffset);
+
 // The sail's world angle (heading convention), matching boat.js: the group
 // is rotated by heading and the sail pivot by leewardSign * trim, from aft.
 export function boomAngle(heading, windFrom, trim) {
@@ -123,6 +137,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
   let state = null; // { self, wind } snapshot from the last apply()
   let aimHeading = null;
   let offSince = 0;
+  let ropeOn = true; // hidden while the chart covers the view
 
   // --- projection helpers ---
   const v3 = new THREE.Vector3();
@@ -185,6 +200,13 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     canvas.setPointerCapture?.(e.pointerId);
     const p = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, t0: performance.now(), trim0: state.self.trim };
     const [bx, by] = boatScreen();
+    const rg = ropeGeom(W, H);
+    if (ropeOn && ropeHit(rg, p.x, p.y) && ![...pointers.values()].some((q) => q.role === 'rope')) {
+      p.role = 'rope'; // a finger on the rope is the rope: it never steers, so the other hand steers on its own
+      p.off = trimToY(rg, state.self.trim) - p.y; // the gap to the handle: no jump on first touch
+      pointers.set(e.pointerId, p);
+      return;
+    }
     if (steering()) p.role = 'sheet';
     else if (Math.hypot(p.x - bx, p.y - by) < 38) p.role = 'boat'; // maybe a ping tap
     else p.role = 'steer';
@@ -200,6 +222,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     if (p.role === 'boat' && Math.hypot(p.x - p.x0, p.y - p.y0) > 14) p.role = 'steer';
     if (p.role === 'steer') aimAt(p.x, p.y);
     else if (p.role === 'sheet') sheetMove(p);
+    else if (p.role === 'rope') state.self.trim = ropeTrimAt(ropeGeom(W, H), p.y, p.off);
     p.px = p.x;
     p.py = p.y;
   }
@@ -418,6 +441,44 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     ctx.fill();
   }
 
+  function drawRopeControl(self, wind, ideal, grabbed) {
+    const g = ropeGeom(W, H);
+    const trimmed = Math.abs(self.trim - ideal) <= TRIM_WINDOW;
+    const hy = trimToY(g, self.trim);
+    ctx.save();
+    ctx.fillStyle = PANEL; // the track
+    ctx.beginPath(); ctx.roundRect(g.x - 16, g.y0 - 22, 32, g.len + 44, 16); ctx.fill();
+    // the sweet band: where the sail is trimmed
+    const bandTop = trimToY(g, Math.min(CONFIG.TRIM_MAX, ideal + TRIM_WINDOW * 1.3));
+    const bandBot = trimToY(g, Math.max(CONFIG.TRIM_MIN, ideal - TRIM_WINDOW * 1.3));
+    if (trimmed) { ctx.shadowColor = 'rgba(120,235,160,0.9)'; ctx.shadowBlur = 14; }
+    ctx.strokeStyle = trimmed ? 'rgba(120,235,160,1)' : 'rgba(120,220,150,0.8)';
+    ctx.lineWidth = trimmed ? 16 : 12; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(g.x, bandTop); ctx.lineTo(g.x, bandBot); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,240,200,0.9)'; // the rope itself
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(g.x, g.y0); ctx.lineTo(g.x, g.y1); ctx.stroke();
+    ctx.font = '700 10px ui-rounded, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(234,246,255,0.6)';
+    ctx.fillText('OUT', g.x, g.y0 - 32); ctx.fillText('IN', g.x, g.y1 + 32);
+    // the handle: gold; green with a white ring and a glow when trimmed
+    if (trimmed) { ctx.shadowColor = 'rgba(120,235,160,0.95)'; ctx.shadowBlur = 16; }
+    ctx.fillStyle = trimmed ? '#78dc96' : GOLD;
+    ctx.beginPath(); ctx.arc(g.x, hy, grabbed ? 20 : 18, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = trimmed ? '#ffffff' : 'rgba(12,32,54,0.6)'; ctx.lineWidth = trimmed ? 3 : 2;
+    ctx.stroke();
+    // words beside the handle, never under the thumb: what to do, or "trimmed"
+    const need = trimmed ? 0 : Math.sign(ideal - self.trim);
+    ctx.font = '800 13px ui-rounded, system-ui, sans-serif'; ctx.textAlign = 'right';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(12,32,54,0.75)';
+    const word = trimmed ? 'trimmed' : need > 0 ? 'ease ▲' : 'sheet in ▼';
+    ctx.fillStyle = trimmed ? '#9af0b4' : GOLD;
+    ctx.strokeText(word, g.x - 28, hy); ctx.fillText(word, g.x - 28, hy);
+    ctx.restore();
+  }
+
   // extras: { partner: {x,z}|null, pings: [{x,z,fromFriend}], foundText }
   function draw(nowS, extras) {
     if (!state) return;
@@ -503,6 +564,8 @@ export function createPhoneControls({ canvas, camera, onPing }) {
       ctx.restore();
     }
 
+    if (ropeOn) drawRopeControl(self, wind, ideal, [...pointers.values()].some((q) => q.role === 'rope'));
+
     if (extras.partner) edgeDot(extras.partner.x, extras.partner.z, '#66ccff', 7);
     for (const ping of extras.pings) if (ping.fromFriend) edgeDot(ping.x, ping.z, GOLD, 9);
 
@@ -518,6 +581,9 @@ export function createPhoneControls({ canvas, camera, onPing }) {
   return {
     apply,
     draw,
+    // The rope's box (for names to keep clear of) and whether it is shown (hidden while the chart covers the view).
+    ropeRect() { const g = ropeGeom(W, H); return ropeOn ? { x: g.x - ROPE_HIT_HALF_W, y: g.y0 - 34, w: ROPE_HIT_HALF_W * 2, h: g.len + 68 } : null; },
+    setRopeVisible(on) { if (on === ropeOn) return; ropeOn = on; if (!on) for (const [id, q] of pointers) if (q.role === 'rope') pointers.delete(id); },
     // Drop every finger the controls are tracking (a pinch-to-zoom began: those two fingers are zooming, not steering).
     interrupt() { pointers.clear(); aimHeading = null; },
     destroy() {

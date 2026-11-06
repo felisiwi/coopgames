@@ -525,7 +525,7 @@ function startGame({ canvas, net, seed, role }, coast) {
   const hud = createHud(canvas);
   // The HUD boxes that are on screen (compass, wind text, trim bar, notice, key legend): names keep clear of them.
   const hudRects = () => [...[hud.rose, hud.text, hud.bar, hud.notice, hud.legend].filter((el) => el && el.style.display !== 'none')
-    .map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0).map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height })), ...(chartCtl ? chartCtl.rects() : [])];
+    .map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0).map((r) => ({ x: r.left, y: r.top, w: r.width, h: r.height })), ...(chartCtl ? chartCtl.rects() : []), ...(phone && phone.ropeRect() ? [phone.ropeRect()] : [])];
   if (coast && debugOverlay) {
     const r = coast.report;
     const t = r.timings;
@@ -742,6 +742,7 @@ function startGame({ canvas, net, seed, role }, coast) {
     }
     if (!(ctlView && ctlView.skip3D)) renderer.render(scene, camera); // the chart covers the whole view: skip the 3D render
     debugOverlay?.frame(now);
+    phone?.setRopeVisible(!(ctlView && ctlView.t > 0.05)); // the chart covers the view: no rope
     phone?.draw(nowS, {
       partner: partnerPos,
       pings,

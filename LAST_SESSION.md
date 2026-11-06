@@ -31,10 +31,10 @@ Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobb
 - Boat Lab: koster (gaff+jib / sprit+jib / gaff) and eka, pennant, deck items, night lantern, wear; ~1k tris each.
 - Boat Lab revision 1 (Felix's picks): gaff + jib only, slimmer koster, eka sail tones, name board removed.
 - Stage 1c (this branch): terrain style, boats.js, zoom -> chart, minimap, fog, lighthouse visits (CHART.md).
-- 1c revision (2026-11-06, phone test): boat arrow, blank uncharted sections, fog-gated + quiet names, Navigate here, trimmed glow, seams. Rope control (item 3) awaits Felix's pick.
+- 1c revision (2026-11-06, phone test): boat arrow, blank uncharted sections, fog-gated + quiet names, Navigate here, trimmed glow, seams. Rope control (option A) built.
 
 ## Next
 
-1. Felix: pick the rope-control option (CHART.md), then phone check of the 1c revision.
+1. Felix: phone check of the 1c revision incl. the rope (CHART.md); then merge 1c.
 2. Confirm the 7 unplaced harbours (candidates in `assets/coast/names.json`); Testholmen, Stora Kornö.
 3. Then: merge 1c; blue-hour sky, edge fog + thunder; the jump to ~1700 (the eka exists behind `?boat=eka`).

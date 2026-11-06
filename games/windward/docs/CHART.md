@@ -62,7 +62,6 @@ background ~2.5 s after the game starts, 1.1 MB).
 - The overview picture's tile seams are repainted by `tools/clean-chart-seams.py` (the cut edges of water bodies at the old tile borders stay straight: the data ends there).
 - Uncharted sections stay blank for now: there is no way to "sail there" and chart them yet (the whole playable window is inside the start section).
 - Lights outside the start section are not drawn on the chart any more (an uncharted section shows nothing).
-- Item 3, the rope control (one-handed sailing), waits for Felix's pick of an option.
 - Stora Kornö ("the barley isle") is still outside the playable edge. Gullholmens Gästhamn has no coordinate of its own.
 - Reveal radius (150 m) and minimap span (320 m) are first guesses: tune by feel (`REVEAL_M` in `src/explored.js`, `MINI.spanM` in `src/minimap.js`).
 
@@ -82,3 +81,7 @@ background ~2.5 s after the game starts, 1.1 MB).
 - Trimmed: the sweet zone glows steadily, the dot grows a white ring, a small "trimmed" word sits by it (and the desktop trim bar does the same).
 - A lighthouse visit now puts its description/name label up in the world.
 Phone checklist additions: tap a discovered place on the chart -> Navigate here -> sail, watch the tag and distance, cross to cancel; sail past an island: a small faint name; trim the sail: the glow and "trimmed".
+
+## The rope (1c revision, option A: absolute rope)
+Bottom-right on phones: a vertical rope, handle height = trim (down = sheet in, up = ease), a green sweet band, the handle glows green with a ring and "trimmed" when in the band, and a word beside it says what to do ("sheet in" / "ease"). The touch target is 84 px wide and taller than it draws. The handle never jumps: the finger keeps its gap to the handle from when it landed. A finger on the rope is the rope and never steers, so the other finger steers on its own; the old second-finger sheet still works elsewhere. Hidden while the chart is up; names keep clear of it. Keyboard and desktop unchanged (the rope is phone-only). Code: `ropeGeom` and friends in `src/phone.js`.
+Phone checklist: touch the rope away from the handle, it must not jump; drag down/up; steer with the other thumb at the same time; steer first, then use the rope; on a small phone check the rope clears the bottom line.
