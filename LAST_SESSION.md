@@ -1,11 +1,11 @@
 # Last session
 
-**2026-11-06: Windward stage 1e, chapter 1 in 1950, REVISED plan** (branch `felix/windward-chapter1-1950`, describes `ff2d3f1`; pushed, NOT merged). Plan changed after Felix's
-phone test (GAME-DESIGN.md "Opening and chapter 1 story, revised"). Done: batch 1 world adapter; **batch 2b the opening in the engine** (`src/opening-stage.js`: dusk over today's
-Fiskebäckskil, storm, lighthouse rewind `src/rewind.js`, looks `src/dusk.js`, site `src/opening-site.js`; then dawn on the 1950 mainland shore); the SVG opening is deleted.
-STILL TO DO under the revised plan: **2c** the first story beats (the boy; errand to Grundsund for parts; "someone in Fiskebäckskil was asking for help") replacing today's wake
-cards in `src/story-1950.js`; **3** the task redone (an earlier batch-3 build, `f452ffe`, is in the history but its story is superseded: Britta ~17, her house = the opening's house,
-depot = her family's shed instead of Lysekil, report back at her house). `?opening=1` replays, `?lights=reset` restarts. All copy is draft (TODO(felix)).
+**2026-11-06: Windward stage 1e, chapter 1 in 1950, REVISED plan** (branch `felix/windward-chapter1-1950`, describes `7cdac9b`; pushed, NOT merged). Done: batch 1 world adapter;
+**2b the opening in the engine** (`src/opening-stage.js`, `rewind.js` lands on Gäven at 1950, `dusk.js`, `opening-site.js`; dawn on the mainland shore) with Felix's fixes (sky, no labels,
+new lines, strike then dark); **paper cards everywhere** (`src/paper.js`); **2c the first beats** (`src/beats-1950.js`, copy in `story-1950.js`: the boy, the eka, Grundsund fittings,
+back at the yard, then Fiskebäckskil). TO DO: **batch 3** the task on the revised story: Britta ~17 in Fiskebäckskil (father's broken arm), her family's shed = the depot (replaces
+Lysekil), four AGA lights + Måseskär's keeper, the Kråksundsgap glimpse, Svalan relaunched, report at her house (= the opening's house, `opening-site.js`). The first batch-3 build is
+in the code but DORMANT (`JOB_1950_LIVE = false` in game.js) and its cards are pre-revision. `?opening=1` replays, `?lights=reset` restarts. All copy is draft (TODO(felix)).
 
 Where things are:
 - Boats: `src/boats.js`, `boat-lab.html`, `docs/boat-lab/`, `docs/BOAT-BRIEF.md`. Design: `games/windward/GAME-DESIGN.md`, `DESIGN.md`
@@ -27,5 +27,5 @@ harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connecti
 
 ## Next
 
-1. Felix: phone check of the opening (batch 2b report); then batch 2c (story beats) and batch 3 (the task, revised).
+1. Felix: phone check of the opening and the beats (batch 2c report); then batch 3 (the task, revised).
 2. Open data TODOs: Bx/B/K light readings, Stångholmen position, the four undrawn fyrkurar, 1950 buoy colour, ferry timetable. Then: night navigation, harbour close-ups.
