@@ -50,7 +50,7 @@ export function chartLights(names, toGame, lights = LIGHTHOUSES) {
 }
 
 // What the card says for a place picked on the chart: its name, with what it is.
-const KIND_LINE = { village: 'Village', harbour: 'Natural harbour', island: 'Island', skerry: 'Skerry', light: 'Lighthouse', granddad: 'Granddad’s mark' };
+const KIND_LINE = { village: 'Village', harbour: 'Natural harbour', island: 'Island', skerry: 'Skerry', light: 'Lighthouse', granddad: 'Grandpa’s mark' };
 export function placeInfo(entry) {
   return { title: entry.name, sub: [entry.desc, KIND_LINE[entry.kind]].filter(Boolean).join(' · ') };
 }
@@ -225,7 +225,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
       const r = state.chart.detailRect;
       state.zoomTarget = Math.max(ZOOM_CHART_FULL, fitZoom(r.x1 - r.x0, r.z1 - r.z0, state.W, state.H, 0.96));
       state.pan = { x: (r.x0 + r.x1) / 2 - state.focus.x, z: (r.z0 + r.z1) / 2 - state.focus.z };
-    } else ui.toast(`${hit.section.lore} isn’t on granddad’s chart. Sail there yourself, or trade for this sheet.`, 4200);
+    } else ui.toast(`${hit.section.lore} isn’t on Grandpa’s chart. Sail there yourself, or trade for this sheet.`, 4200);
   };
   cc.addEventListener('pointerup', up);
   cc.addEventListener('pointercancel', () => { state.drag = null; });

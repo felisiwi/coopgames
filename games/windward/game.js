@@ -686,7 +686,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   }
   const momentEntry = gd ? null : kr ? { id: 'future:kraksundsgap', name: FUTURE_LIGHT_NAME, x: kr.x, z: kr.z } : null; // 1950's strange place
   // Granddad's marks on the chart (after the chest): his favourites in the region (each a real name-list entry, so a Navigate target) and the strange mark.
-  const strangeEntry = momentEntry ? momentEntry : gd ? (() => { const [x, z] = coast.world.toGame(gd.strange.lon, gd.strange.lat); return { id: gd.strange.id, name: gd.strange.name, kind: 'granddad', desc: `Granddad’s note: ${gd.strange.light.pattern.replace(/\s*\(.*\)\s*$/, '')}`, x, z, strange: true }; })() : null;
+  const strangeEntry = momentEntry ? momentEntry : gd ? (() => { const [x, z] = coast.world.toGame(gd.strange.lon, gd.strange.lat); return { id: gd.strange.id, name: gd.strange.name, kind: 'granddad', desc: `Grandpa’s note: ${gd.strange.light.pattern.replace(/\s*\(.*\)\s*$/, '')}`, x, z, strange: true }; })() : null;
   const gdMarks = gd ? [...gd.favourites.map((f) => coast.names.find((e) => e.id === f.id)).filter(Boolean).map((e) => ({ ...e, granddad: true })), strangeEntry] : [];
   const granddadMarks = () => (chapter.chartOpen ? gdMarks : []);
   const lightLookup = (id) => {
@@ -702,7 +702,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     onSetSail: () => { markStartSeen(store); if (chartCtl && chartCtl.state.t > 0.5) chartCtl.toggleChart(); guide(); }, // from the chart: back to the boat; 1950: the first goal gets its tag
     onSkip: () => markStartSeen(store),
     onReport: () => guide(), // the card after the last light: its button sets Navigate to the next goal (Today: Fiskebäckskil; 1950: Måseskär)
-    onGrandma: () => chartCtl?.toast('The chest is on the deck. Granddad’s chart has new marks.', 5200),
+    onGrandma: () => chartCtl?.toast('The chest is on the deck. Grandpa’s chart has new marks.', 5200),
     onStrange: () => {},
   }) : null;
   // Grandma's moment (the harbour reward is over): the task is done, the chest is yours (saved), it appears in Svalan's chest slot, then her card.

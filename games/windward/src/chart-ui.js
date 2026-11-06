@@ -27,7 +27,7 @@ function button(label, aria, css = '') {
 export function createChartUi({ parent = document.body, debug = false, onChart, onTask = () => {}, onLog = () => {}, onZoomStep, onBack, onNavigate = () => {}, onJump, onMiniTap }) {
   // the chart's own canvas (drawn by src/chart.js), above the 3D view and the phone layer, below the controls
   const chartCanvas = el('canvas', 'position:fixed;inset:0;width:100%;height:100%;z-index:4;display:none;pointer-events:none;touch-action:none');
-  chartCanvas.setAttribute('aria-label', "Granddad's chart of the west coast");
+  chartCanvas.setAttribute('aria-label', "Grandpa's chart of the west coast");
   parent.appendChild(chartCanvas);
 
   const top = el('div', `position:fixed;z-index:7;left:max(12px,env(safe-area-inset-left,0px));top:calc(12px + ${SAFE_TOP});display:flex;flex-direction:column;gap:8px;align-items:flex-start;pointer-events:none`);

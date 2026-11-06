@@ -41,6 +41,21 @@ await check('a house by the water in Fiskebäckskil: 9-26 m from the sea, deep w
   console.log(`   house at (${s.house.x.toFixed(0)}, ${s.house.z.toFixed(0)}), sea ${s.waterM} m away, jetty ${len.toFixed(0)} m`);
 });
 
+await check('a low flat jetty and Svalan broadside along it: the deck is a boardwalk at sea height (not ground height), her keel line is parallel to it, she lies beside it (not under it) with deep water at bow and stern', () => {
+  const s = pickSite({ houses: coast.summerHouses, village, heightAt: coast.heightAt });
+  assert.ok(s.jetty.y > 0.2 && s.jetty.y < 0.7, `deck ${s.jetty.y} m above the sea: low and flat`);
+  assert.equal(s.jetty.y, SITE.deckY);
+  const ax = Math.sin(s.dir), az = Math.cos(s.dir); // the jetty's axis
+  const par = Math.abs(Math.sin(s.boat.heading - s.dir)); assert.ok(par < 1e-9, `Svalan is parallel to the jetty (${par})`);
+  const rx = s.boat.x - s.jetty.from.x, rz = s.boat.z - s.jetty.from.z;
+  const along = rx * ax + rz * az, across = Math.abs(rx * az - rz * ax); // metres along the jetty from its land end, and sideways off its axis
+  const len = Math.hypot(s.jetty.to.x - s.jetty.from.x, s.jetty.to.z - s.jetty.from.z);
+  assert.ok(across >= s.jetty.width / 2 + 1.2 && across <= 3.5, `she lies ${across.toFixed(1)} m off the axis: beside the deck, not under it`);
+  assert.ok(along - SITE.boatHalfLenM >= 0 && along + SITE.boatHalfLenM <= len + 0.5, `her 8 m lie along the jetty (${along.toFixed(1)} of ${len.toFixed(1)} m)`);
+  for (const a of [-SITE.boatHalfLenM, 0, SITE.boatHalfLenM]) assert.ok(coast.heightAt(s.boat.x + ax * a, s.boat.z + az * a) <= SITE.deepLevel, `deep water at ${a} m from her middle`);
+  assert.ok(len >= 10 && len <= 18, `a short jetty, ${len.toFixed(1)} m`);
+});
+
 await check('the jetty runs north-south when a house allows it (a portrait phone shows it in one column), and the framing fits house, jetty end and Svalan on a 390 x 844 screen', () => {
   const s = pickSite({ houses: coast.summerHouses, village, heightAt: coast.heightAt });
   const f = frameSite(s, 390 / 844);

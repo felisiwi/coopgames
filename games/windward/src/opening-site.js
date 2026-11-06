@@ -9,9 +9,12 @@ export const SITE = Object.freeze({
   maxWaterM: 26,       // ... and no further (a jetty longer than this is not a jetty)
   seaLevel: -0.3,      // ground below this height is water
   deepLevel: -1.2,     // the jetty ends where it is at least this deep
-  jettyWidthM: 1.7,
-  endIntoWaterM: 5,    // the jetty runs this far past the water's edge
-  boatSideM: 2.6,      // Svalan lies this far to the side of the jetty, alongside its outer half
+  jettyWidthM: 1.8,
+  deckY: 0.42,         // the deck is a low flat boardwalk this far above the sea (not above the ground: it must not follow the slope of the land)
+  shoreInM: 3,         // it starts this far up the shore ...
+  endIntoWaterM: 11,    // ... and runs this far past the water's edge
+  boatSideM: 2.7,      // Svalan lies this far to the side of the jetty axis (half the jetty + half her beam + a fender), broadside along its outer part
+  boatHalfLenM: 4.2,   // Svalan is about 8 m: the water must be deep at her bow and her stern, not just amidships
   verticalWeight: 1.6, // how much a north-south jetty is preferred over a near one (see pickSite)
 });
 
@@ -40,9 +43,10 @@ export function pickSite({ houses, village, heightAt, c = SITE }) {
     if (heightAt(h.x + sx * endM, h.z + sz * endM) > c.deepLevel) continue; // too shallow at the end of the jetty
     // the sea beside the jetty must be open too (Svalan lies there)
     const px = Math.cos(w.dir), pz = -Math.sin(w.dir);
-    const bm = endM - 4, bx = h.x + sx * bm + px * c.boatSideM, bz = h.z + sz * bm + pz * c.boatSideM;
-    const bx2 = h.x + sx * bm - px * c.boatSideM, bz2 = h.z + sz * bm - pz * c.boatSideM;
-    const side = heightAt(bx, bz) < c.deepLevel ? 1 : heightAt(bx2, bz2) < c.deepLevel ? -1 : 0;
+    const bm = endM - c.boatHalfLenM - 0.3; // her middle: her bow just short of the jetty end, her stern well out in the deep (the water shoals near the shore)
+    const deepAt = (side, along) => heightAt(h.x + sx * along + px * c.boatSideM * side, h.z + sz * along + pz * c.boatSideM * side) < c.deepLevel;
+    const open = (side) => [bm - c.boatHalfLenM, bm, bm + c.boatHalfLenM].every((a) => deepAt(side, a));
+    const side = open(1) ? 1 : open(-1) ? -1 : 0;
     if (!side) continue;
     // The phone is held upright and north is up: a jetty that runs north-south shows house, jetty and boat in one column. East-west would not fit the width. Prefer
     // the former, then the nearer to the village point.
@@ -50,8 +54,8 @@ export function pickSite({ houses, village, heightAt, c = SITE }) {
     if (best && best.score <= score) continue;
     best = {
       score, house: h, dir: w.dir, waterM: w.m,
-      jetty: { from: { x: h.x + sx * 3, z: h.z + sz * 3 }, to: { x: h.x + sx * endM, z: h.z + sz * endM }, width: c.jettyWidthM },
-      boat: { x: h.x + sx * bm + px * c.boatSideM * side, z: h.z + sz * bm + pz * c.boatSideM * side, heading: w.dir + Math.PI / 2 },
+      jetty: { from: { x: h.x + sx * Math.max(1, w.m - c.shoreInM), z: h.z + sz * Math.max(1, w.m - c.shoreInM) }, to: { x: h.x + sx * endM, z: h.z + sz * endM }, width: c.jettyWidthM, y: c.deckY },
+      boat: { x: h.x + sx * bm + px * c.boatSideM * side, z: h.z + sz * bm + pz * c.boatSideM * side, heading: w.dir }, // heading along the jetty: broadside to it
     };
   }
   if (!best) return null;

@@ -39,9 +39,13 @@ await check('two or three minimal lines, none during the rewind, no word about t
   const rewindAt = OPENING_PLAN.find((p) => p.id === 'rewind').at;
   for (const l of OPENING_LINES) { assert.ok(l.from < l.to && l.to <= rewindAt, `"${l.text}" is over before the rewind`); assert.ok(l.to - l.from >= 4, `"${l.text}" stays long enough to read`); }
   for (let i = 1; i < OPENING_LINES.length; i++) assert.ok(OPENING_LINES[i].from >= OPENING_LINES[i - 1].to, 'one line at a time');
-  assert.deepEqual(OPENING_LINES.map((l) => [/Fiskebäckskil/.test(l.text) && /Grandma and Granddad/.test(l.text) && /Summer/.test(l.text) && /today/i.test(l.text), /fog/.test(l.text), /Svalan fast/.test(l.text)].filter(Boolean).length), [1, 1, 1], 'in this order: where and when (tied to today), the fog, going down to make Svalan fast');
+  assert.equal(OPENING_LINES[0].text, 'Fiskebäckskil, today\nGrandma and Grandpa’s house', 'the first card is two lines: the place tied to today, then whose house');
+  assert.match(OPENING_LINES[1].text, /strange fog is rolling in/);
+  assert.equal(OPENING_LINES[2].text, 'You go down to make Grandpa’s boat, Svalan, fast.', 'Svalan is Grandpa\'s boat');
+  assert.ok(OPENING_LINES.every((l) => l.text.split('\n').every((x) => x.length <= 60)), 'short lines for a phone');
   assert.ok(OPENING_LINES.every((l) => l.text.length <= 70), 'short: one line at a time');
   assert.ok(!/time|year|1950|travel|back/i.test(OPENING_LINES.map((l) => l.text).join(' ')), 'no explanation of time travel');
+  assert.ok(!/Granddad/i.test(OPENING_LINES.map((l) => l.text).join(' ')), 'Grandpa, not Granddad');
   const storm = OPENING_PLAN.find((p) => p.id === 'storm');
   for (const f of OPENING_FLASHES) { assert.ok(f.at >= storm.at && f.at < storm.at + storm.dur, `flash at ${f.at} is in the storm`); assert.ok(f.thunderAfter > 0 && f.thunderAfter < 3); }
   assert.ok(OPENING_FLASHES.length >= 3);

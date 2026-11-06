@@ -13,7 +13,7 @@ function el(tag, css, text) {
 export const GRANDMA_CARD = {
   who: 'Grandma',
   line: 'He always said the lights talk, if you know how to listen.',
-  gift: 'She gives you granddad\'s sea chest.',
+  gift: 'She gives you Grandpa\'s sea chest.',
   button: 'Carry on sailing',
 };
 
@@ -22,7 +22,7 @@ export const START_CARD = {
   title: 'After the storm',
   lines: [
     'A storm has put out the five lighthouses nearest Grundsund.',
-    'Take granddad\'s old koster, Svalan, sail to each one and bring its light back.',
+    'Take Grandpa\'s old koster, Svalan, sail to each one and bring its light back.',
     'Then report to grandma in Fiskebäckskil.',
   ],
   go: 'Set sail',

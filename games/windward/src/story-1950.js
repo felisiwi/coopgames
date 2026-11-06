@@ -20,12 +20,12 @@ export const OPENING_PLAN = [
   { id: 'out', at: 41, dur: 1.5 },    // a last flash; the game takes over
 ];
 export const OPENING_TOTAL_S = OPENING_PLAN.reduce((t, b) => Math.max(t, b.at + b.dur), 0);
-// Three short lines, one at a time, in this order (Felix): where and when (tied to today), the fog, going down to the jetty. Then the lightning strikes, then dark, then
+// Three short cards, one at a time, in this order (Felix): where and when (tied to today; two lines), the fog, going down to Grandpa's boat. "Grandpa" everywhere in the game's text, never "Granddad". Then the lightning strikes, then dark, then
 // the lighthouses: no line over those. No explanation of time travel. DRAFT wording of (a) is Felix's with "today" added: TODO(felix): confirm.
 export const OPENING_LINES = [
-  { from: 1.2, to: 7.2, text: 'Fiskebäckskil, today. Grandma and Granddad’s house. Summer.' },
+  { from: 1.2, to: 7.2, text: 'Fiskebäckskil, today\nGrandma and Grandpa’s house' }, // two lines (Felix)
   { from: 10.4, to: 15.4, text: 'A strange fog is rolling in.' },
-  { from: 16.4, to: 21.8, text: 'You go down to make Svalan fast.' },
+  { from: 16.4, to: 21.8, text: 'You go down to make Grandpa’s boat, Svalan, fast.' }, // Svalan is Grandpa's boat
 ];
 // Lightning (seconds into the opening) and the thunder that follows each (seconds later). The last one is THE STRIKE: it is followed by the dark.
 export const OPENING_FLASHES = [{ at: 18.6, thunderAfter: 1.5 }, { at: 20.3, thunderAfter: 0.9 }, { at: 22.3, thunderAfter: 0.25, strike: true }];

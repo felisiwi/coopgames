@@ -29,13 +29,14 @@ const ROW_Z = -1500;      // the rewind row sits out in the open sea, far from t
 const ROW_CAM_DIST = 80;  // how far in front of the row the camera stands (a phone shows one or two towers)
 const WINK_S = 0.45;
 // The rewind's sky and its faint distant lightning (seconds into the rewind; flashLevel() shapes each one).
-const REWIND_SKY = { zenith: 0x4a5c80, horizon: 0x93a4c0, glow: 0xdbe6fa };
+// One misty colour for ALL the sky above the horizon and the haze the sea fades into (Felix: about #8898B5), so there is no band or edge between them.
+const REWIND_SKY = { zenith: 0x8898b5, horizon: 0x8898b5, glow: 0xdbe6fa };
 const REWIND_FLICKERS = [{ at: 0.9 }, { at: 1.1 }, { at: 3.4 }, { at: 5.6 }, { at: 5.8 }, { at: 8.2 }, { at: 10.7 }, { at: 10.9 }, { at: 12.6 }];
 const lerpHex = (a, b, k) => { const m = (sh) => Math.round(((a >> sh) & 255) + (((b >> sh) & 255) - ((a >> sh) & 255)) * k); return (m(16) << 16) | (m(8) << 8) | m(0); };      // how long a tower takes to wink out
 
 const CSS = `
 .ow-root{position:fixed;inset:0;z-index:25;pointer-events:none;font-family:Georgia,"Times New Roman",serif;color:#eaf3f8;-webkit-user-select:none;user-select:none}
-.ow-line{position:absolute;left:0;right:0;bottom:17%;padding:0 28px;text-align:center;font-style:italic;font-size:21px;line-height:1.35;text-shadow:0 2px 12px rgba(0,0,0,.85);opacity:0;transition:opacity .9s}
+.ow-line{white-space:pre-line;position:absolute;left:0;right:0;bottom:17%;padding:0 28px;text-align:center;font-style:italic;font-size:21px;line-height:1.35;text-shadow:0 2px 12px rgba(0,0,0,.85);opacity:0;transition:opacity .9s}
 .ow-year{position:absolute;left:0;right:0;top:7%;text-align:center;font:700 64px/1 system-ui,sans-serif;letter-spacing:.02em;color:#f2c46d;text-shadow:0 2px 14px rgba(0,0,0,.8);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s}
 .ow-skip{position:absolute;right:14px;bottom:14px;pointer-events:auto;touch-action:manipulation;font:500 13px system-ui,sans-serif;color:#eaf3f8;background:rgba(10,20,30,.55);border:1px solid rgba(234,246,255,.28);border-radius:16px;padding:8px 16px;cursor:pointer}
 .ow-flash{position:absolute;inset:0;background:#dfe8ff;opacity:0}
@@ -83,18 +84,19 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
   svalan.group.name = 'svalan-at-jetty';
   const jetty = new THREE.Group(); jetty.name = 'jetty';
   if (site) {
-    const { from, to, width } = site.jetty;
-    const len = Math.hypot(to.x - from.x, to.z - from.z), wood = new THREE.MeshLambertMaterial({ color: WOOD, flatShading: true });
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(width, 0.18, len), wood);
+    const { from, to, width, y } = site.jetty;
+    const len = Math.hypot(to.x - from.x, to.z - from.z), wood = new THREE.MeshLambertMaterial({ color: WOOD, emissive: 0x2e2012, flatShading: true });
     const mx = (from.x + to.x) / 2, mz = (from.z + to.z) / 2;
-    deck.position.set(mx, Math.max(0.55, coast.heightAt(mx, mz) + 0.4), mz); deck.rotation.y = site.dir;
-    jetty.add(deck);
-    for (let k = 0; k <= 4; k++) { // posts down both sides
-      const t = k / 4, px = from.x + (to.x - from.x) * t, pz = from.z + (to.z - from.z) * t;
-      for (const s of [-1, 1]) { const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.7, 6), wood); post.position.set(px + Math.cos(site.dir) * s * (width / 2), 0.2, pz - Math.sin(site.dir) * s * (width / 2)); jetty.add(post); }
+    // A low, flat boardwalk at the height of the sea (not at the height of the ground under it): one thin deck, a plank-edge rail either side, posts at the corners.
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(width, 0.12, len), wood);
+    deck.position.set(mx, y, mz); deck.rotation.y = site.dir; jetty.add(deck);
+    const px = Math.cos(site.dir), pz = -Math.sin(site.dir), sx = Math.sin(site.dir), sz = Math.cos(site.dir);
+    for (let k = 0; k <= 5; k++) { // short posts, barely above the deck, down both sides
+      const t = k / 5, cx = from.x + (to.x - from.x) * t, cz = from.z + (to.z - from.z) * t;
+      for (const sd of [-1, 1]) { const post = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 0.16), wood); post.position.set(cx + px * sd * (width / 2), y + 0.12, cz + pz * sd * (width / 2)); jetty.add(post); }
     }
     const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffc878 })); // a lamp on the last post: the warmest thing on the water
-    lamp.position.set(to.x, 1.35, to.z); jetty.add(lamp);
+    lamp.position.set(to.x + px * (width / 2), y + 0.85, to.z + pz * (width / 2)); jetty.add(lamp);
     world.add(jetty);
     svalan.group.position.set(site.boat.x, 0, site.boat.z); svalan.group.rotation.y = site.boat.heading;
     world.add(svalan.group);
@@ -167,6 +169,7 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
     applyLook(look);
     const fogK = inRewind ? 0.55 : smooth((t - 10) / 6) * 0.85;
     const fog = fogMoodValues(savedHaze, fogK); delete fog.HAZE_COLOR; Object.assign(CONFIG, fog);
+    if (inRewind) CONFIG.HAZE_WATER_STRENGTH = 1; // the far sea takes ALL of the haze colour: it meets the sky without an edge
 
     // storm: the wind and the sea rise with the dark
     wind = { dir: wind.dir, strength: 0.5 + 0.5 * smooth((t - 10) / 10) };
@@ -204,6 +207,10 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
       waterFollow(view);
     }
     sky.update(camera); sunGlow.update(camera);
+    if (inRewind) { // the sky shader writes its colours to the screen WITHOUT the sRGB conversion the haze and the sea get, so the same hex looks darker on it: feed it the raw colour instead, and the whole sky is the colour of the mist below it
+      const c = CONFIG.SKY_HORIZON_COLOR;
+      for (const u of [sky.mesh.material.uniforms.uHorizonColor.value, sky.mesh.material.uniforms.uZenithColor.value]) u.setRGB(((c >> 16) & 255) / 255, ((c >> 8) & 255) / 255, (c & 255) / 255);
+    }
     const camTo = camera.position.distanceTo(view);
     scene.fog.color.set(CONFIG.HAZE_COLOR); scene.fog.near = camTo * CONFIG.HAZE_MESH_NEAR_MUL; scene.fog.far = camTo * CONFIG.HAZE_MESH_FAR_MUL;
     setLights(flash);
