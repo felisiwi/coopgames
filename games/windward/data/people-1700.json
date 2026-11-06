@@ -1,0 +1,770 @@
+{
+  "about": "Sourced story details for the 1700 era (docs/PEOPLE-1700.md). Items carry confidence (documented | derived | inferred | later-recorded | INVENTED), an uncertain flag, source ids (A.. pilots, B.. hamlet, C.. war, D.. storms) and a useFor note. INVENTED items are suggestions, not history; later-recorded beliefs are not proof for 1700. No person, station or boat is named unless a source names it. Read 2026-11-06.",
+  "generated": "2026-11-06",
+  "sources": {
+    "A01": {
+      "title": "SOU 2007:106 ch.2, pilot law and organisation",
+      "url": "https://regeringen.se/contentassets/eeab92e3e1cf458cb2ce7815c06d999b/lotsa-ratt-hela-dokumentet-sou-2007106",
+      "read": true
+    },
+    "A02": {
+      "title": "sv.wikipedia: Lotsning i Sverige",
+      "url": "https://sv.wikipedia.org/wiki/Lotsning_i_Sverige",
+      "read": true
+    },
+    "A03": {
+      "title": "hhogman.se: maritime piloting",
+      "url": "https://hhogman.se/maritime-piloting-swe.htm",
+      "read": true
+    },
+    "A04": {
+      "title": "hhogman.se: Lotsväsendet",
+      "url": "https://www.hhogman.se/lotsvasendet.htm",
+      "read": true
+    },
+    "A05": {
+      "title": "hhogman.se: lighthouses and sea marks",
+      "url": "https://hhogman.se/lighthouses-swe.htm",
+      "read": true
+    },
+    "A06": {
+      "title": "Vinga/Brännö pilot station",
+      "url": "https://lotsarnastockholm.se/index.php/vinga-lotsplats-branno/",
+      "read": true,
+      "note": "Gothenburg; analogue only"
+    },
+    "A07": {
+      "title": "Lysekil pilot station",
+      "url": "https://lotsarnastockholm.se/index.php/lysekils-lotsplats/",
+      "read": true,
+      "note": "re-read by me"
+    },
+    "A08": {
+      "title": "Käringön pilot station",
+      "url": "https://lotsarnastockholm.se/index.php/karingons-lotsplats/",
+      "read": true,
+      "note": "re-read by me"
+    },
+    "A09": {
+      "title": "Gullholmen pilot station",
+      "url": "https://lotsarnastockholm.se/index.php/gullholmens-lotsplats/",
+      "read": true
+    },
+    "A10": {
+      "title": "Marstrand pilot station",
+      "url": "https://lotsarnastockholm.se/index.php/marstrands-lotsplats/",
+      "read": true
+    },
+    "A13": {
+      "title": "List of pilot places (1940); Grundsund not on it",
+      "url": "https://lotsarnastockholm.se/index.php/svenska-lotsplatser/",
+      "read": true
+    },
+    "A14": {
+      "title": "sv.wikipedia: Lotsning",
+      "url": "https://sv.wikipedia.org/wiki/Lotsning",
+      "read": true
+    },
+    "A17": {
+      "title": "Fjällbacka archipelago introduction",
+      "url": "https://fjallbacka.com/wp-content/uploads/2022/01/R1-Introduktion.pdf",
+      "read": false,
+      "note": "search-summary"
+    },
+    "B01": {
+      "title": "Bohusläns museum rapport 2012:39, Gullholmens hamn",
+      "url": "https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2012-39.pdf",
+      "read": true
+    },
+    "B02": {
+      "title": "Kulturmiljöer på Orust, Del 1 Historik",
+      "url": "https://www.orust.se/download/18.1f85c5af18509aabb4a7d9/1670938880017/Kulturmilj%C3%B6er%20p%C3%A5%20Orust%20Del%201%20-%20Historik.pdf",
+      "read": true
+    },
+    "B03": {
+      "title": "Kulturhistorisk inventering, Hälleviksstrand och Edshultshall",
+      "url": "https://www.orust.se/",
+      "read": true,
+      "note": "Bohusläns museum for Orust kommun"
+    },
+    "B04": {
+      "title": "Gustavsson, RIG 89:3 (2006) on C G Bernhardson",
+      "url": "https://journals.lub.lu.se/rig/article/download/3688/3333/9609",
+      "read": true,
+      "note": "20th-century informant"
+    },
+    "B05": {
+      "title": "Bohusläns museum: Folktro i Bernhardsons målningar",
+      "url": "https://www.bohuslansmuseum.se/kunskapsbanken_bohuslans_historia/carl-gustaf-bernhardson/",
+      "read": true
+    },
+    "B06": {
+      "title": "Pehr Kalm, Wästgötha och bahusländska resa (1746)",
+      "url": "http://runeberg.org/wgbhresa/0239.html",
+      "read": true,
+      "note": "recorded 1742; OCR unproofread"
+    },
+    "B07": {
+      "title": "godsandmonsters.info: Havsrå",
+      "url": "https://godsandmonsters.info/havsra/",
+      "read": true,
+      "note": "secondary website; its sources unchecked"
+    },
+    "B08": {
+      "title": "sv.wikipedia: Sjörå",
+      "url": "https://sv.wikipedia.org/wiki/Sj%C3%B6r%C3%A5",
+      "read": true
+    },
+    "B09": {
+      "title": "sv.wikipedia: Irrbloss",
+      "url": "https://sv.wikipedia.org/wiki/Irrbloss",
+      "read": true
+    },
+    "B10": {
+      "title": "sv.wikipedia: Lyktgubbe",
+      "url": "https://sv.wikipedia.org/wiki/Lyktgubbe",
+      "read": true
+    },
+    "B11": {
+      "title": "sv.wikipedia: Draug",
+      "url": "https://sv.wikipedia.org/wiki/Draug",
+      "read": true
+    },
+    "B13": {
+      "title": "sv.wikipedia: Bohuslän",
+      "url": "https://sv.wikipedia.org/wiki/Bohusl%C3%A4n",
+      "read": true
+    },
+    "B14": {
+      "title": "Sjöfartsmuseet Akvariet: tosejlare",
+      "url": "https://www.sjofartsmuseetakvariet.se/utstallningar/fartyg-i-fokus/",
+      "read": true
+    },
+    "B15": {
+      "title": "DigitaltMuseum UM027938: hogdalseka",
+      "url": "https://digitaltmuseum.se/011024286876/bat",
+      "read": true,
+      "note": "museum boat is 20th century"
+    },
+    "B16": {
+      "title": "DigitaltMuseum: Skioldenborg",
+      "url": "https://digitaltmuseum.org/021029238579",
+      "read": true,
+      "note": "late 1500s"
+    },
+    "B17": {
+      "title": "SOU 1899:1 fishing population housing",
+      "url": "https://www.riksdagen.se/sv/dokument-och-lagar/dokument/statens-offentliga-utredningar/utredning-angaende-fiskeribefolkningens-i_CWE01b4b1/html/",
+      "read": true,
+      "note": "1899; first 100k of 542k characters read"
+    },
+    "B21": {
+      "title": "Brattö 1990-91 strandsittare article",
+      "url": "https://shfstor.blob.core.windows.net/stangenas/files/2017/02/Strandsittarna-i-Bohusl%C3%A4n-under-1600.pdf",
+      "read": false,
+      "note": "blocked; search-summary"
+    },
+    "C01": {
+      "title": "sv.wikipedia: Slaget vid Dynekilen",
+      "url": "https://sv.wikipedia.org/wiki/Slaget_vid_Dynekilen",
+      "read": true,
+      "note": "re-read by me"
+    },
+    "C02": {
+      "title": "en.wikipedia: Battle of Dynekilen",
+      "url": "https://en.wikipedia.org/wiki/Battle_of_Dynekilen",
+      "read": true
+    },
+    "C03": {
+      "title": "lokalhistoriewiki.no: Slaget i Dynekilen",
+      "url": "https://lokalhistoriewiki.no/wiki/Slaget_i_Dynekilen",
+      "read": true,
+      "note": "secondary; cites Kavli 1990 (not seen)"
+    },
+    "C04": {
+      "title": "en.wikipedia: Tordenskjold",
+      "url": "https://en.wikipedia.org/wiki/Peter_Wessel_Tordenskiold",
+      "read": true
+    },
+    "C06": {
+      "title": "en.wikipedia: Battle of Strömstad",
+      "url": "https://en.wikipedia.org/wiki/Battle_of_Str%C3%B6mstad",
+      "read": true
+    },
+    "C07": {
+      "title": "en.wikipedia: Battles at Göta Älv",
+      "url": "https://en.wikipedia.org/wiki/Battles_at_G%C3%B6ta_%C3%84lv",
+      "read": true
+    },
+    "C08": {
+      "title": "en.wikipedia: Attack on Marstrand",
+      "url": "https://en.wikipedia.org/wiki/Attack_on_Marstrand",
+      "read": true
+    },
+    "C09": {
+      "title": "abc.se: Fredricus at Marstrand",
+      "url": "https://www.abc.se/~pa/publ/fredricus/mar.htm",
+      "read": true
+    },
+    "C10": {
+      "title": "lex.dk: Tordenskjold",
+      "url": "https://lex.dk/Peter_Wessel_Tordenskiold",
+      "read": false,
+      "note": "fetch 403; search-summary"
+    },
+    "C11": {
+      "title": "sv.wikipedia: Olof Strömstierna",
+      "url": "https://sv.wikipedia.org/wiki/Olof_Str%C3%B6mstierna",
+      "read": true,
+      "note": "re-read by me"
+    },
+    "C12": {
+      "title": "en.wikipedia: Olof Strömstierna",
+      "url": "https://en.wikipedia.org/wiki/Olof_Str%C3%B6mstierna",
+      "read": true
+    },
+    "C13": {
+      "title": "sv.wikipedia: Lars Gathenhielm",
+      "url": "https://sv.wikipedia.org/wiki/Lars_Gathenhielm",
+      "read": true
+    },
+    "C14": {
+      "title": "SBL: Gathenhielm",
+      "url": "https://sok.riksarkivet.se/sbl/Presentation.aspx?id=14670",
+      "read": true
+    },
+    "C15": {
+      "title": "historyofwar.org: action off Lindesnes 1714",
+      "url": "https://www.historyofwar.org/articles/action_lindesnaes.html",
+      "read": true
+    },
+    "C16": {
+      "title": "sv.wikipedia: Kapare",
+      "url": "https://sv.wikipedia.org/wiki/Kapare",
+      "read": true
+    },
+    "C17": {
+      "title": "vastsverige.com: Strömstad 1718",
+      "url": "https://www.vastsverige.com/stromstad/sevardheter/1718/",
+      "read": true
+    },
+    "C19": {
+      "title": "en.wikipedia: Great Northern War and Norway (conscription 1704)",
+      "url": "https://en.wikipedia.org/wiki/Great_Northern_War_and_Norway",
+      "read": false,
+      "note": "search-summary"
+    },
+    "C20": {
+      "title": "en.wikipedia: Great Northern War and Norway",
+      "url": "https://en.wikipedia.org/wiki/Great_Northern_War_and_Norway",
+      "read": true
+    },
+    "C21": {
+      "title": "Danish naval ensign (SNL, crwflags, navalhistory.dk)",
+      "url": "https://www.navalhistory.dk/English/TheFlag/the_naval_ensign.htm",
+      "read": false,
+      "note": "fetches failed; search-summary"
+    },
+    "C24": {
+      "title": "Plague 1710 (Skåne)",
+      "url": "https://lup.lub.lu.se/record/20128",
+      "read": false,
+      "note": "search-summary"
+    },
+    "D01": {
+      "title": "en.wikipedia: Great storm of 1703",
+      "url": "https://en.wikipedia.org/wiki/Great_storm_of_1703",
+      "read": true
+    },
+    "D02": {
+      "title": "KNMI: Decemberstorm van 1703",
+      "url": "https://www.knmi.nl/kennis-en-datacentrum/uitleg/decemberstorm-van-1703",
+      "read": true
+    },
+    "D03": {
+      "title": "HMS Association blown to Gothenburg",
+      "url": "https://blogs.york.ac.uk/borthwick-institute/?p=651",
+      "read": false,
+      "note": "search-summary"
+    },
+    "D04": {
+      "title": "en.wikipedia: Christmas Flood of 1717",
+      "url": "https://en.wikipedia.org/wiki/Christmas_Flood_of_1717",
+      "read": true
+    },
+    "D05": {
+      "title": "en.wikipedia: North Sea storm surges",
+      "url": "https://en.wikipedia.org/wiki/North_Sea_storm_surges",
+      "read": true
+    },
+    "D06": {
+      "title": "Storm-series completeness (UEA)",
+      "url": "https://ueaeprints.uea.ac.uk/id/eprint/52308/",
+      "read": false,
+      "note": "search-summary"
+    },
+    "D07": {
+      "title": "en.wikipedia: Great Frost of 1709",
+      "url": "https://en.wikipedia.org/wiki/Great_Frost_of_1709",
+      "read": true
+    },
+    "D08": {
+      "title": "en.wikipedia: Great Famine 1695-1697",
+      "url": "https://en.wikipedia.org/wiki/Great_Famine_of_1695%E2%80%931697",
+      "read": false,
+      "note": "search-summary"
+    },
+    "A18": {
+      "title": "GUPEA: Bohuslänska fisknamn (Ernby)",
+      "url": "https://gupea.ub.gu.se/handle/2077/10910",
+      "read": false,
+      "note": "search-summary"
+    },
+    "B18": {
+      "title": "Västsverige: Uddevallas sillhistoria",
+      "url": "https://www.vastsverige.com/uddevalla/guider1/Uddevallas-sillhistoria/",
+      "read": true
+    },
+    "D10": {
+      "title": "Vänern weather-lore memoir (wrong lake)",
+      "url": "https://kristinehamn.naturskyddsforeningen.se/wp-content/uploads/sites/69/2014/01/De-tolv-apostlarna-1985.pdf",
+      "read": false,
+      "note": "search-summary"
+    }
+  },
+  "items": [
+    {
+      "id": "P01",
+      "topic": "pilots",
+      "text": "Lysekil pilot station set up 'early 1700s'; 4 pilots + 2 apprentices 1729; 4 pilots + 4 lotsdrängar 1744.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A07"
+      ],
+      "useFor": "The only documented station in the game's box."
+    },
+    {
+      "id": "P02",
+      "topic": "pilots",
+      "text": "No source names a pilot station at Grundsund, Skaftö, Fiskebäckskil or Härmanö; Grundsund is not on the 1940 list of pilot places.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A13",
+        "A08"
+      ],
+      "useFor": "Torhild's family piloting from Grundsund is plausible but informal."
+    },
+    {
+      "id": "P03",
+      "topic": "pilots",
+      "text": "1696 regulation (19 Sept): exam and oath for pilots and lotsdrängar, Swedish subjects only, penalties up to nine gatlopp or death; each pilot takes an apprentice.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A01",
+        "A03"
+      ],
+      "useFor": "Torhild's fear of a mistake; her father's rules."
+    },
+    {
+      "id": "P04",
+      "topic": "pilots",
+      "text": "West and south coast were regulated only at the larger harbours in the late 1600s; Western/Northern districts only from 1724.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A01",
+        "A02"
+      ],
+      "useFor": "Why Grundsund piloting is informal."
+    },
+    {
+      "id": "P05",
+      "topic": "pilots",
+      "text": "Pilots were paid per ship (lotspenning); lotshemman holders also farmed and fished, tax-exempt; pilotage often inherited.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A01",
+        "A03",
+        "A04"
+      ],
+      "useFor": "Poor in quiet seasons; fishing and croft alongside. Not dated to 1700."
+    },
+    {
+      "id": "P06",
+      "topic": "pilots",
+      "text": "Käringön pilot Olof Eriksson Ström (b. c.1640) piloted Norwegian ships around 1710 with Peder Wessel aboard.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A08"
+      ],
+      "useFor": "Norwegian sympathies lingered from before 1658; guess is the source's own."
+    },
+    {
+      "id": "P07",
+      "topic": "pilots",
+      "text": "Lysekil pilot supervisor Peter Nilsson (appointed 1700) quit in 1714, saying Norwegians ruined him in 1711.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A08"
+      ],
+      "useFor": "War pressure on pilots; thin (one case)."
+    },
+    {
+      "id": "P08",
+      "topic": "pilots",
+      "text": "Period definition (1736): 'Et Skepp är på lägervall, när vinden ligger mitt åt landet...' (lee shore).",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A08"
+      ],
+      "useFor": "Dialogue flavour; a seamanship definition, not a pilot's saying."
+    },
+    {
+      "id": "P09",
+      "topic": "pilots",
+      "text": "Nearest light: Nidingen (Halland), coal fire from the 1620s-40s; none in Bohuslän before Carlsten 1782.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "A04",
+        "A05"
+      ],
+      "useFor": "Why Torhild has only dreamed of lights."
+    },
+    {
+      "id": "P10",
+      "topic": "pilots",
+      "text": "No documented signals to call a pilot, vårdkase sites, named leading marks, or pilot daughters/wives c.1700.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "A01",
+        "A05",
+        "A13"
+      ],
+      "useFor": "Gaps; do not present these as facts."
+    },
+    {
+      "id": "P11",
+      "topic": "pilots",
+      "text": "Torhild reads the fairway by transit marks and rock names learned on the water; helps with fishing, croft and the boat; fears a pilot's mistake.",
+      "confidence": "INVENTED",
+      "uncertain": true,
+      "sources": [
+        "A01",
+        "A03",
+        "A05",
+        "A17"
+      ],
+      "useFor": "Her teaching tasks in the lab (line up the cairn and the notch). Specific marks invented."
+    },
+    {
+      "id": "H01",
+      "topic": "hamlet",
+      "text": "Strandsittare rented the ground under their house (grundlega); the house counted as movable property.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B02",
+        "B17"
+      ],
+      "useFor": "A hamlet can be moved. The legal wording comes from an 1899 report."
+    },
+    {
+      "id": "H02",
+      "topic": "hamlet",
+      "text": "Gullholmen: 24 strandsittare 1610, about 39 households 1645, 20 fishing families end of the 1600s.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B01"
+      ],
+      "useFor": "Last figure is secondhand (1840s author)."
+    },
+    {
+      "id": "H03",
+      "topic": "hamlet",
+      "text": "Many strandsittar places vanished around the early 1700s (Härmanösund, Vallerö, Lyreleje): tax, lost trade, wartime plunder.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B02",
+        "B21"
+      ],
+      "useFor": "Abandoned hamlet with a stone ring and hearth to find."
+    },
+    {
+      "id": "H04",
+      "topic": "hamlet",
+      "text": "Gullholmen harbour wreck called 'Tordenskiold's ship' is tree-ring dated: latest ring 1717, felled after 1727.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B01"
+      ],
+      "useFor": "A legend a villager insists on."
+    },
+    {
+      "id": "H05",
+      "topic": "hamlet",
+      "text": "Documented Bohuslän fishing boat c.1700-1850: tosejlare (hook-and-line, to Skagen for plaice); eka with sprit sail is plausible but only 20th-century examples survive.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B14",
+        "B15"
+      ],
+      "useFor": "The player's tarred eka is a design choice (BOAT-BRIEF)."
+    },
+    {
+      "id": "H06",
+      "topic": "hamlet",
+      "text": "Kalm 1742: fishermen and pilots' weather signs (mist coiling round the hills = storm from S/SW/W; roaring sea after calm shows the wind's quarter; two cloud banks 'weigh against each other').",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B06"
+      ],
+      "useFor": "Wording for fog and weather warnings. OCR unproofread; 1742, not 1700."
+    },
+    {
+      "id": "H07",
+      "topic": "hamlet",
+      "text": "Gast, fej, departure taboos, fläckkniv, anchor-chain blessing, rooster over a drowned body.",
+      "confidence": "later-recorded",
+      "uncertain": true,
+      "sources": [
+        "B04",
+        "B05"
+      ],
+      "useFor": "Texture for the grandmother's stories; flag as 20th-century informants."
+    },
+    {
+      "id": "H08",
+      "topic": "hamlet",
+      "text": "Havsrå: a Bohuslän version from a man born 1859 (night or before storms, glowing, lures men to the skerries). Swedish Wikipedia treats sjörå as a lake spirit; draug is Norwegian; irrbloss/lyktgubbe are land lights.",
+      "confidence": "later-recorded",
+      "uncertain": true,
+      "sources": [
+        "B07",
+        "B08",
+        "B09",
+        "B10",
+        "B11"
+      ],
+      "useFor": "A phantom light at sea would be invented."
+    },
+    {
+      "id": "H09",
+      "topic": "hamlet",
+      "text": "Timber was scarce (heavy cutting 1500s-1600s; Kalm 1742 'bald hills').",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "B01",
+        "B02"
+      ],
+      "useFor": "Boat and fuel cost."
+    },
+    {
+      "id": "H10",
+      "topic": "hamlet",
+      "text": "c.1700 houses, food, clothing, gear, women's and children's work, taboo words, wreck-law attitudes: not found.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "B02",
+        "B03",
+        "B16"
+      ],
+      "useFor": "Gaps; ask a museum before inventing."
+    },
+    {
+      "id": "W01",
+      "topic": "war",
+      "text": "Dynekilen, 8 July 1716 (new style): Tordenskiold's force got hold of a Swedish sailor who had earlier piloted the Swedish transports into the ~100 m wide fjord. Name not given.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "C01",
+        "C03"
+      ],
+      "useFor": "Torhild's father/uncle as a pilot who fears being taken. The character is invented."
+    },
+    {
+      "id": "W02",
+      "topic": "war",
+      "text": "Koster fishermen reportedly told the Danes about the fleet and the officers' wedding at Dyne farm.",
+      "confidence": "derived",
+      "uncertain": true,
+      "sources": [
+        "C03"
+      ],
+      "useFor": "Divided loyalties after 1658. One secondary page; cited work not seen."
+    },
+    {
+      "id": "W03",
+      "topic": "war",
+      "text": "Olof Strömstierna (born Knape, 1664-1730), commander at Dynekilen, led the first Bohuslän båtsman company from 1704; sv.wikipedia says born on Käringön.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "C11",
+        "C12"
+      ],
+      "useFor": "Local-pride hook. en.wikipedia disagrees on birthplace and father."
+    },
+    {
+      "id": "W04",
+      "topic": "war",
+      "text": "Marstrand 1719: five frigates scuttled by the Swedes on 11-12 July (old style); Colonel Danckwardt executed 16 Sept 1719.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "C08",
+        "C09"
+      ],
+      "useFor": "Masts in the harbour. Salvage by locals is invented."
+    },
+    {
+      "id": "W05",
+      "topic": "war",
+      "text": "Lars Gathenhielm (1689-1718) operated from Gothenburg, not Marstrand.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "C13",
+        "C14"
+      ],
+      "useFor": "Corrects the design/brief notes."
+    },
+    {
+      "id": "W06",
+      "topic": "war",
+      "text": "Strömstad 1717: Tordenskiold's attack failed; 1718: Karl XII's base with barracks and a galley road to the Idefjord; Karl XII died 11 Dec 1718.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "C06",
+        "C07",
+        "C17"
+      ],
+      "useFor": "Rumour of the king's death along the coast."
+    },
+    {
+      "id": "W07",
+      "topic": "war",
+      "text": "Danish naval ensign was swallow-tailed (regulated 1625); ship names Hjælperen, Hvide Ørn (ex-Swedish Hvita Örn), Vindhunden. Exact flags on the 1716-19 ships not verified.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "C04",
+        "C21",
+        "C01"
+      ],
+      "useFor": "Echo with Svalan. Do not assert a specific flag design."
+    },
+    {
+      "id": "W08",
+      "topic": "war",
+      "text": "1714: the privateer Olbing Galley fought Tordenskiold's Løvendals Galej off Lindesnes; the captains exchanged toasts.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "C15"
+      ],
+      "useFor": "A courteous-enemy scene. Norwegian coast, 1714."
+    },
+    {
+      "id": "W09",
+      "topic": "war",
+      "text": "Billeting, requisition, vårdkase watches, refugees, forced pilotage by Tordenskiold, raids tied to Lysekil/Skaftö/Fiskebäckskil: not found. The 1710 plague is documented for Skåne, Stockholm and Karlshamn only.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "C20",
+        "C24"
+      ],
+      "useFor": "Gaps."
+    },
+    {
+      "id": "S01",
+      "topic": "storms",
+      "text": "The Great Storm of 1703 (26-27 Nov old style) hit England, the Channel, the Low Countries and northern Germany; KNMI says Scandinavia was under high pressure. North Sea only.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "D01",
+        "D02"
+      ],
+      "useFor": "Do not claim it hit Bohuslän."
+    },
+    {
+      "id": "S02",
+      "topic": "storms",
+      "text": "One Wikipedia sentence: HMS Association was blown from Harwich to Gothenburg.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "D01",
+        "D03"
+      ],
+      "useFor": "Hook only: a storm that drives a ship across to this coast."
+    },
+    {
+      "id": "S03",
+      "topic": "storms",
+      "text": "Christmas Flood 1717: damage on the Dutch, German and Danish/Schleswig North Sea coasts; nothing supports Bohuslän.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "D04",
+        "D05"
+      ],
+      "useFor": "Do not use as a Bohuslän storm."
+    },
+    {
+      "id": "S04",
+      "topic": "storms",
+      "text": "Cold years: famine 1695-97 (worst in Finland and Norrland), Great Frost 1709; no Bohuslän detail.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "D07",
+        "D08"
+      ],
+      "useFor": "Background only."
+    },
+    {
+      "id": "S05",
+      "topic": "storms",
+      "text": "No named great storm on the Bohuslän coast in 1650-1725 found; no shipwreck lists, church-record notes or ice records.",
+      "confidence": "documented",
+      "uncertain": true,
+      "sources": [
+        "D06"
+      ],
+      "useFor": "Gap."
+    },
+    {
+      "id": "S06",
+      "topic": "storms",
+      "text": "Game storm: a local gale, optionally echoing late November 1703 (old style) as a mood; weather signs before it from Kalm 1742.",
+      "confidence": "INVENTED",
+      "uncertain": true,
+      "sources": [
+        "D01",
+        "D02",
+        "B06"
+      ],
+      "useFor": "Do not name it a historical storm."
+    }
+  ]
+}
