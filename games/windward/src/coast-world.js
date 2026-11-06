@@ -464,9 +464,12 @@ const VILLAGE_RADIUS_M = 70;
 
 // settlements: the `settlements` array of data/settlements-history.json (name, lat, lon, ...).
 // Places a cluster of cottages (+ one boathouse) round each village that lies inside the window.
-export function placeCoastVillages(world, settlements) {
+// opts.summerShare (0..1, default 0): the share of the cottages handed over as summer houses (returned in `summerHouses`, NOT in `buildings`:
+// the busy coast, src/busy-coast.js, draws them from the era's kit). Which ones is a fixed hash of the building's index, so it never disturbs the
+// placement random stream and is the same on both players' phones.
+export function placeCoastVillages(world, settlements, { summerShare = 0 } = {}) {
   const rand = mulberry32(0x5e771e);
-  const buildings = [];
+  let buildings = [];
   const villages = [];
   for (const s of settlements) {
     if (typeof s.lat !== 'number' || typeof s.lon !== 'number') continue;
@@ -500,7 +503,16 @@ export function placeCoastVillages(world, settlements) {
     }
     villages.push({ name: s.name, placed, movedFromOriginM: Math.round(c.fromStartM) });
   }
-  return { buildings, villages };
+  const summerHouses = [];
+  if (summerShare > 0) {
+    const kept = [];
+    buildings.forEach((b, i) => {
+      if (b.kind === 'cottage' && (Math.imul(i + 1, 0x9e3779b1) >>> 0) / 4294967296 < summerShare) summerHouses.push({ x: b.x, z: b.z, y: b.y, facing: b.facing });
+      else kept.push(b);
+    });
+    buildings = kept;
+  }
+  return { buildings, villages, summerHouses };
 }
 
 // Real lighthouses (src/lighthouses.js) at their real lat/lon. A lighthouse islet can be smaller than a
@@ -561,7 +573,7 @@ export async function loadRealCoast(opts = {}) {
 
   const t2 = now();
   const trees = createCoastTrees(world, opts.seed ?? 1, { skip: terrainStyle.isGranite }); // no trees on painted granite
-  const { buildings, villages } = placeCoastVillages(world, settlementsJson.settlements);
+  const { buildings, villages, summerHouses } = placeCoastVillages(world, settlementsJson.settlements, { summerShare: opts.summerShare ?? 0 });
   const lightNames = LIGHTHOUSES.filter((l) => { const [x, z] = world.toGame(l.lon, l.lat); return world.inside(x, z, EDGE_FADE_M); }).map((l) => l.name);
   const lights = placeCoastLighthouses(world, lightNames);
   const props = new THREE.Group();
@@ -589,7 +601,7 @@ export async function loadRealCoast(opts = {}) {
   update(spawn ? spawn.x : sx, spawn ? spawn.z : sz);
   T.buildMs = now() - T.start;
   return {
-    world, group, depthMap: world.depthMap, spawn, trees, terrain, terrainStyle, clamp, update, names,
+    world, group, depthMap: world.depthMap, spawn, trees, terrain, terrainStyle, clamp, update, names, summerHouses, // summerHouses: [{ x, z, y, facing }] for src/busy-coast.js
     findOpenWater: (x, z, o) => findOpenWater(world, x, z, o), // for the debug jump to a lighthouse
     lights: lights.filter((l) => l.group).map((l) => ({ name: l.name, x: l.group.position.x, y: l.group.position.y, z: l.group.position.z, group: l.group })), // + the tower's group (stage 1d: its lantern glows) // where gulls may perch (stage 1b)
     heightAt: world.heightAt,
@@ -600,7 +612,7 @@ export async function loadRealCoast(opts = {}) {
       shoals: { hard: shoalIndex.hardCount, soft: shoalIndex.softCount }, marks: seamarksJson.marks.length,
       bytesDownloadedByLoader: bytes, timings: { ...T, ...world.timings },
       window: { cells: [world.nx, world.nz], metres: [Math.round(world.nx * world.pxM), Math.round(world.nz * world.pxM)], landPct: +world.landPct.toFixed(1) },
-      terrain: terrain.stats, buildings: buildings.length, villages, skerries: world.skerryCount,
+      terrain: terrain.stats, buildings: buildings.length, summerHouses: summerHouses.length, villages, skerries: world.skerryCount,
       lighthouses: lights.map((l) => ({ name: l.name, movedM: l.movedM, error: l.error })),
       names: { hiddenNamesakes, total: names.length, byKind: names.reduce((o, n) => ((o[n.kind] = (o[n.kind] || 0) + 1), o), {}), unplacedHarbours: namesJson.unplaced.map((u) => u.name) },
       spawn, spawnFrom: namesJson.spawn, look: world.look,

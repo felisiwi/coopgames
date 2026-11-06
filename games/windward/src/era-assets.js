@@ -25,7 +25,7 @@ const C = {
   slate: 0x7b7a8c, tile: 0xb4685a, turf: 0x879a68, turf2: 0x9aaa72, timber: 0x9b958a, tar: 0x54453b, tar2: 0x4b3d34, tar3: 0x3a2f27,
   door: 0x5f4d3e, chest: 0x7d5b3f, net: 0x7d8a7a, fishA: 0xcdd2cf, fishB: 0xb5a888, paint: 0xf6f1e6,
 };
-const GLASS = {
+export const GLASS = {
   today: { day: 0xa9c0d0, lit: 0xffd9a0, off: 0x38425c },
   y1700: { day: 0x5a5148, lit: 0xf0b25c, off: 0x2e2a2c },
 };
