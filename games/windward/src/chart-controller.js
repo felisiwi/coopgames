@@ -71,7 +71,8 @@ export function chartSea(sea, toGame) {
 
 export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onLog = () => {}, onRelightDone = () => {}, granddadMarks = () => [], parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
-  const lights = chartLights(coast.names, toGame);
+  const eraLights = coast.lightList || LIGHTHOUSES; // the era's lights (1950: its own seven), else the game's list
+  const lights = chartLights(coast.names, toGame, eraLights);
   const lightList = [...lights.inWindow, ...lights.far];
   const seen = createSeen({ heightAt: coast.heightAt }); // the fog gate for names (src/seen.js); the grid arrives with chart.json
   const nav = createNavTarget();
@@ -130,10 +131,10 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     else { state.returnZoom = Math.max(ZOOM_MIN, state.zoomTarget); state.chart?.ensureLoaded(); state.zoomTarget = maxZoom(); }
   }
   // ---- the sail target ("Navigate here"): one at a time
-  const navTitle = (e) => (e.kind === 'light' ? lightInfo(e, nameBook.isKnown(e.id)).title : (nameBook.isKnown(e.id) ? e.name : (e.desc || e.name)));
+  const navTitle = (e) => (e.kind === 'light' ? lightInfo(e, nameBook.isKnown(e.id), eraLights).title : (nameBook.isKnown(e.id) ? e.name : (e.desc || e.name)));
   function setTarget(entry) { nav.set(entry); onTarget(entry, () => navTitle(entry)); }
   function clearTarget() { if (!nav.entry) return; nav.clear(); onTarget(null, null); }
-  const cardFor = (entry, back) => ({ ...(entry.kind === 'light' ? lightInfo(entry, nameBook.isKnown(entry.id), undefined, isDark(entry.id)) : placeInfo(entry)), nav: entry.outside ? null : (nav.entry && nav.entry.id === entry.id ? 'stop' : 'start'), back });
+  const cardFor = (entry, back) => ({ ...(entry.kind === 'light' ? lightInfo(entry, nameBook.isKnown(entry.id), eraLights, isDark(entry.id)) : placeInfo(entry)), nav: entry.outside ? null : (nav.entry && nav.entry.id === entry.id ? 'stop' : 'start'), back });
   function closeCard() { state.card = null; ui.showVisit(null); }
   function onNavigatePressed() {
     const entry = state.visit ? state.visit.entry : state.card;
@@ -174,7 +175,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
     state.relight = { entry, t: 0, lit: false };
     state.zoomTarget = RELIGHT_ZOOM;
     state.pan = { x: 0, z: 0 };
-    const info = lightInfo(entry, nameBook.isKnown(entry.id), undefined, true);
+    const info = lightInfo(entry, nameBook.isKnown(entry.id), eraLights, true);
     ui.showVisit({ title: info.title, sub: 'Moored. The lamp is being lit again…', nav: null, back: 'none' });
     onVisit(entry);
     return true;
@@ -256,7 +257,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
           r.lit = true;
           const res = onRelit(r.entry); // a toast text, or { message, glyph } (the flash pattern the card shows)
           const msg = res && typeof res === 'object' ? res.message : res;
-          if (res && res.glyph) { const info = lightInfo(r.entry, nameBook.isKnown(r.entry.id), undefined, false); ui.showVisit({ title: info.title, sub: 'The lamp is burning again. Its light says:', glyph: res.glyph, nav: null, back: 'none' }); }
+          if (res && res.glyph) { const info = lightInfo(r.entry, nameBook.isKnown(r.entry.id), eraLights, false); ui.showVisit({ title: info.title, sub: 'The lamp is burning again. Its light says:', glyph: res.glyph, nav: null, back: 'none' }); }
           if (msg) ui.toast(msg, 5600);
           if (nav.entry && nav.entry.id === r.entry.id) clearTarget();
         }

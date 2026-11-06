@@ -18,9 +18,10 @@ import { createShoalIndex, makeSailHeight, GAME_PASS_TIERS } from './sea-truth.j
 import { attachTerrainStyle, STYLE_GAME } from './terrain-style.js';
 import { createSeamarkLayer } from './seamark-layer.js';
 import { createBuilding } from './props.js';
-import { LIGHTHOUSES } from './lighthouses.js';
+import { LIGHTHOUSES, createLighthouse } from './lighthouses.js';
+import { lightEntriesFor } from './lights-1950.js';
 import { createLanternFx } from './lantern.js';
-import { createAsset, BUOY_COLOURS } from './era-assets.js';
+import { createAsset, createFyrkur1950, BUOY_COLOURS } from './era-assets.js';
 import { createBoatMesh } from './boats.js';
 import { createWater } from './water.js';
 import { coastAtWaterLevel, shoalsInEra } from './world-year.js';
@@ -171,7 +172,8 @@ export function createHiddenRockLayer(items) {
 
 // ---- the world for one description --------------------------------------------------------------------------------
 // opts: { seed, patrol: how many tries to find a clear sailing line for each sailing eka }
-export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
+// opts.ownBoats (default true): the era's own stand-in boats and ferry. The game passes false: the busy coast (src/busy-coast.js) provides its traffic.
+export function buildWorldForSpec(files, spec, { seed = 1, ownBoats = true } = {}) {
   const T0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
   const coast = coastAtWaterLevel(files.coast, spec.waterOffsetM);
   const world = buildCoastWorld(coast, { skerries: files.skerries.skerries });
@@ -225,28 +227,33 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
       g.rotation.y = Math.atan2((b.x - a.x) * (fwd ? 1 : -1), (b.z - a.z) * (fwd ? 1 : -1));
     } });
   };
-  const lightTowers = (towers, lookup) => { // place hand-drawn towers (src/lighthouses.js) and give each a lantern that glows if it is lit
-    const names = towers.map((l) => l.name).filter((n) => LIGHTHOUSES.some((e) => e.name === n));
-    const out = [];
-    for (const pl of placeCoastLighthouses(world, names)) {
-      if (!pl.group) continue;
-      props.add(pl.group);
-      const entry = LIGHTHOUSES.find((e) => e.name === pl.name);
-      const info = lookup(pl.name);
-      const fx = createLanternFx(pl.group, entry);
-      fx.setLit(info.lit);
-      lanterns.push({ fx, lit: info.lit });
-      report.lights++; if (info.lit) report.lightsLit++; else report.lightsDark++;
-      out.push({ ...pl, info, entry });
+  // Place lights from ENTRIES ({ name, lat, lon, lit, light, model: 'tower' | 'fyrkur' }): a hand-made tower (src/lighthouses.js) or the generic fyrkur (src/era-assets.js),
+  // each with a lantern that glows if it is lit. Every placed light is recorded in `lightsOut` (with its lantern effect) so the game can use it instead of building its own.
+  const lightsOut = [];
+  const placeEntries = (entries) => {
+    for (const entry of entries) {
+      const [gx, gz] = world.toGame(entry.lon, entry.lat);
+      if (!inWindow(gx, gz)) continue;
+      const land = world.heightAt(gx, gz) >= 0.8 ? { x: gx, z: gz, d: 0 } : nearestLand(world, gx, gz, 160, 0.8);
+      if (!land) { report.notes.push(`${entry.name}: no land within 160 m: not drawn`); continue; }
+      const group = entry.model === 'fyrkur' ? createFyrkur1950().group : createLighthouse(entry.name);
+      group.position.set(land.x, Math.max(0, world.heightAt(land.x, land.z)), land.z);
+      props.add(group);
+      const lit = !!entry.lit;
+      const fx = createLanternFx(group, entry);
+      fx.setLit(lit);
+      lanterns.push({ fx, lit });
+      report.lights++; if (lit) report.lightsLit++; else report.lightsDark++;
+      lightsOut.push({ name: entry.name, id: entry.id ?? entry.name, x: group.position.x, y: group.position.y, z: group.position.z, group, fx, entry, info: { lit, keeperHouse: !!entry.keeperHouse, manned: entry.manned ?? null }, movedM: Math.round(land.d) });
     }
-    return out;
   };
+  let lightSet = null; // the era's light entries (1950); today's are the game's own list
 
   if (spec.era === 'today') {
     // the game's own villages and lighthouses, unchanged
     const { buildings, villages } = placeCoastVillages(world, files.settlements.settlements);
     for (const b of buildings) props.add(createBuilding(b));
-    lightTowers(LIGHTHOUSES.filter((l) => { const [x, z] = world.toGame(l.lon, l.lat); return inWindow(x, z); }), () => ({ lit: true })); // today every light is lit
+    placeEntries(LIGHTHOUSES.filter((l) => { const [x, z] = world.toGame(l.lon, l.lat); return inWindow(x, z); }).map((l) => ({ ...l, model: 'tower', lit: true }))); // today every light is lit
     report.cottages = buildings.filter((b) => b.kind === 'cottage').length;
     report.boathouses = buildings.filter((b) => b.kind === 'boathouse').length;
     report.villages = villages;
@@ -354,16 +361,20 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
       report.factories++;
     }
     // ---- the lighthouses standing in 1950: lit or dark, with a keeper's house where the data says there was one ----
-    const towers = lightTowers(spec.lighthouses || [], (name) => { const l = spec.lighthouses.find((x) => x.name === name); return { lit: l.lit && l.manned !== 'dark', ...l }; });
-    for (const t of towers) {
+    // Tower models where the game has one, the generic fyrkur for the small automatic lights it can place; lights with no position in the data are reported, not guessed.
+    lightSet = lightEntriesFor(spec, LIGHTHOUSES);
+    placeEntries(lightSet.entries);
+    for (const nd of lightSet.notDrawn) report.notes.push(`${nd.name}: ${nd.why}`);
+    for (const t of lightsOut) {
       if (!t.info.keeperHouse) continue;
       const base = { x: t.group.position.x, z: t.group.position.z };
       const spot = shoreSpot(world, base, [], { minR: 9, maxR: 55, clear: 0, rand, yMin: 0.3, yMax: 9, maxSlope: 25 });
       if (!spot) { report.notes.push(`${t.name}: no room for the keeper's house on its islet: not drawn`); continue; }
-      stamp('keeper', t.info.keeperWall === 'red' ? 'red' : 'white', spot.x, spot.y, spot.z, spot.facing, 'keeper-house');
+      const entry = spec.lighthouses.find((x) => x.name === t.name);
+      stamp('keeper', entry && entry.keeperWall === 'red' ? 'red' : 'white', spot.x, spot.y, spot.z, spot.facing, 'keeper-house');
       report.keepers++;
     }
-    for (const t of spec.lighthouses || []) { const [lx, lz] = world.toGame(t.lon, t.lat); if (inWindow(lx, lz)) labels.push({ id: `light-${t.id}`, x: lx, z: lz, text: t.name, year: null, uncertain: !!t.uncertain, documented: true }); }
+    for (const t of lightsOut) labels.push({ id: `light-${t.id}`, x: t.x, z: t.z, text: t.name, year: null, uncertain: !!t.entry.uncertain || !!t.entry.positionUncertain, documented: true });
     // ---- period sea marks: which of today's mark types existed, drawn in the colours and shapes of the time ----
     const pm = spec.periodMarks;
     const hashOf = (id) => { let h = 2166136261; for (const ch of String(id)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return (h >>> 0) / 4294967296; };
@@ -384,10 +395,10 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
         report.marks++; if (buoy) report.buoys++;
       }
     }
-    // ---- boats: wooden, moored near the villages, a few working, and the ferry on its route ----
+    // ---- boats: wooden, moored near the villages, a few working, and the ferry on its route (skipped when the game supplies its own traffic) ----
     const moorKinds = [['snipa1950', 'white'], ['snipa1950', 'green'], ['fishboat1950', 'dark'], ['sailboat1950', ''], ['snipa1950', 'blue'], ['fishboat1950', 'green'], ['snipa1950', 'white'], ['sailboat1950', '']];
     const sorted = [...villages].filter((v) => v.at).sort((a, b) => b.placed - a.placed);
-    for (let round = 0; report.mooredBoats < spec.boats.moored && round < 4 && sorted.length; round++) {
+    for (let round = 0; ownBoats && report.mooredBoats < spec.boats.moored && round < 4 && sorted.length; round++) {
       for (const v of sorted) {
         if (report.mooredBoats >= spec.boats.moored) break;
         const w = waterNear(world, v.at.x, v.at.z, rand, { minR: 20, maxR: 90 });
@@ -398,7 +409,7 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
         report.mooredBoats++;
       }
     }
-    for (let k = 0; k < spec.boats.sailing && spawn; k++) { // working fishing boats on a clear line near the start
+    for (let k = 0; ownBoats && k < spec.boats.sailing && spawn; k++) { // working fishing boats on a clear line near the start
       for (let tries = 0; tries < 300; tries++) {
         const a0 = rand() * Math.PI * 2, r0 = 90 + rand() * 300;
         const a = { x: spawn.x + Math.sin(a0) * r0, z: spawn.z + Math.cos(a0) * r0 };
@@ -410,7 +421,7 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
         break;
       }
     }
-    if (spec.boats.ferry) { // the Lysekil - Fiskebäckskil ferry: across the water between the two harbours if a clear line exists, else at the Fiskebäckskil quay
+    if (ownBoats && spec.boats.ferry) { // the Lysekil - Fiskebäckskil ferry: across the water between the two harbours if a clear line exists, else at the Fiskebäckskil quay
       const fb = villageOf('fiskebackskil'), ly = villageOf('lysekil');
       // the ends of the route: water near each harbour. Lysekil sits on a peninsula with harbours on both sides, so the end is the water
       // point round Lysekil NEAREST Fiskebäckskil that a straight clear line reaches (the real boat crosses to the south harbour).
@@ -440,7 +451,7 @@ export function buildWorldForSpec(files, spec, { seed = 1 } = {}) {
   };
   const seaAtDefault = (x, z) => 0;
   return {
-    era: spec.era, spec, world, group, water, props, terrain, trees, style, spawn, labels, report,
+    era: spec.era, spec, world, group, water, props, terrain, trees, style, spawn, labels, report, lights: lightsOut, lightEntries: lightSet ? lightSet.entries : null, lightsNotDrawn: lightSet ? lightSet.notDrawn : [],
     heightAt: world.heightAt, sailHeightAt, shoalSlowAt: shoalIndex.slowAt, shoalList, shoalLayer, hiddenLayer, seamarkLayer, clamp,
     // per frame: terrain chunks and trees round the view, moving boats, breakers. Returns true when the trees were rebuilt.
     update(x, z, dt = 0, t = 0, seaAt = seaAtDefault) {

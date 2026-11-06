@@ -114,7 +114,9 @@ await check('profileForYear: the three eras tile 1950-2026 with no gap, and noth
   assert.equal(ids(2000), 'today'); assert.equal(ids(2026), 'today'); assert.equal(ids(2027), null);
   for (let y = 1950; y <= 2026; y++) assert.ok(ids(y), `no profile for ${y}`);
   assert.equal(eras.profiles.find((p) => p.id === 'today').placeholderKit, false);
-  assert.ok(eras.profiles.filter((p) => p.id !== 'today').every((p) => p.placeholderKit === true), 'the 1950-1999 profiles must say they use a placeholder kit');
+  // an era profile borrowing the modern 'today' kit must say so; one with its own kit (1950) must not claim to be a placeholder
+  assert.ok(eras.profiles.filter((p) => p.id !== 'today').every((p) => p.placeholderKit === (p.kit === 'today')), 'placeholderKit must be true exactly when an era profile uses the borrowed today kit');
+  assert.equal(eras.profiles.find((p) => p.id === 'summer-guests-1950').kit, '1950', 'the 1950 profile uses the 1950 kit');
 });
 
 await check('every profile is complete, names only assets its kit has, and fits the world data', () => {
