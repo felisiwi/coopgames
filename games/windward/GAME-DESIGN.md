@@ -1258,3 +1258,22 @@ harbour basin; south entrance past Skutevik → fishing-harbour basin). The narr
 the village stays closed at 1:10. Sailing through it is a Grundsund close-up feature (fits
 history: shallow until the 1914-18 canal). General rule: carve to reach harbour basins, and
 leave narrow inner channels to the close-ups.
+
+## End of chapter 1: the lights speak (Felix loved it, 2026-11-06)
+Goal: something to do after the 5 lights, and lighthouses that feel quietly magical (their
+flash patterns become clues/codes later in the game).
+1. **The lights "speak":** relighting a lighthouse shows its real flash pattern as a glyph
+   (e.g. ●●●● · 12s) with a matching soft chime rhythm, saved in a **light log** on the chart.
+   Later: codebook for clues, night navigation, era-jumping.
+2. **Grandma's reward:** report in Fiskebäckskil and she gives you **granddad's sea chest**
+   (it appears in Svalan's chest deck slot). Inside is his old chart. She says something like:
+   "He always said the lights talk, if you know how to listen." His chart adds his
+   favourite harbours (Felix's Segling list, those in the region) as new chart marks and
+   Navigate targets.
+3. **The hook: a light that shouldn't be there.** Granddad marked a lighthouse with a pattern
+   on his chart. Proposal: **Måseskär's old 1865 tower**, dark since 31 Aug 1978 when the
+   fibreglass light replaced it; since 2000 the Måseskär foundation lights it for a few
+   minutes at New Year's midnight (en.wikipedia.org/wiki/Måseskär; 58.0938 N, 11.3302 E). Sail
+   there: a faint flash in the old tower's pattern from the dark tower, a bell, the fog
+   thickening. Card: "That tower has been dark since 1978. But you saw it." That ends chapter
+   1 and points to the storm and the jump.
