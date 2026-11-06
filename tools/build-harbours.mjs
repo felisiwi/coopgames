@@ -119,6 +119,36 @@ console.log('targets', targets.length, '| blocked raw', [...rawReach.values()].f
 
 const slug = (s) => s.toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const lineLen = (pts) => pts.reduce((t, p, i) => (i ? t + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), 0);
+// The centreline: re-routed over the 5 m REAL-water raster so the carve's tube follows the real channel's bends (the 2 m game-cell route, smoothed,
+// flattens a winding channel into a near-straight cut). Falls back to the old smoothed route when no real-water path exists inside the corridor.
+const distFine = D.distanceToLand(env.water, wF, hF);
+
+// The CURVY carve: grow the REAL water outward by `half` (the same minimum width as before) so the outline follows the real banks' bends; then, wherever the
+// boat would still be blocked ON the route (a bend), add a small local bulge there, and repeat. The narrowest width stays 2 x half everywhere else.
+function carveCurvy(line, half, base) {
+  const bulges = []; let rings, poly;
+  for (let iter = 0; iter < 20; iter++) {
+    rings = HA.carveHarbourRings({ ...env }, line, { minHalf: 0, protect, offset: { distFine, half }, bulges });
+    poly = rings.map((r) => r.map(([x, z]) => fromGame(x, z).map(r5)));
+    restoreTo(base);
+    applyPasses(world, [{ id: 'trial', tier: 'harbour', polygon: poly }], { ids: ['trial'], depth: false });
+    const bad = line.filter((p) => isBlocked(world.heightAt, p[0], p[1]));
+    if (!bad.length) return { rings, poly, bulges: bulges.length };
+    for (const p of bad) if (!bulges.some((b) => Math.hypot(b[0] - p[0], b[1] - p[1]) < 1)) bulges.push([p[0], p[1], Math.min(6.5, half + 1.0)]);
+  }
+  return { rings, poly, bulges: bulges.length, stuck: true };
+}
+const sinuosity = (pts) => +(lineLen(pts) / Math.max(1, Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]))).toFixed(2); // path length / straight distance
+function finishLine(coarse) {
+  let old = coarse; // what the previous method produced (the route smoothed twice), kept only to measure how much straighter it was
+  for (let pass = 0; pass < 2; pass++) old = old.map((p, i) => (i === 0 || i === old.length - 1 ? p : [(old[i - 1][0] + 2 * p[0] + old[i + 1][0]) / 4, (old[i - 1][1] + 2 * p[1] + old[i + 1][1]) / 4, p[2]]));
+  const oldSin = sinuosity(old);
+  const r = HA.refineLine(env, distFine, coarse);
+  if (r) return { pts: r, refined: true, coarseLen: lineLen(coarse), len: lineLen(r), oldSin };
+  let pts = coarse;
+  for (let pass = 0; pass < 2; pass++) pts = pts.map((p, i) => (i === 0 || i === pts.length - 1 ? p : [(pts[i - 1][0] + 2 * p[0] + pts[i + 1][0]) / 4, (pts[i - 1][1] + 2 * p[1] + pts[i + 1][1]) / 4, p[2]]));
+  return { pts, refined: false, coarseLen: lineLen(coarse), len: lineLen(pts), oldSin };
+}
 const harbourPasses = [], audit = [];
 const pathLen = (cells) => cells.reduce((t, c, i) => (i ? t + Math.hypot(c[0] - cells[i - 1][0], c[1] - cells[i - 1][1]) * world.pxM : 0), 0);
 
@@ -171,7 +201,7 @@ function carveThrough({ id, name, channel, targetsCovered, wp, basinPts, minClea
   if (process.env.THROUGH_DEBUG) { for (let i = 1; i < wp.length; i++) console.log(`   ${id} leg ${i} ${wp[i - 1].name} -> ${wp[i].name}: ${Math.round(pathLen(route.cells.slice(route.legs[i - 1], route.legs[i] + 1)) * REAL)} m`); }
   let pts = route.cells.map(([a, b]) => { const [x, z] = centreOf(a, b); return [x, z, clear[b * world.nx + a]]; });
   pts = pts.map(([x, z, c]) => [x, z, basinPts.some((bp) => Math.hypot(bp[0] - x, bp[1] - z) < 13) ? Math.max(c, 13) : c]); // keep the basins' real shape
-  for (let pass = 0; pass < 2; pass++) pts = pts.map((p, i) => (i === 0 || i === pts.length - 1 ? p : [(pts[i - 1][0] + 2 * p[0] + pts[i + 1][0]) / 4, (pts[i - 1][1] + 2 * p[1] + pts[i + 1][1]) / 4, p[2]]));
+  const fin = finishLine(pts); const coarseSin = fin.oldSin; pts = fin.pts.map(([x, z, c, hh, pinch]) => [x, z, basinPts.some((bp) => Math.hypot(bp[0] - x, bp[1] - z) < 13) ? Math.max(c, 13) : c, hh, pinch]); // the centreline follows the real channel; basins keep their real shape
   const S = pts[0], B = pts[pts.length - 1], L = lineLen(pts);
   const viaPts = wp.map((w) => centreOf(w.cell.a, w.cell.b));
   const legLens = []; for (let i = 1; i < wp.length; i++) legLens.push(pathLen(route.cells.slice(route.legs[i - 1], route.legs[i] + 1)));
@@ -187,11 +217,8 @@ function carveThrough({ id, name, channel, targetsCovered, wp, basinPts, minClea
   let chosen = null;
   for (let half = HALF0; half <= HALF_MAX + 1e-9; half += STEP) {
     const halves = pts.map((p, i) => (narrow[i] ? half : 0));
-    const line = pts.map((p, i) => [p[0], p[1], p[2], halves[i]]);
-    const rings = HA.carveHarbourRings({ ...env }, line, { minHalf: 0, protect });
-    const poly = rings.map((r) => r.map(([x, z]) => fromGame(x, z).map(r5)));
-    restoreTo(base);
-    applyPasses(world, [{ id: 'trial', tier: 'harbour', polygon: poly }], { ids: ['trial'], depth: false });
+    const line = pts.map((p) => [p[0], p[1], p[2], 0, p[4]]); // tube OFF (vertex half 0): only the real water grown by `half` and the pinch discs
+    const cc = carveCurvy(line, half, base), rings = cc.rings, poly = cc.poly; // the real banks' bends, at the same minimum width
     const fwd = HA.findRouteVia(world, viaPts, { margin: 25, legLimits: legLens }), back = HA.findRouteVia(world, viaPts.slice().reverse(), { margin: 25, legLimits: legLens.slice().reverse() });
     if (process.env.THROUGH_DEBUG2) console.log(`  [${id} half ${half}] fwd ${fwd.ok ? 'ok' : 'leg ' + fwd.leg + ' ' + fwd.reason} back ${back.ok ? 'ok' : 'leg ' + back.leg + ' ' + back.reason}`);
     if (fwd.ok && back.ok) { chosen = { half, poly, halves }; break; }
@@ -210,6 +237,7 @@ function carveThrough({ id, name, channel, targetsCovered, wp, basinPts, minClea
     waypoints: wp.map((w, i) => ({ name: w.name, ...ll(...centreOf(w.cell.a, w.cell.b)), alongM: Math.round(lineLen(pts.slice(0, Math.max(2, Math.round((route.legs[i] / (route.cells.length - 1)) * (pts.length - 1)) + 1))) * REAL) })),
     harbour: { target: name, kind, targets: targetsCovered.map((t) => t.name), quay: quay ?? ll(targetsCovered[0].anchor.x, targetsCovered[0].anchor.z), confidence: 'quay water', via: null, marksUsed: marks.some((m) => pts.some((q) => Math.hypot(q[0] - m.x, q[1] - m.z) <= 8)), quayProtected: quayLines.length > 0 },
     line: pts.map((p) => fromGame(p[0], p[1]).map(r5)), polygon: chosen.poly, dependsOn: [],
+    centreline: { followsRealChannel: fin.refined, sinuosity: sinuosity(pts), coarseSinuosity: coarseSin },
   };
   pass.widenFactor = +(pass.carveWidthM / Math.max(10, realWidthM)).toFixed(1);
   pass.widenedSharePct = Math.round((100 * narrow.filter(Boolean).length) / narrow.length); // the share of the route (by length) where the real channel was narrower than the boat needs and got the tube
@@ -223,7 +251,7 @@ function carveThrough({ id, name, channel, targetsCovered, wp, basinPts, minClea
   restoreTo(base); applyPasses(world, [pass], { ids: [id], depth: false });
   harbourPasses.push(pass); throughPasses.push({ pass, targets: targetsCovered });
   refresh();
-  console.log(`${id.padEnd(34)} THROUGH real ${realWidthM} m x ${pass.lengthM} m -> ${pass.carveWidthM} m (x${pass.widenFactor}), ${wp.length} waypoints`);
+  console.log(`${id.padEnd(34)} real ${realWidthM} m x ${pass.lengthM} m -> ${pass.carveWidthM} m (x${pass.widenFactor}); centreline ${fin.refined ? 'follows the real channel' : 'coarse'} (winding ${coarseSin} -> ${sinuosity(pts)}), ${wp.length} waypoints`);
   return pass;
 }
 
@@ -275,17 +303,14 @@ for (const t of targets) {
     if (dl > 4.6) { const f = 1 - 4.0 / dl; pts.push([last[0] + (A.x - last[0]) * f, last[1] + (A.z - last[1]) * f, Math.max(0, last[2] * 0.6)]); }
   }
   if (pts.length < 2) pts = [pts[0], [A.x, A.z, 0]];
-  for (let pass = 0; pass < 2; pass++) pts = pts.map((p, i) => (i === 0 || i === pts.length - 1 ? p : [(pts[i - 1][0] + 2 * p[0] + pts[i + 1][0]) / 4, (pts[i - 1][1] + 2 * p[1] + pts[i + 1][1]) / 4, p[2]]));
+  const fin = finishLine(pts); const coarseSin = fin.oldSin; pts = fin.pts; // the centreline follows the real channel's bends
   const S = pts[0], B = pts[pts.length - 1], L = lineLen(pts);
   const blockedClr = route.blocked.map(([a, b]) => clear[b * world.nx + a]);
   const realWidthM = Math.round(2 * Math.min(...blockedClr, 9) * REAL);
   const base = snap();
   let chosen = null;
   for (let half = 3.0; half <= 7.0 + 1e-9; half += 0.25) {
-    const rings = HA.carveHarbourRings({ ...env }, pts, { minHalf: half, protect });
-    const poly = rings.map((r) => r.map(([x, z]) => fromGame(x, z).map(r5)));
-    restoreTo(base);
-    applyPasses(world, [{ id: 'trial', tier: 'harbour', polygon: poly }], { ids: ['trial'], depth: false });
+    const cc = carveCurvy(pts.map((p) => [p[0], p[1], p[2], 0, p[4]]), half, base), rings = cc.rings, poly = cc.poly; // the real banks' bends, at the same minimum width
     const rt = findRoute(world, S, B, { margin: 40 + L });
     if (process.env.DEBUG_HARBOUR === t.name) console.log(`  [${t.name} half ${half}] route ok ${rt.ok} ${rt.reason ?? ''} len ${rt.length?.toFixed?.(1)} vs L ${L.toFixed(1)}, B-A ${Math.hypot(B[0] - A.x, B[1] - A.z).toFixed(1)} gm, S blocked-before ${isBlocked(world.heightAt, S[0], S[1])}, B blocked ${isBlocked(world.heightAt, B[0], B[1])}, pts ${pts.length}, rings ${rings.length}`);
     if (rt.ok && rt.length <= 1.35 * L + 25 && Math.hypot(B[0] - A.x, B[1] - A.z) <= HA.HARBOUR_REACH_M) { chosen = { half, poly, rings, rt }; break; }
@@ -301,6 +326,7 @@ for (const t of targets) {
     realWidthM, lengthM: Math.round(L * REAL), carveWidthM: Math.max(realWidthM, Math.round(chosen.half * 2 * REAL)),
     harbour: { target: t.name, kind: t.kind, quay: { lat: r5(fromGame(A.x, A.z)[1]), lon: r5(fromGame(A.x, A.z)[0]) }, confidence: t.confidence, via: t.viaHarbour ?? null, marksUsed: fairway.gates.some(([gx, gz]) => pts.some((q) => Math.hypot(q[0] - gx, q[1] - gz) <= 8)), quayProtected: quayLines.length > 0 },
     line: pts.map((p) => fromGame(p[0], p[1]).map(r5)), polygon: chosen.poly,
+    centreline: { followsRealChannel: fin.refined, sinuosity: sinuosity(pts), coarseSinuosity: coarseSin },
   };
   pass.widenFactor = +(pass.carveWidthM / Math.max(10, realWidthM)).toFixed(1);
   // what it costs: land turned to water
@@ -337,7 +363,7 @@ for (const t of targets) {
   row.status = 'blocked, carved'; row.passes = [id];
   row.blockedAt = route.blocked.length ? (() => { const m = route.blocked[route.blocked.length >> 1]; const [x, z] = centreOf(...m); const [lo, la] = fromGame(x, z); return { lat: r5(la), lon: r5(lo), cells: route.blocked.length, lengthM: Math.round(route.blocked.length * world.pxM * REAL), narrowestM: realWidthM }; })() : null;
   audit.push({ t, row });
-  console.log(`${id.padEnd(34)} real ${realWidthM} m x ${pass.lengthM} m -> ${pass.carveWidthM} m (x${pass.widenFactor}) reach ${row.reachShipM ?? '-'} -> ${row.reachAfterM} m`);
+  console.log(`${id.padEnd(34)} real ${realWidthM} m x ${pass.lengthM} m -> ${pass.carveWidthM} m (x${pass.widenFactor}) reach ${row.reachShipM ?? '-'} -> ${row.reachAfterM} m; centreline ${fin.refined ? 'follows the real channel' : 'coarse'} (winding ${coarseSin} -> ${sinuosity(pts)})`);
 }
 // land removed per pass must not include earlier passes' carves: recompute each against the ship state in isolation
 {

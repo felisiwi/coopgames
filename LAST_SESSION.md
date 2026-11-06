@@ -5,7 +5,7 @@ passes data; `shore.js` untouched (Felix: no oriented hull, no smaller circle: n
 harbours / villages (the arrival's name list + every OSM harbour / marina + Felix's pins): can the boat's centre get within 60 m of the
 quay water from open sea? 33 open, 16 blocked and carved as tier `harbour` in `assets/coast/passes.json` (default `applyPasses` tiers are
 now ship + harbour). Rule: reach each harbour BASIN; narrow inner channels stay closed (Grundsund's canal through the village; its south
-basin is carved from the south-west entrance, 65 m wide, x6.5). `harbour-audit.json`, `src/harbour-approach.js` (+ test),
+basin is carved from the south-west entrance along the real channel's curves, 60 m wide, x6). `harbour-audit.json`, `src/harbour-approach.js` (+ test),
 `tools/build-harbours.mjs`, `harbours-lab.html`, `docs/harbours/README.md` (numbers, the oriented-hull study, 49 screenshots).
 Existing files touched: `passes.js` (tier list, default tiers), `passes.test.js`, `passes-lab.html`. Main also has 1c (chart, minimap,
 Svalan, rope) and the passes data (ship tier: 5 light carves); applyPasses is not wired into the game yet (stage 1d).
@@ -19,7 +19,7 @@ Where things are:
 - Coast + history: `coast-lab.html`, `assets/coast/` (SOURCES.md), `data/`; chart + minimap: `docs/CHART.md`
 - Lighthouses: `src/lighthouses.js`, `lighthouse-lab.html`, `LIGHTHOUSES.md`; trial: `src/coast-world.js`
 
-Open (TODO(felix)): the two big carves by eye on the phone (Grundsund south basin x6.5, Härmanö x3.5); real phone GPU unchecked;
+Open (TODO(felix)): the two big carves by eye on the phone (Grundsund south basin x6, Härmanö x3.5); real phone GPU unchecked;
 `sun.shadow.normalBias = 0.25` is a guess; ddb-restricted population rows need CEDAR OK before commercial use; NMD CC0 wording to
 confirm; Käringön harbour-mouth spawn is approximate. Hub bug from the audit, not fixed: "Connection lost" panel sits in hidden `#lobby`.
 

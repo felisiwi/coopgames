@@ -136,7 +136,7 @@ function distToLine(px, pz, line, dflt) { // nearest point on the polyline: dist
   }
   return { d: best, clr, half };
 }
-export function carveHarbourRings({ water, wF, hF, cellF, x0, z0 }, line, { minHalf, corridorPad = 1.0, simplify = 0.3, protect = null } = {}) {
+export function carveHarbourRings({ water, wF, hF, cellF, x0, z0 }, line, { minHalf, corridorPad = 1.0, simplify = 0.3, protect = null, offset = null, bulges = null } = {}) {
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity, maxClr = 0;
   for (const [x, z, c] of line) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); maxClr = Math.max(maxClr, c); }
   const reach = Math.max(minHalf, maxClr + corridorPad, ...line.map((p) => p[3] ?? 0)) + 2 * cellF;
@@ -148,6 +148,50 @@ export function carveHarbourRings({ water, wF, hF, cellF, x0, z0 }, line, { minH
     const real = water[(j0 + j) * wF + (i0 + i)] === 1;
     if (real && d <= Math.max(clr + corridorPad, 0)) carve[j * w + i] = 1; // the real channel
     else if (d <= half && !(protect && protect(x, z))) carve[j * w + i] = 1; // the widening (per stretch of the route): never into the quay
+  }
+  // OFFSET mode (offset = { distFine, half }): instead of a tube around the centreline (whose edges are just offsets of ONE line and hide the real
+  // banks' bends), grow the REAL water outward by what the boat needs: at each real-water cell near the route the carve extends `half - ridge` game m,
+  // where ridge is the local real half-width of the channel (the largest clearance within 3 game m along it). Where the real channel is already wide enough
+  // nothing grows, so the outline follows BOTH real banks' bends at a constant minimum width, and wide stretches / basins keep their real shape.
+  if (offset) {
+    const { distFine, half } = offset, clrW = new Float32Array(w * h), ridge = new Float32Array(w * h), rr = Math.ceil(3 / cellF);
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) clrW[j * w + i] = water[(j0 + j) * wF + (i0 + i)] === 1 ? Math.max(0, (distFine[(j0 + j) * wF + (i0 + i)] - 0.5) * cellF) : 0;
+    const tmp = new Float32Array(w * h);
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { let m = 0; for (let d = -rr; d <= rr; d++) { const a = i + d; if (a >= 0 && a < w) m = Math.max(m, clrW[j * w + a]); } tmp[j * w + i] = m; }
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { let m = 0; for (let d = -rr; d <= rr; d++) { const b2 = j + d; if (b2 >= 0 && b2 < h) m = Math.max(m, tmp[b2 * w + i]); } ridge[j * w + i] = m; }
+    for (const p of line) { // a pinch (the 5 m raster has cut the real water): the boat's minimum width, as a disc, only there
+      if (!p[4]) continue;
+      const ci = Math.round((p[0] - x0) / cellF - 0.5) - i0, cj = Math.round((p[1] - z0) / cellF - 0.5) - j0, rc = Math.ceil(half / cellF);
+      for (let dj = -rc; dj <= rc; dj++) for (let di = -rc; di <= rc; di++) {
+        const a = ci + di, b2 = cj + dj;
+        if (a < 0 || b2 < 0 || a >= w || b2 >= h || Math.hypot(di, dj) * cellF > half) continue;
+        if (protect && protect(x0 + (i0 + a + 0.5) * cellF, z0 + (j0 + b2 + 0.5) * cellF)) continue;
+        carve[b2 * w + a] = 1;
+      }
+    }
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      if (water[(j0 + j) * wF + (i0 + i)] !== 1) continue;
+      const x = x0 + (i0 + i + 0.5) * cellF, z = z0 + (j0 + j + 0.5) * cellF;
+      if (distToLine(x, z, line, 0).d > 8) continue; // only near the route
+      const need = half - ridge[j * w + i];
+      if (need <= 0) continue;
+      const rc = Math.ceil(need / cellF);
+      for (let dj = -rc; dj <= rc; dj++) for (let di = -rc; di <= rc; di++) {
+        const a = i + di, b2 = j + dj;
+        if (a < 0 || b2 < 0 || a >= w || b2 >= h || Math.hypot(di, dj) * cellF > need) continue;
+        if (protect && water[(j0 + b2) * wF + (i0 + a)] !== 1 && protect(x0 + (i0 + a + 0.5) * cellF, z0 + (j0 + b2 + 0.5) * cellF)) continue;
+        carve[b2 * w + a] = 1;
+      }
+    }
+  }
+  if (bulges) for (const [bx, bz, br] of bulges) { // local bulges: a disc where the boat would still be blocked (a bend); everything else keeps its width
+    const ci = Math.round((bx - x0) / cellF - 0.5) - i0, cj = Math.round((bz - z0) / cellF - 0.5) - j0, rc = Math.ceil(br / cellF);
+    for (let dj = -rc; dj <= rc; dj++) for (let di = -rc; di <= rc; di++) {
+      const a = ci + di, b2 = cj + dj;
+      if (a < 0 || b2 < 0 || a >= w || b2 >= h || Math.hypot(di, dj) * cellF > br) continue;
+      if (protect && water[(j0 + b2) * wF + (i0 + a)] !== 1 && protect(x0 + (i0 + a + 0.5) * cellF, z0 + (j0 + b2 + 0.5) * cellF)) continue;
+      carve[b2 * w + a] = 1;
+    }
   }
   // boundary edges, clockwise around each carved cell, linked into rings
   const vkey = (i, j) => j * (w + 1) + i, out = new Map();
@@ -262,4 +306,71 @@ export function findRouteVia(world, points, { margin = 25, legLimits = null, det
     for (let j = i === 1 ? 0 : 1; j < r.path.length; j++) path.push(r.path[j]);
   }
   return { ok: true, length: total, legs, path };
+}
+
+// ---- a centreline that follows the real channel's curves ------------------------------------------------------------------------
+// The route over the 2 m game cells, smoothed, flattens a winding channel into a near-straight cut. This re-routes between the same two ends over the
+// 5 m REAL-water raster, staying within `corridor` game m of the coarse line, in the middle of the real channel (the cost falls with real clearance), so
+// the carve's tube follows the real channel's bends. Returns [[x, z, clr], ...] about every `step` game m with the exact end points, or null
+// when no real-water path exists inside the corridor (the caller keeps the coarse line).
+// env: { water, wF, hF, cellF, x0, z0 }; distFine: distance to land per fine cell (cells), same grid (pass-derive distanceToLand).
+export function refineLine(env, distFine, coarse, { corridor = 6, step = 1.0, maxWander = 1.6, smoothPasses = 6 } = {}) {
+  const { water, wF, hF, cellF, x0, z0 } = env;
+  if (coarse.length < 2) return null;
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+  for (const [x, z] of coarse) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); }
+  const pad = corridor + 2 * cellF;
+  const i0 = Math.max(0, Math.floor((minX - pad - x0) / cellF)), i1 = Math.min(wF - 1, Math.ceil((maxX + pad - x0) / cellF));
+  const j0 = Math.max(0, Math.floor((minZ - pad - z0) / cellF)), j1 = Math.min(hF - 1, Math.ceil((maxZ + pad - z0) / cellF));
+  const w = i1 - i0 + 1, h = j1 - j0 + 1;
+  const xy = (i, j) => [x0 + (i0 + i + 0.5) * cellF, z0 + (j0 + j + 0.5) * cellF];
+  const inCorridor = new Uint8Array(w * h), okWater = new Uint8Array(w * h);
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+    const [x, z] = xy(i, j);
+    inCorridor[j * w + i] = distToLine(x, z, coarse, 0).d <= corridor ? 1 : 0;
+    okWater[j * w + i] = water[(j0 + j) * wF + (i0 + i)] === 1 ? 1 : 0;
+  }
+  // a cell is passable if it is real water, or (at a high price) within one cell of real water: a pinch the 5 m raster has cut
+  const near = (i, j) => { for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const a = i + di, b = j + dj; if (a >= 0 && b >= 0 && a < w && b < h && okWater[b * w + a]) return true; } return false; };
+  const nearest = (p) => { let best = -1, bd = Infinity; for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { if (!inCorridor[j * w + i] || !okWater[j * w + i]) continue; const [x, z] = xy(i, j), d = Math.hypot(x - p[0], z - p[1]); if (d < bd) { bd = d; best = j * w + i; } } return best; };
+  const s = nearest(coarse[0]), t = nearest(coarse[coarse.length - 1]);
+  if (s < 0 || t < 0) return null;
+  const cost = new Float64Array(w * h).fill(Infinity), prev = new Int32Array(w * h).fill(-1), heap = new Heap();
+  cost[s] = 0; heap.push(0, s);
+  while (heap.size) {
+    const [c, k] = heap.pop();
+    if (c > cost[k]) continue;
+    if (k === t) break;
+    const i = k % w, j = (k / w) | 0;
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      if (!di && !dj) continue;
+      const a = i + di, b = j + dj;
+      if (a < 0 || b < 0 || a >= w || b >= h) continue;
+      const nk = b * w + a;
+      if (!inCorridor[nk]) continue;
+      const wet = okWater[nk] === 1;
+      if (!wet && !near(a, b)) continue;
+      const d = wet ? distFine[(j0 + b) * wF + (i0 + a)] : 0; // clearance in fine cells
+      const nc = c + (di && dj ? 1.414 : 1) * cellF * (1 + 7 / (0.4 + d)) * (wet ? 1 : 6);
+      if (nc < cost[nk]) { cost[nk] = nc; prev[nk] = k; heap.push(nc, nk); }
+    }
+  }
+  if (!(cost[t] < Infinity)) return null;
+  const path = [];
+  for (let k = t; k >= 0; k = prev[k]) { const i = k % w, j = (k / w) | 0, [x, z] = xy(i, j); path.push([x, z, Math.max(0, (distFine[(j0 + j) * wF + (i0 + i)] - 0.5) * cellF), okWater[k] ? 0 : 1]); } // 4th: 1 = a pinch (the 5 m raster has cut the water here)
+  path.reverse();
+  // resample every `step` game m, then ONE light smoothing pass (the curves stay)
+  const dense = []; let acc = 0, next = 0, pinchSeen = false;
+  for (let i = 0; i < path.length; i++) {
+    if (i) acc += Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]);
+    if (path[i][3]) pinchSeen = true;
+    if (acc >= next || i === path.length - 1) { dense.push([path[i][0], path[i][1], path[i][2], pinchSeen ? 1 : 0]); pinchSeen = false; next = acc + step; }
+  }
+  let sm = dense; // a few light smoothing passes (a 5 m raster cell is jittery; the channel's real bends are about 100 m across, so they stay)
+  for (let it = 0; it < smoothPasses; it++) sm = sm.map((p, i) => (i === 0 || i === sm.length - 1 ? p : [(sm[i - 1][0] + 2 * p[0] + sm[i + 1][0]) / 4, (sm[i - 1][1] + 2 * p[1] + sm[i + 1][1]) / 4, p[2]]));
+  sm = sm.map((p, i) => [p[0], p[1], p[2], undefined, dense[i][3]]); // [x, z, clr, half (unset), pinch]
+  sm[0] = [coarse[0][0], coarse[0][1], sm[0][2], undefined, 0]; sm[sm.length - 1] = [coarse[coarse.length - 1][0], coarse[coarse.length - 1][1], sm[sm.length - 1][2], undefined, 0]; // the exact ends
+  const len = (l) => l.reduce((a, p, i) => (i ? a + Math.hypot(p[0] - l[i - 1][0], p[1] - l[i - 1][1]) : 0), 0);
+  if (len(sm) > maxWander * len(coarse) + 4) return null; // it wandered: keep the coarse line
+  return sm;
 }

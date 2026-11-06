@@ -105,7 +105,7 @@
     "lat": 58.20806,
     "lon": 11.41786,
     "cells": null,
-    "lengthM": 578,
+    "lengthM": 566,
     "narrowestM": 5
    },
    "finalOpen": true
@@ -499,7 +499,7 @@
    "anchorOffsetM": 106,
    "reachRawM": 115,
    "reachShipM": 115,
-   "reachAfterM": 30,
+   "reachAfterM": 29,
    "passes": [
     "harbour-usholmen"
    ],
@@ -543,7 +543,7 @@
    "anchorOffsetM": 68,
    "reachRawM": 97,
    "reachShipM": 97,
-   "reachAfterM": 53,
+   "reachAfterM": 18,
    "passes": [
     "harbour-porsholmen"
    ],
@@ -611,7 +611,7 @@
    "anchorOffsetM": 5,
    "reachRawM": 124,
    "reachShipM": 124,
-   "reachAfterM": 29,
+   "reachAfterM": 11,
    "passes": [
     "harbour-assholmen"
    ],
@@ -668,7 +668,7 @@
    "anchorOffsetM": 10,
    "reachRawM": 79,
    "reachShipM": 79,
-   "reachAfterM": 36,
+   "reachAfterM": 8,
    "passes": [
     "harbour-vasholmarna"
    ],
@@ -739,7 +739,7 @@
    "anchorOffsetM": 95,
    "reachRawM": 74,
    "reachShipM": 74,
-   "reachAfterM": 35,
+   "reachAfterM": 18,
    "passes": [
     "harbour-dammholmen"
    ],
@@ -772,7 +772,7 @@
    "anchorOffsetM": 0,
    "reachRawM": 178,
    "reachShipM": 178,
-   "reachAfterM": 33,
+   "reachAfterM": 8,
    "passes": [
     "harbour-danholmen"
    ],
@@ -840,7 +840,7 @@
    "anchorOffsetM": 25,
    "reachRawM": 138,
    "reachShipM": 138,
-   "reachAfterM": 40,
+   "reachAfterM": 22,
    "passes": [
     "harbour-krakholmen"
    ],
@@ -877,7 +877,7 @@
    "anchorOffsetM": 125,
    "reachRawM": 98,
    "reachShipM": 98,
-   "reachAfterM": 53,
+   "reachAfterM": 18,
    "passes": [
     "harbour-harmano"
    ],
@@ -1063,7 +1063,7 @@
    "anchorOffsetM": 0,
    "reachRawM": 138,
    "reachShipM": 138,
-   "reachAfterM": 41,
+   "reachAfterM": 4,
    "passes": [
     "harbour-smabatshamn"
    ],
