@@ -1199,3 +1199,15 @@ green sweet band, glows when trimmed). Generated harbour-mouth marks (where OSM 
 the same as real ones in the game; only the chart/debug view tells them apart (`invented: true`).
 **Torhild** is the friend you meet in 1700 (whether she joins Brita or takes her place is open).
 Local shoal words here are båd/både and flut (e.g. Sverkerbådan, Smedjeflut), not grund/grynna.
+
+**Decisions (2026-11-06, morning):**
+- **Narrow passes = option B:** keep 1:10, and carve a hand-picked list of real sounds and natural
+  harbours from OSM's sharp coastline, widened just enough for the boat (like skerries are
+  exaggerated). Harbour close-ups at near-true scale (option C) are the later harbour stage.
+  Changing the whole scale (A) only if sailing still feels cramped after B. Why: at 1:10 the boat
+  acts like an ~80 m ship (needs ~50 m real gap); the 20 m raster plus smoothing closes passes
+  under ~40-60 m (Smörasken: pool ~70x45 m, entrances ~10-20 m, checked 2026-11-06).
+- **Units:** knots for wind and boat speed, nautical miles for distance (navigation tags, chart).
+- **Rope:** smaller and looks like a real rope: slack (curved) when eased, taut when sheeted
+  in; swipe up/down on it to let out/pull in. The trim indicator by the boat stays; the rope
+  needs no big indicator of its own. The old sheet control is hidden for now.
