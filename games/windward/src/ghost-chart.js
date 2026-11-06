@@ -9,11 +9,14 @@
 //   inkRaster(world, explored) the inked picture: land / sea tint, alpha from the explored cells (the game's fog smoothing)
 //   demoExplored(...)          a stand-in "explored Today chart" for a device with no saved game
 //   createGhostChart(...)      the model: both shore sets, both explored grids, a cached ink picture
-//   drawGhostChart(ctx, ...)   draws it; only ever strokes lines and fills areas, never text
+//   drawGhostChart(ctx, ...)   draws it; the pencil and ink layers only ever stroke lines and fill areas, never text
+//   revealedLabels / drawNames the one place text appears: a place's OLD name, once the ink covers it (the game's own 'seen' rule,
+//                              src/seen.js: revealed land within 150 m of the label point), and only where a name is documented
 //
 // Pure apart from the 2D context passed to drawGhostChart (a recording stub in the tests). The explored grid is src/explored.js, the
 // fog smoothing src/chart.js fogAlpha(): the same machinery as the game's chart, so the inking-in looks like the game's fog lifting.
 import { createExplored } from './explored.js';
+import { SEEN_MAX_REACH_M } from './seen.js';
 import { fogAlpha, FOG_ALPHA, PAPER, INK, SEA_PAPER } from './chart.js';
 
 export const INK_EXPLORED_KEY = 'windward.explored.1700.v1'; // the lab's own: never the game's `windward.explored.v1`
@@ -119,6 +122,28 @@ export function createGhostChart({ today, era, todayExplored, inkExplored, sourc
   };
 }
 
+// ---- names: the old name of a place comes back once the inked chart covers it --------------------------------------------
+// labels: the era's labels [{ id, x, z, text, year, uncertain }] (text null where no name is documented: never shown);
+// seen: a src/seen.js createSeen() over the INK grid, so the rule is the game's: some revealed land within 150 m (SEEN_MAX_REACH_M) of
+// the label point. Seen once = seen for good (until the ink is reset: call seen.setExplored again).
+export function revealedLabels(labels, seen) {
+  return labels.filter((l) => l.text && seen.isSeen({ id: l.id, x: l.x, z: l.z, radius: SEEN_MAX_REACH_M }));
+}
+export const NAME_STYLE = { font: '600 12px system-ui, sans-serif', fontUncertain: 'italic 600 12px system-ui, sans-serif', ink: INK, halo: 'rgba(236,225,201,0.92)' };
+export function drawNames(ctx, view, W, H, names) {
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 3;
+  for (const n of names) {
+    const x = (n.x - view.cx) * view.scale + W / 2, y = (n.z - view.cz) * view.scale + H / 2 - 7;
+    ctx.font = n.uncertain ? NAME_STYLE.fontUncertain : NAME_STYLE.font;
+    ctx.strokeStyle = NAME_STYLE.halo; ctx.strokeText(n.text, x, y); // a paper halo so the name reads over the ink lines
+    ctx.fillStyle = NAME_STYLE.ink; ctx.fillText(n.text, x, y);
+  }
+  return names.length;
+}
+
 // A view that fits the whole chart rectangle in W x H pixels with a margin: { cx, cz, scale } (px per game metre).
 export function fitView(rect, W, H, margin = 18) {
   const scale = Math.min((W - 2 * margin) / (rect.x1 - rect.x0), (H - 2 * margin) / (rect.z1 - rect.z0));
@@ -143,7 +168,7 @@ const hash01 = (i) => (((i * 2654435761) >>> 0) % 10007) / 10007;
 
 // Draws the chart. ctx: a 2D context (or the test stub); inkImage: a canvas / image of the ink picture (inkRaster) or null.
 // boat: { x, z, heading } or null. north up (z grows southward = down the screen). Returns what it drew, for tests.
-export function drawGhostChart(ctx, W, H, view, model, boat = null, inkImage = null) {
+export function drawGhostChart(ctx, W, H, view, model, boat = null, inkImage = null, names = []) {
   const sx = (x) => (x - view.cx) * view.scale + W / 2;
   const sy = (z) => (z - view.cz) * view.scale + H / 2;
   ctx.fillStyle = SHEET;
@@ -153,7 +178,7 @@ export function drawGhostChart(ctx, W, H, view, model, boat = null, inkImage = n
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(inkImage, sx(r.x0), sy(r.z0), (r.x1 - r.x0) * view.scale, (r.z1 - r.z0) * view.scale);
   }
-  const stats = { pencil: 0, pencilInked: 0, ink: 0 };
+  const stats = { pencil: 0, pencilInked: 0, ink: 0, names: 0 };
   // PENCIL: today's shore, only where the old chart was explored; fainter where the new ink already covers it. Two passes, the second
   // nudged a little with a lighter hand: a pencil line, not a vector one.
   const T = model.segsToday;
@@ -188,6 +213,7 @@ export function drawGhostChart(ctx, W, H, view, model, boat = null, inkImage = n
     stats.ink++;
   }
   if (stats.ink) ctx.stroke();
+  stats.names = names.length ? drawNames(ctx, view, W, H, names) : 0; // old names of places the ink has reached; none otherwise
   if (boat) { // you: a small ink triangle pointing the way you head
     const bx = sx(boat.x), by = sy(boat.z), s = 8;
     ctx.save();

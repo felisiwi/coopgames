@@ -47,6 +47,16 @@ check('the lab cannot damage saved progress: the Today chart is read-only, the 1
   for (const bad of ['createNameBook', 'createLightLog', 'createChapter1', 'resetStart', 'markStartSeen', 'createLighthouseTask']) assert.ok(!code.includes(bad), `the lab must not use ${bad} (game progress)`);
 });
 
+check('three eras, a dusk toggle, and old names on the chart by the game\'s own seen rule', () => {
+  for (const era of ['1700', '1950', 'today']) assert.ok(new RegExp(`data-era="${era}"`).test(html), era);
+  assert.ok(/id="dusk"/.test(html));
+  const code = js.replace(/\/\/.*$/gm, '');
+  assert.ok(/createSeen\(\{ explored: inkExplored/.test(code), 'names use src/seen.js over the ink grid');
+  assert.ok(/revealedLabels\(eras\['1700'\]\.labels\.filter\(\(l\) => l\.chartName !== false\), seen\)/.test(code), 'only the 1700 labels, only those seen, no duplicate cairn label');
+  assert.ok(/seen\.setExplored\(inkExplored\)/.test(code), 'a reset forgets the names too');
+  assert.ok(/era\?\.setNight/.test(code), 'dusk reaches the era\'s windows and lanterns');
+});
+
 check('only Today lets the boat ink: marking is gated on the 1700 era', () => {
   assert.ok(/if \(eraId === '1700'\) \{ inkExplored\.mark/.test(js));
 });

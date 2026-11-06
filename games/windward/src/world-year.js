@@ -29,13 +29,26 @@ export const eraById = (years, id) => years.eras.find((e) => e.id === id) || nul
 // The year an era is shown at (its `year`, else its middle): the lab's Today / 1700 toggle.
 export const yearOfEra = (years, id) => { const e = eraById(years, id); return e ? (e.year ?? Math.round((e.from + e.to) / 2)) : years.defaultYear; };
 
-// How many cottages a settlement gets: a count of FAMILIES from the end of the 1600s if the data has one (Gullholmen: "20 fishing
-// families"), one cottage per `householdsPerCottage`; otherwise the size-class table. Counts of adults or people are not used
-// (they are 1645 or 1750, not 1700).
+// How many cottages a settlement gets. Three rules, tried in order, all set by the era's row in data/world-years.json:
+//  1. a count of FAMILIES (Gullholmen 1700: "20 fishing families"): one cottage per `householdsPerCottage`;
+//  2. a count of PEOPLE inside `countYears` (1950: Grundsund's inhabitants): one game house per `peoplePerCottage` people, between
+//     `minCottages` and `maxCottages` (a real village has more houses than fit, so this is a stylised scale, not a headcount);
+//  3. the size-class table. Counts of adults or people outside the years window are not used (they are the wrong year).
 export function cottagesFor(settlement, rule) {
-  const per = rule.householdsPerCottage || 2;
-  const families = (settlement.counts || []).filter((c) => /famil/i.test(c.unit || '') && c.value > 0);
-  if (families.length) return Math.max(1, Math.ceil(families[families.length - 1].value / per));
+  const counts = settlement.counts || [];
+  const families = counts.filter((c) => /famil/i.test(c.unit || '') && c.value > 0 && !rule.peoplePerCottage);
+  if (families.length) return Math.max(1, Math.ceil(families[families.length - 1].value / (rule.householdsPerCottage || 2)));
+  if (rule.peoplePerCottage) {
+    // the data's units are descriptive strings ("tätort (SCB)", "parish incl. Härmanö"): anything that is not a count of houses, families or
+    // households is a count of people
+    const [y0, y1] = rule.countYears || [-Infinity, Infinity];
+    const people = counts.filter((c) => c.value > 0 && !/house|hus\b|famil|household/i.test(c.unit || '') && c.year >= y0 && c.year <= y1);
+    if (people.length) {
+      const near = rule.nearYear ?? 1950;
+      const nearest = people.reduce((best, c) => (Math.abs(c.year - near) < Math.abs(best.year - near) ? c : best));
+      return Math.min(rule.maxCottages ?? 99, Math.max(rule.minCottages ?? 1, Math.ceil(nearest.value / rule.peoplePerCottage)));
+    }
+  }
   return rule.cottagesBySizeClass[settlement.sizeClass] ?? rule.cottagesBySizeClass.unknown ?? 2;
 }
 
@@ -52,17 +65,19 @@ export function worldAtYear(years, sources, year) {
   const spec = {
     era: row.id, year, label: row.label, kit: row.kit, epoch: row.epoch,
     waterOffsetM, hiddenRockIds,
-    lights: !!row.lights, modernMarks: !!(row.seaMarks && row.seaMarks.modern),
-    settlements: [], marks: [], labels: [], notes: [],
-    boats: { kit: row.boats.kit, moored: row.boats.moored || 0, sailing: row.boats.sailing || 0 },
+    lights: !!row.lights, lighthouses: null, modernMarks: !!(row.seaMarks && row.seaMarks.modern), periodMarks: null, industry: [],
+    settlements: [], marks: [], labels: [], notes: [], houseColours: null,
+    boats: { kit: row.boats.kit, moored: row.boats.moored || 0, sailing: row.boats.sailing || 0, ferry: !!row.boats.ferry },
   };
   if (row.settlements && row.settlements.from === 'source') {
-    const rule = row.settlements;
+    const rule = { nearYear: row.year, ...row.settlements };
+    if (rule.colours) spec.houseColours = { ...rule.colours };
     for (const s of get(src, rule.path) || []) {
-      if (!rule.showIf.includes(s.existsAround1700)) continue;
+      const exists = s[rule.existsKey || 'existsAround1700'];
+      if (!rule.showIf.includes(exists)) continue;
       spec.settlements.push({
         id: s.id, name: s.name, lon: s.lon, lat: s.lat, sizeClass: s.sizeClass, cottages: cottagesFor(s, rule),
-        exists: s.existsAround1700, uncertain: !!s.uncertain || s.existsAround1700 !== 'yes', sizeEstimated: !!s.sizeEstimated,
+        exists, uncertain: !!s.uncertain || exists !== 'yes', sizeEstimated: !!s.sizeEstimated, hasCanningFactory: s.hasCanningFactory ?? null, livelihood: s.livelihood || [],
       });
     }
   }
@@ -73,6 +88,34 @@ export function worldAtYear(years, sources, year) {
     }
     spec.notes.push(`${spec.marks.filter((m) => m.invented).length} of ${spec.marks.length} marks are invented recommendations (docs/WORLD-1700.md section 2); only the Maseskar cairn and the Karingon name theory have a source, neither dated to 1700`);
   }
+  // Lighthouses standing in this era (an era whose `lights` rule reads the source): who keeps them, whether they are lit.
+  if (row.lights && typeof row.lights === 'object') {
+    const rule = row.lights;
+    const ov = rule.modelOverrides || {};
+    spec.lighthouses = (get(src, rule.path) || []).filter((l) => Object.entries(rule.where || {}).every(([k, v]) => l[k] === v)).map((l) => ({
+      id: l.id, name: l.name, lat: l.lat, lon: l.lon, lit: l.lit1950 !== false && l.manned1950 !== 'dark', manned: l.manned1950 || 'unknown', keeperHouse: !!(l.keeperBuildings && l.keeperBuildings.present),
+      keeperWall: 'white', uncertain: !!l.uncertain, ...(ov[l.id] || {}), overridden: !!ov[l.id],
+    }));
+    for (const l of spec.lighthouses) if (l.overridden) spec.notes.push(`${l.name}: shown ${l.lit ? 'lit' : 'dark'}${l.manned === 'dark' ? ' (old light)' : ''} - model override: ${(ov[l.id].why || '').slice(0, 160)}`);
+    spec.lights = spec.lighthouses.length > 0;
+    spec.notes.push(`${spec.lighthouses.filter((l) => l.manned === 'keepers').length} of ${spec.lighthouses.length} lights in the window had keepers; the others: ${spec.lighthouses.filter((l) => l.manned !== 'keepers').map((l) => `${l.name} (${l.manned})`).join(', ') || 'none'}`);
+  }
+  // The period sea marks: which of today's OSM mark types existed, and the look of the lateral ones (colour, shape per side).
+  if (row.seaMarks && row.seaMarks.period && src) {
+    const sm = get(src, row.seaMarks.period.path) || {};
+    const existed = {};
+    // the data's `kind` is a descriptive string ("lateral (100: 53 red, 47 green...)", "leading lines (12...)"): the mark type is its first word
+    for (const k of sm.todayKindsVs1950 || []) existed[String(k.kind).split(/[\s(]/)[0]] = k.existedIn1950;
+    const lat = (sm.system && sm.system.lateral) || {};
+    spec.periodMarks = { existed, lateral: { port: lat.port || null, starboard: lat.starboard || null }, system: sm.system ? sm.system.name : null, map: row.seaMarks.period.map || null };
+  }
+  // Industry: fish-canning factories that stood in this era (named only where the source names them).
+  if (row.industry && row.industry.from === 'source' && src) {
+    spec.industry = (get(src, row.industry.path) || []).filter((f) => !row.industry.include || row.industry.include.includes(f.id)).filter((f) => !f.to || f.to >= row.year).filter((f) => !f.from || f.from <= row.year).map((f) => ({ id: f.id, name: f.name ?? null, place: f.place, lat: f.lat ?? null, lon: f.lon ?? null, look: f.look || null, uncertain: /conflict|uncertain/i.test(f.status || '') }));
+  }
+  if (src && src.boats && src.boats.ferry) spec.ferry = { name: src.boats.ferry.name ?? null, route: src.boats.ferry.route || null, status: src.boats.ferry.status || null };
+  if (spec.ferry && spec.ferry.name == null) spec.notes.push('the 1950 Lysekil-Fiskebäckskil ferry is not identified in any source read: unnamed, and its look is the designer\'s choice');
+  if (row.names && row.names.from === 'settlements') for (const s of spec.settlements) spec.labels.push({ id: s.id, lon: s.lon, lat: s.lat, text: s.name, year: null, uncertain: false, documented: true, modern: s.name });
   // Names: an era with documented forms gets them; a place with none gets no name (honest), not a guess.
   if (row.names && row.names.from === 'source') {
     const forms = new Map(get(src, row.names.path).map((n) => [n.modern, n]));
@@ -82,7 +125,7 @@ export function worldAtYear(years, sources, year) {
     }
     for (const m of spec.marks) { // the Karingon white cairn takes the island's old name
       const n = m.id === 'karingon-cairn' ? forms.get('Käringön') : null;
-      if (n) spec.labels.push({ id: m.id, lon: m.lon, lat: m.lat, text: `${n.form} (white cairn?)`, year: n.year, uncertain: true, documented: true, modern: m.name });
+      if (n) spec.labels.push({ id: m.id, lon: m.lon, lat: m.lat, text: `${n.form} (white cairn?)`, year: n.year, uncertain: true, documented: true, modern: m.name, chartName: false }); // chartName false: the island's own name is already on the chart
     }
   }
   if (spec.hiddenRockIds.size) spec.notes.push(`${spec.hiddenRockIds.size} rocks that are awash today are just under the surface (sea ${waterOffsetM} m higher; our arithmetic on SMHI's rate)`);
