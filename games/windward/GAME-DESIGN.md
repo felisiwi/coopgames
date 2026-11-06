@@ -1241,3 +1241,15 @@ close-up lets you sail around, talk to different people, get clues from them, an
 places like the fishery.
 
 **UI (Felix, 2026-11-06):** remove the Chart button; tapping the minimap opens the chart.
+
+**Dug channels: history that changes the map (2026-11-06)**
+- **Grundsund canal**: the village is named after the *grund sund* (shallow sound) between
+  Skaftölandet and Ösö. Grundsunds kanal och hamn were built 1914-1918 (only formally
+  inaugurated at the centenary in 2018; Västsverige, "Kanalfesten Grundsund 2018"). Era
+  mechanic: before ~1914 the sound is shallow, eka-only or closed, and a through-route only
+  from Epoch V on. (Exact pre-canal depth: unverified.)
+- **Sotekanalen** (candidate for the narrow carved passage Felix's dad told him about): 4.8 km
+  canal across the Sotenäs peninsula between Hunnebostrand and Smögen/Kungshamn, built 1930-35
+  (opened 15 July 1935), about 200 men, mostly out-of-work local stonemasons (relief work),
+  30-40 m at its narrowest, swing bridge. It's north of today's map window, so it's a future
+  POI when the map grows. Felix to confirm it's the one he meant.
