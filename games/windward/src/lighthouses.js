@@ -12,7 +12,9 @@
 // Conventions: every part is a flat Lambert mesh. The lantern glass is a warm
 // pale yellow mesh named 'lantern-glass' (exactly one per lighthouse) so a
 // later pass can find it and make it glow. A twin's second light is named
-// 'lantern-glass-twin'. Round towers use 5-8 radial segments. "Front" (door,
+// 'lantern-glass-twin'; Islandsberg's window row names its other panes
+// 'lantern-glass-window' (src/lantern.js lights every mesh whose name starts
+// with 'lantern-glass', and centres the halo on the first). Round towers use 5-8 radial segments. "Front" (door,
 // steps) is +z.
 import * as THREE from '../vendor/three/three.module.js';
 
@@ -46,7 +48,7 @@ const ENTRIES = [
     description: 'The tallest on the coast: all-red cast-iron lattice tower, heavily cross-braced, green dome.' },
   { name: 'Islandsberg', built: 1883, station: null, realHeight: 6, area: 'Lysekil',
     lat: 58.1976349, lon: 11.4050317,
-    description: 'Wooden keeper\'s house, white seaward gable, red behind. The old light showed through a row of windows on the upper floor of the seaward gable (not a lantern on the ridge; fyr.org). Dark since 1938. NB the 3D model (houseLight) still puts a lantern on the ridge: TODO(felix) rework the model, data corrected only.',
+    description: 'Wooden keeper\'s house, white seaward gable, red behind. The old light showed through a row of windows on the upper floor of the seaward gable (not a lantern on the ridge; fyr.org), and the model (gableWindowLight) draws exactly that. Dark since 1938.',
     check: 'lantern colours and roof colour' },
   { name: 'Vinga', built: 1890, station: 1841, realHeight: 29, area: 'Göteborg',
     lat: dm(57, 37.924), lon: dm(11, 36.078),
@@ -429,6 +431,28 @@ function houseLight(g, o) {
   lantern(lg, ridge, lr, lh, { frame, roof: 'dome', roofColor: domeColor });
 }
 
+// Islandsberg's old keeper's house (1883, dark since 1938). The light was NOT in a lantern on the ridge: it showed through a row of windows on the upper floor of the seaward
+// (+z) gable (fyr.org, via docs/CORRECTIONS-TODO.md). Seaward half white, the rest red. No lantern: the house reaches the game height at the ridge. The MIDDLE pane is the one
+// 'lantern-glass' (the halo centres on it); the other panes share the prefix so the glow lights the whole row, and dark or lit they swap together.
+function gableWindowLight(g, o) {
+  const { H, w, d, wallFrac, wall, wall2, roofColor, doorW = 1.0, panes = 5 } = o;
+  const wallH = H * wallFrac;
+  const roofH = H - wallH;
+  box(g, w, wallH, d / 2, 0, wall, 0, d / 4);
+  box(g, w, wallH, d / 2, 0, wall2, 0, -d / 4);
+  gableRoof(g, w + 0.6, d + 0.6, roofH, wallH, roofColor);
+  box(g, doorW, Math.min(1.8, wallH * 0.4), 0.3, 0, DOOR, 0, d / 2); // the door, ground floor, on the seaward gable
+  const paneW = 0.58, gap = 0.14, paneH = 1.1;
+  const step = paneW + gap;
+  const rowW = panes * paneW + (panes - 1) * gap;
+  const y0 = wallH * 0.75 - paneH / 2; // centred on the upper floor (the upper floor is the top half of the wall)
+  box(g, rowW + 0.3, paneH + 0.3, 0.1, y0 - 0.15, DARK, 0, d / 2 + 0.01); // a dark frame round the row, so it reads as one row of windows
+  const order = [...Array(panes).keys()].sort((a, b) => Math.abs(a - (panes - 1) / 2) - Math.abs(b - (panes - 1) / 2)); // the middle pane first (the glow's centre)
+  order.forEach((i, n) => {
+    put(g, new THREE.BoxGeometry(paneW, paneH, 0.1), GLASS, (i - (panes - 1) / 2) * step, y0 + paneH / 2, d / 2 + 0.07, { name: n === 0 ? 'lantern-glass' : 'lantern-glass-window' });
+  });
+}
+
 // Rectangular red slatted daymark on the front (+z) of a round tower.
 function slatDaymark(t, { r, y, h, width, color }) {
   const slats = 4;
@@ -512,7 +536,7 @@ const BUILDERS = {
 
   // Wooden keeper's house, white seaward end, red behind; lantern at the seaward end.
   'Islandsberg'(g, H) {
-    houseLight(g, { H, w: 4.6, d: 8, wallFrac: 0.5, wall: WHITE, wall2: RED, roofColor: DARK_ROOF, lr: 0.75, lh: 1.0, frame: WHITE, domeColor: DARK_ROOF, lanternZ: 1.6 });
+    gableWindowLight(g, { H, w: 4.6, d: 8, wallFrac: 0.62, wall: WHITE, wall2: RED, roofColor: DARK_ROOF });
   },
 
   // Square unpainted grey granite tower, grey dome, lower red-orange pyramid daymark.
