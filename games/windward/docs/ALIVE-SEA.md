@@ -223,3 +223,25 @@ in an era, with conditions (time of day, weather, season, story phase), what it 
 14. **Traces age** by type (stands, weathers, grows, lost) with an optional "survives until" year
     from research (e.g. a breakwater built over your cairn).
 15. **Sighting log per kind,** with the first place and era it was seen.
+
+**Round 3, settled (Felix agreed):**
+16. **Rumour** = target thing, who tells it (era channels: 1950 people, radio forecast, notice
+    boards; 1703 church talk, pilots, letters, market days), text, days it lasts, true or twist.
+    Mostly true, sometimes a twist, never empty.
+17. **Errand** = giver, item, receiver, reward (gift, line, warmth). No time limits by default.
+18. **Regulars remember you** through a hidden warmth per regular, saved in the change log; it
+    unlocks lines, rumours and errands. No visible meter.
+19. **Naming:** only skerries with no real name; era-fitting suggestions plus free text; names
+    live in the world they were given in (the host's); a friend's name enters only if the host
+    accepts it.
+20. **Tap reach** scales with the thing's size; too far = a small "get closer" hint; reach
+    numbers in config.
+21. **Existing life:** life.js wildlife is ported into templates as the first things; the harbour
+    moment stays until regulars replace it.
+22. **First slice** (after Next run is merged, since tap vs hold touches phone.js): tap vs hold
+    steering; a drifting fish box (tap pickup, change log); seals ported (slip off on approach
+    or tap, sighting); one net-mender regular (hail = rumour); one rumour pointing at the seals;
+    world seed saved, day seed per session. Gated, with a phone checklist.
+
+**Left open on purpose (outside the thing model):** hunger/thirst (options above); deriving
+bays/headlands; a weather system; anchoring close-ups; sound wiring.
