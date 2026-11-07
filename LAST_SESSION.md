@@ -1,6 +1,6 @@
 # Last session
 
-**2026-11-07 (agent 2, weather): `felix/windward-weather` @ b52d038 (pushed, NOT merged): the lab's weather in the game; phone fixes round 2 (gusts redrawn soft and rare, a squall you can feel); main is `e1863a1`+; 82 test files pass.** Read `docs/MISSION-CONTROL.md` first.
+**2026-11-07 (mission control): main has weather + sail feel, boat variety, corrections, Islandsberg, island lore, Next run; 85 test files pass. Open branches: landmarks (agent 4), templates (agent 3), hub rejoin (needs a two-phone test).** Read `docs/MISSION-CONTROL.md` first.
 
 **State:** chapter 1 in 1950 is MERGED and LIVE (https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html).
 Order of play: the opening in the engine (`src/opening-stage.js`: dusk over today's Fiskebäckskil, storm, lighthouse rewind
