@@ -274,3 +274,20 @@ bays/headlands; a weather system; anchoring close-ups; sound wiring.
    gusts line up on both phones with no messages. Replaces host-sent wind.
 8. **Reading the wind:** dark ripple patches on the water first, then other boats heeling and
    sails filling, then smoke and flags ashore, the wind arrow as fallback.
+
+**Round 2, settled (Felix agreed):**
+9. **In-game clock starts now with the wind;** visuals follow in the day/night stage. First guess:
+   a game day of ~30 real minutes (tune on the phone).
+10. **Gusts you can see coming:** gusts 30 to 50% stronger, lulls ~40% weaker, patches last 30 to
+    60 s and drift downwind, visible 10 to 20 s before they arrive (the key number). All in config.
+11. **Island shadows and funnelling are strong and readable** (smooth water in the lee). **Felix:**
+    inside the skerries must not feel boring or slow; the point is that sailing **utomskärs**
+    (outside the skerries) feels faster and livelier, not that inside is punished.
+12. **Squalls:** dark cloud and a dark line on the water; wind +~60% and ~30° swing, rain, passes
+    in 1 to 2 min; ease or round up, or heel hard and slow down. Plenty of warning.
+13. **Weather mist looks different from the "not yet" fog:** thin, drifting, all around; the
+    exploration fog stays as it is; the chart keeps working in mist.
+14. **Speed feel is part of this work:** camera dips and tightens with speed, bow spray, a growing
+    wake, heel in gusts.
+15. **Build a sail-feel lab first** (new files only), with toggles for each layer, day types,
+    squalls, mist and speed feel; into the game after Felix has felt it on his phone.
