@@ -1,0 +1,1599 @@
+{
+  "_about": "Quest templates for 1950 (data only, nothing reads them yet). A quest is a small chain: a NEED (a regular, a place or a happening) + 1 to 3 STEPS using existing verbs + a RESOLUTION. Slots are filled by the world from its seeds; each template must be good enough alone (ALIVE-SEA mini-quest grill 1-2). No quest log, no money, no time limits by default; at most one or two offered at once; ignored quests fade gently with a \"fade\" line.",
+  "_spec": "games/windward/docs/ALIVE-SEA.md: \"Grill: generated mini quests\" (rounds 1 to 3), \"the thing model\" (rumours, regulars, warmth), \"anchoring\", \"day and night\". Ids link to data/things-1950.json (things), artifacts-1950.json, quests-1950.json, rumours-1950.json and data/island-lore.json.",
+  "_invented": "Everything here is INVENTED unless a record says otherwise: each carries invented:true and a source {kind, refs}. Spoken lines are INVENTED-DIALOGUE, short, for Felix to rewrite by eye. No real private person is named.",
+  "_fields": {
+    "id": "quest.<slug>",
+    "name": "short title",
+    "kind": "errand (one step) | chain",
+    "firstSlice": "true for the three templates of the first quest slice (ALIVE-SEA mini quests, round 3, item 17)",
+    "giver": "a people thing id, or a {slot}; null when the quest starts from a happening (see trigger)",
+    "trigger": "{ thing, note }: the quest is offered when the player meets this thing",
+    "slots": "{ name: { type, from?, rule?, label?, spawn?, spot?, nameable? } }: what the world fills in. type is one of _vocab.slotTypes",
+    "steps": "1 to 3 of { verb, what?, where?, to?, using?, when?, returns?, note? }; verb is one of _vocab.verbs; ids or {slots} in what/where/to",
+    "resolution": "{ text, receiver }: what happens at the end",
+    "reward": "{ warmth: small | medium, gift?: { artifacts: [ids] } | { tier, pool: [ids], teller?: slot }, rumour?: { from: thing id or slot }, knowledge?: text, nameGift?: true }. A gift is never a unique (those are only placed by Felix).",
+    "offeredWhen": "{ timeOfDay?, weather?, season?, storyPhase? } (same vocabulary as things-1950.json)",
+    "cooldown": "{ days }: per-template cooldown (ALIVE-SEA 15)",
+    "softDeadline": "optional: a time that matters (\"before the ferry\"), not a limit; missing it triggers the fade line",
+    "lines": "{ offer, done: { gruff, chatty, shy }, fade }: short, in the giver's voice; {slots} are filled in",
+    "seeds": "the island-lore.json quest seeds this template grows from: { place, hook: questSeeds, index }",
+    "source": "{ kind: grounded | invented, refs[], note }",
+    "invented": "always true",
+    "loreTeller": "the regular who tells the true story of a rare gift (ALIVE-SEA 13)"
+  },
+  "_vocab": {
+    "slotTypes": [
+      "regular",
+      "place",
+      "skerry",
+      "item",
+      "object",
+      "storm"
+    ],
+    "verbs": [
+      "sail-to",
+      "find",
+      "pick-up",
+      "carry",
+      "deliver",
+      "be-there",
+      "hail",
+      "tell",
+      "name"
+    ],
+    "verbNotes": "sail to, find, pick up, carry, deliver, be there at a time/weather are the settled existing verbs; hail, tell and name come from the tap, quest and names grills.",
+    "warmth": [
+      "small",
+      "medium"
+    ],
+    "personalities": [
+      "gruff",
+      "chatty",
+      "shy"
+    ]
+  },
+  "_counts": {
+    "total": 18,
+    "firstSlice": 3
+  },
+  "notQuested": {
+    "light:Måseskär#0": "canon chapter-1 task (mantles and gas to the keeper): story script",
+    "village:Grundsund#0": "canon first errand (repair parts): story script",
+    "village:Lysekil#0": "canon chapter-1 task (gas tanks from the depot): story script",
+    "light:Islandsberg#0": "canon relight: story script",
+    "light:Hättan#0": "canon relight: story script",
+    "light:Gäven#0": "canon relight, and the iron ring is unique candidate 13: story script and Felix",
+    "relation/10237443#0": "canon relight: story script",
+    "light:Kråksundsgap Södra#0": "canon relight and the glimpse: story script",
+    "relation/10237903#0": "canon relight: story script",
+    "relation/10237897#0": "repainting a belt is not an existing verb; folded into quest.first.delivery as the object \"a tin of paint\""
+  },
+  "templates": [
+    {
+      "id": "quest.first.lost-item",
+      "name": "Lost in the blow",
+      "kind": "chain",
+      "firstSlice": true,
+      "giver": "{giver}",
+      "slots": {
+        "giver": {
+          "type": "regular",
+          "from": [
+            "place.karingon.net-mender-quay",
+            "place.gullholmen.cannery-woman",
+            "place.maseskar.assistant",
+            "place.hallevik.shipwright",
+            "place.fiskebackskil.ferry-deckhand"
+          ]
+        },
+        "item": {
+          "type": "item",
+          "from": [
+            "drift.fish-box",
+            "drift.oar",
+            "drift.cork-float"
+          ]
+        },
+        "skerry": {
+          "type": "skerry",
+          "rule": "a skerry within sight of the giver, on the lee side of where the last blow came from"
+        },
+        "storm": {
+          "type": "storm",
+          "rule": "a label for the last blow, given by the weather system (last night's blow, the gale on Tuesday)"
+        }
+      },
+      "steps": [
+        {
+          "verb": "find",
+          "what": "{item}",
+          "where": "{skerry}",
+          "using": "boathook"
+        },
+        {
+          "verb": "deliver",
+          "what": "{item}",
+          "to": "{giver}"
+        }
+      ],
+      "resolution": {
+        "text": "The giver is glad to have it back. Word gets round the quay that you are good with small things.",
+        "receiver": "{giver}"
+      },
+      "reward": {
+        "warmth": "small",
+        "gift": {
+          "tier": "common",
+          "pool": [
+            "artifact.mackerel-tin-ship-label",
+            "artifact.seine-cork-float",
+            "artifact.barrel-stave-cooper-mark",
+            "artifact.fish-box-stencil-board"
+          ]
+        }
+      },
+      "offeredWhen": {
+        "weather": [
+          "after-squall"
+        ]
+      },
+      "cooldown": {
+        "days": 2
+      },
+      "lines": {
+        "offer": {
+          "gruff": "{storm} took my {item}. Find it and I'll not forget.",
+          "chatty": "You'll never guess! {storm} took my {item}. Out by the skerries, I'd say. Would you look?",
+          "shy": "Excuse me... {storm} took my {item}. Could you look for it?"
+        },
+        "done": {
+          "gruff": "That's mine. Good. Take this.",
+          "chatty": "My {item}! You found it! Here, take this, I insist!",
+          "shy": "Oh. Thank you. I had given it up."
+        },
+        "fade": "Never mind. It washed up by itself in the end."
+      },
+      "seeds": [
+        {
+          "place": "village:Gullholmen",
+          "hook": "questSeeds",
+          "index": 0
+        },
+        {
+          "place": "light:Måseskär",
+          "hook": "questSeeds",
+          "index": 1
+        },
+        {
+          "place": "village:Käringön",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen#questSeeds[0]",
+          "lore:light:Måseskär#questSeeds[1]",
+          "lore:village:Käringön#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "Generic template. Lore variants: Gullholmen (a fish box for a tin of mackerel), Måseskär (a winch handle: also its own template), Käringön (a net float). The need and lines are INVENTED."
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.first.delivery",
+      "name": "A parcel across the water",
+      "kind": "chain",
+      "firstSlice": true,
+      "giver": "{giver}",
+      "slots": {
+        "giver": {
+          "type": "regular",
+          "from": [
+            "place.lysekil.depot-clerk",
+            "place.harmano.egg-farmer",
+            "place.lysekil.engine-fitter",
+            "place.hallevik.shipwright",
+            "place.malo.shipwrights-widow"
+          ]
+        },
+        "receiver": {
+          "type": "regular",
+          "from": [
+            "place.gaso.boarding-house-keeper",
+            "place.korno.teacher",
+            "place.grundsund.cutter-skipper",
+            "place.gullholmen.long-line-fisherman",
+            "place.fiskebackskil.ferry-deckhand"
+          ]
+        },
+        "object": {
+          "type": "object",
+          "from": [
+            "a letter",
+            "a bundle of newspapers",
+            "a bag of mackerel",
+            "a sack of flour",
+            "a tin of paint"
+          ]
+        },
+        "destination": {
+          "type": "place",
+          "rule": "the receiver's own place"
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{object}",
+          "to": "{destination}"
+        },
+        {
+          "verb": "deliver",
+          "what": "{object}",
+          "to": "{receiver}"
+        }
+      ],
+      "resolution": {
+        "text": "The receiver is glad of it and talks for a minute: that is how you hear things.",
+        "receiver": "{receiver}"
+      },
+      "reward": {
+        "warmth": "small",
+        "rumour": {
+          "from": "{receiver}"
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 2
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Take {object} to {receiver}. Don't drop it.",
+          "chatty": "Would you take {object} across to {receiver}? You'd be doing me a real kindness!",
+          "shy": "Um... could you take {object} to {receiver}? If it's on your way."
+        },
+        "done": {
+          "gruff": "Good. Right on time. Sit down a minute.",
+          "chatty": "Oh, wonderful! {object}, just what I wanted. Have you heard the news?",
+          "shy": "Thank you. Please, stay a moment."
+        },
+        "fade": "Never mind. It went with the ferry in the end."
+      },
+      "seeds": [
+        {
+          "place": "village:Grundsund",
+          "hook": "questSeeds",
+          "index": 1
+        },
+        {
+          "place": "relation/10604591",
+          "hook": "questSeeds",
+          "index": 0
+        },
+        {
+          "place": "relation/10094463",
+          "hook": "questSeeds",
+          "index": 0
+        },
+        {
+          "place": "village:Hälleviksstrand",
+          "hook": "questSeeds",
+          "index": 0
+        },
+        {
+          "place": "village:Lysekil",
+          "hook": "questSeeds",
+          "index": 1
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#questSeeds[1]",
+          "lore:relation/10604591#questSeeds[0]",
+          "lore:relation/10094463#questSeeds[0]",
+          "lore:village:Hälleviksstrand#questSeeds[0]",
+          "lore:village:Lysekil#questSeeds[1]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "Generic template; the lore variants are each a sourced errand pattern. A tin of paint is the folded-in version of the Jämningarna \"repaint the belt\" seed (repainting is not an existing verb)."
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.first.after-the-squall",
+      "name": "Adrift after the blow",
+      "kind": "chain",
+      "firstSlice": true,
+      "giver": null,
+      "trigger": {
+        "thing": "drift.drifting-skiff",
+        "note": "offered when you find a drifting boat after a blow"
+      },
+      "slots": {
+        "skiff": {
+          "type": "item",
+          "from": [
+            "drift.drifting-skiff"
+          ]
+        },
+        "area": {
+          "type": "skerry",
+          "from": [
+            "relation/10239187"
+          ]
+        },
+        "owner": {
+          "type": "regular",
+          "from": [
+            "place.karingon.net-mender-quay",
+            "place.gaso.retired-skipper",
+            "place.korno.coaster-skipper",
+            "place.gullholmen.long-line-fisherman"
+          ]
+        },
+        "teller": {
+          "type": "regular",
+          "from": [
+            "place.maseskar.keeper"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "find",
+          "what": "{skiff}",
+          "where": "{area}"
+        },
+        {
+          "verb": "tell",
+          "to": "{owner}"
+        },
+        {
+          "verb": "hail",
+          "to": "{teller}"
+        }
+      ],
+      "resolution": {
+        "text": "The owner is relieved. The keeper reads the drift for you and tells the true story of an old thing from the sea, which he gives you.",
+        "receiver": "{owner}"
+      },
+      "reward": {
+        "warmth": "medium",
+        "gift": {
+          "tier": "rare",
+          "pool": [
+            "artifact.rice-sack-stencil-paula",
+            "artifact.freya-ships-bell",
+            "artifact.svecia-anchor-shackle"
+          ],
+          "teller": "{teller}"
+        }
+      },
+      "offeredWhen": {
+        "weather": [
+          "after-squall"
+        ]
+      },
+      "cooldown": {
+        "days": 5
+      },
+      "lines": {
+        "offer": {
+          "gruff": "That's my boat. Where did you find her?",
+          "chatty": "My boat! My boat! I thought she was gone for good! Where was she?",
+          "shy": "That... that is my boat. Where was she?"
+        },
+        "done": {
+          "gruff": "Good lad. Go and ask the keeper where she came from.",
+          "chatty": "You have no idea what this means! The keeper knows the currents. Go on, ask him!",
+          "shy": "Thank you. The keeper may know where she drifted from."
+        },
+        "fade": "Never mind. She came home on the next tide."
+      },
+      "seeds": [
+        {
+          "place": "village:Käringön",
+          "hook": "questSeeds",
+          "index": 1
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#questSeeds[1]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "Generic template. For this template the offer lines are the OWNER's first words, because the quest starts when you find the boat. The keeper is story-owned: his scene is Felix's, the lore he tells is the artifact's true story. The rare gifts are three wreck relics; none is a unique candidate."
+      },
+      "invented": true,
+      "loreTeller": "place.maseskar.keeper"
+    },
+    {
+      "id": "quest.winch-handle",
+      "name": "The slip's winch handle",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.maseskar.assistant",
+      "slots": {
+        "handle": {
+          "type": "object",
+          "label": "the slip's winch handle",
+          "spawn": {
+            "anchor": "berth",
+            "place": "light:Måseskär",
+            "rule": "in the shallows at the landing, visible when the boat is slow"
+          }
+        }
+      },
+      "steps": [
+        {
+          "verb": "find",
+          "what": "{handle}",
+          "where": "light:Måseskär",
+          "using": "boathook"
+        },
+        {
+          "verb": "deliver",
+          "what": "{handle}",
+          "to": "place.maseskar.assistant"
+        }
+      ],
+      "resolution": {
+        "text": "He is so relieved he talks about the mainland for ten minutes.",
+        "receiver": "place.maseskar.assistant"
+      },
+      "reward": {
+        "warmth": "small",
+        "gift": {
+          "artifacts": [
+            "artifact.lamp-mantle-tin"
+          ]
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Dropped the winch handle in the harbour. Find it.",
+          "chatty": "I've done something stupid! The winch handle went over the side at the landing. Could you fish it out? Please?",
+          "shy": "The winch handle... I dropped it. At the landing. Could you...?"
+        },
+        "done": {
+          "gruff": "Good. Here, a spare mantle.",
+          "chatty": "You found it! I could kiss you. Have a mantle, we have loads. Now tell me about Lysekil!",
+          "shy": "Thank you. Please, take this."
+        },
+        "fade": "Never mind. The keeper made a new one from a boathook."
+      },
+      "seeds": [
+        {
+          "place": "light:Måseskär",
+          "hook": "questSeeds",
+          "index": 1
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#questSeeds[1]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.net-float-torno",
+      "name": "A float for the quarry sound",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.karingon.net-mender-quay",
+      "slots": {
+        "float": {
+          "type": "object",
+          "from": [
+            "a tarred cork float"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{float}",
+          "to": "relation/10238557"
+        },
+        {
+          "verb": "deliver",
+          "what": "{float}",
+          "to": "place.torno.quarryman-dora"
+        }
+      ],
+      "resolution": {
+        "text": "The quarryman turns it over in his hands; it is his father's.",
+        "receiver": "place.torno.quarryman-dora"
+      },
+      "reward": {
+        "warmth": "small",
+        "rumour": {
+          "from": "place.torno.quarryman-dora"
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "This float is not mine. Take it to Tornö.",
+          "chatty": "See this float? It's a Tornö float, it came back with the storm. Could you take it over?",
+          "shy": "This float... it belongs on Tornö. Would you take it?"
+        },
+        "done": {
+          "gruff": "Hm. His. Thank you.",
+          "chatty": "It is! It's my father's! Sit down, sit down, let me tell you about the Dora!",
+          "shy": "Thank you. It means a lot."
+        },
+        "fade": "Never mind. Somebody else took it over."
+      },
+      "seeds": [
+        {
+          "place": "village:Käringön",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.newspapers-to-gaso",
+      "name": "Newspapers for the boarding house",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.lysekil.depot-clerk",
+      "slots": {
+        "parcel": {
+          "type": "object",
+          "from": [
+            "a parcel of newspapers and a letter"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{parcel}",
+          "to": "relation/10604591"
+        },
+        {
+          "verb": "deliver",
+          "what": "{parcel}",
+          "to": "place.gaso.boarding-house-keeper"
+        }
+      ],
+      "resolution": {
+        "text": "She is cross that it is late and glad that it came.",
+        "receiver": "place.gaso.boarding-house-keeper"
+      },
+      "reward": {
+        "warmth": "small",
+        "rumour": {
+          "from": "place.gaso.boarding-house-keeper"
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Parcel for Gåsö. Boarding house. Go.",
+          "chatty": "There's a parcel for the boarding house on Gåsö, papers and a letter. Would you take it? She hates to wait!",
+          "shy": "Is it too much to ask? A parcel for Gåsö. For the boarding house."
+        },
+        "done": {
+          "gruff": "Hmph. Late. But here. Sit.",
+          "chatty": "At last! Two weeks of papers at once. Come in, come in, I have news!",
+          "shy": "Oh. Thank you. I was getting worried."
+        },
+        "fade": "Never mind. It went with the post boat."
+      },
+      "seeds": [
+        {
+          "place": "relation/10604591",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604591#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.name-seal-skerry",
+      "name": "A name for the seal skerry",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.storon.pup-counter",
+      "slots": {
+        "skerry": {
+          "type": "skerry",
+          "rule": "an unnamed skerry within 300 m of the seal rocks west of Storön",
+          "nameable": true
+        }
+      },
+      "steps": [
+        {
+          "verb": "sail-to",
+          "where": "{skerry}"
+        },
+        {
+          "verb": "be-there",
+          "where": "{skerry}",
+          "when": {
+            "still": "about a minute, so the seals come back"
+          }
+        },
+        {
+          "verb": "name",
+          "where": "{skerry}"
+        }
+      ],
+      "resolution": {
+        "text": "The boy writes the name in his notebook. From now on it is on your chart with the name you gave it.",
+        "receiver": "place.storon.pup-counter"
+      },
+      "reward": {
+        "warmth": "medium",
+        "nameGift": true
+      },
+      "offeredWhen": {
+        "season": [
+          "early-summer"
+        ]
+      },
+      "cooldown": {
+        "days": 7
+      },
+      "lines": {
+        "offer": {
+          "gruff": "That skerry has no name. Give it one.",
+          "chatty": "You know, that skerry has no name at all. And the seals sleep on it! Will you name it with me?",
+          "shy": "It has no name. The seals sleep there. Could you... name it?"
+        },
+        "done": {
+          "gruff": "Good name. I'll remember it.",
+          "chatty": "That's the best name! I'm writing it down. Now it is real!",
+          "shy": "I like it. Thank you."
+        },
+        "fade": "Never mind. We just called it the seal rock."
+      },
+      "seeds": [
+        {
+          "place": "relation/10604590",
+          "hook": "questSeeds",
+          "index": 0
+        },
+        {
+          "place": "relation/10604591",
+          "hook": "questSeeds",
+          "index": 1
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604590#questSeeds[0]",
+          "lore:relation/10604591#questSeeds[1]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "The names grill (ALIVE-SEA 19): only skerries with no real name; era-fitting suggestions plus free text; the name lives in the host's world."
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.bakery-parcel-korno",
+      "name": "Buns for the schoolteacher",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.lysekil.bath-house-attendant",
+      "slots": {
+        "parcel": {
+          "type": "object",
+          "from": [
+            "a wrapped parcel from the Lysekil bakery"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{parcel}",
+          "to": "relation/10094463",
+          "when": {
+            "timeOfDay": [
+              "morning"
+            ]
+          }
+        },
+        {
+          "verb": "deliver",
+          "what": "{parcel}",
+          "to": "place.korno.teacher"
+        }
+      ],
+      "resolution": {
+        "text": "The teacher unwraps the buns on the pier and shares one.",
+        "receiver": "place.korno.teacher"
+      },
+      "reward": {
+        "warmth": "small",
+        "gift": {
+          "artifacts": [
+            "artifact.stoneware-shard-blue-band"
+          ]
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "softDeadline": {
+        "timeOfDay": "morning",
+        "note": "before the teacher's Saturday boat leaves for Lysekil; after that she has gone"
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Bakery parcel. Stora Kornö. The teacher. Morning.",
+          "chatty": "There's a parcel from the bakery for the teacher on Kornö! Before the Saturday boat, or she'll be gone!",
+          "shy": "A parcel for the teacher on Kornö. If you could. Before she leaves."
+        },
+        "done": {
+          "gruff": "Mm. Still warm. Here.",
+          "chatty": "Buns! Still warm! You are a saint. Look what I found on the beach.",
+          "shy": "Thank you. Please, take this."
+        },
+        "fade": "Never mind. She had her buns in Lysekil in the end."
+      },
+      "seeds": [
+        {
+          "place": "relation/10094463",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10094463#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.mackerel-for-flour",
+      "name": "Mackerel across, flour back",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.fiskebackskil.ferry-deckhand",
+      "slots": {
+        "basket": {
+          "type": "object",
+          "from": [
+            "a basket of mackerel"
+          ]
+        },
+        "flour": {
+          "type": "object",
+          "from": [
+            "a sack of flour"
+          ]
+        },
+        "stall": {
+          "type": "place",
+          "from": [
+            "village:Lysekil"
+          ],
+          "spot": "the market stall"
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{basket}",
+          "to": "{stall}"
+        },
+        {
+          "verb": "deliver",
+          "what": "{basket}",
+          "to": "{stall}",
+          "returns": "{flour}"
+        },
+        {
+          "verb": "deliver",
+          "what": "{flour}",
+          "to": "place.fiskebackskil.ferry-deckhand"
+        }
+      ],
+      "resolution": {
+        "text": "A swap that suited everyone, and the deckhand has a bit of gossip to go with the flour.",
+        "receiver": "place.fiskebackskil.ferry-deckhand"
+      },
+      "reward": {
+        "warmth": "small",
+        "rumour": {
+          "from": "place.fiskebackskil.ferry-deckhand"
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Mackerel to the Lysekil stall. Flour back. Simple.",
+          "chatty": "Take this basket of mackerel over to the Lysekil market stall and bring back flour! You'll see: it's a good swap!",
+          "shy": "Could you take mackerel to the stall in Lysekil? And bring back flour? If it's not too much."
+        },
+        "done": {
+          "gruff": "Right. Flour. Good.",
+          "chatty": "Flour! Perfect! You can have the first bun, I mean it!",
+          "shy": "Thank you. It saves me the crossing."
+        },
+        "fade": "Never mind. I went over myself in the end."
+      },
+      "seeds": [
+        {
+          "place": "village:Fiskebäckskil",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Fiskebäckskil#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.repaired-part-to-grundsund",
+      "name": "The repaired part",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.lysekil.engine-fitter",
+      "slots": {
+        "part": {
+          "type": "object",
+          "from": [
+            "a repaired engine part wrapped in oily cloth"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{part}",
+          "to": "village:Grundsund"
+        },
+        {
+          "verb": "deliver",
+          "what": "{part}",
+          "to": "place.grundsund.cutter-skipper"
+        }
+      ],
+      "resolution": {
+        "text": "The skipper bolts it on while you wait and the engine starts first swing.",
+        "receiver": "place.grundsund.cutter-skipper"
+      },
+      "reward": {
+        "warmth": "medium",
+        "gift": {
+          "artifacts": [
+            "artifact.skandia-engine-plate"
+          ]
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Repaired part for Grundsund. Skipper waits. Go.",
+          "chatty": "This is the part the Grundsund skipper has been howling about! Fixed at last. Take it over!",
+          "shy": "The part for the Grundsund skipper. It's done. Could you take it?"
+        },
+        "done": {
+          "gruff": "Good. She starts. Take this plate.",
+          "chatty": "It runs! Swing, thump, thump! Look at that, take this as thanks!",
+          "shy": "Thank you. It works. Please."
+        },
+        "fade": "Never mind. He bought a new one in Göteborg."
+      },
+      "seeds": [
+        {
+          "place": "village:Lysekil",
+          "hook": "questSeeds",
+          "index": 1
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Lysekil#questSeeds[1]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.bonden-cap",
+      "name": "A cap on the cairn",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.bonden.dare-lad",
+      "slots": {
+        "cap": {
+          "type": "object",
+          "label": "the lad's cap",
+          "spawn": {
+            "anchor": "skerry",
+            "place": "relation/10250201",
+            "rule": "on top of the cairn, held down by a stone"
+          }
+        }
+      },
+      "steps": [
+        {
+          "verb": "sail-to",
+          "where": "relation/10250201"
+        },
+        {
+          "verb": "pick-up",
+          "what": "{cap}",
+          "where": "relation/10250201"
+        },
+        {
+          "verb": "deliver",
+          "what": "{cap}",
+          "to": "place.bonden.dare-lad"
+        }
+      ],
+      "resolution": {
+        "text": "He puts it on with great dignity and does not mention the dare.",
+        "receiver": "place.bonden.dare-lad"
+      },
+      "reward": {
+        "warmth": "small",
+        "rumour": {
+          "from": "place.bonden.dare-lad"
+        }
+      },
+      "offeredWhen": {
+        "season": [
+          "summer",
+          "late-summer"
+        ]
+      },
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "My cap is on Bonden. Fetch it.",
+          "chatty": "I touched it! I did! But my cap blew off and it's still up there! Would you get it?",
+          "shy": "I left my cap on Bonden. Please..."
+        },
+        "done": {
+          "gruff": "Good. Thanks.",
+          "chatty": "My cap! You're the best! Do you want to hear about the Anna Maria?",
+          "shy": "Thank you. Mamma would have noticed."
+        },
+        "fade": "Never mind. Mamma knitted me another."
+      },
+      "seeds": [
+        {
+          "place": "relation/10250201",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250201#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.eggs-for-guests",
+      "name": "Eggs before the guests wake",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.harmano.egg-farmer",
+      "slots": {
+        "eggs": {
+          "type": "object",
+          "from": [
+            "a crate of eggs packed in straw"
+          ]
+        },
+        "guesthouse": {
+          "type": "place",
+          "from": [
+            "village:Gullholmen"
+          ],
+          "spot": "the guest-house steps"
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{eggs}",
+          "to": "{guesthouse}"
+        },
+        {
+          "verb": "be-there",
+          "where": "{guesthouse}",
+          "when": {
+            "timeOfDay": [
+              "dawn"
+            ]
+          }
+        },
+        {
+          "verb": "deliver",
+          "what": "{eggs}",
+          "to": "{guesthouse}"
+        }
+      ],
+      "resolution": {
+        "text": "The cook takes the crate at the kitchen door with a nod and a bun.",
+        "receiver": "{guesthouse}"
+      },
+      "reward": {
+        "warmth": "small",
+        "rumour": {
+          "from": "place.harmano.egg-farmer"
+        }
+      },
+      "offeredWhen": {
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "dawn",
+          "morning"
+        ]
+      },
+      "cooldown": {
+        "days": 3
+      },
+      "softDeadline": {
+        "timeOfDay": "dawn",
+        "note": "before the guests wake; later the cook has gone elsewhere"
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Eggs to the Gullholmen guest house. Before they wake.",
+          "chatty": "The guests on Gullholmen want eggs for breakfast, and they wake at seven! Can you be there by dawn?",
+          "shy": "Eggs for the guest house. Early. Could you?"
+        },
+        "done": {
+          "gruff": "Good. In time.",
+          "chatty": "In time! The cook was getting anxious! Have you heard about the Svecia?",
+          "shy": "Thank you. They are fussy."
+        },
+        "fade": "Never mind. They ate bread this morning."
+      },
+      "seeds": [
+        {
+          "place": "relation/5463706",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5463706#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.oakum-for-gullholmen",
+      "name": "Oakum for the long-liner",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.gullholmen.long-line-fisherman",
+      "slots": {
+        "oakum": {
+          "type": "object",
+          "from": [
+            "a bag of caulking oakum"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "sail-to",
+          "where": "village:Hälleviksstrand"
+        },
+        {
+          "verb": "pick-up",
+          "what": "{oakum}",
+          "where": "place.hallevik.shipwright"
+        },
+        {
+          "verb": "deliver",
+          "what": "{oakum}",
+          "to": "place.gullholmen.long-line-fisherman"
+        }
+      ],
+      "resolution": {
+        "text": "The fisherman starts to caulk his seams that afternoon and invites you to watch.",
+        "receiver": "place.gullholmen.long-line-fisherman"
+      },
+      "reward": {
+        "warmth": "small",
+        "gift": {
+          "artifacts": [
+            "artifact.caulking-mallet"
+          ],
+          "giver": "place.hallevik.shipwright"
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Need oakum from the Hälleviksstrand yard. Fetch it.",
+          "chatty": "My seams are weeping! The Hälleviksstrand yard has the best oakum. Would you fetch me a bag?",
+          "shy": "I need oakum. From the yard at Hälleviksstrand. If you pass."
+        },
+        "done": {
+          "gruff": "Good. Tar next.",
+          "chatty": "You're a star! Now the tar. Stay and watch an old man work!",
+          "shy": "Thank you. I'll start at once."
+        },
+        "fade": "Never mind. I borrowed some from a neighbour."
+      },
+      "seeds": [
+        {
+          "place": "village:Hälleviksstrand",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Hälleviksstrand#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.foreman-lunch",
+      "name": "The foreman's lunch",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.torno.quarryman-dora",
+      "slots": {
+        "lunch": {
+          "type": "object",
+          "from": [
+            "the foreman's lunch in a cloth"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{lunch}",
+          "to": "relation/10238558",
+          "when": {
+            "timeOfDay": [
+              "midday"
+            ]
+          }
+        },
+        {
+          "verb": "deliver",
+          "what": "{lunch}",
+          "to": "relation/10238558"
+        }
+      ],
+      "resolution": {
+        "text": "A hungry man on the Vallerö side takes it, grunts and gives you something off the spoil heap.",
+        "receiver": "relation/10238558"
+      },
+      "reward": {
+        "warmth": "small",
+        "gift": {
+          "artifacts": [
+            "artifact.mason-chisel-stump"
+          ]
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "softDeadline": {
+        "timeOfDay": "midday",
+        "note": "the foreman eats at noon; after that he is cross"
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Foreman's lunch. Vallerö. By noon.",
+          "chatty": "The foreman's lunch has to be across the sound by noon, or there'll be a riot! Can you row it over?",
+          "shy": "The foreman's lunch. For Vallerö. By noon. Please."
+        },
+        "done": {
+          "gruff": "Hm. Warm. Good. Take this.",
+          "chatty": "Still warm! Hero! Here, a chisel the foreman wore to a stump!",
+          "shy": "Thank you. He was getting cross."
+        },
+        "fade": "Never mind. He shared a colleague's."
+      },
+      "seeds": [
+        {
+          "place": "relation/10238557",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10238557#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.letter-from-malo",
+      "name": "A letter before the ferry",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.malo.shipwrights-widow",
+      "slots": {
+        "letter": {
+          "type": "object",
+          "from": [
+            "a letter to the Fiskebäckskil post"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "carry",
+          "what": "{letter}",
+          "to": "village:Fiskebäckskil"
+        },
+        {
+          "verb": "be-there",
+          "where": "village:Fiskebäckskil",
+          "when": {
+            "before": "the ferry leaves for Lysekil"
+          }
+        },
+        {
+          "verb": "deliver",
+          "what": "{letter}",
+          "to": "place.fiskebackskil.ferry-deckhand"
+        }
+      ],
+      "resolution": {
+        "text": "The deckhand puts it in the post sack with a nod.",
+        "receiver": "place.fiskebackskil.ferry-deckhand"
+      },
+      "reward": {
+        "warmth": "small",
+        "knowledge": "the ferry's turn-round time at Fiskebäckskil: how long you have to make it"
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "softDeadline": {
+        "note": "before the ferry leaves Fiskebäckskil; after that it waits for the next one"
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Letter to the Fiskebäckskil post. Before the ferry.",
+          "chatty": "I have a letter that has to be on the ferry to Lysekil! Can you row it to Fiskebäckskil in time?",
+          "shy": "It's only a letter. But the ferry... could you?"
+        },
+        "done": {
+          "gruff": "Good. In time.",
+          "chatty": "On the sack, just in time! The ferry man winked at me!",
+          "shy": "Thank you. It's important to me."
+        },
+        "fade": "Never mind. It went on the next boat."
+      },
+      "seeds": [
+        {
+          "place": "relation/5214486",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5214486#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.buoy-the-freya",
+      "name": "A buoy for the wreck",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.harpo.long-liner",
+      "slots": {
+        "buoy": {
+          "type": "object",
+          "from": [
+            "a painted buoy on a short line"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "pick-up",
+          "what": "{buoy}",
+          "where": "place.harpo.long-liner"
+        },
+        {
+          "verb": "sail-to",
+          "where": "relation/10250169"
+        },
+        {
+          "verb": "deliver",
+          "what": "{buoy}",
+          "to": "relation/10250169",
+          "note": "drop it at the marked spot over the wreck"
+        }
+      ],
+      "resolution": {
+        "text": "Now his lines miss the wreck and the wreck ground is on your chart.",
+        "receiver": "place.harpo.long-liner"
+      },
+      "reward": {
+        "warmth": "medium",
+        "knowledge": "the Freya wreck ground is marked on your chart"
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Buoy the Freya. My lines keep snagging.",
+          "chatty": "Every hook I own is on that wreck! If you buoy her, I'll keep clear. Would you?",
+          "shy": "The Freya... she catches my lines. Could you mark her?"
+        },
+        "done": {
+          "gruff": "Good. Finally.",
+          "chatty": "Finally! No more snagging! You are a lifesaver! Come and see something later.",
+          "shy": "Thank you. I'm grateful."
+        },
+        "fade": "Never mind. I've moved my lines."
+      },
+      "seeds": [
+        {
+          "place": "relation/10250169",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250169#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "Warmth medium unlocks secret.harpo.ships-bell (requires warm). The verb \"deliver at a spot\" stands in for dropping a buoy."
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.kerosene-can",
+      "name": "The keeper's kerosene can",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.stangehuvud.retired-quarryman",
+      "slots": {
+        "can": {
+          "type": "object",
+          "label": "a weathered kerosene can",
+          "spawn": {
+            "anchor": "light",
+            "place": "light:Stångehuvud",
+            "rule": "wedged in the rocks near the light house; visible when slow and close"
+          }
+        }
+      },
+      "steps": [
+        {
+          "verb": "find",
+          "what": "{can}",
+          "where": "light:Stångehuvud",
+          "using": "boathook"
+        },
+        {
+          "verb": "deliver",
+          "what": "{can}",
+          "to": "place.stangehuvud.retired-quarryman"
+        }
+      ],
+      "resolution": {
+        "text": "He turns it over and says it is exactly the one: the boys carried it over the hills to the light.",
+        "receiver": "place.stangehuvud.retired-quarryman"
+      },
+      "reward": {
+        "warmth": "small",
+        "gift": {
+          "artifacts": [
+            "artifact.granite-chisel-mark-sample"
+          ]
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Old kerosene can in the rocks by the light. Find it.",
+          "chatty": "There's a keeper's can wedged in the rocks by the light house, I know there is! Would you look?",
+          "shy": "A can. Old. In the rocks by the light. Could you...?"
+        },
+        "done": {
+          "gruff": "That's it. Here, a stone for you.",
+          "chatty": "That's the one! Look at that rust! Here, a sample from the old works!",
+          "shy": "Thank you. I'd almost forgotten it."
+        },
+        "fade": "Never mind. It was the wrong can anyway."
+      },
+      "seeds": [
+        {
+          "place": "light:Stångehuvud",
+          "hook": "questSeeds",
+          "index": 0
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Stångehuvud#questSeeds[0]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    },
+    {
+      "id": "quest.toy-boat",
+      "name": "A toy boat adrift",
+      "kind": "chain",
+      "firstSlice": false,
+      "giver": "place.karingon.net-mender-quay",
+      "slots": {
+        "toy": {
+          "type": "item",
+          "from": [
+            "drift.toy-boat"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "verb": "find",
+          "what": "{toy}",
+          "where": "relation/10239114"
+        },
+        {
+          "verb": "deliver",
+          "what": "{toy}",
+          "to": "place.karingon.net-mender-quay"
+        }
+      ],
+      "resolution": {
+        "text": "She sends it to the child with a smile and a note.",
+        "receiver": "place.karingon.net-mender-quay"
+      },
+      "reward": {
+        "warmth": "medium",
+        "rumour": {
+          "from": "place.karingon.net-mender-quay"
+        }
+      },
+      "offeredWhen": {},
+      "cooldown": {
+        "days": 3
+      },
+      "lines": {
+        "offer": {
+          "gruff": "Child lost a toy boat off the pier. It drifted. Find it.",
+          "chatty": "A little one lost their toy boat off the pier, it drifted toward Saltskär! Would you look? It means the world.",
+          "shy": "A child lost a toy boat. It drifted away. Could you...?"
+        },
+        "done": {
+          "gruff": "Good. She'll be pleased.",
+          "chatty": "You found it! I could weep. She'll sleep tonight!",
+          "shy": "Thank you. You've made a child happy."
+        },
+        "fade": "Never mind. Her father is making a new one."
+      },
+      "seeds": [
+        {
+          "place": "relation/10239114",
+          "hook": "questSeeds",
+          "index": 0
+        },
+        {
+          "place": "light:Stångehuvud",
+          "hook": "questSeeds",
+          "index": 1
+        }
+      ],
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10239114#questSeeds[0]",
+          "lore:light:Stångehuvud#questSeeds[1]",
+          "docs/ALIVE-SEA.md: mini quests grill"
+        ],
+        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+      },
+      "invented": true
+    }
+  ]
+}

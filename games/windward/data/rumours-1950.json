@@ -1,0 +1,1507 @@
+{
+  "_about": "Rumour records for 1950 (data only). A rumour POINTS AT a thing or a place, is TOLD through a 1950 channel (a person you hail, the evening shipping forecast on the radio, a harbour notice board, the post), lasts some days, and is TRUE or a TWIST (with what is actually so). Mostly true, sometimes a twist, never empty (ALIVE-SEA mini-quest grill round 3, item 16).",
+  "_spec": "games/windward/docs/ALIVE-SEA.md: \"Grill: generated mini quests\" (rounds 1 to 3), \"the thing model\" (rumours, regulars, warmth), \"anchoring\", \"day and night\". Ids link to data/things-1950.json (things), artifacts-1950.json, quests-1950.json, rumours-1950.json and data/island-lore.json.",
+  "_invented": "Everything here is INVENTED unless a record says otherwise: each carries invented:true and a source {kind, refs}. Spoken lines are INVENTED-DIALOGUE, short, for Felix to rewrite by eye. No real private person is named.",
+  "_fields": {
+    "id": "rumour.<slug>",
+    "channel": "person | radio | notice-board | post",
+    "target": "{ thing?: thing id, place?: name-list or island-lore id }: at least one",
+    "tellers": "[{ thing: id } | { channel: radio, program } | { channel: notice-board | post, at: place id, note? }]",
+    "text": "what is said (never empty)",
+    "days": "how many game days it keeps going round",
+    "truth": "true | twist",
+    "twist": "for a twist: what is actually so",
+    "dynamic": "\"weather\": truth follows the weather system (radio forecasts)",
+    "when": "optional conditions, same vocabulary as things-1950.json",
+    "source": "{ kind, refs[], note? }",
+    "invented": "always true",
+    "lore": "{ place, hook: rumours, index } into island-lore.json"
+  },
+  "_vocab": {
+    "channels": [
+      "person",
+      "radio",
+      "notice-board",
+      "post"
+    ],
+    "truth": [
+      "true",
+      "twist"
+    ]
+  },
+  "_counts": {
+    "total": 53,
+    "byChannel": {
+      "person": 44,
+      "radio": 3,
+      "notice-board": 3,
+      "post": 3
+    },
+    "byTruth": {
+      "true": 37,
+      "twist": 16
+    },
+    "fromLore": 26
+  },
+  "templates": [
+    {
+      "id": "rumour.maseskar-burned-red",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "thing": "place.karingon.pilot-lotsberget"
+        }
+      ],
+      "text": "They say it burned red once, in the old days, and the fishermen from Käringön still call that a bad omen.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#rumours[0]",
+          "W1950: the light was fixed red 1865 to 1887"
+        ],
+        "note": "the red light is sourced; the omen is invented"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.maseskar-fish-taste",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "thing": "place.lysekil.engine-fitter"
+        }
+      ],
+      "text": "The Lysekil harbour men say the fish off Måseskär taste of something since the war.",
+      "days": 5,
+      "truth": "twist",
+      "twist": "There are post-war wrecks west of Måseskär (low-confidence source); whether the fish taste of them is not known.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#rumours[1]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "rumours",
+        "index": 1
+      }
+    },
+    {
+      "id": "rumour.paulapallarna",
+      "target": {
+        "thing": "secret.karingon.boys-loft",
+        "place": "village:Käringön"
+      },
+      "tellers": [
+        {
+          "thing": "place.karingon.pilot-lotsberget"
+        },
+        {
+          "thing": "place.karingon.net-mender-quay"
+        }
+      ],
+      "text": "'You'll want to give Paulapallarna a wide berth when the wind is south-west. They've had one ship already.'",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#rumours[0]",
+          "RAÄ L1960:6080: the bark Paula, November 1872"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Käringön",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.gullholmen-tordenskiold-wreck",
+      "target": {
+        "thing": "secret.gullholmen.saturday-argument",
+        "place": "village:Gullholmen"
+      },
+      "tellers": [
+        {
+          "thing": "place.gullholmen.long-line-fisherman"
+        }
+      ],
+      "text": "'That wreck is Tordenskiold's, sure as I'm standing. A man from the museum said otherwise but he never fished a day.'",
+      "days": 7,
+      "truth": "twist",
+      "twist": "Bohusläns museum (rapport 2012:39) dates the timber to felling in 1727-1827 and rejects the Tordenskiold link.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Gullholmen",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.gaso-hotel-closing",
+      "target": {
+        "place": "relation/10604591"
+      },
+      "tellers": [
+        {
+          "thing": "place.gaso.boarding-house-keeper"
+        }
+      ],
+      "text": "'The hotel will close after this summer. The last of the Göteborg families are coming for the season.'",
+      "days": 5,
+      "truth": "twist",
+      "twist": "The beach hotel closed about 1960, ten years later (SVW-gaso).",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604591#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604591",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.korno-military-south-point",
+      "target": {
+        "place": "relation/10094463"
+      },
+      "tellers": [
+        {
+          "thing": "place.korno.teacher"
+        },
+        {
+          "thing": "place.korno.coaster-skipper"
+        }
+      ],
+      "text": "'They say the military will want the south point one day. Don't tell the sheep.'",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10094463#rumours[0]"
+        ],
+        "note": "FORESIGHT: a coastal battery was built there in 1970. In 1950 it is a hunch; for the player it is a wink across time. Felix decides whether to keep it."
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10094463",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.fiskebackskil-ferry-late",
+      "target": {
+        "place": "village:Fiskebäckskil"
+      },
+      "tellers": [
+        {
+          "thing": "place.fiskebackskil.ferry-deckhand"
+        }
+      ],
+      "text": "'The ferry's late again, and they say the lights are out since the storm.'",
+      "days": 4,
+      "truth": "true",
+      "when": {
+        "storyPhase": [
+          "beats:help",
+          "task:gas",
+          "task:lights"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Fiskebäckskil#rumours[0]",
+          "GAME-DESIGN.md canon: the four AGA lights out since the storm"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Fiskebäckskil",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.grundsund-mackerel-are-in",
+      "target": {
+        "thing": "wildlife.mackerel-jumping",
+        "place": "village:Grundsund"
+      },
+      "tellers": [
+        {
+          "thing": "place.grundsund.cutter-skipper"
+        }
+      ],
+      "text": "'Mackerel are in. The cutters are going out Saturday.'",
+      "days": 3,
+      "truth": "true",
+      "when": {
+        "season": [
+          "early-summer",
+          "summer"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#rumours[0]",
+          "things:wildlife.mackerel-jumping speciesCheck (sv.wikipedia Makrill, Grundsund)"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Grundsund",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.lysekil-skandia-engine",
+      "target": {
+        "place": "village:Lysekil"
+      },
+      "tellers": [
+        {
+          "thing": "place.lysekil.engine-fitter"
+        }
+      ],
+      "text": "'The Skandia works has a new engine that won't fail you in a calm.'",
+      "days": 5,
+      "truth": "twist",
+      "twist": "Hot-bulb engines were reliable but not that reliable; the fitter is selling.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Lysekil#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Lysekil",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.bonden-anna-maria",
+      "target": {
+        "place": "relation/10250201"
+      },
+      "tellers": [
+        {
+          "thing": "place.bonden.dare-lad"
+        },
+        {
+          "thing": "place.grundsund.cutter-skipper"
+        }
+      ],
+      "text": "'Mind Bonden's west side in a north-wester: that took the Anna Maria.'",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250201#rumours[0]",
+          "RAÄ L1960:6098: the schooner Anna Maria, 10 February 1905, three dead"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10250201",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.islandsberg-old-keeper",
+      "target": {
+        "place": "light:Islandsberg"
+      },
+      "tellers": [
+        {
+          "thing": "place.islandsberg.family"
+        }
+      ],
+      "text": "'The light is automatic now but the old keeper still sits on the rock some evenings.'",
+      "days": 6,
+      "truth": "twist",
+      "twist": "No ghost: a man from Grundsund fishes off the rock in the evenings, sits like a keeper and was one once.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Islandsberg#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Islandsberg",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.harmano-svecia-rudder",
+      "target": {
+        "place": "relation/5463706"
+      },
+      "tellers": [
+        {
+          "thing": "place.harmano.quarryman"
+        },
+        {
+          "thing": "place.harmano.egg-farmer"
+        }
+      ],
+      "text": "'The Svecia's rudder is still standing up on the bottom off the huvud. The Danes took the rest.'",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5463706#rumours[0]",
+          "RAÄ L1960:6452: wreck of the Svecia 1926; Danish scrap divers recorded"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5463706",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.hallevik-fire-1905",
+      "target": {
+        "place": "village:Hälleviksstrand"
+      },
+      "tellers": [
+        {
+          "thing": "place.hallevik.cannery-worker"
+        }
+      ],
+      "text": "'Strana had a fire in 1905 and rebuilt in one summer. Ask anyone over sixty.'",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Hälleviksstrand#rumours[0]",
+          "vastsverige.com: the 1905 fire (via history-start-area.md)"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Hälleviksstrand",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.storon-seal-pups",
+      "target": {
+        "thing": "wildlife.seal-pups-storon",
+        "place": "relation/10604590"
+      },
+      "tellers": [
+        {
+          "thing": "place.storon.pup-counter"
+        }
+      ],
+      "text": "'The seals west of Storön have pups again. Don't go near, the mothers watch.'",
+      "days": 4,
+      "truth": "true",
+      "when": {
+        "season": [
+          "early-summer"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604590#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604590",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.hattan-dark",
+      "target": {
+        "place": "light:Hättan"
+      },
+      "tellers": [
+        {
+          "thing": "place.hattan.fisherman"
+        }
+      ],
+      "text": "'Hättan has been dark since the storm. We rowed round the point by feel last night.'",
+      "days": 5,
+      "truth": "true",
+      "when": {
+        "storyPhase": [
+          "task:gas",
+          "task:lights"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Hättan#rumours[0]",
+          "GAME-DESIGN.md canon"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Hättan",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.gaven-old-pole",
+      "target": {
+        "thing": "secret.gaven.initials",
+        "place": "light:Gäven"
+      },
+      "tellers": [
+        {
+          "thing": "place.gaven.pilot"
+        }
+      ],
+      "text": "'My father kept watch from the platform on the old pole. The light does it better but it's lonelier.'",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Gäven#rumours[0]",
+          "RAÄ: Gäven pole mark 1835 with a pilots' lookout platform"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Gäven",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.fredagsholmen-why-friday",
+      "target": {
+        "thing": "secret.fredagsholmen.calendar",
+        "place": "relation/10237443"
+      },
+      "tellers": [
+        {
+          "thing": "place.fredagsholmen.sheep-farmer"
+        }
+      ],
+      "text": "'Why Friday? Ask the first man who was stuck on it all week.'",
+      "days": 5,
+      "truth": "twist",
+      "twist": "Nobody knows where the name comes from; the sheep-farmer is telling a story.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237443#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237443",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.kraksundsgap-second-light",
+      "target": {
+        "thing": "secret.kraksundsgap.white-tower",
+        "place": "light:Kråksundsgap Södra"
+      },
+      "tellers": [
+        {
+          "thing": "place.kraksundsgap.pilot"
+        }
+      ],
+      "text": "'Mind the gap at night. They say there's a second light that isn't a light.'",
+      "days": 7,
+      "truth": "true",
+      "when": {
+        "timeOfDay": [
+          "dusk",
+          "night"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Kråksundsgap Södra#rumours[0]",
+          "GAME-DESIGN.md canon: the Kråksundsgap glimpse"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Kråksundsgap Södra",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.torno-dora",
+      "target": {
+        "place": "relation/10238557"
+      },
+      "tellers": [
+        {
+          "thing": "place.torno.quarryman-dora"
+        }
+      ],
+      "text": "'The Dora sank in the quarry sound on a calm day. Nobody was hurt, and nobody can say whose fault it was.'",
+      "days": 6,
+      "truth": "twist",
+      "twist": "Two records (11 Dec 1925 and 11 Apr 1928) probably describe one steamer; the date, and so the weather, is not settled.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10238557#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10238557",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.harpo-freya-coal",
+      "target": {
+        "thing": "secret.harpo.ships-bell",
+        "place": "relation/10250169"
+      },
+      "tellers": [
+        {
+          "thing": "place.harpo.long-liner"
+        }
+      ],
+      "text": "'Coal and coke, she carried. The Red Company wouldn't touch her.'",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250169#rumours[0]",
+          "RAÄ L1960:6443: cargo coal and coke; salvage judged too hard"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10250169",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.rora-eats-ships",
+      "target": {
+        "place": "relation/10250171"
+      },
+      "tellers": [
+        {
+          "thing": "place.fiskebackskil.shipmaster-bench"
+        }
+      ],
+      "text": "'Röra eats ships at Christmas. Watch it on the twenty-first.'",
+      "days": 5,
+      "truth": "twist",
+      "twist": "One ship, the Neptun, was lost on Röra on 21-22 December 1908; once, not every year.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250171#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10250171",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.stangholmen-dark-too",
+      "target": {
+        "place": "relation/10237903"
+      },
+      "tellers": [
+        {
+          "thing": "place.stangholmen.ferryman"
+        }
+      ],
+      "text": "'Stångehuvud has been dark since the war started. Now Stångholmen is dark too.'",
+      "days": 5,
+      "truth": "true",
+      "when": {
+        "storyPhase": [
+          "task:gas",
+          "task:lights"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237903#rumours[0]",
+          "sv.wikipedia Stångehuvuds naturreservat: the light was put out in 1940"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237903",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.stangehuvud-glows",
+      "target": {
+        "thing": "secret.stangehuvud.nets-in-dark-house",
+        "place": "light:Stångehuvud"
+      },
+      "tellers": [
+        {
+          "thing": "place.stangehuvud.retired-quarryman"
+        }
+      ],
+      "text": "Boys swear the dark light house still glows on the night of a big storm.",
+      "days": 4,
+      "truth": "twist",
+      "twist": "It is lightning in the glazed gallery, and the fisherman's hurricane lamp where his nets hang.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Stångehuvud#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Stångehuvud",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.stangehuvud-academy-flowers",
+      "target": {
+        "place": "light:Stångehuvud"
+      },
+      "tellers": [
+        {
+          "thing": "place.stangehuvud.retired-quarryman"
+        }
+      ],
+      "text": "The Academy of Sciences is said to be sending people to count flowers on the headland.",
+      "days": 5,
+      "truth": "twist",
+      "twist": "The Academy of Sciences has owned the headland since 1925 (a gift via Calla Curman); counting flowers is the story, not the plan.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Stångehuvud#rumours[1]",
+          "sv.wikipedia Stångehuvuds naturreservat: donated to the Academy in 1925"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Stångehuvud",
+        "hook": "rumours",
+        "index": 1
+      }
+    },
+    {
+      "id": "rumour.karingon-pilot-boat-faster",
+      "target": {
+        "thing": "people.pilot-boat",
+        "place": "relation/10239114"
+      },
+      "tellers": [
+        {
+          "thing": "place.karingon-island.net-mender-north-pier"
+        }
+      ],
+      "text": "The new pilot boat is faster than anything the Marstrand men have.",
+      "days": 5,
+      "truth": "twist",
+      "twist": "The pilot boat was built in 1939 and is no faster than the Marstrand boats; the Käringön men are proud.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10239114#rumours[0]"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10239114",
+        "hook": "rumours",
+        "index": 0
+      }
+    },
+    {
+      "id": "rumour.maseskar-no-clockwork",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "thing": "place.karingon-island.pilots-widow"
+        }
+      ],
+      "text": "There will be a light at Måseskär with no clockwork in it before long.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10239114#rumours[1]",
+          "SVW-masesk: in 1955 an electric motor replaced the clockwork and plumb-weight"
+        ]
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10239114",
+        "hook": "rumours",
+        "index": 1
+      }
+    },
+    {
+      "id": "rumour.radio.gale-warning",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast"
+        }
+      ],
+      "text": "Skagerrak: south-westerly gale expected tomorrow, rain from the west. Small craft keep to harbour.",
+      "days": 1,
+      "truth": "true",
+      "dynamic": "weather",
+      "when": {},
+      "channel": "radio",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "people:M03 (Måseskär: battery radio reserved for the weather report, wartime Christmas 1941)",
+          "people:Q11,Q14 (radio in Skaftö households in the 1940s: not found)",
+          "docs/ALIVE-SEA.md: rumours without radio / the evening shipping forecast"
+        ],
+        "note": "DYNAMIC: truth follows the next day's weather; the weather system picks the wording. A wrong forecast makes it a twist. WHERE it is heard is open: radio at Måseskär is sourced (a battery radio reserved for the weather report, 1941), radio in Skaftö homes in the 1940s was NOT found (people:Q11, Q14), so a harbour office, shop or keeper's cottage is Felix's choice."
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.radio.fine-weather",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast"
+        }
+      ],
+      "text": "Skagerrak: fine weather tomorrow, light westerly, a sea breeze by midday.",
+      "days": 1,
+      "truth": "true",
+      "dynamic": "weather",
+      "when": {},
+      "channel": "radio",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md weather grill: fine sea-breeze day type",
+          "people:M03 (the radio forecast at Måseskär)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.radio.fog-banks",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast"
+        }
+      ],
+      "text": "Fog banks off the Skagerrak coast; poor visibility in the morning, clearing by midday.",
+      "days": 1,
+      "truth": "true",
+      "dynamic": "weather",
+      "when": {},
+      "channel": "radio",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md weather grill: calm misty morning that clears",
+          "people:M03 (the radio forecast at Måseskär)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.notice.lights-dark",
+      "target": {
+        "place": "light:Gäven"
+      },
+      "tellers": [
+        {
+          "channel": "notice-board",
+          "at": "village:Lysekil",
+          "note": "the harbour office board"
+        }
+      ],
+      "text": "NOTICE TO MARINERS: the lights at Hättan, Gäven, Stångholmen and Fredagsholmen are reported dark since the storm. Keep to the marked channel.",
+      "days": 7,
+      "truth": "true",
+      "when": {
+        "storyPhase": [
+          "task:gas",
+          "task:lights"
+        ]
+      },
+      "channel": "notice-board",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "GAME-DESIGN.md canon: the four AGA lights out since the storm"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.notice.mackerel-cutters",
+      "target": {
+        "thing": "wildlife.mackerel-jumping",
+        "place": "village:Grundsund"
+      },
+      "tellers": [
+        {
+          "channel": "notice-board",
+          "at": "village:Grundsund",
+          "note": "the quay board"
+        }
+      ],
+      "text": "Cutters sail for the mackerel on Saturday. Crews to report on the quay at four.",
+      "days": 4,
+      "truth": "true",
+      "when": {
+        "season": [
+          "early-summer",
+          "summer"
+        ]
+      },
+      "channel": "notice-board",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.notice.ferry-timetable",
+      "target": {
+        "thing": "place.fiskebackskil.ferry-deckhand",
+        "place": "village:Fiskebäckskil"
+      },
+      "tellers": [
+        {
+          "channel": "notice-board",
+          "at": "village:Fiskebäckskil",
+          "note": "the ferry quay"
+        }
+      ],
+      "text": "The Lysekil ferry runs every half hour in summer. Last crossing in the evening, weather permitting.",
+      "days": 5,
+      "truth": "twist",
+      "twist": "The timetable is more a hope: it runs when the deckhand says it runs.",
+      "when": {},
+      "channel": "notice-board",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "lore:village:Fiskebäckskil (the Lysekil ferry); the times are INVENTED"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.post.guest-postcard",
+      "target": {
+        "place": "relation/10604591"
+      },
+      "tellers": [
+        {
+          "channel": "post",
+          "at": "relation/10604591",
+          "note": "a card on the boarding-house hall table"
+        }
+      ],
+      "text": "A card from a Göteborg family on the hall table: \"Same rooms as last summer, if you will have us.\"",
+      "days": 4,
+      "truth": "true",
+      "when": {},
+      "channel": "post",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.post.new-assistant",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "channel": "post",
+          "at": "village:Käringön",
+          "note": "the post boat's news"
+        }
+      ],
+      "text": "The post boat brought word that Måseskär's assistant is to be relieved in September.",
+      "days": 5,
+      "truth": "twist",
+      "twist": "Reliefs are by the Lotsverket's own timetable; the post boat only hears gossip.",
+      "when": {},
+      "channel": "post",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "people:M01, M03 (staff and supply boat)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.post.letter-for-gaven-pilot",
+      "target": {
+        "thing": "place.gaven.pilot",
+        "place": "light:Gäven"
+      },
+      "tellers": [
+        {
+          "channel": "post",
+          "at": "village:Lysekil",
+          "note": "the post office window"
+        }
+      ],
+      "text": "A letter for the pilot who works under Gäven has lain at the post office for a month.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "post",
+      "source": {
+        "kind": "invented",
+        "refs": [],
+        "note": "a hook for a delivery quest"
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.birds-working",
+      "target": {
+        "thing": "wildlife.diving-flock"
+      },
+      "tellers": [
+        {
+          "thing": "people.fisherman-out-at-dawn"
+        }
+      ],
+      "text": "Birds are working off the point this morning. Mackerel under them, you'll see.",
+      "days": 2,
+      "truth": "true",
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.small-whale",
+      "target": {
+        "thing": "wildlife.porpoises"
+      },
+      "tellers": [
+        {
+          "thing": "people.rowing-guests"
+        }
+      ],
+      "text": "My husband swears he saw a small whale off the outer rocks yesterday. I said it was a seal.",
+      "days": 4,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "things:wildlife.porpoises speciesCheck (sv.wikipedia Vanlig tumlare)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.bread-in-the-cave",
+      "target": {
+        "thing": "secret.korno.cave-loaf"
+      },
+      "tellers": [
+        {
+          "thing": "place.korno.teacher"
+        }
+      ],
+      "text": "Somebody leaves bread and water in the cave on the island. Not me. Not the children, I asked.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.calendar-on-the-rock",
+      "target": {
+        "thing": "secret.fredagsholmen.calendar"
+      },
+      "tellers": [
+        {
+          "thing": "place.fredagsholmen.sheep-farmer"
+        }
+      ],
+      "text": "Somebody cut a calendar in the south rock, seven strokes and six crossed out. Look if you pass.",
+      "days": 5,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.loft-of-wrecks",
+      "target": {
+        "thing": "secret.karingon.boys-loft"
+      },
+      "tellers": [
+        {
+          "thing": "place.karingon.net-mender-quay"
+        }
+      ],
+      "text": "The boy in the boathouse loft keeps half the sea in there. Ask him nicely and he might show you.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.green-glass-float",
+      "target": {
+        "thing": "drift.glass-float"
+      },
+      "tellers": [
+        {
+          "thing": "place.harpo.long-liner"
+        }
+      ],
+      "text": "A green glass float has been seen drifting outside the skerries. Whoever has the sharpest eyes.",
+      "days": 3,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.logbook-in-the-wall",
+      "target": {
+        "thing": "secret.islandsberg.keepers-logbook"
+      },
+      "tellers": [
+        {
+          "thing": "place.fiskebackskil.shipmaster-bench"
+        }
+      ],
+      "text": "They found something in the wall when they bought the old keeper's house. Won't say what.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.pots-under-the-ledge",
+      "target": {
+        "place": "relation/10237443"
+      },
+      "tellers": [
+        {
+          "thing": "people.pot-hauler"
+        }
+      ],
+      "text": "The lobster are thick under the ledge at Fredagsholmen this autumn.",
+      "days": 3,
+      "truth": "twist",
+      "twist": "They are thick everywhere; he just does not want company on his ledge.",
+      "when": {
+        "season": [
+          "autumn"
+        ]
+      },
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.cod-on-the-harpo-bank",
+      "target": {
+        "place": "relation/10250169"
+      },
+      "tellers": [
+        {
+          "thing": "people.long-line-crew"
+        }
+      ],
+      "text": "Cod are on the bank off Stora Harpö. But mind the old Freya; she eats hooks.",
+      "days": 3,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "lore:relation/10250169 (the Freya, snagged lines)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.ship-due-off-maseskar",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "thing": "people.pilot-boat"
+        }
+      ],
+      "text": "Ship due off Måseskär by noon. The pilot is going out to meet her.",
+      "days": 1,
+      "truth": "true",
+      "dynamic": "weather",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "lore:relation/10239114 (Käringön pilot station staffed in 1950)"
+        ],
+        "note": "pairs with the pilot-boat thing"
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.supply-boat-thursday",
+      "target": {
+        "place": "light:Måseskär"
+      },
+      "tellers": [
+        {
+          "thing": "place.maseskar.assistant"
+        }
+      ],
+      "text": "The supply boat comes on Thursday, if the weather lets it. We are down to the last of the coffee.",
+      "days": 4,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "people:M03 (the supply boat to Käringön three or four times a month)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.rescue-boat-out",
+      "target": {
+        "place": "village:Käringön"
+      },
+      "tellers": [
+        {
+          "thing": "place.karingon.rescue-volunteer"
+        }
+      ],
+      "text": "The rescue boat has been out twice this month for people who misjudged the tide.",
+      "days": 4,
+      "truth": "twist",
+      "twist": "Only once, and for a rowing boat with a boy and a very large fish.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "lore:village:Käringön (a Sea Rescue Society station on the island)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.cannery-rebuilt",
+      "target": {
+        "place": "village:Gullholmen"
+      },
+      "tellers": [
+        {
+          "thing": "place.gullholmen.cannery-woman"
+        }
+      ],
+      "text": "They are going to rebuild the cannery again, bigger this time. Work for everyone.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "people:Q03 (the Gullholmen cannery was rebuilt in 1938-39 and again in 1950-52)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.twenty-ships",
+      "target": {
+        "place": "relation/10604591"
+      },
+      "tellers": [
+        {
+          "thing": "place.gaso.retired-skipper"
+        }
+      ],
+      "text": "Twenty big sailing ships we had on Gåsö in my grandfather's day. Now not one.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "lore:relation/10604591 (SVW-gaso: about 20 larger sailing ships in 1860)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.oilskin-works-hiring",
+      "target": {
+        "place": "village:Grundsund"
+      },
+      "tellers": [
+        {
+          "thing": "place.grundsund.seamstress"
+        }
+      ],
+      "text": "The oilskin works takes on more girls after the summer. Mind, you have to like the smell.",
+      "days": 5,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "lore:village:Grundsund (rain-clothes manufacture)"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.bath-jetty-mended",
+      "target": {
+        "place": "village:Lysekil"
+      },
+      "tellers": [
+        {
+          "thing": "place.lysekil.bath-house-attendant"
+        }
+      ],
+      "text": "They say the cold-bath jetty is to be mended before next summer. New planks all along.",
+      "days": 5,
+      "truth": "twist",
+      "twist": "Nothing is planned; she has asked for new planks three years running.",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": []
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.iceland-boat-on-the-slip",
+      "target": {
+        "place": "village:Hälleviksstrand"
+      },
+      "tellers": [
+        {
+          "thing": "place.hallevik.shipwright"
+        }
+      ],
+      "text": "An Iceland boat is on the slip. Half of Gullholmen has put its name down for her.",
+      "days": 6,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "ISLAND-LORE.md: Hälleviksstrand's yard builds Iceland boats under a roof"
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "rumour.person.mind-the-trousers",
+      "target": {
+        "place": "relation/10237897"
+      },
+      "tellers": [
+        {
+          "thing": "place.jamningarna.pilot"
+        }
+      ],
+      "text": "Coming in, keep the Trousers on your port side. And mind the west wind pushing you onto the belts.",
+      "days": 4,
+      "truth": "true",
+      "when": {},
+      "channel": "person",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "lore:relation/10237897 (the two white cairns with painted belts guide ships into the western inlet)"
+        ]
+      },
+      "invented": true
+    }
+  ]
+}

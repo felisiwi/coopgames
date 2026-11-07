@@ -13,6 +13,7 @@
     "personality": "people only: gruff | chatty | shy (quest line variants key on it)",
     "lines": "people only: { hail, hailAfter? }. INVENTED-DIALOGUE.",
     "offers": "people only: what hailing may lead to: rumour, errand",
+    "speciesCheck": "wildlife only: { status, refs[], note }. status: confirmed-1950 | confirmed-today | not-1950 | not-checked (see _vocab.speciesStatus). A confirmed species makes source.kind grounded instead of invented; invented stays true because behaviour, timing and placement are design. not-1950 narrows years so the template does not spawn in 1950.",
     "requires": "{ regular: template id, warmth: friendly | warm }: a secret that a regular reveals once they like you (hidden warmth, ALIVE-SEA 18)",
     "sighting": "{ kind, line, drawing }: the logbook entry, first person, short; {place} is filled with the nearest named place; drawing is the silhouette slug",
     "rarity": "common | uncommon | rare (thing spawn rarity)",
@@ -140,7 +141,13 @@
       "researched": "the template is a sourced fact (refs name the source id)",
       "grounded": "INVENTED content that grows from a sourced fact or lore hook (refs name it)",
       "invented": "INVENTED, no source behind it (design idea from ALIVE-SEA.md or ours)"
-    }
+    },
+    "speciesStatus": [
+      "confirmed-1950",
+      "confirmed-today",
+      "not-1950",
+      "not-checked"
+    ]
   },
   "_counts": {
     "total": 106,
@@ -200,7 +207,12 @@
           "src/life.js: \"a dozen gulls that follow the boat\" (header comment)"
         ]
       },
-      "invented": false
+      "invented": false,
+      "speciesCheck": {
+        "status": "not-checked",
+        "refs": [],
+        "note": "ported from src/life.js; gulls were not part of the species check (they are everywhere on this coast)"
+      }
     },
     {
       "id": "wildlife.gulls-on-marks",
@@ -248,7 +260,12 @@
           "src/life.js: placeMarks, MARKS_PER_PLACE = 2"
         ]
       },
-      "invented": false
+      "invented": false,
+      "speciesCheck": {
+        "status": "not-checked",
+        "refs": [],
+        "note": "ported from src/life.js; gulls were not part of the species check"
+      }
     },
     {
       "id": "wildlife.eider-raft",
@@ -307,7 +324,14 @@
           "src/life.js: raftInCell, RAFT_CELL_M = 150, RAFT_CHANCE = 0.4, RAFT_SIZE = 4, fleeOffset, FLEE_DIST_M = 28, FLEE_MAX_M = 16"
         ]
       },
-      "invented": false
+      "invented": false,
+      "speciesCheck": {
+        "status": "confirmed-1950",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Ejder"
+        ],
+        "note": "Resident on the west coast (sv.wikipedia: stannfågel in western Sweden; dialect name \"knubbgås\" on parts of Västkusten). 1950 was a LOW: the population kept falling into the early 1900s and recovered after spring hunting of sea-ducks was banned in the mid-1950s. The raft numbers are ported from today's code; consider a lower chance for 1950."
+      }
     },
     {
       "id": "wildlife.eider-ducklings",
@@ -360,13 +384,21 @@
       },
       "rarity": "uncommon",
       "source": {
-        "kind": "invented",
+        "kind": "grounded",
         "refs": [
-          "docs/ALIVE-SEA.md"
+          "docs/ALIVE-SEA.md",
+          "https://sv.wikipedia.org/wiki/Ejder"
         ],
-        "note": "\"Eiders with ducklings (early summer)\" is an ALIVE-SEA idea; the raft numbers above are ported, this is not"
+        "note": "the SPECIES is sourced (see speciesCheck); its behaviour, timing and placement here are INVENTED design"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-1950",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Ejder"
+        ],
+        "note": "Same species as the raft (present, at a low in 1950). Early summer is the design; the article does not give a breeding month."
+      }
     },
     {
       "id": "wildlife.harbour-seals",
@@ -426,7 +458,14 @@
         ],
         "note": "Species: the county page for Gåsö says knubbsäl, harbour seals (island-lore.json, Gåsö)."
       },
-      "invented": false
+      "invented": false,
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Knubbsäl"
+        ],
+        "note": "Harbour seal (knubbsäl) is Bohuslän's provincial animal and lives along the west coast. 1950: protection began only in the 1970s, so seals were hunted then; present, abundance unknown. The 1988 distemper epidemic is the later event the article stresses."
+      }
     },
     {
       "id": "wildlife.seal-pups-storon",
@@ -489,6 +528,14 @@
         "place": "relation/10604590",
         "hook": "regulars",
         "index": 0
+      },
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Knubbsäl",
+          "lore:relation/10604590 (county page: the seal skerries by Gåsö are a breeding area)"
+        ],
+        "note": "Species sourced; pups in early summer and this skerry are the lore's hook (INVENTED detail on a real breeding area)."
       }
     },
     {
@@ -496,8 +543,8 @@
       "name": "Cormorants drying their wings",
       "category": "wildlife",
       "years": [
-        1940,
-        1959
+        1990,
+        2030
       ],
       "where": {
         "anchor": "sea-mark",
@@ -542,7 +589,16 @@
         ],
         "note": "\"cormorants drying their wings on marks\" is an ALIVE-SEA idea"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "not-1950",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Storskarv",
+          "https://sv.wikipedia.org/wiki/Toppskarv",
+          "search summary of a Länsstyrelsen Västernorrland report (not read in full): the cormorant re-established as a Swedish breeder at the end of the 1940s, at Kalmarsund"
+        ],
+        "note": "Exterminated from Sweden in the late 1800s; back as a breeder only from the late 1940s on the Baltic side; fast growth in the late 1990s. The shag (toppskarv), the other cormorant of this coast, only became a Bohuslän breeder in 2004. So neither belongs on a 1950 Bohuslän mark. years narrowed to [1990, 2030] so the 1950 engine never spawns it."
+      }
     },
     {
       "id": "wildlife.herons-shallows",
@@ -595,13 +651,21 @@
       },
       "rarity": "uncommon",
       "source": {
-        "kind": "invented",
+        "kind": "grounded",
         "refs": [
-          "docs/ALIVE-SEA.md"
+          "docs/ALIVE-SEA.md",
+          "https://sv.wikipedia.org/wiki/Gråhäger"
         ],
-        "note": "\"Herons standing in shallow bays\" is an ALIVE-SEA idea"
+        "note": "the SPECIES is sourced (see speciesCheck); its behaviour, timing and placement here are INVENTED design"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Gråhäger"
+        ],
+        "note": "Grey heron is a resident (stannfågel) on Sweden's west coast and a fairly common breeder in the south. 1950 status not in the article."
+      }
     },
     {
       "id": "wildlife.porpoises",
@@ -651,13 +715,21 @@
       },
       "rarity": "uncommon",
       "source": {
-        "kind": "invented",
+        "kind": "grounded",
         "refs": [
-          "docs/ALIVE-SEA.md"
+          "docs/ALIVE-SEA.md",
+          "https://sv.wikipedia.org/wiki/Vanlig_tumlare"
         ],
-        "note": "\"Harbour porpoises surfacing now and then (Skagerrak)\" is an ALIVE-SEA idea"
+        "note": "the SPECIES is sourced (see speciesCheck); its behaviour, timing and placement here are INVENTED design"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Vanlig_tumlare"
+        ],
+        "note": "The harbour porpoise lives along Sweden's coasts in the Skagerrak and Kattegatt and is the only whale regularly in Swedish waters. The article says a strong decline since the 1960s (citation needed), so it was probably commoner in 1950."
+      }
     },
     {
       "id": "wildlife.diving-flock",
@@ -711,13 +783,23 @@
       },
       "rarity": "uncommon",
       "source": {
-        "kind": "invented",
+        "kind": "grounded",
         "refs": [
-          "docs/ALIVE-SEA.md"
+          "docs/ALIVE-SEA.md",
+          "https://sv.wikipedia.org/wiki/Silvertärna",
+          "https://sv.wikipedia.org/wiki/Makrill"
         ],
-        "note": "\"A diving flock = a shoal of fish below\" is an ALIVE-SEA idea; the fishing line / fishing-for-gifts ladder is a later system"
+        "note": "the SPECIES is sourced (see speciesCheck); its behaviour, timing and placement here are INVENTED design"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Silvertärna",
+          "https://sv.wikipedia.org/wiki/Makrill"
+        ],
+        "note": "Rests on gulls, terns and mackerel, each checked on its own; the behaviour (a flock working a shoal) is the design."
+      }
     },
     {
       "id": "wildlife.mackerel-jumping",
@@ -738,8 +820,8 @@
       },
       "when": {
         "season": [
-          "summer",
-          "late-summer"
+          "early-summer",
+          "summer"
         ],
         "timeOfDay": [
           "afternoon",
@@ -775,7 +857,15 @@
         ],
         "note": "mackerel fishing from Grundsund in this period is sourced; the jumping fish is an INVENTED visual"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-1950",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Makrill",
+          "https://sv.wikipedia.org/wiki/Grundsund"
+        ],
+        "note": "Mackerel is Bohuslän's provincial fish; it enters the Skagerrak and Kattegatt to spawn in April and May and is fished on the west coast mainly in spring and summer. Grundsund fished mackerel with English-built cutters from the early 1900s. The season is corrected from \"late summer\" to spring to summer."
+      }
     },
     {
       "id": "wildlife.terns-dive-bomb",
@@ -836,7 +926,14 @@
         ],
         "note": "the name means tern skerry; that terns nest on it in 1950 is INVENTED"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Silvertärna"
+        ],
+        "note": "The Arctic tern breeds on coasts and in the outer archipelago along the west coast. That terns nest on Tärneskär in 1950 is INVENTED. The common tern's Swedish range was not found in the article read."
+      }
     },
     {
       "id": "wildlife.storm-petrels-maseskar",
@@ -898,7 +995,15 @@
         ]
       },
       "invented": false,
-      "note": "The folk belief is people:M10 (Käringön names for the bird); no island-lore hook backs it, so there is no lore link."
+      "note": "The folk belief is people:M10 (Käringön names for the bird); no island-lore hook backs it, so there is no lore link.",
+      "speciesCheck": {
+        "status": "confirmed-1950",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Stormsvala",
+          "people:M10"
+        ],
+        "note": "People:M10 records Käringön names for the bird and the belief that it foretells storms: that is the 1950-era source. Today it is seen yearly in strong westerlies off Bohuslän; the first one ringed in Sweden was caught on Härmanö huvud in 1988, so it is rare and mostly unseen."
+      }
     },
     {
       "id": "wildlife.mareld",
@@ -951,13 +1056,21 @@
       },
       "rarity": "uncommon",
       "source": {
-        "kind": "invented",
+        "kind": "grounded",
         "refs": [
-          "docs/ALIVE-SEA.md"
+          "docs/ALIVE-SEA.md",
+          "https://sv.wikipedia.org/wiki/Mareld"
         ],
-        "note": "\"Mareld (sea sparkle)\" is an ALIVE-SEA idea, a night reward for the day/night stage"
+        "note": "the SPECIES is sourced (see speciesCheck); its behaviour, timing and placement here are INVENTED design"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Mareld"
+        ],
+        "note": "Mareld (mostly the dinoflagellate Noctiluca scintillans) is \"most common in late summer\" (sv.wikipedia). The article is not specific to the west coast or to 1950."
+      }
     },
     {
       "id": "wildlife.jellyfish",
@@ -1008,13 +1121,23 @@
       },
       "rarity": "common",
       "source": {
-        "kind": "invented",
+        "kind": "grounded",
         "refs": [
-          "docs/ALIVE-SEA.md"
+          "docs/ALIVE-SEA.md",
+          "https://sv.wikipedia.org/wiki/Öronmanet",
+          "https://sv.wikipedia.org/wiki/Brännmanet"
         ],
-        "note": "\"Jellyfish drifting in late-summer water\" is an ALIVE-SEA idea"
+        "note": "the SPECIES is sourced (see speciesCheck); its behaviour, timing and placement here are INVENTED design"
       },
-      "invented": true
+      "invented": true,
+      "speciesCheck": {
+        "status": "confirmed-today",
+        "refs": [
+          "https://sv.wikipedia.org/wiki/Öronmanet",
+          "https://sv.wikipedia.org/wiki/Brännmanet"
+        ],
+        "note": "The moon jelly (called blåmanet on the west coast) is the commonest jellyfish in Sweden; the red lion's mane lives on the west coast. The late-summer timing is the design, not sourced."
+      }
     },
     {
       "id": "drift.fish-box",
@@ -3381,7 +3504,8 @@
         "hail": "Iceland? Cold and honest. The sea there tells you what it thinks."
       },
       "offers": [
-        "rumour"
+        "rumour",
+        "errand"
       ],
       "reactions": {
         "tap": {
@@ -4000,7 +4124,8 @@
         "hail": "I row to Lysekil every Saturday. Today I am late."
       },
       "offers": [
-        "errand"
+        "errand",
+        "rumour"
       ],
       "reactions": {
         "tap": {
@@ -4200,7 +4325,8 @@
         "hail": "The ferry's late again, and they say the lights are out since the storm."
       },
       "offers": [
-        "rumour"
+        "rumour",
+        "errand"
       ],
       "reactions": {
         "tap": {
@@ -4546,7 +4672,8 @@
         "hail": "The sea is eleven degrees. The guests insist. I only sweep."
       },
       "offers": [
-        "rumour"
+        "rumour",
+        "errand"
       ],
       "reactions": {
         "tap": {
@@ -4808,7 +4935,8 @@
         "hail": "Dare you! Dare you to touch it! I did!"
       },
       "offers": [
-        "errand"
+        "errand",
+        "rumour"
       ],
       "reactions": {
         "tap": {
@@ -5416,7 +5544,8 @@
         "hail": "Eleven! No, twelve! One keeps moving."
       },
       "offers": [
-        "errand"
+        "errand",
+        "rumour"
       ],
       "reactions": {
         "tap": {
@@ -6676,7 +6805,8 @@
         "hail": "That slab was split in '88. See the wedge marks? Berliners paid for it."
       },
       "offers": [
-        "rumour"
+        "rumour",
+        "errand"
       ],
       "reactions": {
         "tap": {
