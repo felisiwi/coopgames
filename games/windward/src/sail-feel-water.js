@@ -13,17 +13,47 @@ const START = '  // gust patches: darker, finely ruffled areas sliding across th
 const END = '  // wind lines: long thin pale lines along the wind';
 const DECL_AFTER = 'uniform float uFoamK;';
 
+// The vertex shader: add the swell (one travelling sine, scaled by open-water exposure from the texture) to the sea's height and slope.
+const V_DECL_AFTER = 'uniform vec2 uPlaneOffset;';
+const V_OLD_H = '  float h = seaHeight(wx, wz, uPhases, uWindDir, uWindStrength) * uWaveScale;';
+const V_OLD_G = '  vGrad = seaSlope(wx, wz, uPhases, uWindDir, uWindStrength);';
+const V_UNIFORMS = `
+uniform sampler2D uWindTex;
+uniform vec4 uWindRect;
+uniform vec4 uSwell;     // x, y: the unit vector (x, z) the swell travels along; z: k (rad/m); w: phase
+uniform float uSwellAmp; // metres, before exposure (0 = no swell)
+`;
+const V_NEW = `  // sail-feel lab: the swell (src/sail-feel-swell.js), full outside the skerries and flat among them
+  vec2 swuv = (vec2(wx, wz) - uWindRect.xy) / uWindRect.zw;
+  vec2 sedge = abs(swuv - 0.5);
+  float swin = 1.0 - smoothstep(0.35, 0.5, max(sedge.x, sedge.y));
+  float swE = smoothstep(0.35, 0.9, texture2D(uWindTex, swuv).g) * swin;
+  float swA = uSwellAmp * swE;
+  float swTheta = uSwell.z * (wx * uSwell.x + wz * uSwell.y) + uSwell.w;
+  float h = (seaHeight(wx, wz, uPhases, uWindDir, uWindStrength) + swA * sin(swTheta)) * uWaveScale;
+  vGrad = seaSlope(wx, wz, uPhases, uWindDir, uWindStrength) + swA * uSwell.z * cos(swTheta) * vec2(uSwell.x, uSwell.y);`;
+
+export function patchWaterVertexSource(vertexShader) {
+  const d = vertexShader.indexOf(V_DECL_AFTER);
+  if (d < 0 || !vertexShader.includes(V_OLD_H) || !vertexShader.includes(V_OLD_G)) throw new Error('sail-feel-water: the water vertex shader in src/water.js no longer has the height/slope lines the swell patch replaces; update src/sail-feel-water.js');
+  const swapped = vertexShader.replace(V_OLD_H, V_NEW).replace(V_OLD_G, '');
+  const at = swapped.indexOf(V_DECL_AFTER) + V_DECL_AFTER.length;
+  return swapped.slice(0, at) + V_UNIFORMS + swapped.slice(at);
+}
+
 const UNIFORMS_GLSL = `
 uniform sampler2D uWindTex;   // r = wind relative to calm-air wind of this water, (local - 0.2) / 1.6
 uniform vec4 uWindRect;       // world x, z of the texture's corner, and its size in metres
 uniform vec2 uWindDrift;      // where the air has carried a patch from the origin: ripples ride with it
 uniform float uWindOn;        // 0 = layer off
+// (texture: r = wind vs calm-air wind, g = open-water exposure, b = squall water darkness)
 `;
 
 const BLOCK_GLSL = `  // sail-feel lab: the real wind field, from a texture around the boat (src/sail-feel-water.js)
   vec2 wuv = (vWorld.xz - uWindRect.xy) / uWindRect.zw;
   float inWin = step(0.0, wuv.x) * step(wuv.x, 1.0) * step(0.0, wuv.y) * step(wuv.y, 1.0);
-  float rel = texture2D(uWindTex, wuv).r * 1.6 + 0.2;
+  vec4 wf = texture2D(uWindTex, wuv);
+  float rel = wf.r * 1.6 + 0.2;
   vec2 dp = vWorld.xz - uWindDrift;
   float rip = vn(dp * 0.55) * 0.6 + vn(dp * 1.3 + 7.0) * 0.4; // fine ripples, carried with the air
   float openSea = smoothstep(1.2, 3.0, depth);
@@ -32,6 +62,9 @@ const BLOCK_GLSL = `  // sail-feel lab: the real wind field, from a texture arou
   col = mix(col, col * vec3(0.42, 0.58, 0.82), gustK * (0.6 + 0.4 * rip)); // a gust: darker ...
   col += vec3(0.10, 0.14, 0.17) * smoothstep(0.62, 0.85, rip) * gustK; // ... and ruffled, with pale flecks (cat's-paws)
   col = mix(col, mix(col, vec3(0.80, 0.88, 0.92), 0.35), lullK * 0.85); // a lull or a lee: a pale, glassy sheen
+  float stormK = wf.b * inWin * uWindOn; // a squall: a dark line racing across the sea, then dark water with whitecaps
+  col = mix(col, col * vec3(0.30, 0.38, 0.50), stormK * 0.85);
+  col += vec3(0.55, 0.62, 0.68) * smoothstep(0.6, 0.82, rip) * stormK * stormK * 0.45;
 `;
 
 export function patchWaterSource(fragmentShader) {
@@ -59,10 +92,13 @@ export function createWindPaint(water, { size = 512, n = 48 } = {}) {
     uWindRect: { value: new THREE.Vector4(0, 0, size, size) },
     uWindDrift: { value: new THREE.Vector2() },
     uWindOn: { value: 1 },
+    uSwell: { value: new THREE.Vector4(1, 0, 0.24, 0) },
+    uSwellAmp: { value: 0 },
   };
   const materials = [water.mesh.material, ...water.mesh.children.map((c) => c.material).filter(Boolean)];
   for (const m of materials) {
     m.fragmentShader = patchWaterSource(m.fragmentShader);
+    m.vertexShader = patchWaterVertexSource(m.vertexShader);
     Object.assign(m.uniforms, u); // the same {value} holders on every material: one update feeds them all
     m.needsUpdate = true;
   }
@@ -81,6 +117,8 @@ export function createWindPaint(water, { size = 512, n = 48 } = {}) {
   return {
     rect: u.uWindRect.value,
     setOn(on) { u.uWindOn.value = on ? 1 : 0; },
+    // sw: swellFor() result or null (no swell); phase: swellPhaseUniform(sw, t); amp: metres before exposure
+    setSwell(sw, phase, amp = sw ? sw.amp : 0) { if (sw) u.uSwell.value.set(sw.tx, sw.tz, sw.k, phase); u.uSwellAmp.value = sw ? amp : 0; },
     // Re-sample the wind field around (cx, cz) at game time t, `rows` rows per call, so the ~n*n windAt calls are spread over
     // n / rows frames instead of landing in one frame (a phone would hitch). A pass is latched at its first call.
     step(field, t, cx, cz, rows = 6) {
@@ -91,7 +129,9 @@ export function createWindPaint(water, { size = 512, n = 48 } = {}) {
           const w = field.windAt(pass.ox + (i + 0.5) * cell, pass.oz + (j + 0.5) * cell, pass.t, tmp);
           const k = (j * n + i) * 4;
           next[k] = Math.round(clamp((w.local - 0.2) / 1.6, 0, 1) * 255);
-          next[k + 1] = 0; next[k + 2] = 0; next[k + 3] = 255;
+          next[k + 1] = Math.round(clamp(w.exposure, 0, 1) * 255);
+          next[k + 2] = Math.round(clamp(w.stormBand, 0, 1) * 255);
+          next[k + 3] = 255;
         }
       }
       pass.row = end;

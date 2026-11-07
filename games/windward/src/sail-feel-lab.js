@@ -19,10 +19,12 @@ import { loadWorldFiles, buildWorldForSpec } from './world-year-build.js';
 import { worldAtYear, yearOfEra } from './world-year.js';
 import { createWindArrow } from './windArrow.js';
 import { createWindField, WIND_FIELD } from './wind-field.js';
-import { nextSquallEtaS } from './squall.js';
+import { nextSquallEtaS, squallAt } from './squall.js';
 import { WEATHER, weatherAt, formatClock, hourOf, timeOfHour, dirToCompass, windMs, compassToDir } from './weather.js';
 import { parseParams, toSearch } from './sail-feel-params.js';
-import { FEEL, labTargetSpeed, heelTarget, stepHeel, createLuffState, stepLuff, luffFlutter, sprayRate } from './sail-feel-model.js';
+import { labTargetSpeed, heelTarget, stepHeel, createLuffState, stepLuff, luffFlutter, sprayRate, overpowerFactor, easeRelief, lookFor } from './sail-feel-model.js';
+import { swellFor, swellHeight, swellPhaseUniform, surfBoost } from './sail-feel-swell.js';
+import { createRain, createMist, createCloudBank } from './sail-feel-weather-fx.js';
 import { createWindPaint } from './sail-feel-water.js';
 import { createSpray, createFeelWake, createFeelCamera } from './sail-feel-fx.js';
 import { createPanel, compassName } from './sail-feel-panel.js';
@@ -36,9 +38,8 @@ const tick = () => new Promise((r) => setTimeout(r, 30)); // let the page paint 
 const approach = (cur, target, dt) => { const d = target - cur; return cur + Math.sign(d) * Math.min(Math.abs(d), (d >= 0 ? CONFIG.SAIL_FORCE : CONFIG.DRAG) * dt); };
 
 // The game's bobBoat (game.js): the boat sits on the sea it is drawn against. `heel` is extra roll to leeward, added to the wave roll.
-function bobBoat(group, x, z, heading, waves, wind, heelRoll) {
+function bobBoat(group, x, z, heading, h, heelRoll) { // h(x, z): the sea's height (wind waves + swell)
   const eps = CONFIG.BOAT_TILT_GRADIENT_EPS; const fx = Math.sin(heading); const fz = Math.cos(heading); const rx = Math.cos(heading); const rz = -Math.sin(heading);
-  const h = (px, pz) => seaHeightCPU(px, pz, waves.phases, wind.dir, wind.strength);
   const y = h(x, z); const max = CONFIG.BOAT_TILT_MAX;
   group.position.y = y;
   group.rotation.x = Math.min(max, Math.max(-max, -((h(x + fx * eps, z + fz * eps) - y) / eps) * CONFIG.BOAT_TILT_GAIN));
@@ -57,7 +58,8 @@ async function main() {
   const sky = createSky();
   scene.add(sky.mesh);
   const camera = new THREE.PerspectiveCamera(CONFIG.FIXED_CAMERA_FOV_DEG, 1, CONFIG.CAMERA_NEAR, 2000);
-  scene.add(new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY));
+  const hemi = new THREE.HemisphereLight(CONFIG.HEMI_SKY_COLOR, CONFIG.HEMI_GROUND_COLOR, CONFIG.HEMI_INTENSITY);
+  scene.add(hemi);
   const sun = new THREE.DirectionalLight(CONFIG.SUN_COLOR, CONFIG.SUN_INTENSITY);
   const laz = CONFIG.LIGHT_AZIMUTH_DEG * DEG; const lel = CONFIG.LIGHT_ELEVATION_DEG * DEG;
   const sunOffset = new THREE.Vector3(Math.sin(laz) * Math.cos(lel), Math.sin(lel), Math.cos(laz) * Math.cos(lel)).multiplyScalar(20);
@@ -98,7 +100,11 @@ async function main() {
   const self = { x: spawn.x, z: spawn.z, heading: 0, speed: 0, trim: 0 };
   const waves = createWaveState(0);
   const seaWind = { dir: 0, strength: 0.3 }; // the sea follows the DAY's wind and sea state (smooth), not the gusts
-  const seaAt = (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength);
+  let swell = null; // today's swell (src/sail-feel-swell.js), refreshed each frame
+  let swellOn = false;
+  const windWaves = (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength);
+  // the sea's height: the game's wind waves plus the swell (the swell only exists outside the skerries; the boat's own exposure stands in for the few metres round it)
+  const seaAt = (x, z) => windWaves(x, z) + (swellOn && swell ? swellHeight(swell, x, z, gt, wind.exposure) : 0);
   const arrow = createWindArrow();
   scene.add(arrow.object);
   const spray = createSpray();
@@ -106,6 +112,18 @@ async function main() {
   const wake = createFeelWake();
   scene.add(wake.group);
   const feelCam = createFeelCamera(camera);
+  const rain = createRain(); scene.add(rain.lines);
+  const mist = createMist(); scene.add(mist.group);
+  const cloudBank = createCloudBank(); scene.add(cloudBank.mesh);
+  const BASE = { haze: new THREE.Color(CONFIG.HAZE_COLOR), horizon: new THREE.Color(CONFIG.SKY_HORIZON_COLOR), zenith: new THREE.Color(CONFIG.SKY_ZENITH_COLOR), hemi: CONFIG.HEMI_INTENSITY, sun: CONFIG.SUN_INTENSITY };
+  const MIST = new THREE.Color(0xdde5e8); const STORM = new THREE.Color(0x4b5563); const STORM_ZENITH = new THREE.Color(0x5d6875);
+  const tint = new THREE.Color(); const horizonC = new THREE.Color(); const zenithC = new THREE.Color();
+  // the screen-edge storm warning: the camera only sees ~100 m of sea, so a squall's cloud on the horizon is off screen; this glow on the edge it comes from, and its countdown, are the "plenty of warning"
+  const stormEl = document.createElement('div');
+  stormEl.style.cssText = 'position:fixed;inset:0;z-index:5;pointer-events:none;opacity:0';
+  const stormLabel = document.createElement('div');
+  stormLabel.style.cssText = 'position:fixed;z-index:5;pointer-events:none;opacity:0;transform:translate(-50%,-50%);padding:3px 10px;border-radius:12px;background:rgba(24,30,42,.82);color:#f3e6c8;font:italic 600 13px Georgia,serif;white-space:nowrap';
+  document.body.append(stormEl, stormLabel);
   const luff = createLuffState();
   let heel = 0;
   const input = createInputState();
@@ -121,17 +139,32 @@ async function main() {
   const RING8 = Array.from({ length: 8 }, (_, k) => [Math.sin((k * Math.PI) / 4), Math.cos((k * Math.PI) / 4)]);
   const waterOk = (x, z, clear = 60) => era.world.inside(x, z, 120) && era.sailHeightAt(x, z) < -3 && RING8.every(([dx, dz]) => era.sailHeightAt(x + dx * clear, z + dz * clear) < -2.5);
   // the nearest open water to the spawn (in rings outward) where the wind there satisfies pred(windAt, x, z)
-  function findWater(pred, rMax = 1600) {
+  function findWater(pred, rMax = 1600, clear = 60) {
     const tmp = {};
     for (let r = 0; r <= rMax; r += 24) {
       const n = Math.max(1, Math.round((2 * Math.PI * r) / 24));
       for (let k = 0; k < n; k++) {
         const a = (k / n) * 2 * Math.PI + r * 0.37; const x = spawn.x + Math.sin(a) * r; const z = spawn.z + Math.cos(a) * r;
-        if (waterOk(x, z) && pred(field.windAt(x, z, gt, tmp), x, z)) return { x, z };
+        if (waterOk(x, z, clear) && pred(field.windAt(x, z, gt, tmp), x, z)) return { x, z };
       }
     }
     return null;
   }
+  // utomskars with room to run: fully open water with 150 m of clear sea all round, as far WEST as the window allows (the open sea is west of
+  // the outermost skerries, and a boat surfing a westerly swell runs east: it needs the whole open stretch). Falls back to any open water.
+  const outside = () => {
+    const tmp = {}; const b = era.world.bounds; let best = null;
+    for (let x = b.minX + 160; x < spawn.x; x += 40) {
+      for (let dz = 0; dz <= 900; dz += 40) {
+        for (const z of dz ? [spawn.z - dz, spawn.z + dz] : [spawn.z]) {
+          if (waterOk(x, z, 150) && field.windAt(x, z, gt, tmp).exposure > 0.97) { best = { x, z }; break; }
+        }
+        if (best) break;
+      }
+      if (best) break;
+    }
+    return best || findWater((w) => w.exposure > 0.97) || spawn;
+  };
   function placeBoat(x, z, heading, { speedNow = true, trim } = {}) {
     self.x = x; self.z = z; self.heading = heading;
     const w = field.windAt(x, z, gt, wind);
@@ -146,7 +179,7 @@ async function main() {
   function placeStart(kind) {
     const base = field.base(gt);
     let at = spawn;
-    if (kind === 'outside') at = findWater((w) => w.exposure > 0.97) || spawn;
+    if (kind === 'outside') at = outside();
     else if (kind === 'inside') at = findWater((w) => w.exposure < 0.25) || spawn;
     placeBoat(at.x, at.z, reachHeading(base.dir));
   }
@@ -157,7 +190,7 @@ async function main() {
     const hour = (h) => { if (!new URLSearchParams(window.location.search).has('t')) { gt = timeOfHour(h); S.t = h; } };
     if (name === 'gust') { // a gust patch about 60 m ahead of a boat sailing north utomskars: the key test
       day('sea-breeze'); hour(14);
-      const o = findWater((w) => w.exposure > 0.97) || spawn;
+      const o = outside();
       const heading = Math.PI; const fx = Math.sin(heading); const fz = Math.cos(heading);
       const tmp = {}; const t0 = gt;
       for (let off = 0; off <= 900; off++) {
@@ -177,9 +210,24 @@ async function main() {
         const side = [[-dw.z, dw.x], [dw.z, -dw.x]].map(([px, pz]) => ({ x: L.x + px * 55, z: L.z + pz * 55 })).find((p) => waterOk(p.x, p.z)) || { x: L.x - dw.x * 60, z: L.z - dw.z * 60 };
         placeBoat(side.x, side.z, Math.atan2(L.x - side.x, L.z - side.z));
       } else placeStart('spawn');
+    } else if (name === 'swell') { // outside on a broad reach, big sea after the afternoon blow: the surf test
+      day('sea-breeze'); hour(17);
+      const o = outside();
+      const sw = swellFor(field.daySeed, field.dayType, gt);
+      placeBoat(o.x, o.z, Math.atan2(sw.tx, sw.tz) + 35 * DEG);
+    } else if (name === 'squall') { // an unsettled afternoon, a squall line about 50 s away, coming from the west
+      day('unsettled');
+      const o = outside();
+      const e = field.squallPlan[0];
+      const arrive = e.tArrive + ((o.x - e.center.x) * e.tx + (o.z - e.center.z) * e.tz) / e.speed; // when the line reaches the boat
+      gt = arrive - 50; S.t = hourOf(gt);
+      placeBoat(o.x, o.z, field.base(gt).dir + 100 * DEG);
+    } else if (name === 'mist') { // the misty morning, in the lee of the skerries by Grundsund
+      day('misty-morning'); hour(7);
+      placeStart('spawn');
     } else if (name === 'heel') { // fresh afternoon, close reach, leaning
       day('sea-breeze'); hour(16);
-      const o = findWater((w) => w.exposure > 0.97) || spawn;
+      const o = outside();
       const base = field.base(gt);
       placeBoat(o.x, o.z, base.dir + 65 * DEG);
     }
@@ -278,7 +326,15 @@ async function main() {
     if (input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
     if (input.down) self.trim = Math.min(CONFIG.TRIM_MAX, self.trim + CONFIG.TRIM_RATE * dt);
     const off = angleOffWind(self.heading, wind.dir);
-    self.speed = hold ? 0 : approach(self.speed, labTargetSpeed(self.heading, wind.dir, wind.strength, self.trim), dt);
+    // swell and surf: a burst down the front of a crest on a broad reach or run, outside only
+    swell = swellFor(field.daySeed, field.dayType, gt);
+    swellOn = layerOn('swell');
+    const surf = swellOn ? surfBoost(swell, self.heading, self.x, self.z, gt, wind.exposure, self.speed) : 0;
+    // squall: a soft slowdown unless you ease the sheet or round up (never damage)
+    const sq = layerOn('squalls') ? squallAt(field.squallPlan, self.x, self.z, gt) : squallAt([], 0, 0, 0);
+    const ideal = idealTrimRad(off);
+    const grip = overpowerFactor(sq.intensity, off, self.trim, ideal);
+    self.speed = hold ? 0 : approach(self.speed, (labTargetSpeed(self.heading, wind.dir, wind.strength, self.trim) + surf) * grip, dt);
     const v = self.speed * shallowFactor(era.sailHeightAt, self.x, self.z) * era.shoalSlowAt(self.x, self.z);
     const mv = stepAlongShore(era.sailHeightAt, self.x, self.z, Math.sin(self.heading) * v * dt, Math.cos(self.heading) * v * dt);
     self.x = mv.x; self.z = mv.z;
@@ -292,10 +348,10 @@ async function main() {
     selfBoat.group.rotation.y = self.heading;
 
     // heel: leans to leeward, more in gusts and strong wind, less running
-    heel = stepHeel(heel, layerOn('heel') ? heelTarget(wind.strength, off) * S.heel : 0, dt);
+    heel = stepHeel(heel, layerOn('heel') ? heelTarget(wind.strength * (1 - easeRelief(self.trim, ideal)), off) * S.heel : 0, dt);
     const down = { x: -Math.sin(wind.dir), z: -Math.cos(wind.dir) };
     const leeSide = Math.sign(down.x * Math.cos(self.heading) + down.z * -Math.sin(self.heading)) || 1; // which side the wind pushes toward
-    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, seaWind, -leeSide * heel);
+    bobBoat(selfBoat.group, self.x, self.z, self.heading, seaAt, -leeSide * heel);
 
     // luff flutter: the sail shivers when headed (the shift signal) or too close to the wind
     stepLuff(luff, off, dt);
@@ -310,6 +366,43 @@ async function main() {
 
     // the wind painted on the water: rebuilt a few rows per frame (about 8 frames per full refresh), so no frame pays for all of it
     const p0 = performance.now(); paint.step(field, gt, self.x, self.z, 6); paintMs = paintMs * 0.95 + (performance.now() - p0) * 0.05;
+
+    paint.setSwell(swellOn ? swell : null, swellPhaseUniform(swell, gt));
+
+    // the weather you can see: mist (visibility), rain, a squall's cloud; fog distances, light and sky follow
+    const vis = layerOn('mist') ? base.visibility : 1;
+    const rainNow = layerOn('squalls') ? Math.max(base.rain, sq.rain) : 0;
+    const look = lookFor(vis, rainNow, sq.cloud);
+    const fogMist = look.mist;
+    tint.copy(BASE.haze).lerp(MIST, fogMist).lerp(STORM, Math.min(0.7, sq.cloud * 0.7));
+    CONFIG.HAZE_COLOR = tint.getHex();
+    CONFIG.HAZE_MESH_NEAR_MUL = look.fogNearMul; CONFIG.HAZE_MESH_FAR_MUL = look.fogFarMul;
+    CONFIG.HAZE_WATER_NEAR_MUL = look.fogNearMul * 0.85; CONFIG.HAZE_WATER_FAR_MUL = look.fogFarMul * 0.93;
+    horizonC.copy(BASE.horizon).lerp(MIST, fogMist).lerp(STORM, sq.cloud * 0.6); CONFIG.SKY_HORIZON_COLOR = horizonC.getHex();
+    zenithC.copy(BASE.zenith).lerp(MIST, fogMist * 0.7).lerp(STORM_ZENITH, Math.max(sq.cloud, rainNow * 0.5) * 0.7); CONFIG.SKY_ZENITH_COLOR = zenithC.getHex();
+    hemi.intensity = BASE.hemi * look.lightScale; sun.intensity = BASE.sun * look.lightScale;
+    rain.update(dt, bp, wind.dir, windMs(wind.strength), rainNow);
+    mist.update(dt, bp, base.dir, fogMist, MIST, nowS);
+    cloudBank.update(bp, sq);
+    // the edge warning (the DOM is only touched when the quantised look changes: repainting a full-screen gradient every frame is expensive)
+    let stormKey = 'off';
+    if (sq.event && sq.aheadM !== null && sq.cloud > 0.04) {
+      const ux = -sq.event.tx; const uy = -sq.event.tz; const m = Math.max(Math.abs(ux), Math.abs(uy)) || 1;
+      const ex = Math.round(50 + (ux / m) * 58); const ey = Math.round(50 + (uy / m) * 58);
+      const a = Math.round(Math.min(0.92, Math.pow(sq.cloud, 0.6) * 1.1) * 40) / 40;
+      stormKey = `${ex},${ey},${a},${Math.round(sq.etaS)}`;
+    }
+    if (stormKey !== frame.stormKey) {
+      frame.stormKey = stormKey;
+      if (stormKey === 'off') { stormEl.style.opacity = '0'; stormLabel.style.opacity = '0'; } else {
+        const [ex, ey, a, eta] = stormKey.split(',').map(Number);
+        stormEl.style.background = `radial-gradient(ellipse 75% 55% at ${ex}% ${ey}%, rgba(26,34,48,${a}) 0%, rgba(26,34,48,${a * 0.55}) 38%, rgba(26,34,48,0) 78%)`;
+        stormEl.style.opacity = '1';
+        stormLabel.textContent = `Squall · ${eta} s`;
+        stormLabel.style.left = `${Math.min(86, Math.max(14, ex))}%`; stormLabel.style.top = `${Math.min(88, Math.max(14, ey))}%`;
+        stormLabel.style.opacity = '1';
+      }
+    }
 
     const viewTarget = new THREE.Vector3(self.x, bp.y, self.z);
     sun.position.copy(viewTarget).add(sunOffset); sun.target.position.copy(viewTarget);

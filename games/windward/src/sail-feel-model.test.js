@@ -1,6 +1,6 @@
 // node games/windward/src/sail-feel-model.test.js — the sail-feel lab's feel rules (src/sail-feel-model.js).
 import assert from 'node:assert/strict';
-import { FEEL, labTargetSpeed, heelTarget, heelPower, stepHeel, createLuffState, stepLuff, luffFlutter, cameraFeel, smoothShare, speedShare, sprayRate, wakeSize, wakeLife } from './sail-feel-model.js';
+import { FEEL, easeRelief, squallGrip, overpowerFactor, lookFor, labTargetSpeed, heelTarget, heelPower, stepHeel, createLuffState, stepLuff, luffFlutter, cameraFeel, smoothShare, speedShare, sprayRate, wakeSize, wakeLife } from './sail-feel-model.js';
 import { boatSpeed, idealTrimRad } from './sail.js';
 
 let passed = 0;
@@ -103,6 +103,37 @@ check('spray: none when slow, more when fast and windy, scaled by the slider; th
   assert.ok(Math.abs(sprayRate(1, 1, 2) - 2 * sprayRate(1, 1)) < 1e-9);
   assert.ok(wakeSize(10) > wakeSize(3) && wakeSize(3) > wakeSize(0.5));
   assert.ok(wakeLife(10) > wakeLife(3));
+});
+
+check('squall overpower: soft only. Slower and loaded in a squall, relieved by easing the sheet or rounding up; no squall = no effect', () => {
+  const ideal = idealTrimRad(90 * DEG);
+  assert.equal(overpowerFactor(0, 90 * DEG, ideal, ideal), 1, 'no squall: nothing');
+  const trimmed = overpowerFactor(1, 90 * DEG, ideal, ideal);
+  assert.ok(Math.abs(trimmed - (1 - FEEL.OVERPOWER_LOSS)) < 1e-9, `sheet in, on a reach, in the heart: x${trimmed.toFixed(2)}`);
+  const eased = overpowerFactor(1, 90 * DEG, ideal + 35 * DEG, ideal);
+  assert.ok(eased > trimmed + 0.2 && eased < 1, `easing the sheet lets it off (x${eased.toFixed(2)})`);
+  const rounded = overpowerFactor(1, 30 * DEG, idealTrimRad(30 * DEG), idealTrimRad(30 * DEG));
+  assert.ok(rounded > trimmed + 0.15, `rounding up lets it off (x${rounded.toFixed(2)})`);
+  const both = overpowerFactor(1, 30 * DEG, idealTrimRad(30 * DEG) + 35 * DEG, idealTrimRad(30 * DEG));
+  assert.ok(both > eased && both > rounded, 'both together lets off the most');
+  assert.ok(both >= 1 - FEEL.OVERPOWER_LOSS && trimmed > 0.5, 'never stops the boat: a soft slowdown, not damage');
+  assert.ok(overpowerFactor(0.5, 90 * DEG, ideal, ideal) > trimmed, 'the edge of a squall grips less');
+  assert.equal(easeRelief(ideal, ideal), 0);
+  assert.ok(squallGrip(1, 90 * DEG, ideal, ideal) === 1);
+});
+
+check('weather look: clear = the game\'s haze; thick mist pulls the fog in close and dims the light; rain and cloud dim it too', () => {
+  const clear = lookFor(1);
+  assert.equal(clear.mist, 0); assert.equal(clear.fogNearMul, FEEL.FOG_NEAR_CLEAR); assert.equal(clear.fogFarMul, FEEL.FOG_FAR_CLEAR); assert.equal(clear.lightScale, 1);
+  const thick = lookFor(0.2);
+  assert.equal(thick.mist, 1);
+  assert.ok(thick.fogNearMul < 1 && thick.fogFarMul < 1.5, `thick mist: fog ${thick.fogNearMul.toFixed(2)}..${thick.fogFarMul.toFixed(2)} camera distances (the boat is at 1.0)`);
+  assert.ok(thick.lightScale < 0.9 && thick.lightScale >= 1 - FEEL.GLOOM_MAX);
+  const half = lookFor(0.6);
+  assert.ok(half.fogFarMul < clear.fogFarMul && half.fogFarMul > thick.fogFarMul, 'in between');
+  assert.ok(lookFor(1, 1, 0).lightScale < 0.75, 'a downpour dims it');
+  assert.ok(lookFor(1, 0, 1).lightScale < lookFor(1, 1, 0).lightScale, 'a squall\'s cloud dims it most');
+  assert.ok(lookFor(1, 1, 1).lightScale >= 1 - FEEL.GLOOM_MAX, 'never darker than the cap');
 });
 
 console.log(`${passed} sail-feel-model checks passed`);

@@ -364,6 +364,7 @@ export function createWindField(opts) {
     out.funnel = funnel;
     out.exposure = exposure; // 0 = inside the skerries, 1 = utomskars
     out.squall = sq ? sq.intensity : 0;
+    out.stormBand = sq ? sq.band : 0; // how dark the water is (the squall's dark line, then its body)
     out.override = ov ? ov.w : 0;
     return out;
   }

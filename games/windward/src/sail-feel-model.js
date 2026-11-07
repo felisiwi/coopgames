@@ -6,7 +6,7 @@
 //   stepLuff         the sail flutters when you are headed (the wind shifted toward the bow) or pointing too high: THE shift signal
 //   cameraFeel       the camera dips and tightens with speed, looks ahead, and pulls back when slow
 import { boatSpeed, speedFactor, trimMultiplier, idealTrimRad, angleOffWind } from './sail.js';
-import { smoothstep, clamp } from './weather-noise.js';
+import { smoothstep, clamp, lerp } from './weather-noise.js';
 
 const DEG = Math.PI / 180;
 
@@ -39,6 +39,23 @@ export const FEEL = {
   CAM_TIGHT: 0.2, // and moves this fraction closer
   CAM_LOOK_AHEAD_M: 45, // and looks this far ahead of the bow at full speed. Measured: at zoom 1.4 the top of the screen sees ~75 m ahead standing still, ~120 m at speed (~15 s of sailing): the 10 to 20 s gust warning
   CAM_TAU_S: 1.4, // the camera's reading of your speed is smoothed over this long (no lurching)
+
+  // --- squall: overpowered (soft only: slower and leaning hard, never damage) ---
+  OVERPOWER_LOSS: 0.45, // in the heart of a squall, sheet in and on a reach, the boat loses this share of its speed
+  EASE_FROM_DEG: 5, // sheet let out this far past the ideal: starts to spill the wind ...
+  EASE_FULL_DEG: 30, // ... this far: fully spilled
+  EASE_RELIEF: 0.7, // fully spilled removes this share of the squall's grip (and of the heel)
+  POINT_FROM_DEG: 60, // pointing closer than this to the wind starts to depower the sail (rounding up) ...
+  POINT_FULL_DEG: 28, // ... fully by here
+  POINT_RELIEF: 0.6, // rounding right up removes this share of the squall's grip
+
+  // --- weather look ---
+  FOG_NEAR_CLEAR: 1.18, FOG_NEAR_THICK: 0.75, // fog starts at this many camera-distances (the game's haze is 1.18)
+  FOG_FAR_CLEAR: 3.3, FOG_FAR_THICK: 1.35, // and is solid at this many (the game's haze is 3.3); thick mist pulls both in
+  MIST_VIS_SPAN: 0.8, // visibility 1 = clear, 0.2 = thickest: mist = (1 - visibility) / this
+  GLOOM_MAX: 0.5, // the light dims by up to this under a squall's cloud, rain or thick mist
+  RAIN_GLOOM: 0.6, // rain's share of the gloom
+  MIST_GLOOM: 0.3, // thick mist's share of the gloom
 
   // --- bow spray ---
   SPRAY_FROM: 0.4, // spray starts at this share of fast
@@ -106,3 +123,29 @@ export const smoothShare = (current, speedMs, dt) => current + (speedShare(speed
 export const sprayRate = (share, strength, amount = 1) => FEEL.SPRAY_RATE_MAX * amount * smoothstep(FEEL.SPRAY_FROM, 1, share) * (0.6 + 0.4 * clamp(strength, 0, 1.25));
 export const wakeSize = (speedMs) => FEEL.WAKE_SIZE_MIN + FEEL.WAKE_SIZE_GAIN * clamp(speedMs / FEEL.CAM_SPEED_FULL_MS, 0, 1.2);
 export const wakeLife = (speedMs) => FEEL.WAKE_LIFE_MIN_S + FEEL.WAKE_LIFE_GAIN_S * clamp(speedMs / FEEL.CAM_SPEED_FULL_MS, 0, 1.2);
+
+// ---- squall: overpowered ----
+const TRIM_DEG = (trimRad, idealRad) => (trimRad - idealRad) / DEG; // positive = the sheet is let out past the ideal
+// The share of power removed by easing the sheet (0 = trimmed, EASE_RELIEF = fully spilled).
+export const easeRelief = (trimRad, idealRad) => FEEL.EASE_RELIEF * smoothstep(FEEL.EASE_FROM_DEG, FEEL.EASE_FULL_DEG, TRIM_DEG(trimRad, idealRad));
+// 0..1: how hard a squall of this intensity grips the boat. Eased sheet and rounding up both let it off.
+export function squallGrip(squall, angleOffRad, trimRad, idealRad) {
+  const ease = easeRelief(trimRad, idealRad);
+  const point = FEEL.POINT_RELIEF * (1 - smoothstep(FEEL.POINT_FULL_DEG, FEEL.POINT_FROM_DEG, angleOffRad / DEG));
+  return clamp(squall, 0, 1) * (1 - ease) * (1 - point);
+}
+// Multiply the target speed by this: 1 in a normal wind, down to 1 - OVERPOWER_LOSS when a squall has the sail fully loaded.
+export const overpowerFactor = (squall, angleOffRad, trimRad, idealRad) => 1 - FEEL.OVERPOWER_LOSS * squallGrip(squall, angleOffRad, trimRad, idealRad);
+
+// ---- weather look ----
+// visibility (1 = clear), rain 0..1, cloud 0..1 (a squall's cloud over you) -> how the fog and light should be.
+export function lookFor(visibility, rain = 0, cloud = 0) {
+  const mist = clamp((1 - visibility) / FEEL.MIST_VIS_SPAN, 0, 1);
+  return {
+    mist,
+    fogNearMul: lerp(FEEL.FOG_NEAR_CLEAR, FEEL.FOG_NEAR_THICK, mist),
+    fogFarMul: lerp(FEEL.FOG_FAR_CLEAR, FEEL.FOG_FAR_THICK, Math.pow(mist, 0.8)),
+    gloom: clamp(Math.max(cloud * 0.9, rain * FEEL.RAIN_GLOOM, mist * FEEL.MIST_GLOOM), 0, 1),
+    lightScale: 1 - FEEL.GLOOM_MAX * clamp(Math.max(cloud * 0.9, rain * FEEL.RAIN_GLOOM, mist * FEEL.MIST_GLOOM), 0, 1),
+  };
+}

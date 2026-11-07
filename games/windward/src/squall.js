@@ -27,6 +27,8 @@ export const SQUALL = {
   PRELUDE_DIP: 0.15, // ... by up to this fraction
   WIDTH_M: 3000, // the line is this long across
   EDGE_M: 500, // and fades at its two ends over this
+  BAND_AHEAD_M: 80, // the dark line on the water starts this far ahead of the front ...
+  BAND_BEHIND_M: 60, // ... and the front's own dark edge fades over this far behind it, into the squall body
   WARNING_M: 700, // the dark cloud is visible this far ahead of the line (about 75 s at 9 m/s)
   RAIN_AHEAD_M: 120, // rain starts just before the front
 };
@@ -70,12 +72,13 @@ export function squallPlanFor(daySeed, dayType, center = { x: 0, z: 0 }) {
   return plan;
 }
 
-const NONE = Object.freeze({ intensity: 0, strengthMul: 1, swingRad: 0, aheadM: null, etaS: null, cloud: 0, rain: 0, index: -1 });
+const NONE = Object.freeze({ intensity: 0, strengthMul: 1, swingRad: 0, aheadM: null, behindM: null, etaS: null, cloud: 0, rain: 0, band: 0, index: -1, event: null });
 
 // How the plan's squalls act on point (x, z) at game time t. Returns:
 //   intensity 0..1 (1 = the heart), strengthMul (multiply the wind by this), swingRad (add to the wind's dir),
 //   aheadM (metres the line is still ahead of you, null when none is coming/here), etaS (seconds until it reaches you),
-//   cloud 0..1 (how strongly the dark cloud/line shows: 0 beyond WARNING_M, 1 at your door), rain 0..1.
+//   cloud 0..1 (how strongly the dark cloud/line shows: 0 beyond WARNING_M, 1 at your door), rain 0..1,
+//   band 0..1 (how dark the WATER is here: a dark line at the front, then the squall body), behindM (metres behind the front, null while ahead), event (the plan entry).
 // The event nearest in time wins when two overlap (they never do on a plan: MIN_GAP_S).
 export function squallAt(plan, x, z, t) {
   let best = NONE;
@@ -97,8 +100,12 @@ export function squallAt(plan, x, z, t) {
     }
     const cloud = ahead > 0 ? (1 - clamp(ahead / SQUALL.WARNING_M, 0, 1)) * lateral : lateral * (1 - smoothstep(e.depthM * 0.7, e.depthM, behind));
     const rain = lateral * (ahead > SQUALL.RAIN_AHEAD_M ? 0 : ahead > 0 ? 1 - ahead / SQUALL.RAIN_AHEAD_M : 1 - smoothstep(e.depthM * 0.6, e.depthM, behind));
+    const band = lateral * (ahead > 0 ? 1 - smoothstep(0, SQUALL.BAND_AHEAD_M, ahead) : Math.max(intensity * 0.85, 1 - smoothstep(0, SQUALL.BAND_BEHIND_M, behind)));
     if (cloud > best.cloud || intensity > best.intensity) {
       best = {
+        band,
+        event: e,
+        behindM: ahead > 0 ? null : behind,
         intensity,
         strengthMul: (1 + SQUALL.GAIN * intensity) * (1 - dip),
         swingRad: SQUALL.SWING_DEG * DEG * intensity * e.swingSign,
