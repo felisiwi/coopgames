@@ -1,7 +1,7 @@
 # Island lore: what makes each place itself
 
 Research summary for Windward's islands, skerries and harbours (play window 58.085-58.30 N, 11.25-11.50 E).
-Machine-readable twin: `data/island-lore.json` (25 places, every fact with a source id and a confidence).
+Machine-readable twin: `data/island-lore.json` (27 places, every fact with a source id and a confidence).
 It feeds `docs/ALIVE-SEA.md`: place profiles, things, rumours, artifacts, mini quests. Written 2026-11-07.
 
 **How to read it.** Facts have a source and a confidence (high / medium / low / uncertain). Anything marked
@@ -9,8 +9,51 @@ INVENTED is ours: regulars, secrets, rumours, quest seeds, artifacts. Real priva
 only named people are historical public figures with a source (Olof Strömstierna, Calla Curman, Carl Wilhelmson,
 Tordenskjold). Folklore is thin on this coast in the sources we could reach: see "Best folklore" and the gaps.
 
-**Counts (JSON):** 25 places, 120 facts, 110 landmarks, 6 folklore items, 107 dated timeline events,
-69 invented regulars, 31 secrets, 32 rumours, 38 quest seeds, 35 artifact candidates.
+**Counts (JSON, after merging agent 3's parallel research):** 27 places, 199 facts, 137 landmarks, 8 folklore
+items, 119 dated timeline events, 77 invented regulars, 35 secrets, 40 rumours, 44 quest seeds, 39 artifact
+candidates, 67 registered sources (30 added from agent 3 and fyr.org, with real URLs).
+
+## Merge with agent 3's research (2026-11-07) and what was verified
+
+Agent 3 researched the same ground by mistake and handed over `lore-handover/` (11 places). Merged in: two new entries,
+**`light:Stångehuvud`** (headland, quarries, the dark wooden light house) and the Käringön island row
+**`relation/10239114`** (with the pilot-station history), plus selected new facts, landmarks and sayings in 9 existing
+places. Items that came from there carry `via: "agent3"`. Not merged: agent 3's hooks for places I already cover, and
+its three `_extras.json` files (13 unique-artifact ideas, hooks per character): still in the handover folder.
+
+**Spot-checks (claims not taken on trust):**
+
+| Claim | Result |
+|---|---|
+| Stångehuvud quarry: Kessel & Röhl of Berlin, 1870s, Vasakyrkan 5,000 m³ 1905-08, Hebbel & Co 1904 | read on stangehuvud.se (the Curman foundation's site): says it. Medium. |
+| Granite for the **Philadelphia** Washington Monument | en.wikipedia confirms a pink **Swedish** granite base (1897); only stangehuvud.se names Stångehuvud. **Low** for the quarry. |
+| **Copenhagen** (ten of Jesuskirken's 82 columns) | the church is real; the figures and quarry are only on stangehuvud.se. **Low.** |
+| **Amsterdam** (Sarphati monument balusters, 1886) | the Dutch monument register says red Swedish granite columns, no quarry named. **Low.** |
+| Skaftö wreck, c.1440, Gdańsk to Belgium, copper from Slovakia | read on the University of Gothenburg's news page (18 Oct 2022). **High.** The Gåsöfjorden position is from RAÄ 270 (medium). |
+| Lysekil pilot station "early 1700s", 1729 roll of 4 pilots and 2 apprentices | read on lotsarnastockholm.se. Medium. |
+| Käringön pilot ~1710 piloting Norwegian ships with the later Tordenskiold; Lysekil pilot supervisor ruined 1711, quit 1714 | read on the same site, which says the passage is from someone's notes with the source not stated. **Low.** |
+| Hättan, Gäven, Stångholmen, Fredagsholmen, Islandsberg, Kråksundsgap (repo light data) | read on fyr.org: confirmed, with corrections (below). |
+
+**What the checks changed:**
+- **Fredagsholmen was built in 1883** (a prefab wooden light house with an eight-day paraffin lamp), not first in 1917.
+- **Gäven's 1835 pole mark** (drawn by Gustav von Heidenstam) blew over; a second pole served to about 1901 when Lysekil's new
+  church became the sea mark. A full-size replica of the pole and its 20 m² lookout house stands at Vindön since 2009.
+- **Islandsberg's 1883 light** sat behind a row of windows on the upper floor of one gable (seaward gable white, rest red),
+  so `LIGHTHOUSES.md`'s "lantern on the ridge" is wrong. (Not edited here: new files only.)
+- **Kråksundsgap was a manned station 1890-1911** (house moved from Husvik on Brännö), before the automatic lights.
+- I had written **"grey seals"** for Gåsö: the county page says knubbsäl, which is **harbour seals**. Fixed.
+- Map Lab name glosses ("the Hood", "the barley isle") are now confidence **low**, matching agent 3's rule for repo-file
+  name sources.
+- Måseskär's tower in 1950: **red and white** (sv.wikipedia and the IALA text), not plain white.
+
+**Checker.** Agent 3's `check-and-merge.mjs` validates its own fragment shape only, so I ported its rules to this file's
+shape (script kept outside the repo: it is a port, not the same script). Result: **0 errors**. Rules applied: a source on
+every fact, landmark, folklore item, timeline entry and place name; confidence in the allowed set; no "invented" flag or
+word inside a fact; every regular, secret, rumour, quest seed and artifact flagged `invented:true`; place-name sources
+that are repo files only at low; clean `nameListIds`; era and kind vocabularies. Not ported: agent 3's fixed landmark-type
+and folklore-kind lists (only imported landmarks carry a `type`). **106 warnings, all one kind: a fact whose only source is
+a repo doc** (WORLD-1950, WORLD-1700, history-start-area.md, the light data) rather than a URL. They are sourced and
+registered but not directly URL-backed; the lights are now partly covered by fyr.org.
 
 ## The 18 richest places, richest first
 
@@ -49,7 +92,12 @@ Keys are the game's own name-list ids (`src/names.js`: `relation/NNN`, `village:
 17. **Jämningarna and Byxeskären** (`relation/10237897`). Painted cairns at Lysekil's western inlet (1874).
 18. **Stora Harpö, Salthästen, Röra** (`relation/10250169`, `relation/10250171`). The wrecks of Freya (1940) and Neptun (1908).
 
-Thin (one or two facts only): Hättan, Fredagsholmen, Malö, Lavön, Silleskär.
+Added by the merge with agent 3's research: **Stångehuvud** (`light:Stångehuvud`: Berlin quarrymen from the 1870s, a
+dark wooden light house since 1940, Calla Curman's rescue) and **Käringön's island row** (`relation/10239114`: the pilot
+station, the Vedholmen lookout of 1880, the 1804 report that the rocks outside are as famous for wrecks as the pilots are
+for skill).
+
+Thin (one or two facts only): Hättan, Fredagsholmen (now with its 1883 origin), Malö, Lavön, Silleskär.
 
 ## Best folklore (and an honest note)
 
@@ -124,14 +172,27 @@ for 1950; the Bonden chain link (1905); the Käringön harbour anchor (found 199
   describe one steamer.
 - **Svarten and Hinneskär (Måseskär).** The pole mark of 1829/1853 was replaced by a cairn in 1878; Hinneskär's
   cone is dated 1878 too and lies south of Måseskär. We say they are the same; the registers do not.
-- **Gäven.** sv.wikipedia's "Gäven" is a lake in Dalarna: it does not describe our rock. All Gäven facts come from RAÄ
+- **Gäven.** sv.wikipedia's "Gäven" is a lake in Dalarna: it does not describe our rock. Gäven facts come from fyr.org, RAÄ
   (the pole mark) and the repo's light data.
 - **Fredagsholmen.** Two skerries by that name; the light is on the one near Gullholmen (`relation/10237443`). The
   name's meaning is not found: do not present "Friday islet" as etymology.
 - **Stångehuvud.** ibiblio lists the light as lit after 1940; the repo's data says out. Left as in WORLD-1950.
 - **Gåsö, 1717.** "Tordenskjold's ship of the line ran aground off Gåsö" is only in sv.wikipedia's Lysekil article.
 - **Käringön and Dynekilen.** That the Strömstierna of Dynekilen is the Käringön-born Olof Knape is our inference.
-- **Lysekil's pilot station,** Vrakevik's name origin, a Klingkyrka legend, pre-1900 Käringön pilot history: not found.
+- **Found since gate 2:** Lysekil's pilot station (early 1700s; rolls of 1729, 1736, 1744) and Käringön's pilot history
+  (named from 1717, pilots from the 1690s) come from lotsarnastockholm.se. Still not found: Vrakevik's name origin, a
+  Klingkyrka legend, wrecks near Käringön before 1800.
+- **Stångehuvud's foreign granite** (Philadelphia, Copenhagen, Amsterdam, Singapore, Argentina) is on one local site only:
+  low. Philadelphia's base is independently confirmed as Swedish granite, not as Stångehuvud's.
+- **Pole mark on Gäven:** RAÄ says it stood until the light of 1917; fyr.org says it blew down and a second pole served to
+  about 1901. Neither stood in 1950.
+- **Måseskär designer:** sv.wikipedia says Gustaf von Heidenstam, an IALA text (as read by agent 3, not re-read by me) says
+  Werner. And `relation/10238677` (Månseskär, 58.128 N, 11.409 E) in the name list is probably not the lighthouse skerry.
+- **Gåsevik is not on Gåsö:** it is a separate reserve beside Fiskebäckskil and Kristineberg (county board). Do not attach
+  Gåsevik facts to Gåsö.
+- **Grundsund's canal:** natural shallow sound (sv.wikipedia) or dug during the First World War (a tourism page): unresolved.
+- **Unsourced pilot passage (Käringön page):** the Ström/Wessel and Peter Nilsson stories are low until a primary source turns up.
+- **Private names left out on purpose:** fyr.org names the family who bought Islandsberg's old house in 1948; not reproduced.
 - **1703 is thin everywhere.** Almost no documented sea marks or buildings for 1703; entries say so.
 - **Excluded on purpose:** a 1969 murder case on Gåsö involving a named private person.
 - **Fornsök itself is a JavaScript app and cannot be scraped,** but its data can be read through the open API below.

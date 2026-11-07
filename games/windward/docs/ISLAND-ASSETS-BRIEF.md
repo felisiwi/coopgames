@@ -29,8 +29,12 @@ Rule for 1950: red-black by compass side for buoys; cairns are fixed marks, some
 ### 1.2 Pole mark (stångmärke)
 Wooden pole with a heart-shaped spire, braced by stays, a board as topmark.
 - **Måseskär** 1829: 18 m, red, board white with the point down; replaced by the iron light in 1865. 1950 / today: gone.
-- **Gäven** 1835: 15 m, red, eight stays, square board half red and half white, a **lookout platform among the stays
-  for pilots**; replaced by a light in 1917. 1703 no, 1950 no, today no.
+- **Gäven** 1835: 15 m (50 ft) on a 56 ft rock, drawn by Gustav von Heidenstam; red, a heart-shaped spire with eight
+  stays, a square board half red and half white, a **lookout house among the stays where pilots kept watch** (about
+  20 m², 3 m above ground, red-painted walls, tarred roof, on nine tarred posts per the replica). It blew over in a storm
+  (big windage); a second pole served until about 1901, when Lysekil's new church became the approach mark; the light
+  followed in 1917 (RAÄ says the pole stood to 1917: sources conflict). 1703 no, 1950 no, today only as a **full-size
+  replica at Vindön Camping & Marina (2009)**: a ready-made reference for the model.
 - **Svarten/Sydbonden** (south of Måseskär) 1829, rebuilt 1853 with an arm pointing ENE to the Käringön channel;
   replaced by a cairn in 1878. 1950 no.
 - **Bonden's** pole with red ball (1875): see 1.1.
@@ -38,8 +42,10 @@ Wooden pole with a heart-shaped spire, braced by stays, a board as topmark.
 ### 1.3 Small automatic light (fyrkur)
 White octagonal iron or sheet-metal lantern on a base. Generic model in the repo (`fyrkur1950`).
 - **Stångholmen** 1940: white octagonal iron/sheet metal, 4 m; replaced by a round plastic one in 1974.
-- **Fredagsholmen** 1942: white sheet metal on a concrete base; before that (1917) a white wooden light house with
-  a lantern on the gable.
+- **Fredagsholmen** 1942: white sheet metal on a concrete base (red roof today); before that a **white prefab wooden
+  light house with a lantern on the gable**, built 1883 by Bark & Warburg of Göteborg (one of 17 delivered that year;
+  88 such lights in 1882-86), with coloured-glass sector screens on frames that look like dark screens in old photographs.
+- **Stångholmen's** old octagonal iron fyrkur survives, blasted and painted, in Lysekil town (since 1994).
 - 1703 no, 1950 yes, today yes (the replaced forms).
 
 ### 1.4 Automatic tower (AGA)
@@ -47,11 +53,15 @@ White round tower with one black band (Hättan 8.9 m; Gäven 9.4 m with an octag
 white concrete 7.1 m. 1703 no, 1950 yes, today yes. White, red and green sectors.
 
 ### 1.5 Manned light station
-Måseskär only: open iron pillar tower, about 21 m, white fields (red-white in some descriptions: **colour in 1950
-undocumented**); keepers' house with slate roof (c.1900), outbuilding, cellar, machine house of the steam siren
+Måseskär only: open iron pillar tower, about 21 m (22 m in the IALA nomination text), **red and white** (sv.wikipedia and
+the IALA text; white fields added 1869; WORLD-1950 says red-white checkers); keepers' house with slate roof (c.1900), outbuilding, cellar, machine house of the steam siren
 (1885), signal cannon, boat harbour with slip, concrete quay (1941), crane (1953), stone-walled garden plots.
 1703 no (maybe a cairn), 1950 yes, today yes (old tower plus the 1978 white plastic one beside it).
-Islandsberg's old keeper's house (1883, private since 1948): yes in 1950, yes today.
+Islandsberg's old keeper's house (1883, private since 1948): yes in 1950, yes today. A prefab wooden house (Bark & Warburg),
+**the seaward gable painted white, the rest red, the lens behind a row of windows on the gable's upper floor** (fyr.org;
+this corrects LIGHTHOUSES.md's "lantern on the ridge"). The new automatic tower of 1938 stands 425 m north (white concrete,
+7.1 m). Kråksundsgap's manned station (1890-1911, a house moved from Husvik on Brännö, plus a second light on a trestle
+from 1896) is the same kind of wooden station: its state in 1950 is not shown.
 
 ### 1.6 Boathouse and sea hut (sjöbod)
 Timber, gable to the water, board or turf-and-seaweed roofs in the early ones; paths run through them to the quays
@@ -104,6 +114,15 @@ Low dry-stone ring, once roofed with oars and sails. Gåsö, Storön, Härmanö 
 - **Wreck traces:** spars or a rudder on a rock; the Svecia off Gullholmen has its rudder and rail visible at 8 to 10 m.
   Most wrecks are invisible from a boat: a "water colour" or a net-snag buoy, not a model.
 
+### 1.17a Pilot lookouts and the dark light house (added by the merge)
+- **Pilot lookouts:** Käringön's "Lotsutkiken" (a former pilot dwelling of about 10 m² at the south-west tip, age not
+  given); a lookout built on **Vedholmen** in 1880 to replace a condemned one, with pilot families on the hill Lotsberget;
+  Lysekil's old pilot lookout (a photo only); Gäven's pole-and-lookout (see 1.2). 1703: lookouts unlikely, pilots watch from
+  rocks; 1950: Käringön's station staffed until 1960; today: preserved as houses.
+- **Stångehuvud's light house:** a small white wooden house with a black A-frame roof at the outermost tip, lit 1890, dark
+  since 1940 but never demolished, now with a solar-powered decorative LED. 1703 no, 1950 yes (dark), today yes. Galleberget
+  in the north of the reserve is a quarry scar with blasting spoil left as it was (county board).
+
 ### 1.17 Things that exist in only one era (do not model across)
 Coastal battery on Kalven (finished 1970, demolished 2003-04): neither 1703 nor 1950. The 1954 tower at Kråksundsgap:
 today only (canon: glimpsed in 1950). The 1978 plastic light at Måseskär: today only.
@@ -136,6 +155,7 @@ today only (canon: glimpsed in 1950). The 1978 plastic light at Måseskär: toda
 3. Boathouse, drying nets and village rock: the same kit repeated.
 4. Quarry scar, church and cannery as one-off sprites.
 
-Open questions for Felix: the 1950 wall colour of Måseskär's tower is undocumented; the 1950 colour of Byxeskären's
-belt is uncertain (red before, green in the record); whether the Svarten pole mark and the Hinneskär cone are the same
-object (our inference).
+Open questions for Felix: the 1950 colour of Byxeskären's belt is uncertain (red before, green in the record); whether the
+Svarten pole mark and the Hinneskär cone are the same object (our inference); which of the two accounts of the Gäven pole
+mark (RAÄ: to 1917, fyr.org: a second pole to about 1901) you want modelled for the 1800s. (Måseskär's colour is settled:
+red and white.)

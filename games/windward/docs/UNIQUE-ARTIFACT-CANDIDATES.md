@@ -66,15 +66,18 @@ Format: **name** · place · made / found · source · fits the story because ·
 
 ## Skaftö and the deep past
 
-12. **Clinker plank with an iron rivet from the Gåsöfjorden wreck** · Gåsö / Skaftö coast · made medieval, found
-    1950 / today · RAÄ 270, "the Skaftö wreck", a medieval ship in Gåsöfjorden excavated 2006-2009 by Bohusläns museum
-    (seen in a search summary of a Digitaltmuseum record; the record itself not opened) · The oldest thing you can find
-    in the window: an object from before any sea mark · leads to: Vrakevik's story (the bay's name is "wreck bay";
-    no source ties the wreck to that bay) · caveat: do not tie it to Vrakevik without a source.
-13. **Iron ring from the Gäven pole** · Gäven · made 1835, found 1950 · RAÄ via Söderlund 2007 (a 15 m red pole mark with
-    a pilots' lookout platform among the stays; replaced by a light in 1917) · An iron footing from a pilot lookout:
-    Torhild's descendants kept watch there · leads to: Britta's father's "out at the old pole", pilot quests · caveat:
-    the ring is our invention; no source says one survives.
+12. **A copper ingot from the Skaftö wreck** (or a brick from its cargo) · off Lysekil / Gåsö coast · made c.1440, found
+    1703 / 1950 / today · University of Gothenburg news (18 Oct 2022, read in full): the ship foundered in the Lysekil
+    archipelago around 1440 on its way from Gdańsk to Belgium with copper from Slovakia, oak, quicklime from Gotland, tar,
+    bricks and roof tiles; found 2003, excavated 2009 by Bohusläns museum (RAÄ 270; the Gåsöfjorden position is medium) ·
+    The oldest thing you can find in the window, and now a *verified* story with a trade route in it · leads to: a "where
+    did it come from" quest across Europe's map; Vrakevik's name (no source ties the wreck to that bay) · caveat: the
+    ingot is our invention; the real cargo is museum property.
+13. **Iron ring from the Gäven pole** · Gäven · made 1835, found 1950 · RAÄ via Söderlund 2007 and fyr.org (a 15 m red pole
+    mark with a pilots' lookout house among the stays, drawn by Gustav von Heidenstam; it blew over in a storm, a second
+    pole served to about 1901, the light came in 1917; a full-size replica stands at Vindön since 2009) · An iron footing
+    from a pilot lookout: Torhild's descendants kept watch there · leads to: Britta's father's "out at the old pole",
+    pilot quests · caveat: the ring is our invention; no source says one survives.
 14. **The Anna Maria's chain link** · Bonden, west of Grundsund · made c.1870s?, found 1950 · RAÄ L1960:6098 (the
     schooner Anna Maria, 10 February 1905, in a north-west gale: the chain parted, she drifted onto Bonden's west side;
     3 died) · A rare in 1950 (the wreck is still in living memory); unique if linked to a family you meet in 1703 or a

@@ -1,5 +1,5 @@
 {
-  "_about": "Island lore research for Windward (gate 1: the 10 richest places). Research and data only; nothing here is wired into game code. Feeds docs/ALIVE-SEA.md (thing templates, place profiles, artifacts, mini quests). Facts and INVENTED hooks are kept apart: everything in `facts`, `landmarks`, `folklore`, `placeName` and `timeline` carries a source id from `sources`; everything in `regulars`, `secrets`, `rumours`, `questSeeds` and `artifacts` is INVENTED (marked invented:true) unless an artifact lists `basedOn` real finds. No real private person is named. Docs are fallible: where this file disagrees with an earlier doc, the entry says so. Gate 2 adds 15 more places; thin places carry only the eras that have a source (an era is left out rather than padded with invention).",
+  "_about": "Island lore research for Windward (gate 1: the 10 richest places). Research and data only; nothing here is wired into game code. Feeds docs/ALIVE-SEA.md (thing templates, place profiles, artifacts, mini quests). Facts and INVENTED hooks are kept apart: everything in `facts`, `landmarks`, `folklore`, `placeName` and `timeline` carries a source id from `sources`; everything in `regulars`, `secrets`, `rumours`, `questSeeds` and `artifacts` is INVENTED (marked invented:true) unless an artifact lists `basedOn` real finds. No real private person is named. Docs are fallible: where this file disagrees with an earlier doc, the entry says so. Gate 2 adds 15 more places; thin places carry only the eras that have a source (an era is left out rather than padded with invention). Merged with agent 3's parallel research (handover folder lore-handover, 2026-11-07): new entries light:Stångehuvud and the Käringön island row relation/10239114, plus selected new facts, landmarks and sayings in 9 places; items from there carry via:\"agent3\". Source URLs added to the registry. Validated by a port of agent 3's checker.",
   "_ids": "Keys use the game's own name-list ids (src/names.js): islands and skerries 'relation/NNN' or 'way/NNN' (the OSM id, no 'osm:' prefix), 'village:Name', 'harbour:Name', 'light:Name'. The mission brief wrote 'osm:relation/...'; the code does not.",
   "_confidence": {
     "high": "a museum, heritage-authority, county-board or church source states it and the wording was read",
@@ -21,7 +21,8 @@
       "title": "sv.wikipedia: Måseskär",
       "url": "https://sv.wikipedia.org/wiki/Måseskär",
       "type": "wikipedia",
-      "read": "2026-11-07"
+      "read": "2026-11-07",
+      "note": ""
     },
     "SVW-karingon": {
       "title": "sv.wikipedia: Käringön",
@@ -142,7 +143,7 @@
       "title": "Bohusläns museum rapport 2012:39 (Gullholmen), as relayed in HSA",
       "url": "https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2012-39.pdf",
       "type": "museum",
-      "read": "via HSA"
+      "read": "read via history-start-area.md; report not re-fetched"
     },
     "W1700": {
       "title": "repo: games/windward/docs/WORLD-1700.md",
@@ -191,6 +192,258 @@
       "title": "repo: games/windward/GAME-DESIGN.md story canon (chapter 1)",
       "url": "repo",
       "type": "repo doc"
+    },
+    "A3-01-sv": {
+      "title": "Fiskebäckskils kyrka (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Fiskeb%C3%A4ckskils_kyrka",
+      "type": "wikipedia",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-02-sv": {
+      "title": "Carl Wilhelmson (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Carl_Wilhelmson",
+      "type": "wikipedia",
+      "read": "partial",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-03-sv": {
+      "title": "Kristinebergs marina forskningsstation (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Kristinebergs_marina_forskningsstation",
+      "type": "wikipedia",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-04-vastsverige": {
+      "title": "Västsverige Östersidan (via summarising fetch)",
+      "url": "https://www.vastsverige.com/lysekil/produkter/skafto-ostersidan/",
+      "type": "regional tourism",
+      "read": "partial",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-05-sv": {
+      "title": "Skaftölandet (sv.wikipedia)",
+      "url": "https://sv.wikipedia.org/wiki/Skaft%C3%B6landet",
+      "type": "wikipedia",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-06-lansstyrelsen": {
+      "title": "Länsstyrelsen Gåsevik (via summarising fetch)",
+      "url": "https://www.lansstyrelsen.se/vastra-gotaland/besoksmal/naturreservat/gasevik.html",
+      "type": "county board",
+      "read": "partial",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-07-bohuslansmuseum": {
+      "title": "Bohusläns museum rapport 2008:32, Gåsö hamn",
+      "url": "https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2008-32.pdf",
+      "type": "museum",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-08-digitaltmuseum": {
+      "title": "Bohusläns museum photo record with Kulturmiljöer Lysekils kommun text (via summarising fetch)",
+      "url": "https://digitaltmuseum.org/021017762068",
+      "type": "museum",
+      "read": "partial",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-09-didriksons": {
+      "title": "Didriksons history (company page, via summarising fetch)",
+      "url": "https://www.didriksons.com/en/our-history",
+      "type": "company history",
+      "read": "partial",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-10-vastsverige": {
+      "title": "Västsverige Grundsund (via summarising fetch)",
+      "url": "https://www.vastsverige.com/lysekil/produkter/skafto-grundsund/",
+      "type": "regional tourism",
+      "read": "partial",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-11-vastsverige": {
+      "title": "Hannas i Hamnen (search snippet)",
+      "url": "https://www.vastsverige.com/lysekil/produkter/hannas-i-hamnen/",
+      "type": "regional tourism",
+      "read": "snippet",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-12-digitaltmuseum": {
+      "title": "Text på kortet: Lilla Kornö, Lyse sn (Bohusläns museum, Aug 1987)",
+      "url": "https://digitaltmuseum.se/021017761958/text-pa-kortet-lilla-korno-lyse-sn-aug-1987",
+      "type": "museum",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-13-lotsarnastockholm": {
+      "title": "Lysekils lotsplats",
+      "url": "https://lotsarnastockholm.se/index.php/lysekils-lotsplats/",
+      "type": "pilot-history site (Sveriges Digitala Lotsmuseum)",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-14-en": {
+      "title": "Lysekil (en.wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/Lysekil",
+      "type": "wikipedia",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-15-lotsarnastockholm": {
+      "title": "Lotsarna: Gullholmens lotsplats",
+      "url": "https://lotsarnastockholm.se/index.php/gullholmens-lotsplats/",
+      "type": "pilot-history site (Sveriges Digitala Lotsmuseum)",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-16-svenskakyrkan": {
+      "title": "Svenska kyrkan Gullholmen church",
+      "url": "https://www.svenskakyrkan.se/orust/gullholmens-kyrka",
+      "type": "church",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-17-lansstyrelsen": {
+      "title": "Länsstyrelsen Härmanö",
+      "url": "https://www.lansstyrelsen.se/vastra-gotaland/besok-och-upptack/naturreservat/harmano.html",
+      "type": "county board",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-18-vastsverige": {
+      "title": "Västsverige: Skaftö Islandsberg",
+      "url": "https://www.vastsverige.com/lysekil/produkter/skafto-islandsberg/",
+      "type": "regional tourism",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-19-heritage": {
+      "title": "IALA heritage nomination Måseskär",
+      "url": "https://heritage.iala.int/?p=47107",
+      "type": "IALA heritage nomination",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-20-en": {
+      "title": "Stångehuvud (en.wikipedia)",
+      "url": "https://en.wikipedia.org/wiki/Stångehuvud",
+      "type": "wikipedia",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-21-stangehuvud": {
+      "title": "Stone quarrying (stangehuvud.se)",
+      "url": "https://www.stangehuvud.se/Stenbrytningen%20eng.htm",
+      "type": "heritage-foundation site (Curman foundation)",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-22-stangehuvud": {
+      "title": "The light (stangehuvud.se)",
+      "url": "https://www.stangehuvud.se/Fyrhuset%20eng.htm",
+      "type": "heritage-foundation site (Curman foundation)",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-23-lansstyrelsen": {
+      "title": "Stångehuvud (Länsstyrelsen)",
+      "url": "https://www.lansstyrelsen.se/vastra-gotaland/besoksmal/naturreservat/stangehuvud.html",
+      "type": "county board",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-24-svenskakyrkan": {
+      "title": "Svenska kyrkan: Käringöns kyrka",
+      "url": "https://www.svenskakyrkan.se/orust/karingons-kyrka",
+      "type": "church",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-25-sv": {
+      "title": "sv.wikipedia Olof Strömstierna",
+      "url": "https://sv.wikipedia.org/wiki/Olof_Strömstierna",
+      "type": "wikipedia",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-26-vastsverige": {
+      "title": "Västsverige: Käringön",
+      "url": "https://www.vastsverige.com/orust/produkter/karingon/",
+      "type": "regional tourism",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-27-lotsarnastockholm": {
+      "title": "Lotsarna: Käringöns lotsplats",
+      "url": "https://lotsarnastockholm.se/index.php/karingons-lotsplats/",
+      "type": "pilot-history site (Sveriges Digitala Lotsmuseum)",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-28-sv": {
+      "title": "sv.wikipedia Käringöns kyrka",
+      "url": "https://sv.wikipedia.org/wiki/Käringöns_kyrka",
+      "type": "wikipedia",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-29-sv": {
+      "title": "sv.wikipedia August Simson",
+      "url": "https://sv.wikipedia.org/wiki/August_Simson",
+      "type": "wikipedia",
+      "read": "partial",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "A3-30-digitaltmuseum": {
+      "title": "DigitaltMuseum Måseskärs fyr (1940 photo)",
+      "url": "https://digitaltmuseum.se/011014337312/maseskars-fyr",
+      "type": "museum",
+      "read": "full",
+      "via": "agent 3 handover (2026-11-07); spot-checks noted in `note`"
+    },
+    "GU-skafto": {
+      "title": "University of Gothenburg news: Skaftö wreck's cargo tells a tale of 15th century trade routes (18 October 2022)",
+      "url": "https://www.gu.se/en/news/skafto-wrecks-cargo-tells-a-tale-of-15th-century-trade-routes",
+      "type": "university news",
+      "read": "full (re-read 2026-11-07)"
+    },
+    "FYR-hattan": {
+      "title": "fyrwiki (Svenska Fyrsällskapet's wiki): Hättan",
+      "url": "https://www.fyr.org/wiki/index.php/H%C3%A4ttan",
+      "type": "lighthouse wiki (quotes Lotsverket notices)",
+      "read": "full (read 2026-11-07)"
+    },
+    "FYR-fredagsholmen": {
+      "title": "fyrwiki (Svenska Fyrsällskapet's wiki): Fredagsholmen",
+      "url": "https://www.fyr.org/wiki/index.php/Fredagsholmen",
+      "type": "lighthouse wiki (quotes Lotsverket notices)",
+      "read": "full (read 2026-11-07)"
+    },
+    "FYR-gaven": {
+      "title": "fyrwiki (Svenska Fyrsällskapet's wiki): Gäven",
+      "url": "https://www.fyr.org/wiki/index.php/G%C3%A4ven",
+      "type": "lighthouse wiki (quotes Lotsverket notices)",
+      "read": "full (read 2026-11-07)"
+    },
+    "FYR-stangholmen": {
+      "title": "fyrwiki (Svenska Fyrsällskapet's wiki): Stångholmen",
+      "url": "https://www.fyr.org/wiki/index.php/St%C3%A5ngholmen",
+      "type": "lighthouse wiki (quotes Lotsverket notices)",
+      "read": "full (read 2026-11-07)"
+    },
+    "FYR-islandsberg": {
+      "title": "fyrwiki (Svenska Fyrsällskapet's wiki): Islandsberg",
+      "url": "https://www.fyr.org/wiki/index.php/Islandsberg",
+      "type": "lighthouse wiki (quotes Lotsverket notices)",
+      "read": "full (read 2026-11-07)"
+    },
+    "FYR-kraksundsgap": {
+      "title": "fyrwiki (Svenska Fyrsällskapet's wiki): Kråksundsgap",
+      "url": "https://www.fyr.org/wiki/index.php/Kr%C3%A5ksundsgap",
+      "type": "lighthouse wiki (quotes Lotsverket notices)",
+      "read": "full (read 2026-11-07)"
     }
   },
   "places": {
@@ -203,7 +456,7 @@
         "light:Måseskär",
         "relation/10239124"
       ],
-      "confidence": "high for the lighthouse history, uncertain for 1703",
+      "confidence": "high",
       "sources": [
         "SVW-masesk",
         "RAA",
@@ -297,6 +550,13 @@
               "t": "A stone cairn (stenkummel) stood on the spot before the 1829 pole mark; when it was built is not known, so its presence in 1703 is possible, not shown.",
               "src": "SVW-masesk",
               "c": "uncertain"
+            },
+            {
+              "t": "Before the 1860s Bohuslän had essentially only the Vinga and Hållö lights plus a lantern on the roof of Carlsten fortress.",
+              "src": "SVW-masesk",
+              "c": "medium",
+              "year": "before 1864",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -311,7 +571,7 @@
           "placeName": {
             "meaning": "'the Gull Skerry' (måse = gull): the game's own descriptive name for the place.",
             "src": "PLACE-NAMES",
-            "c": "medium",
+            "c": "low",
             "note": "A descriptive reading from Felix's Map Lab, not a researched etymology."
           },
           "regulars": [
@@ -389,14 +649,43 @@
               "t": "After the Second World War the Allies are said to have sunk about 20 ships west of Måseskär at roughly 200 m depth (raised arsenic suspected to come from chemical weapons). Dates and ship names not found.",
               "src": "HSA",
               "c": "low"
+            },
+            {
+              "t": "The 1865 Heidenstam iron tower (the first of its type on the west coast, 22 m by the nomination text) was lit on 8 October 1865 with keepers' buildings, a harbour with slip and a blasted, stone-lined well.",
+              "src": "SVW-masesk",
+              "c": "medium",
+              "year": "1865",
+              "via": "agent3"
+            },
+            {
+              "t": "A red steady light with a 2nd-order lens burned crude oil through three wicks (12 nautical miles). Changed to a four-wick kerosene lamp in 1884 and to a rotating 3rd-order lens driven by a weight and clockwork in 1887. (Sources disagree slightly on lens order/year with sv.wikipedia.)",
+              "src": "A3-19-heritage",
+              "c": "medium",
+              "year": "1865-1887",
+              "via": "agent3"
+            },
+            {
+              "t": "Two signal cannons on carriages were set up in 1873 for fog; a coal-fired steam fog siren in a new engine house took over in the mid-1880s. (IALA says a steam engine for a foghorn came in 1873 and a gong came first; the two accounts differ.)",
+              "src": "SVW-masesk",
+              "c": "medium",
+              "year": "1873 / mid-1880s",
+              "via": "agent3"
+            },
+            {
+              "t": "1950: the light is electrified (power by submarine cable per IALA); in 1955 an electric motor replaces the clockwork and plumb-weight, so the light can be watched from the dwelling.",
+              "src": "SVW-masesk",
+              "c": "medium",
+              "year": "1950 / 1955",
+              "via": "agent3"
             }
           ],
           "landmarks": [
             {
-              "what": "white iron pillar tower, ~21 m, white fields",
+              "what": "iron pillar tower, ~21 m (22 m in the IALA nomination text), painted red and white (white fields 1869)",
               "exists": true,
               "src": "SVW-masesk",
-              "c": "medium"
+              "c": "medium",
+              "note": "Colour: sv.wikipedia and the IALA nomination both say red and white; WORLD-1950 says red-white checkers. Earlier gate-1 text said \"white\" only."
             },
             {
               "what": "keepers' house with grey slate roof, outbuilding, cellar",
@@ -433,13 +722,21 @@
               "exists": false,
               "src": "RAA-sjomarken",
               "c": "low"
+            },
+            {
+              "what": "Red-and-white Heidenstam iron tower with a central cylinder and gallery; one of the oldest of its type on the west coast; brass gear and plumb-weight survive.",
+              "type": "lighthouse",
+              "exists": true,
+              "src": "SVW-masesk",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
           "folklore": [],
           "placeName": {
             "meaning": "'the Gull Skerry'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -552,7 +849,7 @@
           "placeName": {
             "meaning": "'the Gull Skerry'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -563,7 +860,8 @@
           "secrets": [
             {
               "t": "Someone has put a bundle of paper charts in the keepers' cellar for the next generation.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -587,6 +885,11 @@
           "id": "relation/10239121",
           "note": "Hinneskär, the white cairn just south"
         }
+      ],
+      "confidenceNote": "high for the lighthouse history, uncertain for 1703",
+      "conflicts": [
+        "Designer: sv.wikipedia says Gustaf von Heidenstam; the IALA nomination text (as read by agent 3) says Werner von Heidenstam. Unresolved. fyr.org (Gäven page) also credits Gustav von Heidenstam for the 1835 Gäven pole mark: the same designer's name appears in two unrelated places.",
+        "relation/10238677 (Månseskär, 58.128 N, 11.409 E) in the name list is probably NOT the lighthouse skerry."
       ]
     },
     "village:Käringön": {
@@ -596,10 +899,9 @@
       "lon": 11.36359,
       "nameListIds": [
         "village:Käringön",
-        "relation/10239114",
         "way/309046742"
       ],
-      "confidence": "high for dated records; the 1703 picture is thin",
+      "confidence": "high",
       "sources": [
         "HSA",
         "SVW-karingon",
@@ -717,13 +1019,15 @@
               "kind": "belief",
               "t": "Fishermen saw women aboard as bad luck and sorted them into lucky 'turkäringar' and unlucky 'oturskäringar'; meeting an unlucky one on the way to the boat meant turning back. A tourism page tells this: it is later-recorded, not a 1703 source.",
               "src": "HSA",
-              "c": "medium"
+              "c": "medium",
+              "toldBy": "a regional tourism page (later-recorded)"
             },
             {
               "kind": "saying",
               "t": "Crews on Bohuslän boats avoided whistling aboard because it was thought to call the devil (later-recorded, from Skaftö-born painter C.G. Bernhardson's material).",
               "src": "RIG-bernhardson",
-              "c": "low"
+              "c": "low",
+              "toldBy": "later-recorded Bohuslän tradition (Bernhardson material)"
             }
           ],
           "placeName": {
@@ -827,7 +1131,8 @@
               "kind": "legend-place",
               "t": "Paulapallarna: a rock group named after a wreck.",
               "src": "RAA",
-              "c": "medium"
+              "c": "medium",
+              "toldBy": "see source"
             }
           ],
           "placeName": {
@@ -954,8 +1259,13 @@
         {
           "id": "relation/10239111",
           "note": "Vedholmen"
+        },
+        {
+          "id": "relation/10239114",
+          "note": "own entry for the island row, with the pilot-station history"
         }
-      ]
+      ],
+      "confidenceNote": "high for dated records; the 1703 picture is thin"
     },
     "village:Gullholmen": {
       "name": "Gullholmen",
@@ -965,7 +1275,7 @@
       "nameListIds": [
         "village:Gullholmen"
       ],
-      "confidence": "high (best-documented place: Bohusläns museum rapport 2012:39)",
+      "confidence": "high",
       "sources": [
         "HSA",
         "BM2012",
@@ -1069,6 +1379,20 @@
               "t": "A now-vanished offering cairn (offerkast, Gullholmen 15) is recorded; a stone with initials and years from the 1700s and 1800s survives (Gullholmen 18).",
               "src": "BM2012",
               "c": "high"
+            },
+            {
+              "t": "Pilotage was carried on from the early 1700s; in 1729 two pilots, in 1736 two (Erland Nilsson in service 1721, Anders Pehrsson from 1724), in 1744 four plus two lads.",
+              "src": "A3-15-lotsarnastockholm",
+              "c": "medium",
+              "year": "1721-1744",
+              "via": "agent3"
+            },
+            {
+              "t": "Dating: only one of three oak samples could be dated (latest ring 1717, no sapwood), probable felling 1727-1827, so the sinking falls from the 1730s to the mid-1800s. The museum says both Traung's mid-1600s dating and the Tordenskiold link can be dismissed. A treenail shows fire damage, so the ship may have burned. A separate 2007 Lund lab report on the 1930s finds gives only a weak hint of felling in winter 1752/53 and says more samples are needed.",
+              "src": "BM2012",
+              "c": "high",
+              "year": "2006-2007 analyses",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -1084,6 +1408,14 @@
               "src": "BM2012",
               "c": "uncertain",
               "note": "Undated; vanished."
+            },
+            {
+              "what": "Oak carvel-built ship remains, about 13 x 8 m, in the north harbour at about 4 m depth (record Gullholmen 25). Two finds from the 1936 dredging survive in the Gothenburg maritime museum: a large wooden rigging block (a topsail-sheet block) and a three-legged clay pot.",
+              "type": "wreck",
+              "exists": "uncertain",
+              "src": "BM2012",
+              "c": "high",
+              "via": "agent3"
             }
           ],
           "folklore": [
@@ -1092,7 +1424,8 @@
               "t": "The wreck in the harbour was said to be from Tordenskiold's fleet, lost in the Great Northern War. The museum rejects it after dating the timber to felling between 1727 and 1827, so the ship cannot be from 1700-1721.",
               "src": "BM2012",
               "c": "high",
-              "note": "The legend exists and the museum rejects it: both facts are high confidence. In 1703 the ship in question is not yet sunk; the legend belongs to later eras."
+              "note": "The legend exists and the museum rejects it: both facts are high confidence. In 1703 the ship in question is not yet sunk; the legend belongs to later eras.",
+              "toldBy": "see source"
             }
           ],
           "placeName": {
@@ -1113,7 +1446,8 @@
           "secrets": [
             {
               "t": "Under a flat rock behind the last boathouse is where a family hides its share of salted fish from the tax man.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -1164,6 +1498,27 @@
               "t": "Sold-off crown land: Gullholmen stayed a kronoholme until 1999.",
               "src": "HSA",
               "c": "medium"
+            },
+            {
+              "t": "In 1936 the harbour was deepened and the wreck pulled up; the head of the Gothenburg maritime museum Olof Traung called it a mid-1600s warship (press headline \"a 300-year-old man-of-war\").",
+              "src": "BM2012",
+              "c": "high",
+              "year": "1936",
+              "via": "agent3"
+            },
+            {
+              "t": "Pilotage was withdrawn for good in 1915 (some sources: 31 March 1915); there had been a 1896 pilot house and a decked pilot boat in 1891. So no pilot station in 1950.",
+              "src": "A3-15-lotsarnastockholm",
+              "c": "medium",
+              "year": "1915",
+              "via": "agent3"
+            },
+            {
+              "t": "In the church a votive ship (full-rigged, by Johan Högvall) was donated in 1945, and in 1949 the pulpit evangelists were painted by Gunnar Erik Ström.",
+              "src": "A3-16-svenskakyrkan",
+              "c": "high",
+              "year": "1945 / 1949",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -1184,6 +1539,14 @@
               "exists": "uncertain",
               "src": "BM2012",
               "c": "uncertain"
+            },
+            {
+              "what": "Dense captain's houses and fishermen's cottages; Stenstugan, one of the oldest houses, is now a maritime museum.",
+              "type": "other",
+              "exists": "uncertain",
+              "src": "A3-17-lansstyrelsen",
+              "c": "high",
+              "via": "agent3"
             }
           ],
           "folklore": [
@@ -1191,13 +1554,14 @@
               "kind": "legend",
               "t": "The 'Tordenskiold wreck' in the harbour: locals tell it; the museum later rejects it.",
               "src": "BM2012",
-              "c": "high"
+              "c": "high",
+              "toldBy": "see source"
             }
           ],
           "placeName": {
             "meaning": "'the crowded islet'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -1278,7 +1642,7 @@
           "placeName": {
             "meaning": "'the crowded islet'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -1301,7 +1665,8 @@
           "id": "relation/11020202",
           "note": "Silleskär"
         }
-      ]
+      ],
+      "confidenceNote": "high (best-documented place: Bohusläns museum rapport 2012:39)"
     },
     "relation/10604591": {
       "name": "Gåsö",
@@ -1311,7 +1676,7 @@
       "nameListIds": [
         "relation/10604591"
       ],
-      "confidence": "high for history; Vrakevik's name origin not found",
+      "confidence": "high",
       "sources": [
         "SVW-gaso",
         "LAN-gaso",
@@ -1369,15 +1734,15 @@
               "c": "high"
             },
             {
-              "t": "A medieval ship lay in Gåsöfjorden (the 'Skaftö wreck', ancient monument RAÄ 270, excavated 2006-2009 by Bohusläns museum).",
-              "src": "RAA",
-              "c": "low",
-              "note": "Seen in a search summary of a Digitaltmuseum record; the primary record was not opened."
-            },
-            {
-              "t": "Skerries west of Storön are a breeding ground for grey seals (a seal-protection area today); that Gåsö's seals were hunted in 1703 is not shown.",
+              "t": "Skerries west of Storön are a breeding ground for harbour seals (knubbsäl) (a seal-protection area today); that Gåsö's seals were hunted in 1703 is not shown.",
               "src": "LAN-gaso",
               "c": "medium"
+            },
+            {
+              "t": "The Skaftö wreck lay on the seabed: a ship that foundered in the Lysekil archipelago around 1440 (found 2003 off Lysekil, excavated 2009 by Bohusläns museum, research led by maritime archaeologist Staffan von Arbin). It probably took on cargo in Gdańsk and was bound for Belgium: copper from Slovakia, oak timber and bricks from Poland, quicklime from Gotland, tar, roof tiles.",
+              "src": "GU-skafto",
+              "c": "high",
+              "note": "The university text says \"off Lysekil\"; the Gåsöfjorden position comes from RAÄ record 270 (seen in a Digitaltmuseum snippet), medium."
             }
           ],
           "landmarks": [
@@ -1398,7 +1763,7 @@
           "placeName": {
             "meaning": "'Goose Isle'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -1413,7 +1778,8 @@
           "secrets": [
             {
               "t": "In one wall-ringed hollow someone has hidden a cask of brännvin from the customs man.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -1465,6 +1831,13 @@
               "src": "RAA",
               "c": "medium",
               "ref": "L1960:5699"
+            },
+            {
+              "t": "Boat links existed with Gothenburg and Lysekil, sometimes Oslo when the steamer passed; year-round links to Lysekil and Grundsund ended in the 1970s.",
+              "src": "SVW-gaso",
+              "c": "medium",
+              "year": "1970s",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -1492,13 +1865,21 @@
               "exists": true,
               "src": "LAN-gaso",
               "c": "high"
+            },
+            {
+              "what": "The old family cemetery with about 70 graves, south of the village (location from a search snippet).",
+              "type": "other",
+              "exists": true,
+              "src": "SVW-gaso",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
           "folklore": [],
           "placeName": {
             "meaning": "'Goose Isle'. Vrakevik ('wreck bay'): name origin not found; no source says a wreck lies there.",
             "src": "PLACE-NAMES",
-            "c": "medium",
+            "c": "low",
             "note": "Vrakevik is Felix's own pin; the natural harbour at its mouth is real (LAN-gaso)."
           },
           "regulars": [
@@ -1565,6 +1946,20 @@
               "t": "Cattle graze the shore meadows; eelgrass is being replanted round Gåsö; seals breed west of Storön.",
               "src": "LAN-gaso",
               "c": "high"
+            },
+            {
+              "t": "Gåsöskärgården (Gåsö, Storö, Tjällsö and many skerries): sv.wikipedia calls it a nature conservation area; Länsstyrelsen's page (via summary) says nature reserve, about 201 ha, from 1987, managed by Västkuststiftelsen. Skerries west of Storö are a harbour-seal breeding site and seal protection area; eelgrass beds around Gåsö are being restored.",
+              "src": "LAN-gaso",
+              "c": "medium",
+              "year": "1987",
+              "via": "agent3"
+            },
+            {
+              "t": "In 2008 Bohusläns museum dived the planned floating-jetty area in Gåsö harbour and found only things dated roughly to the turn of the 1800s/1900s (pottery, glass, bottles, a tyre, copper plate): nothing of archaeological value.",
+              "src": "A3-07-bohuslansmuseum",
+              "c": "high",
+              "year": "2008",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -1573,13 +1968,21 @@
               "exists": true,
               "src": "SVW-gaso",
               "c": "medium"
+            },
+            {
+              "what": "Skerries west of Storö where harbour seals breed.",
+              "type": "seal-skerry",
+              "exists": true,
+              "src": "LAN-gaso",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
           "folklore": [],
           "placeName": {
             "meaning": "'Goose Isle'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -1606,7 +2009,8 @@
           "id": "relation/10238692",
           "note": "Gåseskär"
         }
-      ]
+      ],
+      "confidenceNote": "high for history; Vrakevik's name origin not found"
     },
     "relation/10094463": {
       "name": "Stora Kornö",
@@ -1616,7 +2020,7 @@
       "nameListIds": [
         "relation/10094463"
       ],
-      "confidence": "high; note the island lies in the window's north edge fade strip (PLACE-NAMES)",
+      "confidence": "high",
       "sources": [
         "SVW-korno",
         "LAN-kalven",
@@ -1662,6 +2066,20 @@
               "t": "A temporary fishing station since the late 1500s, lived in since the 1600s, with the oldest timber sea huts from the 1600s. Inhabitants were strandsittare paying tax to the landowner in Lyse.",
               "src": "SVW-korno",
               "c": "medium"
+            },
+            {
+              "t": "Bohusläns museum's 1987 card text confirms settlement on Stora Kornö in the 1600s, with building thickening in the herring boom of the 1700s.",
+              "src": "A3-12-digitaltmuseum",
+              "c": "high",
+              "year": "1600s and 1700s",
+              "via": "agent3"
+            },
+            {
+              "t": "The oldest structures on the island are the timbered sjöbodar (boathouses) in the harbour; sv.wikipedia dates the oldest to the 1600s, while the museum card says they are said to have been moved from Saltö and probably date from the 1700s herring period (sources disagree).",
+              "src": "A3-12-digitaltmuseum",
+              "c": "high",
+              "year": "1600s or 1700s (sources differ)",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -1682,13 +2100,29 @@
               "exists": "uncertain",
               "src": "SVW-korno",
               "c": "low"
+            },
+            {
+              "what": "Klingkyrka, a short sea-cave of about 13 m, with smooth strongly arched walls, in a boulder field at the south end (natural, so older than any settlement; whether people knew it in 1703 is not stated).",
+              "type": "other",
+              "exists": "uncertain",
+              "src": "LAN-kalven",
+              "c": "high",
+              "via": "agent3"
+            },
+            {
+              "what": "A registered burial cairn (gravröse) beside the cave; Länsstyrelsen's page does not mention it, only sv.wikipedia does.",
+              "type": "cairn",
+              "exists": "uncertain",
+              "src": "SVW-korno",
+              "c": "low",
+              "via": "agent3"
             }
           ],
           "folklore": [],
           "placeName": {
             "meaning": "'the barley isle' (the game's Map Lab gloss). 'Klingkyrka' means roughly 'the ringing church', a cave known for its sound; no legend attached found.",
             "src": "PLACE-NAMES",
-            "c": "medium",
+            "c": "low",
             "note": "Etymology of Klingkyrka is our reading of the word, not a source."
           },
           "regulars": [
@@ -1756,7 +2190,7 @@
           "placeName": {
             "meaning": "'the barley isle'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -1771,7 +2205,8 @@
           "secrets": [
             {
               "t": "Someone has been leaving a bottle of water and a loaf in the cave.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -1810,6 +2245,13 @@
               "t": "The island's villages were declared of national interest for cultural-environment care in 1987.",
               "src": "SVW-korno",
               "c": "medium"
+            },
+            {
+              "t": "The Kornö villages were declared a national interest for cultural heritage care (riksintresse) in 1987 per sv.wikipedia; the museum card of the same year says the villages are a riksintresse.",
+              "src": "SVW-korno",
+              "c": "medium",
+              "year": "1987",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -1824,7 +2266,7 @@
           "placeName": {
             "meaning": "'the barley isle'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -1843,7 +2285,8 @@
           "id": "relation/10237852",
           "note": "Kornö kalv, the skerry south"
         }
-      ]
+      ],
+      "confidenceNote": "high; note the island lies in the window's north edge fade strip (PLACE-NAMES)"
     },
     "village:Fiskebäckskil": {
       "name": "Fiskebäckskil",
@@ -1853,7 +2296,7 @@
       "nameListIds": [
         "village:Fiskebäckskil"
       ],
-      "confidence": "high for outline; 1703 thin",
+      "confidence": "high",
       "sources": [
         "SVW-fbk",
         "VS-fbk",
@@ -1913,6 +2356,13 @@
               "t": "The oak font dates from the 1600s and the altarpiece from 1665, so the church had furnishing.",
               "src": "W1700",
               "c": "medium"
+            },
+            {
+              "t": "The parish church before the present one was a red-painted timber church with a turf roof, built in the late 1500s, said to have stood about ten metres further down the slope. The present church replaced it in 1772 because the old one was too small and always needing repair. So a church of this kind is the one a 1703 visitor would know (inference from the dates; the article does not say 'in 1703').",
+              "src": "A3-01-sv",
+              "c": "medium",
+              "year": "late 1500s",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -1921,6 +2371,14 @@
               "exists": true,
               "src": "W1700",
               "c": "uncertain"
+            },
+            {
+              "what": "The old red timber church with a turf roof, on the slope a few metres below where the present church stands. Gone since 1772.",
+              "type": "church",
+              "exists": true,
+              "src": "A3-01-sv",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
           "folklore": [],
@@ -1973,6 +2431,48 @@
               "t": "The shallow sandy beach at Bökevik was a bathing spot; the 'Bökeviks skär' skerry carries the name.",
               "src": "VS-fbk",
               "c": "low"
+            },
+            {
+              "t": "Fiskebäckskil had its own municipal community (municipalsamhälle) from 29 January 1886 until it was dissolved on 31 December 1951, when the rural municipality merged into Skaftö. So in 1950 it still existed as its own unit.",
+              "src": "SVW-fbk",
+              "c": "medium",
+              "year": "1886-1951",
+              "via": "agent3"
+            },
+            {
+              "t": "Painter Carl Wilhelmson was born in Fiskebäckskil in 1866 (son of a mate) and had a summer villa with studio built 1911-1913; he died in 1928 and is buried at the church. The villa is still in the family and open to the public one day a year in summer.",
+              "src": "A3-02-sv",
+              "c": "medium",
+              "year": "1911-1913",
+              "via": "agent3"
+            },
+            {
+              "t": "In 1913 the church was lengthened by moving the chancel east, a sacristy was added and the tower raised (architect Charles Lindholm). The painted ceiling and walls date from 1783 (Joachim Gotthard Reimers); the hell scene over the west gallery was painted over about 1870.",
+              "src": "A3-01-sv",
+              "c": "medium",
+              "year": "1913",
+              "via": "agent3"
+            },
+            {
+              "t": "Kristineberg zoological station was founded in 1877 on the initiative of Sven Lovén (Royal Swedish Academy of Sciences); summer laboratory built 1885, winter laboratory 1905. One of the world's oldest marine research stations, at the edge of Fiskebäckskil at the mouth of Gullmarn.",
+              "src": "A3-03-sv",
+              "c": "medium",
+              "year": "1877",
+              "via": "agent3"
+            },
+            {
+              "t": "Klubban biological station (Uppsala University) is on Östersidan; at Klubban the remains of herring bins from the Bovik guano factory can still be seen (guano = fish meal fertiliser; tourism page, undated).",
+              "src": "A3-04-vastsverige",
+              "c": "low",
+              "year": "undated",
+              "via": "agent3"
+            },
+            {
+              "t": "Östersidan: settlement began in the 1500s; in the 1800s it was a busy sea-captains' community, captains returning from long voyages built the larger houses; herring salteries, guano factories and canning gave work.",
+              "src": "A3-04-vastsverige",
+              "c": "low",
+              "year": "1800s",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2005,6 +2505,14 @@
               "exists": "uncertain",
               "src": "W1950",
               "c": "uncertain"
+            },
+            {
+              "what": "Fiskebäckskil church, white-fronted timber church on the south slope above the village, two votive ships inside (one 1700s, one 1800s per a museum record seen as snippet).",
+              "type": "church",
+              "exists": true,
+              "src": "A3-01-sv",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
           "folklore": [],
@@ -2030,7 +2538,8 @@
           "secrets": [
             {
               "t": "Britta's family shed above the slip holds the gas tanks for the lights (canon).",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -2072,6 +2581,20 @@
               "t": "A summer village of sea huts and captains' villas; the schooner and school-sailing vessel T/S Kvartsita has her home port at Kyrkekajen; the passenger ferry to Lysekil still runs; Klubbans biological station and Kristineberg research station are close by.",
               "src": "VS-fbk",
               "c": "medium"
+            },
+            {
+              "t": "The passenger ferry between Fiskebäckskil, Östersidan and Lysekil is named after the painter, Carl Wilhelmson.",
+              "src": "A3-05-sv",
+              "c": "medium",
+              "year": "undated",
+              "via": "agent3"
+            },
+            {
+              "t": "Gåsevik nature reserve (about 1.5 ha, fen and meadow with shell-rich soil, nature monument 1974, reserve 2011, new decision 2023) lies about 800 m from Fiskebäckskil, between Gåsevik and Kristineberg. It is NOT on Gåsö.",
+              "src": "A3-06-lansstyrelsen",
+              "c": "high",
+              "year": "2011",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2080,6 +2603,14 @@
               "exists": true,
               "src": "PLACE-NAMES",
               "c": "uncertain"
+            },
+            {
+              "what": "Kristineberg research station buildings at the edge of the village, with its quay and research vessel.",
+              "type": "other",
+              "exists": true,
+              "src": "A3-03-sv",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
           "folklore": [],
@@ -2105,7 +2636,8 @@
           "id": "relation/10250491",
           "note": "Bökeviks skär"
         }
-      ]
+      ],
+      "confidenceNote": "high for outline; 1703 thin"
     },
     "village:Grundsund": {
       "name": "Grundsund",
@@ -2116,7 +2648,7 @@
         "village:Grundsund",
         "harbour:Grundsunds hamn"
       ],
-      "confidence": "high for 1798-1950; doubtful as a village in 1703",
+      "confidence": "high",
       "sources": [
         "SVW-grundsund",
         "SVW-grundsunds-kyrka",
@@ -2178,6 +2710,13 @@
               "t": "The sound itself is named for being shallow (grund = shallow), now Grundsund canal, separating Skaftölandet from Ösö.",
               "src": "SVW-grundsund",
               "c": "medium"
+            },
+            {
+              "t": "The settlement as it looks today began in the 1700s herring period, in three clusters: Ösö and Bovik on opposite sides of the narrow sound, and Värbo around Värbofjorden. The name Grundsund only unites them with the 1798-99 church. So in 1703 there is no 'Grundsund' village yet as such (the sources date the clusters to '1700s', not to a year).",
+              "src": "A3-08-digitaltmuseum",
+              "c": "medium",
+              "year": "1700s (approx.)",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2229,6 +2768,20 @@
               "src": "RAA",
               "c": "medium",
               "ref": "L1960:6098, L1960:5828"
+            },
+            {
+              "t": "Late 1800s: many sjöbodar, storehouses and salteries were built along the shores to handle big herring catches. By 1920 Grundsund was one of the largest fishing villages in the county. A Kulturmiljöer Lysekils kommun text (via Bohusläns museum) is the source.",
+              "src": "A3-08-digitaltmuseum",
+              "c": "high",
+              "year": "late 1800s",
+              "via": "agent3"
+            },
+            {
+              "t": "Rain clothes: a company-history page says Didriksons began in Grundsund in 1913 (Julius and Hanna Didrikson, brushing oil onto fabric for fishermen). A Grundéns page says Carl A. Grundén, a fisherman's son, began making oilskin clothes in Grundsund in 1911, stopped in 1914 (WWI), restarted in 1926. A search summary of a museum record (snippet) says Didriksons production in Grundsund lasted until about 1956-57, then moved to Åmål. Sources differ on founding year (1911 vs 1913).",
+              "src": "A3-09-didriksons",
+              "c": "medium",
+              "year": "1911-1913",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2255,6 +2808,22 @@
               "exists": "uncertain",
               "src": "SVW-grundsund",
               "c": "low"
+            },
+            {
+              "what": "Rows of Falu-red or yellow-ochre fishing sheds (sjöbodar) tight along the channel; lighter houses on winding streets behind.",
+              "type": "other",
+              "exists": true,
+              "src": "A3-08-digitaltmuseum",
+              "c": "high",
+              "via": "agent3"
+            },
+            {
+              "what": "The old rain-clothes factory on Östra Kajen, now a shop (search summary, snippet only).",
+              "type": "boathouse",
+              "exists": true,
+              "src": "A3-11-vastsverige",
+              "c": "low",
+              "via": "agent3"
             }
           ],
           "folklore": [
@@ -2262,7 +2831,8 @@
               "kind": "story",
               "t": "The chapel's first money came from one cast of the herring net, donated: a story the village tells about its church.",
               "src": "SVW-grundsund",
-              "c": "medium"
+              "c": "medium",
+              "toldBy": "the village, as recounted on sv.wikipedia"
             }
           ],
           "placeName": {
@@ -2335,6 +2905,13 @@
               "t": "Grundsund was the main location for the TV series 'Saltön' (first season 2005), which drew tourists.",
               "src": "SVW-grundsund",
               "c": "medium"
+            },
+            {
+              "t": "The harbour channel runs through a rock pass that gave shelter. Vastsverige says the canal that divides the village was dug during World War I so boats and schooners pass more easily. NOTE: sv.wikipedia treats the 'canal' as the old natural shallow sound; the two accounts differ (probably a dredged and widened sound, uncertain).",
+              "src": "A3-10-vastsverige",
+              "c": "low",
+              "year": "WWI (uncertain)",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2368,7 +2945,8 @@
           "id": "relation/10250201",
           "note": "Bonden, west of Grundsund"
         }
-      ]
+      ],
+      "confidenceNote": "high for 1798-1950; doubtful as a village in 1703"
     },
     "village:Lysekil": {
       "name": "Lysekil",
@@ -2376,10 +2954,9 @@
       "lat": 58.27717,
       "lon": 11.4431,
       "nameListIds": [
-        "village:Lysekil",
-        "light:Stångehuvud"
+        "village:Lysekil"
       ],
-      "confidence": "high; Lysekil's pilot station not found",
+      "confidence": "high",
       "sources": [
         "SVW-lysekil",
         "W1700",
@@ -2468,6 +3045,20 @@
               "t": "The herring boom of 1566-1587 and the 1666 packing licence had faded by 1675; the early 1700s were lean.",
               "src": "SVW-lysekil",
               "c": "medium"
+            },
+            {
+              "t": "The pilot station at Lysekil was set up early in the 1700s ('inrättad tidigt 1700-tal'). A 1729 roll lists 4 pilots and 2 apprentices; the 1736 roll names a senior pilot, 4 pilots, a pilot servant and an apprentice; 1744 shows 4 pilots and 4 pilot servants. Nothing on the page dates the station more exactly than 'early 1700s', so late 1703 is not confirmed.",
+              "src": "A3-13-lotsarnastockholm",
+              "c": "medium",
+              "year": "1700s (approx.)",
+              "via": "agent3"
+            },
+            {
+              "t": "During the Great Northern War (1700-1721) the Swedish government sanctioned privateering from Lysekil's harbours. The English Wikipedia article gives no names or counts, and also says plundering of stranded ships was common on this coast.",
+              "src": "A3-14-en",
+              "c": "medium",
+              "year": "1700-1721",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2482,6 +3073,14 @@
               "exists": "uncertain",
               "src": "SVW-lysekil",
               "c": "uncertain"
+            },
+            {
+              "what": "The pilot station (lotsplats) at Lysekil; its exact 1703 position is not given by the source.",
+              "type": "other",
+              "exists": "uncertain",
+              "src": "A3-13-lotsarnastockholm",
+              "c": "low",
+              "via": "agent3"
             }
           ],
           "folklore": [],
@@ -2561,6 +3160,27 @@
               "t": "A great many wrecks cluster in the late-October storm of 1863 and the early-November storm of 1872 (see timeline of Käringön/Gullholmen).",
               "src": "RAA",
               "c": "medium"
+            },
+            {
+              "t": "Granite quarrying and stonemasonry were among the town's industries between 1850 and 1950; five granite quarries were working in 1909 and the stone industry stayed vital until the 1950s. Much of the stone went abroad (for example to Germany) rather than being used locally.",
+              "src": "A3-14-en",
+              "c": "medium",
+              "year": "1850-1950",
+              "via": "agent3"
+            },
+            {
+              "t": "From 1859 Dr Carl Curman promoted Lysekil as a spa; the bathing establishment and cold-water bathhouse date from the 1860s, and Curman's two villas in Nordic 'dragon style' were built there in 1864-1890.",
+              "src": "A3-14-en",
+              "c": "medium",
+              "year": "1859-1890",
+              "via": "agent3"
+            },
+            {
+              "t": "The pilot station kept buildings and boats through the 1900s: a new supervision house in 1928, a new motor cutter built at Ringens varv in Marstrand with a Skandia engine in 1941. In 1925 pilots and a crewman got 100 kr for rescuing the crew of the Danish schooner Merkur.",
+              "src": "A3-13-lotsarnastockholm",
+              "c": "medium",
+              "year": "1925-1941",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2593,6 +3213,14 @@
               "exists": true,
               "src": "W1950",
               "c": "high"
+            },
+            {
+              "what": "Stone-working yards and quarry scars at the town edge (Lysekil quarried granite; exact 1950 sites not given by sources read).",
+              "type": "other",
+              "exists": true,
+              "src": "A3-14-en",
+              "c": "low",
+              "via": "agent3"
             }
           ],
           "folklore": [],
@@ -2659,6 +3287,13 @@
               "t": "A town with an aquarium (Havets Hus), a refinery since 1975 and a guest harbour in the old Norra hamnen; the 1926 cast-iron urinal in Norra hamnen is a listed building.",
               "src": "SVW-lysekil",
               "c": "medium"
+            },
+            {
+              "t": "The pilot station moved to Fiskebäcksvik by Brofjorden in 1974; the oil refinery (Scanraff, now Preemraff) was inaugurated on 29 May 1975. An early-1800s report said the Lysekil pilot place was badly chosen and proposed Flatholmen instead (undated, 'early 1800s').",
+              "src": "A3-13-lotsarnastockholm",
+              "c": "medium",
+              "year": "1974-1975",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -2699,8 +3334,13 @@
         {
           "id": "relation/10250374",
           "note": "Inre Byxeskär"
+        },
+        {
+          "id": "light:Stångehuvud",
+          "note": "own entry"
         }
-      ]
+      ],
+      "confidenceNote": "high; Lysekil's pilot station not found"
     },
     "relation/10250201": {
       "name": "Bonden (the outer skerry west of Grundsund)",
@@ -2710,7 +3350,7 @@
       "nameListIds": [
         "relation/10250201"
       ],
-      "confidence": "high (sea mark and wreck records); which skerry the wreck records mean should be checked on the chart",
+      "confidence": "high",
       "sources": [
         "RAA",
         "RAA-sjomarken",
@@ -2754,7 +3394,7 @@
           "placeName": {
             "meaning": "'the farmer' (bonde): the name is a common skerry name; no meaning researched here.",
             "src": "PLACE-NAMES",
-            "c": "uncertain",
+            "c": "low",
             "note": "Not a source."
           },
           "regulars": [],
@@ -2795,7 +3435,7 @@
           "placeName": {
             "meaning": "'the farmer'.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -2857,7 +3497,7 @@
           "placeName": {
             "meaning": "'the farmer'.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -2871,7 +3511,8 @@
           "id": "relation/10239120",
           "note": "NOT this place: the other Bonden, at the southern edge"
         }
-      ]
+      ],
+      "confidenceNote": "high (sea mark and wreck records); which skerry the wreck records mean should be checked on the chart"
     },
     "light:Islandsberg": {
       "name": "Islandsberg",
@@ -2881,12 +3522,13 @@
       "nameListIds": [
         "light:Islandsberg"
       ],
-      "confidence": "medium; the story of the keeper's house is only in two lines of sv.wikipedia and the repo doc",
+      "confidence": "medium",
       "sources": [
         "SVW-islandsberg",
         "W1950",
         "RAA-sjomarken",
-        "PLACE-NAMES"
+        "PLACE-NAMES",
+        "FYR-islandsberg"
       ],
       "timeline": [
         {
@@ -2926,13 +3568,37 @@
               "exists": true,
               "src": "PLACE-NAMES",
               "c": "uncertain"
+            },
+            {
+              "what": "The bare headland: gneiss with mica, a sea cliff about 35 m high that drops about 30 m below the water, and two deep water-filled cracks through the later lighthouse site.",
+              "type": "rock-shape",
+              "exists": true,
+              "src": "A3-18-vastsverige",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
-          "folklore": [],
+          "folklore": [
+            {
+              "kind": "saying",
+              "t": "Experienced fishermen count the waters between Gullholmen and Islandsberg among the worst at sea, long feared.",
+              "toldBy": "regional tourism page, undated",
+              "src": "A3-18-vastsverige",
+              "c": "medium",
+              "via": "agent3"
+            }
+          ],
           "placeName": {
             "meaning": "'the island hill' (the game's gloss).",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low",
+            "alt": [
+              {
+                "meaning": "'Iceland-berg': named for the bare, heathery, treeless landscape (a regional tourism page's claim only)",
+                "src": "A3-18-vastsverige",
+                "c": "low"
+              }
+            ]
           },
           "regulars": [
             {
@@ -2958,6 +3624,38 @@
               "src": "W1950",
               "c": "high",
               "also": "SVW-islandsberg"
+            },
+            {
+              "t": "The combined lighthouse and dwelling was built in 1883; the light was in an attic room on the western gable and burned until 1938, when an unmanned AGA light replaced it a short distance north. A search summary elsewhere says the house held two keeper families (not fetched: low).",
+              "src": "A3-18-vastsverige",
+              "c": "medium",
+              "year": "1883-1938",
+              "via": "agent3"
+            },
+            {
+              "t": "The western gable is painted white as a daymark from the sea; a stone staircase leads down from the cliff top to the site; the southern crack was used as a harbour.",
+              "src": "A3-18-vastsverige",
+              "c": "medium",
+              "year": "undated (present state)",
+              "via": "agent3"
+            },
+            {
+              "t": "Built 1883 as a combined wooden light and dwelling house by Bark & Warburg of Göteborg: the lens stood on the upper floor of one gable behind a row of windows; the sea-facing gable was painted white, the rest of the house red. Original optic: 4th-order drum lens with clockwork and a 26 kg weight, a two-wick paraffin lamp (replaced by a Lux light in 1912). The staff also tended the unmanned lights at Ösö and Fredagsholmen.",
+              "src": "FYR-islandsberg",
+              "c": "medium",
+              "via": "fyr.org check"
+            },
+            {
+              "t": "1938: a new concrete tower 425 m north, AGA light with a 4th-order lens, Bx(4) WRG 12 s, range 12 M, focal height 13.5 m, white 7.1 m tower; the old light was put out and the station de-manned. In 1948 the old station was sold to a private family (named on fyr.org; names not reproduced here).",
+              "src": "FYR-islandsberg",
+              "c": "medium",
+              "via": "fyr.org check"
+            },
+            {
+              "t": "The passage by Islandsberg is said to have a bad reputation: the sea outside is almost always unsettled and choppy. This second source agrees with the tourism page's \"worst waters\" saying.",
+              "src": "FYR-islandsberg",
+              "c": "medium",
+              "via": "fyr.org check"
             }
           ],
           "landmarks": [
@@ -2978,13 +3676,36 @@
               "exists": true,
               "src": "RAA-sjomarken",
               "c": "high"
+            },
+            {
+              "what": "Old wooden keeper's house with a light in the attic of its western gable, white seaward end.",
+              "type": "lighthouse",
+              "exists": true,
+              "src": "A3-18-vastsverige",
+              "c": "medium",
+              "via": "agent3"
+            },
+            {
+              "what": "Southern crack used as a harbour.",
+              "type": "jetty",
+              "exists": "uncertain",
+              "src": "A3-18-vastsverige",
+              "c": "medium",
+              "via": "agent3"
             }
           ],
           "folklore": [],
           "placeName": {
             "meaning": "'the island hill'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low",
+            "alt": [
+              {
+                "meaning": "'Iceland-berg': named for the bare, heathery, treeless landscape (a regional tourism page's claim only)",
+                "src": "A3-18-vastsverige",
+                "c": "low"
+              }
+            ]
           },
           "regulars": [
             {
@@ -3046,7 +3767,14 @@
           "placeName": {
             "meaning": "'the island hill'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low",
+            "alt": [
+              {
+                "meaning": "'Iceland-berg': named for the bare, heathery, treeless landscape (a regional tourism page's claim only)",
+                "src": "A3-18-vastsverige",
+                "c": "low"
+              }
+            ]
           },
           "regulars": [],
           "secrets": [],
@@ -3054,7 +3782,11 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "conflicts": [
+        "RESOLVED 2026-11-07: LIGHTHOUSES.md says the 1883 light was a lantern on the ridge. fyr.org (and a tourism page) say the lens sat on the upper floor of one gable behind a row of windows, with the seaward gable painted white. Follow fyr.org; fix LIGHTHOUSES.md when someone touches it (not edited here: new files only)."
+      ],
+      "confidenceNote": "medium; the story of the keeper's house is only in two lines of sv.wikipedia and the repo doc"
     },
     "relation/5463706": {
       "name": "Härmanö",
@@ -3075,7 +3807,7 @@
           "note": "the automatic light off Stora Härmanö's north-west point"
         }
       ],
-      "confidence": "high (Västkuststiftelsen folder and Bohusläns museum via HSA, RAÄ records)",
+      "confidence": "high",
       "sources": [
         "HSA",
         "W1950",
@@ -3147,6 +3879,13 @@
               "t": "The fishing hamlet Härmanösund still existed in 1703 (abandoned 1705).",
               "src": "W1950",
               "c": "medium"
+            },
+            {
+              "t": "Skållehus settlement remains are dated to the 1500s (Länsstyrelsen).",
+              "src": "A3-17-lansstyrelsen",
+              "c": "high",
+              "year": "1500s",
+              "via": "agent3"
             }
           ],
           "landmarks": [
@@ -3161,12 +3900,20 @@
               "exists": true,
               "src": "HSA",
               "c": "high"
+            },
+            {
+              "what": "Ulkhåleberget, a split rock hill with passages and caves in the north; an old oak on the east side with a guestbook.",
+              "type": "other",
+              "exists": "uncertain",
+              "src": "A3-17-lansstyrelsen",
+              "c": "high",
+              "via": "agent3"
             }
           ],
           "folklore": [],
           "placeName": {
             "meaning": "written 'Hermanö' in 1673; the medieval 'Hermanösund' of 1253, 1565, 1572 and 1587 is the sound, and where it lay is disputed.",
-            "src": "HSA",
+            "src": "BM2012",
             "c": "high",
             "note": "No meaning of 'Härman-' found."
           },
@@ -3183,7 +3930,8 @@
           "secrets": [
             {
               "t": "At Skållehus the old house walls hold a hidden hearthstone with a child's handprints burned in.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -3261,7 +4009,7 @@
           "folklore": [],
           "placeName": {
             "meaning": "see 1703.",
-            "src": "HSA",
+            "src": "BM2012",
             "c": "high"
           },
           "regulars": [
@@ -3337,7 +4085,7 @@
           "folklore": [],
           "placeName": {
             "meaning": "see 1703.",
-            "src": "HSA",
+            "src": "BM2012",
             "c": "high"
           },
           "regulars": [
@@ -3351,7 +4099,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "high (Västkuststiftelsen folder and Bohusläns museum via HSA, RAÄ records)"
     },
     "village:Hälleviksstrand": {
       "name": "Hälleviksstrand",
@@ -3367,7 +4116,7 @@
           "note": "Bråtö, with the Kråksundsgap marks 1.6 km south"
         }
       ],
-      "confidence": "medium (sv.wikipedia and tourism; the repo's WORLD docs for 1950)",
+      "confidence": "medium",
       "sources": [
         "SVW-hallevik",
         "HSA",
@@ -3431,7 +4180,7 @@
           "placeName": {
             "meaning": "'the rock-slab bay' (the game's Map Lab gloss for Hälleviksstrand); no page explains the name.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -3521,7 +4270,8 @@
           "secrets": [
             {
               "t": "In the yard loft: a half-model of a boat nobody has ordered.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -3576,7 +4326,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "medium (sv.wikipedia and tourism; the repo's WORLD docs for 1950)"
     },
     "relation/10604590": {
       "name": "Storön",
@@ -3596,7 +4347,7 @@
           "note": "natural harbour at Gåsö sund; name origin not found"
         }
       ],
-      "confidence": "high (county board page)",
+      "confidence": "high",
       "sources": [
         "LAN-gaso",
         "SVW-gaso"
@@ -3624,7 +4375,7 @@
           "placeName": {
             "meaning": "'the big island'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -3635,7 +4386,8 @@
           "secrets": [
             {
               "t": "A cask of salt is buried in one hollow, marked by three flat stones.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [],
@@ -3646,7 +4398,7 @@
           "era": "1950",
           "facts": [
             {
-              "t": "Mostly bare rock with grass and heather; meadows grazed by cows; the skerries west of Storön are a grey-seal breeding area (a protected area now; protection dates not given).",
+              "t": "Mostly bare rock with grass and heather; meadows grazed by cows; the skerries west of Storön are a harbour-seal (knubbsäl) breeding area (a protected area now; protection dates not given).",
               "src": "LAN-gaso",
               "c": "high"
             },
@@ -3674,7 +4426,7 @@
           "placeName": {
             "meaning": "'the big island'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -3712,7 +4464,7 @@
           "placeName": {
             "meaning": "'the big island'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -3720,7 +4472,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "high (county board page)"
     },
     "light:Hättan": {
       "name": "Hättan",
@@ -3737,12 +4490,13 @@
           "note": "Härmanö; the light stands on a skerry off Stora Härmanö's north-west point"
         }
       ],
-      "confidence": "medium: light data from the repo (fyr.org), no heritage-register or wiki article found",
+      "confidence": "medium",
       "sources": [
         "REPO-lights",
         "W1950",
         "PLACE-NAMES",
-        "GD-canon"
+        "GD-canon",
+        "FYR-hattan"
       ],
       "timeline": [
         {
@@ -3774,7 +4528,7 @@
           "placeName": {
             "meaning": "'the Hood' (the game's Map Lab gloss).",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -3794,6 +4548,12 @@
               "t": "The light switches itself on at dusk by Dalén's sun valve (Nobel prize 1912); acetylene gas tanks must be replaced by a service boat.",
               "src": "GD-canon",
               "c": "medium"
+            },
+            {
+              "t": "Established 1938 as a Dalén light with a 4th-order lens: B(2) WRG 15 s, range 13 M, focal height 15 m; white tower 8.9 m with a black band. In 1973 it got its later character (Bx(2) WRG 6 s). Position about 58°10.4′ N, 11°22.4′ E, which matches the game's coordinates.",
+              "src": "FYR-hattan",
+              "c": "medium",
+              "via": "fyr.org check"
             }
           ],
           "landmarks": [
@@ -3808,7 +4568,7 @@
           "placeName": {
             "meaning": "'the Hood'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -3854,7 +4614,7 @@
           "placeName": {
             "meaning": "'the Hood'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -3862,7 +4622,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "medium: light data from the repo (fyr.org), no heritage-register or wiki article found"
     },
     "light:Gäven": {
       "name": "Gäven",
@@ -3879,12 +4640,13 @@
           "note": "the light stands west of Lysekil, near the mouth of the fjord"
         }
       ],
-      "confidence": "high for the pole mark (RAÄ + Söderlund 2007), medium for the light (repo / fyr.org)",
+      "confidence": "high",
       "sources": [
         "RAA-sjomarken",
         "REPO-lights",
         "W1950",
-        "PLACE-NAMES"
+        "PLACE-NAMES",
+        "FYR-gaven"
       ],
       "timeline": [
         {
@@ -3905,6 +4667,12 @@
           "year": 1941,
           "t": "Rebuilt: white 9.4 m round tower with one black band and an octagonal iron lantern house; Bx(3) WRG 9 s, 4th-order lens, focal height 27 m.",
           "src": "REPO-lights",
+          "c": "medium"
+        },
+        {
+          "year": 1917,
+          "t": "AGA light built: 4th-order lens, Bx WRG 3 s, range 12 M, focal height 27 m, white 9.5 m tower of concrete and iron.",
+          "src": "FYR-gaven",
           "c": "medium"
         }
       ],
@@ -3930,7 +4698,7 @@
           "placeName": {
             "meaning": "'the outer rock' (the game's Map Lab gloss). 'Gäven' elsewhere in Sweden is a lake name: not related.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -3966,6 +4734,13 @@
               "t": "Before 1917 the rock carried a red 15 m pole mark with a lookout platform for the Lysekil pilots (1835).",
               "src": "RAA-sjomarken",
               "c": "high"
+            },
+            {
+              "t": "The 1835 pole mark (15 m, 50 ft, on a 56 ft rock) was drawn by Gustav von Heidenstam. A 1842 notice calls it a landfall mark with a lookout clad in the middle and a square board half red, half white. It blew over in a storm because of its windage; another pole mark served until Lysekil's new church (1901) became the approach mark. The light followed in 1917: AGA, 4th-order lens, Bx WRG 3 s, range 12 M, focal height 27 m, a white 9.5 m tower of concrete and iron (the repo data says 9.4 m).",
+              "src": "FYR-gaven",
+              "c": "medium",
+              "via": "fyr.org check",
+              "note": "Conflict to keep visible: RAÄ (Söderlund 2007) says the pole mark stood until the light was built in 1917; fyr.org says it blew down and was replaced by a second pole that served to about 1901. Neither stood in 1950."
             }
           ],
           "landmarks": [
@@ -3980,7 +4755,7 @@
           "placeName": {
             "meaning": "'the outer rock'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [
             {
@@ -4028,6 +4803,12 @@
               "t": "The light stands (built 1941).",
               "src": "REPO-lights",
               "c": "medium"
+            },
+            {
+              "t": "A full-size replica of the pole mark and its lookout house, dedicated in 2009, stands at Vindön Camping & Marina (not on Gäven): nine tarred posts (eight larch, one pine), a lookout house of about 20 m² three metres above ground, walls in red slurry paint, a tarred roof, and a post with a slanted board, half red, half white.",
+              "src": "FYR-gaven",
+              "c": "medium",
+              "via": "fyr.org check"
             }
           ],
           "landmarks": [],
@@ -4035,7 +4816,7 @@
           "placeName": {
             "meaning": "'the outer rock'.",
             "src": "PLACE-NAMES",
-            "c": "medium"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -4043,7 +4824,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "high for the pole mark (RAÄ + Söderlund 2007), medium for the light (repo / fyr.org)"
     },
     "relation/10237443": {
       "name": "Fredagsholmen (the light 1.5 km east of Gullholmen)",
@@ -4063,12 +4845,19 @@
           "note": "the light stands on the south point of an island about 1.5 km east of Gullholmen (repo data)"
         }
       ],
-      "confidence": "medium: light data from the repo (OSM node 'Fredagsholmen fyr'); no register records",
+      "confidence": "medium",
       "sources": [
         "REPO-lights",
-        "W1950"
+        "W1950",
+        "FYR-fredagsholmen"
       ],
       "timeline": [
+        {
+          "year": 1883,
+          "t": "Light established: a prefab wooden light house with an eight-day paraffin lamp, first lit 7 November.",
+          "src": "FYR-fredagsholmen",
+          "c": "medium"
+        },
         {
           "year": 1917,
           "t": "First an AGA light, a white wooden light house with a lantern on the gable; Bx WRG 3 s, 8 M.",
@@ -4090,6 +4879,18 @@
               "t": "An unmanned automatic light; one of the four automatic lights of chapter 1.",
               "src": "W1950",
               "c": "high"
+            },
+            {
+              "t": "Established in 1883 as a prefab wooden light house made by the Göteborg joinery Bark & Warburg, with an eight-day paraffin lamp and coloured-glass sector screens; first lit 7 November (1883). One of 17 such wooden light houses delivered in 1883; Lotsverket built 88 of these leading lights in 1882 to 1886. It was tended by the staff of Islandsberg.",
+              "src": "FYR-fredagsholmen",
+              "c": "medium",
+              "via": "fyr.org check"
+            },
+            {
+              "t": "From 1917 an automatic AGA light with a sun valve (on at dusk, off at dawn); Lotsverket staff from the Erholmen gas station at Marstrand swapped the acetylene accumulators once or twice a year. The 1942 rebuild put a white sheet-metal fyrkur on a concrete base and new light sectors. Today it is white with a red roof and solar power.",
+              "src": "FYR-fredagsholmen",
+              "c": "medium",
+              "via": "fyr.org check"
             }
           ],
           "landmarks": [
@@ -4104,7 +4905,7 @@
           "placeName": {
             "meaning": "no meaning found; 'Friday islet' read literally, with no source tying it to a day-of-the-week story.",
             "src": "PLACE-NAMES",
-            "c": "uncertain",
+            "c": "low",
             "note": "Do not present as etymology."
           },
           "regulars": [
@@ -4116,7 +4917,8 @@
           "secrets": [
             {
               "t": "On the south point someone has cut a calendar into the rock: seven strokes, six crossed.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -4155,7 +4957,7 @@
           "placeName": {
             "meaning": "see 1950.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -4163,7 +4965,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "medium: light data from the repo (OSM node 'Fredagsholmen fyr'); no register records"
     },
     "light:Kråksundsgap Södra": {
       "name": "Kråksundsgap (the gap, its cairns and the light from the future)",
@@ -4182,13 +4985,14 @@
           "note": "1.6 km north; the gap lies between Högholmen and Bråtö"
         }
       ],
-      "confidence": "high for the sea marks (RAÄ), medium for the lights",
+      "confidence": "high",
       "sources": [
         "RAA-sjomarken",
         "RAA",
         "REPO-lights",
         "GD-canon",
-        "HSA"
+        "HSA",
+        "FYR-kraksundsgap"
       ],
       "timeline": [
         {
@@ -4204,6 +5008,12 @@
           "src": "RAA",
           "c": "high",
           "ref": "ORUST BARREVIK 1:16"
+        },
+        {
+          "year": 1911,
+          "t": "The manned station (1890 to 1911) gives way to automatic leading lights.",
+          "src": "FYR-kraksundsgap",
+          "c": "medium"
         },
         {
           "year": 1926,
@@ -4252,7 +5062,7 @@
           "placeName": {
             "meaning": "Kråksundsgap = 'the crow sound gap' (kråka = crow, sund = sound, gap = narrow opening); our reading, not a source.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -4282,6 +5092,12 @@
               "t": "The old 1890 combined light and keeper's house on Högholmen: the register does not say whether it was still standing in 1950.",
               "src": "RAA",
               "c": "uncertain"
+            },
+            {
+              "t": "The Kråksundsgap light station on Högholmen (north of Bråtö) was manned 1890 to 1911: a combined light and dwelling house moved from Husvik on Brännö and enlarged (designed by Emil Karlsson), a 5th-order lens and a wick lamp. In 1896 a second light, Kråksundsgap övre (called Sollid), was added on a trestle, and the staff also tended the Tenholmen light; in 1898 the first house was replaced by a Lotsverket house built for the Stockholm exhibition. Later four automatic AGA leading lights replaced the station.",
+              "src": "FYR-kraksundsgap",
+              "c": "medium",
+              "via": "fyr.org check"
             }
           ],
           "landmarks": [
@@ -4314,7 +5130,7 @@
           "placeName": {
             "meaning": "see 1703.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -4377,7 +5193,7 @@
           "placeName": {
             "meaning": "see 1703.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -4385,7 +5201,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "high for the sea marks (RAÄ), medium for the lights"
     },
     "relation/10238557": {
       "name": "Tornö (with Korsholmen, Vedholmen and the quarry sound)",
@@ -4413,7 +5230,7 @@
           "note": "the cairns are NW of Käringön"
         }
       ],
-      "confidence": "high for the cairns; conflicting records for the steamer Dora",
+      "confidence": "high",
       "sources": [
         "RAA-sjomarken",
         "RAA"
@@ -4486,7 +5303,7 @@
           "placeName": {
             "meaning": "Tornö = 'the thorn island' (our reading); no source.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -4497,7 +5314,8 @@
           "secrets": [
             {
               "t": "A cut-stone block with a mason's mark lies under the black cairn.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -4537,7 +5355,7 @@
           "placeName": {
             "meaning": "see 1950.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -4545,7 +5363,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "high for the cairns; conflicting records for the steamer Dora"
     },
     "relation/5214486": {
       "name": "Malö",
@@ -4561,7 +5380,7 @@
           "note": "Skaftölandet, just west across the Malö strömmar"
         }
       ],
-      "confidence": "medium (sv.wikipedia); coordinates verified to match the name list",
+      "confidence": "medium",
       "sources": [
         "SVW-malo"
       ],
@@ -4601,7 +5420,7 @@
           "placeName": {
             "meaning": "no source for the name's meaning.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -4635,7 +5454,7 @@
           "placeName": {
             "meaning": "no source.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -4673,7 +5492,7 @@
           "placeName": {
             "meaning": "no source.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -4681,7 +5500,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "medium (sv.wikipedia); coordinates verified to match the name list"
     },
     "relation/7455712": {
       "name": "Lavön",
@@ -4692,7 +5512,7 @@
         "relation/7455712"
       ],
       "related": [],
-      "confidence": "low: the only records matched the text 'Lavön' in Morlanda parish; whether they stand on this island is not confirmed",
+      "confidence": "low",
       "sources": [
         "RAA"
       ],
@@ -4726,7 +5546,7 @@
           "placeName": {
             "meaning": "no source.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [
@@ -4751,7 +5571,8 @@
             }
           ]
         }
-      ]
+      ],
+      "confidenceNote": "low: the only records matched the text 'Lavön' in Morlanda parish; whether they stand on this island is not confirmed"
     },
     "relation/10250169": {
       "name": "Stora Harpö (with Salthästen and the wreck of the Freya)",
@@ -4762,7 +5583,7 @@
         "relation/10250169"
       ],
       "related": [],
-      "confidence": "medium: records filed under Skaftö; which Salthästen is meant is not shown",
+      "confidence": "medium",
       "sources": [
         "RAA"
       ],
@@ -4804,7 +5625,7 @@
           "placeName": {
             "meaning": "'Stora Harpö' = the big Harpö; no meaning found.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -4845,7 +5666,8 @@
             }
           ]
         }
-      ]
+      ],
+      "confidenceNote": "medium: records filed under Skaftö; which Salthästen is meant is not shown"
     },
     "relation/10250171": {
       "name": "Röra (the shoal where the Neptun was lost)",
@@ -4856,7 +5678,7 @@
         "relation/10250171"
       ],
       "related": [],
-      "confidence": "low: the name Röra is also an Orust parish; the records say 'vid Röra' under Skaftö",
+      "confidence": "low",
       "sources": [
         "RAA"
       ],
@@ -4891,7 +5713,7 @@
           "placeName": {
             "meaning": "röra = 'mess' or 'stir' (our reading of the word).",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -4905,7 +5727,8 @@
           "questSeeds": [],
           "artifacts": []
         }
-      ]
+      ],
+      "confidenceNote": "low: the name Röra is also an Orust parish; the records say 'vid Röra' under Skaftö"
     },
     "relation/11020202": {
       "name": "Silleskär",
@@ -4921,7 +5744,7 @@
           "note": "off Gullholmen"
         }
       ],
-      "confidence": "medium (one record)",
+      "confidence": "medium",
       "sources": [
         "RAA",
         "PLACE-NAMES"
@@ -4983,7 +5806,8 @@
             }
           ]
         }
-      ]
+      ],
+      "confidenceNote": "medium (one record)"
     },
     "relation/10237897": {
       "name": "Jämningarna and Byxeskären (the western inlet marks)",
@@ -5010,7 +5834,7 @@
           "note": "the marks flank the western inlet to Lysekil and Gullmarn"
         }
       ],
-      "confidence": "high (RAÄ + Söderlund 2007)",
+      "confidence": "high",
       "sources": [
         "RAA-sjomarken"
       ],
@@ -5051,7 +5875,7 @@
           "placeName": {
             "meaning": "Byxeskären = 'the trouser skerries' (our reading, two skerries like two trouser legs); Jämningarna = 'the evens' (our reading).",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -5077,7 +5901,8 @@
             }
           ]
         }
-      ]
+      ],
+      "confidenceNote": "high (RAÄ + Söderlund 2007)"
     },
     "relation/10237903": {
       "name": "Stångholmen (with the dark Stångehuvud light)",
@@ -5085,21 +5910,25 @@
       "lat": 58.2666,
       "lon": 11.4205,
       "nameListIds": [
-        "relation/10237903",
-        "light:Stångehuvud"
+        "relation/10237903"
       ],
       "related": [
         {
           "id": "village:Lysekil",
           "note": "the islet lies just off Lysekil harbour; the light itself has no id in the name list (the game places it from the OSM islet)"
+        },
+        {
+          "id": "light:Stångehuvud",
+          "note": "own entry"
         }
       ],
-      "confidence": "medium: repo/fyr.org for the lights, sv.wikipedia for Stångehuvud's granite",
+      "confidence": "medium",
       "sources": [
         "REPO-lights",
         "W1950",
         "SVW-lysekil",
-        "PLACE-NAMES"
+        "PLACE-NAMES",
+        "FYR-stangholmen"
       ],
       "timeline": [
         {
@@ -5149,7 +5978,7 @@
           "placeName": {
             "meaning": "Stångehuvud = 'the pole headland' (Map Lab gloss); the name may refer to a pole mark, not shown for 1703.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -5170,6 +5999,12 @@
               "src": "W1950",
               "c": "high",
               "note": "ibiblio lists it as lit: the source conflicts."
+            },
+            {
+              "t": "Established 1940: AGA light with a 6th-order lens, K WRG 4 s, focal height 6 m, a white octagonal iron fyrkur. It replaced the Stångehuvud light the same year.",
+              "src": "FYR-stangholmen",
+              "c": "medium",
+              "via": "fyr.org check"
             }
           ],
           "landmarks": [
@@ -5190,7 +6025,7 @@
           "placeName": {
             "meaning": "'the pole holm'.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [
             {
@@ -5201,7 +6036,8 @@
           "secrets": [
             {
               "t": "In the dark Stångehuvud house a fisherman keeps his nets dry.",
-              "invented": true
+              "invented": true,
+              "grounding": "none: invented from the place's general character, no specific fact"
             }
           ],
           "rumours": [
@@ -5235,14 +6071,29 @@
               "t": "The Stångholmen light is a round plastic fyrkur (1974); Stångehuvud is a nature reserve.",
               "src": "REPO-lights",
               "c": "medium"
+            },
+            {
+              "t": "In 1974 the octagonal iron fyrkur was replaced by a round plastic one with solar power; in 1994 the old one was taken over by Stångholmsunds Båtägareförening (a boat-owners' club) in Lysekil, where it stands blasted and painted fairly centrally in the town.",
+              "src": "FYR-stangholmen",
+              "c": "medium",
+              "via": "fyr.org check"
             }
           ],
-          "landmarks": [],
+          "landmarks": [
+            {
+              "what": "the old octagonal iron fyrkur of Stångholmen, preserved in Lysekil town",
+              "type": "lighthouse",
+              "exists": true,
+              "src": "FYR-stangholmen",
+              "c": "medium",
+              "via": "fyr.org check"
+            }
+          ],
           "folklore": [],
           "placeName": {
             "meaning": "see 1950.",
             "src": "PLACE-NAMES",
-            "c": "uncertain"
+            "c": "low"
           },
           "regulars": [],
           "secrets": [],
@@ -5250,7 +6101,749 @@
           "questSeeds": [],
           "artifacts": []
         }
+      ],
+      "confidenceNote": "medium: repo/fyr.org for the lights, sv.wikipedia for Stångehuvud's granite"
+    },
+    "light:Stångehuvud": {
+      "name": "Stångehuvud",
+      "kind": "light",
+      "lat": 58.2711831,
+      "lon": 11.4134545,
+      "nameListIds": [
+        "light:Stångehuvud"
+      ],
+      "related": [
+        {
+          "id": "relation/10237903",
+          "note": "Stångholmen: its automatic light replaced Stångehuvud's in 1940"
+        },
+        {
+          "id": "village:Lysekil",
+          "note": "the headland is at the tip of Stångenäset, west of Lysekil"
+        }
+      ],
+      "sourceNote": "From agent 3's handover. Quarry facts rest mainly on stangehuvud.se (the Curman foundation's site); foreign destinations are rated low after spot-checks (see each fact's note).",
+      "confidence": "medium",
+      "sources": [
+        "A3-20-en",
+        "A3-21-stangehuvud",
+        "SVW-lysekil",
+        "A3-22-stangehuvud",
+        "A3-23-lansstyrelsen"
+      ],
+      "timeline": [
+        {
+          "year": 1904,
+          "t": "Kessel & Röhl sold its stoneworks at Stångholmesund to Hebbel & Co of Uddevalla in 1904 after Germany raised import duties on worked stone.",
+          "src": "A3-21-stangehuvud",
+          "c": "medium"
+        },
+        {
+          "year": 1940,
+          "t": "The light was put out in 1940, when a new lighthouse on a nearby islet took over its navigational role; the little wooden house was never demolished because it was so tied to the place. So in 1950 the house stands dark.",
+          "src": "A3-22-stangehuvud",
+          "c": "medium"
+        }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [],
+          "landmarks": [
+            {
+              "what": "Rounded red granite slabs with ice-scoured grooves at the tip of the peninsula, formed about 920 million years ago and shaped by the ice sheet.",
+              "type": "rock-shape",
+              "exists": true,
+              "src": "A3-20-en",
+              "c": "medium",
+              "via": "agent3"
+            }
+          ],
+          "folklore": [],
+          "placeName": {
+            "meaning": "Repo place-names.json glosses it as 'the pole headland' (stång = pole, huvud = headland). No source fetched here explains the name; treat as unconfirmed.",
+            "sv": "Stångehuvud (stång + huvud)",
+            "src": "PLACE-NAMES",
+            "c": "low"
+          },
+          "regulars": [
+            {
+              "role": "shepherd boy: Grazes a few sheep on the bare granite and watches the sea for sails.",
+              "invented": true,
+              "via": "agent3"
+            }
+          ],
+          "secrets": [
+            {
+              "t": "A hollow between two slabs stays dry in any gale and holds a child's collection of shells.",
+              "invented": true,
+              "grounding": "Rounded granite slabs",
+              "via": "agent3"
+            }
+          ],
+          "rumours": [
+            {
+              "t": "Pilots say you can steer by the pale rock on the headland when the fog lifts.",
+              "invented": true,
+              "channel": "pilots",
+              "truth": "twist",
+              "via": "agent3"
+            }
+          ],
+          "questSeeds": [
+            {
+              "t": "A child dropped a wooden whistle among the rounded rocks at the headland.",
+              "invented": true,
+              "template": "lost-item",
+              "via": "agent3"
+            }
+          ],
+          "artifacts": []
+        },
+        {
+          "era": "1950",
+          "facts": [
+            {
+              "t": "Quarrying at Stångehuvud began in the early 1870s; the Berlin firm Kessel & Röhl worked reddish coarse-grained granite at Stångholmesund. Quarrying lasted nearly 50 years in the later 1800s until Calla Curman's purchases.",
+              "src": "A3-21-stangehuvud",
+              "c": "medium",
+              "year": "1870s",
+              "via": "agent3"
+            },
+            {
+              "t": "The granite was shipped abroad, mostly as pedestals and columns for monuments in Germany, but also to Copenhagen, Amsterdam, Philadelphia, and (after 1910) as far as Singapore and Argentina. Loads left by ship from Pinnevik, Stångholmesund, Munkevik and Hästevik. About 5,000 cubic metres of facade stone for Vasakyrkan in Gothenburg were shipped in 1905-1908.",
+              "src": "A3-21-stangehuvud",
+              "c": "low",
+              "year": "1870s-1910s",
+              "via": "agent3",
+              "note": "Spot-check 2026-11-07: en.wikipedia confirms the Washington Monument in Philadelphia (Siemering, 1897) has a pink SWEDISH granite base (medium); only stangehuvud.se names Stångehuvud as the quarry (low). Amsterdam and Copenhagen: not independently confirmed (the Dutch monument register says red Swedish granite columns for the Sarphati monument, no quarry named; Jesuskirken's 82/ten column figures are only on stangehuvud.se). Treat the destinations list as low."
+            },
+            {
+              "t": "Kessel & Röhl sold its stoneworks at Stångholmesund to Hebbel & Co of Uddevalla in 1904 after Germany raised import duties on worked stone.",
+              "src": "A3-21-stangehuvud",
+              "c": "medium",
+              "year": "1904",
+              "via": "agent3"
+            },
+            {
+              "t": "Calla Curman bought most of the headland between 1916 and 1920 to stop quarrying. In 1925 (3 November per en.wikipedia) she gave the land to the Royal Swedish Academy of Sciences, and the Carl and Calla Curman Foundation was set up.",
+              "src": "SVW-lysekil",
+              "c": "medium",
+              "year": "1916-1925",
+              "via": "agent3"
+            },
+            {
+              "t": "The wooden light house at the western tip dates from 1890 and first burned kerosene; boys from Lysekil reportedly carried kerosene cans over the hills to the keeper. In 1917 the light was changed to acetylene gas (AGA), so no daily refuelling; Maritime Administration staff from Örholmen near Marstrand changed the gas tubes.",
+              "src": "A3-22-stangehuvud",
+              "c": "medium",
+              "year": "1890 and 1917",
+              "via": "agent3"
+            },
+            {
+              "t": "The light was put out in 1940, when a new lighthouse on a nearby islet took over its navigational role; the little wooden house was never demolished because it was so tied to the place. So in 1950 the house stands dark.",
+              "src": "A3-22-stangehuvud",
+              "c": "medium",
+              "year": "1940",
+              "via": "agent3"
+            }
+          ],
+          "landmarks": [
+            {
+              "what": "Small wooden light house at the outermost tip, dark since 1940 (a landmark visible from land and sea).",
+              "type": "lighthouse",
+              "exists": true,
+              "src": "A3-22-stangehuvud",
+              "c": "medium",
+              "via": "agent3"
+            },
+            {
+              "what": "Galleberget in the north of the reserve is a former quarry area; spoil heaps from blasting were left. The county board says it was left almost as it was.",
+              "type": "quarry-scar",
+              "exists": true,
+              "src": "A3-23-lansstyrelsen",
+              "c": "high",
+              "via": "agent3"
+            }
+          ],
+          "folklore": [],
+          "placeName": null,
+          "regulars": [
+            {
+              "role": "retired quarryman: Walks the headland most evenings and knows which slabs were split.",
+              "invented": true,
+              "via": "agent3"
+            },
+            {
+              "role": "gas-tube courier: Rowed out to the light house with the tubes a Marstrand crew once delivered.",
+              "invented": true,
+              "via": "agent3"
+            }
+          ],
+          "secrets": [
+            {
+              "t": "A pedestal stone with a number chiselled in it was never shipped and lies among the scrap heaps.",
+              "invented": true,
+              "grounding": "Quarry shipments of pedestals and columns",
+              "via": "agent3"
+            }
+          ],
+          "rumours": [
+            {
+              "t": "Boys swear the dark light house still glows on the night of a big storm.",
+              "invented": true,
+              "channel": "a person",
+              "truth": "twist",
+              "via": "agent3"
+            },
+            {
+              "t": "The Academy of Sciences is said to be sending people to count flowers on the headland.",
+              "invented": true,
+              "channel": "letters",
+              "truth": "twist",
+              "via": "agent3"
+            }
+          ],
+          "questSeeds": [
+            {
+              "t": "Find the weathered keeper's kerosene can said to be wedged in the rocks near the light house.",
+              "invented": true,
+              "template": "other",
+              "via": "agent3"
+            },
+            {
+              "t": "A child's wooden boat was lost off the rocks below the dark light.",
+              "invented": true,
+              "template": "lost-item",
+              "via": "agent3"
+            }
+          ],
+          "artifacts": [
+            {
+              "name": "Granite sample with Berlin firm's chisel mark",
+              "rarity": "uncommon",
+              "madeEra": "1890s",
+              "foundEra": "today",
+              "invented": true,
+              "basedOn": [
+                "Kessel & Röhl quarrying 1870s-1904"
+              ],
+              "via": "agent3"
+            }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            {
+              "t": "Stångehuvud became a nature reserve in 1982 (en.wikipedia gives 22 March 1982, 47.15 ha; the county board page says 1983, ca 48 ha, so sources disagree by a year). The land is donation land owned by the Royal Swedish Academy of Sciences.",
+              "src": "A3-20-en",
+              "c": "medium",
+              "year": "1982 or 1983",
+              "via": "agent3"
+            },
+            {
+              "t": "The Curman Foundation added a solar panel, battery and dusk switch to power an LED decorative light at the light house in 2014; it bought the building from the Vikarvet society in June 2017 and renovated the roof and front.",
+              "src": "A3-22-stangehuvud",
+              "c": "medium",
+              "year": "2014 and 2017",
+              "via": "agent3"
+            },
+            {
+              "t": "The county board's rules forbid moving or removing stones, camping, motor vehicles and loose dogs on the reserve.",
+              "src": "A3-23-lansstyrelsen",
+              "c": "high",
+              "year": "undated",
+              "via": "agent3"
+            },
+            {
+              "t": "The light house was named one of the seven wonders of Västra Götaland in 2019 (en.wikipedia); two roads to the reserve were named for Calla and Carl Curman on 3 October 2020.",
+              "src": "A3-20-en",
+              "c": "medium",
+              "year": "2019 and 2020",
+              "via": "agent3"
+            },
+            {
+              "t": "Some of the stone survives in buildings: Vasakyrkan and Kungsportsbron in Gothenburg, the granite stairs at Gula villan in Lysekil; ten columns of Jesuskirken in Copenhagen's Valby.",
+              "src": "A3-21-stangehuvud",
+              "c": "low",
+              "year": "undated",
+              "via": "agent3",
+              "note": "Single-source (stangehuvud.se); not independently confirmed in spot-check 2026-11-07."
+            }
+          ],
+          "landmarks": [
+            {
+              "what": "The small wooden light house with a solar-powered decorative LED, a favourite walk-out spot.",
+              "type": "lighthouse",
+              "exists": true,
+              "src": "A3-22-stangehuvud",
+              "c": "medium",
+              "via": "agent3"
+            }
+          ],
+          "folklore": [],
+          "placeName": null,
+          "regulars": [
+            {
+              "role": "weekend walker with a dog on a lead: Brings coffee out to the light house at dusk.",
+              "invented": true,
+              "via": "agent3"
+            }
+          ],
+          "secrets": [
+            {
+              "t": "The little light flickers on in a pattern only visible from one rock ledge.",
+              "invented": true,
+              "grounding": "2014 solar LED light",
+              "via": "agent3"
+            }
+          ],
+          "rumours": [
+            {
+              "t": "Someone says a message is kept behind a loose board in the light house.",
+              "invented": true,
+              "channel": "notice board",
+              "truth": "twist",
+              "via": "agent3"
+            }
+          ],
+          "questSeeds": [
+            {
+              "t": "Relight the decorative lamp at dusk by finding where the sun-charged battery was moved.",
+              "invented": true,
+              "template": "other",
+              "via": "agent3"
+            }
+          ],
+          "artifacts": [
+            {
+              "name": "Keeper's kerosene can",
+              "rarity": "rare",
+              "madeEra": "1890s",
+              "foundEra": "today",
+              "invented": true,
+              "basedOn": [
+                "Kerosene-fed light of 1890-1917"
+              ],
+              "via": "agent3"
+            }
+          ]
+        }
+      ],
+      "notFound": [
+        "Anything for 1703: no source mentions Stångehuvud before the 1870s quarrying and the 1890 light; era 1703 facts are empty.",
+        "Name of any keeper or whether the house had resident keepers (sources only mention gas-tube changes by Maritime Administration staff).",
+        "Folklore, legends or wrecks attached to the headland.",
+        "Actual 1917 AGA light characteristic. Conflict: the repo's lighthouses.js note 'dark since the 1990s' for Stångehuvud contradicts the sources read here (extinguished 1940: sv.wikipedia article Stångehuvuds naturreservat in scratchpad/wp, en.wikipedia, stangehuvud.se).",
+        "Source for the name meaning 'pole headland'."
+      ]
+    },
+    "relation/10239114": {
+      "name": "Käringön",
+      "kind": "skerry",
+      "lat": 58.10872,
+      "lon": 11.36481,
+      "nameListIds": [
+        "relation/10239114"
+      ],
+      "related": [
+        {
+          "id": "village:Käringön",
+          "note": "the village row and the 1703/1950 life of the island: see that entry"
+        },
+        {
+          "id": "way/309046742",
+          "note": "another Käringön row (skerry) in the name list"
+        }
+      ],
+      "sourceNote": "From agent 3's handover: the island row, with the pilot-station history (lotsarnastockholm.se).",
+      "confidence": "medium",
+      "sources": [
+        "SVW-karingon",
+        "A3-24-svenskakyrkan",
+        "A3-25-sv",
+        "A3-26-vastsverige",
+        "A3-27-lotsarnastockholm",
+        "A3-28-sv",
+        "A3-29-sv",
+        "A3-30-digitaltmuseum"
+      ],
+      "timeline": [
+        {
+          "year": 1659,
+          "t": "The island is written \"Kierlingøon\" in 1659; the name is thought to contain \"käring\" in the sense of a whitewashed cairn used as a sea mark.",
+          "src": "SVW-karingon",
+          "c": "medium"
+        },
+        {
+          "year": 1714,
+          "t": "The Lysekil pilot supervisor Peter Nilsson, appointed in 1700, quit in 1714 saying Norwegians had ruined him in 1711 when he refused to co-operate with them (appears on the Käringön page).",
+          "src": "A3-27-lotsarnastockholm",
+          "c": "medium"
+        },
+        {
+          "year": 1715,
+          "t": "He was ennobled as Strömstierna in 1715 and died 17 September 1730; the name Strömstierna appears at several places on the island today.",
+          "src": "A3-26-vastsverige",
+          "c": "medium"
+        },
+        {
+          "year": 1880,
+          "t": "A lookout had been built on Vedholmen in 1880 to replace a condemned one; pilot families lived on the hill called Lotsberget near the lookout (the page does not say whether this is the later \"Lotsutkiken\").",
+          "src": "A3-27-lotsarnastockholm",
+          "c": "medium"
+        },
+        {
+          "year": 1940,
+          "t": "A photograph of the Måseskär lighthouse and keeper's dwelling taken in 1940 (A. E. Johansson, Bohusläns museum) exists, for how the neighbouring lighthouse looked a decade before 1950.",
+          "src": "A3-30-digitaltmuseum",
+          "c": "high"
+        },
+        {
+          "year": 1993,
+          "t": "Memorial plaques for islanders lost at sea were consecrated at the church over Ascension weekend 1993; a stone and an anchor stand outside.",
+          "src": "A3-24-svenskakyrkan",
+          "c": "high"
+        },
+        {
+          "year": 2020,
+          "t": "About 80 permanent residents (2020) on 0.45 km2. No cars: passenger ferry from Tuvesvik; cycling is banned 15 June-15 August.",
+          "src": "SVW-karingon",
+          "c": "medium"
+        }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            {
+              "t": "The island is written \"Kierlingøon\" in 1659; the name is thought to contain \"käring\" in the sense of a whitewashed cairn used as a sea mark.",
+              "src": "SVW-karingon",
+              "c": "medium",
+              "year": "1659",
+              "via": "agent3"
+            },
+            {
+              "t": "Käringön is said to have been inhabited since the 1500s; house foundations (tomtningar) have been found in the parish.",
+              "src": "A3-24-svenskakyrkan",
+              "c": "high",
+              "year": "1500s (approx.)",
+              "via": "agent3"
+            },
+            {
+              "t": "Olof Knape, later Strömstierna, was born on Käringön in 1664 (sv.wikipedia; en.wikipedia is said by the repo docs to disagree on birthplace). He went to sea in 1672, served the Dutch East India Company and the Dutch States for a time, and in 1700 got his commission as admiralty captain after helping Admiral Anckarstierna muster all seafarers in Bohus county.",
+              "src": "A3-25-sv",
+              "c": "low",
+              "year": "1664 / 1700",
+              "via": "agent3",
+              "note": "Verified on lotsarnastockholm.se (Käringön lotsplats), but the site says the passage is from someone's notes and the original source is not stated: low."
+            },
+            {
+              "t": "In 1701 Knape commanded the frigate \"Marstrand\" on the expedition to Archangel; in 1704 he became chief of the 1st enrolment company in Bohuslän. (Nothing in the source is dated to late 1703 itself.)",
+              "src": "A3-25-sv",
+              "c": "medium",
+              "year": "1701 / 1704",
+              "via": "agent3"
+            },
+            {
+              "t": "He was ennobled as Strömstierna in 1715 and died 17 September 1730; the name Strömstierna appears at several places on the island today.",
+              "src": "A3-26-vastsverige",
+              "c": "low",
+              "year": "1715",
+              "via": "agent3",
+              "note": "Verified on lotsarnastockholm.se (Käringön lotsplats), but the site says the passage is from someone's notes and the original source is not stated: low."
+            },
+            {
+              "t": "A pilot station on Käringön is first named in the pilot rolls in 1717. Before that, a pilot born in the 1640s, Olof Eriksson Ström, is recorded as pilot in the 1690s and, around 1710, as piloting Norwegian ships with Peder Wessel (later Tordenskiold) aboard. In 1711 pilots Simon Eriksson and Nils Nilsson are on record.",
+              "src": "A3-27-lotsarnastockholm",
+              "c": "low",
+              "year": "1690s-1717",
+              "via": "agent3",
+              "note": "Verified on lotsarnastockholm.se (Käringön lotsplats), but the site says the passage is from someone's notes and the original source is not stated: low."
+            },
+            {
+              "t": "The Lysekil pilot supervisor Peter Nilsson, appointed in 1700, quit in 1714 saying Norwegians had ruined him in 1711 when he refused to co-operate with them (appears on the Käringön page).",
+              "src": "A3-27-lotsarnastockholm",
+              "c": "low",
+              "year": "1714",
+              "via": "agent3",
+              "note": "Verified on lotsarnastockholm.se (Käringön lotsplats), but the site says the passage is from someone's notes and the original source is not stated: low."
+            },
+            {
+              "t": "The island was \"put on the map\" by the great herring period of the 1700s.",
+              "src": "A3-26-vastsverige",
+              "c": "medium",
+              "year": "1700s (approx.)",
+              "via": "agent3"
+            },
+            {
+              "t": "Pilot rolls show 3 ordinary pilots in 1729 and 4 in 1744.",
+              "src": "A3-27-lotsarnastockholm",
+              "c": "medium",
+              "year": "1729 / 1744",
+              "via": "agent3"
+            },
+            {
+              "t": "In the 1770s the pilots clashed with a fishing company that had bought the island for herring work; the authorities ruled the island large enough for both.",
+              "src": "A3-27-lotsarnastockholm",
+              "c": "medium",
+              "year": "1770s",
+              "via": "agent3"
+            }
+          ],
+          "landmarks": [
+            {
+              "what": "A name theory (not a fact): \"käring\" = a whitewashed cairn used as a sea mark. A separate navigation mark called \"käring\" is said to have stood on Saltskär nearby. The origin of the name is described as disputed.",
+              "type": "cairn",
+              "exists": "uncertain",
+              "src": "A3-26-vastsverige",
+              "c": "low",
+              "via": "agent3"
+            }
+          ],
+          "folklore": [
+            {
+              "kind": "superstition",
+              "t": "Women aboard a fishing boat were long taboo; fishermen later split them into lucky \"turkäringar\" and unlucky \"oturskäringar\". Meeting an unlucky one on the way down to the pier meant turning round and going home.",
+              "toldBy": "regional tourism site (Västsverige), no date given, so it is not shown to be 1703",
+              "src": "A3-26-vastsverige",
+              "c": "medium",
+              "via": "agent3"
+            }
+          ],
+          "placeName": {
+            "meaning": "Probably \"käring\" in the sense of a whitewashed cairn used as a sea mark (a name theory from Svenskt ortnamnslexikon as cited on sv.wikipedia); the tourism page says the origin is disputed.",
+            "sv": "(vitmålat) röse till ledning för sjöfarande",
+            "src": "SVW-karingon",
+            "c": "medium"
+          },
+          "regulars": [
+            {
+              "role": "pilot watching the sound from a rock at the south-west tip: a quiet figure who knows which Norwegian-flag boats are about to ask for a pilot",
+              "invented": true,
+              "via": "agent3"
+            },
+            {
+              "role": "herring-company clerk counting barrels on the jetty: worried about the pilots and the company sharing the island",
+              "invented": true,
+              "via": "agent3"
+            }
+          ],
+          "secrets": [
+            {
+              "t": "A pilot keeps a private tally of which ships came in under escort and which came in alone, in case he is ever asked.",
+              "invented": true,
+              "grounding": "1710-1714 pilot pressure from Norwegians",
+              "via": "agent3"
+            }
+          ],
+          "rumours": [
+            {
+              "t": "They say the captain from Käringön, the one the King chose, will come home for Christmas if the weather lets him.",
+              "invented": true,
+              "channel": "pilots",
+              "truth": "twist",
+              "via": "agent3"
+            },
+            {
+              "t": "An unlucky woman was seen on the path to the pier this morning; two boats stayed in.",
+              "invented": true,
+              "channel": "a person",
+              "truth": "true",
+              "via": "agent3"
+            }
+          ],
+          "questSeeds": [
+            {
+              "t": "Carry a sealed letter for a pilot from the Käringön rock to a boat waiting off the outer skerries.",
+              "invented": true,
+              "template": "delivery",
+              "via": "agent3"
+            }
+          ],
+          "artifacts": [
+            {
+              "name": "Pilot's tally-stick",
+              "rarity": "uncommon",
+              "madeEra": "1700s (approx.)",
+              "foundEra": "today",
+              "invented": true,
+              "basedOn": [
+                "pilot rolls and Norwegian pressure on pilots"
+              ],
+              "via": "agent3"
+            }
+          ]
+        },
+        {
+          "era": "1950",
+          "facts": [
+            {
+              "t": "Käringön had a municipalsamhälle (local government for the built-up village) from 29 September 1886 until 31 December 1959; it had 568 inhabitants in 1900 and 548 in 1925.",
+              "src": "SVW-karingon",
+              "c": "medium",
+              "year": "1886-1959",
+              "via": "agent3"
+            },
+            {
+              "t": "The Käringön pilot station was still staffed in 1950 (it closed on 1 July 1960, its duties moving to Marstrand and Lysekil; staffed for at least 250 years). A new pilot boat was built in 1939 and the pilot house was moved and raised in 1926.",
+              "src": "A3-27-lotsarnastockholm",
+              "c": "medium",
+              "year": "1926 / 1939 / 1960",
+              "via": "agent3"
+            },
+            {
+              "t": "A lookout had been built on Vedholmen in 1880 to replace a condemned one; pilot families lived on the hill called Lotsberget near the lookout (the page does not say whether this is the later \"Lotsutkiken\").",
+              "src": "A3-27-lotsarnastockholm",
+              "c": "medium",
+              "year": "1880",
+              "via": "agent3"
+            },
+            {
+              "t": "The white wooden church (taken into use 1796) was red outside for about 100 years and is now white. The south entrance by the chancel was removed in 1952, so in 1950 it still existed. A floor clock from 1845 and the 1915 organ by Eskil Lundén are inside.",
+              "src": "A3-28-sv",
+              "c": "medium",
+              "year": "1796 / 1952",
+              "via": "agent3"
+            },
+            {
+              "t": "The preacher August Simson (1815-1900) was chapel preacher and teacher on Käringön from 1849 and had a vicarage built in 1877 at his own cost; it still stands, high up with a view over the island, run today by a foundation. He closed the island's illicit taverns, renamed families and was very strict.",
+              "src": "A3-29-sv",
+              "c": "medium",
+              "year": "1849-1900",
+              "via": "agent3"
+            },
+            {
+              "t": "A photograph of the Måseskär lighthouse and keeper's dwelling taken in 1940 (A. E. Johansson, Bohusläns museum) exists, for how the neighbouring lighthouse looked a decade before 1950.",
+              "src": "A3-30-digitaltmuseum",
+              "c": "high",
+              "year": "1940",
+              "via": "agent3"
+            }
+          ],
+          "landmarks": [
+            {
+              "what": "The white wooden church with a 20 m tower and a copper-clad spire, with two ship-related details: communion silver given by five shipowners and a stone and anchor outside.",
+              "type": "church",
+              "exists": true,
+              "src": "A3-24-svenskakyrkan",
+              "c": "high",
+              "via": "agent3"
+            },
+            {
+              "what": "Lotsutkiken: a small former pilot dwelling (about 10 square metres) at the south-western tip. Age and original use not given.",
+              "type": "pilot-lookout",
+              "exists": "uncertain",
+              "src": "A3-26-vastsverige",
+              "c": "low",
+              "via": "agent3"
+            }
+          ],
+          "folklore": [],
+          "placeName": null,
+          "regulars": [
+            {
+              "role": "pilot's widow who keeps the lamp in the lookout window",
+              "invented": true,
+              "via": "agent3"
+            },
+            {
+              "role": "net-mender on the north pier: knows every boat by its sound",
+              "invented": true,
+              "via": "agent3"
+            }
+          ],
+          "secrets": [],
+          "rumours": [
+            {
+              "t": "The new pilot boat is faster than anything the Marstrand men have.",
+              "invented": true,
+              "channel": "pilots",
+              "truth": "twist",
+              "via": "agent3"
+            },
+            {
+              "t": "There will be a light at Måseskär with no clockwork in it before long.",
+              "invented": true,
+              "channel": "radio forecast",
+              "truth": "true",
+              "via": "agent3"
+            }
+          ],
+          "questSeeds": [
+            {
+              "t": "A child lost a toy boat off the pier on Käringön; it drifted toward Saltskär.",
+              "invented": true,
+              "template": "lost-item",
+              "via": "agent3"
+            }
+          ],
+          "artifacts": [
+            {
+              "name": "Pilot-boat nameboard, 1939",
+              "rarity": "uncommon",
+              "madeEra": "1939",
+              "foundEra": "today",
+              "invented": true,
+              "basedOn": [
+                "new pilot boat built 1939"
+              ],
+              "via": "agent3"
+            }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            {
+              "t": "About 80 permanent residents (2020) on 0.45 km2. No cars: passenger ferry from Tuvesvik; cycling is banned 15 June-15 August.",
+              "src": "SVW-karingon",
+              "c": "medium",
+              "year": "2020",
+              "via": "agent3"
+            },
+            {
+              "t": "Memorial plaques for islanders lost at sea were consecrated at the church over Ascension weekend 1993; a stone and an anchor stand outside.",
+              "src": "A3-24-svenskakyrkan",
+              "c": "high",
+              "year": "1993",
+              "via": "agent3"
+            },
+            {
+              "t": "The Swedish Sea Rescue Society runs one of Sweden's largest rescue stations here (sv.wikipedia); the Society's 2025 yearbook lists \"RS Käringön\" (search-result summary only; the station's founding year was not found).",
+              "src": "SVW-karingon",
+              "c": "low",
+              "year": "undated",
+              "via": "agent3"
+            }
+          ],
+          "landmarks": [
+            {
+              "what": "Salon Strömstierna in the Seglarhotellet, and several other places named after the admiral.",
+              "type": "other",
+              "exists": true,
+              "src": "A3-26-vastsverige",
+              "c": "medium",
+              "via": "agent3"
+            }
+          ],
+          "folklore": [],
+          "placeName": null,
+          "regulars": [],
+          "secrets": [],
+          "rumours": [],
+          "questSeeds": [],
+          "artifacts": []
+        }
+      ],
+      "notFound": [
+        "Wrecks near Käringön before 1800 (searched: sv.wikipedia pages, general web; nothing found). Only 1800s rescues appear on the pilot page (e.g. brig MARY ANN 28 Sept 1875, schooner AMOR 18 Feb 1878, OSKAR grounded near Måseskär 5 Mar 1891).",
+        "When Lotsutkiken was built and whether it is the 1880 lookout.",
+        "Founding year of the sea-rescue station.",
+        "Herring-year detail for Käringön itself beyond \"1700s\" (Nils Tengby's books exist: Libris 7657917, 7657998, 7657917 not read).",
+        "Anything dated to late 1703 or to 1950 about daily life."
       ]
     }
-  }
+  },
+  "_schema": "Fact items: {t, src (id in sources), c (high|medium|low|uncertain), year?, ref?, also?, note?, via?}. Hooks (regulars, secrets, rumours, questSeeds, artifacts): invented:true always, never evidence. timeline: dated events. related: {id, note} (nameListIds stay clean)."
 }
