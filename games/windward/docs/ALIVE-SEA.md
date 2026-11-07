@@ -291,3 +291,11 @@ bays/headlands; a weather system; anchoring close-ups; sound wiring.
     wake, heel in gusts.
 15. **Build a sail-feel lab first** (new files only), with toggles for each layer, day types,
     squalls, mist and speed feel; into the game after Felix has felt it on his phone.
+
+**Round 3, settled (Felix agreed):**
+16. **Utomskärs is faster and livelier** through all three: a steadier, stronger open-water wind;
+    a swell to surf on a broad reach (flat water in among the skerries); more spray and heel.
+    Inside keeps a decent pace (light-air floor) and its own charm: flat water, wildlife, shortcuts
+    through passes.
+17. **Noticing a shift:** the sail is the main signal (luff flutter when headed, the trim control
+    shows you're off); the wind arrow confirms.
