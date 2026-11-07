@@ -377,3 +377,7 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
 5. **Automatic handwritten entries** with small drawings; your own short notes later.
 6. **One book across all eras,** entries marked with their era.
 7. **Co-op:** your book is yours; days sailed in a friend's world are recorded in it too.
+
+**Round 2 (in progress):**
+12. **Logbook drawings:** auto-made ink silhouettes rendered from the 3D models for every template;
+    hand-drawn only for unique artifacts (Felix agreed).
