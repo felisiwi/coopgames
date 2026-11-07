@@ -131,3 +131,58 @@ Cost key: **S** = small, data or tuning; **M** = a new system; **L** = big. **(g
 2. The **route log** measurement on the chapter 1 legs.
 3. Pick a first handful from B (cheap ones: seals, birds lifting, fishing boats on a rhythm,
    people waving) and build them as one batch.
+
+## Round 2: Felix's picks and new ideas (2026-11-07 midday)
+
+**Felix loves:** rumours, "different each time", what you leave behind, places with personality
+(all four parts), the boathook, the fishing line, anchoring in a bay, the sighting log, carrying
+things, names that survive across eras (and naming a place together with a quest partner).
+Carved initials: cute, niche. **Not busy, but engaging, with things to interact with.**
+**Approach (Felix): design systems, not single things,** fed by the research docs per era and
+place, so the world grows on its own and each player's world comes out a little different.
+
+### Tap to interact (input change)
+- **Today (verified in src/phone.js onDown):** a finger anywhere except the boat or the rope
+  steers at once on pointer down; a short tap on the boat is a ping.
+- **Idea (Felix):** steering starts only after a short hold (~120 to 150 ms) or once the finger
+  moves; a quick release is a **tap** that goes to the world. Dragging still steers immediately,
+  so it should not feel slower. The boat tap stays a ping.
+- **What a tap could do:** pick up floating things in reach (no aiming minigame: in reach = yours);
+  scare a flock up; a seal slips into the water; a passing boat: wave or toot; a person on a
+  jetty: hail them (and maybe hear a rumour); a place: add it to the sighting log.
+- **One system:** anything in the world can register as "tappable" with a reach and a reaction.
+  New things plug in as data.
+
+### Fishing
+- Trail a line; over a diving flock at calm speed, it tugs. Not a fishing minigame.
+- **Purpose ladder (Felix):** fish as gifts → sell fish → later a fishery of your own.
+- **Hunger/thirst (open, Felix's idea):** fish could feed you. Mission control's caution: in a
+  cosy game survival meters can turn into chores. Options: (a) real hunger that slowly drains;
+  (b) meals as a bonus only (a good meal = a small boost, never a penalty for skipping); (c) no
+  meters, fish is for people and trade. Decide later.
+
+### Anchoring and close-ups
+- When you anchor or moor, the camera eases in and the island gains detail it can't afford while
+  sailing: small fish in a lagoon, rock pools, flowers, birds coming closer. Wildlife comes closer
+  the longer you're still. Overlaps the planned harbour close-ups: one "close look" system.
+
+### The place system (data-driven)
+- A **place profile** per spot and era: mood (wind, birds, sound), regulars (who is there and
+  when), a secret, its temper by time and weather. Filled from WORLD-/PEOPLE- research docs.
+- A per-world seed picks which regulars, secrets and rumours a given world gets, so worlds differ.
+  In co-op the host's world rules (fits "visit the host's world").
+- Keep invented people marked as invented, never real people's names (existing rule).
+
+### Rumours without radio
+- 1950: the evening shipping forecast on the radio, people you hail, harbour notice boards, the
+  post. Before radio (1703): news after Sunday service outside the church, the pilots' and
+  sailors' talk in harbour, letters, market days, a traveller passing through.
+
+### Names you give
+- Unnamed skerries can be named by you, or by you and a quest partner together; the name carries
+  into later eras' charts. Extends the "names are discovered" rule.
+
+### One data model behind it all (sketch, to grill)
+Taps, sightings, rumours, carry-jobs and happenings could share one shape: a **thing** at a place,
+in an era, with conditions (time of day, weather, season, story phase), what it does on its own
+(routine), and how it reacts (tap, approach, anchoring nearby). Rumours then just point at things.
