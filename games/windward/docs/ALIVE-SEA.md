@@ -299,3 +299,29 @@ bays/headlands; a weather system; anchoring close-ups; sound wiring.
     through passes.
 17. **Noticing a shift:** the sail is the main signal (luff flutter when headed, the trim control
     shows you're off); the wind arrow confirms.
+
+## Grill: generated mini quests (2026-11-07, in progress)
+
+**Round 1, settled (Felix agreed):**
+1. **A mini quest is a small chain:** a need (regular, place, happening) + 1 to 3 steps with
+   existing verbs (sail to, find, pick up, carry, deliver, be there at a time/weather) + a
+   resolution. An errand is a one-step quest; a rumour can be the lead-in step.
+2. **Quest templates with slots** the world fills ("{regular} lost {item} near {skerry} in
+   {last storm}"); each template good enough alone; generation adds variety, not substance.
+   (Not Skyrim-style radiant grammar.)
+3. **Sources:** regulars' needs (the main source), places' secrets, happenings, weather
+   aftermath, story chapters.
+4. **No quest log:** people remember; a paper "on your mind" page in the logbook lists what you
+   said yes to; Navigate can point at one you pick.
+5. **At most 1 to 2 offered at once,** never pushy; saying no is fine; ignored quests fade
+   gently ("Never mind, my brother found it").
+6. **Rewards:** warmth, gifts, rumours, a name to give, **knowledge** (a shortcut through a pass,
+   where the mackerel run), boat improvements later; no money until an economy.
+   **Felix: gifts are lore-appropriate artifacts with a rarity scale.** Collectibles for now;
+   later sell the common ones; rare ones lead to historically accurate lore; some rare artifacts
+   unlock other templated quests (a bigger system), and Felix can hand-assign story meaning to
+   rare objects.
+7. **Words:** a few short line variants per personality type (gruff, chatty, shy) per template,
+   drafted from the research, marked INVENTED, rewritten by Felix by eye.
+8. **Co-op:** quests live in the host's world, both can help, rewards split like the thing model;
+   a few two-boat quests (towing, holding a line) later, after co-op stage 2.
