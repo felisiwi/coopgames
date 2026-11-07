@@ -23,11 +23,11 @@ export const FYRKURAR_1950 = {
     light: { pattern: 'quick flashing, 4 s period (K WRG 4 s)', colour: WRG, kind: 'flash', count: 1, period: 4 },
   },
   fredagsholmen: {
-    name: 'Fredagsholmen', built: 1942, station: 1917, realHeight: 5.5, area: 'Gullholmen',
+    name: 'Fredagsholmen', built: 1942, station: 1883, realHeight: 5.5, area: 'Gullholmen',
     lat: 58.18649, lon: 11.42178, model: 'fyrkur', characterUncertain: true,
     positionSource: 'the OSM node "Fredagsholmen fyr" (assets/coast/seamarks.json, node/1531134954); the data says "on the south point of an island about 1.5 km east of Gullholmen".',
     positionUncertain: false,
-    description: 'White sheet-metal fyrkur on a concrete base (1942; the year is 1943 in one source). AGA light since 1917.',
+    description: 'White sheet-metal fyrkur on a concrete base (1942; the year is 1943 in one source). A light here since 1883 (a prefab wooden light house with a paraffin lamp, tended from Islandsberg); AGA light since 1917 (fyr.org).',
     light: { pattern: 'one flash every 3 s (Bx WRG 3 s)', colour: WRG, kind: 'flash', count: 1, period: 3 },
   },
 };
@@ -38,13 +38,13 @@ export const FYRKURAR_1950 = {
 export const KRAKSUNDSGAP_1950 = {
   name: 'Kråksundsgap Södra', built: 1941, station: 1911, realHeight: 6, area: 'Orust', lat: 58.1005563, lon: 11.4404817, model: 'fyrkur', characterUncertain: true, positionUncertain: false,
   positionSource: 'src/lighthouses.js (the modern tower\'s position; Bråtö, NW point)',
-  description: 'Small octagonal iron lantern with an AGA light (exchanged 1 Nov 1941). The 13 m white tower replaced it in 1954.',
+  description: 'Small octagonal iron lantern with an AGA light (exchanged 1 Nov 1941). The station was manned 1890 to 1911 (a combined light and dwelling house moved from Husvik on Brännö), then an automatic AGA light from 1911. The 13 m white tower replaced the lantern in 1954.',
   light: { pattern: 'two flashes every 7 s (Bx(2) WRG 7 s)', colour: WRG, kind: 'flash', count: 2, period: 7 },
 };
 
 // 1950 overrides for the lights that have a tower model: the character and the state then. By name.
 export const LIGHT_1950 = {
-  'Måseskär': { light: { pattern: 'three white flashes every 30 s (Bx(3) W 30 s)', colour: 'white', kind: 'flash', count: 3, period: 30 }, note: 'Lit and manned in 1950: three keepers. White, NOT red (the fixed red light was 1865-1887). Electric lamp from 1950.', characterUncertain: true },
+  'Måseskär': { light: { pattern: 'three white flashes every 30 s (Bx(3) W 30 s)', colour: 'white', kind: 'flash', count: 3, period: 30 }, note: 'Lit and manned in 1950: three keepers. The LIGHT was white, NOT red (the fixed red light was 1865-1887); the TOWER was red and white (iron lattice, sv.wikipedia and the IALA text), not plain white. Electric lamp from 1950.', characterUncertain: true },
   'Hättan': { light: { pattern: 'two flashes every 15 s (B(2) WRG 15 s)', colour: WRG, kind: 'flash', count: 2, period: 15 }, note: 'Unmanned AGA light since 1938. The character changed in 1973.', characterUncertain: true },
   'Gäven': { light: { pattern: 'three flashes every 9 s (Bx(3) WRG 9 s)', colour: WRG, kind: 'flash', count: 3, period: 9 }, note: 'Unmanned AGA light since 1917; the 1941 tower with its black band.', characterUncertain: true },
   'Islandsberg': { light: null, note: 'The game\'s tower is the old keeper\'s-house light, dark since 1938 (a new concrete tower 425 m north was lit in 1950 but has no model).' },

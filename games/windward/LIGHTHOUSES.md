@@ -31,8 +31,8 @@ The game scales distances to about 1:8, so towers don't have to be at real heigh
 |---|---|---|---|---|
 | Carlsten Fortress light | Marstrand | 1782 (dark since 1868) | — | Light on the fortress tower; the directory calls it the world's first flashing light |
 | Böttö (1) | Göteborg | 1841 (dark since 1964) | — | Red lantern on the roof of a red-and-white wooden keeper's house |
-| Islandsberg (1) | Lysekil | 1883 (dark since 1938) | 6 m | Wooden keeper's house, white seaward end, red behind |
-| Stångehuvud | Lysekil | 1890 | 4 m | Small white wooden house, black A-frame roof |
+| Islandsberg (1) | Lysekil | 1883 (dark since 1938) | 6 m | Wooden keeper's house, white seaward gable, red behind. The light sat behind a row of windows on the upper floor of the seaward gable (fyr.org), **not** a lantern on the ridge. The 3D model draws exactly that (`gableWindowLight` in `src/lighthouses.js`: five panes in a dark frame, the middle one is the glow's `lantern-glass`). |
+| Stångehuvud | Lysekil | 1890 (dark since 1940) | 4 m | Small white wooden house, black A-frame roof. Put out in 1940 when Stångholmen replaced it (fyr.org, stangehuvud.se); ibiblio's "1990s" is the odd one out. |
 | Eggskär | Klädesholmen | 1904 | 8 m | White round stone tower |
 | Tistlarna | Göteborg south | 1905 | 14 m | Square white masonry, black trim, grey dome |
 | Mollösund | Orust | 1930 | 7 m | White, black base band, red roof |

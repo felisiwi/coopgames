@@ -105,7 +105,7 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
   `?jump=britta` straight to Britta's jetty (overwrites that browser's chapter-1 save: use a
   private window); `?debug=1` overlay (fps, draw calls) and debug hooks; `?year=1700|1950|2015`.
 - **Labs** (all under `/games/windward/`): coast-lab, lighthouse-lab, boat-lab, terrain-lab,
-  seamarks-lab, passes-lab, harbours-lab, era-asset-lab, world-1700-lab (`?era=1950|today`), sound-lab.
+  seamarks-lab, passes-lab, harbours-lab, era-asset-lab, world-1700-lab (`?era=1950|today`), sound-lab, boats-lab (`?era=1950|today`: 20 seeded boats per era, the same boats the busy coast draws).
 
 ## 6. Hard-won gotchas (Windward era)
 

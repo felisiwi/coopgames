@@ -18,7 +18,7 @@ import { createShoalIndex, makeSailHeight, GAME_PASS_TIERS } from './sea-truth.j
 import { attachTerrainStyle, STYLE_GAME } from './terrain-style.js';
 import { createSeamarkLayer } from './seamark-layer.js';
 import { createBuilding } from './props.js';
-import { LIGHTHOUSES, createLighthouse } from './lighthouses.js';
+import { LIGHTHOUSES, createLighthouse, lanternOptions } from './lighthouses.js';
 import { lightEntriesFor } from './lights-1950.js';
 import { createLanternFx } from './lantern.js';
 import { createAsset, createFyrkur1950, BUOY_COLOURS } from './era-assets.js';
@@ -240,7 +240,7 @@ export function buildWorldForSpec(files, spec, { seed = 1, ownBoats = true } = {
       group.position.set(land.x, Math.max(0, world.heightAt(land.x, land.z)), land.z);
       props.add(group);
       const lit = !!entry.lit;
-      const fx = createLanternFx(group, entry);
+      const fx = createLanternFx(group, entry, lanternOptions(entry.name)); // Islandsberg: a glow behind its gable windows, no sweeping beam
       fx.setLit(lit);
       lanterns.push({ fx, lit });
       report.lights++; if (lit) report.lightsLit++; else report.lightsDark++;

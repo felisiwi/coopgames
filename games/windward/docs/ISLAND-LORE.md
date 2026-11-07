@@ -81,7 +81,7 @@ Keys are the game's own name-list ids (`src/names.js`: `relation/NNN`, `village:
    1954 tower, the black Bråtö cairn (1838), Pipeskär cone, leading marks (1926, 1941).
 10. **Härmanö** (`relation/5463706`). House platforms at Skållehus, the abandoned hamlet (1705), feldspar quarry,
     wrecks Jupiter (1899), Svecia (1926), Vendlus (1927).
-11. **Gäven** (`light:Gäven`). A red 15 m pole mark with a pilots' lookout platform (1835) before the light (1917).
+11. **Gäven** (`light:Gäven`). A red 15 m pole mark with a pilots' lookout platform (1835) before the light (1917); it blew over, a second pole served to about 1901, a replica stands at Vindön since 2009.
 12. **Bonden**, west of Grundsund (`relation/10250201`). White 8 m cairn with pole and red ball (1875); the
     schooner Anna Maria wrecked on its west side in 1905.
 13. **Hälleviksstrand** (`village:Hälleviksstrand`). "Strana", the 1905 fire, boatyard (1907), Bovik cannery.

@@ -378,6 +378,53 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
 6. **One book across all eras,** entries marked with their era.
 7. **Co-op:** your book is yours; days sailed in a friend's world are recorded in it too.
 
-**Round 2 (in progress):**
-12. **Logbook drawings:** auto-made ink silhouettes rendered from the 3D models for every template;
-    hand-drawn only for unique artifacts (Felix agreed).
+**Round 2 and 3, settled (Felix chose):**
+8. **Open it** with a small book icon in a corner; a ribbon shows when something new was noted.
+9. **When something is noted:** a small "noted in the logbook" toast only; the book never opens itself.
+10. **Lettering:** legible handwriting for entries, serif headings; fall back to serif if it reads badly
+    on a phone.
+11. **Voice:** you, first person, short ("Three harbour seals off Gåsö. Fog lifting.").
+12. **Drawings:** auto-made ink silhouettes rendered from the 3D models for every template; hand-drawn
+    only for unique artifacts.
+13. **Grandpa's faded pages:** in today's opening some pages are already written but unreadable; as you
+    write in 1950 they turn out to be your own entries, one by one.
+14. **A sighting entry** holds one handwritten line, the ink sketch, and the place and era in the margin.
+15. **Tapping an entry** opens the chart at that place.
+16. **Order:** newest first within each section.
+
+## Grill: anchoring close-ups (2026-11-07, settled; Felix chose)
+
+1. **Where:** sheltered, shallow spots near land: coves always, and an island's lee when today's wind
+   blows from the other side (ties to the weather's lee). Harbours by mooring as now.
+2. **How:** an "Anchor" button appears when you're slow near a good spot.
+3. **Camera:** eases in low and close; drag to look around; tap things (the tap system).
+4. **Up close:** wildlife comes closer, shore detail (rock pools, flowers, small fish in shallow water),
+   finds to pick up, and people ashore you can hail. All via the thing model's "anchored nearby" reaction.
+5. **Patience:** gradual: birds within seconds, seals after about a minute of stillness.
+6. **Ashore:** everything is reached from the boat for now; no walking.
+7. **Passing time:** a "Wait until evening / morning" button once day and night exist; in co-op both
+   players must be anchored.
+8. **Harbour close-ups** (steering narrow gaps at a big scale) share the close camera and detail tech but
+   stay a separate, later feature.
+9. **Co-op:** raft up side by side; both get the close view and the same wildlife.
+10. **Leaving:** a "Weigh anchor" button (or start steering and it asks once).
+
+## Grill: day and night (2026-11-07, settled; Felix chose)
+
+Already settled elsewhere: a game day of ~30 real minutes (weather grill); "wait until evening/morning"
+when anchored, both players in co-op (anchoring grill); one shared clock in co-op (pause rule).
+
+1. **Short summer night:** a long golden dusk and a short blue night, about a quarter of the day (a
+   Bohuslän summer). Seasons can change this later.
+2. **Readable blue night:** deep blue, coast shapes faintly visible; lights, windows and stars stand out.
+3. **Lights first:** lighthouses and their flash patterns are the main guide at night; Navigate still works.
+4. **Real sector lights as a mechanic:** e.g. Kråksundsgap shows white over safe water, red or green over
+   danger; stay in the white.
+5. **Bound to time:** night happenings (mareld, the keeper's night watch, the Kråksundsgap glimpse), a few
+   night-only quests (e.g. guide a boat home by the lights), regulars keep hours (fishermen out at dawn,
+   home at dusk), AGA lights switch themselves on at dusk (sun valve).
+6. **A new session starts late morning** (~11:00); nothing new is saved.
+7. **Night on the water:** boats and the ferry carry lanterns, windows lit (dusk.js), stars and moonlight,
+   a quieter sea (fewer boats, wildlife asleep).
+8. **The story can set the time, rarely** (key moments jump to dusk or night), like the wind override.
+9. **The first dusk after relighting:** your lights come on one by one along the coast.

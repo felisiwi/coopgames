@@ -69,7 +69,7 @@ export function chartSea(sea, toGame) {
   };
 }
 
-export function createChartController({ canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onLog = () => {}, onRelightDone = () => {}, onRelightTick = () => {}, granddadMarks = () => [], parent = document.body, assetsBase, storage = deviceStorage() }) {
+export function createChartController({ homeZoom = 1, canvas, coast, nameBook, getMarks = () => [], debug = false, onJump = () => {}, onTarget = () => {}, onVisit = () => {}, isDark = () => false, holdTarget = () => false, onRelit = () => null, onArrive = () => {}, onTask = () => {}, onLog = () => {}, onRelightDone = () => {}, onRelightTick = () => {}, granddadMarks = () => [], parent = document.body, assetsBase, storage = deviceStorage() }) {
   const toGame = coast.world.toGame;
   const eraLights = coast.lightList || LIGHTHOUSES; // the era's lights (1950: its own seven), else the game's list
   const lights = chartLights(coast.names, toGame, eraLights);
@@ -77,7 +77,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   const seen = createSeen({ heightAt: coast.heightAt }); // the fog gate for names (src/seen.js); the grid arrives with chart.json
   const nav = createNavTarget();
   const state = {
-    zoom: 1, zoomTarget: 1, returnZoom: 1, pan: { x: 0, z: 0 }, focus: { x: NaN, z: NaN },
+    zoom: homeZoom, zoomTarget: homeZoom, returnZoom: homeZoom, pan: { x: 0, z: 0 }, focus: { x: NaN, z: NaN },
     visit: null, relight: null, card: null, explored: null, chart: null, cfg: null, W: 390, H: 844, dpr: 1, view: null, t: 0, drag: null, zooming: false, lastSave: 0,
   };
 
@@ -169,7 +169,7 @@ export function createChartController({ canvas, coast, nameBook, getMarks = () =
   // the fog lifts in a wide circle, the camera returns to the boat (src/relight.js is the timeline).
   function startRelight(entry) {
     if (state.visit || state.relight || entry.outside) return false;
-    state.returnZoom = state.zoomTarget < ZOOM_CHART_START ? state.zoomTarget : 1;
+    state.returnZoom = state.zoomTarget < ZOOM_CHART_START ? state.zoomTarget : homeZoom;
     state.card = null;
     state.visit = { entry, x: entry.x, z: entry.z, relight: true };
     state.relight = { entry, t: 0, lit: false };

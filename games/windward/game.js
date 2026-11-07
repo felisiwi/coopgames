@@ -40,7 +40,7 @@ import { parseGameStyle } from './src/terrain-style.js';
 import { createArrivals, giftFor } from './src/arrival.js';
 import { createDeck } from './src/deck.js';
 import { createAudio } from './src/audio.js';
-import { LIGHTHOUSES, createLighthouse } from './src/lighthouses.js';
+import { LIGHTHOUSES, createLighthouse, lanternOptions } from './src/lighthouses.js';
 import { createTask1950 } from './src/task-1950.js';
 import { createLanternFx, colourHex } from './src/lantern.js';
 import { createLighthouseTask, towerLit, GRANDMA_ID, REWARD_DELAY_S, hasSeenStart, markStartSeen, resetStart } from './src/lighthouse-task.js';
@@ -65,6 +65,16 @@ import { createGameClock } from './src/game-clock.js';
 import { createPause } from './src/pause.js';
 import { withBrittaNames } from './src/britta-names.js';
 import { createErrandWind } from './src/errand-wind.js';
+import { createGameWeather, windMessage, dayTypeFromParam, startHourFromParam, GAME_WEATHER } from './src/game-weather.js';
+import { createWindPaint } from './src/sail-feel-water.js';
+import { createSpray, createFeelWake, lookAheadVector } from './src/sail-feel-fx.js';
+import { FEEL, heelTarget, stepHeel, createLuffState, stepLuff, luffFlutter, sprayRate, cameraFeel, smoothShare, overpowerFactor, easeRelief, lookFor } from './src/sail-feel-model.js';
+import { createRain, createMist, createCloudBank } from './src/sail-feel-weather-fx.js';
+import { squallAt } from './src/squall.js';
+import { createSquallNotes } from './src/squall-notes.js';
+import { emulateMediumpFragment } from './src/shader-fp16.js';
+import { swellHeight, swellPhaseUniform, surfBoost } from './src/sail-feel-swell.js';
+import { smoothstep } from './src/weather-noise.js';
 import { createPauseCard } from './src/pause-ui.js';
 import { profileForYear } from './src/busy-era.js';
 
@@ -74,14 +84,14 @@ import { profileForYear } from './src/busy-era.js';
 // Pitch/roll come from a finite-difference gradient of that same function
 // sampled a short distance ahead/right of the boat, clamped so a steep local
 // slope can't flip it.
-function bobBoat(group, x, z, headingRad, waves, wind) {
+function bobBoat(group, x, z, headingRad, waves, wind, swellAt = null, heelRoll = 0) { // swellAt(x, z): the swell's height there (weather); heelRoll: extra roll to leeward
   const eps = CONFIG.BOAT_TILT_GRADIENT_EPS;
   const fwd = { x: Math.sin(headingRad), z: Math.cos(headingRad) };
   const right = { x: Math.cos(headingRad), z: -Math.sin(headingRad) };
 
-  const y = seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength);
-  const yFwd = seaHeightCPU(x + fwd.x * eps, z + fwd.z * eps, waves.phases, wind.dir, wind.strength);
-  const yRight = seaHeightCPU(x + right.x * eps, z + right.z * eps, waves.phases, wind.dir, wind.strength);
+  const y = seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength) + (swellAt ? swellAt(x, z) : 0);
+  const yFwd = seaHeightCPU(x + fwd.x * eps, z + fwd.z * eps, waves.phases, wind.dir, wind.strength) + (swellAt ? swellAt(x + fwd.x * eps, z + fwd.z * eps) : 0);
+  const yRight = seaHeightCPU(x + right.x * eps, z + right.z * eps, waves.phases, wind.dir, wind.strength) + (swellAt ? swellAt(x + right.x * eps, z + right.z * eps) : 0);
 
   const slopeForward = (yFwd - y) / eps;
   const slopeRight = (yRight - y) / eps;
@@ -89,7 +99,7 @@ function bobBoat(group, x, z, headingRad, waves, wind) {
 
   group.position.y = y;
   group.rotation.x = Math.min(max, Math.max(-max, -slopeForward * CONFIG.BOAT_TILT_GAIN));
-  group.rotation.z = Math.min(max, Math.max(-max, slopeRight * CONFIG.BOAT_TILT_GAIN));
+  group.rotation.z = Math.min(max, Math.max(-max, slopeRight * CONFIG.BOAT_TILT_GAIN)) + heelRoll;
 }
 
 // Eases self.speed toward the sail model's instantaneous target
@@ -184,6 +194,10 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   // ?debug=1: performance overlay (src/debug-overlay.js). Not created otherwise.
   const debugOverlay = new URLSearchParams(window.location.search).get('debug') === '1' ? createDebugOverlay(renderer) : null;
+  if (debugOverlay) { // what this GPU really runs the shaders at (a phone that reports "mediump" or few bits here explains water that is fine on a desktop)
+    const gl = renderer.getContext(); const hf = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT); const mf = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT);
+    debugOverlay.set('gpu', `gpu         shaders ${renderer.capabilities.precision} | fragment highp ${hf ? hf.precision : 0} bits, mediump ${mf ? mf.precision : 0} bits | WebGL${renderer.capabilities.isWebGL2 ? 2 : 1}`);
+  }
   // Phones: cap render resolution (a 3x screen is 9x the pixels for little
   // visible gain on flat shapes).
   const isPhone = wantsPhoneControls();
@@ -266,6 +280,14 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
 
   const water = createWater(depthMap);
   scene.add(water.mesh);
+  // WEATHER on the real coast (src/game-weather.js); ?weather=0 keeps the old wind and the old sea paint (for comparison). Decided here because the sea, the wake and the camera all depend on it.
+  const weatherWanted = !!coast && new URLSearchParams(window.location.search).get('weather') !== '0';
+  const windPaint = weatherWanted ? createWindPaint(water) : null;
+  // ?fp16=1 (debug): run the water's fragment shader as a phone's mediump would (16-bit coordinates), with or without weather (src/shader-fp16.js)
+  if (new URLSearchParams(window.location.search).get('fp16') === '1') for (const m of [water.mesh.material, ...water.mesh.children.map((c) => c.material).filter(Boolean)]) { m.fragmentShader = emulateMediumpFragment(m.fragmentShader); m.needsUpdate = true; }
+  // The swell's height anywhere (0 when weather is off or the boat is inside the skerries). Filled in every frame by the weather; declared here so the sea lambdas below can use it.
+  const swellState = { on: false, sw: null, t: 0, exposure: 0 };
+  const swellNow = (x, z) => (swellState.on ? swellHeight(swellState.sw, x, z, swellState.t, swellState.exposure) : 0); // the real wind field on the sea (gusts, lulls, lees, squall line) + the swell (src/sail-feel-water.js)
 
   // Golden distance haze: fog for the meshes (the sea mixes the same colour
   // in its own shader). near/far follow the camera-to-boat distance each
@@ -419,8 +441,44 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // The beach where you wake in 1950: Svalan thrown up wrecked, the boatbuilder's son and Britta (src/wake-scene.js). Already hauled onto her cradle if the intro has been seen.
   const wakeScene = coast && coast.wake ? createWakeScene({ plan: coast.wake, heightAt: coast.heightAt }) : null;
   if (wakeScene) { scene.add(wakeScene.group); { const q = new URLSearchParams(window.location.search); if (hasSeenIntro(store) && q.get('opening') !== '1' && q.get('lights') !== 'reset') wakeScene.settle(); } if (relaunched) { wakeScene.settle(); wakeScene.relaunch(); } }
-  const selfWake = createWake();
+  if (weatherWanted) selfBoat.group.rotation.order = 'YXZ'; // yaw first, then pitch and roll in the boat's own frame, so heel rolls along the keel
+  const selfWake = weatherWanted ? createFeelWake() : createWake(); // the weather's wake grows and lingers with speed
   scene.add(selfWake.group);
+  const spray = weatherWanted ? createSpray() : null; // bow spray
+  if (spray) scene.add(spray.points);
+  const luff = createLuffState(); // the sail's flutter when headed (the shift signal)
+  let heel = 0; // how far the boat leans to leeward now (radians)
+  let camShare = 0; // the camera's smoothed reading of your speed
+  const aheadV = { x: 0, z: 0 }; // how far the view has slid ahead of the bow (smoothed), and where it is heading
+  const aheadTarget = { x: 0, z: 0 };
+  // Squalls and mist (the lab's, src/sail-feel-weather-fx.js): rain, drifting mist wisps, a squall's cloud bank, and the storm warning on the screen edge it comes from. Soft: never damage.
+  const rain = weatherWanted ? createRain() : null; if (rain) scene.add(rain.lines);
+  const mistFx = weatherWanted ? createMist() : null; if (mistFx) scene.add(mistFx.group);
+  const cloudBank = weatherWanted ? createCloudBank() : null; if (cloudBank) scene.add(cloudBank.mesh);
+  const MIST_COLOR = new THREE.Color(0xdde5e8); const STORM_COLOR = new THREE.Color(0x4b5563); const STORM_ZENITH = new THREE.Color(0x5d6875);
+  const wxTint = new THREE.Color(); const wxHorizon = new THREE.Color(); const wxZenith = new THREE.Color();
+  // The camera only sees ~100 m of sea, so a squall's cloud on the horizon is off screen: this glow on the edge it comes from, with its countdown, is the "plenty of warning".
+  const stormEl = weatherWanted ? document.createElement('div') : null;
+  const stormLabel = weatherWanted ? document.createElement('div') : null;
+  if (stormEl) {
+    stormEl.style.cssText = 'position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0';
+    stormLabel.style.cssText = 'position:fixed;z-index:4;pointer-events:none;opacity:0;transform:translate(-50%,-50%);padding:6px 14px;border-radius:16px;background:rgba(20,26,38,.92);border:1px solid rgba(243,230,200,.6);color:#fff3d6;font:italic 700 17px/1.1 Georgia,serif;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.45)';
+    document.body.append(stormEl, stormLabel);
+  }
+  // Telling the player what a squall IS and what to do (src/squall-notes.js): one explanation at the first warning, "Squall! Ease the sheet..." when it hits, "has passed" after. A toast,
+  // not a card: the game keeps running. At the hit it is also FELT: a buzz on a phone that can, and a short shake of the camera (the heel, spray and the wind jump come from the weather itself).
+  const squallNotes = weatherWanted ? createSquallNotes() : null;
+  const squallToast = weatherWanted ? document.createElement('div') : null;
+  let squallToastUntil = 0;
+  let squallShake = 0;
+  if (squallToast) {
+    squallToast.style.cssText = 'position:fixed;left:50%;top:15%;transform:translateX(-50%);max-width:min(88vw,420px);padding:12px 18px;border-radius:14px;background:rgba(20,26,38,.94);border:1px solid rgba(243,230,200,.6);color:#fff3d6;font:italic 600 19px/1.3 Georgia,serif;text-align:center;z-index:6;pointer-events:none;opacity:0;transition:opacity .35s;box-shadow:0 4px 18px rgba(0,0,0,.5)';
+    const kf = document.createElement('style'); kf.textContent = '@keyframes sqPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.1)}}'; document.head.appendChild(kf);
+    document.body.appendChild(squallToast);
+  }
+  let sqNow = squallAt([], 0, 0, 0); // this frame's squall at the boat
+  let wxLook = null; // this frame's weather look { mist, fogNearMul, fogFarMul, gloom, lightScale } (null without weather)
+  let stormKey = 'off';
   let otherBoat = null; // created lazily on the peer's first 'pos' (drop-in play)
   let otherWake = null; // created alongside otherBoat
 
@@ -459,13 +517,13 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const life = lureOn
     ? createLife({
       THREE, scene, heightAt: coast.heightAt, places: coast.names, lights: coast.lights,
-      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength), // (waves / wind are set up below)
+      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength) + swellNow(x, z), // (waves / seaWind are set up below)
       inside: (x, z) => coast.world.inside(x, z, 100),
       onCry: () => audio.gull(0, 0.5),
       marks: seamarkLayer ? seamarkLayer.perchMarks() : null, // gulls perch on the REAL marks; no decorative buoys
     })
     : null;
-  const seaAtCPU = (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength); // the sea surface at a point (waves / wind are set up below)
+  const seaAtCPU = (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength) + swellNow(x, z); // the sea surface at a point (waves / seaWind are set up below)
   // THE game clock (src/game-clock.js): wall time minus time paused. The busy coast's traffic and ferry and the host's wind controller read it instead of the
   // wall clock, so a pause (src/pause.js) freezes them and a return does not make them jump. (Co-op: see the rule in src/pause.js.)
   const clock = createGameClock();
@@ -502,17 +560,30 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // messages, never runs its own timer (W0.8: replaces the old instant
   // snap-to-new-wind with a gradual ease, see DESIGN.md's "Wind" section).
   const nowS0 = clock.now(); // the GAME clock: the wind's hold/transition timers do not run while paused
-  let windController = role === 'host' ? createWindController(seed, nowS0) : null;
-  let wind = role === 'host' ? windController.current : initialWind(seed);
-  const waves = createWaveState(wind.dir); // src/water.js: per-component wave phases
+  // WEATHER (src/game-weather.js, the sail-feel lab's weather): on the real coast the wind comes from the day's weather on the GAME clock, the same on both phones;
+  // ?weather=0 keeps the old random wind controller below (for comparison), and so does the procedural-islands game. ?day=<type> ?t=HH:MM pick the day and the hour.
+  const weatherQ = new URLSearchParams(window.location.search);
+  let weatherActive = weatherWanted; // a guest that hears an old host (no `wx` in its wind message) drops back to the old way
+  const weather = weatherActive ? createGameWeather({ seed, dayType: dayTypeFromParam(weatherQ.get('day')), startHour: startHourFromParam(weatherQ.get('t')), squallSoon: weatherQ.get('squall') === 'soon', heightAt: coast.heightAt, bounds: coast.world.bounds, center: coast.spawn, clock }) : null;
+  const windOut = {}; // windAt() fills this each frame: the wind at the boat
+  if (weather && debugOverlay) window.__weather = weather; // headless checks (?debug=1)
+  if (weather && windPaint) windPaint.refreshNow(weather.field, weather.gt, self.x, self.z); // the sea's first picture of the wind, before the first frame
+  let windController = !weatherActive && role === 'host' ? createWindController(seed, nowS0) : null;
+  let wind = weatherActive ? weather.update().windAt(self.x, self.z, windOut) : (role === 'host' ? windController.current : initialWind(seed));
+  // The start faces across the wind (a beam reach, src/spawn.js): spawnPose chose that against the OLD random wind, so with weather it is chosen again against the weather's wind at the start (else the boat can start head to wind).
+  if (weatherActive) self.heading = (wind.dir + Math.PI / 2) % (Math.PI * 2);
+  // The SEA (waves, foam, the boat's bob) follows the day's wind and sea state, not the gusts, so it does not shimmer when a gust passes. Without weather: the wind itself.
+  let seaWind = weatherActive ? weather.sea : wind;
+  const waves = createWaveState(seaWind.dir); // src/water.js: per-component wave phases
   let windSeq = role === 'host' ? 0 : -1; // guest applies any real message (seq >= 0)
   let heardFromPeer = false;
-  let windHeartbeatAt = nowS0 + CONFIG.WIND_HEARTBEAT_S; // hold-phase resend cadence
+  let windHeartbeatAt = nowS0 + (weatherActive ? GAME_WEATHER.HEARTBEAT_S : CONFIG.WIND_HEARTBEAT_S); // hold-phase resend cadence
   let windTransitionSendAt = nowS0; // transition-phase resend cadence (faster, so the guest eases too)
 
   function sendWind() {
     windSeq += 1;
-    net.send({ type: 'wind', dir: wind.dir, strength: wind.strength, seq: windSeq });
+    // weather: the old fields (dir, strength, seq = the wind at the host's boat, all an OLD guest reads) plus `wx` (weather time, seed, day, story events) for a new guest
+    net.send(weatherActive ? windMessage(weather, wind, windSeq) : { type: 'wind', dir: wind.dir, strength: wind.strength, seq: windSeq });
     // Piggyback the full found list on the host's wind heartbeat, so a guest
     // who joins late (drop-in) or missed a 'found' catches up.
     if (found.size) net.send({ type: 'found-all', ids: [...found] });
@@ -562,7 +633,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       other.heading = msg.heading;
       other.speed = msg.speed;
       if (!otherBoat) {
-        pauseCtl.peerJoined(); // a friend arrives: rejoin the wall clock so both phones see the same traffic (a solo pause left us behind it)
+        if (weatherActive) weather.rebase(() => pauseCtl.peerJoined()); else pauseCtl.peerJoined(); // a friend arrives: rejoin the wall clock so both phones see the same traffic (a solo pause left us behind it); the weather time stays continuous across it
         otherBoat = createBoatMesh(otherColor, boatOptions);
         scene.add(otherBoat.group);
         otherWake = createWake();
@@ -577,8 +648,12 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       showNotice('Your friend pinged — follow the gold dot on the compass', 3, 'ping');
     } else if (msg.type === 'wind' && role === 'guest') {
       if (msg.seq > windSeq) {
-        wind = { dir: msg.dir, strength: msg.strength };
         windSeq = msg.seq;
+        if (weatherActive && weather.receive(msg.wx)) { /* a weather packet: this phone computes its own wind from the same seed and (now aligned) weather time */ } else {
+          weatherActive = false; // an old host (no weather packet): the old way, apply what it sends
+          wind = { dir: msg.dir, strength: msg.strength };
+          seaWind = wind;
+        }
       }
     }
   });
@@ -615,7 +690,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   window.addEventListener('keydown', onKeyDown);
 
   // Zoom. The procedural islands keep the old wheel zoom; the real coast has the new zoom + chart (src/chart-controller.js).
-  let zoom = 1;
+  let zoom = weatherWanted ? GAME_WEATHER.HOME_ZOOM : 1;
   function onWheel(e) {
     e.preventDefault();
     zoom = Math.min(CONFIG.ZOOM_MAX, Math.max(CONFIG.ZOOM_MIN, zoom + e.deltaY * CONFIG.ZOOM_WHEEL_SENSITIVITY));
@@ -678,6 +753,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // The first errand's wind (src/errand-wind.js): host only, derived from beats.phase (nothing new saved). From behind yard -> Grundsund, then from behind the way home;
   // when the yard is reached ('help') it eases back to the normal controller. Null in the Today game: the normal wind, untouched.
   const errandWind = beats && role === 'host' ? createErrandWind({ yard: yardEntry, grundsund: grundsundEntry }) : null;
+  if (weather && errandWind) weather.setErrand({ yard: yardEntry, grundsund: grundsundEntry }); // with weather, the errand wind is a story override on the weather's field (src/game-weather.js)
   if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(store); resetIntro(store); beats?.reset(); }
   const lightList = coast ? coast.lightList : LIGHTHOUSES; // the era's lights (1950: seven; Today: the game's own list)
   const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
@@ -688,7 +764,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       const entry = lightList.find((x) => x.name === l.name);
       if (!entry || !l.group) continue;
       const ghost = !!gd && entry.name === gd.strange.tower;
-      const fx = l.fx ? l.fx : ghost ? createLanternFx(l.group, { ...entry, light: gd.strange.light }, { beam: false, solidHalo: true, color: colourHex(gd.strange.light.colour) }) : createLanternFx(l.group, entry);
+      const fx = l.fx ? l.fx : ghost ? createLanternFx(l.group, { ...entry, light: gd.strange.light }, { beam: false, solidHalo: true, color: colourHex(gd.strange.light.colour) }) : createLanternFx(l.group, entry, lanternOptions(entry.name)); // (the world builder has normally made it already: src/world-year-build.js)
       if (ghost) { fx.phase = 0; fx.dim = STRANGE_FLASH_LEVEL; fx.haloMul = 1.6; fx.setLit(false); towerFx = fx; continue; }
       const taskLight = task.lights.some((t) => t.id === `light:${l.name}`);
       // a task light is lit exactly when restored (Islandsberg and Stångehuvud are dark in real life but start dark AND stay lit once restored, also after a reload);
@@ -835,6 +911,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
   const chartCtl = coast
     ? createChartController({
+      homeZoom: weatherWanted ? GAME_WEATHER.HOME_ZOOM : 1, // the camera rests further out with the weather: gusts show ~15 s early
       isDark: (id) => !!task && task.isDark(id),
       holdTarget: (entry) => !!task && (task.isDark(entry.id) || (task.phase === 'report' && entry.id === GRANDMA_ID) || (era1950 && beats && ((beats.phase === 'errand' && grundsundEntry && entry.id === grundsundEntry.id) || (beats.phase === 'return' && entry.id === YARD.id) || ((beats.phase === 'help' || task.phase === 'report') && entry.id === BRITTA_ENTRY.id))) || (era1950 && task.phase === 'keeper' && keeperEntry && entry.id === keeperEntry.id)), // a dark light's tag stays until it is lit; grandma's until you are IN the harbour
       onRelit,
@@ -951,11 +1028,27 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     last = now;
     const nowS = now / 1000;
 
-    if (role === 'host') {
+    if (weatherActive) {
+      weather.update(); // the weather time of this frame (game clock: frozen under a solo pause, wall time in co-op), the sea's wind, the coast grid kept warm
+      weather.setPhase(beats ? beats.phase : null); // the first errand's scripted wind, as a story override that hands back smoothly at 'help' (host only: the guest gets the events)
+      wind = weather.windAt(self.x, self.z, windOut);
+      seaWind = weather.sea;
+      swellState.sw = weather.swell; swellState.t = weather.gt; swellState.exposure = wind.exposure;
+      if (role === 'host') {
+        const windS = clock.now();
+        if (windS >= windHeartbeatAt) { windHeartbeatAt = windS + GAME_WEATHER.HEARTBEAT_S; sendWind(); }
+      }
+      if (debugOverlay && nowS - (frame.wxDbgAt ?? 0) > 0.4) {
+        frame.wxDbgAt = nowS;
+        const deg = Math.round(((180 - (wind.dir * 180) / Math.PI) % 360 + 360) % 360); // the compass bearing the wind comes FROM
+        debugOverlay.set('weather', `weather     ${weather.dayType} ${weather.clockText} | wind ${(2 + 12 * wind.strength).toFixed(1)} m/s from ${String(deg).padStart(3, '0')}° (day ${(2 + 12 * wind.baseStrength).toFixed(1)}, ${wind.local >= 1 ? '+' : ''}${Math.round((wind.local - 1) * 100)}%) | open ${wind.exposure.toFixed(2)} shadow ${wind.shadow.toFixed(2)}${wind.override > 0 ? ' | story wind' : ''} | vis ${(weather.base().visibility * 100).toFixed(0)}% rain ${((wxLook?.rain ?? 0) * 100).toFixed(0)}% squall ${sqNow.etaS !== null ? 'in ' + Math.round(sqNow.etaS) + ' s' : sqNow.intensity > 0.05 ? 'now' : '-'}`);
+      }
+    } else if (role === 'host') {
       const windS = clock.now(); // game clock (not the frame time): frozen under the pause card, wall time in co-op (src/pause.js)
       const prevPhase = windController.phase;
       windController = stepWindController(windController, windS);
       wind = errandWind ? errandWind.step(beats.phase, windS, windController.current) : windController.current; // the first errand overrides the normal wind (and hands back smoothly)
+      seaWind = wind;
       const justChangedPhase = windController.phase !== prevPhase;
 
       if (windController.phase === 'transition' || (errandWind && errandWind.blending)) { // swinging: broadcast fast so the friend's phone eases too
@@ -968,8 +1061,25 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
         windHeartbeatAt = windS + CONFIG.WIND_HEARTBEAT_S;
         sendWind();
       }
+    } else {
+      seaWind = wind; // an old-style guest: the host's wind is the sea's wind too
     }
 
+    swellState.on = weatherActive;
+    sqNow = weatherActive ? squallAt(weather.field.squallPlan, self.x, self.z, weather.gt) : sqNow;
+    if (squallNotes) {
+      for (const ev of squallNotes.step(weatherActive ? sqNow : null)) {
+        squallToast.textContent = ev.text; squallToast.style.opacity = '1'; squallToastUntil = nowS + ev.seconds;
+        if (ev.kind === 'hit') { squallShake = 1; try { navigator.vibrate?.([70, 40, 160]); } catch { /* no buzz on this device */ } }
+      }
+      if (squallToastUntil && nowS > squallToastUntil) { squallToast.style.opacity = '0'; squallToastUntil = 0; }
+    }
+    if (weatherActive) {
+      const wb = weather.base();
+      const rainNow = Math.max(wb.rain, sqNow.rain);
+      wxLook = lookFor(wb.visibility, rainNow, sqNow.cloud);
+      wxLook.rain = rainNow;
+    } else wxLook = null;
     const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible) || !!dawn || pauseCtl.paused; // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
     if (!frozen) phone?.apply(self, wind, dt);
     if (!frozen && (input.left || input.right)) hasSteered = true;
@@ -979,7 +1089,12 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (!frozen && input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
     if (!frozen && input.down) self.trim = Math.min(CONFIG.TRIM_MAX, self.trim + CONFIG.TRIM_RATE * dt);
 
-    const targetSpeed = boatSpeed(self.heading, wind.dir, wind.strength, self.trim);
+    // surf: a burst down the front of a crest on a broad reach or run, outside the skerries only (src/sail-feel-swell.js)
+    const surf = weatherActive ? surfBoost(weather.swell, self.heading, self.x, self.z, weather.gt, wind.exposure, self.speed) : 0;
+    // a squall's overpower: a soft slowdown unless you ease the sheet or round up (never damage; src/sail-feel-model.js)
+    const offNow = angleOffWind(self.heading, wind.dir);
+    const grip = weatherActive ? overpowerFactor(sqNow.intensity, offNow, self.trim, idealTrimRad(offNow)) : 1;
+    const targetSpeed = (boatSpeed(self.heading, wind.dir, wind.strength, self.trim) + surf) * grip;
     self.speed = frozen ? 0 : approachSpeed(self.speed, targetSpeed, dt);
     if (coast) {
       // Real coast: very shallow water slows the boat a little; the shore is solid but gentle: the boat slides along
@@ -1050,10 +1165,20 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (dawn) stepDawn(dt);
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
-    stepWaves(waves, dt, wind, self.x, self.z); // before anything samples the sea this frame
-    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, wind);
-    selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
+    stepWaves(waves, dt, seaWind, self.x, self.z); // before anything samples the sea this frame
+    // heel (leans to leeward in gusts and strong wind) and luff flutter (the sail shivers when headed: the shift signal)
+    const offWind = angleOffWind(self.heading, wind.dir);
+    let heelRoll = 0;
+    if (weatherActive) {
+      heel = stepHeel(heel, heelTarget(wind.strength * (1 - easeRelief(self.trim, idealTrimRad(offWind))), offWind), dt); // easing the sheet spills the wind: less heel
+      stepLuff(luff, offWind, dt);
+      const leeSide = Math.sign(-Math.sin(wind.dir) * Math.cos(self.heading) + Math.cos(wind.dir) * Math.sin(self.heading)) || 1; // which side the wind pushes toward
+      heelRoll = -leeSide * heel;
+    }
+    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, seaWind, weatherActive ? swellNow : null, heelRoll);
+    selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim + (weatherActive ? luffFlutter(luff.luff, nowS) : 0));
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
+    if (spray) spray.update(dt, selfBoat.group.position, self.heading, self.speed, weatherActive ? sprayRate(camShare, wind.strength, 1 + 1.5 * sqNow.intensity) : 0); // a squall throws more spray
     updateSunPosition(viewTarget);
     if (lureOn) {
       moment.update(dt, nowS);
@@ -1113,7 +1238,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
       otherBoat.group.rotation.y = other.heading;
-      bobBoat(otherBoat.group, other.x, other.z, other.heading, waves, wind);
+      bobBoat(otherBoat.group, other.x, other.z, other.heading, waves, seaWind);
       // Trim isn't synced (DESIGN.md) — approximate the other boat's sail
       // with the ideal trim for its current point of sail.
       const otherIdeal = idealTrimRad(angleOffWind(other.heading, wind.dir));
@@ -1126,12 +1251,69 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       ? chartCtl.update(dt, nowS, { x: self.x, z: self.z, heading: self.heading, speed: self.speed }, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, Math.min(window.devicePixelRatio || 1, 2), partnerPos ? [{ x: partnerPos.x, z: partnerPos.z, heading: partnerPos.heading }] : [])
       : null;
     for (const [id, fx] of lanternFx) fx.update(nowS, ctlView && ctlView.relight && ctlView.relight.id === id ? ctlView.relight.lamp : 1); // lit lanterns flash their real pattern; the one being relit warms up
+    // The speed feel (sail-feel lab defaults): the camera dips, moves in and looks ahead of the bow with speed, pulls back when slow. It fades out toward the chart (its scale is
+    // matched to the zoom) and on a lighthouse visit (its own framing), so the chart, the minimap and the visits work exactly as before.
+    let feel = null;
+    if (weatherActive) {
+      camShare = smoothShare(camShare, self.speed, dt);
+      const viewZoom = ctlView ? ctlView.zoom : zoom;
+      const k = ctlView && (ctlView.visiting || ctlView.relight) ? 0 : 1 - smoothstep(1.8, 3.2, viewZoom);
+      const f = cameraFeel(camShare);
+      feel = { elevDropDeg: f.elevDropDeg * k, distMul: 1 - (1 - f.distMul) * k };
+      lookAheadVector(self.heading, f.lookAheadM * k, viewZoom, aheadTarget);
+    } else { aheadTarget.x = 0; aheadTarget.z = 0; }
+    const aheadK = 1 - Math.exp(-2 * dt);
+    aheadV.x += (aheadTarget.x - aheadV.x) * aheadK; aheadV.z += (aheadTarget.z - aheadV.z) * aheadK;
     const lookAt = ctlView ? ctlView.focus : self;
     const drift = strange && strangeEntry ? STRANGE_LOOK_BIAS * strange.look : 0; // the strange moment: the view drifts toward the old tower so the flash is on screen
     viewTarget.set(lookAt.x + (drift ? (strangeEntry.x - lookAt.x) * drift : 0), ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z + (drift ? (strangeEntry.z - lookAt.z) * drift : 0));
-    water.update(waves, wind, viewTarget, dt, camera.position);
+    viewTarget.x += aheadV.x; viewTarget.z += aheadV.z; // look ahead of the bow (zero on a visit, near the chart, and without weather)
+    // The weather you can see. Rain, mist wisps and a squall's cloud are scene objects; the fog, sky, water haze and light are CONFIG-driven (and tweened by the dawn and the strange moment),
+    // so the weather scales them for this frame only and restores them after the sky is drawn: it never fights those tweens.
+    const wxSaved = wxLook ? { hc: CONFIG.HAZE_COLOR, wn: CONFIG.HAZE_WATER_NEAR_MUL, wf: CONFIG.HAZE_WATER_FAR_MUL, sh: CONFIG.SKY_HORIZON_COLOR, sz: CONFIG.SKY_ZENITH_COLOR } : null;
+    let fogNearK = 1; let fogFarK = 1;
+    if (wxLook) {
+      fogNearK = wxLook.fogNearMul / FEEL.FOG_NEAR_CLEAR; fogFarK = wxLook.fogFarMul / FEEL.FOG_FAR_CLEAR; // 1 when the air is clear
+      wxTint.set(wxSaved.hc).lerp(MIST_COLOR, wxLook.mist).lerp(STORM_COLOR, Math.min(0.7, sqNow.cloud * 0.7));
+      CONFIG.HAZE_COLOR = wxTint.getHex(); CONFIG.HAZE_WATER_NEAR_MUL = wxSaved.wn * fogNearK; CONFIG.HAZE_WATER_FAR_MUL = wxSaved.wf * fogFarK;
+      wxHorizon.set(wxSaved.sh).lerp(MIST_COLOR, wxLook.mist).lerp(STORM_COLOR, sqNow.cloud * 0.6); CONFIG.SKY_HORIZON_COLOR = wxHorizon.getHex();
+      wxZenith.set(wxSaved.sz).lerp(MIST_COLOR, wxLook.mist * 0.7).lerp(STORM_ZENITH, Math.max(sqNow.cloud, wxLook.rain * 0.5) * 0.7); CONFIG.SKY_ZENITH_COLOR = wxZenith.getHex();
+      hemi.intensity = CONFIG.HEMI_INTENSITY * wxLook.lightScale; sun.intensity = CONFIG.SUN_INTENSITY * wxLook.lightScale; // re-derived from CONFIG each frame: no compounding
+      rain.update(dt, selfBoat.group.position, wind.dir, 2 + 12 * wind.strength, wxLook.rain);
+      mistFx.update(dt, selfBoat.group.position, weather.base().dir, wxLook.mist, MIST_COLOR, nowS);
+      cloudBank.update(selfBoat.group.position, sqNow);
+    } else if (rain) { rain.lines.visible = false; mistFx.group.visible = false; cloudBank.mesh.visible = false; }
+    // the storm warning on the screen edge it comes from (the DOM is only touched when the quantised look changes: repainting a full-screen gradient every frame is expensive)
+    if (stormEl) {
+      let key = 'off';
+      if (weatherActive && sqNow.event && sqNow.aheadM !== null && sqNow.cloud > 0.04) {
+        const ux = -sqNow.event.tx; const uy = -sqNow.event.tz; const m = Math.max(Math.abs(ux), Math.abs(uy)) || 1;
+        const ex = Math.round(50 + (ux / m) * 50); const ey = Math.round(50 + (uy / m) * 50); // ON the edge (or corner) it comes from, so the glow is at its strongest right at the screen's rim
+        const a = Math.round(Math.min(0.95, Math.pow(sqNow.cloud, 0.35) * 1.2) * 40) / 40; // strong from the first moment (a squall ~60 s away already reads clearly)
+        const arrow = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'][((Math.round(Math.atan2(uy, ux) / (Math.PI / 4)) % 8) + 8) % 8]; // where it is coming from, on the screen (north is up)
+        key = `${ex},${ey},${a},${Math.round(sqNow.etaS)},${arrow}`;
+      }
+      if (key !== stormKey) {
+        stormKey = key;
+        if (key === 'off') { stormEl.style.opacity = '0'; stormLabel.style.opacity = '0'; } else {
+          const parts = key.split(','); const [ex, ey, a, eta] = parts.slice(0, 4).map(Number); const arrow = parts[4];
+          stormEl.style.background = `radial-gradient(ellipse 110% 80% at ${ex}% ${ey}%, rgba(22,29,42,${a}) 0%, rgba(22,29,42,${a * 0.75}) 35%, rgba(22,29,42,${a * 0.3}) 70%, rgba(22,29,42,0) 100%)`;
+          stormEl.style.opacity = '1';
+          stormLabel.textContent = `${arrow} Squall coming · ${eta} s`;
+          stormLabel.style.animation = eta <= 15 ? 'sqPulse .8s ease-in-out infinite' : 'none'; // the last 15 s: the label throbs
+          stormLabel.style.left = `${Math.min(74, Math.max(26, ex))}%`; stormLabel.style.top = `${Math.min(84, Math.max(16, ey))}%`; // fully on screen, clear of the corner buttons and the minimap
+          stormLabel.style.opacity = '1';
+        }
+      }
+    }
+    if (windPaint) { // the wind painted on the sea, a few rows a frame (src/sail-feel-water.js); off (and no swell) if an old host sent the old wind
+      windPaint.setOn(weatherActive);
+      if (weatherActive) { windPaint.step(weather.field, weather.gt, selfBoat.group.position.x, selfBoat.group.position.z, 6); windPaint.setSwell(weather.swell, swellPhaseUniform(weather.swell, weather.gt)); } else windPaint.setSwell(null, 0);
+      windPaint.setOrigin(viewTarget.x, viewTarget.z); // the fragment shader only ever sees positions relative to this (src/shader-local.js: a phone's 16-bit shader turned big world coordinates into blocks)
+    }
+    water.update(waves, seaWind, viewTarget, dt, camera.position);
     shoalLayer?.update(nowS);
-    seamarkLayer?.update(nowS, viewTarget, (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength)); // buoys ride the real waves
+    seamarkLayer?.update(nowS, viewTarget, seaAtCPU); // buoys ride the real waves (and the swell)
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {
@@ -1142,16 +1324,18 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     }
 
     if (isFixedCamera) {
-      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined, ctlView ? ctlView.yaw : 0);
+      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined, ctlView ? ctlView.yaw : 0, feel);
+      if (squallShake > 0.01) { camera.position.x += (Math.random() - 0.5) * 0.9 * squallShake; camera.position.y += (Math.random() - 0.5) * 0.5 * squallShake; squallShake *= Math.exp(-dt * 2.2); } // the squall's first blow: a short, small shake
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }
     // Haze distances track the camera (after it moved, before it renders).
     const camToBoat = camera.position.distanceTo(viewTarget);
     scene.fog.color.set(CONFIG.HAZE_COLOR);
-    scene.fog.near = camToBoat * CONFIG.HAZE_MESH_NEAR_MUL;
-    scene.fog.far = camToBoat * CONFIG.HAZE_MESH_FAR_MUL;
+    scene.fog.near = camToBoat * CONFIG.HAZE_MESH_NEAR_MUL * fogNearK;
+    scene.fog.far = camToBoat * CONFIG.HAZE_MESH_FAR_MUL * fogFarK;
     sky.update(camera);
+    if (wxSaved) { CONFIG.HAZE_COLOR = wxSaved.hc; CONFIG.HAZE_WATER_NEAR_MUL = wxSaved.wn; CONFIG.HAZE_WATER_FAR_MUL = wxSaved.wf; CONFIG.SKY_HORIZON_COLOR = wxSaved.sh; CONFIG.SKY_ZENITH_COLOR = wxSaved.sz; } // give the dawn / strange-moment tweens their values back
     sunGlow.update(camera);
     if (!phone) setLegendVisible(hud, !(hasSteered && hasTrimmed));
     const bearingTo = (x, z) => Math.atan2(x - self.x, z - self.z);

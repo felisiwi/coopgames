@@ -1,6 +1,6 @@
 # People and details of 1700 (research for the story)
 
-Research for the 1700 era (the end of "New border", Great Northern War from 1700): the pilots and Torhild's world, a poor fishing hamlet, what the
+Research for the 1700 era (the end of "New border", Great Northern War from 1700): the pilots and Torhild's world (Lysekil, a fishing place with a church and a pilot station, and the poorer fishing hamlets round it), what the
 war did to ordinary people and Tordenskiold's later raids, and storms. Machine-readable twin: `data/people-1700.json` (sources + items, flagged).
 Builds on `docs/WORLD-1700.md` (cited as "WORLD-1700") and `story/characters/torhild-1700.md`. Read 2026-11-06. New sources: A01-A18 (pilots),
 B01-B21 (hamlet), C01-C24 (war), D01-D10 (storms).
@@ -21,7 +21,7 @@ captured-sailor passage at Dynekilen (sv.wikipedia). The rest is as the agents r
    station**, and a 1940 list of pilot places leaves Grundsund out. The 1696 regulation mostly concerned Stockholm-Kalmar; on the west coast only the
    larger harbours were regulated. So Torhild's father piloting out of Grundsund is **plausible but informal**: a fisherman who knows the passage, not a
    station with a roll. Options: keep Grundsund and call it informal (recommended; true to the thin evidence), or move her family to Lysekil or Käringön
-   (documented stations; Käringön has real named pilots, so you would have to avoid those names).
+   (documented stations; Käringön has real named pilots, so you would have to avoid those names). **Update 2026-11-07:** Torhild's file now puts her family in Lysekil (the documented station); the Grundsund option above is superseded.
 2. **The most useful true fact for Torhild: pilots were paid by the ship.** A quiet season meant no income, so the family fished and farmed a small croft too.
    A war year was the worst of both: fewer foreign ships, and Norwegians pressing pilots to work for them (section 1 and 3).
 3. **There is almost nothing documented on pilots' wives, daughters or grandmothers.** What Torhild knows and does is INVENTED, grounded in how a pilot's
@@ -90,6 +90,10 @@ captured-sailor passage at Dynekilen (sv.wikipedia). The rest is as the agents r
 
 ## 2. A poor fishing hamlet around 1700
 
+**Correction (2026-11-07): this section is about the strandsittare hamlets (Gullholmen, Härmanö and the like), not about Lysekil.** Around 1703 Lysekil is not a hamlet: a fishing
+place older than the herring period 1566-1587 with its own church and priest, 82 adults in 1645 (half of them strandsittare), part of Lysekil parish from 1700, a pilot
+station set up early in the 1700s (4 pilots in 1729), and a town only from 1 April 1903 (L01 in `data/people-1700.json`; sv.wikipedia Lysekil, lotsarnastockholm.se).
+
 ### Facts (sourced)
 
 - **Who lived there.** Strandsittare: families who rented the ground under their house and paid a yearly *grundlega* ("six marks of silver coin" originally); the house
@@ -104,7 +108,8 @@ captured-sailor passage at Dynekilen (sv.wikipedia). The rest is as the agents r
   had to go through Gothenburg (B02). Great Northern War: 1716-19 landings (*strandhugg*), captured cargoes and kidnapped locals; Tordenskiold anchored at Gullholmen
   several times (B02).
 - **A good true story about a "legend".** Gullholmen's big harbour wreck was always called "Tordenskiold's ship", but tree-ring dating gives a latest ring of 1717
-  and felling **after 1727**, so the legend is later (B01).
+  with no sapwood, so felling **no earlier than the 1720s** (probably 1727-1827), and the museum rejects the Tordenskiold link; one oak treenail shows fire damage,
+  so the ship may have burned (B01; Bohusläns museum rapport 2012:39 via `data/island-lore.json`).
 - **Boats.** The only dated Bohuslän fishing boat I found is the *tosejlare* ("two-sailer"), **built about 1700-1850**, for hook-and-line fishing and fish cargo, no
   shelter or heating, sailing as far as Skagen to buy plaice (B14). A *hogdalseka* (a small clinker rowing eka that "may have had a sprit sail") exists, but the
   museum boat is 20th-century (B15). So the game's tarred eka with a spritsail is plausible, not documented for 1700 (WORLD-1700 and BOAT-BRIEF already say this).
