@@ -408,3 +408,23 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
    stay a separate, later feature.
 9. **Co-op:** raft up side by side; both get the close view and the same wildlife.
 10. **Leaving:** a "Weigh anchor" button (or start steering and it asks once).
+
+## Grill: day and night (2026-11-07, settled; Felix chose)
+
+Already settled elsewhere: a game day of ~30 real minutes (weather grill); "wait until evening/morning"
+when anchored, both players in co-op (anchoring grill); one shared clock in co-op (pause rule).
+
+1. **Short summer night:** a long golden dusk and a short blue night, about a quarter of the day (a
+   Bohuslän summer). Seasons can change this later.
+2. **Readable blue night:** deep blue, coast shapes faintly visible; lights, windows and stars stand out.
+3. **Lights first:** lighthouses and their flash patterns are the main guide at night; Navigate still works.
+4. **Real sector lights as a mechanic:** e.g. Kråksundsgap shows white over safe water, red or green over
+   danger; stay in the white.
+5. **Bound to time:** night happenings (mareld, the keeper's night watch, the Kråksundsgap glimpse), a few
+   night-only quests (e.g. guide a boat home by the lights), regulars keep hours (fishermen out at dawn,
+   home at dusk), AGA lights switch themselves on at dusk (sun valve).
+6. **A new session starts late morning** (~11:00); nothing new is saved.
+7. **Night on the water:** boats and the ferry carry lanterns, windows lit (dusk.js), stars and moonlight,
+   a quieter sea (fewer boats, wildlife asleep).
+8. **The story can set the time, rarely** (key moments jump to dusk or night), like the wind override.
+9. **The first dusk after relighting:** your lights come on one by one along the coast.
