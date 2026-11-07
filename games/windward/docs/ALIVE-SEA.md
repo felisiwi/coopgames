@@ -186,3 +186,21 @@ place, so the world grows on its own and each player's world comes out a little 
 Taps, sightings, rumours, carry-jobs and happenings could share one shape: a **thing** at a place,
 in an era, with conditions (time of day, weather, season, story phase), what it does on its own
 (routine), and how it reacts (tap, approach, anchoring nearby). Rumours then just point at things.
+
+## Grill: the thing model (2026-11-07, in progress)
+
+**Round 1, settled (Felix agreed):**
+1. A **thing** is something physically out there (seal, float, net-mender, wreck). Rumours and
+   errands are lighter records that point at things; the sighting log reuses things too.
+2. Things come from **templates** written once (kind of place, era, conditions), placed by rules
+   on real places. A few story things stay hand-placed (Britta, the boy, the keeper).
+3. Templates attach to **typed anchors** from the real coast, not coordinates. Today's data has:
+   skerry (283), island, harbour, village, light, sea mark (226), berth/jetty, the passes. No bays,
+   headlands or sounds as data yet.
+4. The world saves **only what you changed** (picked up, helped, named, carved, delivered), as a
+   small log per era under the saves rule. Nature just reappears (like life.js today).
+5. Two seeds: a **world seed** fixed when a save begins (regulars, secrets, nameable skerries) and
+   a **day seed** per in-game day (rumours, weather, visitors, finds; per session until day/night
+   exists). No world seed is saved today: it will be a new key, with a test.
+6. **Cross-era traces are things** you create, with the year made and how they age; later eras
+   read the same list.
