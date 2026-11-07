@@ -1,0 +1,6845 @@
+{
+  "_about": "Thing templates for 1950 (Windward). A THING is something physically out there: wildlife, a drift find, a person at work, a secret. Templates are written once and PLACED by rules on real anchors from the coast data, not at coordinates; the world seed and the day seed (ALIVE-SEA.md thing model, round 1 to 3) choose which exist in a given world and on a given day. This file is DATA ONLY: nothing reads it yet. Every template marks where it comes from (source.kind) and carries invented:true when any part of it is invented. Spoken lines are INVENTED-DIALOGUE, short, for Felix to rewrite by eye.",
+  "_spec": "games/windward/docs/ALIVE-SEA.md: \"Grill: the thing model\" (rounds 1 to 3, fields in item 7), \"mini quests\", \"anchoring close-ups\", \"day and night\", \"logbook\". Linked files (later): quests-1950.json (givers and targets by id), artifacts-1950.json (foundVia: thing ids), rumours-1950.json (teller and target: thing or place ids).",
+  "_fields": {
+    "id": "unique, \"<category>.<slug>\"; stable (the change log keys on template + anchor)",
+    "category": "wildlife | people | drift | secret | ashore | gear",
+    "years": "[from, to]: the era range the template is valid for (guessed from the sources where possible)",
+    "where": "{ anchor: anchor type, places?: [name-list ids to restrict it to], spot?: a spot at the place, rule: how it is placed, params?: numbers }. Placement is a fixed function of world seed + day seed + anchor + template (ALIVE-SEA 9).",
+    "density": "{ chance, cap, areaM, stormBoost? }: rarity per template and a cap per area (ALIVE-SEA 10)",
+    "when": "{ timeOfDay?, dayType?, weather?, season?, storyPhase? }: arrays; absent means any (ALIVE-SEA 7)",
+    "routine": "what it does on its own, in a sentence; movement is its type",
+    "reactions": "{ tap, approach, anchored }: each { effect, line?, reach? (tap only: small | medium | large, scales with the thing's size) }",
+    "personality": "people only: gruff | chatty | shy (quest line variants key on it)",
+    "lines": "people only: { hail, hailAfter? }. INVENTED-DIALOGUE.",
+    "offers": "people only: what hailing may lead to: rumour, errand",
+    "requires": "{ regular: template id, warmth: friendly | warm }: a secret that a regular reveals once they like you (hidden warmth, ALIVE-SEA 18)",
+    "sighting": "{ kind, line, drawing }: the logbook entry, first person, short; {place} is filled with the nearest named place; drawing is the silhouette slug",
+    "rarity": "common | uncommon | rare (thing spawn rarity)",
+    "source": "{ kind: ported | researched | grounded | invented, refs[], note? }; see _vocab.sourceKinds",
+    "invented": "true when any part is invented (source kind grounded or invented); false for ported and researched",
+    "lore": "{ place, hook, index }: the exact hook in data/island-lore.json (places[place].eras[1950][hook][index])",
+    "storyOwned": "true: hand-placed by the story (Britta, the boy, the keeper, the depot clerk, scripted moments); the placement engine never spawns it. Kept so quests can name it and so lore links are tracked."
+  },
+  "_vocab": {
+    "anchors": [
+      "skerry",
+      "island",
+      "harbour",
+      "village",
+      "light",
+      "sea-mark",
+      "berth",
+      "pass",
+      "open-water"
+    ],
+    "categories": [
+      "wildlife",
+      "people",
+      "drift",
+      "secret",
+      "ashore",
+      "gear"
+    ],
+    "movement": [
+      "stationary",
+      "patrol",
+      "drift",
+      "follows-boat",
+      "commute",
+      "perched"
+    ],
+    "timeOfDay": [
+      "dawn",
+      "morning",
+      "midday",
+      "afternoon",
+      "dusk",
+      "night"
+    ],
+    "dayType": [
+      "fine-sea-breeze",
+      "grey-westerly",
+      "calm-misty-morning",
+      "unsettled"
+    ],
+    "weather": [
+      "mist",
+      "rain",
+      "squall",
+      "after-squall",
+      "calm",
+      "fresh"
+    ],
+    "season": [
+      "spring",
+      "early-summer",
+      "summer",
+      "late-summer",
+      "autumn",
+      "winter"
+    ],
+    "storyPhase": [
+      "beats:find",
+      "beats:errand",
+      "beats:return",
+      "beats:help",
+      "beats:free",
+      "task:gas",
+      "task:lights",
+      "task:keeper",
+      "task:report",
+      "task:done"
+    ],
+    "effects": [
+      "none",
+      "sighting",
+      "flee",
+      "dive",
+      "lift-off",
+      "wave-back",
+      "toot-back",
+      "hail",
+      "pickup",
+      "look-closer",
+      "give",
+      "race-invite",
+      "show",
+      "circle",
+      "dive-bomb",
+      "shout"
+    ],
+    "reach": [
+      "small",
+      "medium",
+      "large"
+    ],
+    "personality": [
+      "gruff",
+      "chatty",
+      "shy"
+    ],
+    "rarity": [
+      "common",
+      "uncommon",
+      "rare"
+    ],
+    "sightingKinds": [
+      "birds",
+      "mammals",
+      "fish",
+      "boats",
+      "people",
+      "finds",
+      "places",
+      "lights",
+      "weather"
+    ],
+    "sourceKinds": {
+      "ported": "taken from existing game code (src/life.js); not invented",
+      "researched": "the template is a sourced fact (refs name the source id)",
+      "grounded": "INVENTED content that grows from a sourced fact or lore hook (refs name it)",
+      "invented": "INVENTED, no source behind it (design idea from ALIVE-SEA.md or ours)"
+    }
+  },
+  "_counts": {
+    "total": 106,
+    "byCategory": {
+      "wildlife": 15,
+      "drift": 12,
+      "gear": 1,
+      "ashore": 6,
+      "people": 51,
+      "secret": 21
+    }
+  },
+  "templates": [
+    {
+      "id": "wildlife.gulls-follow-boat",
+      "name": "Gulls following the boat",
+      "category": "wildlife",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "a dozen gulls trail the boat while it is near land; more near a fishing boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 12,
+        "areaM": 200
+      },
+      "when": {},
+      "routine": "Wheel and glide behind the stern; peel off when the boat stops.",
+      "movement": "follows-boat",
+      "reactions": {
+        "tap": {
+          "effect": "lift-off",
+          "reach": "large",
+          "line": "The gulls scatter, shrieking, then settle again."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A few land on the water and sit about, hoping."
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "Gulls following us in from {place}.",
+        "drawing": "gull"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "ported",
+        "refs": [
+          "src/life.js: \"a dozen gulls that follow the boat\" (header comment)"
+        ]
+      },
+      "invented": false
+    },
+    {
+      "id": "wildlife.gulls-on-marks",
+      "name": "Gulls perched on sea marks",
+      "category": "wildlife",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "sea-mark",
+        "rule": "on a buoy top, a cairn or a lighthouse rock (src/life.js perchSpots)"
+      },
+      "density": {
+        "chance": 0.6,
+        "cap": 3,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Sit on the mark, preen, watch the water.",
+      "movement": "perched",
+      "reactions": {
+        "tap": {
+          "effect": "lift-off",
+          "reach": "medium"
+        },
+        "approach": {
+          "effect": "lift-off",
+          "line": "They lift off a boat-length before you reach the mark."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "Gulls on the mark by {place}, one always facing the wind.",
+        "drawing": "gull"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "ported",
+        "refs": [
+          "src/life.js: perchSpots(marks, lights)",
+          "src/life.js: placeMarks, MARKS_PER_PLACE = 2"
+        ]
+      },
+      "invented": false
+    },
+    {
+      "id": "wildlife.eider-raft",
+      "name": "A raft of eiders",
+      "category": "wildlife",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "sea 1.5 to 10 m deep with open water round it, one raft per 150 m cell with chance 0.4, 4 birds (src/life.js raftInCell)",
+        "params": {
+          "cellM": 150,
+          "chance": 0.4,
+          "perRaft": 4,
+          "depthM": [
+            1.5,
+            10
+          ],
+          "fleeDistM": 28,
+          "fleeMaxM": 16
+        }
+      },
+      "density": {
+        "chance": 0.4,
+        "cap": 1,
+        "areaM": 150
+      },
+      "when": {},
+      "routine": "Drift in a loose raft over the shallows, diving for mussels. Drakes white, ducks brown.",
+      "movement": "patrol",
+      "reactions": {
+        "tap": {
+          "effect": "flee",
+          "reach": "medium"
+        },
+        "approach": {
+          "effect": "flee",
+          "line": "Inside about 28 m they paddle away, then drift back to the raft centre once you have passed."
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "After a while they forget you and drift closer."
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "A raft of eiders off {place}. Soft, low voices.",
+        "drawing": "eider"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "ported",
+        "refs": [
+          "src/life.js: raftInCell, RAFT_CELL_M = 150, RAFT_CHANCE = 0.4, RAFT_SIZE = 4, fleeOffset, FLEE_DIST_M = 28, FLEE_MAX_M = 16"
+        ]
+      },
+      "invented": false
+    },
+    {
+      "id": "wildlife.eider-ducklings",
+      "name": "Eider ducks with ducklings",
+      "category": "wildlife",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "skerry",
+        "rule": "in the lee of a low skerry, near where eider rafts form; replaces the plain raft"
+      },
+      "density": {
+        "chance": 0.25,
+        "cap": 1,
+        "areaM": 400
+      },
+      "when": {
+        "season": [
+          "early-summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "A duck leads a line of ducklings along the shore rocks; a \"nursery\" crèche of several ducks may gather.",
+      "movement": "patrol",
+      "reactions": {
+        "tap": {
+          "effect": "flee",
+          "reach": "small",
+          "line": "The mother herds them behind a rock, quick, quick."
+        },
+        "approach": {
+          "effect": "flee",
+          "line": "They bunch up and keep their distance."
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "One duckling is bolder than the rest and paddles over to look."
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "Eider ducks with ducklings in the lee of {place}. Eleven, counting twice.",
+        "drawing": "eider-ducklings"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"Eiders with ducklings (early summer)\" is an ALIVE-SEA idea; the raft numbers above are ported, this is not"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.harbour-seals",
+      "name": "Harbour seals hauled out on a skerry",
+      "category": "wildlife",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "skerry",
+        "rule": "a low rock 0.25 to 1.6 m above the sea with water about it, one per 100 m cell with chance 0.3 (src/life.js sealRockInCell)",
+        "params": {
+          "cellM": 100,
+          "chance": 0.3,
+          "rockHeightM": [
+            0.25,
+            1.6
+          ],
+          "alertM": 30
+        }
+      },
+      "density": {
+        "chance": 0.3,
+        "cap": 1,
+        "areaM": 100
+      },
+      "when": {},
+      "routine": "Lie in a heap on the warm rock, one head up on watch. Slip into the water when something comes close.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "dive",
+          "reach": "medium",
+          "line": "Splash, splash. Heads pop up further out, looking back."
+        },
+        "approach": {
+          "effect": "dive",
+          "line": "Within about 30 m they slide off one by one (sealDive)."
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "After about a minute of stillness the heads come back, curious."
+        }
+      },
+      "sighting": {
+        "kind": "mammals",
+        "line": "Harbour seals on a skerry by {place}. Fog lifting.",
+        "drawing": "seal"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "ported",
+        "refs": [
+          "src/life.js: sealRockInCell, SEAL_CELL_M = 100, SEAL_CHANCE = 0.3, sealDive, SEAL_ALERT_M = 30",
+          "docs/ALIVE-SEA.md anchoring grill 5: seals come back after about a minute of stillness"
+        ],
+        "note": "Species: the county page for Gåsö says knubbsäl, harbour seals (island-lore.json, Gåsö)."
+      },
+      "invented": false
+    },
+    {
+      "id": "wildlife.seal-pups-storon",
+      "name": "Seal pups west of Storön",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10604590"
+        ],
+        "rule": "the seal skerry west of Storön"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 200
+      },
+      "when": {
+        "season": [
+          "early-summer"
+        ]
+      },
+      "routine": "Mothers guard the pups from the water; the pups lie on the rock.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "dive",
+          "reach": "small",
+          "line": "The mothers slip in at once and circle. You feel watched."
+        },
+        "approach": {
+          "effect": "dive",
+          "line": "The mothers slip in well before you are close; the pups stay put."
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "From far enough away: a pup yawns, and goes back to sleep."
+        }
+      },
+      "sighting": {
+        "kind": "mammals",
+        "line": "Seal pups west of {place}. Kept my distance. The mothers were watching.",
+        "drawing": "seal-pup"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604590#rumours",
+          "lore:relation/10604590#regulars[0]"
+        ],
+        "note": "the lore rumour \"The seals west of Storön have pups again\" and the boy who counts pups from a rock are INVENTED hooks"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604590",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "wildlife.cormorants-drying",
+      "name": "Cormorants drying their wings",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "sea-mark",
+        "rule": "on a mark or a bare skerry head, a few birds in a row"
+      },
+      "density": {
+        "chance": 0.3,
+        "cap": 1,
+        "areaM": 400
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday"
+        ]
+      },
+      "routine": "Stand with wings hung open like washing, after fishing.",
+      "movement": "perched",
+      "reactions": {
+        "tap": {
+          "effect": "lift-off",
+          "reach": "medium"
+        },
+        "approach": {
+          "effect": "lift-off",
+          "line": "One at a time, low over the water, grudgingly."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "Cormorants on the mark by {place}, wings hung out to dry.",
+        "drawing": "cormorant"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"cormorants drying their wings on marks\" is an ALIVE-SEA idea"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.herons-shallows",
+      "name": "A heron in the shallows",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "island",
+        "rule": "a sheltered shallow shore of a larger island, water under 1.5 m"
+      },
+      "density": {
+        "chance": 0.15,
+        "cap": 1,
+        "areaM": 500
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "dusk"
+        ],
+        "dayType": [
+          "calm-misty-morning",
+          "fine-sea-breeze"
+        ]
+      },
+      "routine": "Stands motionless on one leg; a stab; stands again.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "lift-off",
+          "reach": "small",
+          "line": "It unfolds, slow and enormous, and flaps away over the rocks."
+        },
+        "approach": {
+          "effect": "lift-off",
+          "line": "It watches until you are very close, then goes."
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "If you keep still it goes on fishing, ignoring you completely."
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "A grey heron in the shallows at {place}. Did not move for ten minutes.",
+        "drawing": "heron"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"Herons standing in shallow bays\" is an ALIVE-SEA idea"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.porpoises",
+      "name": "Harbour porpoises",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "outside the skerries, on the Skagerrak side, deep water"
+      },
+      "density": {
+        "chance": 0.08,
+        "cap": 1,
+        "areaM": 1500
+      },
+      "when": {
+        "dayType": [
+          "fine-sea-breeze"
+        ],
+        "weather": [
+          "calm"
+        ]
+      },
+      "routine": "A small dark back rolls up, a puff, gone; two or three together, heading somewhere.",
+      "movement": "patrol",
+      "reactions": {
+        "tap": {
+          "effect": "none",
+          "reach": "large",
+          "line": "Too quick: by the time you look, there is only a ring on the water."
+        },
+        "approach": {
+          "effect": "show",
+          "line": "They surface once, close by, and are gone."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "mammals",
+        "line": "Porpoises, two, outside {place}. Gone as quick as they came.",
+        "drawing": "porpoise"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"Harbour porpoises surfacing now and then (Skagerrak)\" is an ALIVE-SEA idea"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.diving-flock",
+      "name": "A flock diving on a shoal",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "over a shoal of fish, in water a fishing boat would work; draws fishing boats"
+      },
+      "density": {
+        "chance": 0.12,
+        "cap": 1,
+        "areaM": 800
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning",
+          "dusk"
+        ],
+        "season": [
+          "summer",
+          "late-summer"
+        ]
+      },
+      "routine": "Gulls and terns fold and drop one after another into the same patch; the water boils faintly.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "lift-off",
+          "reach": "large",
+          "line": "They rise in a cloud and come straight back down."
+        },
+        "approach": {
+          "effect": "show",
+          "line": "Fish scatter silver at the edge of the patch."
+        },
+        "anchored": {
+          "effect": "hail",
+          "line": "A fishing boat comes to the spot and shouts a greeting."
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "Birds diving on a shoal off {place}. A fishing boat already on its way.",
+        "drawing": "flock"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"A diving flock = a shoal of fish below\" is an ALIVE-SEA idea; the fishing line / fishing-for-gifts ladder is a later system"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.mackerel-jumping",
+      "name": "Mackerel jumping",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "beside a diving flock or a school, summer evenings"
+      },
+      "density": {
+        "chance": 0.1,
+        "cap": 1,
+        "areaM": 600
+      },
+      "when": {
+        "season": [
+          "summer",
+          "late-summer"
+        ],
+        "timeOfDay": [
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Sudden silver arcs and a patter on the surface.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "none",
+          "reach": "medium"
+        },
+        "approach": {
+          "effect": "show",
+          "line": "The patter moves away across the water as you come."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "fish",
+        "line": "Mackerel jumping off {place}. The cutters should know.",
+        "drawing": "mackerel"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "docs/ALIVE-SEA.md",
+          "people:Q02 / lore:village:Grundsund rumour \"Mackerel are in\""
+        ],
+        "note": "mackerel fishing from Grundsund in this period is sourced; the jumping fish is an INVENTED visual"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.terns-dive-bomb",
+      "name": "Terns on a nesting skerry",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10211341"
+        ],
+        "rule": "Tärneskär: the name is the tern skerry"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 200
+      },
+      "when": {
+        "season": [
+          "early-summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "A noisy colony: white birds hang in the air, then fold and dive at anything near the nests.",
+      "movement": "patrol",
+      "reactions": {
+        "tap": {
+          "effect": "dive-bomb",
+          "reach": "medium",
+          "line": "A tern dives close past your ear, scolding. Harmless, and very sure of itself."
+        },
+        "approach": {
+          "effect": "dive-bomb",
+          "line": "The whole colony goes up, shrieking. Time to keep away."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "Terns at {place}, screaming at us to leave. We left.",
+        "drawing": "tern"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "assets/coast/names.json: \"Tärneskär\" (relation/10211341)"
+        ],
+        "note": "the name means tern skerry; that terns nest on it in 1950 is INVENTED"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.storm-petrels-maseskar",
+      "name": "Small black birds round the Måseskär lamp",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Måseskär"
+        ],
+        "rule": "circling the lantern in a blow, at dusk or night"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 200
+      },
+      "when": {
+        "weather": [
+          "squall",
+          "fresh",
+          "after-squall"
+        ],
+        "timeOfDay": [
+          "dusk",
+          "night"
+        ]
+      },
+      "routine": "Flutter in and out of the beam like moths.",
+      "movement": "patrol",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "Storm petrels, small and black and quick. Käringön folk call them stormtrollet."
+        },
+        "approach": {
+          "effect": "circle"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "birds",
+        "line": "Small black birds circling the lamp at {place}. The Käringön folk say they foretell a storm.",
+        "drawing": "petrel"
+      },
+      "rarity": "rare",
+      "source": {
+        "kind": "researched",
+        "refs": [
+          "people:M10 (storm petrels, Käringön names sjöpink and stormtrollet, believed to foretell storms and carry sailors' souls)",
+          "people:M12 (INVENTED-DIALOGUE built on it)"
+        ]
+      },
+      "invented": false,
+      "note": "The folk belief is people:M10 (Käringön names for the bird); no island-lore hook backs it, so there is no lore link."
+    },
+    {
+      "id": "wildlife.mareld",
+      "name": "Sea sparkle (mareld)",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "any dark water, strongest where the boat or an oar disturbs it"
+      },
+      "density": {
+        "chance": 0.5,
+        "cap": 1,
+        "areaM": 1500
+      },
+      "when": {
+        "timeOfDay": [
+          "night"
+        ],
+        "season": [
+          "late-summer"
+        ],
+        "weather": [
+          "calm"
+        ]
+      },
+      "routine": "The wake and every oar dip glow green-blue and fade.",
+      "movement": "follows-boat",
+      "reactions": {
+        "tap": {
+          "effect": "show",
+          "reach": "small",
+          "line": "You trail a hand over the side: sparks run off your fingers."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "The boat swinging on the anchor stirs a faint glow all round."
+        }
+      },
+      "sighting": {
+        "kind": "weather",
+        "line": "Mareld off {place}. Every oar-dip a handful of sparks.",
+        "drawing": "mareld"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"Mareld (sea sparkle)\" is an ALIVE-SEA idea, a night reward for the day/night stage"
+      },
+      "invented": true
+    },
+    {
+      "id": "wildlife.jellyfish",
+      "name": "Jellyfish drifting",
+      "category": "wildlife",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "in the shallows near villages and harbours, drifting with the current"
+      },
+      "density": {
+        "chance": 0.2,
+        "cap": 3,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "late-summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Pale bells pulse slowly just under the surface.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "small",
+          "line": "Pretty, and best looked at from the boat."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "fish",
+        "line": "Jellyfish drifting in at {place}. The bathers will know.",
+        "drawing": "jellyfish"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"Jellyfish drifting in late-summer water\" is an ALIVE-SEA idea"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.fish-box",
+      "name": "A fish box",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "afloat in open water; heavier after a blow; stencilled with a port (Grundsund, Käringön, Gullholmen or Lysekil)"
+      },
+      "density": {
+        "chance": 0.3,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {},
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "You hook it with the boathook and lift it aboard. A stencilled name on the end."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A fish box adrift off {place}, stencilled with a port.",
+        "drawing": "box"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "docs/ALIVE-SEA.md (lost item template: a fish box)",
+          "lore:village:Gullholmen quest seed (a fisherman has lost a fish box in the storm)"
+        ],
+        "note": "the box and its owner are INVENTED; fish boxes are the right kind of object for a 1950 mackerel coast"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.oar",
+      "name": "A lost oar",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "afloat, blade up, usually near a landing or a skerry where someone has been rowing"
+      },
+      "density": {
+        "chance": 0.25,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {},
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "You fish it out. It has been used hard; the loom is worn smooth."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "An oar drifting off {place}. Somebody is walking home.",
+        "drawing": "oar"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "a drift-find idea from ALIVE-SEA.md (\"flotsam from the storm as souvenirs\", \"a lost oar or fish box\")"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.cork-float",
+      "name": "A cork net float",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "afloat in a line or alone, near fishing grounds; sometimes a few still on a bit of rope"
+      },
+      "density": {
+        "chance": 0.3,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {},
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "A cork float, tarred. Some net is missing it."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A cork float off {place}, tarred and salted.",
+        "drawing": "float"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "people:Q09 (nets and net boxes)",
+          "lore:village:Grundsund artifact \"seine-net cork float\""
+        ],
+        "note": "the drifting float is INVENTED; the cork seine float is in the lore"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.glass-float",
+      "name": "A green glass float",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "bobbing in open water, far from any net; a rare find"
+      },
+      "density": {
+        "chance": 0.05,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {},
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "Green glass, thick, with a seam. It rolls in your hand like a heavy bubble."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A glass net-float adrift outside {place}. Green as bottle glass.",
+        "drawing": "glass-float"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "an invented rare find; glass net floats existed on the Scandinavian coast but this one was not researched for Bohuslän"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.bottle",
+      "name": "A bottle with a note",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "riding low in the water in a quiet bay or lee"
+      },
+      "density": {
+        "chance": 0.04,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {},
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "A corked bottle with a paper rolled inside, very damp."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A bottle with a note off {place}. The paper points somewhere.",
+        "drawing": "bottle"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"A message in a bottle that points somewhere on the chart\" is an ALIVE-SEA idea; what the notes say is for the rumour/quest files"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.crate-stencilled",
+      "name": "A crate stencilled with a ship's name",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "after a blow, drifting among broken planks; a ship's name painted on the lid"
+      },
+      "density": {
+        "chance": 0.12,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {
+        "weather": [
+          "after-squall"
+        ]
+      },
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "The stencil is half washed off. A ship that lost a deck load."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A crate off {place} stencilled with a ship's name.",
+        "drawing": "crate"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"a crate stencilled with a ship's name\" is an ALIVE-SEA idea; the name on each crate is drawn from a short INVENTED list"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.barrel",
+      "name": "A drifting barrel",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "afloat, stave-built, usually empty; one end stamped"
+      },
+      "density": {
+        "chance": 0.15,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {
+        "weather": [
+          "after-squall"
+        ]
+      },
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "Hollow and loud when you knock it. It floats high."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A barrel adrift off {place}. Empty, and glad of it.",
+        "drawing": "barrel"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "docs/ALIVE-SEA.md and GAME-DESIGN.md: pair net sweeps \"drifting barrels\"",
+          "lore:storm-day wrecks with salt, coal, petroleum barrels (ISLAND-LORE.md)"
+        ],
+        "note": "barrels from wrecks are real in the register; this one is INVENTED"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.driftwood-plank",
+      "name": "A plank from a wreck",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "afloat after a blow, with rusted nails or treenails still in it"
+      },
+      "density": {
+        "chance": 0.2,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {
+        "weather": [
+          "after-squall"
+        ]
+      },
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "Oak, black with age. Nails as thick as your finger."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A plank off {place}, with a treenail still in it. From which ship?",
+        "drawing": "plank"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen (treenails in the harbour wreck)",
+          "lore:relation/10239114 (the old keel)"
+        ],
+        "note": "a drifting plank is INVENTED; wrecks and treenails are in the lore"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.pot-float-lost",
+      "name": "A lost pot float with a flag",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "adrift with a short rope and a scrap of cloth for a flag"
+      },
+      "density": {
+        "chance": 0.1,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {},
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "Someone's pot float, lost from its line. The flag is a rag on a stick."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A pot float with a little flag off {place}, cut loose.",
+        "drawing": "pot-float"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md"
+        ],
+        "note": "\"lobster and pot floats with little flags\" is an ALIVE-SEA idea; this is the lost one"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.net-tangle",
+      "name": "A tangle of net",
+      "category": "drift",
+      "years": [
+        1900,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "afloat in a ball of cork floats and knotted twine"
+      },
+      "density": {
+        "chance": 0.2,
+        "cap": 2,
+        "areaM": 500,
+        "stormBoost": 3
+      },
+      "when": {},
+      "routine": "Drifts with the wind and current; the same box seen twice will be somewhere else.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "It takes some hauling. Mostly floats and weed, and a single crab."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A tangle of net adrift off {place}. Somebody will want the floats.",
+        "drawing": "net-tangle"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "people:Q09 (nets froze stiff in the net box)"
+        ],
+        "note": "the drifting tangle is INVENTED"
+      },
+      "invented": true
+    },
+    {
+      "id": "drift.toy-boat",
+      "name": "A child's wooden toy boat",
+      "category": "drift",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "open-water",
+        "places": [
+          "relation/10239114",
+          "light:Stångehuvud"
+        ],
+        "rule": "drifted from the Käringön pier toward Saltskär, or from the rocks below the dark Stångehuvud light"
+      },
+      "density": {
+        "chance": 0.4,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Floats upright with a stubby mast; the sail is a scrap of sheet.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "pickup",
+          "reach": "small",
+          "line": "Whittled by someone who loved it. There is a name cut under the keel."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A toy boat adrift off {place}. A child is looking for it.",
+        "drawing": "toy-boat"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10239114 questSeeds[0]",
+          "lore:light:Stångehuvud questSeeds[1]"
+        ],
+        "note": "both lore quest seeds are INVENTED hooks"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10239114",
+        "hook": "questSeeds",
+        "index": 0
+      }
+    },
+    {
+      "id": "drift.drifting-skiff",
+      "name": "A small boat adrift",
+      "category": "drift",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "a small open boat, unmanned, drifting loose near a landing (src/life.js has a drifting small boat)"
+      },
+      "density": {
+        "chance": 0.08,
+        "cap": 1,
+        "areaM": 800,
+        "stormBoost": 4
+      },
+      "when": {
+        "weather": [
+          "after-squall"
+        ]
+      },
+      "routine": "Wallows slowly downwind, an oar trailing.",
+      "movement": "drift",
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "large",
+          "line": "No one aboard. Take her in tow, or tell the owner where she went?"
+        },
+        "approach": {
+          "effect": "look-closer"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "boats",
+        "line": "An empty boat adrift near {place}. Whose?",
+        "drawing": "skiff"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "ported",
+        "refs": [
+          "src/life.js: \"the drifting small boat\"",
+          "docs/ALIVE-SEA.md: \"a boat in trouble\", \"after the squall\" quest template"
+        ],
+        "note": "the drifting boat is ported; its owner and the tow are quest content"
+      },
+      "invented": false
+    },
+    {
+      "id": "gear.pot-floats",
+      "name": "Pot floats with little flags",
+      "category": "gear",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "skerry",
+        "rule": "bobbing in lines along rocky shores in bays and lees; skerries and island shores"
+      },
+      "density": {
+        "chance": 0.3,
+        "cap": 4,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "autumn"
+        ]
+      },
+      "routine": "A line of floats, each with a little flag; a fisherman hauls them at dawn.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "small",
+          "line": "Somebody's pots. Leave them be."
+        },
+        "approach": {
+          "effect": "shout",
+          "line": "If you sail right through the line, the fisherman shouts. Not angry, just loud."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "boats",
+        "line": "Pot floats with little flags at {place}. Sailed round them.",
+        "drawing": "pot-floats"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md: \"Lobster and pot floats with little flags in bays; fishermen shout if you sail through\""
+        ],
+        "note": "ALIVE-SEA notes the lobster season opens in autumn and that date rules changed over the years; not checked for 1950"
+      },
+      "invented": true
+    },
+    {
+      "id": "ashore.chimney-smoke",
+      "name": "Smoke from the chimneys",
+      "category": "ashore",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "village",
+        "rule": "every village and fishing hamlet, thicker at dawn and dusk"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "dusk",
+          "morning"
+        ]
+      },
+      "routine": "Straight up in calm, flat along the roofs in a westerly: it tells you the wind.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "Smoke from the chimneys at {place}, leaning east.",
+        "drawing": "chimney"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md: \"Life ashore: smoke from chimneys\"; \"reading the wind: smoke and flags ashore\""
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "ashore.washing-lines",
+      "name": "Washing on the lines",
+      "category": "ashore",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "village",
+        "rule": "between the houses and on the rocks above the quay"
+      },
+      "density": {
+        "chance": 0.8,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday"
+        ],
+        "dayType": [
+          "fine-sea-breeze",
+          "calm-misty-morning"
+        ]
+      },
+      "routine": "Sheets, shirts and long woollen drawers, stiff and flapping.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "Washing out on the rocks at {place}. A good drying wind.",
+        "drawing": "washing"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md: \"washing on lines\""
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "ashore.nets-drying",
+      "name": "Nets hung to dry",
+      "category": "ashore",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "village",
+        "rule": "on poles and over fences by the quay; brown tanned nets"
+      },
+      "density": {
+        "chance": 0.7,
+        "cap": 2,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Long brown curtains of net, with cork floats in a row along the top.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "large",
+          "line": "Tarred and cutch-brown. Every hole has been mended twice."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "Nets hung to dry at {place}.",
+        "drawing": "nets"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "people:Q09 (nets, net boxes)",
+          "lore:village:Käringön net-mender"
+        ],
+        "note": "the scene is INVENTED from the sourced fishing life"
+      },
+      "invented": true
+    },
+    {
+      "id": "ashore.church-bells",
+      "name": "Church bells on a Sunday",
+      "category": "ashore",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "village",
+        "places": [
+          "village:Grundsund",
+          "village:Fiskebäckskil",
+          "village:Käringön",
+          "village:Gullholmen"
+        ],
+        "rule": "carries across the water to a boat within about 500 m"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 600
+      },
+      "when": {
+        "timeOfDay": [
+          "morning"
+        ]
+      },
+      "routine": "Rings the hour of service, once each Sunday morning.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "Church bells carrying across the water from {place}. A Sunday.",
+        "drawing": "church"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "people:Q12 (Fiskebäckskil church 1772 with votive ships; Grundsund church 1799)",
+          "history-start-area.md (Käringön church 1796, Gullholmen 1799)"
+        ],
+        "note": "the churches are sourced; hearing the bells from a boat is INVENTED"
+      },
+      "invented": true
+    },
+    {
+      "id": "ashore.dog-on-quay",
+      "name": "A dog barking on the quay",
+      "category": "ashore",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "berth",
+        "rule": "a working quay in a village; one dog, tied or free"
+      },
+      "density": {
+        "chance": 0.4,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Barks at every boat that comes close, then loses interest.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "wave-back",
+          "reach": "medium",
+          "line": "Wag, wag."
+        },
+        "approach": {
+          "effect": "shout",
+          "line": "A bark, then a second, politely."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A dog on the quay at {place}, barking us in.",
+        "drawing": "dog"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md: \"a dog barking as you pass\""
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "ashore.aga-lights-at-dusk",
+      "name": "The automatic lights coming on at dusk",
+      "category": "ashore",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "light",
+        "rule": "every automatic (AGA) light in the window that is lit, one by one as the sun valve closes"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 100
+      },
+      "when": {
+        "timeOfDay": [
+          "dusk"
+        ],
+        "storyPhase": [
+          "task:done"
+        ]
+      },
+      "routine": "The black rod cools, the valve opens, the flame catches: no one is there to see it.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "lights",
+        "line": "The light at {place} came on by itself at dusk, as it should.",
+        "drawing": "aga-light"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "researched",
+        "refs": [
+          "people:G04 (the sun valve 1907, light heats the black rod, a lever opens the gas)",
+          "docs/ALIVE-SEA.md day/night grill 5 and 9 (AGA lights switch themselves on at dusk; your lights come on one by one)"
+        ],
+        "note": "The template is the sourced mechanism applied to the story moment after the lights are relit."
+      },
+      "invented": false
+    },
+    {
+      "id": "people.fisherman-out-at-dawn",
+      "name": "A fisherman out at dawn, home at dusk",
+      "category": "people",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "harbour",
+        "places": [
+          "village:Grundsund",
+          "village:Gullholmen",
+          "village:Fiskebäckskil",
+          "village:Käringön"
+        ],
+        "rule": "leaves the home harbour at first light and returns at dusk with gulls behind"
+      },
+      "density": {
+        "chance": 0.7,
+        "cap": 4,
+        "areaM": 600
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "dusk"
+        ]
+      },
+      "routine": "Out through the gap at dawn, working the grounds, home at dusk with the catch and a cloud of gulls.",
+      "movement": "commute",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Birds are working off the point. Go and see."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "large",
+          "line": "Birds are working off the point. Go and see."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "boats",
+        "line": "A fishing boat heading out of {place} at first light, gulls already behind her.",
+        "drawing": "fishing-boat"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "docs/ALIVE-SEA.md day/night grill 5: \"fishermen out at dawn, home at dusk\"",
+          "people:Q03,Q04 (Grundsund and Gullholmen fishing families)"
+        ],
+        "note": "the rhythm is a settled design rule; the lines are INVENTED"
+      },
+      "invented": true
+    },
+    {
+      "id": "people.pot-hauler",
+      "name": "A fisherman hauling pots",
+      "category": "people",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "skerry",
+        "rule": "beside a line of pot floats along a rocky shore"
+      },
+      "density": {
+        "chance": 0.5,
+        "cap": 2,
+        "areaM": 500
+      },
+      "when": {
+        "season": [
+          "autumn"
+        ],
+        "timeOfDay": [
+          "dawn",
+          "morning"
+        ]
+      },
+      "routine": "Standing in a small boat, hauling pot after pot hand over hand, tipping crabs into a tub.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Keep your wash off my floats, will you."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Keep your wash off my floats, will you."
+        },
+        "approach": {
+          "effect": "shout",
+          "line": "Slow down! Pots!"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "boats",
+        "line": "A man hauling pots at {place}. Went slow past.",
+        "drawing": "pot-hauler"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md: \"fishermen shout if you sail through\""
+        ],
+        "note": "not researched for 1950; autumn lobster season to be checked"
+      },
+      "invented": true
+    },
+    {
+      "id": "people.long-line-crew",
+      "name": "Two small boats setting long lines",
+      "category": "people",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "a big boat at anchor on the bank with two small boats rowing away from it paying out line"
+      },
+      "density": {
+        "chance": 0.15,
+        "cap": 1,
+        "areaM": 800
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning"
+        ]
+      },
+      "routine": "The small boats row out and back, setting and hauling the line while the big boat waits.",
+      "movement": "patrol",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Mind the line! Pass astern of us, there's a good lad."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "large",
+          "line": "Mind the line! Pass astern of us, there's a good lad."
+        },
+        "approach": {
+          "effect": "shout",
+          "line": "Astern! Astern of us!"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "boats",
+        "line": "Long-liners setting line off {place}, two dories and the mother boat.",
+        "drawing": "dory"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "researched",
+        "refs": [
+          "people:Q17 (long-line fishing, storbacka: set from the small boat while the big boat lay at anchor on the bank)"
+        ]
+      },
+      "invented": false,
+      "note": "The method is sourced (people:Q17); the lines are INVENTED-DIALOGUE."
+    },
+    {
+      "id": "people.pilot-boat",
+      "name": "The pilot boat heading out",
+      "category": "people",
+      "years": [
+        1939,
+        1960
+      ],
+      "where": {
+        "anchor": "harbour",
+        "places": [
+          "village:Lysekil",
+          "relation/10239114"
+        ],
+        "rule": "a pilot boat leaves the pilot station to meet an inbound ship in the outer approaches"
+      },
+      "density": {
+        "chance": 0.4,
+        "cap": 1,
+        "areaM": 1200
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon",
+          "dawn"
+        ]
+      },
+      "routine": "Out from the pilot station at speed, a man standing in the stern, to meet a ship; back an hour later.",
+      "movement": "commute",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Ship due off Måseskär. Clear the fairway."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "toot-back",
+          "reach": "large"
+        },
+        "approach": {
+          "effect": "toot-back",
+          "line": "One short blast: it means thank you, and keep clear."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "boats",
+        "line": "The pilot boat running out of {place} to meet a ship.",
+        "drawing": "pilot-boat"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10239114 (Käringön pilot station: staffed in 1950, new pilot boat 1939, closed 1960)",
+          "lore:village:Lysekil (pilot station from the early 1700s)"
+        ],
+        "note": "stations and the 1939 boat are sourced in the lore (lotsarnastockholm.se, medium); the moment is INVENTED"
+      },
+      "invented": true
+    },
+    {
+      "id": "people.summer-swimmers",
+      "name": "Swimmers and children diving from the rocks",
+      "category": "people",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "village:Fiskebäckskil",
+          "relation/10604591",
+          "village:Hälleviksstrand"
+        ],
+        "rule": "smooth rocks near a summer-guest village or hotel; shrieks carry across the water"
+      },
+      "density": {
+        "chance": 0.6,
+        "cap": 3,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "summer",
+          "late-summer"
+        ],
+        "timeOfDay": [
+          "midday",
+          "afternoon"
+        ],
+        "dayType": [
+          "fine-sea-breeze"
+        ]
+      },
+      "routine": "A line of children, one after another off the same rock, with a cold shriek each.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Watch this! Watch! Did you see?"
+      },
+      "offers": [],
+      "reactions": {
+        "tap": {
+          "effect": "wave-back",
+          "reach": "medium",
+          "line": "Watch this! Watch! Did you see?"
+        },
+        "approach": {
+          "effect": "wave-back",
+          "line": "They wave madly and dive again, harder."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "Children diving off the rocks by {place}. I waved.",
+        "drawing": "swimmers"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "people:Q10 (Fiskebäckskil a bath resort from the late 1800s, mainly a summer resort in the 1900s)",
+          "lore:relation/10604591 (Gåsö: bath resort)"
+        ],
+        "note": "the setting is sourced; the scene is INVENTED"
+      },
+      "invented": true
+    },
+    {
+      "id": "people.rowing-guests",
+      "name": "Summer guests out rowing",
+      "category": "people",
+      "years": [
+        1900,
+        2030
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "village:Fiskebäckskil",
+          "relation/10604591"
+        ],
+        "rule": "a hired rowing boat with a family aboard, rowing in circles near the guest houses"
+      },
+      "density": {
+        "chance": 0.5,
+        "cap": 2,
+        "areaM": 400
+      },
+      "when": {
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "afternoon"
+        ]
+      },
+      "routine": "One rows, three advise; the boat goes in slow arcs.",
+      "movement": "patrol",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Is it far to the lighthouse? Is that the lighthouse?"
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Is it far to the lighthouse? Is that the lighthouse?"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "Summer guests rowing in slow arcs off {place}.",
+        "drawing": "rowing-boat"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "people:Q10 (summer guests at Fiskebäckskil)",
+          "docs/ALIVE-SEA.md: \"Summer guests: rowing boats\""
+        ],
+        "note": "INVENTED scene"
+      },
+      "invented": true
+    },
+    {
+      "id": "people.snipa-racer",
+      "name": "A local snipa that wants a race",
+      "category": "people",
+      "years": [
+        1940,
+        1959
+      ],
+      "where": {
+        "anchor": "open-water",
+        "rule": "a clinker snipa edging up alongside near a village, on a fine breezy day; the race is to the harbour mouth"
+      },
+      "density": {
+        "chance": 0.1,
+        "cap": 1,
+        "areaM": 900
+      },
+      "when": {
+        "dayType": [
+          "fine-sea-breeze"
+        ],
+        "timeOfDay": [
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Sails parallel for a minute, sizing you up, then edges ahead.",
+      "movement": "patrol",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Race you to the harbour! Loser buys the buns."
+      },
+      "offers": [],
+      "reactions": {
+        "tap": {
+          "effect": "race-invite",
+          "reach": "large",
+          "line": "Race you to the harbour! Loser buys the buns."
+        },
+        "approach": {
+          "effect": "race-invite"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "boats",
+        "line": "Raced a snipa in to {place}. Close.",
+        "drawing": "snipa"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "docs/ALIVE-SEA.md: \"A local snipa edges alongside and races you to the harbour\""
+        ]
+      },
+      "invented": true
+    },
+    {
+      "id": "people.the-boy",
+      "name": "The boy (young Grandpa), Grundsund boatyard",
+      "category": "people",
+      "years": [
+        1950,
+        1950
+      ],
+      "where": {
+        "anchor": "village",
+        "places": [
+          "village:Grundsund"
+        ],
+        "spot": "the yard beach"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Story-owned: lends the eka, sends you to Grundsund, then to Britta.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "(story-owned: lines live in src/story-1950.js)"
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The boatbuilder's boy at {place}.",
+        "drawing": "person"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "GAME-DESIGN.md story canon (the boy = young Grandpa, a boatbuilder's son)",
+          "docs/MISSION-CONTROL.md section 3"
+        ],
+        "note": "hand-placed by the story; a stub so quests can name him as giver"
+      },
+      "invented": true,
+      "storyOwned": true
+    },
+    {
+      "id": "people.britta",
+      "name": "Britta, Fiskebäckskil",
+      "category": "people",
+      "years": [
+        1950,
+        1950
+      ],
+      "where": {
+        "anchor": "village",
+        "places": [
+          "village:Fiskebäckskil"
+        ],
+        "spot": "her jetty"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Story-owned: about 17, a fisherman's daughter; her father tends the lights and has a broken arm; her family's shed holds the gas tanks.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "(story-owned: lines live in src/story-1950.js)"
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "Britta on her jetty at {place}.",
+        "drawing": "person"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "GAME-DESIGN.md story canon",
+          "lore:village:Fiskebäckskil#regulars[0] and secrets[0] (the shed holding the gas tanks, canon)"
+        ],
+        "note": "hand-placed by the story; a stub so quests can name her as giver"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Fiskebäckskil",
+        "hook": "regulars",
+        "index": 0
+      },
+      "storyOwned": true
+    },
+    {
+      "id": "place.maseskar.keeper",
+      "name": "The keeper of Måseskär",
+      "category": "people",
+      "years": [
+        1950,
+        1950
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Måseskär"
+        ],
+        "spot": "the gallery or the landing"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning",
+          "midday",
+          "afternoon",
+          "dusk",
+          "night"
+        ]
+      },
+      "routine": "Story-owned. Trims the lamp, polishes the lens, winds the clockwork weight, keeps the log to the minute (people:M06); night watch.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Fog gun's tested. Lamp's trimmed. State your business."
+      },
+      "offers": [
+        "rumour",
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Fog gun's tested. Lamp's trimmed. State your business."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The keeper on Måseskär, watching us come in.",
+        "drawing": "person"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#regulars[0]",
+          "people:M01",
+          "people:M06",
+          "people:M14"
+        ],
+        "note": "hand-placed by the story (no 1950 keeper is named in any source: people:M02); the lines are INVENTED-DIALOGUE"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "regulars",
+        "index": 0
+      },
+      "storyOwned": true,
+      "note": "storyOwned: the placement engine never spawns him."
+    },
+    {
+      "id": "place.maseskar.assistant",
+      "name": "The keeper's assistant, rowing the supply boat",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Måseskär"
+        ],
+        "spot": "the landing"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Rows or runs the station motor boat to Käringön for post, shop and school, three or four times a month (people:M03); talks the whole way.",
+      "movement": "commute",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Any news from the mainland? Anything at all?"
+      },
+      "offers": [
+        "rumour",
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Any news from the mainland? Anything at all?"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The keeper's assistant, out in the supply boat toward Käringön.",
+        "drawing": "person"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#regulars[1]",
+          "people:M03"
+        ],
+        "note": "the role is an INVENTED regular; the supply rhythm is sourced (people:M03)"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.maseskar.wife",
+      "name": "The keeper's wife, hanging the wash",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Måseskär"
+        ],
+        "spot": "the stone-walled plots"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday"
+        ]
+      },
+      "routine": "Pegs out sheets on the lee side of the plot walls; her washing can be seen from the sea.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "Mind the rock at the landing. It is greasy in the morning."
+      },
+      "offers": [],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Mind the rock at the landing. It is greasy in the morning."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "Washing on a line on Måseskär, a speck of white on the rock.",
+        "drawing": "washing"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#regulars[2]"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "regulars",
+        "index": 2
+      }
+    },
+    {
+      "id": "secret.maseskar.second-book",
+      "name": "The keeper's second book of lights",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Måseskär"
+        ],
+        "rule": "story-owned: not placed by the engine"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Story-owned. A second book beside the log, where he writes lights that should not be there, with the date and the bearing.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "(story-owned: told by the keeper in his scene)"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "(story-owned: told by the keeper in his scene)"
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "The keeper keeps a second book. He did not say what is in it.",
+        "drawing": "book"
+      },
+      "rarity": "rare",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#secrets[0]",
+          "GAME-DESIGN.md canon: Måseskär's keeper hints about a light that should not be there"
+        ],
+        "note": "INVENTED, canon-grounded. This is unique candidate 2 in UNIQUE-ARTIFACT-CANDIDATES.md: no artifact is created here."
+      },
+      "invented": true,
+      "requires": {
+        "regular": "place.maseskar.keeper",
+        "warmth": "warm"
+      },
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "secrets",
+        "index": 0
+      },
+      "storyOwned": true,
+      "note": "storyOwned; links to unique candidate 2, which Felix places."
+    },
+    {
+      "id": "secret.maseskar.signal-cannon",
+      "name": "The old signal cannon",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Måseskär"
+        ],
+        "spot": "by the engine house",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "A black iron cannon on a carriage, lashed down; the fog gun of 1873.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "One of the two 1873 fog cannons, still lashed to its carriage. The keeper says it holds a charge of damp powder \"just in case\"."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "One of the two 1873 fog cannons, still lashed to its carriage. The keeper says it holds a charge of damp powder \"just in case\"."
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "An old iron cannon by the engine house on {place}.",
+        "drawing": "cannon"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#secrets[1]",
+          "history-start-area.md: 1873 two signal cannons installed for fog, replaced by a steam siren in the mid-1880s"
+        ],
+        "note": "the cannons are sourced (sv.wikipedia Måseskär, medium); the damp powder is an INVENTED detail"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "secrets",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.karingon.pilot-lotsberget",
+      "name": "A pilot ashore on Lotsberget",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "village",
+        "places": [
+          "village:Käringön"
+        ],
+        "spot": "Lotsberget, the pilots' hill"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning",
+          "midday",
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Sits on the hill with a pipe and a glass, watching the approaches.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "The rocks outside are famous. So are we. Don't test either."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "The rocks outside are famous. So are we. Don't test either."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A pilot on Lotsberget at {place}, glass up.",
+        "drawing": "pilot"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#regulars[0]",
+          "lore:relation/10239114 (an 1804 report: the rocks outside are as famous for wrecks as the pilots are for skill)"
+        ],
+        "note": "INVENTED regular; the line paraphrases a sourced 1804 report in the lore"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Käringön",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.karingon.net-mender-quay",
+      "name": "A net-mender on the Käringön quay",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Käringön"
+        ],
+        "spot": "the quay"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Unhurried; a net across her knees, a needle going, remembers every storm.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "The storm took half the floats on this coast. Find any, you bring them here."
+      },
+      "offers": [
+        "rumour",
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "The storm took half the floats on this coast. Find any, you bring them here."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A net-mender on the quay at {place}, not looking up until we spoke.",
+        "drawing": "net-mender"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#regulars[1]",
+          "people:Q09"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Käringön",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.karingon.rescue-volunteer",
+      "name": "A rescue-station volunteer",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Käringön"
+        ],
+        "spot": "the rescue station slip"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Checks every boat that leaves late in the day; kindly, and without saying so.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Late out. Got a bailer? A light? Good. Off you go, then."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Late out. Got a bailer? A light? Good. Off you go, then."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The rescue volunteer at {place} checking boats going out late.",
+        "drawing": "person"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#regulars[2]",
+          "vastsverige.com: Swedish Sea Rescue Society station on Käringön (low, via lore)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Käringön",
+        "hook": "regulars",
+        "index": 2
+      }
+    },
+    {
+      "id": "secret.karingon.boys-loft",
+      "name": "A boy's collection from the wrecks",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Käringön"
+        ],
+        "spot": "a boathouse loft",
+        "rule": "revealed by a regular once they like you; otherwise nothing to see"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "A boy keeps what the sea has given: a brass porthole, a rice-sack stencil, a clay pipe.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A boy leans out of the loft door: \"Want to see? This is from the Paula.\""
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A boy leans out of the loft door: \"Want to see? This is from the Paula.\""
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A boy at {place} showed us what he has fished up from the wrecks.",
+        "drawing": "porthole"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#secrets[0]",
+          "ISLAND-LORE.md: the bark Paula, wrecked 1 Nov 1872, gave Paulapallarna its name (medium)"
+        ],
+        "note": "the collection is an INVENTED hook; the Paula wreck is sourced"
+      },
+      "invented": true,
+      "requires": {
+        "regular": "place.karingon.net-mender-quay",
+        "warmth": "friendly"
+      },
+      "lore": {
+        "place": "village:Käringön",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.karingon-island.pilots-widow",
+      "name": "The pilot's widow in the lookout window",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10239114"
+        ],
+        "spot": "the Lotsutkiken lookout window"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dusk",
+          "night"
+        ]
+      },
+      "routine": "A small lamp in the lookout window from dusk until the last boat is in.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "I keep the lamp lit for the ones still out. Habit, nothing more."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "I keep the lamp lit for the ones still out. Habit, nothing more."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A lamp in the lookout window at {place}, lit for the boats still out.",
+        "drawing": "lamp"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10239114#regulars[0]",
+          "vastsverige.com: a small former pilot dwelling Lotsutkiken at the island's south-west tip (low, via lore)"
+        ],
+        "note": "INVENTED regular; the lookout house is in the lore (low)"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10239114",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.karingon-island.net-mender-north-pier",
+      "name": "A net-mender on the north pier who knows every boat by its sound",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "relation/10239114"
+        ],
+        "spot": "the north pier"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Hears each boat coming round the point and says whose it is without looking.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "I heard you before I saw you. Engine's fine, sail's a bit loose."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "I heard you before I saw you. Engine's fine, sail's a bit loose."
+        },
+        "approach": {
+          "effect": "show",
+          "line": "She calls your boat's name before you are in sight."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A net-mender on the north pier at {place} named our boat by its sound.",
+        "drawing": "net-mender"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10239114#regulars[1]"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10239114",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.gullholmen.long-line-fisherman",
+      "name": "A long-line fisherman home from the Iceland grounds",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "harbour",
+        "places": [
+          "village:Gullholmen"
+        ],
+        "spot": "the harbour mouth"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "afternoon",
+          "dusk"
+        ],
+        "season": [
+          "summer",
+          "late-summer"
+        ]
+      },
+      "routine": "Home after weeks away; coiling line on the quay and telling anyone who stops.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Iceland? Cold and honest. The sea there tells you what it thinks."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Iceland? Cold and honest. The sea there tells you what it thinks."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A long-liner back from Iceland at {place}, still telling it.",
+        "drawing": "fisherman"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen#regulars[0]",
+          "lore:village:Gullholmen (regular: a long-line fisherman home from the Iceland grounds)",
+          "ISLAND-LORE.md: Hälleviksstrand yard builds Iceland boats"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Gullholmen",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.gullholmen.cannery-woman",
+      "name": "A cannery woman packing mackerel in tins",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Gullholmen"
+        ],
+        "spot": "the quay by the cannery"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Packs and seams tins on the quay; sings under her breath; offers a tin to anyone who helps.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Bring me mackerel and I'll bring you a tin with a ship on it."
+      },
+      "offers": [
+        "errand",
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Bring me mackerel and I'll bring you a tin with a ship on it."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A cannery woman at {place} packing mackerel in tins.",
+        "drawing": "cannery-woman"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen#regulars[1]",
+          "people:Q02,Q03 (Gullholmen cannery: girls start after confirmation; rebuilt 1938-39 and 1950-52)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Gullholmen",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.gullholmen.sketching-guest",
+      "name": "A summer guest sketching the harbour",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "harbour",
+        "places": [
+          "village:Gullholmen"
+        ],
+        "spot": "a rented cottage porch above the harbour"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "afternoon"
+        ]
+      },
+      "routine": "Sits with a board on her knee; every boat that passes ends up in the drawing.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "Oh, do keep sailing. You're better moving, honestly."
+      },
+      "offers": [],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Oh, do keep sailing. You're better moving, honestly."
+        },
+        "approach": {
+          "effect": "show",
+          "line": "She holds up the sketch for a second: your boat is in it."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A summer guest at {place} drew us into her sketch.",
+        "drawing": "sketcher"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen#regulars[2]",
+          "people:Q10 (summer guests)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Gullholmen",
+        "hook": "regulars",
+        "index": 2
+      }
+    },
+    {
+      "id": "secret.gullholmen.saturday-argument",
+      "name": "The old men and the harbour wreck",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Gullholmen"
+        ],
+        "spot": "the quay bench",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "afternoon"
+        ]
+      },
+      "routine": "Every Saturday the old men argue about the wreck in the harbour; one swears he saw its stem when it was dredged in 1936.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A knot of old men on the quay, arguing with their hands."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "hail",
+          "line": "One calls across: \"Settle it for us! Tordenskiold, or not?\""
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The old men at {place} arguing about the harbour wreck again.",
+        "drawing": "old-men"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen#secrets[0]",
+          "Bohusläns museum rapport 2012:39 via lore: the wreck found in 1936; the museum rejects the Tordenskiold link"
+        ],
+        "note": "the wreck, the 1936 dredge and the legend are sourced (high, via lore); the Saturday argument is INVENTED"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Gullholmen",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.gaso.retired-skipper",
+      "name": "A retired skipper on his steps who names every sail",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10604591"
+        ],
+        "spot": "his steps above the landing"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Sits and names every sail by cut; has an opinion about each.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Gaff cutter. No, don't tell me. Eight years a mate under sail, I can read a cut from here."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Gaff cutter. No, don't tell me. Eight years a mate under sail, I can read a cut from here."
+        },
+        "approach": {
+          "effect": "show",
+          "line": "He names your sail aloud as you pass, and is right."
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A retired skipper on the steps at {place} named our sail from fifty metres.",
+        "drawing": "skipper"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604591#regulars[0]",
+          "lore:relation/10604591 (Gåsö: a skipper community, about 20 larger sailing ships in 1860)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604591",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.gaso.rooms-girl",
+      "name": "A girl whose family rents rooms to summer guests",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10604591"
+        ],
+        "spot": "the guest-house steps"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Runs errands between the guest house and the landing; watches the water for the post boat.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "Mamma asks if the post boat has come. It hasn't, has it?"
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Mamma asks if the post boat has come. It hasn't, has it?"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A girl at {place} watching for the post boat.",
+        "drawing": "girl"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604591#regulars[1]"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604591",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.gaso.boarding-house-keeper",
+      "name": "A boarding-house keeper hanging sheets over the rock",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10604591"
+        ],
+        "spot": "the rock behind the boarding house"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "midday"
+        ]
+      },
+      "routine": "Hangs white sheets over the sun-warmed rock to dry; wars with the gulls.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "If that is the post boat I'll eat a sheet. Is it?"
+      },
+      "offers": [
+        "errand",
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "If that is the post boat I'll eat a sheet. Is it?"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "White sheets spread on the rock at {place} to dry.",
+        "drawing": "washing"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604591#regulars[2]"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604591",
+        "hook": "regulars",
+        "index": 2
+      }
+    },
+    {
+      "id": "secret.gaso.vrakevik-wreck",
+      "name": "The wreck behind Vrakevik",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "harbour",
+        "places": [
+          "relation/10604591",
+          "harbour:Vrakevik"
+        ],
+        "spot": "the bay behind Vrakevik",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "The old men say a wreck lies in the bay: nobody has dived it, but nets catch on it.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A fisherman's net-float jerks and drags as if held from below."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A fisherman's net-float jerks and drags as if held from below."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A net caught on something below, at {place}. The old men say it is a wreck.",
+        "drawing": "net-snag"
+      },
+      "rarity": "rare",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604591#secrets[0]",
+          "lore:relation/10604590 (Vrakevik is a natural harbour at Gåsö sund; the origin of its name was not found)"
+        ],
+        "note": "the wreck is an INVENTED hook; \"Vrakevik\" is a real name in the name list. Do NOT present the wreck as the origin of the name: the origin was not found."
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604591",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.korno.coaster-skipper",
+      "name": "A coaster skipper loading stone blocks",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10094463"
+        ],
+        "spot": "the pier"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Loads cut blocks from the pier by crane and hand; sails when the hold is full.",
+      "movement": "commute",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Stone for Göteborg. Don't block my gangplank."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Stone for Göteborg. Don't block my gangplank."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A coaster loading stone blocks at {place}.",
+        "drawing": "coaster"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10094463#regulars[0]",
+          "people:Q10; ISLAND-LORE.md: Stora Kornö train-oil works 1791 and 1799, timber sea huts"
+        ],
+        "note": "INVENTED regular on an island with a real pier; the stone trade is not researched for Kornö"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10094463",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.korno.teacher",
+      "name": "The schoolteacher who rows to Lysekil on Saturdays",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10094463"
+        ],
+        "spot": "the school landing"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning"
+        ]
+      },
+      "routine": "Rows a small boat to Lysekil on Saturdays for the post and the bakery.",
+      "movement": "commute",
+      "personality": "shy",
+      "lines": {
+        "hail": "I row to Lysekil every Saturday. Today I am late."
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "I row to Lysekil every Saturday. Today I am late."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The schoolteacher rowing for Lysekil from {place}.",
+        "drawing": "rowing-boat"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10094463#regulars[1]"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10094463",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "secret.korno.cave-loaf",
+      "name": "Water and a loaf left in the cave",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10094463"
+        ],
+        "spot": "the cave Klingkyrka",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Someone leaves a bottle of water and a loaf in the cave, and takes the old ones away.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "On a ledge inside the cave mouth: a bottle of water and a loaf in a cloth. Fresh."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "On a ledge inside the cave mouth: a bottle of water and a loaf in a cloth. Fresh."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A loaf and water left in the cave at {place}. For whom?",
+        "drawing": "loaf"
+      },
+      "rarity": "rare",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10094463#secrets[0]",
+          "ISLAND-LORE.md: the cave Klingkyrka on Stora Kornö (no legend found)"
+        ],
+        "note": "the cave exists in the lore; the loaf and the mystery are INVENTED. Do not present it as a legend."
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10094463",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.fiskebackskil.shipmaster-bench",
+      "name": "A retired shipmaster on a bench on Kaptensgatan",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "village",
+        "places": [
+          "village:Fiskebäckskil"
+        ],
+        "spot": "a bench on Kaptensgatan"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Reads the sky from a bench above the harbour and tells passers-by what it will do.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "That sky wants a reef by noon. I'm too old to be wrong about it."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "That sky wants a reef by noon. I'm too old to be wrong about it."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "An old shipmaster on a bench at {place}, reading the sky.",
+        "drawing": "shipmaster"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Fiskebäckskil#regulars[1]",
+          "people:Q10; lore:village:Fiskebäckskil (captains' villas)"
+        ],
+        "note": "INVENTED regular; Fiskebäckskil's skipper community is sourced (sv.wikipedia)"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Fiskebäckskil",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.fiskebackskil.ferry-deckhand",
+      "name": "A ferry deckhand who knows everyone's business",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Fiskebäckskil"
+        ],
+        "spot": "the Lysekil ferry quay"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning",
+          "midday",
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Throws the line, takes the fare, hears everything on the crossing and repeats most of it.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "The ferry's late again, and they say the lights are out since the storm."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "The ferry's late again, and they say the lights are out since the storm."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The ferry deckhand at {place}, passing on the news.",
+        "drawing": "deckhand"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Fiskebäckskil#regulars[2]",
+          "lore:village:Fiskebäckskil (the Lysekil ferry)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Fiskebäckskil",
+        "hook": "regulars",
+        "index": 2
+      }
+    },
+    {
+      "id": "place.grundsund.cutter-skipper",
+      "name": "A cutter skipper who talks about the English builders",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "harbour",
+        "places": [
+          "village:Grundsund"
+        ],
+        "spot": "the canal quay"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning",
+          "midday",
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Takes the cutter out for mackerel and back; will talk about her lines for as long as you stand there.",
+      "movement": "commute",
+      "personality": "chatty",
+      "lines": {
+        "hail": "English-built, she is. They knew how to make a boat in England. Mackerel are in."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "English-built, she is. They knew how to make a boat in England. Mackerel are in."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A mackerel cutter at {place}, English-built, they say.",
+        "drawing": "cutter"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#regulars[1]",
+          "sv.wikipedia Grundsund: many fishing cutters bought from England, mackerel fishing early 1900s (medium)"
+        ],
+        "note": "INVENTED regular; the English cutters and mackerel fishing are sourced"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Grundsund",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.grundsund.seamstress",
+      "name": "A raincoat-factory seamstress on her break",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Grundsund"
+        ],
+        "spot": "the quay by the factory"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "midday"
+        ]
+      },
+      "routine": "Sits on a crate in her apron with a cup, looking at the boats.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "Break is fifteen minutes. I spend it looking at the water."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Break is fifteen minutes. I spend it looking at the water."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A seamstress from the oilskin works at {place}, on her break.",
+        "drawing": "seamstress"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#regulars[2]",
+          "lore:village:Grundsund (Didriksons began in Grundsund in 1913; Grundéns began oilskin clothes there in 1911; company-history pages, medium)"
+        ],
+        "note": "INVENTED regular; the rain-clothes industry is sourced"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Grundsund",
+        "hook": "regulars",
+        "index": 2
+      }
+    },
+    {
+      "id": "secret.grundsund.bonden-ball",
+      "name": "The red ball on Bonden at sunset",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Grundsund",
+          "relation/10250201"
+        ],
+        "spot": "the quay",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dusk"
+        ]
+      },
+      "routine": "At sunset the pole ball on the Bonden cairn catches the last light and glows red.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "Far out west, a pinprick of red sits on the skerry at sunset."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "Far out west, a pinprick of red sits on the skerry at sunset."
+        }
+      },
+      "sighting": {
+        "kind": "lights",
+        "line": "The ball on Bonden glowed red at sunset, seen from {place}.",
+        "drawing": "red-ball"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#secrets[0]",
+          "ISLAND-LORE.md: Bonden, white 8 m cairn with pole and red ball (1875)"
+        ],
+        "note": "the cairn and ball are sourced; \"it flashes red at sunset\" is the old men's INVENTED saying"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Grundsund",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.lysekil.engine-fitter",
+      "name": "A hot-bulb engine fitter with oil to his elbows",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Lysekil"
+        ],
+        "spot": "the Skandia yard slip"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Working on a hot-bulb engine on its stand; blowlamp roaring.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Blowlamp on the head, wait for it to glow, swing the wheel. Thump. Never fails. Almost."
+      },
+      "offers": [
+        "rumour",
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Blowlamp on the head, wait for it to glow, swing the wheel. Thump. Never fails. Almost."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A Skandia engine fitter at {place}, up to the elbows in oil.",
+        "drawing": "fitter"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Lysekil#regulars[1]",
+          "people:P11 (Skandia hot-bulb engines made in Lysekil, founded 1899)"
+        ],
+        "note": "INVENTED regular; Skandia engines in Lysekil are sourced (people:P11)"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Lysekil",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "place.lysekil.bath-house-attendant",
+      "name": "The bath-house attendant sweeping the cold-bath jetty",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Lysekil"
+        ],
+        "spot": "the cold-bath jetty"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "morning"
+        ]
+      },
+      "routine": "Sweeps the planks and wipes the benches before the first bathers.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "The sea is eleven degrees. The guests insist. I only sweep."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "The sea is eleven degrees. The guests insist. I only sweep."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The bath-house attendant sweeping the jetty at {place}.",
+        "drawing": "attendant"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Lysekil#regulars[2]",
+          "lore:village:Fiskebäckskil and lore:relation/10604591 (bath resorts nearby: Fiskebäckskil since 1867, a bath house on Gåsö around 1900)"
+        ],
+        "note": "INVENTED regular. island-lore.json does not document a cold-bath jetty at Lysekil itself: this borrows the sourced bath-resort setting of its neighbours, TODO(felix): confirm or move to Fiskebäckskil"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Lysekil",
+        "hook": "regulars",
+        "index": 2
+      }
+    },
+    {
+      "id": "secret.lysekil.gunboats",
+      "name": "The gunboats that came at night",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "harbour",
+        "places": [
+          "village:Lysekil"
+        ],
+        "spot": "Norra hamnen",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dusk",
+          "night"
+        ]
+      },
+      "routine": "An old fisherman says wartime gunboats came into Norra hamnen at night with their lights out, and he never saw them.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "An old fisherman at the end of the quay, looking out at the dark as if something were coming in."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "hail",
+          "line": "\"Never saw a thing,\" he says, and looks you in the eye until you nod."
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "An old man at {place} says the gunboats came in at night with no lights.",
+        "drawing": "quay-night"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Lysekil#secrets[0]",
+          "lore:village:Lysekil (Operation Bridford: fast gunboats run Lysekil to Hull with ball bearings through the Skagerrak blockade, 1943-45)"
+        ],
+        "note": "Operation Bridford is a sourced event; the fisherman, his claim and his silence are INVENTED"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Lysekil",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.lysekil.depot-clerk",
+      "name": "The depot clerk in the Lysekil harbour shed",
+      "category": "people",
+      "years": [
+        1950,
+        1950
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Lysekil"
+        ],
+        "spot": "the depot shed on the quay"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Story-owned: hands out the gas tanks and paraffin for the lights (canon).",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "(story-owned: lines live in src/story-1950.js)"
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The depot clerk at {place}.",
+        "drawing": "person"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Lysekil#regulars[0] (canon)",
+          "GAME-DESIGN.md canon: the depot on the Lysekil quay"
+        ],
+        "note": "hand-placed by the story; a stub so quests can name him as giver"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Lysekil",
+        "hook": "regulars",
+        "index": 0
+      },
+      "storyOwned": true
+    },
+    {
+      "id": "place.grundsund.boatbuilder",
+      "name": "The boatbuilder at Grundsund (the boy's father)",
+      "category": "people",
+      "years": [
+        1950,
+        1950
+      ],
+      "where": {
+        "anchor": "village",
+        "places": [
+          "village:Grundsund"
+        ],
+        "spot": "the yard"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Story-owned: takes Svalan into the yard and says it will be a while.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "(story-owned: lines live in src/story-1950.js)"
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "none"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The boatbuilder at {place}.",
+        "drawing": "person"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#regulars[0] (canon)",
+          "people:P01-P19 (boatbuilding); GAME-DESIGN.md canon"
+        ],
+        "note": "hand-placed by the story; a stub so quests can name him as giver"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Grundsund",
+        "hook": "regulars",
+        "index": 0
+      },
+      "storyOwned": true
+    },
+    {
+      "id": "place.bonden.dare-lad",
+      "name": "A Grundsund lad who rows out to touch the cairn on a dare",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10250201"
+        ],
+        "spot": "the Bonden cairn"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "summer",
+          "late-summer"
+        ],
+        "timeOfDay": [
+          "afternoon"
+        ]
+      },
+      "routine": "Rows out on a dare, touches the cairn and rows back as fast as he can.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Dare you! Dare you to touch it! I did!"
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "show",
+          "reach": "medium",
+          "line": "He slaps the cairn, whoops, and is nearly in the water."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A lad rowed out to touch the cairn on {place}. Dared by his mates.",
+        "drawing": "lad"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250201#regulars[0]",
+          "ISLAND-LORE.md: Bonden, white 8 m cairn (1875); the Anna Maria wrecked on its west side in 1905"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10250201",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.islandsberg.family",
+      "name": "The family in the old keeper's house",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Islandsberg"
+        ],
+        "spot": "the porch of the old keeper's house"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "afternoon"
+        ]
+      },
+      "routine": "A family who bought the house in 1948, learning its quirks: the light above them is automatic and dark upstairs.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "The wind finds every crack. Seventeen so far. We are counting."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "The wind finds every crack. Seventeen so far. We are counting."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The family in the old keeper's house at {place}, waving from the porch.",
+        "drawing": "family"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Islandsberg#regulars[0]",
+          "ISLAND-LORE.md: Islandsberg's old light dark since 1938, the house sold 1948 (private family not named)"
+        ],
+        "note": "INVENTED regular; the sale in 1948 is sourced (fyr.org); no private person is named"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Islandsberg",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.islandsberg.keepers-logbook",
+      "name": "A keeper's logbook in the wall cupboard",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Islandsberg"
+        ],
+        "spot": "the old keeper's house",
+        "rule": "revealed by a regular once they like you; otherwise nothing to see"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "The family found a keeper's logbook in a wall cupboard and have not shown it to anyone.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A face at the upstairs window, and a hand holding something square and dark."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A face at the upstairs window, and a hand holding something square and dark."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "The family at {place} showed us a logbook found in a wall cupboard.",
+        "drawing": "book"
+      },
+      "rarity": "rare",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Islandsberg#secrets[0]",
+          "ISLAND-LORE.md: Islandsberg 1883 combined light and dwelling, dark 1938"
+        ],
+        "note": "INVENTED hook grounded in the sourced house history"
+      },
+      "invented": true,
+      "requires": {
+        "regular": "place.islandsberg.family",
+        "warmth": "warm"
+      },
+      "lore": {
+        "place": "light:Islandsberg",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.harmano.quarryman",
+      "name": "A quarryman about to be out of work",
+      "category": "people",
+      "years": [
+        1948,
+        1952
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/5463706"
+        ],
+        "spot": "the feldspar quarry landing"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Drills and splits the pink feldspar by hand at Höpallen or Stenvik; talks about what he will do next.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Last season on the stone. After that, who knows."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Last season on the stone. After that, who knows."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A quarryman at {place}, the quarry going quiet.",
+        "drawing": "quarryman"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5463706#regulars[0]",
+          "history-start-area.md: feldspar quarried at Höpallen and Stenvik in the first half of the 1900s (high)"
+        ],
+        "note": "INVENTED regular; the quarrying is sourced"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5463706",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.harmano.egg-farmer",
+      "name": "A farmer who sells eggs to summer guests",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/5463706"
+        ],
+        "spot": "Härm, the old farm on the east shore"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday"
+        ],
+        "season": [
+          "summer"
+        ]
+      },
+      "routine": "Packs eggs in straw for the guest houses; will trade them for news.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Eggs for the guests on Gullholmen. They don't know what they're asking."
+      },
+      "offers": [
+        "errand",
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Eggs for the guests on Gullholmen. They don't know what they're asking."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A farmer at {place} with a crate of eggs for the summer guests.",
+        "drawing": "farmer"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5463706#regulars[1]",
+          "history-start-area.md: farm Härm on the east shore, farming with fishing and freight sailing (high)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5463706",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "secret.harmano.feldspar-stack",
+      "name": "Cut feldspar blocks under a tarpaulin",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/5463706"
+        ],
+        "spot": "the quarry landing",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "A stack of cut blocks, never shipped, tarpaulin-covered and weighted with stones.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A neat stack under a grey tarpaulin: pink stone, cut square."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A neat stack under a grey tarpaulin: pink stone, cut square."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "Cut feldspar blocks, never shipped, at {place}.",
+        "drawing": "blocks"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5463706#secrets[0]",
+          "history-start-area.md: feldspar quarrying (high)"
+        ],
+        "note": "the secret is an INVENTED hook from island-lore.json"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5463706",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.hallevik.shipwright",
+      "name": "A boatyard shipwright who builds under a roof in winter",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Hälleviksstrand"
+        ],
+        "spot": "the yard slip"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Planks, steam box, rivets; a half-built Iceland boat on the slip.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Caulking oakum, tar, patience. In that order. Need a hand with any?"
+      },
+      "offers": [
+        "errand",
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Caulking oakum, tar, patience. In that order. Need a hand with any?"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A shipwright at {place}, a half-planked hull behind him.",
+        "drawing": "shipwright"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Hälleviksstrand#regulars[0]",
+          "ISLAND-LORE.md: Hälleviksstrand boatyard 1907; people:P03-P08 (clinker building)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Hälleviksstrand",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.hallevik.cannery-worker",
+      "name": "A cannery worker",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Hälleviksstrand"
+        ],
+        "spot": "the cannery quay"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Smoke and steam from the cannery; she comes out for air.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Strana burned in 1905 and was rebuilt in a summer. Ask anyone over sixty."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Strana burned in 1905 and was rebuilt in a summer. Ask anyone over sixty."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A cannery worker taking air at {place}.",
+        "drawing": "cannery-woman"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Hälleviksstrand#regulars[1]",
+          "vastsverige.com: the 1905 fire, a cannery and shipyard start the same year (medium, via history-start-area.md)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Hälleviksstrand",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "secret.hallevik.half-model",
+      "name": "A half-model nobody ordered",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "berth",
+        "places": [
+          "village:Hälleviksstrand"
+        ],
+        "spot": "the yard loft",
+        "rule": "revealed by a regular once they like you; otherwise nothing to see"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "In the yard loft: a half-model of a boat nobody has ordered, a hull the shipwright draws for himself.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "Up in the loft window, a pale carved shape on a board."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "Up in the loft window, a pale carved shape on a board."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A half-model of a boat nobody ordered, in the yard loft at {place}.",
+        "drawing": "half-model"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Hälleviksstrand#secrets[0]"
+        ],
+        "note": "the secret is an INVENTED hook from island-lore.json"
+      },
+      "invented": true,
+      "requires": {
+        "regular": "place.hallevik.shipwright",
+        "warmth": "friendly"
+      },
+      "lore": {
+        "place": "village:Hälleviksstrand",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.storon.pup-counter",
+      "name": "A boy who counts seal pups from a rock",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/10604590"
+        ],
+        "spot": "a lookout rock"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "early-summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "midday"
+        ]
+      },
+      "routine": "Lies on his stomach on a rock with a stub of pencil and a notebook, counting pups.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Eleven! No, twelve! One keeps moving."
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Eleven! No, twelve! One keeps moving."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A boy counting seal pups from a rock at {place}.",
+        "drawing": "boy"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604590#regulars[0]"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604590",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.hattan.fisherman",
+      "name": "A Gullholmen fisherman who complains when the light is dark",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Hättan"
+        ],
+        "spot": "a boathouse in sight of Hättan"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning",
+          "midday",
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Sees the Hättan light every night from the boathouse and complains when it is not there.",
+      "movement": "stationary",
+      "personality": "gruff",
+      "lines": {
+        "hail": "Hättan's dark. Three nights now. We rowed round the point by feel.",
+        "hailAfter": "It's back. Right on time. A man can sleep."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Hättan's dark. Three nights now. We rowed round the point by feel."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A fisherman at {place} grumbling that Hättan has been dark since the storm.",
+        "drawing": "fisherman"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Hättan#regulars[0]",
+          "GAME-DESIGN.md canon: the four AGA lights out since the storm"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Hättan",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.gaven.pilot",
+      "name": "A Lysekil pilot who still says \"out at the old pole\"",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Gäven"
+        ],
+        "spot": "a pilot boat close under Gäven"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Cruises under the rock between jobs, still calling it the pole.",
+      "movement": "patrol",
+      "personality": "chatty",
+      "lines": {
+        "hail": "My father kept watch on the platform of the old pole. The light does it better, but it's lonelier."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "My father kept watch on the platform of the old pole. The light does it better, but it's lonelier."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A pilot at {place} still calling it \"the old pole\".",
+        "drawing": "pilot"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Gäven#regulars[0]",
+          "ISLAND-LORE.md: Gäven pole mark 1835 with a pilots' lookout platform; it blew over; the light came in 1917"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Gäven",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.gaven.initials",
+      "name": "Initials cut in the rock beside Gäven",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Gäven"
+        ],
+        "spot": "the rock beside the tower",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Initials and years, cut over a century, going back to the pole mark's day.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "Close beside the tower, the rock is cut with initials and years, some older than the light."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "Close beside the tower, the rock is cut with initials and years, some older than the light."
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "Initials and dates cut into the rock beside {place}, going back before the tower.",
+        "drawing": "initials"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Gäven#secrets[0]",
+          "ISLAND-LORE.md: Gäven pole mark 1835"
+        ],
+        "note": "INVENTED hook; carved initials are an ALIVE-SEA idea (\"carved initials: cute, niche\")"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Gäven",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.fredagsholmen.sheep-farmer",
+      "name": "A Gullholmen sheep-farmer who lands sheep on the islet",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10237443"
+        ],
+        "spot": "the grass on the islet"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "morning",
+          "midday"
+        ]
+      },
+      "routine": "Rows out with a few sheep each summer and leaves them to graze; rows back for them in autumn.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Seven out, seven back. Mostly."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Seven out, seven back. Mostly."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "Sheep on the grass of {place}, and a farmer in a rowboat.",
+        "drawing": "sheep"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237443#regulars[0]",
+          "ISLAND-LORE.md: Fredagsholmen, a light since 1883"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237443",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.fredagsholmen.calendar",
+      "name": "A calendar cut in the rock",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10237443"
+        ],
+        "spot": "the south point",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "Seven strokes cut in the rock, six crossed out: someone was stuck here for a week.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "On the south point: seven strokes cut in the rock, six crossed through."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "On the south point: seven strokes cut in the rock, six crossed through."
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "A week's tally cut in the rock at {place}. Six days crossed out.",
+        "drawing": "calendar"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237443#secrets[0]",
+          "ISLAND-LORE.md: do not present \"Friday islet\" as the etymology"
+        ],
+        "note": "INVENTED hook. The name's meaning is unknown: the line must not claim to explain it."
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237443",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.kraksundsgap.pilot",
+      "name": "A Hälleviksstrand pilot who complains about the concrete marks",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "pass",
+        "places": [
+          "light:Kråksundsgap Södra"
+        ],
+        "spot": "the leading line"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Takes the leading line in and out of the gap, steering by the cairns, scorning the new marks.",
+      "movement": "patrol",
+      "personality": "gruff",
+      "lines": {
+        "hail": "I've used the line every day for thirty years. They want to put up concrete. Concrete!"
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "I've used the line every day for thirty years. They want to put up concrete. Concrete!"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A pilot in the gap at {place}, steering by the old line.",
+        "drawing": "pilot"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Kråksundsgap Södra#regulars[0]",
+          "people:K01-K07 (Kråksundsgap Södra: a working AGA light long before 1954)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Kråksundsgap Södra",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.kraksundsgap.white-tower",
+      "name": "A tall white tower not on the chart",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Kråksundsgap Södra"
+        ],
+        "rule": "story-owned: not placed by the engine"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "night"
+        ]
+      },
+      "routine": "Story-owned. At night someone has seen a tall white tower here that is not on the chart: the 1954 tower, glimpsed.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "(story-owned: the Kråksundsgap glimpse is scripted)"
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "(story-owned: the Kråksundsgap glimpse is scripted)"
+        }
+      },
+      "sighting": {
+        "kind": "lights",
+        "line": "A tall white tower at {place} that is not on the chart. Gone when I looked again.",
+        "drawing": "tower"
+      },
+      "rarity": "rare",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Kråksundsgap Södra#secrets[0]",
+          "people:K02 (1954: a 13 m concrete tower replaced the former lantern)",
+          "GAME-DESIGN.md canon: the Kråksundsgap glimpse"
+        ],
+        "note": "canon: scripted; this stub exists so the lore link is tracked, not spawned"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Kråksundsgap Södra",
+        "hook": "secrets",
+        "index": 0
+      },
+      "storyOwned": true,
+      "note": "storyOwned."
+    },
+    {
+      "id": "place.torno.quarryman-dora",
+      "name": "A quarryman who talks of the sunk steamer as if she were a person",
+      "category": "people",
+      "years": [
+        1948,
+        1955
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10238557"
+        ],
+        "spot": "the quarry sound landing"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Cuts stone at Tornö; looks across the sound at the place where the Dora lies.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "She went down on a calm day. Calm! And no man can say whose fault."
+      },
+      "offers": [
+        "rumour",
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "She went down on a calm day. Calm! And no man can say whose fault."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A quarryman at {place} talking about the Dora like an old friend.",
+        "drawing": "quarryman"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10238557#regulars[0]",
+          "ISLAND-LORE.md: the Dora in the quarry sound; two records (1925, 1928) probably one steamer"
+        ],
+        "note": "INVENTED regular; the Dora records conflict (flagged in the lore)"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10238557",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.torno.mason-block",
+      "name": "A cut block with a mason's mark",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10238557"
+        ],
+        "spot": "under the black cairn",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "A cut block under the Tornö black cairn, with a mason's mark on its face.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A squared block of granite, a mason's mark chiselled in its face."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A squared block of granite, a mason's mark chiselled in its face."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A cut stone with a mason's mark under the black cairn at {place}.",
+        "drawing": "stone"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10238557#secrets[0]",
+          "ISLAND-LORE.md: Tornö black cairn 1886"
+        ],
+        "note": "the secret is an INVENTED hook from island-lore.json"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10238557",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.malo.shipwrights-widow",
+      "name": "A shipwright's widow who rents out the old yard shed",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/5214486"
+        ],
+        "spot": "the shed beside the old slip"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Sweeps the shed for summer lodgers; looks at the slip when she thinks no one is watching.",
+      "movement": "stationary",
+      "personality": "shy",
+      "lines": {
+        "hail": "My husband built three boats in that shed. Do you want to see the slip?"
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "My husband built three boats in that shed. Do you want to see the slip?"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A woman at the old yard on {place}, sweeping.",
+        "drawing": "widow"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5214486#regulars[0]",
+          "sv.wikipedia Malö: shipyard and shipping at Malö in the 1800s (medium)"
+        ],
+        "note": "INVENTED regular; Malö's 1800s yard is sourced (medium)"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5214486",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.malo.half-built-hull",
+      "name": "A half-built hull under tarpaulins",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/5214486"
+        ],
+        "spot": "the old yard slip",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "The old slip still holds a half-built hull, ribs showing, under tarpaulins.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "Ribs like a whale's on the old slip, a tarpaulin over the bow."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "Ribs like a whale's on the old slip, a tarpaulin over the bow."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A hull half-built on the old slip at {place}. Nobody has finished her.",
+        "drawing": "hull"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5214486#secrets[0]",
+          "sv.wikipedia Malö (medium)"
+        ],
+        "note": "the secret is an INVENTED hook from island-lore.json"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5214486",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.lavon.sludge-pond",
+      "name": "The old fish-oil pond",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "island",
+        "places": [
+          "relation/7455712"
+        ],
+        "spot": "the old train-oil works",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "weather": [
+          "calm"
+        ],
+        "season": [
+          "summer"
+        ],
+        "timeOfDay": [
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "On a hot day the old sludge pond still smells of fish oil.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A warm breeze brings a rich, rank smell of old fish oil off the shore."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A warm breeze brings a rich, rank smell of old fish oil off the shore."
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "The old fish-oil pond at {place} still smells on a hot day.",
+        "drawing": "pond"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/7455712#secrets[0]",
+          "ISLAND-LORE.md: Lavön train-oil boilery (not confirmed to be on the island)"
+        ],
+        "note": "INVENTED detail on an unconfirmed site"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/7455712",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.harpo.long-liner",
+      "name": "A long-liner who curses the Freya for every snagged hook",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10250169"
+        ],
+        "spot": "a small boat over the wreck ground"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning"
+        ]
+      },
+      "routine": "Works his lines near the wreck and swears at her by name.",
+      "movement": "patrol",
+      "personality": "gruff",
+      "lines": {
+        "hail": "The Freya! Every hook. Coal and coke, and she's still costing me."
+      },
+      "offers": [
+        "errand",
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "The Freya! Every hook. Coal and coke, and she's still costing me."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A long-liner cursing the Freya off {place}.",
+        "drawing": "fisherman"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250169#regulars[0]",
+          "ISLAND-LORE.md: the wreck of the Freya (1940) near Stora Harpö"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10250169",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.harpo.ships-bell",
+      "name": "A ship's bell pulled up on a line",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/10250169"
+        ],
+        "spot": "the long-liner's boathouse",
+        "rule": "revealed by a regular once they like you; otherwise nothing to see"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "The skipper has pulled a green brass ship's bell up on a line and never told anyone.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A glint of old green brass in the dark of a boathouse door."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A glint of old green brass in the dark of a boathouse door."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A ship's bell, green with age, pulled up on a fishing line near {place}.",
+        "drawing": "bell"
+      },
+      "rarity": "rare",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250169#secrets[0]",
+          "ISLAND-LORE.md: the wreck of the Freya"
+        ],
+        "note": "INVENTED hook on a sourced wreck"
+      },
+      "invented": true,
+      "requires": {
+        "regular": "place.harpo.long-liner",
+        "warmth": "warm"
+      },
+      "lore": {
+        "place": "relation/10250169",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.silleskar.linseed-cask",
+      "name": "A cask of linseed cake in a cleft",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "skerry",
+        "places": [
+          "relation/11020202"
+        ],
+        "spot": "a cleft on the lee side",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "A cask of linseed cake still sits in a rock cleft: nobody wants to eat it, or move it.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A black stave cask wedged in a cleft, hard and weathered."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A black stave cask wedged in a cleft, hard and weathered."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "An old cask of linseed cake, stuck in a cleft at {place}.",
+        "drawing": "cask"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/11020202#secrets[0]",
+          "ISLAND-LORE.md: a linseed-cake cargo wrecked in 1878"
+        ],
+        "note": "the secret is an INVENTED hook from island-lore.json"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/11020202",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.jamningarna.pilot",
+      "name": "A Lysekil pilot who calls the two marks the Trousers",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "sea-mark",
+        "places": [
+          "relation/10237897"
+        ],
+        "spot": "a pilot boat between the cairns"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Takes a short cut through the western inlet between the two cairns.",
+      "movement": "patrol",
+      "personality": "chatty",
+      "lines": {
+        "hail": "Two legs, one belt each. Keep the Trousers on your port side and you can't go wrong."
+      },
+      "offers": [
+        "rumour",
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "Two legs, one belt each. Keep the Trousers on your port side and you can't go wrong."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A pilot at {place} calling the two marks the Trousers.",
+        "drawing": "pilot"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237897#regulars[0]",
+          "ISLAND-LORE.md: painted cairns Jämningarna and Byxeskären (1874); byxa = trousers"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237897",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.stangholmen.ferryman",
+      "name": "A Lysekil ferryman who passes Stångholmen on every crossing",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "relation/10237903"
+        ],
+        "spot": "the ferry bridge"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "dawn",
+          "morning",
+          "midday",
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Shuttles across the mouth of Gullmarn between Lysekil and Fiskebäckskil; counts the lights.",
+      "movement": "commute",
+      "personality": "chatty",
+      "lines": {
+        "hail": "I've gone past Stångholmen forty times today. It's dark. Fix it, will you?"
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "I've gone past Stångholmen forty times today. It's dark. Fix it, will you?"
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "The Lysekil ferry crossing past {place}.",
+        "drawing": "ferry"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237903#regulars[0]",
+          "lore:village:Fiskebäckskil (the Lysekil ferry)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237903",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "secret.stangehuvud.nets-in-dark-house",
+      "name": "Nets drying in the dark light house",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "relation/10237903",
+          "light:Stångehuvud"
+        ],
+        "spot": "the dark wooden light house",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "In the dark Stångehuvud light house a fisherman keeps his nets dry.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "Through the glazed gallery: brown nets hung where the lamp used to be."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "Through the glazed gallery: brown nets hung where the lamp used to be."
+        }
+      },
+      "sighting": {
+        "kind": "places",
+        "line": "Nets hung to dry in the dark light house on Stångehuvud.",
+        "drawing": "nets"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237903#secrets[0]",
+          "sv.wikipedia Stångehuvuds naturreservat: the wooden light house remains, light extinguished 1940"
+        ],
+        "note": "INVENTED use of a sourced dark light house"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237903",
+        "hook": "secrets",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.stangehuvud.retired-quarryman",
+      "name": "A retired quarryman who walks the headland",
+      "category": "people",
+      "years": [
+        1945,
+        1959
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Stångehuvud"
+        ],
+        "spot": "the granite slabs below the headland"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "afternoon",
+          "dusk"
+        ]
+      },
+      "routine": "Walks the headland most evenings and tells you which slabs were split and when.",
+      "movement": "stationary",
+      "personality": "chatty",
+      "lines": {
+        "hail": "That slab was split in '88. See the wedge marks? Berliners paid for it."
+      },
+      "offers": [
+        "rumour"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "That slab was split in '88. See the wedge marks? Berliners paid for it."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "An old quarryman on the slabs at {place}, naming them.",
+        "drawing": "quarryman"
+      },
+      "rarity": "common",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Stångehuvud#regulars[0]",
+          "stangehuvud.se: quarrying from the early 1870s (Kessel & Röhl, Berlin) to 1904 (medium, via lore)"
+        ],
+        "note": "INVENTED regular; the quarry history is sourced (medium)"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Stångehuvud",
+        "hook": "regulars",
+        "index": 0
+      }
+    },
+    {
+      "id": "place.stangehuvud.gas-courier",
+      "name": "A courier who rows tubes out to the dark light house",
+      "category": "people",
+      "years": [
+        1948,
+        1953
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Stångehuvud"
+        ],
+        "spot": "a small rowing boat below the headland"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {
+        "timeOfDay": [
+          "morning",
+          "midday",
+          "afternoon"
+        ]
+      },
+      "routine": "Rows a gas tube out to the light house when asked.",
+      "movement": "commute",
+      "personality": "shy",
+      "lines": {
+        "hail": "A Marstrand crew brought the tubes once. I row them out when they ask."
+      },
+      "offers": [
+        "errand"
+      ],
+      "reactions": {
+        "tap": {
+          "effect": "hail",
+          "reach": "medium",
+          "line": "A Marstrand crew brought the tubes once. I row them out when they ask."
+        },
+        "approach": {
+          "effect": "wave-back"
+        },
+        "anchored": {
+          "effect": "none"
+        }
+      },
+      "sighting": {
+        "kind": "people",
+        "line": "A man rowing a gas tube to the dark light house at {place}.",
+        "drawing": "rowing-boat"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Stångehuvud#regulars[1]",
+          "people:G01-G03 (AGA tube service)"
+        ],
+        "note": "the role is an INVENTED regular from island-lore.json; the lines are INVENTED-DIALOGUE for Felix to rewrite"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Stångehuvud",
+        "hook": "regulars",
+        "index": 1
+      }
+    },
+    {
+      "id": "secret.stangehuvud.pedestal-stone",
+      "name": "A pedestal stone with a number",
+      "category": "secret",
+      "years": [
+        1930,
+        1990
+      ],
+      "where": {
+        "anchor": "light",
+        "places": [
+          "light:Stångehuvud"
+        ],
+        "spot": "among the scrap heaps",
+        "rule": "one per place; noticed by looking close from an anchored boat"
+      },
+      "density": {
+        "chance": 1,
+        "cap": 1,
+        "areaM": 300
+      },
+      "when": {},
+      "routine": "A pedestal stone with a number chiselled in it was never shipped; it lies among the scrap heaps.",
+      "movement": "stationary",
+      "reactions": {
+        "tap": {
+          "effect": "look-closer",
+          "reach": "medium",
+          "line": "A squared granite block with a number cut in its top, among the quarry waste."
+        },
+        "approach": {
+          "effect": "none"
+        },
+        "anchored": {
+          "effect": "look-closer",
+          "line": "A squared granite block with a number cut in its top, among the quarry waste."
+        }
+      },
+      "sighting": {
+        "kind": "finds",
+        "line": "A pedestal stone with a number cut in it, never shipped, at {place}.",
+        "drawing": "stone"
+      },
+      "rarity": "uncommon",
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Stångehuvud#secrets[0]",
+          "stangehuvud.se: monument bases shipped from Stångehuvud (medium, via lore)"
+        ],
+        "note": "the secret is an INVENTED hook from island-lore.json"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Stångehuvud",
+        "hook": "secrets",
+        "index": 0
+      }
+    }
+  ]
+}
