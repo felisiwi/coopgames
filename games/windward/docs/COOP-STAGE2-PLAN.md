@@ -44,10 +44,38 @@ Settled (Felix, quoted from GAME-DESIGN.md; this plan implements these, it does 
 | World changes are saved by the host and show on both screens; personal rewards go to whoever tapped. One world seed (fixed when a save begins) and one day seed; the guest uses the host's seeds, sent on join. Wind becomes a fixed function of day seed and clock | ALIVE-SEA grills (thing model 5, 9, 12; weather 7) |
 | Pause: solo freezes the game clock; with a peer connected the shared clock does **not** freeze | next-run stage prompt, batch 1a |
 
-Open (marked **FELIX:**; the full list is in section 7): what the guest can *do* in the host's story (F1), how
+Were open, now decided by Felix on 2026-11-07 (see "Decisions" below; section 7 keeps the options and
+reasoning): what the guest can *do* in the host's story (F1), how
 the guest learns the year (F2), the opening for a visitor (F3), where the visitor spawns (F4), world versus
 personal flags (F5), the visitor's boat (F6), three hub choices (F7), eligibility (F8) and a "visiting" tag
 (F9). Each has a recommendation.
+
+## Decisions (Felix, 2026-11-07)
+
+Felix agreed with every recommendation in section 7. These are now settled; section 7 keeps the options and
+the reasoning behind them.
+
+| # | Decision |
+|---|---|
+| **F1** | **Sail-along only, to start.** The visitor sees the host's world and sails anywhere; story interactions belong to the host. Batch 5 (guest actions) stays optional and is not scheduled. |
+| **F2** | **The year travels in the hub launch `options`** (plus the mismatch check). The guest builds its world without waiting for the snapshot. |
+| **F3** | **A visitor skips the opening, and it is NOT marked seen**, so their own solo game still plays it later. |
+| **F4** | **The visitor spawns beside the host** (from `session.host`), once, before the first frame. |
+| **F5** | **`towerSeen` is personal**, not a world flag. See the consequence below. |
+| **F6** | **Each player sails their own boat**; its look travels in `hello` / `session` so each friend is drawn correctly. |
+| **F7** | **The hub passes options through verbatim** (capped); **each game whitelists**. **Windward never accepts `?lights=reset`, `?jump`, `?opening`, `?tune` or any other save-touching option from a host.** **Freeing the guest slot is its own change** (branch `felix/hub-guest-rejoin`), not part of the options PR. **The unordered channel stays**; state messages use revision numbers. |
+| **F8** | **`canVisit(year)` returns `true` for now.** |
+| **F9** | **A small HUD tag: "visiting <friend>'s world".** |
+| Kenny | **Heads-up notes only, no sign-off** (`docs/notes/KENNY-HUB-LAUNCH.md`, and one for the rejoin change). |
+
+**Consequence of F5 to keep in mind when building batch 3.** `towerSeen` and `chest` share one save key
+(`windward.chapter1.v1`), and the module only honours `towerSeen` when `chest` is true in the same record
+(`chapter1.js:20`). So for a visitor: the world `chapter` module is seeded with the host's `chest` only (the
+snapshot no longer carries `towerSeen`), and the visitor's own `towerSeen` is read from their own save, read-only.
+The tower glimpse is each player's own screen. If the visitor sees it while visiting, it is held in memory for the
+session and is **not** written to their save unless their own save already has `chest: true`; no new key is
+added. If Felix would rather a visited glimpse count toward the visitor's own chapter, that needs a decision
+and possibly a migration, and is not part of stage 2.
 
 ## 2. Current state, verified against the code
 
@@ -120,7 +148,7 @@ has none, `1950` appends `.1950`. One shared `store` object serves all of them (
 | `windward.lights.v1` | which task lights are relit | **World** (the host's) |
 | `windward.task1950.v1` | gas aboard, post delivered to the keeper | **World** |
 | `windward.beats1950.v1` | story phase | **World** |
-| `windward.chapter1.v1` | `chest`, `towerSeen` | **World** (see F5 for `towerSeen`) |
+| `windward.chapter1.v1` | `chest`, `towerSeen` | `chest`: **World**. `towerSeen`: **Personal** (F5, decided; see Decisions) |
 | `windward.names.v1` | names you have discovered | **Personal** (guest keeps and writes) |
 | `windward.lightlog.v1` | flash patterns you have seen | **Personal** |
 | `windward.explored.v1` | chart fog | **Personal** |
@@ -182,7 +210,7 @@ state changes, and on a 10 s heartbeat)
   "story": {
     "beats": "help",
     "task": { "gas": true, "keeper": false, "relit": ["light:Hättan", "light:Gäven"] },
-    "chapter": { "chest": false, "towerSeen": false }
+    "chapter": { "chest": false }
   },
   "boat": { "type": "eka", "deck": ["crate", "barrel", null], "wear": 0.1 },
   "host": { "x": 1234.5, "z": -980.2, "heading": 1.2 }
