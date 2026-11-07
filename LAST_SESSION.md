@@ -34,3 +34,4 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 - mission control: merged the co-op stage 2 plan (`games/windward/docs/COOP-STAGE2-PLAN.md`, decisions F1-F9) and `docs/notes/KENNY-HUB-LAUNCH.md`.
 - stage agent, corrections: `felix/windward-corrections` applies docs/CORRECTIONS-TODO.md (data and docs only; ticked off with evidence); 71 test files pass; rewind unaffected (no build year changed). Still open: Islandsberg's 3D model has a ridge lantern.
 - mission control: merged the corrections. Still on branches: `felix/hub-guest-rejoin` (needs Felix's two-phone test before merge), `felix/windward-landmarks` (agent 4, in progress), weather into the game (agent 2, in progress).
+- agent 1, Islandsberg model: `felix/windward-islandsberg-model` replaces the ridge lantern with a row of five gable windows (`gableWindowLight`, `src/lighthouses.js`); lit/dark via the unchanged glow code; 72 test files pass; game.js untouched.
