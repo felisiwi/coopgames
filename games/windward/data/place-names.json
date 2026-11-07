@@ -18,9 +18,10 @@
   },
 
   "descriptionNotes": {
-    "Stora Kornö": "The Map Lab says 'Kornö = the barley isle'. OSM has Stora Kornö (island, 58.2978 N) and Kornö kalv (skerry); the description sits on the island. It lies in the 80 m edge-fade strip at the north border of today's window, so it is not on the chart yet; it appears when the window grows north. TODO(felix): confirm Stora Kornö is the Kornö meant.",
+    "Stora Kornö": "The Map Lab says 'Kornö = the barley isle'. OSM has Stora Kornö (island, 58.2978 N) and Kornö kalv (skerry); the description sits on the island. It lies in the 80 m edge-fade strip at the north border of today's window, so it is not on the chart yet; it appears when the window grows north. TODO(felix): confirm Stora Kornö is the Kornö meant. Confidence in the Map Lab gloss 'the barley isle': low.",
     "Stångehuvud": "Placed by stage 1c as a lighthouse (src/lighthouses.js, lat/lon from LIGHTHOUSES.md): the headland's own name is the light's. TODO(felix): confirm the description is meant for the lighthouse place.",
-    "Islandsberg": "As Stångehuvud: placed as a lighthouse in stage 1c."
+    "Islandsberg": "As Stångehuvud: placed as a lighthouse in stage 1c.",
+    "Hättan": "Confidence in the Map Lab gloss 'the Hood': low (a lore description, not an etymology claim)."
   },
 
   "extraHarbours": [

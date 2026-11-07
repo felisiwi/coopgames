@@ -14,7 +14,8 @@ summary: A down-to-earth pilot's daughter who knows every mark, shoal and secret
 ---
 
 ## Story
-**(lore)** Torhild is a **pilot's daughter** from Lysekil: a working family, not posh.
+**(lore)** Torhild is a **pilot's daughter** from Lysekil: a working family, not posh. Lysekil around 1703 is **not a hamlet**: a fishing place with its own church and
+priest since the herring years (1566-1587), part of Lysekil parish from 1700, a pilot station set up early in the 1700s (4 pilots in 1729); not yet a town (charter 1903).
 Her father guides ships through the skerries (Sweden's state pilot service was founded by decree
 in 1696, and compulsory pilotage dates from 1667; see docs/WORLD-1700.md). With no lighthouses
 yet, the pilots' knowledge of cairns, marks and leading lines is how the coast is read, and

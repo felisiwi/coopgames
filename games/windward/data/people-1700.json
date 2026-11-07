@@ -330,6 +330,12 @@
       "url": "https://kristinehamn.naturskyddsforeningen.se/wp-content/uploads/sites/69/2014/01/De-tolv-apostlarna-1985.pdf",
       "read": false,
       "note": "search-summary"
+    },
+    "E01": {
+      "title": "sv.wikipedia: Lysekil (as read by the island-lore research, source SVW-lysekil in island-lore.json)",
+      "url": "https://sv.wikipedia.org/wiki/Lysekil",
+      "read": true,
+      "note": "medium; read 2026-11-07 by the island-lore agent, not re-read here"
     }
   },
   "items": [
@@ -503,7 +509,7 @@
     {
       "id": "H04",
       "topic": "hamlet",
-      "text": "Gullholmen harbour wreck called 'Tordenskiold's ship' is tree-ring dated: latest ring 1717, felled after 1727.",
+      "text": "Gullholmen harbour wreck called 'Tordenskiold's ship' is tree-ring dated: latest ring 1717 with no sapwood, so probably felled 1727-1827 (no earlier than the 1720s); the museum rejects the Tordenskiold link; one oak treenail shows fire damage, so the ship may have burned (Bohusläns museum rapport 2012:39, via data/island-lore.json).",
       "confidence": "documented",
       "uncertain": false,
       "sources": [
@@ -765,6 +771,18 @@
         "B06"
       ],
       "useFor": "Do not name it a historical storm."
+    },
+    {
+      "id": "L01",
+      "topic": "place",
+      "text": "Lysekil around 1703 is not a hamlet: a fishing place older than the herring period 1566-1587 with its own church and priest, 82 adults in 1645 (half strandsittare), part of Lysekil parish from 1700, a pilot station set up early in the 1700s (4 pilots in 1729), and a town only from 1 April 1903.",
+      "confidence": "documented",
+      "uncertain": false,
+      "sources": [
+        "E01",
+        "A07"
+      ],
+      "useFor": "Torhild's home: a small working fishing place with a church and a pilot station, not a bare hamlet and not yet a town."
     }
   ]
 }
