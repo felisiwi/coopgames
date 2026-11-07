@@ -371,8 +371,8 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
 1. **One paper book** with sections you leaf through (the cards' paper style).
 2. **It is Grandpa's logbook:** it lies aboard Svalan in today's opening; you carry it into 1950 and
    write in it; the finale can reveal its old pages are in your hand (mirrors Svalan's loop).
-3. **Sections (Felix: lighter):** light log, sightings, collection, stories, people, places.
-   ("On your mind" and best runs are not sections for now; quests are remembered by people.)
+3. **Sections (Felix: lighter):** light log, sightings, collection, stories, people, places, and
+   **quests** (accepted quests and tasks live there; replaces "on your mind"). No best-runs section for now.
 4. **Opening the book pauses** solo (game clock), not in co-op (same rule as the pause).
 5. **Automatic handwritten entries** with small drawings; your own short notes later.
 6. **One book across all eras,** entries marked with their era.
