@@ -64,6 +64,7 @@ import { createBusyCoast } from './src/busy-coast.js';
 import { createGameClock } from './src/game-clock.js';
 import { createPause } from './src/pause.js';
 import { withBrittaNames } from './src/britta-names.js';
+import { createErrandWind } from './src/errand-wind.js';
 import { createPauseCard } from './src/pause-ui.js';
 import { profileForYear } from './src/busy-era.js';
 
@@ -674,6 +675,9 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const grundsundEntry = era1950 ? coast.names.find((e) => e.id === 'harbour:Grundsunds hamn') || coast.names.find((e) => e.id === 'village:Grundsund') || null : null;
   const yardEntry = era1950 && coast.wake ? { ...YARD, x: coast.wake.spawn.x, z: coast.wake.spawn.z } : null;
   const beats = era1950 ? createBeats({ storage: store, grundsund: grundsundEntry, yard: yardEntry, britta: brittaEntry }) : null;
+  // The first errand's wind (src/errand-wind.js): host only, derived from beats.phase (nothing new saved). From behind yard -> Grundsund, then from behind the way home;
+  // when the yard is reached ('help') it eases back to the normal controller. Null in the Today game: the normal wind, untouched.
+  const errandWind = beats && role === 'host' ? createErrandWind({ yard: yardEntry, grundsund: grundsundEntry }) : null;
   if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(store); resetIntro(store); beats?.reset(); }
   const lightList = coast ? coast.lightList : LIGHTHOUSES; // the era's lights (1950: seven; Today: the game's own list)
   const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
@@ -754,7 +758,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     taskUi.showCards([STORY_1950.parts], { onDone: () => { guide(); chartCtl?.toast(FITTINGS_TOAST, 5200); } });
   }
   function yardMoment() {
-    beats.advance(); // 'free'
+    beats.advance(); // 'help' (the sail to Britta's jetty; 'free' comes after her cards). The errand wind hands back to the normal wind here (src/errand-wind.js)
     taskUi.showCards(STORY_1950.yard, { onDone: () => { guide(); chartCtl?.toast(HELP_TOAST, 5600); } });
   }
   function findMoment() { // after the dawn: the boy finds you; his father will take Svalan (the haul); the eka is yours
@@ -945,10 +949,10 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       const windS = clock.now(); // game clock (not the frame time): frozen under the pause card, wall time in co-op (src/pause.js)
       const prevPhase = windController.phase;
       windController = stepWindController(windController, windS);
-      wind = windController.current;
+      wind = errandWind ? errandWind.step(beats.phase, windS, windController.current) : windController.current; // the first errand overrides the normal wind (and hands back smoothly)
       const justChangedPhase = windController.phase !== prevPhase;
 
-      if (windController.phase === 'transition') {
+      if (windController.phase === 'transition' || (errandWind && errandWind.blending)) { // swinging: broadcast fast so the friend's phone eases too
         if (justChangedPhase || windS >= windTransitionSendAt) {
           windTransitionSendAt = windS + CONFIG.WIND_TRANSITION_SEND_INTERVAL_S;
           windHeartbeatAt = windS + CONFIG.WIND_HEARTBEAT_S;

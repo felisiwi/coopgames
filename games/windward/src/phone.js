@@ -21,7 +21,7 @@
 // steering. All drawn on a 2D layer over the WebGL canvas.
 import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
-import { boatSpeed, idealTrimRad, angleOffWind, leewardSign } from './sail.js';
+import { boatSpeed, effectiveStrength, idealTrimRad, angleOffWind, leewardSign } from './sail.js';
 
 const DEG = Math.PI / 180;
 const NO_GO_HALF = 22.5 * DEG;
@@ -561,7 +561,7 @@ export function createPhoneControls({ canvas, camera, onPing }) {
     for (const p of pointers.values()) {
       if (p.role === 'steer' && aimHeading !== null) {
         const sp = boatSpeed(aimHeading, wind.dir, wind.strength);
-        const best = CONFIG.BOAT_MAX_SPEED * wind.strength || 1;
+        const best = CONFIG.BOAT_MAX_SPEED * effectiveStrength(wind.strength) || 1; // the same light-air strength boatSpeed uses (src/sail.js)
         const f = Math.min(1, sp / best);
         const color = sp < 0.5 ? 'rgba(255,110,80,0.95)' : `rgba(${Math.round(255 - 135 * f)},220,${Math.round(110 + 40 * f)},0.95)`;
         ctx.strokeStyle = color;

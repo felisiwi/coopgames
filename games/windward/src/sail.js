@@ -89,6 +89,14 @@ export function leewardSign(headingRad, windFromRad) {
   return wrapToPi(windFromRad - headingRad) >= 0 ? 1 : -1;
 }
 
+// Light air (Next run, 2c; numbers in config.js): the wind strength the boat actually feels. Unchanged from the breakpoint up; below it the range 0..breakpoint
+// is squeezed into floor..breakpoint, so a lull is slower than a breeze but never a crawl. Continuous and increasing.
+export function effectiveStrength(strength) {
+  const s = Math.max(0, strength);
+  const u = CONFIG.LIGHT_AIR_BREAKPOINT;
+  return s >= u ? s : CONFIG.LIGHT_AIR_FLOOR + (u - CONFIG.LIGHT_AIR_FLOOR) * (s / u);
+}
+
 // trimRad omitted (or null) means "assume ideal trim" — full speed, used to
 // isolate the wind/heading curve from the trim system (tests, and the
 // remote peer's boat in W0 whose trim isn't synced over the wire).
@@ -101,5 +109,5 @@ export function boatSpeed(headingRad, windFromRad, strength, trimRad) {
   const angle = angleOffWind(headingRad, windFromRad);
   const factor = speedFactor(angle);
   const trimMult = trimRad == null ? 1 : trimMultiplier(trimRad, idealTrimRad(angle));
-  return CONFIG.BOAT_MAX_SPEED * strength * factor * trimMult;
+  return CONFIG.BOAT_MAX_SPEED * effectiveStrength(strength) * factor * trimMult;
 }
