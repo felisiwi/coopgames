@@ -728,6 +728,11 @@ function taperStackSimple(g, rBot, rTop, h, color, seg) {
   return taperStack(g, rBot, rTop, 0, [{ h, color }], seg);
 }
 
+// Lights that have NO sweeping beam. Islandsberg's old light showed through a row of windows in a gable (gableWindowLight above), not from a rotating lantern: when it is lit it should glow behind
+// those windows (the glass and the halo), and not throw the shared beam round. Everything else keeps its beam. Pass the result as the third argument of createLanternFx (src/lantern.js).
+export const NO_BEAM_LIGHTS = Object.freeze(['Islandsberg']);
+export const lanternOptions = (name) => (NO_BEAM_LIGHTS.includes(name) ? { beam: false } : {});
+
 export function createLighthouse(name) {
   const entry = LIGHTHOUSES.find((l) => l.name === name);
   const build = BUILDERS[name];

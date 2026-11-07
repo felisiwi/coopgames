@@ -1,6 +1,6 @@
 // node games/windward/src/lantern.test.js: the lantern's flash patterns (src/lantern.js) against the real lighthouse data, and the glow.
 import assert from 'node:assert/strict';
-import { LIGHTHOUSES, createLighthouse } from './lighthouses.js';
+import { LIGHTHOUSES, createLighthouse, lanternOptions, NO_BEAM_LIGHTS } from './lighthouses.js';
 import { lightOnAt, lightPattern, createLanternFx, ECLIPSE_S } from './lantern.js';
 
 let passed = 0;
@@ -74,6 +74,25 @@ check('every tower has a lantern glass to light', () => {
     let n = 0; g.traverse((o) => { if (o.isMesh && /^lantern-glass/.test(o.name)) n++; });
     assert.ok(n >= 1, `${e.name} has no lantern glass`);
   }
+});
+
+check('Islandsberg\'s light (behind gable windows) glows with NO sweeping beam; every other light keeps its beam, unchanged', () => {
+  assert.deepEqual([...NO_BEAM_LIGHTS], ['Islandsberg'], 'only Islandsberg');
+  assert.deepEqual(lanternOptions('Islandsberg'), { beam: false });
+  for (const e of LIGHTHOUSES) {
+    const group = createLighthouse(e.name);
+    const fx = createLanternFx(group, e, lanternOptions(e.name));
+    const beam = group.getObjectByName('lantern-beam');
+    if (e.name === 'Islandsberg') assert.equal(beam, undefined, 'Islandsberg has no beam in its tower');
+    else { assert.deepEqual(lanternOptions(e.name), {}, `${e.name}: no options, the default (a beam)`); assert.ok(beam, `${e.name} keeps its sweeping beam`); }
+    assert.ok(group.getObjectByName('lantern-halo'), `${e.name} has its halo (the glow)`);
+  }
+  // lit: Islandsberg glows (halo up, the window glass lit) and throws nothing round
+  const e = LIGHTHOUSES.find((x) => x.name === 'Islandsberg');
+  const group = createLighthouse('Islandsberg'); const fx = createLanternFx(group, { ...e, light: { pattern: 'steady', kind: 'fixed', period: 0 } }, lanternOptions('Islandsberg'));
+  fx.setLit(true); fx.update(3, 1);
+  assert.equal(fx.halo.visible, true, 'lit: the halo glows'); assert.ok(fx.glass.length >= 2, 'behind the whole row of windows'); assert.equal(group.getObjectByName('lantern-beam'), undefined, 'and no beam is ever added');
+  fx.setLit(false); assert.equal(fx.halo.visible, false, 'dark again when put out');
 });
 
 console.log(`${passed} checks passed`);
