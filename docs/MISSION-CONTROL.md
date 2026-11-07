@@ -74,8 +74,9 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
 - **Mission control merges.** Felix says "merge …" in this chat; mission control does
   `git merge --no-ff` locally on `main`, runs all tests, resolves `LAST_SESSION.md` conflicts (they
   happen on almost every merge; keep main's version and add a line), pushes. Agents don't merge.
-- Name agents **by job** ("stage agent", "research agent"), not numbers: his phone and laptop
-  sessions are labelled differently.
+- Name agents **by terminal number** (Felix, 2026-11-07): agent 1, 2, 3, 4 are fixed terminal slots; their tasks change. Each
+  prompt says "You are agent N". Prompts live in `games/windward/docs/prompts/`; Felix sends a one-liner: "Read <prompt file> and carry
+  out the prompt below its first --- line."
 - **Root cause before fixes** (with evidence); ask before long rebuilds; options before
   recommendations on design; let him judge looks and feel on his phone.
 - **Gated batches:** each prompt = stage, batches, DONE WHEN with 390×844 screenshots the agent

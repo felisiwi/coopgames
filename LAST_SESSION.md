@@ -1,6 +1,6 @@
 # Last session
 
-**2026-11-07, describes `felix/windward-next-run` @ e3e231c + the Task-card commit (pushed, NOT merged; main = d5e54e2). Felix phone-tested pause and ?jump=britta: both work.** Mission control: read `docs/MISSION-CONTROL.md` first, then merge the branch.
+**2026-11-07 (mission control): `felix/windward-next-run` and `felix/windward-island-lore` are MERGED into main; 70 test files pass.** Read `docs/MISSION-CONTROL.md` first.
 
 **State:** chapter 1 in 1950 is MERGED and LIVE (https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html).
 Order of play: the opening in the engine (`src/opening-stage.js`: dusk over today's Fiskebäckskil, storm, lighthouse rewind
@@ -22,11 +22,12 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 
 ## Next
 
-1. Merge `felix/windward-next-run` (Next run is built there: pause card + `src/game-clock.js`, Britta's four lights by name, `src/errand-wind.js`, light air in `sail.js`); Felix's phone checklist is in the stage report.
-2. Co-op stage 2 ("visit the host's world", docs/COOP-CHECK.md), then day and night, sound wiring, chapter 2, the 1703 jump.
+1. Agent 2: weather and sail feel into the game (docs/prompts/2026-11-07-weather-into-game.md; the lab is on `felix/windward-sail-feel-lab`). Agent 1: research corrections (docs/CORRECTIONS-TODO.md). Agent 3: guest rejoin fix (`felix/hub-guest-rejoin`); co-op stage 2 plan on `felix/windward-coop2-plan`.
+2. Then: the thing-model slice and the quest slice (docs/ALIVE-SEA.md build order), co-op stage 2 ("visit the host's world", docs/COOP-CHECK.md), then day and night, sound wiring, chapter 2, the 1703 jump.
 
 ## Today's sessions
 
 - mission-control handover written (`docs/MISSION-CONTROL.md`).
 - stage agent, Next run: batches 0-2 on `felix/windward-next-run` (1020d30); 69 test files pass; no save keys changed. Errand wind covers `errand`+`return`, hands back at `help` (not `free`: the doc was stale).
 - stage agent, Task card: in 1950 the Task button now shows what-and-why (`TASK_WHY`, `taskCardLines` in `story-1950.js`, draft copy) before the progress line; 70 test files pass.
+- mission control: merged next-run (pause, game clock, light names, errand wind, light air, task card) and island-lore (`data/island-lore.json`, 27 places; `docs/ISLAND-LORE.md`, `ISLAND-ASSETS-BRIEF.md`, `UNIQUE-ARTIFACT-CANDIDATES.md`). Design grills (thing model, weather, mini quests, logbook) in `docs/ALIVE-SEA.md`; agent prompts in `docs/prompts/`.
