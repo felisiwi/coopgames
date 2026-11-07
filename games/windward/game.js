@@ -65,6 +65,7 @@ import { createGameClock } from './src/game-clock.js';
 import { createPause } from './src/pause.js';
 import { withBrittaNames } from './src/britta-names.js';
 import { createErrandWind } from './src/errand-wind.js';
+import { createGameWeather, windMessage, dayTypeFromParam, startHourFromParam, GAME_WEATHER } from './src/game-weather.js';
 import { createPauseCard } from './src/pause-ui.js';
 import { profileForYear } from './src/busy-era.js';
 
@@ -459,13 +460,13 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const life = lureOn
     ? createLife({
       THREE, scene, heightAt: coast.heightAt, places: coast.names, lights: coast.lights,
-      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength), // (waves / wind are set up below)
+      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength), // (waves / seaWind are set up below)
       inside: (x, z) => coast.world.inside(x, z, 100),
       onCry: () => audio.gull(0, 0.5),
       marks: seamarkLayer ? seamarkLayer.perchMarks() : null, // gulls perch on the REAL marks; no decorative buoys
     })
     : null;
-  const seaAtCPU = (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength); // the sea surface at a point (waves / wind are set up below)
+  const seaAtCPU = (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength); // the sea surface at a point (waves / seaWind are set up below)
   // THE game clock (src/game-clock.js): wall time minus time paused. The busy coast's traffic and ferry and the host's wind controller read it instead of the
   // wall clock, so a pause (src/pause.js) freezes them and a return does not make them jump. (Co-op: see the rule in src/pause.js.)
   const clock = createGameClock();
@@ -502,17 +503,27 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // messages, never runs its own timer (W0.8: replaces the old instant
   // snap-to-new-wind with a gradual ease, see DESIGN.md's "Wind" section).
   const nowS0 = clock.now(); // the GAME clock: the wind's hold/transition timers do not run while paused
-  let windController = role === 'host' ? createWindController(seed, nowS0) : null;
-  let wind = role === 'host' ? windController.current : initialWind(seed);
-  const waves = createWaveState(wind.dir); // src/water.js: per-component wave phases
+  // WEATHER (src/game-weather.js, the sail-feel lab's weather): on the real coast the wind comes from the day's weather on the GAME clock, the same on both phones;
+  // ?weather=0 keeps the old random wind controller below (for comparison), and so does the procedural-islands game. ?day=<type> ?t=HH:MM pick the day and the hour.
+  const weatherQ = new URLSearchParams(window.location.search);
+  let weatherActive = !!coast && weatherQ.get('weather') !== '0'; // a guest that hears an old host (no `wx` in its wind message) drops back to the old way
+  const weather = weatherActive ? createGameWeather({ seed, dayType: dayTypeFromParam(weatherQ.get('day')), startHour: startHourFromParam(weatherQ.get('t')), heightAt: coast.heightAt, bounds: coast.world.bounds, center: coast.spawn, clock }) : null;
+  const windOut = {}; // windAt() fills this each frame: the wind at the boat
+  if (weather && debugOverlay) window.__weather = weather; // headless checks (?debug=1)
+  let windController = !weatherActive && role === 'host' ? createWindController(seed, nowS0) : null;
+  let wind = weatherActive ? weather.update().windAt(self.x, self.z, windOut) : (role === 'host' ? windController.current : initialWind(seed));
+  // The SEA (waves, foam, the boat's bob) follows the day's wind and sea state, not the gusts, so it does not shimmer when a gust passes. Without weather: the wind itself.
+  let seaWind = weatherActive ? weather.sea : wind;
+  const waves = createWaveState(seaWind.dir); // src/water.js: per-component wave phases
   let windSeq = role === 'host' ? 0 : -1; // guest applies any real message (seq >= 0)
   let heardFromPeer = false;
-  let windHeartbeatAt = nowS0 + CONFIG.WIND_HEARTBEAT_S; // hold-phase resend cadence
+  let windHeartbeatAt = nowS0 + (weatherActive ? GAME_WEATHER.HEARTBEAT_S : CONFIG.WIND_HEARTBEAT_S); // hold-phase resend cadence
   let windTransitionSendAt = nowS0; // transition-phase resend cadence (faster, so the guest eases too)
 
   function sendWind() {
     windSeq += 1;
-    net.send({ type: 'wind', dir: wind.dir, strength: wind.strength, seq: windSeq });
+    // weather: the old fields (dir, strength, seq = the wind at the host's boat, all an OLD guest reads) plus `wx` (weather time, seed, day, story events) for a new guest
+    net.send(weatherActive ? windMessage(weather, wind, windSeq) : { type: 'wind', dir: wind.dir, strength: wind.strength, seq: windSeq });
     // Piggyback the full found list on the host's wind heartbeat, so a guest
     // who joins late (drop-in) or missed a 'found' catches up.
     if (found.size) net.send({ type: 'found-all', ids: [...found] });
@@ -562,7 +573,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       other.heading = msg.heading;
       other.speed = msg.speed;
       if (!otherBoat) {
-        pauseCtl.peerJoined(); // a friend arrives: rejoin the wall clock so both phones see the same traffic (a solo pause left us behind it)
+        if (weatherActive) weather.rebase(() => pauseCtl.peerJoined()); else pauseCtl.peerJoined(); // a friend arrives: rejoin the wall clock so both phones see the same traffic (a solo pause left us behind it); the weather time stays continuous across it
         otherBoat = createBoatMesh(otherColor, boatOptions);
         scene.add(otherBoat.group);
         otherWake = createWake();
@@ -577,8 +588,12 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       showNotice('Your friend pinged — follow the gold dot on the compass', 3, 'ping');
     } else if (msg.type === 'wind' && role === 'guest') {
       if (msg.seq > windSeq) {
-        wind = { dir: msg.dir, strength: msg.strength };
         windSeq = msg.seq;
+        if (weatherActive && weather.receive(msg.wx)) { /* a weather packet: this phone computes its own wind from the same seed and (now aligned) weather time */ } else {
+          weatherActive = false; // an old host (no weather packet): the old way, apply what it sends
+          wind = { dir: msg.dir, strength: msg.strength };
+          seaWind = wind;
+        }
       }
     }
   });
@@ -678,6 +693,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // The first errand's wind (src/errand-wind.js): host only, derived from beats.phase (nothing new saved). From behind yard -> Grundsund, then from behind the way home;
   // when the yard is reached ('help') it eases back to the normal controller. Null in the Today game: the normal wind, untouched.
   const errandWind = beats && role === 'host' ? createErrandWind({ yard: yardEntry, grundsund: grundsundEntry }) : null;
+  if (weather && errandWind) weather.setErrand({ yard: yardEntry, grundsund: grundsundEntry }); // with weather, the errand wind is a story override on the weather's field (src/game-weather.js)
   if (task && new URLSearchParams(window.location.search).get('lights') === 'reset') { task.reset(); resetStart(store); resetIntro(store); beats?.reset(); }
   const lightList = coast ? coast.lightList : LIGHTHOUSES; // the era's lights (1950: seven; Today: the game's own list)
   const lanternFx = new Map(); // id -> the tower's lantern glow (dark or lit, on its real flash pattern)
@@ -951,11 +967,26 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     last = now;
     const nowS = now / 1000;
 
-    if (role === 'host') {
+    if (weatherActive) {
+      weather.update(); // the weather time of this frame (game clock: frozen under a solo pause, wall time in co-op), the sea's wind, the coast grid kept warm
+      weather.setPhase(beats ? beats.phase : null); // the first errand's scripted wind, as a story override that hands back smoothly at 'help' (host only: the guest gets the events)
+      wind = weather.windAt(self.x, self.z, windOut);
+      seaWind = weather.sea;
+      if (role === 'host') {
+        const windS = clock.now();
+        if (windS >= windHeartbeatAt) { windHeartbeatAt = windS + GAME_WEATHER.HEARTBEAT_S; sendWind(); }
+      }
+      if (debugOverlay && nowS - (frame.wxDbgAt ?? 0) > 0.4) {
+        frame.wxDbgAt = nowS;
+        const deg = Math.round(((180 - (wind.dir * 180) / Math.PI) % 360 + 360) % 360); // the compass bearing the wind comes FROM
+        debugOverlay.set('weather', `weather     ${weather.dayType} ${weather.clockText} | wind ${(2 + 12 * wind.strength).toFixed(1)} m/s from ${String(deg).padStart(3, '0')}° (day ${(2 + 12 * wind.baseStrength).toFixed(1)}, ${wind.local >= 1 ? '+' : ''}${Math.round((wind.local - 1) * 100)}%) | open ${wind.exposure.toFixed(2)} shadow ${wind.shadow.toFixed(2)}${wind.override > 0 ? ' | story wind' : ''}`);
+      }
+    } else if (role === 'host') {
       const windS = clock.now(); // game clock (not the frame time): frozen under the pause card, wall time in co-op (src/pause.js)
       const prevPhase = windController.phase;
       windController = stepWindController(windController, windS);
       wind = errandWind ? errandWind.step(beats.phase, windS, windController.current) : windController.current; // the first errand overrides the normal wind (and hands back smoothly)
+      seaWind = wind;
       const justChangedPhase = windController.phase !== prevPhase;
 
       if (windController.phase === 'transition' || (errandWind && errandWind.blending)) { // swinging: broadcast fast so the friend's phone eases too
@@ -968,6 +999,8 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
         windHeartbeatAt = windS + CONFIG.WIND_HEARTBEAT_S;
         sendWind();
       }
+    } else {
+      seaWind = wind; // an old-style guest: the host's wind is the sea's wind too
     }
 
     const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible) || !!dawn || pauseCtl.paused; // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
@@ -1050,8 +1083,8 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (dawn) stepDawn(dt);
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
-    stepWaves(waves, dt, wind, self.x, self.z); // before anything samples the sea this frame
-    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, wind);
+    stepWaves(waves, dt, seaWind, self.x, self.z); // before anything samples the sea this frame
+    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, seaWind);
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
     updateSunPosition(viewTarget);
@@ -1113,7 +1146,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (otherBoat && other.x !== null) {
       otherBoat.group.position.set(other.x, 0, other.z);
       otherBoat.group.rotation.y = other.heading;
-      bobBoat(otherBoat.group, other.x, other.z, other.heading, waves, wind);
+      bobBoat(otherBoat.group, other.x, other.z, other.heading, waves, seaWind);
       // Trim isn't synced (DESIGN.md) — approximate the other boat's sail
       // with the ideal trim for its current point of sail.
       const otherIdeal = idealTrimRad(angleOffWind(other.heading, wind.dir));
@@ -1129,9 +1162,9 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     const lookAt = ctlView ? ctlView.focus : self;
     const drift = strange && strangeEntry ? STRANGE_LOOK_BIAS * strange.look : 0; // the strange moment: the view drifts toward the old tower so the flash is on screen
     viewTarget.set(lookAt.x + (drift ? (strangeEntry.x - lookAt.x) * drift : 0), ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z + (drift ? (strangeEntry.z - lookAt.z) * drift : 0));
-    water.update(waves, wind, viewTarget, dt, camera.position);
+    water.update(waves, seaWind, viewTarget, dt, camera.position);
     shoalLayer?.update(nowS);
-    seamarkLayer?.update(nowS, viewTarget, (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength)); // buoys ride the real waves
+    seamarkLayer?.update(nowS, viewTarget, (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength)); // buoys ride the real waves
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {

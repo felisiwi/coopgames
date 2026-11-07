@@ -8,20 +8,12 @@ function check(name, fn) { fn(); passed += 1; console.log(`ok - ${name}`); }
 const DEG = Math.PI / 180;
 const WIND_FROM = 0; // wind from the north; heading = angle off the wind (symmetrical)
 
-check('light-air floor: a reach in almost no wind still makes way, never faster than the same boat with wind; into the wind is still 0', () => {
+check('one light-air floor: the lab uses sail.js\'s (main\'s), not a copy; into the wind is still 0', () => {
   const trim = idealTrimRad(90 * DEG);
-  const calm = labTargetSpeed(90 * DEG, WIND_FROM, 0.03, trim);
-  assert.ok(calm >= FEEL.LIGHT_AIR_FLOOR_MS * 0.9 && calm <= FEEL.LIGHT_AIR_FLOOR_MS + 1e-9, `${calm.toFixed(2)} m/s in a near-calm`);
-  assert.ok(boatSpeed(90 * DEG, WIND_FROM, 0.03, trim) < 0.5, 'the unfloored boat nearly stops (what the floor fixes)');
+  for (const strength of [0.03, 0.2, 0.5, 1, 1.2]) assert.equal(labTargetSpeed(90 * DEG, WIND_FROM, strength, trim), boatSpeed(90 * DEG, WIND_FROM, strength, trim), `strength ${strength}`);
+  assert.ok(labTargetSpeed(90 * DEG, WIND_FROM, 0.03, trim) > 1.5, 'a near-calm still makes way (main\'s floor)');
+  assert.ok(labTargetSpeed(90 * DEG, WIND_FROM, 0.03, trim) < 4, 'but it is not a floor on top of a floor');
   assert.equal(labTargetSpeed(10 * DEG, WIND_FROM, 0.5, trim), 0, 'pointing into the wind: still nothing');
-  for (const s of [0.3, 0.6, 1, 1.2]) assert.equal(labTargetSpeed(90 * DEG, WIND_FROM, s, trim), boatSpeed(90 * DEG, WIND_FROM, s, trim), 'with real wind the floor is not involved');
-});
-
-check('the floor still rewards a good point of sail and decent trim', () => {
-  const t = (deg, trim) => labTargetSpeed(deg * DEG, WIND_FROM, 0.03, trim);
-  assert.ok(t(100, idealTrimRad(100 * DEG)) > t(35, idealTrimRad(35 * DEG)), 'a reach beats close-hauled in a drift');
-  assert.ok(t(90, idealTrimRad(90 * DEG)) > t(90, 0), 'good trim beats bad trim');
-  assert.ok(t(90, 0) >= FEEL.LIGHT_AIR_FLOOR_MS * FEEL.FLOOR_TRIM_MIN * 0.9 * 0.9, 'bad trim is slower, not stuck');
 });
 
 check('heel: none in a drift, more in a gust, capped; close-hauled leans more than running', () => {

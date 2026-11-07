@@ -1,20 +1,16 @@
 // The sail-feel lab's own rules for how sailing FEELS (docs/ALIVE-SEA.md decisions 14 to 17). Pure, no THREE, no clock inside.
 // Nothing here edits sail.js: it calls boatSpeed() and wraps it. The game can adopt these once Felix has felt them on his phone.
 //
-//   labTargetSpeed   boatSpeed() plus a light-air floor, so a calm morning or a lee is slow but never dead
+//   labTargetSpeed   boatSpeed() (which carries the game's one light-air floor)
 //   heelTarget/stepHeel   the boat leans in gusts and strong wind (more close-hauled, less running)
 //   stepLuff         the sail flutters when you are headed (the wind shifted toward the bow) or pointing too high: THE shift signal
 //   cameraFeel       the camera dips and tightens with speed, looks ahead, and pulls back when slow
-import { boatSpeed, speedFactor, trimMultiplier, idealTrimRad, angleOffWind } from './sail.js';
+import { boatSpeed, idealTrimRad, angleOffWind } from './sail.js';
 import { smoothstep, clamp, lerp } from './weather-noise.js';
 
 const DEG = Math.PI / 180;
 
 export const FEEL = {
-  // --- light-air floor (the other agent adds one in sail.js; this one lives only in the lab) ---
-  LIGHT_AIR_FLOOR_MS: 2.2, // on a good point of sail the boat still makes at least this much, however little wind
-  FLOOR_TRIM_MIN: 0.5, // the floor still cares a little about trim (bad trim = a lower floor), never below this share
-
   // --- heel ---
   HEEL_MAX_RAD: 0.42, // the most it leans (~24 degrees)
   HEEL_FROM: 0.35, // heel power (strength x point of sail) where leaning starts ...
@@ -76,17 +72,10 @@ export const FEEL = {
 
 export const speedShare = (speedMs) => clamp(speedMs / FEEL.CAM_SPEED_FULL_MS, 0, 1.3);
 
-// boatSpeed() with a floor. Pointing inside the no-go zone is still 0 (you cannot sail into the wind);
-// anywhere else the target is at least LIGHT_AIR_FLOOR_MS x (how good the point of sail is) x (a bit of trim).
-export function labTargetSpeed(headingRad, windFromRad, strength, trimRad) {
-  const base = boatSpeed(headingRad, windFromRad, strength, trimRad);
-  const angle = angleOffWind(headingRad, windFromRad);
-  const factor = speedFactor(angle);
-  if (factor <= 0) return base;
-  const trimMult = trimRad == null ? 1 : trimMultiplier(trimRad, idealTrimRad(angle));
-  const floor = FEEL.LIGHT_AIR_FLOOR_MS * factor * (FEEL.FLOOR_TRIM_MIN + (1 - FEEL.FLOOR_TRIM_MIN) * trimMult);
-  return Math.max(base, floor);
-}
+// The light-air floor now lives in sail.js (effectiveStrength, numbers in config.js: LIGHT_AIR_BREAKPOINT / LIGHT_AIR_FLOOR), added on main by the Next run.
+// The lab used to carry its own copy; with both, a calm would have been floored twice. Reconciled 2026-11-07: main's is the ONE floor, this lab's is gone.
+// labTargetSpeed stays as the lab's name for "boatSpeed with the game's floor".
+export const labTargetSpeed = (headingRad, windFromRad, strength, trimRad) => boatSpeed(headingRad, windFromRad, strength, trimRad);
 
 // ---- heel ----
 // How hard the wind presses on the sail: strength, less so running downwind.
