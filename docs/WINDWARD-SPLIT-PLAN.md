@@ -15,6 +15,10 @@ separate Claude project for Windward; its kickoff is `docs/WINDWARD-KICKOFF.md` 
 - **Old home:** the old Windward page in coopgames carries saves over and redirects to the new address, while
   an **old copy stays playable as history** (frozen, its own link); Windward leaves the hub's game list.
 - **Repo:** `felisiwi/windward` (private, like coopgames).
+- **Collaborator Pierre** (Felix's friend) joins the new repo after the split, with write access on
+  `pierre/*` branches. Felix upgraded to **GitHub Pro** (2026-11-07) so `main` and `felix/*` can be protected:
+  nothing reaches main without Felix's "merge", and Pierre's agents can't overwrite Felix's branches.
+  Phase 1 prompt: `games/windward/docs/prompts/2026-11-07-split-phase1.md`.
 
 ## What Windward depends on outside games/windward (checked 2026-11-07)
 
