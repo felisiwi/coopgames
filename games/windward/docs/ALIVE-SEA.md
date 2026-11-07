@@ -243,5 +243,7 @@ in an era, with conditions (time of day, weather, season, story phase), what it 
     or tap, sighting); one net-mender regular (hail = rumour); one rumour pointing at the seals;
     world seed saved, day seed per session. Gated, with a phone checklist.
 
-**Left open on purpose (outside the thing model):** hunger/thirst (options above); deriving
+**Hunger (Felix, 2026-11-07):** no hunger to begin with; meals/fish are a bonus only (option b).
+
+**Left open on purpose (outside the thing model):** deriving
 bays/headlands; a weather system; anchoring close-ups; sound wiring.
