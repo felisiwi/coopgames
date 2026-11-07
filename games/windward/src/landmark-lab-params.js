@@ -1,13 +1,16 @@
 // Landmark Lab, the pure parts (no THREE scene, no DOM): the address parameters and the shelf layout, so both are testable in node.
 //
 // URL: ?mode=shelf|boat  ?era=1703|1950|today|all  ?type=all|cairn|polemark|fyrkur|sjobod|church|windmill|darkhouse  ?v=<variant> (one variant, turntable)
-//      ?night=1  ?cam=game|orbit  ?zoom=<n>  ?az= ?el= ?dist= (orbit)  ?rot=<deg>  ?fig=0|1 (the 1.5 m figure for scale)  ?rs=0|1 (apply the game's read scale)
-//      ?place=<id> (boat mode, gate 2)  ?panel=1 (open the panel)
+//      ?night=1  ?cam=game|weather|speed|orbit (shelf: game|orbit; boat: the three game cameras)  ?zoom=<n>  ?az= ?el= ?dist= (orbit)  ?rot=<deg>  ?fig=0|1 (the 1.5 m figure for scale)
+//      ?rs=0|1 (apply the game's read scale: default 0 on the shelf, 1 from the boat)  ?view=<id from data/landmarks.json> (boat)  ?lm=0|1 (draw the kit's landmarks; 0 = the bare game)  ?panel=1
 import { TYPE_IDS, LANDMARK_TYPES, ALL_VARIANTS } from './landmark-assets.js';
 
 export const LAB_ERAS = ['1703', '1950', 'today', 'all'];
 export const LAB_MODES = ['shelf', 'boat'];
-export const LAB_DEFAULTS = { mode: 'shelf', type: 'cairn', era: '1950', v: '', night: 0, cam: 'game', zoom: 1, az: 35, el: 30, dist: 30, rot: 40, fig: 1, rs: 0, place: '' };
+export const LAB_DEFAULTS = { mode: 'shelf', type: 'cairn', era: '1950', v: '', night: 0, cam: 'game', zoom: 1, az: 35, el: 30, dist: 30, rot: 40, fig: 1, rs: 0, view: '', lm: 1 };
+export const CAM_CHOICES = ['game', 'weather', 'speed', 'orbit'];
+export const BOAT_ERAS = ['1703', '1950', 'today'];
+export const rsDefault = (mode) => (mode === 'boat' ? 1 : 0); // from the boat the game's read scale is on: that is how the game places landmarks
 
 const num = (x, lo, hi, d) => { const n = Number(x); return Number.isFinite(n) && x !== null && x !== '' ? Math.min(hi, Math.max(lo, n)) : d; };
 export function parseLabParams(search) {
@@ -20,20 +23,22 @@ export function parseLabParams(search) {
   const v = q.get('v');
   if (v) { const hit = ALL_VARIANTS.find((x) => x.variant === v && (S.type === 'all' || x.type === S.type)) ?? ALL_VARIANTS.find((x) => x.variant === v); if (hit) { S.v = v; S.type = hit.type; } }
   S.night = q.get('night') === '1' ? 1 : 0;
-  S.cam = q.get('cam') === 'orbit' ? 'orbit' : 'game';
+  S.cam = CAM_CHOICES.includes(q.get('cam')) ? q.get('cam') : 'game';
   S.zoom = num(q.get('zoom'), 0.05, 3, LAB_DEFAULTS.zoom);
   S.az = num(q.get('az'), 0, 360, LAB_DEFAULTS.az); S.el = num(q.get('el'), 4, 88, LAB_DEFAULTS.el); S.dist = num(q.get('dist'), 3, 400, LAB_DEFAULTS.dist);
   S.rot = num(q.get('rot'), 0, 360, LAB_DEFAULTS.rot);
   S.fig = q.get('fig') === '0' ? 0 : 1;
-  S.rs = q.get('rs') === '1' ? 1 : 0;
-  S.place = q.get('place') || '';
+  S.rs = q.has('rs') ? (q.get('rs') === '1' ? 1 : 0) : rsDefault(S.mode);
+  S.view = q.get('view') || '';
+  S.lm = q.get('lm') === '0' ? 0 : 1;
+  if (S.mode === 'boat' && !BOAT_ERAS.includes(S.era)) S.era = '1950'; // the coast is built per era: no 'all' from the boat
   return S;
 }
 // Write only what differs from the defaults, and keep unrelated parameters (panel=1, anything the page does not know).
 export function labParamsToSearch(search, S) {
   const q = new URLSearchParams(search);
   for (const k of Object.keys(LAB_DEFAULTS)) q.delete(k);
-  for (const [k, d] of Object.entries(LAB_DEFAULTS)) if (S[k] !== d && S[k] !== '' && S[k] != null) q.set(k, String(S[k]));
+  for (const [k, d0] of Object.entries(LAB_DEFAULTS)) { const d = k === 'rs' ? rsDefault(S.mode) : d0; if (S[k] !== d && S[k] != null && !(S[k] === '' && d === '')) q.set(k, String(S[k])); }
   const s = q.toString();
   return s ? `?${s}` : '';
 }

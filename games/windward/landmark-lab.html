@@ -61,25 +61,29 @@
 <div id="labels"></div>
 <div id="loading">loading the landmarks…</div>
 <div id="bar">
-  <button class="nav" id="prev" type="button" aria-label="Previous type">◀</button>
+  <button class="nav" id="prev" type="button" aria-label="Previous type or place">◀</button>
   <div id="title"><b id="tname">Landmark Lab</b><small id="tsub"></small></div>
-  <button class="nav" id="next" type="button" aria-label="Next type">▶</button>
+  <button class="nav" id="next" type="button" aria-label="Next type or place">▶</button>
   <button id="dusk" type="button" aria-pressed="false">Day</button>
 </div>
 <div id="panel">
   <button id="head" type="button" aria-expanded="false" aria-controls="body"><span class="name" id="headname">Landmark Lab</span><span class="chev" aria-hidden="true">▲</span></button>
   <div id="body">
+    <h2>View</h2>
+    <div class="chips" id="modes"></div>
     <h2>Era</h2>
     <div class="chips" id="eras"></div>
-    <h2>Type</h2>
-    <div class="chips" id="types"></div>
+    <div id="viewBox" hidden><h2>Place (from the boat)</h2><div class="chips" id="views"></div></div>
+    <div id="typeBox"><h2>Type</h2>
+    <div class="chips" id="types"></div></div>
     <div id="variantBox"><h2>One variant (turn it)</h2><div class="chips" id="variants"></div></div>
     <h2>Show</h2>
-    <label class="tog"><input type="checkbox" id="fig"><span>A 1.5 m figure beside each, for scale</span></label>
+    <label class="tog" id="figBox"><input type="checkbox" id="fig"><span>A 1.5 m figure beside each, for scale</span></label>
+    <label class="tog" id="lmBox" hidden><input type="checkbox" id="lm"><span>The kit's landmarks (off = the bare game)</span></label>
     <label class="tog"><input type="checkbox" id="rs"><span>The game's read scale (cairns x1.8, marks x2.0)</span></label>
     <h2>Camera</h2>
     <div class="chips" id="cams"></div>
-    <label class="slider"><span class="top"><span>Distance (1 = fitted to the shelf)</span><output id="zoomOut"></output></span><input id="zoom" type="range" min="0.05" max="3" step="0.01"></label>
+    <label class="slider" id="zoomBox"><span class="top"><span>Distance (1 = fitted to the shelf)</span><output id="zoomOut"></output></span><input id="zoom" type="range" min="0.05" max="3" step="0.01"></label>
     <label class="slider" id="rotBox"><span class="top"><span>Turn the landmark</span><output id="rotOut"></output></span><input id="rot" type="range" min="0" max="360" step="1"></label>
     <div id="info"></div>
     <div class="row"><button id="copy" type="button">Copy link</button><span class="note" style="margin:0">The address always holds your settings: send it back.</span></div>

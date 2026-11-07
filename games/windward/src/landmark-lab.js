@@ -8,7 +8,9 @@ import { createWater, createWaveState, stepWaves } from './water.js';
 import { createSky } from './sky.js';
 import { createAsset } from './era-assets.js';
 import { TYPE_IDS, LANDMARK_TYPES, createLandmark } from './landmark-assets.js';
-import { LAB_DEFAULTS, LAB_ERAS, parseLabParams, labParamsToSearch, shelfEntries, layoutShelf } from './landmark-lab-params.js';
+import { LAB_DEFAULTS, LAB_ERAS, BOAT_ERAS, CAM_CHOICES, rsDefault, parseLabParams, labParamsToSearch, shelfEntries, layoutShelf } from './landmark-lab-params.js';
+import { createBoatMode } from './landmark-boat.js';
+import { CAMERA_RIGS } from './landmark-place.js';
 
 const $ = (id) => document.getElementById(id);
 const loading = $('loading');
@@ -24,8 +26,9 @@ const DAY = Object.fromEntries(Object.keys(NIGHT).map((k) => [k, CONFIG[k]]));
 const ERA_LABEL = { 1703: '1703', 1950: '1950', today: 'Today', all: 'All eras (+ 1800s)' };
 const plinthMat = new THREE.MeshLambertMaterial({ color: 0xe3c9c1, flatShading: true });
 
-function main() {
+async function main() {
   const S = parseLabParams(window.location.search);
+  const lmData = await (await fetch(new URL('../data/landmarks.json', import.meta.url), { cache: 'no-store' })).json(); // the views (and, from the boat, the placements)
   const canvas = $('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   const isPhone = window.matchMedia?.('(pointer: coarse)').matches ?? false;
@@ -57,6 +60,7 @@ function main() {
 
   // ---- the shelf ----
   let shown = null; // { group, items, layout, setNight, describe, dispose }
+  let boat = null, boatBusy = false, boatQueued = false; // the "from the boat" mode, built on first use
   const target = new THREE.Vector3();
   const aspectNow = () => (canvas.clientWidth && canvas.clientHeight ? canvas.clientWidth / canvas.clientHeight : 0.46);
   function build() {
@@ -112,7 +116,7 @@ function main() {
     return Math.max(needW, needD) * (shown.items.length > 12 ? 1.3 : 1.12); // a dense shelf gets extra room so nothing is cut off at the edge
   };
   const GAME = { az: CONFIG.FIXED_CAMERA_AZIMUTH_DEG, el: CONFIG.FIXED_CAMERA_ELEVATION_DEG };
-  const view = () => (S.cam === 'game' ? { az: GAME.az, el: GAME.el, dist: fitDist() * S.zoom } : { az: S.az, el: S.el, dist: S.dist });
+  const view = () => (S.cam !== 'orbit' ? { az: GAME.az, el: GAME.el, dist: fitDist() * S.zoom } : { az: S.az, el: S.el, dist: S.dist });
   function placeCamera() {
     const v = view();
     const a = v.az * DEG, e = v.el * DEG;
@@ -127,13 +131,18 @@ function main() {
     if (sun.shadow.camera.right !== s) { Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s }); sun.shadow.camera.updateProjectionMatrix(); }
     return v;
   }
-  const toOrbit = () => { if (S.cam === 'game') { const v = view(); Object.assign(S, { cam: 'orbit', az: v.az, el: v.el, dist: Math.min(300, v.dist) }); refreshPanel(); writeUrl(); } };
+  const toOrbit = () => {
+    if (S.cam === 'orbit') return;
+    if (S.mode === 'boat') Object.assign(S, { cam: 'orbit', az: GAME.az, el: GAME.el, dist: CONFIG.FIXED_CAMERA_DISTANCE * (CAMERA_RIGS[S.cam]?.zoom ?? 1) }); // continue from the rig's own distance
+    else { const v = view(); Object.assign(S, { cam: 'orbit', az: v.az, el: v.el, dist: Math.min(300, v.dist) }); }
+    refreshPanel(); writeUrl();
+  };
   const pointers = new Map();
   let pinch0 = 0, dist0 = 1;
   canvas.addEventListener('pointerdown', (e) => {
     try { canvas.setPointerCapture(e.pointerId); } catch { /* the pointer already ended */ }
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); dist0 = S.cam === 'game' ? S.zoom : S.dist; }
+    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); if (S.mode === 'boat') toOrbit(); dist0 = S.mode !== 'boat' && S.cam !== 'orbit' ? S.zoom : S.dist; }
   });
   const end = (e) => { pointers.delete(e.pointerId); if (pointers.size === 0) writeUrl(); };
   canvas.addEventListener('pointerup', end);
@@ -150,14 +159,15 @@ function main() {
     } else if (pointers.size === 2 && pinch0 > 0) {
       const [a, b] = [...pointers.values()];
       const f = pinch0 / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y));
-      if (S.cam === 'game') S.zoom = Math.min(3, Math.max(0.05, dist0 * f)); else S.dist = Math.min(400, Math.max(3, dist0 * f));
+      if (S.mode !== 'boat' && S.cam !== 'orbit') S.zoom = Math.min(3, Math.max(0.05, dist0 * f)); else S.dist = Math.min(600, Math.max(3, dist0 * f));
       refreshPanel();
     }
   });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     const f = Math.exp(e.deltaY * 0.001);
-    if (S.cam === 'game') S.zoom = Math.min(3, Math.max(0.05, S.zoom * f)); else S.dist = Math.min(400, Math.max(3, S.dist * f));
+    if (S.mode === 'boat') toOrbit();
+    if (S.mode !== 'boat' && S.cam !== 'orbit') S.zoom = Math.min(3, Math.max(0.05, S.zoom * f)); else S.dist = Math.min(600, Math.max(3, S.dist * f));
     refreshPanel(); writeUrl();
   }, { passive: false });
 
@@ -176,7 +186,8 @@ function main() {
   const rebuild = () => { build(); fillVariants(); applyLight(); refreshPanel(); writeUrl(); };
   const setType = (t) => { S.type = t; S.v = ''; S.zoom = 1; rebuild(); };
   const typeLabel = (t) => (t === 'all' ? 'All types' : LANDMARK_TYPES[t].label.replace(/ \(.*/, ''));
-  const syncEras = chipsIn($('eras'), LAB_ERAS.map((e) => [e, ERA_LABEL[e]]), (id) => S.era === id, (id) => { S.era = id; S.zoom = 1; rebuild(); });
+  const syncEras = chipsIn($('eras'), LAB_ERAS.map((e) => [e, ERA_LABEL[e]]), (id) => S.era === id, (id) => { S.era = id; S.zoom = 1; if (S.mode === 'boat') reshow(); else rebuild(); });
+  const eraAllBtn = $('eras').children[LAB_ERAS.indexOf('all')]; // there is no all-eras coast: hidden from the boat
   const syncTypes = chipsIn($('types'), ['all', ...TYPE_IDS].map((t) => [t, typeLabel(t)]), (id) => S.type === id && !S.v, setType);
   let syncVariants = () => {};
   function fillVariants() {
@@ -185,16 +196,63 @@ function main() {
     $('variantBox').hidden = S.type === 'all';
     syncVariants = chipsIn($('variants'), [['', 'Whole shelf'], ...here.map((e) => [e.variant, e.label.replace(/ \(.*/, '').replace(/^[^:]*: /, '')])], (id) => S.v === id, (id) => { S.v = id; S.zoom = 1; rebuild(); });
   }
-  const camSync = chipsIn($('cams'), [['game', 'Game camera'], ['orbit', 'Free orbit']], (id) => S.cam === id, (id) => { if (id === 'orbit') toOrbit(); else { S.cam = 'game'; S.zoom = 1; refreshPanel(); writeUrl(); } });
+  // the camera chips depend on the view: on the shelf the fitted game camera or free orbit; from the boat the game's three cameras (agent 2's weather camera is the 2nd and 3rd)
+  let camSync = () => {};
+  function fillCams() {
+    $('cams').replaceChildren();
+    const items = S.mode === 'boat' ? CAM_CHOICES.map((id) => [id, id === 'orbit' ? 'Free orbit' : CAMERA_RIGS[id].label]) : [['game', 'Game camera'], ['orbit', 'Free orbit']];
+    camSync = chipsIn($('cams'), items, (id) => (S.mode === 'boat' ? S.cam === id : (S.cam === 'orbit') === (id === 'orbit')), (id) => { if (id === 'orbit') toOrbit(); else { S.cam = id; S.zoom = 1; refreshPanel(); writeUrl(); } });
+  }
+  const viewId = () => S.view || lmData.views[0].id;
+  const syncViews = chipsIn($('views'), lmData.views.map((v) => [v.id, v.label]), (id) => viewId() === id, (id) => { S.view = id; reshow(); });
+  const syncModes = chipsIn($('modes'), [['shelf', 'Shelf'], ['boat', 'From the boat']], (id) => S.mode === id, (id) => {
+    if (S.mode === id) return;
+    S.mode = id; S.rs = rsDefault(id); S.zoom = 1;
+    if (id === 'boat' && !BOAT_ERAS.includes(S.era)) S.era = '1950';
+    if (id === 'boat' && !S.view) S.view = lmData.views[0].id;
+    if (id === 'shelf' && (S.cam === 'weather' || S.cam === 'speed')) S.cam = 'game';
+    applyMode();
+  });
+  let report = null;
+  async function reshow() { // build / refresh the coast of the era with the kit's landmarks on it
+    if (boatBusy) { boatQueued = true; return; }
+    boatBusy = true;
+    try {
+      do {
+        boatQueued = false;
+        $('tsub').textContent = 'building the coast…';
+        boat ??= await createBoatMode({ scene, camera, onStatus: (t) => { $('tsub').textContent = t; } });
+        if (!S.view) S.view = boat.views[0].id;
+        report = await boat.show(S);
+        boat.setNight(!!S.night);
+        camera.near = CONFIG.CAMERA_NEAR; camera.far = 2500; camera.updateProjectionMatrix();
+      } while (boatQueued);
+    } catch (err) { console.error(err); $('tsub').textContent = `could not build the coast: ${err.message}`; } finally { boatBusy = false; }
+    refreshPanel(); writeUrl();
+  }
+  async function applyMode() {
+    const isBoat = S.mode === 'boat';
+    water.mesh.visible = !isBoat; if (shown) shown.group.visible = !isBoat;
+    $('labels').style.display = isBoat ? 'none' : '';
+    fillCams();
+    if (isBoat) await reshow();
+    else { boat?.hide(); rebuild(); }
+    refreshPanel(); writeUrl();
+  }
   $('fig').addEventListener('change', (e) => { S.fig = e.target.checked ? 1 : 0; rebuild(); });
-  $('rs').addEventListener('change', (e) => { S.rs = e.target.checked ? 1 : 0; rebuild(); });
-  $('zoom').addEventListener('input', (e) => { const v = Number(e.target.value); if (S.cam === 'game') S.zoom = v; else S.dist = v * 100; refreshPanel(); });
+  $('rs').addEventListener('change', (e) => { S.rs = e.target.checked ? 1 : 0; if (S.mode === 'boat') { boat?.setScale(!!S.rs); refreshPanel(); writeUrl(); } else rebuild(); });
+  $('lm').addEventListener('change', (e) => { S.lm = e.target.checked ? 1 : 0; reshow(); });
+  $('zoom').addEventListener('input', (e) => { const v = Number(e.target.value); if (S.cam !== 'orbit') S.zoom = v; else S.dist = v * 100; refreshPanel(); });
   $('zoom').addEventListener('change', writeUrl);
   $('rot').addEventListener('input', (e) => { S.rot = Number(e.target.value); refreshPanel(); });
   $('rot').addEventListener('change', writeUrl);
   $('dusk').addEventListener('click', () => { S.night = S.night ? 0 : 1; applyLight(); refreshPanel(); writeUrl(); });
-  $('prev').addEventListener('click', () => { const ids = ['all', ...TYPE_IDS]; setType(ids[(ids.indexOf(S.type) + ids.length - 1) % ids.length]); });
-  $('next').addEventListener('click', () => { const ids = ['all', ...TYPE_IDS]; setType(ids[(ids.indexOf(S.type) + 1) % ids.length]); });
+  const step = (d) => {
+    if (S.mode === 'boat') { const ids = lmData.views.map((v) => v.id); S.view = ids[(ids.indexOf(viewId()) + d + ids.length) % ids.length]; reshow(); return; }
+    const ids = ['all', ...TYPE_IDS]; setType(ids[(ids.indexOf(S.type) + d + ids.length) % ids.length]);
+  };
+  $('prev').addEventListener('click', () => step(-1));
+  $('next').addEventListener('click', () => step(1));
   $('head').addEventListener('click', () => { const open = $('panel').classList.toggle('open'); $('head').setAttribute('aria-expanded', String(open)); });
   $('copy').addEventListener('click', () => {
     const b = $('copy');
@@ -203,17 +261,32 @@ function main() {
   if (new URLSearchParams(window.location.search).get('panel') === '1') $('panel').classList.add('open');
 
   function refreshPanel() {
-    syncEras(); syncTypes(); syncVariants(); camSync();
-    $('fig').checked = !!S.fig; $('rs').checked = !!S.rs;
-    $('zoom').value = S.cam === 'game' ? S.zoom : S.dist / 100;
-    $('zoomOut').textContent = S.cam === 'game' ? `${S.zoom.toFixed(2)}×` : `${S.dist.toFixed(0)} m`;
-    $('rot').value = S.rot; $('rotOut').textContent = `${Math.round(S.rot)}°`; $('rotBox').hidden = !S.v;
-    const one = S.v ? shown.entries[0] : null;
-    $('tname').textContent = one ? one.label : `${typeLabel(S.type)} · ${ERA_LABEL[S.era]}`;
-    $('headname').textContent = `Landmark Lab: ${one ? one.label : typeLabel(S.type)}, ${ERA_LABEL[S.era]}, ${S.night ? 'dusk' : 'day'}`;
+    const isBoat = S.mode === 'boat';
+    syncModes(); syncEras(); syncTypes(); syncVariants(); syncViews(); camSync();
+    eraAllBtn.hidden = isBoat;
+    $('viewBox').hidden = !isBoat; $('lmBox').hidden = !isBoat; $('typeBox').hidden = isBoat; $('figBox').hidden = isBoat;
+    $('variantBox').hidden = isBoat || S.type === 'all';
+    $('zoomBox').hidden = isBoat && S.cam !== 'orbit';
+    $('fig').checked = !!S.fig; $('rs').checked = !!S.rs; $('lm').checked = !!S.lm;
+    $('zoom').value = S.cam !== 'orbit' ? S.zoom : S.dist / 100;
+    $('zoomOut').textContent = S.cam !== 'orbit' ? `${S.zoom.toFixed(2)}×` : `${S.dist.toFixed(0)} m`;
+    $('rot').value = S.rot; $('rotOut').textContent = `${Math.round(S.rot)}°`; $('rotBox').hidden = isBoat || !S.v;
     $('dusk').textContent = S.night ? 'Dusk' : 'Day';
     $('dusk').classList.toggle('on', !!S.night);
     $('dusk').setAttribute('aria-pressed', String(!!S.night));
+    if (isBoat) {
+      const v = lmData.views.find((x) => x.id === viewId());
+      $('tname').textContent = v.label;
+      $('headname').textContent = `Landmark Lab: ${v.label}, ${ERA_LABEL[S.era]}, ${CAMERA_RIGS[S.cam]?.label ?? 'free orbit'}${S.night ? ', dusk' : ''}`;
+      const esc = (t) => String(t ?? '').replace(/</g, '&lt;');
+      const r = report;
+      $('info').innerHTML = `<b>${esc(v.label)}</b> · ${ERA_LABEL[S.era]} · ${esc(CAMERA_RIGS[S.cam]?.note ?? 'free orbit')}${v.note ? `<br>${esc(v.note)}` : ''}`
+        + (r ? `<br>${r.placed} landmarks placed${S.lm ? '' : ' (hidden)'}; read scale ${S.rs ? 'on' : 'off'}.${r.snappedFar.length ? `<br>Moved more than 30 m to reach land: ${esc(r.snappedFar.join(', '))}.` : ''}${r.noLandWithin90m.length ? `<br>No land within 90 m (left in place): ${esc(r.noLandWithin90m.join(', '))}.` : ''}` : '');
+      return;
+    }
+    const one = S.v ? shown.entries[0] : null;
+    $('tname').textContent = one ? one.label : `${typeLabel(S.type)} · ${ERA_LABEL[S.era]}`;
+    $('headname').textContent = `Landmark Lab: ${one ? one.label : typeLabel(S.type)}, ${ERA_LABEL[S.era]}, ${S.night ? 'dusk' : 'day'}`;
     $('info').innerHTML = one ? infoFor(one) : `<b>${shown.items.length}</b> looks on the shelf. Tap one under “One variant” to turn it and read where it comes from.`;
   }
   function infoFor(entry) {
@@ -225,7 +298,8 @@ function main() {
     Object.assign(CONFIG, S.night ? NIGHT : DAY);
     hemi.color.set(CONFIG.HEMI_SKY_COLOR); hemi.groundColor.set(CONFIG.HEMI_GROUND_COLOR); hemi.intensity = CONFIG.HEMI_INTENSITY;
     sun.color.set(CONFIG.SUN_COLOR); sun.intensity = CONFIG.SUN_INTENSITY;
-    shown.setNight(!!S.night);
+    shown?.setNight(!!S.night);
+    boat?.setNight(!!S.night);
   }
   function resize() {
     const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
@@ -245,6 +319,19 @@ function main() {
     const dt = Math.min(0.1, (nowMs - last) / 1000);
     last = nowMs;
     if (dt > 0) fps += (1 / dt - fps) * 0.1;
+    if (S.mode === 'boat') { // from the boat: the era's coast, the game's fixed camera (or free orbit)
+      if (boat?.visible) {
+        const orbit = S.cam === 'orbit' ? { az: S.az, el: S.el, dist: S.dist } : null;
+        const f = boat.frame(dt, nowMs / 1000, { rig: orbit ? 'game' : S.cam, orbit, sun, sunOffset });
+        camera.near = CONFIG.CAMERA_NEAR; camera.far = 2500; camera.updateProjectionMatrix();
+        scene.fog.color.set(CONFIG.HAZE_COLOR); scene.fog.near = f.dist * CONFIG.HAZE_MESH_NEAR_MUL; scene.fog.far = f.dist * CONFIG.HAZE_MESH_FAR_MUL;
+        sky.update(camera);
+        renderer.render(scene, camera);
+        if (++frames % 15 === 0 && report) $('tsub').textContent = `${report.placed} landmarks · ${report.triangles.toLocaleString('en')} triangles · ${fps.toFixed(0)} fps`;
+      }
+      requestAnimationFrame(frame);
+      return;
+    }
     stepWaves(waves, dt, wind, 0, 0);
     if (S.v) for (const x of shown.items) x.turn.rotation.y = S.rot * DEG;
     const v = placeCamera();
@@ -271,18 +358,21 @@ function main() {
     }
     requestAnimationFrame(frame);
   }
+  fillCams();
+  refreshPanel();
   loading.remove();
   requestAnimationFrame(frame);
+  if (S.mode === 'boat') applyMode();
 
   // Handle for the headless checks and screenshots; not used by the page.
   window.__landmarkLab = {
-    ready: true, state: S, get shown() { return shown; }, describe: () => shown.describe(), renderer, scene, camera,
-    setState(next) { Object.assign(S, next); build(); fillVariants(); applyLight(); refreshPanel(); writeUrl(); },
+    ready: true, state: S, get shown() { return shown; }, get boat() { return boat; }, get report() { return report; }, describe: () => (S.mode === 'boat' ? report : shown.describe()), renderer, scene, camera,
+    async setState(next) { Object.assign(S, next); await applyMode(); },
   };
 }
 
-try { main(); } catch (err) {
+main().catch((err) => {
   console.error(err);
   loading.className = 'err';
   loading.textContent = `the landmark lab failed to start:\n${(err && err.stack) || err}`;
-}
+});

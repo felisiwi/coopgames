@@ -21,6 +21,15 @@ check('parameters round-trip, junk is ignored, other parameters are kept', () =>
   assert.equal(parseLabParams('?zoom=999').zoom, 3, 'zoom is clamped');
   assert.equal(parseLabParams('?v=gaven-1835').type, 'polemark', 'a variant implies its type');
 });
+check('from the boat: the read scale is on by default and survives a round trip; cameras and views parse; there is no all-eras coast', () => {
+  const B = parseLabParams('?mode=boat&view=bonden&cam=speed&era=all');
+  assert.equal(B.mode, 'boat'); assert.equal(B.rs, 1, 'read scale on from the boat'); assert.equal(B.view, 'bonden'); assert.equal(B.cam, 'speed'); assert.equal(B.era, '1950', 'no "all" from the boat');
+  assert.equal(parseLabParams('?mode=boat&rs=0').rs, 0);
+  const off = labParamsToSearch('', { ...parseLabParams('?mode=boat'), rs: 0 });
+  assert.equal(parseLabParams(off).rs, 0, 'rs=0 from the boat is written to the address, not lost: ' + off);
+  assert.equal(labParamsToSearch('', parseLabParams('?mode=boat')), '?mode=boat', 'the boat defaults write only the mode');
+  assert.equal(parseLabParams('?lm=0').lm, 0); assert.equal(parseLabParams('?cam=weather').cam, 'weather'); assert.equal(parseLabParams('?cam=nope').cam, 'game');
+});
 check('the shelf for an era holds exactly the variants that stood then', () => {
   for (const era of ['1703', '1950', 'today']) {
     const keys = shelfEntries({ era }).filter((e) => !e.opts || Object.keys(e.opts).length === 0).map((e) => e.key).sort();
