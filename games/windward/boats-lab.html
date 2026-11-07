@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windward Boats Lab</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #9fb7c9; overflow: hidden; font: 600 14px/1.3 Georgia, serif; color: #1b2a36; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #bar { position: fixed; z-index: 2; top: 8px; left: 8px; right: 8px; display: flex; gap: 8px; align-items: center; pointer-events: none; }
+  #bar a, #title { pointer-events: auto; background: rgba(244, 240, 228, 0.92); border: 1px solid #8c7a5c; border-radius: 6px; padding: 8px 12px; color: inherit; text-decoration: none; min-height: 20px; }
+  #title { flex: 1; font-weight: 400; }
+  #title b { font-weight: 600; }
+  #err { position: fixed; inset: 0; display: none; place-items: center; padding: 24px; background: #20303c; color: #ffb4a8; white-space: pre-wrap; z-index: 9; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="bar"><a href="?era=1950">1950</a><a href="?era=today">Today</a><div id="title"></div></div>
+<div id="err"></div>
+<script type="module" src="./src/boats-lab.js"></script>
+</body>
+</html>

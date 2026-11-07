@@ -17,7 +17,7 @@
 import * as THREE from '../vendor/three/three.module.js';
 import { CONFIG } from './config.js';
 import { Mesher } from './era-assets.js';
-import { getKit } from './busy-kits.js';
+import { getKit, buildAsset } from './busy-kits.js';
 import { makeRoute, makeSchedule, makeLoopSchedule, vesselPose, mustYield, stepYield } from './busy-route.js';
 import { vesselFor, berthBoat, berthsToFill, boatsFor, frac } from './busy-era.js';
 import { mulberry32, ambientPathAdaptive, ambientAt, ambientDone } from './busy-ambient.js';
@@ -32,10 +32,10 @@ function template(kit, assetId, opts) {
   if (!A) throw new Error(`busy-coast: kit "${kit.id}" has no asset "${assetId}"`);
   const S = new Mesher(), G = { on: new Mesher(), off: new Mesher() };
   S.peers = [G.on, G.off];
-  A.build(S, G, opts);
+  const look = buildAsset(kit, assetId, opts, S, G); // the boat's look is drawn from opts.seed (src/boat-looks.js)
   const nOn = G.on.pos.length / 3, nOff = G.off.pos.length / 3;
   return {
-    assetId, opts, halfLen: A.halfLen ? A.halfLen(opts) : 6, solidPos: Float32Array.from(S.pos), solidCol: Float32Array.from(S.col),
+    assetId, opts, look, halfLen: A.halfLen ? A.halfLen(opts) : 6, solidPos: Float32Array.from(S.pos), solidCol: Float32Array.from(S.col),
     glassPos: Float32Array.from([...G.on.pos, ...G.off.pos]), nOn, nOff, triangles: S.triangles + G.on.triangles + G.off.triangles,
   };
 }
@@ -67,14 +67,14 @@ export function createBusyCoast({ world, profile, kit = null, toGame, seaY, hous
   // ---- static: moored boats and summer houses, stamped into one mesher pair in world coordinates -------------------------------
   const S = new Mesher(), G = { on: new Mesher(), off: new Mesher() };
   S.peers = [G.on, G.off];
-  const stampAt = (assetId, opts, place) => { S.at(place, () => kit.assets[assetId].build(S, G, opts)); };
+  const stampAt = (assetId, opts, place) => { S.at(place, () => buildAsset(kit, assetId, opts, S, G)); };
   let moored = 0;
   for (const m of world.moorings) {
     const n = m.berths.length, take = berthsToFill(profile, n);
     for (const b of m.berths.slice(0, take)) {
       const [x, z] = toGame(b.lon, b.lat);
       const boat = berthBoat(profile.moorings.classes[b.class], b);
-      stampAt(boat.asset, { L: boat.L, stripe: boat.stripe, sailsUp: false, lod: true, lit: boat.lit }, { p: [x, 0, z], ry: b.heading });
+      stampAt(boat.asset, { L: boat.L, stripe: boat.stripe, sailsUp: false, lod: true, lit: boat.lit, seed: boat.seed, role: boat.role }, { p: [x, 0, z], ry: b.heading });
       if (b.how === 'buoy' && kit.buoy != null) { const d = boat.L / 2 + 1.6; S.drum(x + Math.sin(b.heading) * d, -0.15, z + Math.cos(b.heading) * d, 0.35, 0.6, 5, kit.buoy); } // the kit's mooring buoy colour
       moored++;
     }
@@ -104,7 +104,7 @@ export function createBusyCoast({ world, profile, kit = null, toGame, seaY, hous
     const r = b.route, v = vesselFor(profile.traffic.classes[r.class], b.seed), loop = r.shape === 'loop';
     const route = makeRoute(r.route.map(([lon, lat]) => toGame(lon, lat)), { loop });
     const sched = loop ? makeLoopSchedule({ lengthM: route.length, speed: v.speed }) : makeSchedule({ stopsAtM: stopsOf(route), speed: v.speed, dwellS: v.dwellS });
-    const tmpl = template(kit, v.asset, { L: v.L, stripe: v.stripe, sailsUp: true, lit: true });
+    const tmpl = template(kit, v.asset, { L: v.L, stripe: v.stripe, sailsUp: true, lit: true, seed: v.seed, role: v.role });
     addVessel({ id: `${r.id}#${b.k}`, kind: 'traffic', route, sched, tmpl, halfLen: tmpl.halfLen, phase: ((b.k + frac(r.seed, 9)) / b.n) * sched.cycleS, tilt: 1 }); // the n boats of a route are spread evenly round its cycle
   }
   if (profile.ferry.enabled) {
@@ -125,7 +125,7 @@ export function createBusyCoast({ world, profile, kit = null, toGame, seaY, hous
     for (let i = 0; i < ambientCfg.count; i++) {
       const cls = rand() < (ambientCfg.mix?.sail ?? 0.7) ? 'sail' : 'motor', sd = (0.137 + i * 0.6180339887) % 1;
       const v = vesselFor(profile.traffic.classes[cls], sd);
-      const tmpl = template(kit, v.asset, { L: v.L, stripe: v.stripe, sailsUp: true, lit: true });
+      const tmpl = template(kit, v.asset, { L: v.L, stripe: v.stripe, sailsUp: true, lit: true, seed: v.seed, role: v.role });
       addVessel({ id: `ambient#${i}`, kind: 'ambient', cls, tmpl, halfLen: tmpl.halfLen, speed: v.speed, path: null, s: 0, nextTry: 0, tilt: 1 });
     }
   }
