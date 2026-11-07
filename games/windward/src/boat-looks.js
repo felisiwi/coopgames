@@ -51,7 +51,8 @@ export const ALLOWED_RIGS = {
 export const hasLook = (assetId) => assetId in RULES;
 
 // The look for a boat of `assetId` with this seed in [0, 1). Salts 20.. keep these draws apart from vesselFor's (1-6) and berthBoat's.
-export function lookFor(assetId, seed) {
+// hint: optional facts from the profile (hint.role fixes a koster's role: a fishing-fleet entry is 'fishing', a sailing-class entry 'yacht'); everything else is drawn from the seed.
+export function lookFor(assetId, seed, hint = {}) {
   const R = RULES[assetId];
   if (!R) return null;
   const r = (salt) => frac(seed, 20 + salt);
@@ -89,7 +90,7 @@ export function lookFor(assetId, seed) {
       return { ...base, hullName, hull: Y1950_HULLS[hullName], sailName, sail: Y1950_SAILS[sailName], rig: pick(R.rigs, r(4)) };
     }
     case 'koster1950': {
-      const role = pick(R.roles, r(9)), T = R[role];
+      const role = hint.role === 'fishing' || hint.role === 'yacht' ? hint.role : pick(R.roles, r(9)), T = R[role];
       const hn = pick(T.hulls, r(1)), sn = pick(T.sails, r(3));
       return { ...base, role, hullName: hn, hull: Y1950_HULLS[hn], sailName: sn, sail: Y1950_SAILS[sn], rig: role === 'fishing' ? 'gaff' : 'bermuda', flag: r(5) < R.flag, jib: r(6) < 0.8 };
     }

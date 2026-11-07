@@ -27,6 +27,7 @@ export function vesselFor(classBlock, seed) {
     speed: round1(lerp(classBlock.speed[0], classBlock.speed[1], frac(seed, 4))),
     dwellS: Math.round(lerp(classBlock.dwellS[0], classBlock.dwellS[1], frac(seed, 5))),
     seed, // the boat's own seed: the kit's look() draws its hull, sail and rig colours from it (src/boat-looks.js), so both phones see the same boat
+    role: a.role, // an optional hint from the profile's asset entry (a koster: 'fishing' or 'yacht'); undefined = the look draws it from the seed
   };
 }
 // The boat a berth gets (profile.moorings.classes[class]); never longer than the length the berth was planned for (fitL).
@@ -39,6 +40,7 @@ export function berthBoat(classBlock, berth) {
     L: round1(Math.min(want, berth.fitL)),
     lit: frac(berth.seed, 6) < (classBlock.litShare ?? 0.5),
     seed: berth.seed,
+    role: a.role,
   };
 }
 // How many berths of a harbour an era fills: fill (0..1) of its berths, at most maxPerHarbour, never fewer than 0.

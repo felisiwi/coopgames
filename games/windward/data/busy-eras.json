@@ -38,6 +38,23 @@
                   7.0,
                   9.0
                 ]
+              },
+              {
+                "id": "koster1950",
+                "weight": 1.1,
+                "stripes": [
+                  "tar",
+                  "white",
+                  "yellowtar",
+                  "workgreen",
+                  "cream",
+                  "paleblue"
+                ],
+                "length": [
+                  8.5,
+                  10.0
+                ],
+                "role": "yacht"
               }
             ],
             "speed": [
@@ -91,6 +108,38 @@
                   8.0,
                   10.0
                 ]
+              },
+              {
+                "id": "eka1950",
+                "weight": 1.2,
+                "stripes": [
+                  "tarbrown",
+                  "tar",
+                  "white",
+                  "green",
+                  "paleblue"
+                ],
+                "length": [
+                  4.0,
+                  5.2
+                ]
+              },
+              {
+                "id": "koster1950",
+                "weight": 1.2,
+                "stripes": [
+                  "tar",
+                  "white",
+                  "yellowtar",
+                  "workgreen",
+                  "cream",
+                  "paleblue"
+                ],
+                "length": [
+                  8.5,
+                  10.0
+                ],
+                "role": "fishing"
               }
             ],
             "speed": [
@@ -159,6 +208,22 @@
                   7.0,
                   8.8
                 ]
+              },
+              {
+                "id": "koster1950",
+                "weight": 1,
+                "stripes": [
+                  "tar",
+                  "white",
+                  "yellowtar",
+                  "workgreen",
+                  "cream",
+                  "paleblue"
+                ],
+                "length": [
+                  8.0,
+                  9.6
+                ]
               }
             ],
             "litShare": 0.3
@@ -178,6 +243,21 @@
                 "length": [
                   5.2,
                   6.8
+                ]
+              },
+              {
+                "id": "eka1950",
+                "weight": 1.5,
+                "stripes": [
+                  "tarbrown",
+                  "tar",
+                  "white",
+                  "green",
+                  "paleblue"
+                ],
+                "length": [
+                  4.0,
+                  5.0
                 ]
               }
             ],
@@ -224,6 +304,20 @@
                   7.2,
                   10.0
                 ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.8,
+                  6.2
+                ]
               }
             ],
             "speed": [
@@ -247,6 +341,20 @@
                 ],
                 "length": [
                   4.8,
+                  7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.7,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
                   7.0
                 ]
               }
@@ -342,6 +450,20 @@
                   7.2,
                   10.0
                 ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.6,
+                  6.0
+                ]
               }
             ],
             "litShare": 0.5
@@ -359,6 +481,20 @@
                 "length": [
                   4.8,
                   7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.5,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
+                  6.4
                 ]
               }
             ],
@@ -406,6 +542,20 @@
                   7.2,
                   10.0
                 ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.8,
+                  6.2
+                ]
               }
             ],
             "speed": [
@@ -430,6 +580,20 @@
                 ],
                 "length": [
                   4.8,
+                  7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.7,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
                   7.0
                 ]
               }
@@ -526,6 +690,20 @@
                   7.2,
                   10.0
                 ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.6,
+                  6.0
+                ]
               }
             ],
             "litShare": 0.7
@@ -544,6 +722,20 @@
                 "length": [
                   4.8,
                   7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.5,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
+                  6.4
                 ]
               }
             ],

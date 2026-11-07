@@ -36,6 +36,7 @@ No readable source names the fishermen's boats of c.1700 (`WORLD-1700.md`). The 
 
 - **Same seed, same boat.** Every choice below is drawn from the boat's own seed (`frac(seed, salt)`), so both phones see the same boat. Nothing uses `Math.random()`.
 - **Hull, sail, rig, size, cabin, flag all come from an era table.** A 1950 look can only be picked from the 1950 table, a Today look from the Today table; a test checks every combination.
+- **A profile entry can fix a koster's role** (`role: 'fishing'` in the fishing class, `'yacht'` in the sailing class); with no role the seed draws it 55 / 45.
 - **1950:** no white Bermuda sloops among the fishing boats (fishing boats and working kosters get tanbark sails and a gaff rig); Bermuda is for Folkbåt-type yachts and "modernised" kosters; ekas are mostly rowed; no GRP colours or RIBs.
 - **Today:** Bermuda rigs only, white most often, no tanbark sails, no gaff.
 - **Small details are all [designer]** (no source): a small Swedish ensign on the stern of some boats, the sheer-strake colour of 1950 yachts (white, green, navy or red-brown), 0-4 orange floats on fishing boats, a spray hood or a canvas canopy on some Today boats, a wheel shelter or none on snipor, a beam 94-106 % of the type's.

@@ -19,7 +19,7 @@ export function shelfFor(eras, era, n = 20) {
     for (let c = 0; c < counts[ci]; c++, k++) {
       const seed = (0.137 + k * 0.6180339887) % 1;
       const v = vesselFor(profile.traffic.classes[cls], seed);
-      out.push({ i: out.length, cls, seed, v, assetId: v.asset, opts: { L: v.L, stripe: v.stripe, sailsUp: true, lit: true, seed: v.seed } });
+      out.push({ i: out.length, cls, seed, v, assetId: v.asset, opts: { L: v.L, stripe: v.stripe, sailsUp: true, lit: true, seed: v.seed, role: v.role } });
     }
   });
   return { profile, kit, boats: out };
