@@ -1,0 +1,815 @@
+{
+  "_about": "Island lore research for Windward (gate 1: the 10 richest places). Research and data only; nothing here is wired into game code. Feeds docs/ALIVE-SEA.md (thing templates, place profiles, artifacts, mini quests). Facts and INVENTED hooks are kept apart: everything in `facts`, `landmarks`, `folklore`, `placeName` and `timeline` carries a source id from `sources`; everything in `regulars`, `secrets`, `rumours`, `questSeeds` and `artifacts` is INVENTED (marked invented:true) unless an artifact lists `basedOn` real finds. No real private person is named. Docs are fallible: where this file disagrees with an earlier doc, the entry says so.",
+  "_ids": "Keys use the game's own name-list ids (src/names.js): islands and skerries 'relation/NNN' or 'way/NNN' (the OSM id, no 'osm:' prefix), 'village:Name', 'harbour:Name', 'light:Name'. The mission brief wrote 'osm:relation/...'; the code does not.",
+  "_confidence": {
+    "high": "a museum, heritage-authority, county-board or church source states it and the wording was read",
+    "medium": "Swedish Wikipedia, a regional tourism page, or an earlier repo doc that read its source",
+    "low": "a search summary, an unconfirmed single mention, or a conflict between sources",
+    "uncertain": "kept because it is useful but not established: say so in the game's 'real history' marking"
+  },
+  "_eraKey": { "1703": "late 1703, the first big jump (Torhild)", "1950": "the home-base era (Britta, the boy, the keeper)", "today": "the opening and finale" },
+  "_excluded": [
+    "Gåsö: a 1969 murder case involving a named, real private person (seen in a search summary). Excluded on purpose: not cozy, and the rules bar real private names.",
+    "The 1717 'Tordenskjold's ship aground off Gåsö' claim: only sv.wikipedia Lysekil says it; two independent searches found nothing. Kept as low-confidence in Lysekil's entry, flagged, never used as a quest premise without a second source."
+  ],
+  "sources": {
+    "SVW-masesk": { "title": "sv.wikipedia: Måseskär", "url": "https://sv.wikipedia.org/wiki/Måseskär", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-karingon": { "title": "sv.wikipedia: Käringön", "url": "https://sv.wikipedia.org/wiki/Käringön", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-gullholmen": { "title": "sv.wikipedia: Gullholmen", "url": "https://sv.wikipedia.org/wiki/Gullholmen", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-gaso": { "title": "sv.wikipedia: Gåsö, Lysekils kommun", "url": "https://sv.wikipedia.org/wiki/Gåsö,_Lysekils_kommun", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-korno": { "title": "sv.wikipedia: Stora Kornö", "url": "https://sv.wikipedia.org/wiki/Stora_Kornö", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-fbk": { "title": "sv.wikipedia: Fiskebäckskil", "url": "https://sv.wikipedia.org/wiki/Fiskebäckskil", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-grundsund": { "title": "sv.wikipedia: Grundsund", "url": "https://sv.wikipedia.org/wiki/Grundsund", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-grundsunds-kyrka": { "title": "sv.wikipedia: Grundsunds kyrka", "url": "https://sv.wikipedia.org/wiki/Grundsunds_kyrka", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-lysekil": { "title": "sv.wikipedia: Lysekil", "url": "https://sv.wikipedia.org/wiki/Lysekil", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-islandsberg": { "title": "sv.wikipedia: Islandsberg", "url": "https://sv.wikipedia.org/wiki/Islandsberg", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-skaftosocken": { "title": "sv.wikipedia: Skaftö socken", "url": "https://sv.wikipedia.org/wiki/Skaftö_socken", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-gullmarn": { "title": "sv.wikipedia: Gullmarn", "url": "https://sv.wikipedia.org/wiki/Gullmarn", "type": "wikipedia", "read": "2026-11-07" },
+    "SVW-tordenskjold": { "title": "sv.wikipedia: Peter Tordenskjold", "url": "https://sv.wikipedia.org/wiki/Peter_Tordenskjold", "type": "wikipedia", "read": "2026-11-07" },
+    "LAN-gaso": { "title": "Länsstyrelsen Västra Götaland: Gåsöskärgården (nature reserve page)", "url": "https://www.lansstyrelsen.se/vastra-gotaland/besoksmal/naturreservat/Gasoskargarden.html", "type": "county board", "read": "2026-11-07" },
+    "LAN-kalven": { "title": "Länsstyrelsen Västra Götaland: Kalven på Kornö (nature reserve page)", "url": "https://www.lansstyrelsen.se/vastra-gotaland/besoksmal/naturreservat/kalven-pa-korno.html", "type": "county board", "read": "2026-11-07" },
+    "VS-fbk": { "title": "vastsverige.com: Fiskebäckskil", "url": "https://www.vastsverige.com/lysekil/produkter/skafto-fiskebackskil/", "type": "regional tourism", "read": "2026-11-07" },
+    "RAA": { "title": "Riksantikvarieämbetet records via the K-samsök open API (the data behind Fornsök). Each fact gives the record id in `ref`.", "url": "https://kulturarvsdata.se/ksamsok/api", "type": "heritage authority", "read": "2026-11-07", "note": "RAÄ marks many descriptions 'not quality-assured'; wreck entries are archive notes (arkivuppgift) unless they say 'fartygslämning' with measurements." },
+    "RAA-sjomarken": { "title": "Sea-mark records in RAÄ that cite: Johnny Söderlund, 'Sjömärken; vägvisare och kulturmärke' (2007)", "url": "https://kulturarvsdata.se/ksamsok/api", "type": "heritage authority / book", "read": "2026-11-07" },
+    "RIG-bernhardson": { "title": "Rig (Lund) article on painter C.G. Bernhardson's pictures of Bohuslän maritime folk belief; his book 'Bohuslänsk sed och folktro' (1980)", "url": "https://journals.lub.lu.se/rig/article/download/16104/14581/41203", "type": "journal", "read": "search summary only" },
+    "HSA": { "title": "repo: games/windward/data/history-start-area.md (itself cites Bohusläns museum rapport 2012:39, Svenska kyrkan, Västkuststiftelsen)", "url": "repo", "type": "repo doc", "read": "2026-11-07" },
+    "BM2012": { "title": "Bohusläns museum rapport 2012:39 (Gullholmen), as relayed in HSA", "url": "https://www.bohuslansmuseum.se/wp-content/uploads/2016/11/BM_Rapport_2012-39.pdf", "type": "museum", "read": "via HSA" },
+    "W1700": { "title": "repo: games/windward/docs/WORLD-1700.md", "url": "repo", "type": "repo doc" },
+    "W1950": { "title": "repo: games/windward/docs/WORLD-1950.md", "url": "repo", "type": "repo doc" },
+    "P1700": { "title": "repo: games/windward/docs/PEOPLE-1700.md", "url": "repo", "type": "repo doc" },
+    "PLACE-NAMES": { "title": "repo: games/windward/data/place-names.json (Felix's Map Lab descriptions, 'lore, not etymology claims')", "url": "repo", "type": "repo data" }
+  },
+  "places": {
+
+    "light:Måseskär": {
+      "name": "Måseskär", "kind": "light", "lat": 58.0941, "lon": 11.33037,
+      "nameListIds": ["light:Måseskär", "relation/10239124", "relation/10239121 (Hinneskär, the white cairn just south)"],
+      "confidence": "high for the lighthouse history, uncertain for 1703",
+      "sources": ["SVW-masesk", "RAA", "RAA-sjomarken", "HSA", "W1950", "PLACE-NAMES"],
+      "timeline": [
+        { "year": 1829, "t": "A pole mark (stångmärke) is built at the Crown's expense where a stone cairn stood: 18 m high, red-painted, with a white board pointing down as topmark.", "src": "SVW-masesk", "c": "medium", "also": "RAA record ORUST MÅSESKÄR 1:1 (high)" },
+        { "year": 1853, "t": "The pole mark south of the light (Svarten/Sydbonden) is rebuilt and given an arm showing east-north-east along the sailing channel through the southern ('great') inlet.", "src": "RAA-sjomarken", "c": "high", "ref": "ORUST MÅSESKÄR 1:2" },
+        { "year": 1865, "t": "Open iron pillar tower, about 21 m, with a second-order lens, made at Eriksberg in Göteborg and shipped in parts; keepers' house, outbuilding, cellar, a blasted stone-lined well, a boat harbour with a slip. Lit 8 October. The old pole mark is taken down.", "src": "SVW-masesk", "c": "medium" },
+        { "year": 1869, "t": "Tower painted with white fields so it can be told from neighbouring lights by day.", "src": "SVW-masesk", "c": "medium" },
+        { "year": 1873, "t": "Two signal cannons on carriages for fog; a coal-fired steam fog siren in a new machine house follows in the mid-1880s.", "src": "SVW-masesk", "c": "medium" },
+        { "year": 1878, "t": "Hinneskär cairn just south of the light: white, conical, 4.8 m, built in stone 1878, raised after 1978.", "src": "RAA-sjomarken", "c": "high", "ref": "ORUST MÅSESKÄR 1:1 husnr 9002" },
+        { "year": 1950, "t": "Light electrified (it burned paraffin before). 1955 an electric motor replaces the brass clockwork and weights, so the light can be watched from the house.", "src": "SVW-masesk", "c": "medium" },
+        { "year": 1978, "t": "A small white plastic lighthouse is built beside the old one; the old light goes out in August and fog signalling is automated.", "src": "SVW-masesk", "c": "medium" },
+        { "year": 2015, "t": "The old lighthouse is lit again 1 to 8 August by enthusiasts of Svenska Fyrsällskapet.", "src": "SVW-masesk", "c": "medium" },
+        { "year": 2017, "t": "Declared a state building monument 7 December; the foundation Stiftelsen Måseskär has used the old light and buildings since 1988.", "src": "SVW-masesk", "c": "medium" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "No lighthouse and no pole mark yet. The repo's own research finds no documented sea marks in the region for 1700 beyond an undated stone cairn at Måseskär.", "src": "W1700", "c": "medium" },
+            { "t": "A stone cairn (stenkummel) stood on the spot before the 1829 pole mark; when it was built is not known, so its presence in 1703 is possible, not shown.", "src": "SVW-masesk", "c": "uncertain" }
+          ],
+          "landmarks": [
+            { "what": "bare outer rock with a heaped stone cairn, nothing else", "exists": "uncertain", "src": "SVW-masesk", "c": "uncertain" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the Gull Skerry' (måse = gull): the game's own descriptive name for the place.", "src": "PLACE-NAMES", "c": "medium", "note": "A descriptive reading from Felix's Map Lab, not a researched etymology." },
+          "regulars": [
+            { "role": "a pilot's crew rowing out to meet a ship, steering by the cairn", "invented": true },
+            { "role": "an outer-skerry fisherman who sets lines on the edge of the rock", "invented": true }
+          ],
+          "secrets": [
+            { "t": "Someone has lined the lee side of the rock with a low stone wall to sleep behind in a blow: older than any chart.", "invented": true, "grounding": "Gåsö/Käringön records describe such wall shelters (tomtningar) on outer islands." }
+          ],
+          "rumours": [
+            { "t": "The pilots say the cairn is the first thing you can steer by past Käringön, and the last you see in a gale.", "invented": true }
+          ],
+          "questSeeds": [
+            { "t": "A pilot's boy left his lunch pail on the rock; return it before the tide changes.", "invented": true }
+          ],
+          "artifacts": [
+            { "name": "flat beach stone with a cross scratched on it", "rarity": "common", "madeEra": "1703", "foundEra": "1950 / today", "invented": true, "basedOn": ["marked stones exist on Gullholmen (RAÄ Gullholmen 18, initials and years)"] }
+          ]
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "The only lighthouse with keepers in the game window in 1950: fyrmästare, fyrvaktare and fyrbiträde; manned 1865 to 1997. All the other lights in the window were unmanned AGA gas lights.", "src": "W1950", "c": "high" },
+            { "t": "The light shows white flashes in 1950 (fixed red 1865 to 1887, white flashes after). Electrified in 1950; the brass clockwork and weights still turned the apparatus until 1955.", "src": "W1950", "c": "high", "also": "SVW-masesk (medium)" },
+            { "t": "The iron tower (about 21 m) is painted white with fields; the lens was swapped for a third-order one in the late 1800s.", "src": "SVW-masesk", "c": "medium" },
+            { "t": "A steam fog siren in its own machine house (built mid-1880s) and one of the 1873 signal cannons stand on the rock; whether the siren was still used in 1950 is not established.", "src": "SVW-masesk", "c": "uncertain" },
+            { "t": "Slate roofs on the house, outbuilding and cellar since about 1900; small stone-walled plots show the keepers grew their own food.", "src": "SVW-masesk", "c": "medium" },
+            { "t": "After the Second World War the Allies are said to have sunk about 20 ships west of Måseskär at roughly 200 m depth (raised arsenic suspected to come from chemical weapons). Dates and ship names not found.", "src": "HSA", "c": "low" }
+          ],
+          "landmarks": [
+            { "what": "white iron pillar tower, ~21 m, white fields", "exists": true, "src": "SVW-masesk", "c": "medium" },
+            { "what": "keepers' house with grey slate roof, outbuilding, cellar", "exists": true, "src": "SVW-masesk", "c": "medium" },
+            { "what": "machine house of the steam fog siren, a signal cannon on its carriage", "exists": true, "src": "SVW-masesk", "c": "medium" },
+            { "what": "small stone-walled garden plots", "exists": true, "src": "SVW-masesk", "c": "medium" },
+            { "what": "boat harbour with a slip (blasted into the rock)", "exists": true, "src": "SVW-masesk", "c": "medium" },
+            { "what": "Hinneskär: white conical cairn 4.8 m, with an arm pointing south-east, just south of the light", "exists": true, "src": "RAA-sjomarken", "c": "high" },
+            { "what": "Svarten/Sydbonden pole mark with an arm to ENE, south of the light", "exists": true, "src": "RAA-sjomarken", "c": "medium", "note": "Built 1829, rebuilt 1853; standing in 1950 is likely, not shown." }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the Gull Skerry'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [
+            { "role": "the keeper (fyrmästare): a gruff, careful man who keeps the log to the minute (canon: invented, no named 1950 keeper found)", "invented": true },
+            { "role": "the keeper's assistant (fyrbiträde), a young man who rows the supply boat and wants to talk about the mainland", "invented": true },
+            { "role": "the keeper's wife, who tends the stone-walled plots and hangs wash that you can see from the sea", "invented": true }
+          ],
+          "secrets": [
+            { "t": "The keeper has a second book beside the official log where he writes down lights that should not be there, with the date and the bearing. Britta's father knows about it.", "invented": true, "grounding": "canon: Måseskär's keeper hints about strange lights (GAME-DESIGN.md)" },
+            { "t": "One of the old signal cannons is still loaded with a charge of damp powder 'just in case'.", "invented": true, "grounding": "a cannon from 1873 survives on the rock (SVW-masesk)" }
+          ],
+          "rumours": [
+            { "t": "They say it burned red once, in the old days, and the fishermen from Käringön still call that a bad omen.", "invented": true, "grounding": "the light was fixed red 1865 to 1887 (W1950); the omen is invented" },
+            { "t": "The Lysekil harbour men say the fish off Måseskär taste of something since the war.", "invented": true, "grounding": "HaV note on post-war wrecks west of Måseskär (low)" }
+          ],
+          "questSeeds": [
+            { "t": "Deliver paraffin mantles and gas to the keeper; he gives a hint about the light that should not be there.", "invented": true, "grounding": "canon first-chapter task" },
+            { "t": "The assistant has dropped the slip's winch handle in the harbour: find it with the boathook.", "invented": true }
+          ],
+          "artifacts": [
+            { "name": "spare lamp mantle in its tin", "rarity": "common", "madeEra": "1950", "foundEra": "1950", "invented": true },
+            { "name": "brass gear wheel from the clockwork", "rarity": "rare", "madeEra": "1865", "foundEra": "1950 / today", "invented": true, "basedOn": ["brass clockwork and plumb weights are preserved today (SVW-masesk)"] },
+            { "name": "cannon wad of tarred rope", "rarity": "uncommon", "madeEra": "1873", "foundEra": "1950", "invented": true, "basedOn": ["signal cannons from 1873 (SVW-masesk)"] }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "A small white plastic lighthouse (1978) stands beside the intact old iron lighthouse; the old one is a state building monument since 7 December 2017 and is run by a foundation.", "src": "SVW-masesk", "c": "medium" },
+            { "t": "Brass clockwork, plumb weights, one 1873 signal cannon and the steam fog siren survive; the stone-walled plots are still visible.", "src": "SVW-masesk", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "old white iron tower beside a small white plastic tower", "exists": true, "src": "SVW-masesk", "c": "medium" },
+            { "what": "Hinneskär cone raised after 1978", "exists": true, "src": "RAA-sjomarken", "c": "high" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the Gull Skerry'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [{ "role": "a volunteer from the foundation who shows visitors the old brass clockwork", "invented": true }],
+          "secrets": [{ "t": "Someone has put a bundle of paper charts in the keepers' cellar for the next generation.", "invented": true }],
+          "rumours": [{ "t": "The old light was lit for a week in 2015 and some boats still steer for it by habit.", "invented": true, "grounding": "SVW-masesk: lit 1 to 8 August 2015" }],
+          "questSeeds": [{ "t": "Find what you left in the cellar in 1950.", "invented": true }],
+          "artifacts": []
+        }
+      ]
+    },
+
+    "village:Käringön": {
+      "name": "Käringön", "kind": "village", "lat": 58.10985, "lon": 11.36359,
+      "nameListIds": ["village:Käringön", "relation/10239114", "way/309046742", "relation/10238558 (Vallerö)", "relation/10238557 (Tornö)", "relation/10239187 (Korsholmen)", "relation/10239111 (Vedholmen)"],
+      "confidence": "high for dated records; the 1703 picture is thin",
+      "sources": ["HSA", "SVW-karingon", "RAA", "RAA-sjomarken", "W1700", "W1950", "SVW-tordenskjold"],
+      "timeline": [
+        { "year": 1659, "t": "The island is written 'Kierlingøon'.", "src": "SVW-karingon", "c": "medium" },
+        { "year": 1664, "t": "Olof Knape (later Strömstierna) is born on Käringön; admiralty captain 1700; ennobled; died 1730.", "src": "HSA", "c": "medium" },
+        { "year": 1716, "t": "The Swedish squadron chief at the battle of Dynekilen (8 July 1716) is named as Olof Strömstierna, which matches the Käringön-born captain. The identification is ours: sv.wikipedia's Tordenskjold article names the commander, HSA names the Käringön man; no page says they are the same.", "src": "SVW-tordenskjold", "c": "low" },
+        { "year": 1796, "t": "Church taken into use; the 1797 bell was donated by a fishing company on the island.", "src": "HSA", "c": "high" },
+        { "year": 1853, "t": "Korsholmen sea mark built: a white square stone cairn between Tornö and Vedholmen.", "src": "RAA-sjomarken", "c": "high", "ref": "ORUST VALLERÖ 1:4" },
+        { "year": 1872, "t": "Early November storm: the bark Paula strands on rocks that are still called Paulapallarna; crew of 13 saved; a stranding auction on 12 November sold 800 sacks of rice. Several other ships are lost around Käringön in the same days (Nordkap 2 Nov, David with petroleum barrels 2 Nov, Queens Own and Martin Luther 7 Nov).", "src": "RAA", "c": "medium", "ref": "L1960:6080, L1960:6040, L2022:1796, L2022:1693" },
+        { "year": 1886, "t": "Tornö sea mark: a black cylindrical stone cairn, 3.5 m, on the island's highest point.", "src": "RAA-sjomarken", "c": "high", "ref": "ORUST VALLERÖ 1:5" },
+        { "year": 1899, "t": "The bark Jupiter drives ashore at Korsets Stenar by Härmanö huvud between the Käringön and Gullholmen pilot stations; 3 dead.", "src": "RAA", "c": "medium", "ref": "L1960:5680" },
+        { "year": 1928, "t": "The steamer Dora strands and sinks in the quarry sound between Vallerö and Tornö, later scrapped by Danes.", "src": "RAA", "c": "medium", "ref": "L1960:5651" },
+        { "year": 1936, "t": "Dredging in the harbour finds timbers of an older harbour structure in clay; a stock anchor from the harbour roads was raised in 1995 or 1996.", "src": "RAA", "c": "medium", "ref": "L1960:6481, L1960:7197" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "A hamlet; said to be inhabited since the 1500s; the great herring period that 'put it on the map' only comes after 1747.", "src": "HSA", "c": "medium" },
+            { "t": "Its most famous son is a young sea officer: Olof Knape, born 1664, in the East Indies until 1697, made admiralty captain by Karl XII in 1700.", "src": "HSA", "c": "medium" },
+            { "t": "Nine-metre keel timber, stem knee and a plank fragment were dived up near Käringön; tree-ring analysis (1987) dates the timbers to 1516-1648, so a ship of that age lay on the bottom already in 1703.", "src": "RAA", "c": "medium", "ref": "L1960:5601" }
+          ],
+          "landmarks": [
+            { "what": "a whitewashed stone cairn ('käring') on the headland or at Saltskär, if the name theory is right", "exists": "uncertain", "src": "HSA", "c": "uncertain" },
+            { "what": "timber boathouses and fishermen's huts round a rocky harbour", "exists": "uncertain", "src": "W1700", "c": "uncertain" }
+          ],
+          "folklore": [
+            { "kind": "belief", "t": "Fishermen saw women aboard as bad luck and sorted them into lucky 'turkäringar' and unlucky 'oturskäringar'; meeting an unlucky one on the way to the boat meant turning back. A tourism page tells this: it is later-recorded, not a 1703 source.", "src": "HSA", "c": "medium" },
+            { "kind": "saying", "t": "Crews on Bohuslän boats avoided whistling aboard because it was thought to call the devil (later-recorded, from Skaftö-born painter C.G. Bernhardson's material).", "src": "RIG-bernhardson", "c": "low" }
+          ],
+          "placeName": { "meaning": "'käring' here may mean a whitewashed cairn used as a sea mark (Svenskt ortnamnslexikon 2003 via Wikipedia); the game's gloss 'the Old Woman's Isle' is the folk reading. The origin is disputed.", "src": "SVW-karingon", "c": "medium", "note": "A name theory, not a fact." },
+          "regulars": [
+            { "role": "a young officer's mother, who still lives on the island and has a letter from the East Indies", "invented": true },
+            { "role": "a pilot who rows out from the island's rock", "invented": true }
+          ],
+          "secrets": [{ "t": "The old keel on the bottom: boys dive for it in summer and swear it is a Spanish ship.", "invented": true, "grounding": "RAÄ finds, dendro 1516-1648" }],
+          "rumours": [{ "t": "Talk after Sunday service: the captain son has been given a ship by the king.", "invented": true, "grounding": "HSA: commissioned 1700" }],
+          "questSeeds": [{ "t": "Carry a sealed letter from a mother to the ship her son is said to command, as far as Lysekil.", "invented": true }],
+          "artifacts": [
+            { "name": "iron nail from an old keel", "rarity": "common", "madeEra": "1500s-1600s", "foundEra": "1703 / 1950 / today", "invented": true, "basedOn": ["L1960:5601 keel timber 1516-1648"] }
+          ]
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "336 inhabitants in 1944 (548 in 1925); double houses dominate; the harbour was made in the 1930s; pilots and lighthouse staff lived on Lotsberget.", "src": "W1950", "c": "high" },
+            { "t": "A former pilot dwelling (Lotsutkiken, about 10 m²) at the south-west tip and the Sea Rescue Society's station are named on a tourism page; no dates.", "src": "HSA", "c": "low" },
+            { "t": "Rocks near the village are called Paulapallarna after the bark Paula wrecked there in the November storm of 1872.", "src": "RAA", "c": "medium", "ref": "L1960:6080" }
+          ],
+          "landmarks": [
+            { "what": "Tornö: black cylindrical stone cairn 3.5 m on the highest point, NW of Vedholmen", "exists": true, "src": "RAA-sjomarken", "c": "high" },
+            { "what": "Korsholmen: white square stone cairn between Tornö and Vedholmen", "exists": true, "src": "RAA-sjomarken", "c": "high" },
+            { "what": "church (1796) with a bell from 1797 in a small tower", "exists": true, "src": "HSA", "c": "high" },
+            { "what": "granite quarry sound between Vallerö and Tornö", "exists": "uncertain", "src": "RAA", "c": "low", "note": "Only the 1928 Dora record places a quarry there; no page read on the quarry itself." }
+          ],
+          "folklore": [
+            { "kind": "legend-place", "t": "Paulapallarna: a rock group named after a wreck.", "src": "RAA", "c": "medium" }
+          ],
+          "placeName": { "meaning": "see 1703.", "src": "SVW-karingon", "c": "medium" },
+          "regulars": [
+            { "role": "a pilot ashore on Lotsberget, who knows every rock between here and Måseskär", "invented": true },
+            { "role": "a net-mender on the quay, unhurried, who remembers the storm", "invented": true },
+            { "role": "a rescue-station volunteer who checks every boat that leaves late", "invented": true }
+          ],
+          "secrets": [{ "t": "A boy keeps a collection of things washed up from the old wrecks in a boathouse loft: a brass porthole, a rice-sack stencil, a clay pipe.", "invented": true, "grounding": "wrecks and finds listed in RAÄ" }],
+          "rumours": [{ "t": "'You'll want to give Paulapallarna a wide berth when the wind is south-west. They've had one ship already.'", "invented": true, "grounding": "RAÄ L1960:6080" }],
+          "questSeeds": [
+            { "t": "Return a net-mender's lost float to a skerry owner on Tornö's side.", "invented": true },
+            { "t": "After the storm: find the drifted boat near Korsholmen, tell the owner, and be told by the keeper where the boat came from.", "invented": true, "grounding": "ALIVE-SEA quest template 3" }
+          ],
+          "artifacts": [
+            { "name": "clay pipe, white, stamped with a ship's initial", "rarity": "common", "madeEra": "1800s", "foundEra": "1950", "invented": true, "basedOn": ["pipe finds recorded elsewhere on the coast (L1960:5596)"] },
+            { "name": "rice-sack stencil from the Paula", "rarity": "rare", "madeEra": "1872", "foundEra": "1950", "invented": true, "basedOn": ["L1960:6080: 800 sacks of rice auctioned 12 Nov 1872"] }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "About 80 permanent residents (2020); no cars; one of Sweden's largest sea rescue stations is on the island; a well-visited guest harbour.", "src": "SVW-karingon", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "Tornö and Korsholmen cairns, repainted and kept", "exists": "uncertain", "src": "RAA-sjomarken", "c": "medium" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "see 1703.", "src": "SVW-karingon", "c": "medium" },
+          "regulars": [{ "role": "a volunteer sea-rescue sailor on the quay", "invented": true }],
+          "secrets": [],
+          "rumours": [{ "t": "The old stock anchor by the harbour was dredged up in the 1990s and nobody knows whose it was.", "invented": true, "grounding": "RAÄ L1960:7197" }],
+          "questSeeds": [],
+          "artifacts": []
+        }
+      ]
+    },
+
+    "village:Gullholmen": {
+      "name": "Gullholmen", "kind": "village", "lat": 58.17993, "lon": 11.40585,
+      "nameListIds": ["village:Gullholmen", "relation/5463706 (Härmanö)", "relation/11020202 (Silleskär)"],
+      "confidence": "high (best-documented place: Bohusläns museum rapport 2012:39)",
+      "sources": ["HSA", "BM2012", "SVW-gullholmen", "W1700", "W1950", "RAA", "SVW-tordenskjold"],
+      "timeline": [
+        { "year": 1253, "t": "Håkon Håkonsson's saga: the king put in at 'Hermanösund'; an unproven link to Gullholmen.", "src": "BM2012", "c": "high" },
+        { "year": 1565, "t": "Fredrik II allows a Lübeck admiral to build booths at Hermanösund and Mollösund.", "src": "BM2012", "c": "high" },
+        { "year": 1588, "t": "Oldest secure evidence of settlement: a letter mentioning a man 'paa Guldholmen'.", "src": "BM2012", "c": "high" },
+        { "year": 1610, "t": "24 resident strandsittare (shore-dwellers) in the extra-tax roll; about 39 households by 1645.", "src": "BM2012", "c": "high" },
+        { "year": 1705, "t": "The old fishing hamlet Härmanösund is abandoned.", "src": "W1950", "c": "medium" },
+        { "year": 1799, "t": "Church finished in autumn (stands on Lilla Härmanö); altarpiece from 1828.", "src": "HSA", "c": "high" },
+        { "year": 1864, "t": "Hallgren cannery (later bought 1898 by a conserve company).", "src": "W1950", "c": "medium" },
+        { "year": 1936, "t": "Dredging the harbour finds a large wooden ship's remains in its north part (ancient-monument Gullholmen 25).", "src": "BM2012", "c": "high" },
+        { "year": 1942, "t": "Gullholmsbaden, a bathing place, is opened (Reso).", "src": "W1950", "c": "medium" },
+        { "year": 1872, "t": "Early November storm: the bark Fata Morgana (timber cargo) is lost near Gullholmen, crew saved. Ship losses here cluster in storms (for example the galeas Rosina and Julius, both 15 Nov 1861), which shows how often ships came ashore.", "src": "RAA", "c": "medium", "ref": "L1960:5473, L2022:1704" },
+        { "year": 1878, "t": "A Riga-to-Hamburg ship with linseed cake is abandoned in a south-south-west storm and strands on Silleskär, Gullholmen.", "src": "RAA", "c": "medium", "ref": "L1960:5700" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "Best-documented place in the region: about 20 fishing families at the end of the 1600s, on crown land (kronoholme), free to build on.", "src": "BM2012", "c": "high" },
+            { "t": "A recognised anchorage: the Norwegian row fleet anchored here in the Gyldenløve feud; in the Great Northern War Tordenskiold called it one of the coast's most useful harbours.", "src": "W1700", "c": "medium", "also": "citing Hansson 1983:178" },
+            { "t": "The sound between Gullholmen and Lilla Härmanö was a harbour already in the Middle Ages (two medieval potsherds from test pits).", "src": "BM2012", "c": "high" },
+            { "t": "A now-vanished offering cairn (offerkast, Gullholmen 15) is recorded; a stone with initials and years from the 1700s and 1800s survives (Gullholmen 18).", "src": "BM2012", "c": "high" }
+          ],
+          "landmarks": [
+            { "what": "two small rock islets with a short bridge-less gap, a tight cluster of low huts, boathouses and drying poles", "exists": true, "src": "BM2012", "c": "medium" },
+            { "what": "a heap of stones used as an offering cairn", "exists": "uncertain", "src": "BM2012", "c": "uncertain", "note": "Undated; vanished." }
+          ],
+          "folklore": [
+            { "kind": "legend", "t": "The wreck in the harbour was said to be from Tordenskiold's fleet, lost in the Great Northern War. The museum rejects it after dating the timber to felling between 1727 and 1827, so the ship cannot be from 1700-1721.", "src": "BM2012", "c": "high", "note": "The legend exists and the museum rejects it: both facts are high confidence. In 1703 the ship in question is not yet sunk; the legend belongs to later eras." }
+          ],
+          "placeName": { "meaning": "'the crowded islet' (the game's gloss). The name has no accepted etymology; the saga's 'Gulleyna' is debated.", "src": "BM2012", "c": "medium" },
+          "regulars": [
+            { "role": "a family head of one of the ~20 fishing households, who owns the only rowing boat with a sail", "invented": true },
+            { "role": "a crown customs man who drops in by boat now and then", "invented": true }
+          ],
+          "secrets": [{ "t": "Under a flat rock behind the last boathouse is where a family hides its share of salted fish from the tax man.", "invented": true }],
+          "rumours": [{ "t": "'Norwegian ships were at anchor here in our grandfathers' time. The harbour has seen more of the world than we have.'", "invented": true, "grounding": "W1700 / BM2012" }],
+          "questSeeds": [{ "t": "Find a missing net-stone on the bottom of the sound and return it before the herring comes.", "invented": true }],
+          "artifacts": [
+            { "name": "broken medieval pot sherd", "rarity": "uncommon", "madeEra": "Middle Ages", "foundEra": "1703 / today", "invented": true, "basedOn": ["BM2012: medieval sherds in the sound"] }
+          ]
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "Parish population 466 in 1950 (524 in 1940, a peak of over 800 in 1910); large-sea fishing 'was the base of the economy until the middle of the 1900s'; fish processing continued to the 1960s; about 150 houses and 100 boathouses in 1920.", "src": "W1950", "c": "high" },
+            { "t": "Many of the island's houses became summer homes after the First World War; school and cannery closed (the year of closure is in conflict: left null).", "src": "HSA", "c": "high" },
+            { "t": "The harbour wreck found in 1936 is an oak carvel-built ship, about 13 x 8 m remaining, dated by tree-rings to felling between 1727 and 1827.", "src": "BM2012", "c": "high" },
+            { "t": "Sold-off crown land: Gullholmen stayed a kronoholme until 1999.", "src": "HSA", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "a crowded fishing village on a 7-hectare islet: boathouses, stone cottages, a cannery building, fish racks", "exists": true, "src": "SVW-gullholmen", "c": "medium" },
+            { "what": "the church on Lilla Härmanö reached by the bridge", "exists": true, "src": "HSA", "c": "high" },
+            { "what": "remains of the dredged wreck at the harbour (probably re-buried)", "exists": "uncertain", "src": "BM2012", "c": "uncertain" }
+          ],
+          "folklore": [
+            { "kind": "legend", "t": "The 'Tordenskiold wreck' in the harbour: locals tell it; the museum later rejects it.", "src": "BM2012", "c": "high" }
+          ],
+          "placeName": { "meaning": "'the crowded islet'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [
+            { "role": "a long-line fisherman home from the Iceland grounds", "invented": true },
+            { "role": "a cannery woman who packs mackerel in tins on the quay", "invented": true },
+            { "role": "a summer guest in a rented cottage who sketches the harbour", "invented": true }
+          ],
+          "secrets": [{ "t": "The old men argue about the harbour wreck every Saturday; one claims he saw its stem when the harbour was dredged in 1936.", "invented": true, "grounding": "BM2012: found 1936" }],
+          "rumours": [{ "t": "'That wreck is Tordenskiold's, sure as I'm standing. A man from the museum said otherwise but he never fished a day.'", "invented": true, "grounding": "legend vs museum, BM2012" }],
+          "questSeeds": [
+            { "t": "A fisherman has lost a fish box in the storm: find it with the boathook and bring it back for a tin of mackerel.", "invented": true, "grounding": "ALIVE-SEA template 1" }
+          ],
+          "artifacts": [
+            { "name": "oak treenail from the harbour wreck", "rarity": "rare", "madeEra": "1700s-1800s", "foundEra": "1950", "invented": true, "basedOn": ["BM2012: oak carvel ship found 1936, dendro 1727-1827"] },
+            { "name": "mackerel tin with a painted ship label", "rarity": "common", "madeEra": "1950", "foundEra": "1950", "invented": true, "basedOn": ["cannery history, W1950"] }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "About 10 permanent residents on Gullholmen and 92 on Härmanö (2012); no car connection; a museum (Skepparhuset), a cinema, a library and a bird museum.", "src": "SVW-gullholmen", "c": "medium" }
+          ],
+          "landmarks": [{ "what": "dense old village, now mostly summer houses", "exists": true, "src": "SVW-gullholmen", "c": "medium" }],
+          "folklore": [],
+          "placeName": { "meaning": "'the crowded islet'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [{ "role": "a guide at Skepparhuset", "invented": true }],
+          "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    },
+
+    "relation/10604591": {
+      "name": "Gåsö", "kind": "island", "lat": 58.2359, "lon": 11.4059,
+      "nameListIds": ["relation/10604591", "relation/10604590 (Storön, same archipelago)", "harbour:Vrakevik (Felix's pin)", "relation/10238692 (Gåseskär)"],
+      "confidence": "high for history; Vrakevik's name origin not found",
+      "sources": ["SVW-gaso", "LAN-gaso", "RAA", "SVW-lysekil", "SVW-skaftosocken", "PLACE-NAMES", "W1700"],
+      "timeline": [
+        { "year": 1741, "t": "Gåsö with the surrounding archipelago is bought from the Crown by two fisher-farmers for 50 riksdaler.", "src": "SVW-gaso", "c": "medium" },
+        { "year": 1817, "t": "The galeas Ulrica sinks in 11 fathoms at Långesund in the Gåseskär group; anchor and cable salvaged.", "src": "RAA", "c": "medium", "ref": "L1960:5641" },
+        { "year": 1830, "t": "'Bondeseglation' (farmer sailing) is encouraged; a few years later 17 ships are based on Gåsö; about 20 big sailing ships in 1860.", "src": "SVW-gaso", "c": "medium" },
+        { "year": 1912, "t": "The big beach hotel (Strandhotellet) opens; a social house with warm and cold baths about 1900.", "src": "SVW-gaso", "c": "medium" },
+        { "year": 1955, "t": "The island's former school, converted into a chapel, is consecrated.", "src": "SVW-gaso", "c": "medium" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "Occasional temporary households from the 1500s; the first permanent year-round residents come at the end of the 1600s.", "src": "SVW-gaso", "c": "medium" },
+            { "t": "There are stone-walled foundations (tomtningar) on Gåsö and Storön, walls that sheltered hunting and fishing and sometimes got a makeshift roof of oars and sails.", "src": "LAN-gaso", "c": "high" },
+            { "t": "A medieval ship lay in Gåsöfjorden (the 'Skaftö wreck', ancient monument RAÄ 270, excavated 2006-2009 by Bohusläns museum).", "src": "RAA", "c": "low", "note": "Seen in a search summary of a Digitaltmuseum record; the primary record was not opened." },
+            { "t": "Skerries west of Storön are a breeding ground for grey seals (a seal-protection area today); that Gåsö's seals were hunted in 1703 is not shown.", "src": "LAN-gaso", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "bare granite islets with wall-ringed shelter hollows", "exists": true, "src": "LAN-gaso", "c": "high" },
+            { "what": "one or two houses on the east side, sheltered from south-west storms", "exists": "uncertain", "src": "SVW-gaso", "c": "uncertain" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'Goose Isle'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [
+            { "role": "a sealer-fisherman couple who winter on the island", "invented": true },
+            { "role": "a boy who rows between Gåsö and the Skaftö mainland for salt", "invented": true }
+          ],
+          "secrets": [{ "t": "In one wall-ringed hollow someone has hidden a cask of brännvin from the customs man.", "invented": true }],
+          "rumours": [{ "t": "'Gåsö will be bought out of the Crown's hands one day by two of us, you wait.'", "invented": true, "grounding": "1741 purchase by two fisher-farmers (after 1703: a seed only)" }],
+          "questSeeds": [{ "t": "A seal-hunter's club has gone missing among the skerries; find it before the family sees.", "invented": true }],
+          "artifacts": [{ "name": "seal-bone fishing weight", "rarity": "common", "madeEra": "1600s", "foundEra": "1703", "invented": true, "basedOn": ["Härmanö settlers hunted seal (HSA); tomtningar on Gåsö"] }]
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "After the great herring period Gåsö became a skipper community with about 20 larger sailing ships in 1860; steamships ended that, and the islanders turned to summer guests: a bath house around 1900, a guesthouse a few years later, the beach hotel in 1912.", "src": "SVW-gaso", "c": "medium" },
+            { "t": "Small-scale farming stopped in the 1940s and the guesthouse closed; the beach hotel closed about a decade later and the island shop in the 1960s; the school became a chapel in 1955.", "src": "SVW-gaso", "c": "medium" },
+            { "t": "About 150 inhabitants at the end of the 1800s; the older of two churchyards (about 70 graves, started in the early 1860s) lies a little from the village.", "src": "SVW-gaso", "c": "medium" },
+            { "t": "Wrecks recorded near the Gåseskär group include the schooner Orion (salt, 1829) and more from the 1800s.", "src": "RAA", "c": "medium", "ref": "L1960:5699" }
+          ],
+          "landmarks": [
+            { "what": "70+ wooden houses and many boathouses on the east side", "exists": true, "src": "SVW-gaso", "c": "medium" },
+            { "what": "the Strandhotell (1912) and the social house with bath house", "exists": true, "src": "SVW-gaso", "c": "medium", "note": "The hotel closed about 1960; open or shuttered in 1950 is not shown." },
+            { "what": "the old school (chapel from 1955)", "exists": true, "src": "SVW-gaso", "c": "medium" },
+            { "what": "natural harbours at Gåsö sund, at the mouths of Vrakevik and Buvik, and round Tjällsö holme", "exists": true, "src": "LAN-gaso", "c": "high" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'Goose Isle'. Vrakevik ('wreck bay'): name origin not found; no source says a wreck lies there.", "src": "PLACE-NAMES", "c": "medium", "note": "Vrakevik is Felix's own pin; the natural harbour at its mouth is real (LAN-gaso)." },
+          "regulars": [
+            { "role": "a retired skipper who sits on his steps and names every sail by cut", "invented": true },
+            { "role": "a girl whose family rents rooms to summer guests", "invented": true },
+            { "role": "a boarding-house keeper who hangs sheets over the rock", "invented": true }
+          ],
+          "secrets": [{ "t": "Behind Vrakevik the old men say a wreck lies: nobody has dived it, but nets catch on it.", "invented": true, "grounding": "name 'Vrakevik' (origin unconfirmed)" }],
+          "rumours": [{ "t": "'The hotel will close after this summer. the last of the Göteborg families are coming for the season.'", "invented": true, "grounding": "hotel closed c. 1960 (SVW-gaso)" }],
+          "questSeeds": [
+            { "t": "Deliver a parcel of newspapers and a letter to the boarding-house keeper from the Lysekil post.", "invented": true },
+            { "t": "Name the unnamed skerry west of Storön with a seal-watching child.", "invented": true, "grounding": "ALIVE-SEA 'names you give'" }
+          ],
+          "artifacts": [
+            { "name": "ship's wheel spoke, brass-capped", "rarity": "uncommon", "madeEra": "1860", "foundEra": "1950", "invented": true, "basedOn": ["20 big sailing ships on Gåsö 1860 (SVW-gaso)"] }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "Two year-round residents since 2017; about 250 summer people, many descendants of the skipper families; no regular boat service.", "src": "SVW-gaso", "c": "medium" },
+            { "t": "Cattle graze the shore meadows; eelgrass is being replanted round Gåsö; seals breed west of Storön.", "src": "LAN-gaso", "c": "high" }
+          ],
+          "landmarks": [{ "what": "70 houses, grazing cattle on the meadows", "exists": true, "src": "SVW-gaso", "c": "medium" }],
+          "folklore": [],
+          "placeName": { "meaning": "'Goose Isle'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [{ "role": "a summer neighbour who keeps the cattle fence", "invented": true }],
+          "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    },
+
+    "relation/10094463": {
+      "name": "Stora Kornö", "kind": "island", "lat": 58.2978, "lon": 11.3778,
+      "nameListIds": ["relation/10094463", "relation/10237852 (Kornö kalv, the skerry south)"],
+      "confidence": "high; note the island lies in the window's north edge fade strip (PLACE-NAMES)",
+      "sources": ["SVW-korno", "LAN-kalven", "PLACE-NAMES"],
+      "timeline": [
+        { "year": 1743, "t": "Four families buy half the island free; the rest in 1830.", "src": "SVW-korno", "c": "medium" },
+        { "year": 1791, "t": "A train-oil boilery (trankokeri) at Lilla Smalsund and a saltery; 1799 another at Håskär.", "src": "SVW-korno", "c": "medium" },
+        { "year": 1907, "t": "A telephone line reaches the island; electricity in December 1946.", "src": "SVW-korno", "c": "medium" },
+        { "year": 1932, "t": "Pier and harbour built to receive larger coasters.", "src": "SVW-korno", "c": "medium" },
+        { "year": 1970, "t": "A coastal artillery battery (3 guns) is finished on Kalven; stood down 1997, demolished 2003-04; the nature reserve is formed in 2016.", "src": "SVW-korno", "c": "medium" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "A temporary fishing station since the late 1500s, lived in since the 1600s, with the oldest timber sea huts from the 1600s. Inhabitants were strandsittare paying tax to the landowner in Lyse.", "src": "SVW-korno", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "timber sea huts in a crowd at the harbour, roofed with boards, turf and seaweed", "exists": true, "src": "SVW-korno", "c": "medium" },
+            { "what": "Klingkyrka cave on the south point (Kalven): vaulted and rounded walls, formed as the ice retreated about 10,000 years ago", "exists": true, "src": "LAN-kalven", "c": "high" },
+            { "what": "seal skerries to the south (a seal colony on Breviks skär)", "exists": "uncertain", "src": "SVW-korno", "c": "low" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the barley isle' (the game's Map Lab gloss). 'Klingkyrka' means roughly 'the ringing church', a cave known for its sound; no legend attached found.", "src": "PLACE-NAMES", "c": "medium", "note": "Etymology of Klingkyrka is our reading of the word, not a source." },
+          "regulars": [{ "role": "a tax-paying shore-dweller who fishes cod by hand-line off the south cliffs", "invented": true }],
+          "secrets": [{ "t": "In the cave you can make the whole rock ring if you shout at the right pitch; the boys dare each other.", "invented": true, "grounding": "cave's vaulted shape and the name Klingkyrka" }],
+          "rumours": [], "questSeeds": [{ "t": "A girl wants to hear the cave ring: row her round the south point at slack water.", "invented": true }],
+          "artifacts": []
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "A settled fishing and freight island: 140 people in 1897; 10 to 12 sailing coasters, with motors from about the 1920s; telephone from 1907; electricity from December 1946; a new school in the mid-1930s open until 1955.", "src": "SVW-korno", "c": "medium" },
+            { "t": "Train-oil boileries and salteries were built in the 1700s (1791, 1798/99) on the herring boom; fishing and freight carried the economy.", "src": "SVW-korno", "c": "medium" },
+            { "t": "The last new permanent house was built in the mid-1940s; 63 voting residents in 1961; no permanent residents since the early 1970s.", "src": "SVW-korno", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "crowded double houses of captains and skippers (23 single, 26 double houses today)", "exists": true, "src": "SVW-korno", "c": "medium" },
+            { "what": "the 1932 pier", "exists": true, "src": "SVW-korno", "c": "medium" },
+            { "what": "drying nets and timber boathouses; paths running straight through sea huts to the quays", "exists": true, "src": "SVW-korno", "c": "medium" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the barley isle'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [
+            { "role": "a coaster skipper loading stone blocks at the pier", "invented": true },
+            { "role": "the schoolteacher who rows to Lysekil on Saturdays", "invented": true }
+          ],
+          "secrets": [{ "t": "Someone has been leaving a bottle of water and a loaf in the cave.", "invented": true }],
+          "rumours": [{ "t": "'They say the military will want the south point one day. Don't tell the sheep.'", "invented": true, "grounding": "battery built there 1970 (after 1950: a seed)" }],
+          "questSeeds": [{ "t": "Deliver a wrapped parcel from the Lysekil bakery to the teacher before the Saturday boat.", "invented": true }],
+          "artifacts": [{ "name": "stoneware shard with a blue band", "rarity": "common", "madeEra": "1800s", "foundEra": "1950", "invented": true }]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "Season-inhabited since the 1970s, owned by a village association; no motor vehicles; the south point 'Kalven' (25 ha) is a nature reserve since 2016 managed by Västkuststiftelsen; a guest harbour; seal colony on Breviks skär; the 'Klingkyrka' cave is its main sight.", "src": "LAN-kalven", "c": "high", "also": "SVW-korno" },
+            { "t": "The island's villages were declared of national interest for cultural-environment care in 1987.", "src": "SVW-korno", "c": "medium" }
+          ],
+          "landmarks": [{ "what": "the old military pier at Kalven; traces of gun positions", "exists": true, "src": "LAN-kalven", "c": "high" }],
+          "folklore": [], "placeName": { "meaning": "'the barley isle'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [{ "role": "a member of the island association who keeps the sheep", "invented": true }],
+          "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    },
+
+    "village:Fiskebäckskil": {
+      "name": "Fiskebäckskil", "kind": "village", "lat": 58.24565, "lon": 11.45663,
+      "nameListIds": ["village:Fiskebäckskil", "relation/10250491 (Bökeviks skär)"],
+      "confidence": "high for outline; 1703 thin",
+      "sources": ["SVW-fbk", "VS-fbk", "SVW-gullmarn", "W1700", "W1950", "SVW-skaftosocken"],
+      "timeline": [
+        { "year": 1535, "t": "The church bell is cast (the old wooden church replaced in 1772).", "src": "W1700", "c": "medium" },
+        { "year": 1665, "t": "Altarpiece dated 1665 in the old church.", "src": "W1700", "c": "medium" },
+        { "year": 1867, "t": "Bath resort begins (museum record cited in W1950).", "src": "W1950", "c": "medium" },
+        { "year": 1866, "t": "The painter Carl Wilhelmson is born, a mate's son; his villa and studio stand above the village.", "src": "SVW-fbk", "c": "medium" },
+        { "year": 1877, "t": "Kristineberg marine research station founded by the Royal Academy of Sciences.", "src": "SVW-gullmarn", "c": "medium" },
+        { "year": 1951, "t": "The local municipal community is dissolved on 31 December.", "src": "SVW-fbk", "c": "medium" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "A fishing place 'since the 1500s' on the west side of a deep inlet (a 'kil'); a parish with a wooden church, probably an estimated size of a few dozen households.", "src": "W1700", "c": "uncertain" },
+            { "t": "The oak font dates from the 1600s and the altarpiece from 1665, so the church had furnishing.", "src": "W1700", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "an old wooden church on the hill; sea huts at the head of the 'kil'", "exists": true, "src": "W1700", "c": "uncertain" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the fish-brook inlet' (fisk-bäck-kil): a kil is an inlet in old Bohuslän dialect.", "src": "SVW-fbk", "c": "medium" },
+          "regulars": [{ "role": "a church-warden's wife who knows every family's boat", "invented": true }],
+          "secrets": [], "rumours": [{ "t": "Torhild's family trades fish for grain at the Fiskebäckskil quay.", "invented": true, "grounding": "canon: Torhild lives by Lysekil, across the fjord mouth" }],
+          "questSeeds": [{ "t": "Row a message across the fjord mouth to the Lysekil pilot station.", "invented": true }],
+          "artifacts": []
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "370 inhabitants (535 including Östersidan) in 1950; a former skipper community with the largest freight fleet in Bohuslän in the 1800s; bath resort since 1867; locals rented rooms to summer guests; the AB Lyckes söner cannery at Östersidan (name only).", "src": "W1950", "c": "high" },
+            { "t": "The Lysekil to Fiskebäckskil passenger ferry ran; the 1950 ship could not be identified. The old passenger boat 'Ran' (1876) is tied to the route by an undated museum record.", "src": "W1950", "c": "high" },
+            { "t": "Lyckans Slip, the boatyard slip at the head of the inlet, is named on a tourism page; its age is not given.", "src": "VS-fbk", "c": "low" },
+            { "t": "The shallow sandy beach at Bökevik was a bathing spot; the 'Bökeviks skär' skerry carries the name.", "src": "VS-fbk", "c": "low" }
+          ],
+          "landmarks": [
+            { "what": "sea huts with openings onto the water; captains' villas with glass verandahs higher up", "exists": true, "src": "VS-fbk", "c": "medium" },
+            { "what": "Kaptensgatan and winding steps and paths between houses", "exists": true, "src": "VS-fbk", "c": "medium" },
+            { "what": "Wilhelmson's villa with studio, high up", "exists": true, "src": "SVW-fbk", "c": "medium" },
+            { "what": "the 1772 church", "exists": true, "src": "W1700", "c": "medium" },
+            { "what": "Östersidan opposite: the cannery chimney and saltery buildings", "exists": "uncertain", "src": "W1950", "c": "uncertain" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the fish-brook inlet'.", "src": "SVW-fbk", "c": "medium" },
+          "regulars": [
+            { "role": "Britta, a fisherman's daughter, 17 (canon)", "invented": true },
+            { "role": "a retired shipmaster on a bench along Kaptensgatan", "invented": true },
+            { "role": "a ferry deckhand who knows everyone's business", "invented": true }
+          ],
+          "secrets": [{ "t": "Britta's family shed above the slip holds the gas tanks for the lights (canon).", "invented": true }],
+          "rumours": [{ "t": "'The ferry's late again, and they say the lights are out since the storm.'", "invented": true }],
+          "questSeeds": [{ "t": "Carry a basket of mackerel across to the Lysekil market stall and bring back flour.", "invented": true }],
+          "artifacts": [
+            { "name": "ship's-lantern glass, cracked", "rarity": "common", "madeEra": "1900s", "foundEra": "1950", "invented": true },
+            { "name": "shipmaster's brass sextant case, empty", "rarity": "uncommon", "madeEra": "1880s", "foundEra": "1950", "invented": true, "basedOn": ["skipper community, SVW-fbk"] }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "A summer village of sea huts and captains' villas; the schooner and school-sailing vessel T/S Kvartsita has her home port at Kyrkekajen; the passenger ferry to Lysekil still runs; Klubbans biological station and Kristineberg research station are close by.", "src": "VS-fbk", "c": "medium" }
+          ],
+          "landmarks": [{ "what": "Svalan's jetty (canon): the opening's house by the water", "exists": true, "src": "PLACE-NAMES", "c": "uncertain" }],
+          "folklore": [], "placeName": { "meaning": "'the fish-brook inlet'.", "src": "SVW-fbk", "c": "medium" },
+          "regulars": [{ "role": "old Britta (canon)", "invented": true }],
+          "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    },
+
+    "village:Grundsund": {
+      "name": "Grundsund", "kind": "village", "lat": 58.21336, "lon": 11.41924,
+      "nameListIds": ["village:Grundsund", "harbour:Grundsunds hamn", "relation/10250201 (Bonden, west of Grundsund)"],
+      "confidence": "high for 1798-1950; doubtful as a village in 1703",
+      "sources": ["SVW-grundsund", "SVW-grundsunds-kyrka", "W1700", "W1950", "RAA", "RAA-sjomarken"],
+      "timeline": [
+        { "year": 1794, "t": "An auction of a wreck and its fittings is held in Grundsund; the ship was lost west of Skaftö.", "src": "RAA", "c": "medium", "ref": "L1960:5588" },
+        { "year": 1798, "t": "Royal permission for a chapel (February); consecrated 5 October 1799, the fourth day of prayer. The money for the first building came from a herring catch: a seine team decided to make one cast for herring and donate the profit.", "src": "SVW-grundsund", "c": "medium" },
+        { "year": 1818, "t": "A tower and a bell added; before that a ship's bell was used.", "src": "SVW-grundsund", "c": "medium" },
+        { "year": 1875, "t": "Bonden sea mark built: a white stone cairn, 8 m, on the highest point of the skerry Bonden west of Grundsund; the pole and red ball on top fell in 2005.", "src": "RAA-sjomarken", "c": "high", "ref": "LYSEKIL GÅSÖ S:14" },
+        { "year": 1893, "t": "About 1,100 people; the chapel is rebuilt as a cross church with 700 seats.", "src": "SVW-grundsund", "c": "medium" },
+        { "year": 1914, "t": "The canal and harbour built 1914 to 1918.", "src": "W1950", "c": "medium" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "As a village: doubtful. One source says a fishing place 'from the 1600s at least'; the museum says the present village began in the 1700s herring period as three clusters round the sound. The name Grundsund may only have become a village name when the church was built.", "src": "W1700", "c": "uncertain" },
+            { "t": "The sound itself is named for being shallow (grund = shallow), now Grundsund canal, separating Skaftölandet from Ösö.", "src": "SVW-grundsund", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "a shallow sound between two islands with a few huts at each end", "exists": true, "src": "W1700", "c": "uncertain" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'the shallow sound' (grund = shoal, sund = sound).", "src": "SVW-grundsund", "c": "medium" },
+          "regulars": [{ "role": "a fisher couple whose boat is drawn up on the slip by the sound", "invented": true }],
+          "secrets": [], "rumours": [],
+          "questSeeds": [{ "t": "A pilot's boat has stuck on the sandbar in the sound at ebb: help float it before dark.", "invented": true }],
+          "artifacts": []
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "983 inhabitants (1950); never a bath resort; raincoat manufacture and canning in the 1900s; a Bovik mackerel-in-tomato cannery (undated); English fishing cutters were bought for mackerel fishing in the early 1900s; the wooden vessel Sandö (long-line fishing from 1949) is based here.", "src": "W1950", "c": "high", "also": "SVW-grundsund" },
+            { "t": "The main church (cross church, 1893) has a plaster Christ by Thorvaldsen on the altar (replaced by an oil painting in 1937 by another artist) and a big Danish Bible of 1588-89 on the pulpit.", "src": "SVW-grundsunds-kyrka", "c": "medium" },
+            { "t": "Wrecks near Grundsund include the schooner Maria and Anna Maria (both 10 Feb 1905, same storm), the first on the west side of the skerry Bonden (3 dead).", "src": "RAA", "c": "medium", "ref": "L1960:6098, L1960:5828" }
+          ],
+          "landmarks": [
+            { "what": "the white cross church (1893 rebuild of the 1799 red-painted chapel)", "exists": true, "src": "SVW-grundsunds-kyrka", "c": "medium" },
+            { "what": "Bonden: white 8 m stone cairn with a pole and red ball on the highest point", "exists": true, "src": "RAA-sjomarken", "c": "high" },
+            { "what": "the canal with the harbour basin, cutters moored in rows", "exists": true, "src": "W1950", "c": "medium" },
+            { "what": "raincoat factory, cannery buildings, fish racks", "exists": "uncertain", "src": "SVW-grundsund", "c": "low" }
+          ],
+          "folklore": [
+            { "kind": "story", "t": "The chapel's first money came from one cast of the herring net, donated: a story the village tells about its church.", "src": "SVW-grundsund", "c": "medium" }
+          ],
+          "placeName": { "meaning": "'the shallow sound'.", "src": "SVW-grundsund", "c": "medium" },
+          "regulars": [
+            { "role": "the boatbuilder who is the boy's father and takes Svalan in (canon)", "invented": true },
+            { "role": "a cutter skipper who fishes mackerel and talks about the English builders", "invented": true },
+            { "role": "a raincoat-factory seamstress on her break", "invented": true }
+          ],
+          "secrets": [{ "t": "The old men say you can see the Bonden pole ball flash red at sunset from the quay.", "invented": true, "grounding": "RAÄ: red ball on top until 2005" }],
+          "rumours": [{ "t": "'Mackerel are in. The cutters are going out Saturday.'", "invented": true }],
+          "questSeeds": [
+            { "t": "Fetch repair parts (canon first errand) and a tin of paint for Svalan.", "invented": true, "grounding": "canon" },
+            { "t": "Deliver a bag of mackerel to a regular on Gåsö.", "invented": true }
+          ],
+          "artifacts": [
+            { "name": "mackerel tin, Bovik label", "rarity": "common", "madeEra": "1950", "foundEra": "1950", "invented": true, "basedOn": ["Bovik mackerel cannery (SVW-grundsund)"] },
+            { "name": "seine-net cork float", "rarity": "common", "madeEra": "1900s", "foundEra": "1950", "invented": true }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "Grundsund was the main location for the TV series 'Saltön' (first season 2005), which drew tourists.", "src": "SVW-grundsund", "c": "medium" }
+          ],
+          "landmarks": [{ "what": "the canal, the cross church, the guest and fishing harbour", "exists": true, "src": "SVW-grundsund", "c": "medium" }],
+          "folklore": [], "placeName": { "meaning": "'the shallow sound'.", "src": "SVW-grundsund", "c": "medium" },
+          "regulars": [{ "role": "a fish-shop owner", "invented": true }], "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    },
+
+    "village:Lysekil": {
+      "name": "Lysekil", "kind": "village", "lat": 58.27717, "lon": 11.4431,
+      "nameListIds": ["village:Lysekil", "light:Stångehuvud", "relation/10250169 (Stora Harpö)", "relation/10237897 (Jämningarna)", "relation/10250374 (Inre Byxeskär)"],
+      "confidence": "high; Lysekil's pilot station not found",
+      "sources": ["SVW-lysekil", "W1700", "W1950", "RAA", "RAA-sjomarken", "SVW-tordenskjold", "P1700"],
+      "timeline": [
+        { "year": 1658, "t": "Roskilde peace: Bohuslän (and Lysekil) becomes Swedish.", "src": "SVW-lysekil", "c": "medium" },
+        { "year": 1666, "t": "After big herring catches Lysekil is one of the six harbours where herring packing is allowed; a herring inspector is stationed. The herring period fades already in 1675.", "src": "SVW-lysekil", "c": "medium" },
+        { "year": 1712, "t": "Norwegian ships (Tordenskjold's) are fired on in Norra hamnen.", "src": "SVW-lysekil", "c": "medium" },
+        { "year": 1717, "t": "Tordenskjold's return: a ship of the line is said to have gone aground off Gåsö and fired on Swedish riders on land. Only sv.wikipedia states this; a search found no second source.", "src": "SVW-lysekil", "c": "low" },
+        { "year": 1773, "t": "A fire burns 23 of the fishing village's 80 houses.", "src": "SVW-lysekil", "c": "medium" },
+        { "year": 1874, "t": "Jämningarna and Byxeskären cairns built at the western inlet to Lysekil and Gullmarn: white stone cairns with a red belt (Jämningarna) and a green belt and square topmark (Byxeskären).", "src": "RAA-sjomarken", "c": "high" },
+        { "year": 1890, "t": "Stångehuvud light first lit; extinguished 1940 and replaced by Stångholmen.", "src": "W1950", "c": "medium" },
+        { "year": 1916, "t": "Calla Curman starts buying Stångehuvud (1916-20) to stop quarrying; given to the Academy in 1925.", "src": "SVW-lysekil", "c": "medium" },
+        { "year": 1943, "t": "Operation Bridford: fast gunboats run Lysekil to Hull with ball bearings through the German Skagerrak blockade, autumn 1943 to winter 1944; resumed 1944-45 with supplies for the Danish resistance.", "src": "SVW-lysekil", "c": "medium" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [
+            { "t": "A fishing place older than the herring period 1566-1587, with its own church and priest; by 1645 82 adults, half of them strandsittare. Part of Lysekil parish from 1700.", "src": "SVW-lysekil", "c": "medium" },
+            { "t": "The settlement lay round Norra hamnen (the old Gamlestan); in 1712 a Norwegian squadron was fired on there, so the village had seen real war.", "src": "SVW-lysekil", "c": "medium" },
+            { "t": "A state pilot service existed from 1696 and compulsory pilotage from 1667; a pilot station by Lysekil is in the canon (Torhild's family) but no source for Lysekil's pilot station was found.", "src": "P1700", "c": "uncertain" },
+            { "t": "The herring boom of 1566-1587 and the 1666 packing licence had faded by 1675; the early 1700s were lean.", "src": "SVW-lysekil", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "a wooden church on the hill (Kyrkberget); a cluster of fishing huts round Norra hamnen", "exists": true, "src": "SVW-lysekil", "c": "medium" },
+            { "what": "a stone cairn on Stångehuvud's granite", "exists": "uncertain", "src": "SVW-lysekil", "c": "uncertain" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "'Lyse' (the parish; 'light' or a brook) + 'kil' (an inlet): 'the inlet by Lyse'.", "src": "SVW-lysekil", "c": "medium" },
+          "regulars": [
+            { "role": "Torhild's father, a pilot who also fishes and farms (canon)", "invented": true },
+            { "role": "a herring inspector's clerk who counts barrels and checks nobody sells outside the six harbours", "invented": true }
+          ],
+          "secrets": [{ "t": "Local boys know where a Norwegian cannon-ball from 1712 is stuck in the cliff behind Norra hamnen.", "invented": true, "grounding": "SVW-lysekil: ships shelled there 1712" }],
+          "rumours": [{ "t": "'The king's war is far, but the Norwegians have been at our harbour once already. Mind the pilots when they say the fleet is near.'", "invented": true, "grounding": "SVW-lysekil 1712" }],
+          "questSeeds": [{ "t": "Take Torhild's tally of ship arrivals to the herring inspector before the tide turns.", "invented": true }],
+          "artifacts": [{ "name": "iron cannon-ball, rusted flat", "rarity": "uncommon", "madeEra": "1712", "foundEra": "1950 / today", "invented": true, "basedOn": ["SVW-lysekil: 1712 firing in Norra hamnen"] }]
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "A town since 1 April 1903 with about 6,000 inhabitants (no 1950 figure found: 5,969 in 1960); engines, stone (declining), fishing, a bath resort since the mid-1800s.", "src": "W1950", "c": "high" },
+            { "t": "Lysekils Mekaniska Verkstad (1899) made the Skandia hot-bulb engines; hot-bulb engines made in Lysekil until 1966.", "src": "W1950", "c": "high" },
+            { "t": "Stångehuvud lay dark in 1950: its light was extinguished in 1940 and replaced by Stångholmen. The granite headland itself was saved from quarrying by Calla Curman and is a natural reserve (since 1982).", "src": "W1950", "c": "high", "also": "SVW-lysekil" },
+            { "t": "The war's last years made Lysekil a secret port: Operation Bridford ran ball-bearings to England 1943-45.", "src": "SVW-lysekil", "c": "medium" },
+            { "t": "A great many wrecks cluster in the late-October storm of 1863 and the early-November storm of 1872 (see timeline of Käringön/Gullholmen).", "src": "RAA", "c": "medium" }
+          ],
+          "landmarks": [
+            { "what": "Jämningarna: white stone cairn with a red belt at the western inlet", "exists": true, "src": "RAA-sjomarken", "c": "high" },
+            { "what": "Byxeskären: white stone cairn with a green belt and square topmark", "exists": true, "src": "RAA-sjomarken", "c": "high" },
+            { "what": "Stångehuvud's pink-grey granite slabs facing the open sea", "exists": true, "src": "SVW-lysekil", "c": "medium" },
+            { "what": "the cold-bath house and the Curman villas in Old Norse style", "exists": true, "src": "SVW-lysekil", "c": "medium" },
+            { "what": "the passenger ferry to Fiskebäckskil", "exists": true, "src": "W1950", "c": "high" }
+          ],
+          "folklore": [],
+          "placeName": { "meaning": "see 1703.", "src": "SVW-lysekil", "c": "medium" },
+          "regulars": [
+            { "role": "the depot clerk in the Lysekil harbour shed who hands out gas tanks and paraffin (canon)", "invented": true },
+            { "role": "a hot-bulb engine fitter with oil to his elbows", "invented": true },
+            { "role": "a bath-house attendant who sweeps the cold-bath jetty", "invented": true }
+          ],
+          "secrets": [{ "t": "Down by Norra hamnen an old fisherman says the war-time gunboats came in at night with their lights out and he never saw them.", "invented": true, "grounding": "Operation Bridford (SVW-lysekil)" }],
+          "rumours": [{ "t": "'The Skandia works has a new engine that won't fail you in a calm.'", "invented": true }],
+          "questSeeds": [
+            { "t": "Collect gas tanks from the depot and carry them out to four automatic lights (canon).", "invented": true, "grounding": "canon chapter 1" },
+            { "t": "Take a repaired engine part back to a Grundsund skipper.", "invented": true }
+          ],
+          "artifacts": [
+            { "name": "Skandia engine builder's plate", "rarity": "uncommon", "madeEra": "1920s-1950", "foundEra": "1950", "invented": true, "basedOn": ["W1950: Skandia engines made in Lysekil to 1966"] }
+          ]
+        },
+        {
+          "era": "today",
+          "facts": [
+            { "t": "A town with an aquarium (Havets Hus), a refinery since 1975 and a guest harbour in the old Norra hamnen; the 1926 cast-iron urinal in Norra hamnen is a listed building.", "src": "SVW-lysekil", "c": "medium" }
+          ],
+          "landmarks": [{ "what": "the restored 1941 Kråksundsgap lantern stands in a roundabout in Lysekil (canon easter egg)", "exists": true, "src": "PLACE-NAMES", "c": "uncertain" }],
+          "folklore": [], "placeName": { "meaning": "see 1703.", "src": "SVW-lysekil", "c": "medium" },
+          "regulars": [{ "role": "an aquarium guide", "invented": true }], "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    },
+
+    "relation/10250201": {
+      "name": "Bonden (the outer skerry west of Grundsund)", "kind": "skerry", "lat": 58.2087, "lon": 11.3127,
+      "nameListIds": ["relation/10250201", "NOT relation/10239120 (the other Bonden, at the southern edge)"],
+      "confidence": "high (sea mark and wreck records); which skerry the wreck records mean should be checked on the chart",
+      "sources": ["RAA", "RAA-sjomarken", "SVW-skaftosocken"],
+      "timeline": [
+        { "year": 1875, "t": "A white stone cairn, 8 m high, built on the skerry's highest point; a pole and red ball on top fell in 2005.", "src": "RAA-sjomarken", "c": "high", "ref": "LYSEKIL GÅSÖ S:14" },
+        { "year": 1905, "t": "10 February, a north-west gale: the schooner Anna Maria, her rig damaged, anchored; the chain parted and she drifted ashore on the west side of Bonden; 3 died. A schooner named Maria is recorded the same day.", "src": "RAA", "c": "medium", "ref": "L1960:6098, L1960:5828" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [{ "t": "No cairn yet (built 1875); the skerry is a bare rock west of the Skaftö coast.", "src": "RAA-sjomarken", "c": "medium" }],
+          "landmarks": [{ "what": "bare rock, gulls, nothing built", "exists": true, "src": "RAA-sjomarken", "c": "uncertain" }],
+          "folklore": [], "placeName": { "meaning": "'the farmer' (bonde): the name is a common skerry name; no meaning researched here.", "src": "PLACE-NAMES", "c": "uncertain", "note": "Not a source." },
+          "regulars": [], "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        },
+        {
+          "era": "1950",
+          "facts": [{ "t": "A white 8 m stone cairn with a pole and red ball stood on the highest point and was the first thing you saw coming in to Grundsund from the sea.", "src": "RAA-sjomarken", "c": "high" },
+                    { "t": "The 1905 wreck of the schooner Anna Maria on the west side was still within living memory.", "src": "RAA", "c": "medium" }],
+          "landmarks": [
+            { "what": "white stone cairn 8 m with pole and red ball", "exists": true, "src": "RAA-sjomarken", "c": "high" },
+            { "what": "rotting spars on the west side from the wreck", "exists": "uncertain", "src": "RAA", "c": "uncertain" }
+          ],
+          "folklore": [], "placeName": { "meaning": "'the farmer'.", "src": "PLACE-NAMES", "c": "uncertain" },
+          "regulars": [{ "role": "a Grundsund lad who rows out to Bonden on a dare to touch the cairn", "invented": true }],
+          "secrets": [{ "t": "On the west side the old men say a brass-capped chain link still lies from the 1905 wreck.", "invented": true, "grounding": "RAÄ L1960:6098: anchor chain parted" }],
+          "rumours": [{ "t": "'Mind Bonden's west side in a north-wester: that took the Anna Maria.'", "invented": true, "grounding": "L1960:6098" }],
+          "questSeeds": [{ "t": "A boy dared to touch Bonden's cairn and left his cap there: fetch it.", "invented": true }],
+          "artifacts": [{ "name": "chain link from the Anna Maria's parted chain", "rarity": "rare", "madeEra": "1905", "foundEra": "1950", "invented": true, "basedOn": ["L1960:6098"] }]
+        },
+        {
+          "era": "today",
+          "facts": [{ "t": "The pole and red ball on top fell in 2005.", "src": "RAA-sjomarken", "c": "high" }],
+          "landmarks": [{ "what": "the white cairn, now without pole and ball", "exists": true, "src": "RAA-sjomarken", "c": "high" }],
+          "folklore": [], "placeName": { "meaning": "'the farmer'.", "src": "PLACE-NAMES", "c": "uncertain" },
+          "regulars": [], "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    },
+
+    "light:Islandsberg": {
+      "name": "Islandsberg", "kind": "light", "lat": 58.19763, "lon": 11.40503,
+      "nameListIds": ["light:Islandsberg"],
+      "confidence": "medium; the story of the keeper's house is only in two lines of sv.wikipedia and the repo doc",
+      "sources": ["SVW-islandsberg", "W1950", "RAA-sjomarken", "PLACE-NAMES"],
+      "timeline": [
+        { "year": 1875, "t": "A white 2.5 m stone cairn is built just south of what became the keeper's house: a wide view; not marked on the chart.", "src": "RAA-sjomarken", "c": "high", "ref": "LYSEKIL ISLANDSBERG 1:27" },
+        { "year": 1883, "t": "A combined lighthouse and keeper's house is built on the Skaftö mainland, 7 km south of Lysekil near Grundsund.", "src": "SVW-islandsberg", "c": "medium" },
+        { "year": 1938, "t": "The keeper's-house light goes dark; a new unmanned AGA light tower stands 425 m north (Bx(4) WRG 12 s). The old house is sold in 1948 to a private family.", "src": "W1950", "c": "high", "also": "SVW-islandsberg" }
+      ],
+      "eras": [
+        {
+          "era": "1703",
+          "facts": [{ "t": "No light until 1883; the headland is a bare granite hill ('Island's hill') on the sailing route round to Ellösefjorden. The parish journey from Grundsund 'round Islandsberg and across Ellösefjorden' was sometimes hard in 1700s weather.", "src": "SVW-grundsund", "c": "medium" }],
+          "landmarks": [{ "what": "a bare hill used as a seamark by day", "exists": true, "src": "PLACE-NAMES", "c": "uncertain" }],
+          "folklore": [], "placeName": { "meaning": "'the island hill' (the game's gloss).", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [{ "role": "a church-goer rowing round the hill to Morlanda in a blow", "invented": true }], "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        },
+        {
+          "era": "1950",
+          "facts": [
+            { "t": "Islandsberg was not dark in 1950, contrary to the design note: the old keeper's-house light had gone dark in 1938, but a new automatic concrete tower 425 m north was lit.", "src": "W1950", "c": "high" },
+            { "t": "The old keeper's house was sold in 1948 to a private family; it is a summer house today.", "src": "W1950", "c": "high", "also": "SVW-islandsberg" }
+          ],
+          "landmarks": [
+            { "what": "the white automatic tower north of the old house", "exists": true, "src": "W1950", "c": "high" },
+            { "what": "the 1883 keeper's house, privately owned since 1948", "exists": true, "src": "SVW-islandsberg", "c": "medium" },
+            { "what": "the white 2.5 m cairn just south of the old house", "exists": true, "src": "RAA-sjomarken", "c": "high" }
+          ],
+          "folklore": [], "placeName": { "meaning": "'the island hill'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [{ "role": "the family who bought the old keeper's house in 1948, still learning its quirks", "invented": true }],
+          "secrets": [{ "t": "The family found a keeper's logbook in a wall cupboard and have not shown it to anyone.", "invented": true, "grounding": "house sold 1948, ex-station" }],
+          "rumours": [{ "t": "'The light is automatic now but the old keeper still sits on the rock some evenings.'", "invented": true }],
+          "questSeeds": [{ "t": "Deliver gas to the automatic light and relight it yourself (canon).", "invented": true, "grounding": "canon chapter 1" }],
+          "artifacts": [{ "name": "keeper's logbook, last pages blank", "rarity": "rare", "madeEra": "1883-1938", "foundEra": "1950", "invented": true, "basedOn": ["station manned 1883-1938 (SVW-islandsberg, W1950)"] }]
+        },
+        {
+          "era": "today",
+          "facts": [{ "t": "The old house is a private summer house; the tower stands.", "src": "SVW-islandsberg", "c": "medium" }],
+          "landmarks": [{ "what": "the concrete tower and the old house", "exists": true, "src": "SVW-islandsberg", "c": "medium" }],
+          "folklore": [], "placeName": { "meaning": "'the island hill'.", "src": "PLACE-NAMES", "c": "medium" },
+          "regulars": [], "secrets": [], "rumours": [], "questSeeds": [], "artifacts": []
+        }
+      ]
+    }
+
+  }
+}
