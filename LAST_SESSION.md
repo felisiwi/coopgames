@@ -1,6 +1,6 @@
 # Last session
 
-**2026-11-07, describes `felix/windward-next-run` @ 1020d30 (pushed, NOT merged; main = d5e54e2).** Mission control: read `docs/MISSION-CONTROL.md` first, then merge the branch.
+**2026-11-07, describes `felix/windward-next-run` @ e3e231c + the Task-card commit (pushed, NOT merged; main = d5e54e2). Felix phone-tested pause and ?jump=britta: both work.** Mission control: read `docs/MISSION-CONTROL.md` first, then merge the branch.
 
 **State:** chapter 1 in 1950 is MERGED and LIVE (https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html).
 Order of play: the opening in the engine (`src/opening-stage.js`: dusk over today's Fiskebäckskil, storm, lighthouse rewind
@@ -29,3 +29,4 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 
 - mission-control handover written (`docs/MISSION-CONTROL.md`).
 - stage agent, Next run: batches 0-2 on `felix/windward-next-run` (1020d30); 69 test files pass; no save keys changed. Errand wind covers `errand`+`return`, hands back at `help` (not `free`: the doc was stale).
+- stage agent, Task card: in 1950 the Task button now shows what-and-why (`TASK_WHY`, `taskCardLines` in `story-1950.js`, draft copy) before the progress line; 70 test files pass.

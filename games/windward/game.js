@@ -48,7 +48,7 @@ import { createHarbourWater } from './src/harbour-water.js';
 import { createTaskUi } from './src/task-ui.js';
 import { createWakeScene } from './src/wake-scene.js';
 import { createBeats } from './src/beats-1950.js';
-import { STORY_1950, BRITTA_HOUSE, BRITTA_ENTRY, TANKS_TOAST, EASE_OFF_BRITTA, OBJECTIVES, NOW_TITLE, EASE_OFF_GRUNDSUND, EASE_OFF_YARD, FITTINGS_TOAST, HELP_TOAST, YARD, LIGHTS_1950, KEEPER_LIGHT, RELIGHT_STEPS, NO_GAS_HINT, GLOW_TOAST, FUTURE_CARD, FUTURE_LIGHT_NAME } from './src/story-1950.js';
+import { taskCardLines, STORY_1950, BRITTA_HOUSE, BRITTA_ENTRY, TANKS_TOAST, EASE_OFF_BRITTA, OBJECTIVES, NOW_TITLE, EASE_OFF_GRUNDSUND, EASE_OFF_YARD, FITTINGS_TOAST, HELP_TOAST, YARD, LIGHTS_1950, KEEPER_LIGHT, RELIGHT_STEPS, NO_GAS_HINT, GLOW_TOAST, FUTURE_CARD, FUTURE_LIGHT_NAME } from './src/story-1950.js';
 import { createBrittaHouse } from './src/britta-house.js';
 import { shouldShowOpening, hasSeenOpening, markOpeningSeen, hasSeenIntro, markIntroSeen, resetIntro } from './src/opening.js';
 import { GREY_DAWN, blendLook, snapshotLook, applyLook as applyLookValues } from './src/dusk.js';
@@ -739,6 +739,13 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     taskUi.showGrandma();
   }
   // The goal's tag on the sail view (Navigate): 1950: the depot, then Måseskär, then Fiskebäckskil; Today: Fiskebäckskil once all five are lit.
+  // 1950, with the gas aboard: the nearest light still dark, so it is always clear where to sail next (Felix, 2026-11-06). The Navigate tag (guide) and the Task card share this choice.
+  function nextDarkLight() {
+    if (!task) return null;
+    let best = null, bd = Infinity;
+    for (const l of task.lights) { if (!task.isDark(l.id)) continue; const d = Math.hypot(l.x - self.x, l.z - self.z); if (d < bd) { bd = d; best = l; } }
+    return best && (lightEntries.find((e) => e.id === best.id) || best);
+  }
   function guide() {
     if (!chartCtl || !task) return;
     if (era1950 && beats && beats.phase !== 'free') { // the first beats: Grundsund, then the yard
@@ -747,9 +754,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       return;
     }
     const p = task.phase;
-    // 1950, with the gas aboard: point at the nearest light still dark, so it is always clear where to sail next (Felix, 2026-11-06)
-    const nextDark = () => { let best = null, bd = Infinity; for (const l of task.lights) { if (!task.isDark(l.id)) continue; const d = Math.hypot(l.x - self.x, l.z - self.z); if (d < bd) { bd = d; best = l; } } return best && (lightEntries.find((e) => e.id === best.id) || best); };
-    const goal = era1950 ? (p === 'lights' ? nextDark() : p === 'keeper' ? keeperEntry : p === 'report' ? brittaEntry : null) : (p === 'report' ? grandma : null);
+    const goal = era1950 ? (p === 'lights' ? nextDarkLight() : p === 'keeper' ? keeperEntry : p === 'report' ? brittaEntry : null) : (p === 'report' ? grandma : null);
     if (goal) chartCtl.setTarget(goal); else if (era1950) chartCtl.clearTarget();
   }
   // The beats' moments (1950): the chandler at Grundsund, the boy at the yard, and the first sight of the beach.
@@ -835,7 +840,8 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       onRelit,
       onRelightDone: () => { if (task && task.phase === 'report') taskUi.showReport(); else if (era1950 && task && task.phase === 'keeper') taskUi.showReport(STORY_1950.keeperNudge); }, // the last light: no end card, a short "sail home" card (1950: "sail out to Måseskär")
       onRelightTick,
-      onTask: () => (era1950 && beats ? taskUi.showCards([{ title: NOW_TITLE, lines: [progressLine()], button: 'Close' }]) : taskUi.showStart({ progress: progressLine() })),
+      // the Task card in 1950: what the job is and why first, then the progress line (taskCardLines, src/story-1950.js); Today keeps the start card
+      onTask: () => (era1950 && beats ? taskUi.showCards([{ title: NOW_TITLE, lines: taskCardLines(beats.phase !== 'free' ? beats.phase : task.phase, progressLine(), (nextDarkLight() || {}).name || null), button: 'Close' }]) : taskUi.showStart({ progress: progressLine() })),
       onLog: () => taskUi.showLog(logRows(lightLog, lightLookup, lightGlyph)),
       granddadMarks,
       canvas, coast, nameBook: chartNames, storage: store, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
