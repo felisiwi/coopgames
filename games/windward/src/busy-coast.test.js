@@ -169,7 +169,8 @@ await check('vessels and berth boats are deterministic from their seed, within t
     const v = vesselFor(c.traffic.classes[r.class], r.seed), w = vesselFor(c.traffic.classes[r.class], r.seed), blk = c.traffic.classes[r.class];
     assert.deepEqual(v, w);
     assert.ok(v.speed >= blk.speed[0] && v.speed <= blk.speed[1] && v.dwellS >= blk.dwellS[0] && v.dwellS <= blk.dwellS[1], r.id);
-    assert.ok(v.L >= blk.assets[0].length[0] && v.L <= blk.assets[0].length[1], r.id);
+    const own = blk.assets.find((a) => a.id === v.asset); // a class can hold several boat types, each with its own length range
+    assert.ok(own && v.L >= own.length[0] && v.L <= own.length[1], `${r.id}: ${v.asset} ${v.L} m`);
   }
   for (const m of world.moorings) for (const b of m.berths) { const x = berthBoat(c.moorings.classes[b.class], b); assert.ok(x.L <= b.fitL + 1e-9 && x.L >= 4, `${m.id}`); }
   assert.ok(frac(0.25, 1) !== frac(0.26, 1));

@@ -2,14 +2,14 @@
 
 Found by research agents; each was verified against the repo's recorded source reading (data/world-1950.json S-records, data/island-lore.json, docs/ISLAND-LORE.md,
 docs/PEOPLE-1950.md) before anything changed. Live pages were NOT re-fetched in this pass: the checks are against what those research notes recorded.
-Data and docs only: game.js and the 3D models are untouched. `src/corrections.test.js` keeps the light-data corrections from drifting back.
+Data and docs only at first (game.js untouched); the Islandsberg 3D model was reworked afterwards, see below. `src/corrections.test.js` keeps the light-data corrections from drifting back.
 
 - [x] **Stångehuvud dark since 1940.** Verified: fyr.org (S07: "EXTINGUISHED in 1940 and replaced by Stångholmen"), fyr.org Stångholmen (S08: set up 1940), stangehuvud.se (the
   house's owner, read in full). Only ibiblio's "inactive since the 1990s" disagrees (probably the building). Fixed `src/lighthouses.js` (the light's `lightNote`). `src/lights-1950.js` and
   WORLD-1950 already said 1940. `built: 1890` unchanged, so the rewind is unaffected. LIGHTHOUSES.md row updated. (`ref/lighthouses-kit-play.js` is a frozen lab: left.)
 - [x] **Islandsberg's old light.** Verified: fyr.org / WORLD-1950.md:233 ("lens window in the upper gable"). The ridge claim lived in the `description` string of `src/lighthouses.js`
-  (not in LIGHTHOUSES.md, which said nothing about where the light sat): fixed there, and LIGHTHOUSES.md now states it. **Still open: the 3D model (`houseLight`) draws a lantern on the
-  ridge; reworking the model is a separate task (TODO(felix)).**
+  (not in LIGHTHOUSES.md, which said nothing about where the light sat): fixed there, and LIGHTHOUSES.md now states it. **The 3D model is now fixed too** (branch felix/windward-islandsberg-model: `gableWindowLight`
+  draws the window row on the seaward gable's upper floor, no ridge lantern; `src/islandsberg-model.test.js`).
 - [x] **Lysekil around 1703.** Verified (sv.wikipedia Lysekil and lotsarnastockholm.se, as read by the island-lore research; medium): a fishing place older than the 1566-87 herring period with
   its own church and priest, 82 adults in 1645, part of Lysekil parish from 1700, pilot station set up early in the 1700s (4 pilots in 1729), town only from 1 April 1903. The three files never
   called Lysekil a hamlet outright, but `PEOPLE-1700.md` framed Torhild's world as "a poor fishing hamlet" and still recommended Grundsund over Lysekil. Fixed: PEOPLE-1700.md (intro, a

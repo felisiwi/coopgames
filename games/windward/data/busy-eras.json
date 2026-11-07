@@ -29,12 +29,32 @@
                 "id": "sailboat1950",
                 "weight": 1,
                 "stripes": [
-                  "white"
+                  "white",
+                  "cream",
+                  "paleblue",
+                  "green"
                 ],
                 "length": [
-                  7.4,
-                  8.8
+                  7.0,
+                  9.0
                 ]
+              },
+              {
+                "id": "koster1950",
+                "weight": 1.1,
+                "stripes": [
+                  "tar",
+                  "white",
+                  "yellowtar",
+                  "workgreen",
+                  "cream",
+                  "paleblue"
+                ],
+                "length": [
+                  8.5,
+                  10.0
+                ],
+                "role": "yacht"
               }
             ],
             "speed": [
@@ -54,11 +74,13 @@
                 "stripes": [
                   "white",
                   "green",
-                  "blue"
+                  "blue",
+                  "tar",
+                  "yellowtar"
                 ],
                 "length": [
-                  5.6,
-                  6.8
+                  5.2,
+                  7.2
                 ]
               }
             ],
@@ -79,12 +101,45 @@
                 "stripes": [
                   "white",
                   "dark",
-                  "green"
+                  "workgreen",
+                  "tarbrown"
+                ],
+                "length": [
+                  8.0,
+                  10.0
+                ]
+              },
+              {
+                "id": "eka1950",
+                "weight": 1.2,
+                "stripes": [
+                  "tarbrown",
+                  "tar",
+                  "white",
+                  "green",
+                  "paleblue"
+                ],
+                "length": [
+                  4.0,
+                  5.2
+                ]
+              },
+              {
+                "id": "koster1950",
+                "weight": 1.2,
+                "stripes": [
+                  "tar",
+                  "white",
+                  "yellowtar",
+                  "workgreen",
+                  "cream",
+                  "paleblue"
                 ],
                 "length": [
                   8.5,
                   10.0
-                ]
+                ],
+                "role": "fishing"
               }
             ],
             "speed": [
@@ -144,11 +199,30 @@
                 "id": "sailboat1950",
                 "weight": 1,
                 "stripes": [
-                  "white"
+                  "white",
+                  "cream",
+                  "paleblue",
+                  "green"
                 ],
                 "length": [
-                  7.2,
-                  8.6
+                  7.0,
+                  8.8
+                ]
+              },
+              {
+                "id": "koster1950",
+                "weight": 1,
+                "stripes": [
+                  "tar",
+                  "white",
+                  "yellowtar",
+                  "workgreen",
+                  "cream",
+                  "paleblue"
+                ],
+                "length": [
+                  8.0,
+                  9.6
                 ]
               }
             ],
@@ -162,11 +236,28 @@
                 "stripes": [
                   "white",
                   "green",
-                  "blue"
+                  "blue",
+                  "tar",
+                  "yellowtar"
                 ],
                 "length": [
-                  5.6,
-                  6.6
+                  5.2,
+                  6.8
+                ]
+              },
+              {
+                "id": "eka1950",
+                "weight": 1.5,
+                "stripes": [
+                  "tarbrown",
+                  "tar",
+                  "white",
+                  "green",
+                  "paleblue"
+                ],
+                "length": [
+                  4.0,
+                  5.0
                 ]
               }
             ],
@@ -210,8 +301,22 @@
                   "sand"
                 ],
                 "length": [
-                  8.0,
-                  9.4
+                  7.2,
+                  10.0
+                ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.8,
+                  6.2
                 ]
               }
             ],
@@ -235,8 +340,22 @@
                   "sand"
                 ],
                 "length": [
-                  5.4,
-                  6.2
+                  4.8,
+                  7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.7,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
+                  7.0
                 ]
               }
             ],
@@ -260,8 +379,8 @@
                   "sage"
                 ],
                 "length": [
-                  5.2,
-                  6.0
+                  4.8,
+                  6.8
                 ]
               }
             ],
@@ -328,8 +447,22 @@
                   "sand"
                 ],
                 "length": [
-                  7.4,
-                  9.0
+                  7.2,
+                  10.0
+                ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.6,
+                  6.0
                 ]
               }
             ],
@@ -346,8 +479,22 @@
                   "sand"
                 ],
                 "length": [
-                  5.2,
-                  6.0
+                  4.8,
+                  7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.5,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
+                  6.4
                 ]
               }
             ],
@@ -392,8 +539,22 @@
                   "sand"
                 ],
                 "length": [
-                  8.2,
-                  9.6
+                  7.2,
+                  10.0
+                ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.8,
+                  6.2
                 ]
               }
             ],
@@ -418,8 +579,22 @@
                   "sage"
                 ],
                 "length": [
-                  5.6,
-                  6.6
+                  4.8,
+                  7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.7,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
+                  7.0
                 ]
               }
             ],
@@ -444,8 +619,8 @@
                   "sage"
                 ],
                 "length": [
-                  5.4,
-                  6.4
+                  4.8,
+                  6.8
                 ]
               }
             ],
@@ -513,7 +688,21 @@
                 ],
                 "length": [
                   7.2,
-                  9.6
+                  10.0
+                ]
+              },
+              {
+                "id": "daysailer",
+                "weight": 0.8,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  4.6,
+                  6.0
                 ]
               }
             ],
@@ -531,7 +720,21 @@
                   "sage"
                 ],
                 "length": [
-                  5.2,
+                  4.8,
+                  7.0
+                ]
+              },
+              {
+                "id": "rib",
+                "weight": 0.5,
+                "stripes": [
+                  "navy",
+                  "coral",
+                  "sage",
+                  "sand"
+                ],
+                "length": [
+                  5.0,
                   6.4
                 ]
               }

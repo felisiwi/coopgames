@@ -202,22 +202,37 @@ function loft(S, st, { bands, deck = C.teak, pf = 0.55, open = false, floorY = 0
   }
 }
 
+// The helpers the boat models in src/boat-models.js reuse (hull lofting, sails, the Swedish flag).
+export { hullStations, loft, atZ, sail3, quadSail, windowAt, shade, mid, lerp, clamp, C };
+// A small Swedish ensign on a staff (blue with a yellow cross) streaming aft (-z), standing at x, y, z. 16 triangles; [designer]: a common sight on both eras' boats, no source. Both sides read.
+export function addFlag(S, x, y, z, { h = 1.1, w = 0.55, fh = 0.34 } = {}) {
+  S.tube([x, y, z], [x, y + h, z], 0.025, 0.02, 3, C.silver);
+  const y1 = y + h, y0 = y1 - fh, blue = 0x5b86b8, gold = 0xe8c04f;
+  S.quad([x, y0, z], [x, y0, z - w], [x, y1, z - w], [x, y1, z], blue);
+  for (const d of [0.006, -0.006]) {
+    S.quad([x + d, y0 + fh * 0.4, z], [x + d, y0 + fh * 0.4, z - w], [x + d, y0 + fh * 0.6, z - w], [x + d, y0 + fh * 0.6, z], gold);
+    S.quad([x + d, y0, z - w * 0.28], [x + d, y0, z - w * 0.42], [x + d, y1, z - w * 0.42], [x + d, y1, z - w * 0.28], gold);
+  }
+}
+
 // ======================================================================================================
 //  TODAY
 // ======================================================================================================
 export const STRIPES = { navy: C.navy, coral: C.coral, sage: C.sage, sand: C.sand };
 
 // A modern cruising sailboat: white hull and sails, a coloured cove stripe, teak deck, cabin with windows. ~9 m.
-export function addSailboat(S, G, { L = 9, stripe = 'navy', sailsUp = true, lod = false, lit = true } = {}) {
+export function addSailboat(S, G, { L = 9, stripe = 'navy', sailsUp = true, lod = false, lit = true, look = null } = {}) {
   const stripeC = STRIPES[stripe] ?? C.navy;
-  const B = L * 0.34;
+  // a look (src/boat-looks.js) sets the hull and sail colours, the rig, the spray hood and the flag; with none the boat is the white sloop it always was
+  const hullC = look?.hull ?? C.white, sailC = look?.sail ?? C.sailWhite, jibC = look ? shade(look.sail, 0.97) : C.genoa, coveC = !look || look.hullName === 'white' ? stripeC : C.white;
+  const B = L * 0.34 * (look?.beamK ?? 1);
   const st = hullStations({ L, B, n: lod ? 5 : 9, sheer0: 0.8, riseBow: 0.34, riseStern: 0.1, keelD: 0.7, peak: 0.45, pBow: 1.3, pStern: 1.8, sternW0: 0.55 });
-  const bands = lod ? [[0.5, C.white], [1, C.antifoul]] : [[0.13, C.white], [0.21, stripeC], [0.55, C.white], [1, C.antifoul]];
+  const bands = lod ? [[0.5, hullC], [1, C.antifoul]] : [[0.13, hullC], [0.21, coveC], [0.55, hullC], [1, C.antifoul]];
   loft(S, st, { bands, deck: C.teak, pf: 0.55 });
   const dy = (z) => atZ(st, z, 'sheer');
   const cz = L * 0.04, cl = L * 0.36, cw = B * 0.6;
   const base = dy(cz);
-  S.box(0, base + 0.26, cz, cw, 0.52, cl, C.white); // cabin trunk
+  S.box(0, base + 0.26, cz, cw, 0.52, cl, hullC); // cabin trunk
   S.box(0, base + 0.55, cz, cw * 0.86, 0.06, cl * 0.9, C.grey); // roof panel
   S.quad([-cw * 0.4, base + 0.01, cz - cl * 0.5 - cl * 0.55], [cw * 0.4, base + 0.01, cz - cl * 0.5 - cl * 0.55], [cw * 0.4, base + 0.01, cz - cl * 0.5 - 0.1], [-cw * 0.4, base + 0.01, cz - cl * 0.5 - 0.1], C.teakDark); // cockpit sole
   for (const side of [1, -1]) {
@@ -231,28 +246,36 @@ export function addSailboat(S, G, { L = 9, stripe = 'navy', sailsUp = true, lod 
   const boomY = base + 1.15, boomLen = L * 0.32;
   S.at({ p: [0, 0, mz], ry: 0.3 }, () => { // boom, main and cover swing out about the mast (17 degrees)
     S.tube([0, boomY, -0.04], [0, boomY - 0.02, -boomLen], 0.05, 0.045, 4, sailsUp ? C.silver : stripeC);
-    if (sailsUp) sail3(S, [0, boomY + 0.05, -0.06], [0, top - 0.4, -0.06], [0, boomY + 0.05, -boomLen], 0.38, C.sailWhite);
+    if (sailsUp) sail3(S, [0, boomY + 0.05, -0.06], [0, top - 0.4, -0.06], [0, boomY + 0.05, -boomLen], 0.38, sailC);
     else if (!lod) S.tube([0, boomY + 0.08, -0.1], [0, boomY + 0.08, -boomLen + 0.2], 0.11, 0.11, 5, stripeC); // sail cover on the boom
   });
-  if (sailsUp && !lod) sail3(S, [0, base + 0.35, L / 2 - 0.25], [0, top - 1.1, mz + 0.05], [0.08, base + 0.9, mz - 1.5], 0.3, C.genoa);
-  if (!lod) S.box(0, base + 0.3, cz - cl * 0.5 - cl * 0.62, cw * 0.7, 0.04, 0.5, stripeC); // spray hood stripe / bench
+  if (sailsUp && !lod && look?.rig !== 'main') sail3(S, [0, base + 0.35, L / 2 - 0.25], [0, top - 1.1, mz + 0.05], [0.08, base + 0.9, mz - 1.5], 0.3, jibC);
+  if (!lod && (look ? look.hood : true)) S.box(0, base + 0.3, cz - cl * 0.5 - cl * 0.62, cw * 0.7, 0.04, 0.5, stripeC); // spray hood stripe / bench
+  if (look?.flag && !lod) addFlag(S, 0, st[0].sheer, -L / 2 + 0.2); // the ensign on the stern
 }
 
 // A small open motorboat with a console and an outboard. ~6 m.
-export function addMotorboat(S, G, { L = 6.2, stripe = 'coral', lod = false, lit = true } = {}) {
+export function addMotorboat(S, G, { L = 6.2, stripe = 'coral', lod = false, lit = true, look = null } = {}) {
   const stripeC = STRIPES[stripe] ?? C.coral;
-  const B = L * 0.38;
+  const hullC = look?.hull ?? C.white, coveC = !look || look.hullName === 'white' ? stripeC : C.white;
+  const B = L * 0.38 * (look?.beamK ?? 1);
   const st = hullStations({ L, B, n: lod ? 5 : 8, sheer0: 0.62, riseBow: 0.4, riseStern: 0.04, keelD: 0.34, peak: 0.35, pBow: 1.2, pStern: 3, sternW0: 0.85 });
-  loft(S, st, { bands: lod ? [[0.5, C.white], [1, C.antifoul]] : [[0.15, C.white], [0.23, stripeC], [0.52, C.white], [1, C.antifoul]], deck: C.teak, pf: 0.4 });
+  loft(S, st, { bands: lod ? [[0.5, hullC], [1, C.antifoul]] : [[0.15, hullC], [0.23, coveC], [0.52, hullC], [1, C.antifoul]], deck: C.teak, pf: 0.4 });
   const dy = (z) => atZ(st, z, 'sheer');
   const cz = 0.3, base = dy(cz);
-  S.box(-0.45, base + 0.28, cz, 0.7, 0.56, 0.9, C.white); // console
+  S.box(-0.45, base + 0.28, cz, 0.7, 0.56, 0.9, hullC); // console
   S.quad([-1.05, base + 0.55, cz + 0.28], [0.15, base + 0.55, cz + 0.28], [0.15, base + 1.05, cz + 0.08], [-1.05, base + 1.05, cz + 0.08], C.trim); // windscreen frame
   G[lit ? 'on' : 'off'].quad([-1.0, base + 0.6, cz + 0.285], [0.1, base + 0.6, cz + 0.285], [0.1, base + 1.0, cz + 0.095], [-1.0, base + 1.0, cz + 0.095], null);
   S.box(0, base + 0.2, -L * 0.22, B * 0.55, 0.3, 0.7, C.sand); // bench
-  S.box(0, base + 0.55, -L / 2 + 0.2, 0.34, 0.9, 0.3, C.charcoal); // outboard
+  S.box(0, base + 0.55, -L / 2 + 0.2, 0.34, 0.9, 0.3, look?.outboard === 'white' ? C.white : C.charcoal); // outboard
   S.box(0, base + 1.05, -L / 2 + 0.2, 0.4, 0.2, 0.36, C.grey);
   if (!lod) S.box(0, base + 0.06, L / 2 - 0.9, B * 0.3, 0.12, 0.5, stripeC); // anchor locker
+  if (look?.canopy && !lod) { // a canvas canopy on four thin posts over the console and the bench
+    const cy = base + 1.6;
+    for (const [x, z] of [[-0.8, 0.55], [0.7, 0.55], [-0.8, -1.7], [0.7, -1.7]]) S.tube([x, base, z], [x, cy, z], 0.03, 0.03, 3, C.silver);
+    S.box(-0.05, cy + 0.04, -0.575, 1.7, 0.06, 2.3, stripeC);
+  }
+  if (look?.flag && !lod) addFlag(S, 0.55, st[0].sheer, -L / 2 + 0.3);
 }
 
 // The Lysekil-Fiskebackskil passenger ferry (line 847), ~24 m: a low white boat with an enclosed salon (windows all along),
@@ -668,31 +691,42 @@ const wallWindowsX = (S, G, halfW, y0, zs, w, h, lit = true, offLit = 3) => { //
 };
 
 // A wooden snipa (open working boat) with a small inboard engine: a low engine box, a little wheel shelter, a thin exhaust. ~6.6 m.
-export const SNIPA_COLOURS = { white: F50.hullWhite, green: 0x7fa08a, blue: 0x7f9bb8 };
-export function addSnipa1950(S, G, { variant = 'white', L = 6.6, lit = true } = {}) {
+export const SNIPA_COLOURS = { white: F50.hullWhite, green: 0x7fa08a, blue: 0x7f9bb8, tar: 0x4b3d34, yellowtar: 0xc9a24d }; // tar and yellow tar: [designer], from the tarred / yellow-tarred working boats of the older sources (docs/BOATS-BY-ERA.md)
+// look (src/boat-looks.js): wheel shelter or not, a small sprit sail on some (a Bohusläns museum snipa model has one), a flag; with none the snipa is the motor snipa it always was.
+export function addSnipa1950(S, G, { variant = 'white', L = 6.6, lit = true, look = null } = {}) {
   const hull = SNIPA_COLOURS[variant] ?? F50.hullWhite;
-  const st = hullStations({ L, B: L * 0.32, n: 8, sheer0: 0.55, riseBow: 0.3, riseStern: 0.14, keelD: 0.42, peak: 0.45, pBow: 1.5, pStern: 1.6, sternW0: 0.08 }); // pointed bow, pointed and slightly rounded stern (S50)
+  const st = hullStations({ L, B: L * 0.32 * (look?.beamK ?? 1), n: 8, sheer0: 0.55, riseBow: 0.3, riseStern: 0.14, keelD: 0.42, peak: 0.45, pBow: 1.5, pStern: 1.6, sternW0: 0.08 }); // pointed bow, pointed and slightly rounded stern (S50)
   loft(S, st, { bands: [[0.14, F50.hullWhite], [0.3, hull], [0.46, shade(hull, 0.94)], [0.62, hull], [1, F50.bottom]], open: true, floorY: 0.14, floor: F50.deck, pf: 0.5 });
   S.box(0, 0.3, L * 0.1, st[3].w * 1.5, 0.04, 0.28, F50.wood); S.box(0, 0.3, -L * 0.28, st[3].w * 1.4, 0.04, 0.28, F50.wood); // thwarts
   S.box(0, 0.4, L * 0.02, 0.8, 0.46, 0.7, F50.engine); // the engine box
   S.tube([0.2, 0.6, L * 0.02 - 0.2], [0.34, 1.5, L * 0.02 - 0.55], 0.04, 0.035, 4, F50.exhaust); // exhaust
-  S.box(0, 0.62, -L * 0.1, 1.0, 0.7, 0.9, hull); // wheel shelter
-  S.box(0, 1.0, -L * 0.1, 1.1, 0.05, 1.0, F50.white);
-  (lit ? G.on : G.off).quad([-0.4, 0.7, -L * 0.1 + 0.46], [0.4, 0.7, -L * 0.1 + 0.46], [0.4, 0.97, -L * 0.1 + 0.46], [-0.4, 0.97, -L * 0.1 + 0.46], null);
+  if (!look || look.shelter) {
+    S.box(0, 0.62, -L * 0.1, 1.0, 0.7, 0.9, hull); // wheel shelter
+    S.box(0, 1.0, -L * 0.1, 1.1, 0.05, 1.0, F50.white);
+    (lit ? G.on : G.off).quad([-0.4, 0.7, -L * 0.1 + 0.46], [0.4, 0.7, -L * 0.1 + 0.46], [0.4, 0.97, -L * 0.1 + 0.46], [-0.4, 0.97, -L * 0.1 + 0.46], null);
+  } else S.box(0, 0.5, -L * 0.1, 0.5, 0.3, 0.4, F50.engine); // no shelter: just the helm box
+  if (look?.rig === 'sprit') { // a small sprit sail on a mast forward of the engine
+    const mz = L * 0.24;
+    S.tube([0, 0.1, mz], [0, 2.7, mz], 0.05, 0.03, 4, F50.wood);
+    S.tube([0, 0.45, mz - 0.05], [0, 2.95, mz - 1.5], 0.035, 0.022, 4, F50.wood); // the sprit
+    quadSail(S, [0, 0.55, mz - 0.05], [0, 2.5, mz - 0.05], [0, 2.85, mz - 1.5], [0, 0.55, mz - 1.7], 0.26, look.sail, 3, 3);
+  }
+  if (look?.flag) addFlag(S, 0.0, st[0].sheer, -L / 2 + 0.3);
   S.tube([0, 0.2, L / 2 - 0.5], [0, 1.4, L / 2 - 0.4], 0.04, 0.03, 4, F50.wood); // a short stem staff with the flag
   S.tri([0, 1.4, L / 2 - 0.4], [0, 1.15, L / 2 - 0.4], [-0.5, 1.28, L / 2 - 0.55], 0xe8c04f);
 }
 
 // A wooden fishing boat (kosterbåt type) with a wheelhouse aft and a mast forward, ~11.5 m. Looks: designer's choice within the era's
 // wooden-boat picture (docs/WORLD-1950.md); the hull colours are the part that varies.
-export const FISHBOAT_COLOURS = { white: 0xeae6da, dark: 0x2f3b3a, green: 0x5f7f6c }; // white = the documented one (linseed-oil paint above the waterline, a red stripe, a red bottom: S48/S49); the others are designer's choice
-export function addFishingBoat1950(S, G, { variant = 'white', L = 11.5, lit = true } = {}) {
+export const FISHBOAT_COLOURS = { white: 0xeae6da, dark: 0x2f3b3a, green: 0x5f7f6c, workgreen: 0x5f7f6c, tarbrown: 0x5b4636 }; // white = the documented one (linseed-oil paint above the waterline, a red stripe, a red bottom: S48/S49); the others are designer's choice
+// look (src/boat-looks.js): wheelhouse colour, a tanbark steadying sail or none (a fishing boat never gets a Bermuda or gaff rig), 0-4 floats; with none it is the boat it always was.
+export function addFishingBoat1950(S, G, { variant = 'white', L = 11.5, lit = true, look = null } = {}) {
   const hull = FISHBOAT_COLOURS[variant] ?? FISHBOAT_COLOURS.white;
-  const st = hullStations({ L, B: L * 0.31, n: 10, sheer0: 0.95, riseBow: 0.85, riseStern: 0.25, keelD: 0.85, peak: 0.55, pBow: 1.2, pStern: 1.6, sternW0: 0.28 });
+  const st = hullStations({ L, B: L * 0.31 * (look?.beamK ?? 1), n: 10, sheer0: 0.95, riseBow: 0.85, riseStern: 0.25, keelD: 0.85, peak: 0.55, pBow: 1.2, pStern: 1.6, sternW0: 0.28 });
   loft(S, st, { bands: [[0.12, F50.hullWhite], [0.5, hull], [0.58, F50.falu], [1, F50.bottom]], deck: F50.deck, pf: 0.5 }); // the red stripe at the waterline, the red bottom
   const dy = (z) => atZ(st, z, 'sheer');
   const wz = -L * 0.2, base = dy(wz);
-  S.box(0, base + 0.95, wz, 2.1, 1.9, 2.3, F50.white); // wheelhouse
+  S.box(0, base + 0.95, wz, 2.1, 1.9, 2.3, look?.house ?? F50.white); // wheelhouse
   S.box(0, base + 1.98, wz, 2.4, 0.1, 2.6, F50.black);
   S.at({ p: [0, base, wz + 1.16] }, () => { for (const x of [-0.6, 0.6]) (lit ? G.on : G.off).quad([x - 0.4, 1.0, 0.03], [x + 0.4, 1.0, 0.03], [x + 0.4, 1.7, 0.03], [x - 0.4, 1.7, 0.03], null); });
   wallWindowsX(S, G, 1.06, base, [wz - 0.4, wz + 0.4], 0.55, 0.7, lit, 5);
@@ -700,29 +734,36 @@ export function addFishingBoat1950(S, G, { variant = 'white', L = 11.5, lit = tr
   S.tube([0.5, base + 3.3, wz - 1.58], [0.5, base + 3.45, wz - 1.59], 0.16, 0.16, 6, F50.falu); // its red band
   const mz = L * 0.22;
   S.tube([0, base, mz], [0, base + 7.2, mz], 0.12, 0.07, 6, F50.wood); // mast
-  S.tube([0, base + 2.6, mz - 0.05], [0, base + 2.6, mz - 3.2], 0.06, 0.05, 5, F50.wood); // boom
-  sail3(S, [0, base + 2.7, mz - 0.08], [0, base + 6.4, mz - 0.08], [0, base + 2.7, mz - 3.0], 0.3, 0xa7714b); // a small tanned steadying sail
+  if (!look || look.rig === 'steady') { // a small steadying sail (tanbark or cotton)
+    S.tube([0, base + 2.6, mz - 0.05], [0, base + 2.6, mz - 3.2], 0.06, 0.05, 5, F50.wood); // boom
+    sail3(S, [0, base + 2.7, mz - 0.08], [0, base + 6.4, mz - 0.08], [0, base + 2.7, mz - 3.0], 0.3, look?.sail ?? 0xa7714b);
+  }
   S.box(0, base + 0.25, L * 0.02, 1.5, 0.5, 1.8, F50.grey); // hatch coaming
-  for (const [x, z] of [[-1.0, wz - 2.6], [1.0, wz - 2.7], [-0.3, wz - 3.0]]) S.drum(x, base, z, 0.28, 0.5, 6, 0xe48f55); // orange floats
+  for (const [x, z] of [[-1.0, wz - 2.6], [1.0, wz - 2.7], [-0.3, wz - 3.0], [0.5, wz - 3.5]].slice(0, look ? look.floats : 3)) S.drum(x, base, z, 0.28, 0.5, 6, 0xe48f55); // orange floats
 }
 
 // A wooden sailing boat of the time (a folkbåt-like keelboat), cotton sails, varnished mast and boom. ~8 m.
-export function addSailboat1950(S, G, { L = 8, sailsUp = true, hull = F50.hullWhite, lit = true } = {}) {
-  const st = hullStations({ L, B: L * 0.28, n: 9, sheer0: 0.65, riseBow: 0.32, riseStern: 0.1, keelD: 0.95, peak: 0.45, pBow: 1.4, pStern: 1.7, sternW0: 0.3 });
-  loft(S, st, { bands: [[0.16, F50.hullWhite], [0.55, hull], [1, F50.bottom]], deck: F50.deck, pf: 0.55 });
+// look (src/boat-looks.js): hull and cotton-sail colours, a mainsail-only rig on some, the doghouse or not, a flag; with none it is the white folkbåt it always was.
+export function addSailboat1950(S, G, { L = 8, sailsUp = true, hull = F50.hullWhite, lit = true, look = null } = {}) {
+  const hullC = look?.hull ?? hull, sailC = look?.sail ?? F50.cotton, sailShade = look ? shade(look.sail, 0.93) : F50.cottonShade;
+  const st = hullStations({ L, B: L * 0.28 * (look?.beamK ?? 1), n: 9, sheer0: 0.65, riseBow: 0.32, riseStern: 0.1, keelD: 0.95, peak: 0.45, pBow: 1.4, pStern: 1.7, sternW0: 0.3 });
+  loft(S, st, { bands: [[0.16, look?.strake ?? F50.hullWhite], [0.55, hullC], [1, F50.bottom]], deck: F50.deck, pf: 0.55 });
   const dy = (z) => atZ(st, z, 'sheer');
   const cz = L * 0.06, base = dy(cz);
-  S.box(0, base + 0.2, cz, L * 0.2, 0.4, L * 0.28, F50.hullWhite); // low doghouse
-  wallWindowsX(S, G, L * 0.1, base + 0.1, [cz - 0.3, cz + 0.3], 0.4, 0.2, lit, 4);
+  if (!look || look.doghouse) {
+    S.box(0, base + 0.2, cz, L * 0.2, 0.4, L * 0.28, F50.hullWhite); // low doghouse
+    wallWindowsX(S, G, L * 0.1, base + 0.1, [cz - 0.3, cz + 0.3], 0.4, 0.2, lit, 4);
+  }
   S.box(0, base + 0.02, -L * 0.28, L * 0.18, 0.03, 1.2, F50.deck); // cockpit
   const mz = L * 0.14, top = base + L * 1.1;
   S.tube([0, base, mz], [0, top, mz], 0.06, 0.035, 5, F50.wood);
   const boomY = base + 1.0, boomLen = L * 0.34;
   S.at({ p: [0, 0, mz], ry: 0.28 }, () => {
     S.tube([0, boomY, -0.04], [0, boomY - 0.02, -boomLen], 0.045, 0.04, 4, F50.wood);
-    if (sailsUp) quadSail(S, [0, boomY + 0.05, -0.06], [0, top - 0.5, -0.06], [0, top - 0.5, -0.06], [0, boomY + 0.05, -boomLen], 0.34, F50.cotton, 2, 3, (i, j) => ((i + j) % 2 ? F50.cottonShade : F50.cotton)); // panelled cotton
+    if (sailsUp) quadSail(S, [0, boomY + 0.05, -0.06], [0, top - 0.5, -0.06], [0, top - 0.5, -0.06], [0, boomY + 0.05, -boomLen], 0.34, sailC, 2, 3, (i, j) => ((i + j) % 2 ? sailShade : sailC)); // panelled cotton
   });
-  if (sailsUp) sail3(S, [0, base + 0.35, L / 2 - 0.25], [0, top - 1.0, mz + 0.05], [0.08, base + 0.8, mz - 1.3], 0.26, F50.cottonShade);
+  if (sailsUp && look?.rig !== 'main') sail3(S, [0, base + 0.35, L / 2 - 0.25], [0, top - 1.0, mz + 0.05], [0.08, base + 0.8, mz - 1.3], 0.26, sailShade);
+  if (look?.flag) addFlag(S, 0, st[0].sheer, -L / 2 + 0.2);
 }
 
 // The Lysekil-Fiskebackskil ferry of the 1950s. See docs/WORLD-1950.md for what is and is not documented about its name and look; the
