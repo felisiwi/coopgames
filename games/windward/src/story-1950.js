@@ -59,6 +59,25 @@ export const OBJECTIVES = {
   free: { hud: '', now: '' },
 };
 export const NOW_TITLE = 'Now';
+// What the Task card says FIRST, in every 1950 phase: what the job is and why (a line or two), before the progress line. Keys: the beats phases before 'free', then the task phases.
+// INVENTED-DIALOGUE / TODO(felix): all draft copy in the voice of the cards above (plain, short); only the facts come from the story (the storm put the AGA lights out, Britta's family's
+// shed holds the gas, Måseskär has the only keeper here, the boatbuilder's family mends Svalan). Felix rewrites by eye.
+export const TASK_WHY = {
+  find: ['You washed ashore on Skaftö after the storm.'],
+  errand: ['The boatbuilder can’t mend Svalan without fittings.', 'Grundsund is a short sail from here.'],
+  return: ['The boatbuilder is waiting for the fittings to mend Svalan.'],
+  help: ['The storm put the lights out.', 'Someone in Fiskebäckskil asked for help.'],
+  gas: ['The storm put out the four automatic gas lights.', 'Their gas is in Britta’s shed.'],
+  lights: ['The storm put out the four automatic gas lights.', 'Take a gas tube to each one and light it again.'],
+  keeper: ['The lights are burning again.', 'Måseskär’s keeper, the only keeper out here, is waiting for his post.'],
+  report: ['The lights are burning and the post is delivered.', 'Britta is waiting to hear.'],
+  done: ['The lights are burning and Svalan is afloat again.'],
+};
+// The Task card's lines: what and why, then (in the lights phase) the nearest dark light by name, then the progress line. phase: a key of TASK_WHY. nearestDark: the light's name or null.
+export function taskCardLines(phase, progress, nearestDark = null) {
+  const why = TASK_WHY[phase] || [];
+  return [...why, ...(phase === 'lights' && nearestDark ? [`Nearest dark light: ${nearestDark}.`] : []), progress].filter(Boolean);
+}
 export const EASE_OFF_GRUNDSUND = 'Ease off to tie up at the quay in Grundsund';
 export const EASE_OFF_YARD = 'Ease off to come alongside the yard';
 export const FITTINGS_TOAST = 'Fittings aboard · back to the boatbuilder';

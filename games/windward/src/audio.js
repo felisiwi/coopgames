@@ -25,21 +25,22 @@ export function createAudio(ContextClass = globalThis.AudioContext || globalThis
   let ctx = null;
   let master = null;
   let broken = !ContextClass;
+  let muted = false; // the pause (src/pause.js): silent, nothing scheduled plays, and new sounds are dropped until setMuted(false)
 
   function unlock() {
     if (ctx || broken) return;
     try {
       ctx = new ContextClass();
       master = ctx.createGain();
-      master.gain.value = 0.9;
+      master.gain.value = muted ? 0 : 0.9;
       master.connect(ctx.destination);
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended' && !muted) ctx.resume();
     } catch {
       broken = true;
       ctx = null;
     }
   }
-  const live = () => ctx && !broken && ctx.state !== 'closed';
+  const live = () => ctx && !broken && !muted && ctx.state !== 'closed';
 
   function tone(type, freq, t0, attack, hold, release, peak) {
     const o = ctx.createOscillator();
@@ -59,6 +60,16 @@ export function createAudio(ContextClass = globalThis.AudioContext || globalThis
   const api = {
     get unlocked() { return !!ctx && !broken; },
     unlock,
+    // The pause hook: true silences everything (volume 0, the context suspended so already-scheduled sounds do not play on later), false brings it back. Safe before unlock.
+    setMuted(on) {
+      muted = !!on;
+      if (!ctx || broken || ctx.state === 'closed') return;
+      try {
+        master.gain.value = muted ? 0 : 0.9;
+        if (muted) ctx.suspend?.(); else ctx.resume?.();
+      } catch { /* sound must never break the game */ }
+    },
+    get muted() { return muted; },
     // Listens for the first tap / key and unlocks. Returns a function that removes the listeners.
     armOnFirstGesture(target = globalThis.window) {
       if (!target || !target.addEventListener) return () => {};

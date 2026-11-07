@@ -29,7 +29,7 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
   + 16 harbour approaches carved, busy era-driven traffic + ferry, the **world-years system**
   (`worldAtYear(year)`, rows in `data/world-years.json` for 1700 / 1950 / today; `?year=2015` gives
   the old Today game), research data for 1700 and 1950, a synthesised 1950 sound lab (not yet wired).
-- **Tests:** ~66 node test files, all passing. Run: `cd games/windward && for t in src/*.test.js test/*.test.js; do node $t >/dev/null || echo FAIL $t; done`.
+- **Tests:** 65 node test files in `games/windward/src/` on `main` (recounted 2026-11-07; there is no `test/` folder; 69 on `felix/windward-next-run`), all passing. Run: `cd games/windward && for t in src/*.test.js; do node $t >/dev/null || echo FAIL $t; done`.
 
 ## 2. Where the truth lives (read in this order)
 
@@ -43,6 +43,7 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
    `world-years.json`.
 5. `games/windward/docs/`: per-stage reports and research (CHART, LURE, LIGHTHOUSE-TASK, WORLD-1700/1950,
    PEOPLE-1700/1950, SOUND-1950, COOP-CHECK, BOAT-BRIEF, passes/, seamarks/, harbours/, era-assets/…).
+   `games/windward/docs/ALIVE-SEA.md`: the alive-sea ideas plus the settled thing-model and weather grills.
 6. `AGENTS.md`, `docs/COLLABORATION.md`, `games/README.md`: hub contract and rules (Kenny shares the repo).
 
 ## 3. The story canon (short)
@@ -110,8 +111,8 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
 - Vercel Hobby = 100 deployments/day; Promote also counts as a deployment. Now on Pro.
 - The game is `index.html`; `coast-lab.html` in the same folder looks like a loading game: send exact URLs.
 - A tab left open keeps old code until reloaded; fresh loads get updates (no cache problem).
-- `requestAnimationFrame` freezes the game when the tab is hidden; traffic/ferry run on the wall
-  clock and jump ahead. No pause screen yet (on the Next-run list).
+- `requestAnimationFrame` freezes the game when the tab is hidden. `main` has no pause screen: traffic/ferry run on the wall
+  clock and jump ahead. `felix/windward-next-run` fixes it (one game clock, `src/game-clock.js`; paper pause card; co-op keeps wall time).
 - At 1:10 the boat acts like an ~80 m ship; the 20 m coast raster closes passes under ~40–60 m.
   An oriented hull barely helps (raster limit). Narrow gems (Smörasken, Kråksundsgap, Grundsund's
   canal) belong to the planned **harbour close-ups**, not carving.
@@ -126,11 +127,10 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
 
 ## 7. Next (Felix's order)
 
-1. **Next run list** (GAME-DESIGN.md "Next run"): a proper **pause** when hidden (sound off, tap to
-   continue card); the first errand **downwind both ways** (scripted wind); **light winds** must not
-   crawl (minimum speed / light-air performance).
-2. Small open choice: Navigate tag shows "A lighthouse" (names-are-discovered rule) though Britta
-   names all four; Felix may want real names there.
+1. **Next run list** (GAME-DESIGN.md "Next run"): built on `felix/windward-next-run` (pause card, scripted
+   first-errand wind, light-air curve), waiting for Felix's phone check and a merge.
+2. Navigate tag: after Britta's cards the four AGA lights show their real names (same branch); Måseskär and
+   the rest keep the discovery rule.
 3. **Co-op stage 2** ("visit the host's world"): host session message on join (clock offset + era),
    game options through the hub launch message (shared hub: Kenny), host's lit lights for the friend.
 4. **Day and night** (reuse `src/dusk.js` looks; quests bound to day/night; moor to pass time;
@@ -142,9 +142,11 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
 
 ## 8. Branches and worktrees (cleanup pending)
 
-Merged into `main` but still on GitHub: `felix/windward-1700-people`, `-1950-people`, `-busy-today`,
-`-chapter1-1950`, `-coop-check`, `-sound-lab`. Keep `felix/windward-chapter1-1950` only while
-anyone still uses its preview link; otherwise delete all merged ones. Unmerged and old:
-`felix/art-facet-rule` (September, unrelated history), `felix/windward-touch` (superseded touch
-controls). Deleting remote branches is Felix's command to run (mission control is blocked from it).
+From `git ls-remote --heads origin` on 2026-11-07 (merged = ancestor of `main`).
+Merged into `main`, still on GitHub, safe to delete: `felix/windward-1700-people`,
+`felix/windward-busy-today`, `felix/windward-chapter1-1950` (keep only while anyone still uses its
+preview link), `felix/windward-coop-check`, `felix/windward-sound-lab`, `felix/art-facet-rule`.
+(`felix/windward-1950-people` is already gone.) Unmerged: `felix/windward-touch` (superseded touch
+controls; ours). **Kenny's, not ours to delete:** `kenny/hub-mobile`, `kenny/last-session-append-only`.
+Deleting remote branches is Felix's command to run (mission control is blocked from it).
 Laptop worktrees under `~/GitHub/coopgames-*` can be removed once their branches are merged.

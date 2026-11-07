@@ -23,6 +23,8 @@ import { OPENING_PLAN, OPENING_LINES, OPENING_FLASHES, OPENING_TOTAL_S, OPENING_
 import { phaseAt, flashLevel, darkLevel } from './opening.js';
 import { pickSite, ferryClockFor, frameSite } from './opening-site.js';
 import { createJetty } from './jetty.js';
+import { createPause } from './pause.js';
+import { createPauseCard } from './pause-ui.js';
 
 const smooth = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };
 const ROW_Z = -1500;      // the rewind row sits out in the open sea, far from the coast (the coast is hidden then)
@@ -71,9 +73,8 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
   const site = pickSite({ houses: coast.summerHouses, village, heightAt: coast.heightAt });
   let clockBase = 0, busyCoast = null;
   if (busy) {
-    const t0 = performance.now() / 1000;
     const profile = { ...busy.profile, houses: { ...busy.profile.houses, litShare: 1 } }; // at dusk every window is lit
-    busyCoast = createBusyCoast({ world: busy.world, profile, toGame: coast.world.toGame, houses: coast.summerHouses, seaY: seaAt, blocked: (x, z) => isBlocked(coast.sailHeightAt, x, z), night: true, clock: () => clockBase + (performance.now() / 1000 - t0) });
+    busyCoast = createBusyCoast({ world: busy.world, profile, toGame: coast.world.toGame, houses: coast.summerHouses, seaY: seaAt, blocked: (x, z) => isBlocked(coast.sailHeightAt, x, z), night: true, clock: () => clockBase + t }); // the opening's OWN story time (dt-clamped, so a hidden tab cannot make the ferry jump), not the wall clock
     world.add(busyCoast.group);
     const ferry = busyCoast.vessels.find((v) => v.kind === 'ferry');
     const base = site && ferry ? (ferryClockFor(ferry, site.house, { atS: 2.5, withinM: 80 }) ?? ferryClockFor(ferry, site.house, { atS: 2.5, withinM: 170 })) : null; // coming in past the house during the wide first shot
@@ -135,14 +136,14 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
   }
 
   // ---- the run ----------------------------------------------------------------------------------------------------------------------------------------------
-  let t = 0, frozen = false, last = performance.now(), raf = 0, finished = false, thunderDone = new Set();
+  let t = 0, frozen = false, pausedHold = false, last = performance.now(), raf = 0, finished = false, thunderDone = new Set();
   let resolveDone; const done = new Promise((r) => { resolveDone = r; });
   const rowCam = { x: 0 };
 
   function frame(now) {
     if (finished) return;
     raf = requestAnimationFrame(frame);
-    const dt = frozen ? 0 : Math.min(0.1, (now - last) / 1000); last = now; t += dt;
+    const dt = frozen || pausedHold ? 0 : Math.min(0.1, (now - last) / 1000); last = now; t += dt;
     if (t >= OPENING_TOTAL_S) { finish('finished'); return; }
     const ph = phaseAt(t);
     const inRewind = t >= 24 && t < OPENING_TOTAL_S;
@@ -231,6 +232,7 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
     if (finished) return;
     finished = true;
     cancelAnimationFrame(raf);
+    pauseCtl.destroy(); pauseCard.destroy(); audio?.setMuted?.(false);
     window.removeEventListener('resize', resize);
     scene.traverse((o) => { if (o.geometry) o.geometry.dispose?.(); });
     water.mesh.material.dispose?.();
@@ -241,6 +243,14 @@ export function playOpening({ canvas, coast, busy = null, village, seed = 1, aud
     resolveDone(how);
   }
   skipEl.addEventListener('click', () => finish('skipped'));
+  // Pause (src/pause.js): the opening's time is its own `t` (dt-clamped), so it never needs the shared clock; hidden -> the card, the story holds, the thunder is muted.
+  const pauseCard = createPauseCard({ parent, onTap: () => pauseCtl.resume() });
+  const pauseCtl = createPause({
+    clock: { pause() {}, resume() {}, resync() {} },
+    showCard: () => pauseCard.show(), hideCard: () => pauseCard.hide(),
+    onPause: () => { pausedHold = true; audio?.setMuted?.(true); },
+    onResume: () => { pausedHold = false; last = performance.now(); audio?.setMuted?.(false); },
+  });
   raf = requestAnimationFrame(frame);
-  return { done, skip: () => finish('skipped'), dispose: () => finish('skipped'), get elapsed() { return t; }, debug: { scene, camera, site, row, towers, busy: busyCoast, get t() { return t; }, set t(v) { t = v; }, set frozen(v) { frozen = !!v; } } };
+  return { done, skip: () => finish('skipped'), dispose: () => finish('skipped'), get elapsed() { return t; }, pause: () => pauseCtl, debug: { scene, camera, site, row, towers, busy: busyCoast, get t() { return t; }, set t(v) { t = v; }, set frozen(v) { frozen = !!v; } } };
 }

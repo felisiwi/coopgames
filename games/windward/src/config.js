@@ -81,6 +81,18 @@ export const CONFIG = {
   // nextWindTarget). Was 0.4-1.0, which kept the sea from ever going calm
   // (audit: waves only varied 1.75x). Lower floor = real lulls you can see
   // on the water. Too low and the boat crawls; tune by feel.
+  // Light air (Next run, 2c): boat speed was linear in wind strength, so the lightest target wind (0.2) gave 20% of top speed (~2 m/s) and felt stuck.
+  // src/sail.js effectiveStrength(): strength at or above LIGHT_AIR_BREAKPOINT is unchanged (strong wind feels as it did); below it the wind's effect is
+  // compressed so that strength 0 would still give LIGHT_AIR_FLOOR of top speed. Strength 0.2 -> 0.367 (3.5 m/s on a beam reach, was 1.9). Continuous and
+  // still rising with the wind, so a lull is slower than a breeze, just never a crawl.
+  // The first errand's scripted wind (src/errand-wind.js): from straight behind the boat both ways. Strength 0.7 is a lively but easy breeze (about 19 kn, 5.6 m/s
+  // dead downwind). SWING_S: how long the wind takes to turn when the phase changes (the turn at Grundsund; the hand-back to the normal wind at the yard).
+  // OFF_STERN_DEG: 0 = dead downwind (speed factor 0.80); 35-45 would be a broad reach (0.92) if downwind ever feels slow.
+  ERRAND_WIND_STRENGTH: 0.7,
+  ERRAND_WIND_SWING_S: 4,
+  ERRAND_WIND_OFF_STERN_DEG: 0,
+  LIGHT_AIR_BREAKPOINT: 0.6,
+  LIGHT_AIR_FLOOR: 0.25,
   WIND_TARGET_STRENGTH_MIN: 0.2,
   WIND_TARGET_STRENGTH_MAX: 1.0,
 

@@ -1,7 +1,8 @@
 // node games/windward/src/sail.test.js — plain node, no framework, no
 // Three.js import chain (sail.js is pure math, runs headless by design).
 import assert from 'node:assert/strict';
-import { boatSpeed, speedFactor, idealTrimRad, trimMultiplier, leewardSign } from './sail.js';
+import { boatSpeed, speedFactor, idealTrimRad, trimMultiplier, leewardSign, effectiveStrength } from './sail.js';
+import { CONFIG } from './config.js';
 
 const DEG = Math.PI / 180;
 let passed = 0;
@@ -144,6 +145,25 @@ check('upwind still sails (2026-11-05): close-hauled is well under a reach but n
   assert.ok(at(30) > 0.4, `30 deg: ${at(30)}`); // was ~0.03
   assert.ok(at(45) > 0.6 && at(45) < at(90), `45 deg: ${at(45)}`);
   for (let d = 23; d < 100; d++) assert.ok(at(d + 1) >= at(d) - 1e-12, `not rising at ${d}`);
+});
+
+check('light air (2c): strong wind is exactly as before; a lull is lifted, continuous, still rising with the wind', () => {
+  const U = CONFIG.LIGHT_AIR_BREAKPOINT, F = CONFIG.LIGHT_AIR_FLOOR;
+  for (const s of [U, 0.7, 0.85, 1]) assert.equal(effectiveStrength(s), s, `unchanged at ${s}`);
+  assert.ok(Math.abs(effectiveStrength(U - 1e-9) - U) < 1e-6, 'no jump at the breakpoint');
+  assert.equal(effectiveStrength(0), F, 'strength 0 maps to the floor');
+  assert.equal(effectiveStrength(-1), F, 'never below the floor');
+  let last = -Infinity;
+  for (let s = 0; s <= 1.0001; s += 0.01) { const e = effectiveStrength(s); assert.ok(e > last, `rising at ${s}`); last = e; }
+  for (const s of [0.2, 0.3, 0.4, 0.5]) assert.ok(effectiveStrength(s) > s, `${s} is lifted`);
+});
+
+check('light air (2c): the lightest target wind (0.2) is a pleasant pace, not a crawl; the table the report quotes', () => {
+  const beam = (s) => boatSpeed(90 * DEG, 0, s, null), broad = (s) => boatSpeed(135 * DEG, 0, s, null);
+  assert.ok(beam(0.2) >= 3.3 && beam(0.2) <= 3.7, `beam reach at 0.2: ${beam(0.2)} (was 1.9)`);
+  assert.ok(broad(0.2) >= 3.2 && broad(0.2) <= 3.6, `broad reach at 0.2: ${broad(0.2)} (was 1.84)`);
+  assert.ok(Math.abs(beam(1) - 9.5) < 1e-9 && Math.abs(broad(1) - 9.186) < 0.01, 'full wind unchanged');
+  assert.ok(beam(0.2) < beam(0.5) && beam(0.5) < beam(1), 'a lull is still slower than a breeze');
 });
 
 console.log(`\n${passed}/${passed} assertions passed`);

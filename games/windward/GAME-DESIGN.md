@@ -1415,8 +1415,7 @@ Britta born ~1933 (17 in 1950, ~93 in the finale).
    Grundsund, then turns so the sail back is downwind too (scripted wind for the opening beats).
 3. **Light winds feel REALLY slow:** give the boat a sensible minimum speed / better light-air
    performance so low wind never feels stuck.
-Then: merge chapter 1 (after agent 1's rewind fixes), co-op stage 2 ("visit the host's world"),
-and day/night (reuse dusk.js).
+Then: co-op stage 2 ("visit the host's world"), then day/night (reuse dusk.js).
 
 **Rule: players keep their progress (Felix, 2026-11-06).** The live game is shared; players'
 progress lives in their browser (localStorage) on the live address. Every future change must keep
