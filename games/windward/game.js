@@ -61,6 +61,10 @@ import { createShoalLayer } from './src/shoal-look.js';
 import { createSeamarkLayer } from './src/seamark-layer.js';
 import { createHarbourMoment } from './src/harbour-moment.js';
 import { createBusyCoast } from './src/busy-coast.js';
+import { createGameClock } from './src/game-clock.js';
+import { createPause } from './src/pause.js';
+import { withBrittaNames } from './src/britta-names.js';
+import { createPauseCard } from './src/pause-ui.js';
 import { profileForYear } from './src/busy-era.js';
 
 // Bobs and tilts a boat on the wave surface (W0.6, games/windward/DESIGN.md).
@@ -461,11 +465,14 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     })
     : null;
   const seaAtCPU = (x, z) => seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength); // the sea surface at a point (waves / wind are set up below)
+  // THE game clock (src/game-clock.js): wall time minus time paused. The busy coast's traffic and ferry and the host's wind controller read it instead of the
+  // wall clock, so a pause (src/pause.js) freezes them and a return does not make them jump. (Co-op: see the rule in src/pause.js.)
+  const clock = createGameClock();
   // The busy coast: boats, the ferry, moored boats, summer houses (era profile + kit), drawn in four meshes. ?night=1 lights the windows (the dusk hook).
   const busy = coast && coast.busy
     ? createBusyCoast({
       world: coast.busy.world, profile: coast.busy.profile, toGame: coast.world.toGame, houses: coast.summerHouses,
-      seaY: seaAtCPU,
+      seaY: seaAtCPU, clock: clock.now,
       blocked: (x, z) => isBlocked(coast.sailHeightAt, x, z), // the ambient boats stay in water the boat could really be in
       night: new URLSearchParams(window.location.search).get('night') === '1',
     })
@@ -493,7 +500,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // stepWindController); the guest only ever applies incoming 'wind'
   // messages, never runs its own timer (W0.8: replaces the old instant
   // snap-to-new-wind with a gradual ease, see DESIGN.md's "Wind" section).
-  const nowS0 = performance.now() / 1000;
+  const nowS0 = clock.now(); // the GAME clock: the wind's hold/transition timers do not run while paused
   let windController = role === 'host' ? createWindController(seed, nowS0) : null;
   let wind = role === 'host' ? windController.current : initialWind(seed);
   const waves = createWaveState(wind.dir); // src/water.js: per-component wave phases
@@ -554,6 +561,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       other.heading = msg.heading;
       other.speed = msg.speed;
       if (!otherBoat) {
+        pauseCtl.peerJoined(); // a friend arrives: rejoin the wall clock so both phones see the same traffic (a solo pause left us behind it)
         otherBoat = createBoatMesh(otherColor, boatOptions);
         scene.add(otherBoat.group);
         otherWake = createWake();
@@ -576,6 +584,20 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
 
   const input = createInputState();
 
+  // Pause (src/pause.js): hidden tab / minimised app -> a paper card "Tap to continue" (src/pause-ui.js); the boat is held, sound is muted, and (solo) the game
+  // clock freezes. The card sits above every other card, so a story card or lighthouse visit underneath is exactly where it was when the player taps.
+  const pauseCard = createPauseCard({ parent: document.body, onTap: () => pauseCtl.resume() });
+  const pauseCtl = createPause({
+    clock,
+    hasPeer: () => !!otherBoat, // a friend is sailing with us: their traffic runs on wall time, so ours must too
+    showCard: () => pauseCard.show(),
+    hideCard: () => pauseCard.hide(),
+    onPause: () => audio?.setMuted(true),
+    onResume: () => audio?.setMuted(false),
+  });
+  if (debugOverlay) window.__pause = pauseCtl; // headless checks (?debug=1)
+  if (debugOverlay) window.__clock = clock;
+
   function doPing() {
     const nowS = performance.now() / 1000;
     if (nowS - lastPingS < CONFIG.PING_COOLDOWN_S) return;
@@ -586,6 +608,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   function onKeyDown(e) {
     if (e.code !== 'Space' || e.repeat) return;
     e.preventDefault(); // no page scroll
+    if (pauseCtl.paused) return; // under the pause card Space only presses its button
     doPing();
   }
   window.addEventListener('keydown', onKeyDown);
@@ -797,6 +820,9 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   };
   let cardFrames = 0; // frames a task card has been up (the 3D render pauses after a few)
   let rewardAt = null; // when the boat entered the harbour: the moment plays, then the end card (REWARD_DELAY_S later)
+  // 1950: once Britta has named the four AGA lights (beats.phase reached 'free', saved already) the chart, the Navigate tag and the visit card use their real names
+  // (src/britta-names.js). Only the chart side gets this wider name book; the "places named" count and discovery keep the real one.
+  const chartNames = nameBook && beats ? withBrittaNames(nameBook, () => beats.phase) : nameBook;
   // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
   const chartCtl = coast
     ? createChartController({
@@ -808,13 +834,13 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       onTask: () => (era1950 && beats ? taskUi.showCards([{ title: NOW_TITLE, lines: [progressLine()], button: 'Close' }]) : taskUi.showStart({ progress: progressLine() })),
       onLog: () => taskUi.showLog(logRows(lightLog, lightLookup, lightGlyph)),
       granddadMarks,
-      canvas, coast, nameBook, storage: store, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
+      canvas, coast, nameBook: chartNames, storage: store, getMarks: () => (seamarkLayer ? seamarkLayer.minimapMarks() : []), debug: !!debugOverlay, assetsBase: new URL('./assets/chart/', import.meta.url).href,
       onJump: (x, z) => { const w = coast.findOpenWater(x, z, { clear: 14 }); if (w) { self.x = w.x; self.z = w.z; self.speed = 0; } },
       // "Navigate here": the target's edge tag (src/name-labels.js); null clears it
       onTarget: (entry, titleFn) => nameLabels.setTarget(entry, entry ? Math.max(0, coast.heightAt(entry.x, entry.z)) + 8 : 0, titleFn),
       // a lighthouse visit: its name label is up while you look at it (the real name if found, else its description)
       onVisit: (entry) => {
-        const known = nameBook.isKnown(entry.id);
+        const known = chartNames.isKnown(entry.id);
         if (known || entry.desc) nameLabels.show(entry, Math.max(0, coast.heightAt(entry.x, entry.z)) + 8, performance.now() / 1000, !known);
       },
     })
@@ -916,24 +942,25 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     const nowS = now / 1000;
 
     if (role === 'host') {
+      const windS = clock.now(); // game clock (not the frame time): frozen under the pause card, wall time in co-op (src/pause.js)
       const prevPhase = windController.phase;
-      windController = stepWindController(windController, nowS);
+      windController = stepWindController(windController, windS);
       wind = windController.current;
       const justChangedPhase = windController.phase !== prevPhase;
 
       if (windController.phase === 'transition') {
-        if (justChangedPhase || nowS >= windTransitionSendAt) {
-          windTransitionSendAt = nowS + CONFIG.WIND_TRANSITION_SEND_INTERVAL_S;
-          windHeartbeatAt = nowS + CONFIG.WIND_HEARTBEAT_S;
+        if (justChangedPhase || windS >= windTransitionSendAt) {
+          windTransitionSendAt = windS + CONFIG.WIND_TRANSITION_SEND_INTERVAL_S;
+          windHeartbeatAt = windS + CONFIG.WIND_HEARTBEAT_S;
           sendWind();
         }
-      } else if (justChangedPhase || nowS >= windHeartbeatAt) {
-        windHeartbeatAt = nowS + CONFIG.WIND_HEARTBEAT_S;
+      } else if (justChangedPhase || windS >= windHeartbeatAt) {
+        windHeartbeatAt = windS + CONFIG.WIND_HEARTBEAT_S;
         sendWind();
       }
     }
 
-    const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible) || !!dawn; // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
+    const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible) || !!dawn || pauseCtl.paused; // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
     if (!frozen) phone?.apply(self, wind, dt);
     if (!frozen && (input.left || input.right)) hasSteered = true;
     if (input.up || input.down) hasTrimmed = true;
@@ -1132,7 +1159,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     // A full-screen card (storm, sail home, end) covers the view and the boat is held: nothing behind it needs drawing. Render a few frames so the
     // card opens over a real picture, then stop (the canvas keeps its last frame): the card costs no GPU. (3.4 fps at the end card was a software-GL
     // run, but a phone GPU should not draw 345k dimmed triangles under a card either.)
-    cardFrames = taskUi && taskUi.visible ? cardFrames + 1 : 0;
+    cardFrames = (taskUi && taskUi.visible) || pauseCtl.paused ? cardFrames + 1 : 0;
     if (!(ctlView && ctlView.skip3D) && cardFrames <= 3) renderer.render(scene, camera); // the chart covers the whole view: skip the 3D render
     debugOverlay?.frame(now);
     phone?.setRopeVisible(!(ctlView && ctlView.t > 0.05)); // the chart covers the view: no rope
@@ -1147,6 +1174,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
 
   window.addEventListener('beforeunload', () => {
     clearInterval(posInterval);
+    pauseCtl.destroy(); pauseCard.destroy();
     window.removeEventListener('resize', resize);
     canvas.removeEventListener('wheel', onWheel);
     window.removeEventListener('keydown', onKeyDown);

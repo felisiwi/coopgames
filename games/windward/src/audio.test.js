@@ -78,4 +78,24 @@ check('missing or broken WebAudio never throws', () => {
   assert.ok(true, 'a failing node is swallowed');
 });
 
+check('the pause hook: setMuted(true) drops new sounds and suspends the context; setMuted(false) brings sound back; safe before unlock', () => {
+  const log = { suspended: 0, resumed: 0, oscillators: 0 };
+  class P { constructor() { this.value = 0; } setValueAtTime() {} linearRampToValueAtTime() {} exponentialRampToValueAtTime() {} }
+  const node = () => ({ connect: (x) => x, disconnect() {}, start() {}, stop() {}, gain: new P(), frequency: new P(), type: '' });
+  class Ctx {
+    constructor() { this.currentTime = 0; this.state = 'running'; this.destination = node(); }
+    createGain() { return node(); } createOscillator() { log.oscillators++; return node(); } createBiquadFilter() { return node(); }
+    suspend() { log.suspended++; } resume() { log.resumed++; }
+  }
+  const early = createAudio(Ctx); early.setMuted(true); early.unlock(); early.bell();
+  assert.equal(log.oscillators, 0, 'muted before the first tap: unlocking does not make noise');
+  early.setMuted(false); early.bell(); assert.ok(log.oscillators > 0, 'unmuted: it plays');
+  const a = createAudio(Ctx); a.unlock();
+  const before = log.oscillators; a.setMuted(true);
+  assert.equal(a.muted, true); assert.equal(log.suspended, 1);
+  a.bell(); a.horn(); a.gull(); assert.equal(log.oscillators, before, 'nothing new plays while muted');
+  a.setMuted(false); assert.equal(a.muted, false); assert.ok(log.resumed >= 1);
+  a.bell(); assert.ok(log.oscillators > before);
+});
+
 console.log(`${passed} checks passed`);
