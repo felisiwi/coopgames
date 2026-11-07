@@ -1,0 +1,1379 @@
+{
+  "_about": "Artifact templates for 1950 (data only). An artifact is a collectible with a TRUE STORY: the object is invented, the story it carries is sourced wherever story.kind is \"sourced\". Tiers: common, uncommon, rare. NO UNIQUES: those are only ever placed by Felix, from docs/UNIQUE-ARTIFACT-CANDIDATES.md; six lore artifacts are deliberately held back (see heldBack).",
+  "_spec": "games/windward/docs/ALIVE-SEA.md: \"Grill: generated mini quests\" (rounds 1 to 3), \"the thing model\" (rumours, regulars, warmth), \"anchoring\", \"day and night\". Ids link to data/things-1950.json (things), artifacts-1950.json, quests-1950.json, rumours-1950.json and data/island-lore.json.",
+  "_invented": "Everything here is INVENTED unless a record says otherwise: each carries invented:true and a source {kind, refs}. Spoken lines are INVENTED-DIALOGUE, short, for Felix to rewrite by eye. No real private person is named.",
+  "_fields": {
+    "id": "artifact.<slug>",
+    "name": "the object",
+    "tier": "common | uncommon | rare (never unique)",
+    "madeEra": "when it was made (text, as the lore gives it)",
+    "foundEra": "eras it can be found in; [\"1950\"] here",
+    "story": "{ kind: sourced | invented, text, refs[], confidence: high | medium | low | none }: the true story it carries; sourced stories contain only claims in the refs",
+    "foundVia": "thing ids (secrets, drift finds) that yield it",
+    "foundAt": "anchor ids where a close look from an anchored boat finds it",
+    "givenBy": "regulars who give it once they like you or after a quest",
+    "teller": "the regular who tells the story (\"lore is told by a regular who knows\", ALIVE-SEA 13)",
+    "leadsTo": "{ quest: id | null, hook: text | null }: rare artifacts lead to small quests or story hooks (ALIVE-SEA 14)",
+    "sellable": "{ later, note }: common ones can be sold once there is an economy",
+    "drawing": "silhouette slug for the logbook collection page",
+    "unique": "always false",
+    "source": "{ kind, refs[], note }",
+    "invented": "always true (the object is invented)",
+    "lore": "{ place, hook: artifacts, index } into island-lore.json"
+  },
+  "_vocab": {
+    "tiers": [
+      "common",
+      "uncommon",
+      "rare"
+    ],
+    "storyKinds": [
+      "sourced",
+      "invented"
+    ],
+    "confidence": [
+      "high",
+      "medium",
+      "low",
+      "none"
+    ]
+  },
+  "_counts": {
+    "total": 31,
+    "byTier": {
+      "common": 19,
+      "uncommon": 8,
+      "rare": 4
+    },
+    "fromLore": 25,
+    "fromDrift": 6
+  },
+  "heldBack": {
+    "light:Måseskär#1": "brass gear wheel: this is unique candidate 3 (the clockwork pinion) in UNIQUE-ARTIFACT-CANDIDATES.md; Felix places it",
+    "village:Gullholmen#0": "oak treenail from the harbour wreck: the same wreck as unique candidate 7 (the Tordenskjold plank); held so Felix can choose",
+    "relation/10250201#0": "Anna Maria chain link: unique candidate 14",
+    "light:Gäven#0": "iron ring from the pole mark: unique candidate 13",
+    "light:Kråksundsgap Södra#0": "brass lantern plate 1954: unique candidate 1 and the lore itself says rarity unique",
+    "relation/10239114#0": "pilot-boat nameboard 1939: the lore finds it only \"today\"; a boat in service in 1950 cannot be found as an artifact in 1950"
+  },
+  "templates": [
+    {
+      "id": "artifact.lamp-mantle-tin",
+      "name": "Spare lamp mantle in its tin",
+      "tier": "common",
+      "madeEra": "1950",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Måseskär burned a Lux paraffin lamp until the station was electrified in 1950; the power came by cable and an electric bulb replaced the lamp.",
+        "refs": [
+          "people:M04",
+          "lore:light:Måseskär (SVW-masesk)"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.maseskar.assistant"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "tin",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.cannon-wad-tarred-rope",
+      "name": "Cannon wad of tarred rope",
+      "tier": "uncommon",
+      "madeEra": "1873",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "In 1873 two signal cannons on carriages were set up at Måseskär to warn ships in fog; a coal-fired steam siren replaced them in the mid-1880s.",
+        "refs": [
+          "history-start-area.md (sv.wikipedia Måseskär)"
+        ],
+        "confidence": "medium"
+      },
+      "foundVia": [
+        "secret.maseskar.signal-cannon"
+      ],
+      "teller": "place.maseskar.keeper",
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "rope-wad",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Måseskär#artifacts[2]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Måseskär",
+        "hook": "artifacts",
+        "index": 2
+      }
+    },
+    {
+      "id": "artifact.clay-pipe-ship-initial",
+      "name": "White clay pipe, stamped with a ship's initial",
+      "tier": "common",
+      "madeEra": "1800s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Clay pipes are recorded as finds on this coast (RAÄ L1960:5596); this one's ship initial is our invention.",
+        "refs": [
+          "lore:village:Käringön artifacts[0] (RAÄ L1960:5596)"
+        ],
+        "confidence": "low"
+      },
+      "foundVia": [
+        "secret.karingon.boys-loft"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "pipe",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Käringön",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.rice-sack-stencil-paula",
+      "name": "Rice-sack stencil from the Paula",
+      "tier": "rare",
+      "madeEra": "1872",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "The bark Paula was wrecked on the rocks near Käringön in the November storm of 1872, which is why they are called Paulapallarna. Eight hundred sacks of her rice were auctioned on 12 November 1872.",
+        "refs": [
+          "lore:village:Käringön facts (RAÄ L1960:6080)"
+        ],
+        "confidence": "medium"
+      },
+      "foundVia": [
+        "secret.karingon.boys-loft"
+      ],
+      "teller": "place.karingon.pilot-lotsberget",
+      "leadsTo": {
+        "quest": null,
+        "hook": "ask the Käringön pilot who bought the rice, and where the rest of the Paula's cargo went"
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "stencil",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Käringön#artifacts[1]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Käringön",
+        "hook": "artifacts",
+        "index": 1
+      }
+    },
+    {
+      "id": "artifact.mackerel-tin-ship-label",
+      "name": "Mackerel tin with a painted ship label",
+      "tier": "common",
+      "madeEra": "1950",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Gullholmen's cannery packed fish in tins; it was rebuilt in 1938-39 and again in 1950-52, and girls started there after confirmation.",
+        "refs": [
+          "people:Q02",
+          "people:Q03"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.gullholmen.cannery-woman"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "tin",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Gullholmen#artifacts[1]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Gullholmen",
+        "hook": "artifacts",
+        "index": 1
+      }
+    },
+    {
+      "id": "artifact.wheel-spoke-brass-capped",
+      "name": "Ship's wheel spoke, brass-capped",
+      "tier": "uncommon",
+      "madeEra": "1860",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "After the great herring period Gåsö became a skipper community: about 20 larger sailing ships in 1860, until steamships ended it.",
+        "refs": [
+          "lore:relation/10604591 (SVW-gaso)"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.gaso.retired-skipper"
+      ],
+      "teller": "place.gaso.retired-skipper",
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "wheel-spoke",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10604591#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10604591",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.stoneware-shard-blue-band",
+      "name": "Stoneware shard with a blue band",
+      "tier": "common",
+      "madeEra": "1800s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Train-oil boileries and salteries were built on Stora Kornö in the 1790s herring boom (1791 and 1798-99); fishing and freight carried the island's economy.",
+        "refs": [
+          "lore:relation/10094463 (SVW-korno)"
+        ],
+        "confidence": "medium"
+      },
+      "foundAt": [
+        "relation/10094463"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "shard",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10094463#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10094463",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.lantern-glass-cracked",
+      "name": "Ship's-lantern glass, cracked",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Fiskebäckskil was a skipper community with the largest freight fleet in Bohuslän in the 1800s, and a bath resort from 1867.",
+        "refs": [
+          "lore:village:Fiskebäckskil (SVW-fbk)"
+        ],
+        "confidence": "medium"
+      },
+      "foundAt": [
+        "village:Fiskebäckskil"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "lantern-glass",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Fiskebäckskil#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Fiskebäckskil",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.sextant-case-empty",
+      "name": "Shipmaster's brass sextant case, empty",
+      "tier": "uncommon",
+      "madeEra": "1880s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Fiskebäckskil was a skipper community with the largest freight fleet in Bohuslän in the 1800s; the sextant case itself is our invention.",
+        "refs": [
+          "lore:village:Fiskebäckskil (SVW-fbk)"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.fiskebackskil.shipmaster-bench"
+      ],
+      "teller": "place.fiskebackskil.shipmaster-bench",
+      "leadsTo": {
+        "quest": null,
+        "hook": "ask the shipmaster where the sextant went, and whose it was"
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "case",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Fiskebäckskil#artifacts[1]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Fiskebäckskil",
+        "hook": "artifacts",
+        "index": 1
+      }
+    },
+    {
+      "id": "artifact.mackerel-tin-bovik",
+      "name": "Mackerel tin, Bovik label",
+      "tier": "common",
+      "madeEra": "1950",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Grundsund had a Bovik cannery that packed mackerel in tomato sauce (undated), and fished mackerel with English-built cutters from the early 1900s.",
+        "refs": [
+          "lore:village:Grundsund (W1950, SVW-grundsund)"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.grundsund.cutter-skipper"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "tin",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Grundsund",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.seine-cork-float",
+      "name": "Seine-net cork float",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Grundsund grew on its herring and mackerel fisheries; by 1920 it was Bohuslän's largest fishing village.",
+        "refs": [
+          "lore:village:Grundsund",
+          "people:Q13"
+        ],
+        "confidence": "medium"
+      },
+      "foundVia": [
+        "drift.cork-float"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "float",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Grundsund#artifacts[1]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Grundsund",
+        "hook": "artifacts",
+        "index": 1
+      }
+    },
+    {
+      "id": "artifact.skandia-engine-plate",
+      "name": "Skandia engine builder's plate",
+      "tier": "uncommon",
+      "madeEra": "1920s-1950",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Lysekils Mekaniska Verkstad (founded 1899) made the Skandia hot-bulb engines; they were made in Lysekil until 1966.",
+        "refs": [
+          "lore:village:Lysekil (W1950)",
+          "people:P11"
+        ],
+        "confidence": "high"
+      },
+      "givenBy": [
+        "place.lysekil.engine-fitter"
+      ],
+      "teller": "place.lysekil.engine-fitter",
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "plate",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Lysekil#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Lysekil",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.keepers-logbook-islandsberg",
+      "name": "Keeper's logbook, last pages blank",
+      "tier": "rare",
+      "madeEra": "1883-1938",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Islandsberg's light was manned from 1883 to 1938; its old keeper's-house light went dark in 1938 and an automatic tower 425 m north took over.",
+        "refs": [
+          "lore:light:Islandsberg (SVW-islandsberg, W1950)"
+        ],
+        "confidence": "high"
+      },
+      "foundVia": [
+        "secret.islandsberg.keepers-logbook"
+      ],
+      "givenBy": [
+        "place.islandsberg.family"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": "the blank pages are not blank under a lamp: what did the last keeper write down?"
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "logbook",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Islandsberg#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Islandsberg",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.feldspar-chunk",
+      "name": "Feldspar chunk, pink and glassy",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Feldspar was quarried at Höpallen and Stenvik on Härmanö until about 1950.",
+        "refs": [
+          "lore:relation/5463706 (W1950, HSA)",
+          "history-start-area.md"
+        ],
+        "confidence": "high"
+      },
+      "foundVia": [
+        "secret.harmano.feldspar-stack"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "rock",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5463706#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5463706",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.svecia-anchor-shackle",
+      "name": "Brass stock-anchor shackle from the Svecia",
+      "tier": "rare",
+      "madeEra": "1924",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "The Svecia was wrecked in 1926 off Härmanö; Danish scrap divers are recorded working the wreck (RAÄ L1960:6452).",
+        "refs": [
+          "lore:relation/5463706 (RAÄ L1960:6452)"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.harmano.quarryman"
+      ],
+      "teller": "place.harmano.quarryman",
+      "leadsTo": {
+        "quest": null,
+        "hook": "the rudder is said to be still standing on the bottom off the huvud: find where"
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "shackle",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/5463706#artifacts[1]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/5463706",
+        "hook": "artifacts",
+        "index": 1
+      }
+    },
+    {
+      "id": "artifact.caulking-mallet",
+      "name": "Shipwright's caulking mallet",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Caulking (\"driva\") drives tarred yarn into the seams of carvel hulls and decks; Hälleviksstrand's boatyard dates from 1907.",
+        "refs": [
+          "people:P14",
+          "lore:village:Hälleviksstrand"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.hallevik.shipwright"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "mallet",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:village:Hälleviksstrand#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "village:Hälleviksstrand",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.acetylene-valve-washer",
+      "name": "Acetylene valve washer, brass",
+      "tier": "common",
+      "madeEra": "1938",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "AGA's automatic lights run on acetylene: a flasher valve (1905) makes the flashes and a sun valve (1907) lights the lamp at dusk and puts it out at dawn.",
+        "refs": [
+          "people:G04",
+          "people:G05"
+        ],
+        "confidence": "medium"
+      },
+      "foundAt": [
+        "light:Hättan"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "washer",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Hättan#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Hättan",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.sheep-shears-rusted",
+      "name": "Sheep-shearing shears, rusted open",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "A light has stood on Fredagsholmen since 1883, a prefab wooden light house with an eight-day paraffin lamp.",
+        "refs": [
+          "lore:relation/10237443 (fyr.org)"
+        ],
+        "confidence": "medium"
+      },
+      "givenBy": [
+        "place.fredagsholmen.sheep-farmer"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "shears",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237443#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237443",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.mason-chisel-stump",
+      "name": "Mason's chisel, worn to a stump",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Granite quarrying and stonemasonry were among Lysekil's industries between 1850 and 1950, and five quarries were working in 1909.",
+        "refs": [
+          "lore:village:Lysekil (W1950)"
+        ],
+        "confidence": "medium"
+      },
+      "foundVia": [
+        "secret.torno.mason-block"
+      ],
+      "givenBy": [
+        "place.torno.quarryman-dora"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "chisel",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10238557#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10238557",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.oil-jar-shard",
+      "name": "Stoneware oil-jar shard",
+      "tier": "common",
+      "madeEra": "1700s-1800s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "A train-oil boilery site is recorded in Morlanda parish that matches \"Lavön\": 130 by 70 m with a sludge pond and five house foundations. Not confirmed to be on the island.",
+        "refs": [
+          "lore:relation/7455712 (RAÄ L1968:1956)"
+        ],
+        "confidence": "low"
+      },
+      "foundVia": [
+        "secret.lavon.sludge-pond"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "shard",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/7455712#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/7455712",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.freya-ships-bell",
+      "name": "Ship's bell, green with age",
+      "tier": "rare",
+      "madeEra": "1924",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "The Freya, a coal and coke carrier, was lost near Stora Harpö in 1940; salvage was judged too hard, and the old fishermen know where she lies from their snagged lines.",
+        "refs": [
+          "lore:relation/10250169 (RAÄ L1960:6443)"
+        ],
+        "confidence": "medium"
+      },
+      "foundVia": [
+        "secret.harpo.ships-bell"
+      ],
+      "teller": "place.harpo.long-liner",
+      "leadsTo": {
+        "quest": "quest.buoy-the-freya",
+        "hook": null
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "bell",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10250169#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10250169",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.linseed-cake-fragment",
+      "name": "Linseed-cake fragment, hard as stone",
+      "tier": "common",
+      "madeEra": "1878",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Silleskär (\"herring skerry\") has one recorded event: a ship stranded on it in 1878 (RAÄ L1960:5700). That the cargo was linseed cake is our invention.",
+        "refs": [
+          "lore:relation/11020202 (RAÄ L1960:5700)"
+        ],
+        "confidence": "medium"
+      },
+      "foundVia": [
+        "secret.silleskar.linseed-cask"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "cake",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/11020202#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/11020202",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.marine-paint-tin-red",
+      "name": "Tin of red marine paint, dried solid",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "Two white stone cairns with painted belts, Jämningarna and Byxeskären, guide ships in from the sea to Lysekil's western inlet.",
+        "refs": [
+          "lore:relation/10237897"
+        ],
+        "confidence": "high"
+      },
+      "givenBy": [
+        "place.jamningarna.pilot"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "paint-tin",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237897#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237897",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.granite-chip-stangholmen",
+      "name": "Granite chip, polished by the waves",
+      "tier": "common",
+      "madeEra": "natural",
+      "foundEra": [
+        "1950",
+        "today"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "The red Bohus granite of Stångehuvud formed about 920 million years ago; its rounded shapes come from the melting ice sheet.",
+        "refs": [
+          "sv.wikipedia Stångehuvuds naturreservat"
+        ],
+        "confidence": "medium"
+      },
+      "foundAt": [
+        "relation/10237903",
+        "light:Stångehuvud"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "stone",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:relation/10237903#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "relation/10237903",
+        "hook": "artifacts",
+        "index": 0
+      }
+    },
+    {
+      "id": "artifact.granite-chisel-mark-sample",
+      "name": "Granite sample with a Berlin firm's chisel mark",
+      "tier": "uncommon",
+      "madeEra": "1890s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "sourced",
+        "text": "A Berlin firm, Kessel & Röhl, quarried Stångehuvud from the early 1870s; the works were sold in 1904.",
+        "refs": [
+          "stangehuvud.se (via lore:light:Stångehuvud)"
+        ],
+        "confidence": "medium"
+      },
+      "foundVia": [
+        "secret.stangehuvud.pedestal-stone"
+      ],
+      "givenBy": [
+        "place.stangehuvud.retired-quarryman"
+      ],
+      "teller": "place.stangehuvud.retired-quarryman",
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "stone-sample",
+      "unique": false,
+      "source": {
+        "kind": "grounded",
+        "refs": [
+          "lore:light:Stångehuvud#artifacts[0]"
+        ],
+        "note": "the object is an INVENTED find from island-lore.json; the story is sourced where story.kind says so"
+      },
+      "invented": true,
+      "lore": {
+        "place": "light:Stångehuvud",
+        "hook": "artifacts",
+        "index": 0
+      },
+      "note": "The lore lists \"found today\" only; the quarry waste lay on the headland in 1950 too (the quarry closed in 1904), so foundEra here is 1950."
+    },
+    {
+      "id": "artifact.fish-box-stencil-board",
+      "name": "End board of a fish box, stencilled with a port",
+      "tier": "common",
+      "madeEra": "1940s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "invented",
+        "text": "Fish boxes were stencilled with the home port so they came back to the right quay.",
+        "refs": [],
+        "confidence": "none"
+      },
+      "foundVia": [
+        "drift.fish-box"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "box-board",
+      "unique": false,
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "things:drift.fish-box"
+        ],
+        "note": "the object is INVENTED (a drift-find souvenir)"
+      },
+      "invented": true
+    },
+    {
+      "id": "artifact.oar-with-name-burned-in",
+      "name": "Oar with a name burned into the loom",
+      "tier": "common",
+      "madeEra": "1940s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "invented",
+        "text": "A name burned into the loom meant the oar could be sent home from wherever it washed up.",
+        "refs": [],
+        "confidence": "none"
+      },
+      "foundVia": [
+        "drift.oar"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "oar",
+      "unique": false,
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "things:drift.oar"
+        ],
+        "note": "the object is INVENTED (a drift-find souvenir)"
+      },
+      "invented": true
+    },
+    {
+      "id": "artifact.green-glass-float",
+      "name": "Green glass net float",
+      "tier": "uncommon",
+      "madeEra": "1930s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "invented",
+        "text": "Glass floats carried a net's line; some drifted far from the net they were made for.",
+        "refs": [],
+        "confidence": "none"
+      },
+      "foundVia": [
+        "drift.glass-float"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "glass-float",
+      "unique": false,
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "things:drift.glass-float"
+        ],
+        "note": "the object is INVENTED (a drift-find souvenir)"
+      },
+      "invented": true
+    },
+    {
+      "id": "artifact.bottle-with-note",
+      "name": "Bottle with a damp note",
+      "tier": "uncommon",
+      "madeEra": "1940s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "invented",
+        "text": "A note in a bottle: who wrote it, and where, is for a rumour or a quest to say.",
+        "refs": [],
+        "confidence": "none"
+      },
+      "foundVia": [
+        "drift.bottle"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": "the note names a place on the chart"
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "bottle",
+      "unique": false,
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "things:drift.bottle"
+        ],
+        "note": "the object is INVENTED (a drift-find souvenir)"
+      },
+      "invented": true
+    },
+    {
+      "id": "artifact.crate-lid-stencil",
+      "name": "Crate lid, stencilled with a ship's name",
+      "tier": "uncommon",
+      "madeEra": "1940s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "invented",
+        "text": "After a blow a ship may lose deck cargo; the stencil says whose.",
+        "refs": [],
+        "confidence": "none"
+      },
+      "foundVia": [
+        "drift.crate-stencilled"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": "find which ship the crate came from"
+      },
+      "sellable": {
+        "later": false,
+        "note": "kept for its story: it leads to lore, not to a sale"
+      },
+      "drawing": "crate-lid",
+      "unique": false,
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "things:drift.crate-stencilled"
+        ],
+        "note": "the object is INVENTED (a drift-find souvenir)"
+      },
+      "invented": true
+    },
+    {
+      "id": "artifact.barrel-stave-cooper-mark",
+      "name": "Barrel stave with a cooper's mark",
+      "tier": "common",
+      "madeEra": "1900s",
+      "foundEra": [
+        "1950"
+      ],
+      "story": {
+        "kind": "invented",
+        "text": "Coopers branded their barrels; the mark tells where the barrel was made.",
+        "refs": [],
+        "confidence": "none"
+      },
+      "foundVia": [
+        "drift.barrel"
+      ],
+      "leadsTo": {
+        "quest": null,
+        "hook": null
+      },
+      "sellable": {
+        "later": true,
+        "note": "a common find: can be sold or traded once there is an economy"
+      },
+      "drawing": "stave",
+      "unique": false,
+      "source": {
+        "kind": "invented",
+        "refs": [
+          "things:drift.barrel"
+        ],
+        "note": "the object is INVENTED (a drift-find souvenir)"
+      },
+      "invented": true
+    }
+  ]
+}
