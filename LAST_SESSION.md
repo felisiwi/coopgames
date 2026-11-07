@@ -1,6 +1,6 @@
 # Last session
 
-**2026-11-07: mission-control handover written** (`docs/MISSION-CONTROL.md`, full rewrite for Windward; read it first).
+**2026-11-07, describes `felix/windward-next-run` @ 1020d30 (pushed, NOT merged; main = d5e54e2).** Mission control: read `docs/MISSION-CONTROL.md` first, then merge the branch.
 
 **State:** chapter 1 in 1950 is MERGED and LIVE (https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html).
 Order of play: the opening in the engine (`src/opening-stage.js`: dusk over today's Fiskebäckskil, storm, lighthouse rewind
@@ -22,5 +22,10 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 
 ## Next
 
-1. GAME-DESIGN.md "Next run": pause when hidden; first errand downwind both ways; light winds not crawling.
+1. Merge `felix/windward-next-run` (Next run is built there: pause card + `src/game-clock.js`, Britta's four lights by name, `src/errand-wind.js`, light air in `sail.js`); Felix's phone checklist is in the stage report.
 2. Co-op stage 2 ("visit the host's world", docs/COOP-CHECK.md), then day and night, sound wiring, chapter 2, the 1703 jump.
+
+## Today's sessions
+
+- mission-control handover written (`docs/MISSION-CONTROL.md`).
+- stage agent, Next run: batches 0-2 on `felix/windward-next-run` (1020d30); 69 test files pass; no save keys changed. Errand wind covers `errand`+`return`, hands back at `help` (not `free`: the doc was stale).
