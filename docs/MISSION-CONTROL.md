@@ -1,92 +1,150 @@
-# Mission Control — handover
+# Mission Control: handover
 
-Read this if you are the mission-control chat for `coopgames` (claude.ai, usually
-Fable): you plan and review; terminal Claude Code agents do the work. Felix pastes
-your prompts into a Claude Code session in `~/GitHub/coopgames` and pastes the
-agent's report back to you. Kenny runs the same loop on his machine.
+Read this first if you are the mission-control chat for `coopgames` (a claude.ai chat that plans,
+reviews and merges; terminal Claude Code agents on Felix's Mac do the building). Last full rewrite:
+2026-11-07, after the long Windward mission-control chat (2026-11-05 to 11-07). Handover docs are
+fallible: verify on disk (`git log`, tests, the live URL) before trusting any line here.
 
-## State (2026-09-11, v1 shipped)
+## 1. The state today (2026-11-07)
 
-- **Live:** https://coopgames-felisiwis-projects.vercel.app — Vercel project
-  `coopgames`, auto-deploys every push to `main` (~1 min), branches get preview URLs.
-- **Repo:** github.com/felisiwi/coopgames (private; Felix + Kenny collaborators).
-- **Verified end-to-end:** Felix (London, VPN on) and Kenny connected across two
-  networks, picked Archipelago from the hub, both spawned on the same island.
-- **What exists:** hub (`index.html`) owning the PeerJS connection + game picker;
-  `shared/net.js` (PeerJS 1.5.5 vendored, explicit `ICE_SERVERS`); game contract
-  (`game.json` + `game.js` exporting `start({canvas, net, seed, role, players})`);
-  discovery via `scripts/manifest.js` (gitignored output, run by Vercel build);
-  `games/archipelago/` — procedural island, curated CC0 tiles, WASD, camera-follow,
-  per-player fog, positions synced at 20 Hz; `games/_template/` two-dot game.
-- **Stage D drop-in play is merged:** host can pick and play a game solo; a guest
-  connecting mid-pick or mid-game gets a `launch` message and lands in the same
-  game/seed the host is already in.
+- **Game:** Windward, Felix's cosy sailing game on the real Bohuslän coast (`games/windward/`).
+  The hub's other games (Archipelago = obsolete predecessor, Kenny's Dino Rumble, Will it fit) are
+  out of scope unless Felix says otherwise.
+- **Live (production, share this one):** https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html
+  (also aliased as `coopgames-murex.vercel.app`). Auto-deploys every push to `main`.
+- **Vercel:** Felix upgraded the team "felisiwi's projects" (all his projects) to **Pro** on
+  2026-11-06 after we hit the Hobby limit of 100 deployments/day. `.vercelignore` keeps
+  `games/*/docs/` out of deployments (they were 46 MB of screenshots per deploy).
+- **What is playable (chapter 1, in 1950):** opening in the engine (dusk over today's
+  Fiskebäckskil, fog, storm, the **lighthouse rewind** from 2026 to 1950 landing on Gäven) → dawn on
+  Skaftö's mainland shore with battered Svalan → **the boy** (young Grandpa, a boatbuilder's son)
+  lends you an eka → fittings from Grundsund → back at the yard → **Britta** (about 17) at her
+  jetty in Fiskebäckskil (the house from the opening; her father tends the lights and broke his
+  arm) → four **AGA gas lights** (Hättan, Gäven, Stångholmen, Fredagsholmen) + post to **Måseskär's
+  keeper** → report at Britta's → **Svalan relaunched** → the **Kråksundsgap glimpse** (the small
+  1941 lantern becomes its 1954 tower for a moment). Paper-style cards, one speaker per card.
+- **Underneath:** real coast at 1:10 (`src/coast-world.js`, `assets/coast/`), chart + fog + minimap
+  (round, north-up; tap opens chart), north-up camera, terrain style, Svalan/eka boats, rope trim
+  control, knots + nautical miles, shoals, real OSM sea marks (+ invented harbour gates), 5 passes
+  + 16 harbour approaches carved, busy era-driven traffic + ferry, the **world-years system**
+  (`worldAtYear(year)`, rows in `data/world-years.json` for 1700 / 1950 / today; `?year=2015` gives
+  the old Today game), research data for 1700 and 1950, a synthesised 1950 sound lab (not yet wired).
+- **Tests:** ~66 node test files, all passing. Run: `cd games/windward && for t in src/*.test.js test/*.test.js; do node $t >/dev/null || echo FAIL $t; done`.
 
-## Documents, in reading order
+## 2. Where the truth lives (read in this order)
 
-1. `AGENTS.md` — design, audited risks, tool economy, hub structure. Later
-   sections override earlier ones.
-2. `LAST_SESSION.md` — state pointer, what the last agent did and left open.
-3. `docs/COLLABORATION.md` — pull/push/branch/ownership rules for two humans.
-4. `games/README.md` — the game contract; what any agent building a game reads.
+1. `games/windward/GAME-DESIGN.md`: the design, appended over time. **Later sections override
+   earlier ones.** Most current: "The flow, revised: wake in 1950", "Opening and chapter 1 story,
+   revised", the "Correction and decision" notes, "Decisions (… late afternoon)", "Next run".
+2. `LAST_SESSION.md` (repo root): the state pointer the last agent/mission control left.
+3. `games/windward/story/characters/`: `britta-1950.md`, `britta-today.md`, `torhild-1700.md`.
+4. `games/windward/data/`: `epochs.json` (epochs, eras, markers: 1703 first big jump, 1950 home
+   base, 2026 finale), `world-1700.json`, `world-1950.json`, `people-1700.json`, `people-1950.json`,
+   `world-years.json`.
+5. `games/windward/docs/`: per-stage reports and research (CHART, LURE, LIGHTHOUSE-TASK, WORLD-1700/1950,
+   PEOPLE-1700/1950, SOUND-1950, COOP-CHECK, BOAT-BRIEF, passes/, seamarks/, harbours/, era-assets/…).
+6. `AGENTS.md`, `docs/COLLABORATION.md`, `games/README.md`: hub contract and rules (Kenny shares the repo).
 
-## How Felix wants mission control to work
+## 3. The story canon (short)
 
-- **Verify on disk before trusting a report.** You have Filesystem/Desktop Commander
-  access to `~/GitHub/coopgames`; `git log`, `git status`, `grep` and `curl` on the
-  live URL are cheap. Handover docs and agent reports are fallible.
-- **Root cause with evidence before any fix.** No blind "try this" loops. If an agent
-  offers options, pick the one that produces a diagnosis, and prefer a 2-minute manual
-  check by Felix over a long agent investigation.
-- **Ask before anything long-running or on his accounts.** Vercel/GitHub settings are
-  his clicks (the Vercel connector token is read-only: project creation and settings
-  changes return 403). Everything else: use judgment and keep moving.
-- **One stage per prompt.** Each prompt names the stage, the batches (one commit each),
-  and a checkable DONE-WHEN with pasted evidence. End with "stop and report".
-  Tell the agent which skill to use (`/grill-me` before new features or shared changes).
-- **Cheap tools first.** Node/curl/grep/ASCII before the browser; Claude in Chrome
-  only for genuinely visual checks, one screenshot max. Visual/"does it feel good"
-  judgments go to Felix.
-- **Parallel work = git worktree,** never two agents in the same checkout:
-  `git worktree add ../coopgames-<thing> -b felix/<thing>`; merge on `main` after.
-  Archipelago is Felix's folder — commit to `main` directly. `shared/`, hub, `docs/`,
-  `AGENTS.md`, `scripts/` are shared surfaces — branch + PR always, per
-  `docs/COLLABORATION.md` (not just when Kenny happens to be active).
+- **Frame:** a ~30 s opening today → you wake in **1950** (home base, chapters 1–2) → first big jump
+  to **late 1703** (echo of the November 1703 North Sea storm) → later eras → **finale today**: old
+  Britta opens the door, "I've been waiting for you since 1950"; maybe Grandpa alive because you
+  changed history (kept the lights burning).
+- **People:** Britta (b. ~1933; 17 in 1950, ~93 today; your grandma). The boy = young Grandpa
+  (unnamed so far), boatbuilder's son; **you are why your grandparents meet** (he sends you to her).
+  Torhild, the pilot's daughter around 1703, lives by **Lysekil** (the area's only recorded pilot
+  station). Måseskär's keeper: invented, unnamed (never use real people's names).
+- **Svalan's loop:** Grandpa's koster washes up in 1950, the boy's family repairs her, she becomes
+  "Grandpa's boat" that you inherit today. Clinker-built: riveted, not caulked.
+- **Lighthouses are the clock and the code:** real flash patterns as glyphs (light log), the sun
+  valve, the rewind, the glimpse of a light's future self. Later: night navigation by lights.
+- **"Grandpa"** everywhere (not "Granddad"; a test enforces it). All spoken lines are draft
+  (`INVENTED-DIALOGUE`, `TODO(felix)` in `src/story-1950.js`); Felix rewrites by eye.
+- **Ghost chart after a jump:** pencil outlines of the land you explored, no names/marks; the sea
+  stood ~0.55 m higher in 1700, so remembered rocks hide; re-sailing inks the 1700 chart.
+- **Co-op model:** "you visit the host's world" (host's era, progress, lights; friend keeps personal
+  souvenirs). Not built yet; see `docs/COOP-CHECK.md`.
 
-## Hard-won gotchas (each cost a round trip)
+## 4. How Felix works with mission control
 
-- Open Relay free TURN (openrelay.metered.ca) returns no relay candidates for peers
-  behind carrier NAT: phone on mobile data → onicecandidateerror, only host remote
-  candidates, ICE checking → disconnected. Laptop-to-laptop works. Fix when needed:
-  Metered free-tier credentials in shared/net.js ICE_SERVERS (Felix's signup).
-- PeerJS's shipped TURN hosts (`eu-0`/`us-0.turn.peerjs.com`) have no DNS. Without a
-  relay, VPNs and strict NATs fail silently at ICE "checking". `shared/net.js` now
-  uses Google STUN + Open Relay Project's free TURN — fine for hobby use, swap for a
-  proper TURN (Cloudflare/Metered account) if it gets flaky.
-- Game asset paths must resolve via `import.meta.url`; page-relative paths 404 when the
-  hub at `/` imports the game. Test through the hub, not only the solo dev entry.
-- The host's address bar is rewritten to `?host=<id>`; a page reload = new peer id =
-  dead link. Guest shows a timeout after ~8 s; `start()` errors render on screen.
-- `games/manifest.json` is generated and gitignored — never commit it.
-- Tileset "Thick" 128×72 cells are a 128×64 diamond plus an 8 px skirt
-  (`TILE_STEP_Y = 32`, not 36). Measure, don't assume.
-- `coopgames.vercel.app` is taken by someone else; the team-scoped URL is production.
-  Vercel Authentication had to be switched off manually for the link to be public.
+- He pastes **prompts** from mission control into terminal agents and pastes **reports** back. He
+  wants prompts, not mission control doing big builds itself (small fixes are fine when he asks).
+- **Mission control merges.** Felix says "merge …" in this chat; mission control does
+  `git merge --no-ff` locally on `main`, runs all tests, resolves `LAST_SESSION.md` conflicts (they
+  happen on almost every merge; keep main's version and add a line), pushes. Agents don't merge.
+- Name agents **by job** ("stage agent", "research agent"), not numbers: his phone and laptop
+  sessions are labelled differently.
+- **Root cause before fixes** (with evidence); ask before long rebuilds; options before
+  recommendations on design; let him judge looks and feel on his phone.
+- **Gated batches:** each prompt = stage, batches, DONE WHEN with 390×844 screenshots the agent
+  has looked at, "push (not merged)", preview URL from the deployment record, phone checklist.
+  Add **"push only at gates/end"** to every prompt (preview builds count against Vercel limits).
+- **Parallel agents = separate git worktrees**, never the main folder (an agent once switched the
+  main folder's branch). Two agents must not touch `game.js` at once: give the second a research,
+  data or lab task (new files only).
+- **Saves must survive updates:** never rename/drop a localStorage key without a migration + test
+  (rule in GAME-DESIGN.md). Progress is per web address: share only the production link.
+- He keeps decision-making labs/tools frozen as they were (`games/windward/ref/`).
+- Commit attribution: commits must show as verified on GitHub: author `Claude <noreply@anthropic.com>`
+  (a stop hook enforces it), messages end with the Co-Authored-By / Claude-Session lines.
 
-## Backlog
+## 5. Tools and checks that work
 
-0. **TURN fallback:** Open Relay free TURN (openrelay.metered.ca) returns no relay
-   candidates for peers behind carrier NAT: phone on mobile data → onicecandidateerror,
-   only host remote candidates, ICE checking → disconnected. Laptop-to-laptop works.
-   Fix when needed: Metered free-tier credentials in shared/net.js ICE_SERVERS (Felix's
-   signup).
-1. ~~**Housekeeping commit:** live URL into `AGENTS.md`/`README.md`; copy `grill-me` +
-   `grilling` from `~/.claude/skills/` into `.claude/skills/` with attribution and a
-   `docs/SKILLS.md` index; Skills section in `AGENTS.md`.~~ **Done** (Stage H, 2026-09-11).
-2. **Archipelago tuning** from real play: `VISION_RADIUS` (5) and spawn distance (18)
-   in `games/archipelago/src/config.js`; player sprite instead of marker; landmarks
-   as things to find; boats / multi-island (the original archipelago idea, deferred).
-3. **Hub:** show connected-player name/count before launch; "back to picker" after a
-   game; live lobby without link-sharing → Kenny's Firebase, only if wanted.
-4. **Kenny's first game** — his folder, his agent; mission control only reviews
-   contract compatibility and shared-surface PRs.
+- **Headless checks (container):** Python Playwright, chromium with
+  `--use-gl=swiftshader --enable-webgl --ignore-gpu-blocklist`, served by `python3 -m http.server`.
+  Kill servers by port (`kill $(lsof -t -i:PORT)`), never `pkill -f` (it killed the shell).
+- **Preview/deploy status:** `gh api repos/felisiwi/coopgames/commits/<sha>/statuses` (shows
+  "rate limited" etc.) and the Vercel MCP `list_deployments`. Mission control may NOT deploy to
+  production itself (blocked); pushes to `main` deploy automatically.
+- **Network from the container:** vercel.app, Overpass, sv.wikipedia are blocked; read them via
+  Claude in Chrome on Felix's machine (MediaWiki API URLs work) or have a terminal agent fetch.
+- **Jump links for testing:** `?opening=1` replay the opening; `?lights=reset` restart chapter 1;
+  `?jump=britta` straight to Britta's jetty (overwrites that browser's chapter-1 save: use a
+  private window); `?debug=1` overlay (fps, draw calls) and debug hooks; `?year=1700|1950|2015`.
+- **Labs** (all under `/games/windward/`): coast-lab, lighthouse-lab, boat-lab, terrain-lab,
+  seamarks-lab, passes-lab, harbours-lab, era-asset-lab, world-1700-lab (`?era=1950|today`), sound-lab.
+
+## 6. Hard-won gotchas (Windward era)
+
+- Vercel Hobby = 100 deployments/day; Promote also counts as a deployment. Now on Pro.
+- The game is `index.html`; `coast-lab.html` in the same folder looks like a loading game: send exact URLs.
+- A tab left open keeps old code until reloaded; fresh loads get updates (no cache problem).
+- `requestAnimationFrame` freezes the game when the tab is hidden; traffic/ferry run on the wall
+  clock and jump ahead. No pause screen yet (on the Next-run list).
+- At 1:10 the boat acts like an ~80 m ship; the 20 m coast raster closes passes under ~40–60 m.
+  An oriented hull barely helps (raster limit). Narrow gems (Smörasken, Kråksundsgap, Grundsund's
+  canal) belong to the planned **harbour close-ups**, not carving.
+- Same-year lighthouses (Lindholmen, Brandskärsflak, Dynabrott, all 1974) needed spread "effective"
+  years in the rewind. Brandskärsflak and Dynabrott share coordinates in `lighthouses.js` (data quirk).
+- Research corrections to remember: in 1950 only Måseskär had keepers here (others automatic AGA);
+  Kråksundsgap Södra had a light from 1941 (tower 1954); Islandsberg's old light dark from 1938,
+  new tower 425 m away; 1950 sea marks were red/black by compass side (IALA A from 1980).
+- Older hub gotchas (PeerJS TURN on mobile data, `import.meta.url` asset paths, `?host=` rewrite
+  dropping game options): see `AGENTS.md` and `docs/COOP-CHECK.md`. Fixing the hub launch message
+  touches Kenny's shared surface: tell him.
+
+## 7. Next (Felix's order)
+
+1. **Next run list** (GAME-DESIGN.md "Next run"): a proper **pause** when hidden (sound off, tap to
+   continue card); the first errand **downwind both ways** (scripted wind); **light winds** must not
+   crawl (minimum speed / light-air performance).
+2. Small open choice: Navigate tag shows "A lighthouse" (names-are-discovered rule) though Britta
+   names all four; Felix may want real names there.
+3. **Co-op stage 2** ("visit the host's world"): host session message on join (clock offset + era),
+   game options through the hub launch message (shared hub: Kenny), host's lit lights for the friend.
+4. **Day and night** (reuse `src/dusk.js` looks; quests bound to day/night; moor to pass time;
+   AGA sun valves light themselves at dusk; night navigation ideas in GAME-DESIGN.md).
+5. Wire the 1950 sound lab into the game; the dialogue pass with Felix; chapter 2 in 1950; the
+   storm jump to 1703 (Torhild, the eka, ghost chart); harbour close-ups (Fiskebäckskil first).
+6. Consider a custom domain early (free with Pro for year one), before many players have saves
+   on the current address; a save carry-over would be needed after.
+
+## 8. Branches and worktrees (cleanup pending)
+
+Merged into `main` but still on GitHub: `felix/windward-1700-people`, `-1950-people`, `-busy-today`,
+`-chapter1-1950`, `-coop-check`, `-sound-lab`. Keep `felix/windward-chapter1-1950` only while
+anyone still uses its preview link; otherwise delete all merged ones. Unmerged and old:
+`felix/art-facet-rule` (September, unrelated history), `felix/windward-touch` (superseded touch
+controls). Deleting remote branches is Felix's command to run (mission control is blocked from it).
+Laptop worktrees under `~/GitHub/coopgames-*` can be removed once their branches are merged.
