@@ -247,3 +247,30 @@ in an era, with conditions (time of day, weather, season, story phase), what it 
 
 **Left open on purpose (outside the thing model):** deriving
 bays/headlands; a weather system; anchoring close-ups; sound wiring.
+
+## Grill: weather and sail feel (2026-11-07, in progress)
+
+**Fact (src/wind.js, config.js):** today the wind is one value for the whole sea. Every 40 to
+60 s it eases (8 to 12 s) to a fully random new direction (any of 360°) and a random strength
+0.2 to 1.0. No gusts in space, no shifts around a steady direction, no weather system.
+
+**Round 1, settled (Felix agreed):**
+1. **Weather is the source of the wind:** the day's weather sets direction, strength, sea state
+   and visibility; sailing feel comes from local variation on top.
+2. **Layered wind**, replacing the random 360° jumps: the day's wind (steady, slowly veering);
+   shifts (±10 to 20° every minute or two: lifts and headers); gusts and lulls as patches drifting
+   across the water; local effects (shadows behind islands, funnelling through sounds).
+3. **Real Bohuslän patterns, simplified:** calm or light mornings, a westerly sea breeze filling
+   in around midday, fresh in the afternoon, easing in the evening; fronts bring grey westerlies
+   and shifts.
+4. **Day types** by day seed (and season later): fine sea-breeze day; grey fresh westerly; calm
+   misty morning that clears; unsettled with showers and squalls. Story storms stay scripted.
+5. **Soft weather now:** strong wind is fast but lively (heel, spray, harder to hold a course); a
+   squall's worst is a slowdown and a soaking. **Later (Felix):** boat damage, collisions with
+   boats, rocks and grounding doing something (fits a repair loop with the boatbuilder family).
+6. **Story override layer** on top of weather (generalises the scripted errand wind), rare,
+   always handing back smoothly.
+7. **Wind is a fixed function of the day seed and the clock** (like traffic and things), so
+   gusts line up on both phones with no messages. Replaces host-sent wind.
+8. **Reading the wind:** dark ripple patches on the water first, then other boats heeling and
+   sails filling, then smoke and flags ashore, the wind arrow as fallback.
