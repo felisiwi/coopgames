@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windward (the old version) — coopgames</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0a1a2a; }
+    #game { display: block; width: 100%; height: 100%; }
+    #hud { display: block; position: fixed; top: 8px; left: 8px; font: 13px monospace; color: #eaf6ff; } /* frozen copy: the label is always visible */
+  </style>
+</head>
+<body>
+  <div id="hud"><a href="../../" style="color:#eaf6ff">&larr; hub</a> — the old version of Windward (frozen, no longer updated; no bridge, no redirect)</div>
+  <canvas id="game"></canvas>
+  <script type="module">
+    import start from './game.js';
+    import { CONFIG } from './src/config.js';
+
+    // Fakes the hub's net object for solo testing. There's no second peer:
+    // send() just logs, and onMessage() only fires if you drive it
+    // yourself from devtools (fakeNet._emit({...})).
+    const listeners = [];
+    const fakeNet = {
+      send(msg) { console.log('[dev net] send', msg); },
+      onMessage(fn) { listeners.push(fn); },
+      _emit(msg) { listeners.forEach((fn) => fn(msg)); },
+      peerId: 'solo-dev',
+      isHost: true,
+    };
+    window.fakeNet = fakeNet; // so fakeNet._emit(...) works from devtools
+
+    const canvas = document.getElementById('game');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('debug') === '1') document.getElementById('hud').style.display = 'block';
+    const seed = params.has('seed') ? Number(params.get('seed')) : Math.floor(Math.random() * 1_000_000);
+
+    // Island-density A/B overrides (I2, 2026-09-16) — mutate CONFIG directly
+    // before start() calls scatterIslands, so Felix can compare densities on
+    // localhost without a rebuild. Solo dev entry only; the hub doesn't wire
+    // these through (see games/windward/src/config.js's Island scattering
+    // comment for what each knob does).
+    if (params.has('span')) CONFIG.ISLAND_SCATTER_AREA = Number(params.get('span'));
+    if (params.has('count')) CONFIG.ISLAND_SCATTER_COUNT_CAP = Number(params.get('count'));
+    if (params.has('pitch')) CONFIG.ISLAND_SCATTER_PITCH_OVERRIDE = Number(params.get('pitch'));
+    if (params.has('big')) CONFIG.ISLAND_SCATTER_LARGE_COUNT = Number(params.get('big'));
+    if (params.has('medium')) CONFIG.ISLAND_SCATTER_MEDIUM_COUNT = Number(params.get('medium'));
+    // I3, 2026-09-16: mesh cell size is absolute world-space now (every
+    // island shares it, src/island-scatter.js), so a single override here
+    // A/B's tessellation density/vertex-count across the whole field at once.
+    if (params.has('cell')) CONFIG.ISLAND_GRID_CELL_SIZE = Number(params.get('cell'));
+    // I3b, 2026-09-16: wireframe everything + a 4m reference grid on the
+    // water, for comparing facet sizes across terrain/water/trees in one
+    // screenshot (shared/ART.md's one-facet-scale rule).
+    if (params.get('wire') === '1') CONFIG.DEBUG_WIREFRAME = true;
+
+    // Stage 2: finds normally need BOTH boats nearby; with no second peer in
+    // the solo dev entry, let one boat find things so you can test alone.
+    // The hub keeps the real rule.
+    CONFIG.DISCOVER_REQUIRE_BOTH = false;
+
+    start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
+  </script>
+</body>
+</html>
