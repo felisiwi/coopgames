@@ -347,3 +347,20 @@ bays/headlands; a weather system; anchoring close-ups; sound wiring.
 **New research thread (Felix, 2026-11-07):** lore of Bohuslän's islands (history, folklore,
 place-name meanings, landmarks) for the game, story and quests, and for recognisable per-island
 assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
+
+**Round 3, settled (Felix agreed):**
+17. **First quest slice** (after the thing-model slice): three templates: lost item (find with the
+    boathook near a skerry, return it: warmth + a common artifact); delivery (harbour to a regular:
+    a rumour or knowledge); after the squall (find a drifted boat, tell the owner: a rare artifact
+    with lore told by the keeper). Plus the logbook's "on your mind" and collection pages. Slots fed
+    by the island-lore research.
+
+## Build order (proposed, 2026-11-07)
+
+1. Next run (pause, light names, downwind errand, light air): prompts/2026-11-07-next-run-stage.md
+2. In parallel, new files only: co-op stage 2 plan, sail-feel lab, island lore research
+   (prompts/2026-11-07-*.md).
+3. Thing-model slice: tap vs hold, fish box, seals ported, net-mender, one rumour, world seed.
+4. Weather and sail feel into the game, once Felix has felt the lab.
+5. Quest slice: the three templates, logbook pages.
+6. Co-op stage 2 build (after Kenny's OK on the hub launch message).
