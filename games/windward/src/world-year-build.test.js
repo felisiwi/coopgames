@@ -162,6 +162,9 @@ await check('1950 lights: five towers and three fyrkurar; Maseskar lit with a ke
   assert.equal(e1950.report.lightsLit, 6); assert.equal(e1950.report.lightsDark, 2);
   assert.deepEqual(e1950.lights.map((l) => l.name).sort(), ['Fredagsholmen', 'Gäven', 'Hättan', 'Islandsberg', 'Kråksundsgap Södra', 'Måseskär', 'Stångehuvud', 'Stångholmen'].sort());
   assert.equal(e1950.lights.filter((l) => l.entry.model === 'fyrkur').length, 3);
+  // the REAL build (what the game uses): Islandsberg's light is a glow behind gable windows, no sweeping beam; every other light still has its beam
+  for (const l of e1950.lights) { const beam = l.group.getObjectByName('lantern-beam'); if (l.name === 'Islandsberg') assert.equal(beam, undefined, 'Islandsberg: no beam in the built world'); else assert.ok(beam, `${l.name} keeps its beam in the built world`); }
+  for (const l of eToday.lights) assert.equal(!!l.group.getObjectByName('lantern-beam'), l.name !== 'Islandsberg', `${l.name} (Today): beam unless Islandsberg`);
   for (const l of e1950.lights) { assert.ok(l.group && l.fx && typeof l.fx.setLit === 'function', `${l.name} has its group and lantern effect`); assert.equal(l.fx.lit, l.info.lit, `${l.name}: the lantern follows the era's state`); assert.ok(e1950.heightAt(l.x, l.z) >= 0.3, `${l.name} stands on land`); }
   assert.ok(e1950.lightsNotDrawn.length === 4 && e1950.lightsNotDrawn.every((n) => /no position/.test(n.why)), 'the four lights without a position are reported, never guessed');
   assert.ok(e1950.report.notes.some((n) => /Grötö.*no position/.test(n)), 'and the report says so');
