@@ -1,0 +1,628 @@
+{
+  "_about": "Landmark placements for Windward (agent 4, 2026-11-07). Each row puts one look of the landmark kit (src/landmark-assets.js) at a real place. Nothing here is used by the game yet; src/landmark-lab.js and docs/LANDMARKS.md show how it would be placed.",
+  "_fields": {
+    "id": "stable id, lm-<place>",
+    "type": "LANDMARK_TYPES key",
+    "variant": "the type's variant",
+    "opts": "extra build options ({size:\"small\"}, {h: metres}, {n: huts})",
+    "era": "the game eras it stands in: 1703 | 1950 | today (never an era it did not exist in: tested)",
+    "built": "the year THIS LOOK began (not necessarily the first construction), or null if undated; until: the year this look ended, or omitted",
+    "replacedBy": "the id of the look that stands in the eras this one does not",
+    "lat": "degrees north",
+    "lon": "degrees east",
+    "heading": "compass bearing (0 north, 90 east) the model's +Z side faces: an arm's direction; omitted = the placer turns it to face the water",
+    "place": "the island-lore.json key of the place",
+    "source": "where the position and the facts come from",
+    "confidence": "exact = the record or node gives the position; approx = the place's point, snapped to land by the placer",
+    "factConfidence": "high | medium | low: how sure the fact that it stood there is",
+    "note": "free text"
+  },
+  "_eraYears": {
+    "1703": 1703,
+    "1950": 1950,
+    "today": 2026
+  },
+  "_scale": "Models are 1:1 real metres. The game enlarges landmarks when it places them (cairns x1.8, marks x2.0: world-year-build.js); the factor is LANDMARK_TYPES[type].readScale in the kit, not baked in here.",
+  "placements": [
+    {
+      "id": "lm-korsholmen",
+      "type": "cairn",
+      "variant": "square-white",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1853,
+      "lat": 58.114333439232176,
+      "lon": 11.346928759350575,
+      "place": "relation/10238557",
+      "source": "RAÄ ORUST VALLERÖ 1:4 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "white square stone cairn between Tornö and Vedholmen"
+    },
+    {
+      "id": "lm-torno",
+      "type": "cairn",
+      "variant": "cylinder-black",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1886,
+      "lat": 58.117192619796704,
+      "lon": 11.350390328401996,
+      "place": "relation/10238557",
+      "source": "RAÄ ORUST VALLERÖ 1:5 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "black cylinder, 3.5 m, on the highest point of Tornö"
+    },
+    {
+      "id": "lm-kraksundsgap-brato",
+      "type": "cairn",
+      "variant": "cylinder-black-arm",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1838,
+      "lat": 58.11031851679492,
+      "lon": 11.456162057285084,
+      "place": "light:Kråksundsgap Södra",
+      "source": "RAÄ ORUST BARREVIK 1:16 husnr 9002 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "built 1838, rebuilt 1868. The record says \"on the west point of Bråtö\" but its coordinate is 1.4 km north of the name list's Bråtö centre: CHECK on the coast (the lab reports where it lands)."
+    },
+    {
+      "id": "lm-hinneskar",
+      "type": "cairn",
+      "variant": "cone-white-arm",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1878,
+      "heading": 135,
+      "lat": 58.09050563841263,
+      "lon": 11.332086112527927,
+      "place": "light:Måseskär",
+      "source": "RAÄ ORUST MÅSESKÄR 1:1 husnr 9002 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "arm to the south-east (heading 135); 4.8 m today, raised after 1978; probably the cairn that replaced the Svarten pole mark in 1878 (our inference)"
+    },
+    {
+      "id": "lm-pipeskar",
+      "type": "cairn",
+      "variant": "cone-white-arm",
+      "opts": {
+        "size": "small"
+      },
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1933,
+      "heading": 90,
+      "lat": 58.09225924665867,
+      "lon": 11.4455457867258,
+      "place": "light:Kråksundsgap Södra",
+      "source": "RAÄ ORUST EDSHULT S:6 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "2.6 m concrete cone, a 75 cm arm toward the fairway in the east (heading 90)"
+    },
+    {
+      "id": "lm-jamningarna",
+      "type": "cairn",
+      "variant": "belt-white-red",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1874,
+      "lat": 58.265483557110386,
+      "lon": 11.39032450822492,
+      "place": "relation/10237897",
+      "source": "RAÄ LYSEKIL GÅSÖ S:27 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "medium",
+      "note": "the record says \"earlier all white\": the year of the red belt is not given"
+    },
+    {
+      "id": "lm-byxeskaren",
+      "type": "cairn",
+      "variant": "belt-white-green",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1874,
+      "lat": 58.26084530652012,
+      "lon": 11.386208320862021,
+      "place": "relation/10237897",
+      "source": "RAÄ LYSEKIL GÅSÖ S:5 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "medium",
+      "note": "green belt and a square top mark; \"earlier a slanting red belt\": shown red in 1950, green today (low confidence)"
+    },
+    {
+      "id": "lm-bonden",
+      "type": "cairn",
+      "variant": "tall-white-pole-ball",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1875,
+      "lat": 58.20866586552939,
+      "lon": 11.314155985992267,
+      "place": "relation/10250201",
+      "source": "RAÄ LYSEKIL GÅSÖ S:14 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "8 m white cairn on the highest point; the pole and red ball stood in 1950 and fell in 2005"
+    },
+    {
+      "id": "lm-tenholmen",
+      "type": "cairn",
+      "variant": "small-white",
+      "opts": {
+        "h": 1.8
+      },
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1937,
+      "lat": 58.11918168765708,
+      "lon": 11.42590765022775,
+      "place": "village:Hälleviksstrand",
+      "source": "RAÄ ORUST HÄLLEVIK S:36 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "\"built before 1937\": the year is an upper bound"
+    },
+    {
+      "id": "lm-lilla-bockholmen",
+      "type": "cairn",
+      "variant": "small-white",
+      "opts": {
+        "h": 2
+      },
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1870,
+      "lat": 58.0947196854836,
+      "lon": 11.466437126377562,
+      "place": "village:Hälleviksstrand",
+      "source": "RAÄ ORUST EDSHULT S:2 husnr 9002 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "south of Edshultshall"
+    },
+    {
+      "id": "lm-islandsberg-cairn",
+      "type": "cairn",
+      "variant": "small-white",
+      "opts": {
+        "h": 2.5
+      },
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1875,
+      "lat": 58.197605447139225,
+      "lon": 11.40506899869197,
+      "place": "light:Islandsberg",
+      "source": "RAÄ LYSEKIL ISLANDSBERG 1:27 husnr 9001 (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "high",
+      "note": "just south of the old keeper's house"
+    },
+    {
+      "id": "lm-maseskar-heap",
+      "type": "cairn",
+      "variant": "heap",
+      "era": [
+        "1703"
+      ],
+      "built": null,
+      "lat": 58.093787675812735,
+      "lon": 11.330237816794476,
+      "place": "light:Måseskär",
+      "source": "RAÄ ORUST MÅSESKÄR 1:1 husnr 9003 (Måseskär, stångmärke): \"an even earlier stone cairn stood on the same place\" (Söderlund 2007), record coordinates via K-samsök",
+      "confidence": "exact",
+      "factConfidence": "low",
+      "note": "a cairn stood there before 1829; whether in 1703 is uncertain"
+    },
+    {
+      "id": "lm-stangholmen-iron",
+      "type": "fyrkur",
+      "variant": "stangholmen-iron",
+      "era": [
+        "1950"
+      ],
+      "built": 1940,
+      "until": 1974,
+      "lat": 58.26662,
+      "lon": 11.42047,
+      "place": "relation/10237903",
+      "source": "fyrwiki Stångholmen; position: the OSM islet Stångholmen (names.json), as lights-1950.js does (the light's own coordinates are not in our data)",
+      "confidence": "approx",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-stangholmen-plastic",
+      "type": "fyrkur",
+      "variant": "stangholmen-plastic",
+      "era": [
+        "today"
+      ],
+      "built": 1974,
+      "lat": 58.26662,
+      "lon": 11.42047,
+      "place": "relation/10237903",
+      "source": "fyrwiki Stångholmen",
+      "confidence": "approx",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-fredagsholmen-1942",
+      "type": "fyrkur",
+      "variant": "fredagsholmen-1942",
+      "era": [
+        "1950"
+      ],
+      "built": 1942,
+      "replacedBy": "lm-fredagsholmen-today",
+      "lat": 58.18649,
+      "lon": 11.42178,
+      "place": "relation/10237443",
+      "source": "OSM node \"Fredagsholmen fyr\" (seamarks.json node/1531134954, as lights-1950.js); fyrwiki Fredagsholmen",
+      "confidence": "exact",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-fredagsholmen-today",
+      "type": "fyrkur",
+      "variant": "fredagsholmen-today",
+      "era": [
+        "today"
+      ],
+      "built": null,
+      "lat": 58.18649,
+      "lon": 11.42178,
+      "place": "relation/10237443",
+      "source": "OSM node \"Fredagsholmen fyr\"; fyrwiki Fredagsholmen (red roof, solar power: the year is not given)",
+      "confidence": "exact",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-stangehuvud-dark",
+      "type": "darkhouse",
+      "variant": "dark",
+      "era": [
+        "1950"
+      ],
+      "built": 1940,
+      "until": 2014,
+      "lat": 58.27118,
+      "lon": 11.41345,
+      "place": "light:Stångehuvud",
+      "source": "src/lighthouses.js Stångehuvud (OSM-derived light position); stangehuvud.se (Fyrhuset): dark since 1940",
+      "confidence": "exact",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-stangehuvud-led",
+      "type": "darkhouse",
+      "variant": "led",
+      "era": [
+        "today"
+      ],
+      "built": 2014,
+      "lat": 58.27118,
+      "lon": 11.41345,
+      "place": "light:Stångehuvud",
+      "source": "stangehuvud.se (Fyrhuset): a solar-powered decorative LED from 2014",
+      "confidence": "exact",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-fiskebackskil-windmill",
+      "type": "windmill",
+      "variant": "dutch",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1854,
+      "lat": 58.24790214584477,
+      "lon": 11.457946505896185,
+      "place": "village:Fiskebäckskil",
+      "source": "RAÄ LYSEKIL SKAFTÖ-FISKEBÄCK 1:107 husnr 1 (record coordinates via K-samsök): a Dutch windmill built 1854-55",
+      "confidence": "exact",
+      "factConfidence": "high"
+    },
+    {
+      "id": "lm-grundsund-church",
+      "type": "church",
+      "variant": "cross-church",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1893,
+      "lat": 58.21197222,
+      "lon": 11.41855556,
+      "place": "village:Grundsund",
+      "source": "sv.wikipedia Grundsunds kyrka (coordinates and the 1893 cross church)",
+      "confidence": "exact",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-karingon-church",
+      "type": "church",
+      "variant": "tower-church",
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": 1796,
+      "lat": 58.11080556,
+      "lon": 11.36366667,
+      "place": "village:Käringön",
+      "source": "sv.wikipedia Käringöns kyrka (coordinates); Svenska kyrkan (taken into use 1796)",
+      "confidence": "exact",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-gaso-chapel",
+      "type": "church",
+      "variant": "school-chapel",
+      "era": [
+        "today"
+      ],
+      "built": 1955,
+      "lat": 58.23462096759603,
+      "lon": 11.408369037280828,
+      "place": "relation/10604591",
+      "source": "RAÄ LYSEKIL GÅSÖ S:1 husnr 10 (GÅSÖ KAPELL, record coordinates); sv.wikipedia Gåsö (the school made a chapel, 1955)",
+      "confidence": "exact",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-gullholmen-huts",
+      "type": "sjobod",
+      "variant": "row",
+      "opts": {
+        "n": 5
+      },
+      "era": [
+        "1703",
+        "1950",
+        "today"
+      ],
+      "built": null,
+      "lat": 58.17993,
+      "lon": 11.40585,
+      "place": "village:Gullholmen",
+      "source": "BM2012 via history-start-area.md (about 20 families in 1703; about 100 boathouses in 1920); village point from settlements-history.json",
+      "confidence": "approx",
+      "factConfidence": "medium",
+      "note": "the village point, snapped to land and turned to face the water"
+    },
+    {
+      "id": "lm-korno-huts",
+      "type": "sjobod",
+      "variant": "row",
+      "opts": {
+        "n": 5
+      },
+      "era": [
+        "1703",
+        "1950",
+        "today"
+      ],
+      "built": null,
+      "lat": 58.2978,
+      "lon": 11.3778,
+      "place": "relation/10094463",
+      "source": "sv.wikipedia Stora Kornö (sea huts from the 1600s); island point from names.json",
+      "confidence": "approx",
+      "factConfidence": "medium",
+      "note": "Stora Kornö lies in the window's north edge fade strip"
+    },
+    {
+      "id": "lm-karingon-huts",
+      "type": "sjobod",
+      "variant": "row",
+      "opts": {
+        "n": 4
+      },
+      "era": [
+        "1703",
+        "1950",
+        "today"
+      ],
+      "built": null,
+      "lat": 58.10985,
+      "lon": 11.36359,
+      "place": "village:Käringön",
+      "source": "WORLD-1700 / WORLD-1950 (a hamlet in 1703, harbour made in the 1930s); village point from settlements-history.json",
+      "confidence": "approx",
+      "factConfidence": "low"
+    },
+    {
+      "id": "lm-fiskebackskil-huts",
+      "type": "sjobod",
+      "variant": "row",
+      "opts": {
+        "n": 5
+      },
+      "era": [
+        "1703",
+        "1950",
+        "today"
+      ],
+      "built": null,
+      "lat": 58.24565,
+      "lon": 11.45663,
+      "place": "village:Fiskebäckskil",
+      "source": "sv.wikipedia Fiskebäckskil (a fishing place since the 1500s); vastsverige.com (sea huts, openings toward the water)",
+      "confidence": "approx",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-grundsund-huts",
+      "type": "sjobod",
+      "variant": "row",
+      "opts": {
+        "n": 5
+      },
+      "era": [
+        "1950",
+        "today"
+      ],
+      "built": null,
+      "lat": 58.21336,
+      "lon": 11.41924,
+      "place": "village:Grundsund",
+      "source": "sv.wikipedia Grundsund; WORLD-1700 (Grundsund as a village in 1703 is doubtful, so no 1703 huts)",
+      "confidence": "approx",
+      "factConfidence": "medium"
+    },
+    {
+      "id": "lm-gullholmen-nets",
+      "type": "sjobod",
+      "variant": "nets",
+      "era": [
+        "1703",
+        "1950"
+      ],
+      "built": null,
+      "lat": 58.18033,
+      "lon": 11.40655,
+      "place": "village:Gullholmen",
+      "source": "ISLAND-ASSETS-BRIEF 1.7 (drying nets: 1703 yes, 1950 yes, today rare)",
+      "confidence": "approx",
+      "factConfidence": "low"
+    },
+    {
+      "id": "lm-gullholmen-racks",
+      "type": "sjobod",
+      "variant": "racks",
+      "era": [
+        "1703",
+        "1950"
+      ],
+      "built": null,
+      "lat": 58.17953,
+      "lon": 11.406749999999999,
+      "place": "village:Gullholmen",
+      "source": "ISLAND-ASSETS-BRIEF 1.7; era-assets.js addDryingRacks",
+      "confidence": "approx",
+      "factConfidence": "low"
+    }
+  ],
+  "views": [
+    {
+      "id": "maseskar",
+      "label": "Måseskär: Hinneskär ahead, the tower beyond",
+      "era": "1950",
+      "focus": {
+        "lat": 58.09050563841263,
+        "lon": 11.332086112527927
+      },
+      "from": 180,
+      "distM": 24,
+      "landmarks": [
+        "lm-hinneskar",
+        "lm-maseskar-heap"
+      ],
+      "note": "the tower is the game's own (lighthouses.js), 40 m beyond the cairn: you see it with the weather camera. The window's south edge fades the coast here."
+    },
+    {
+      "id": "karingon",
+      "label": "Käringön marks: Korsholmen ahead, Tornö beyond",
+      "era": "1950",
+      "focus": {
+        "lat": 58.114333439232176,
+        "lon": 11.346928759350575
+      },
+      "from": 180,
+      "distM": 24,
+      "landmarks": [
+        "lm-korsholmen",
+        "lm-torno"
+      ],
+      "note": "Tornö is 32 m north of Korsholmen: the weather camera shows both"
+    },
+    {
+      "id": "karingon-village",
+      "label": "Käringön village: church and sea huts",
+      "era": "1950",
+      "focus": {
+        "lat": 58.11080556,
+        "lon": 11.36366667
+      },
+      "from": 180,
+      "distM": 22,
+      "landmarks": [
+        "lm-karingon-church",
+        "lm-karingon-huts"
+      ]
+    },
+    {
+      "id": "kraksundsgap",
+      "label": "Kråksundsgap: the black cairn on Bråtö",
+      "era": "1950",
+      "focus": {
+        "lat": 58.11031851679492,
+        "lon": 11.456162057285084
+      },
+      "from": 225,
+      "distM": 20,
+      "landmarks": [
+        "lm-kraksundsgap-brato"
+      ],
+      "note": "Bråtö is a long island: the cairn is near its north-west part, seen from the south-west. Pipeskär is 200 m south of here, out of this view"
+    },
+    {
+      "id": "bonden",
+      "label": "Bonden, west of Grundsund",
+      "era": "1950",
+      "focus": {
+        "lat": 58.20866586552939,
+        "lon": 11.314155985992267
+      },
+      "from": 180,
+      "distM": 22,
+      "landmarks": [
+        "lm-bonden"
+      ]
+    },
+    {
+      "id": "fiskebackskil",
+      "label": "Fiskebäckskil: the windmill from the fjord",
+      "era": "1950",
+      "focus": {
+        "lat": 58.24790214584477,
+        "lon": 11.457946505896185
+      },
+      "from": 0,
+      "distM": 14,
+      "landmarks": [
+        "lm-fiskebackskil-windmill",
+        "lm-fiskebackskil-huts"
+      ],
+      "note": "seen from the north, as when you cross from Lysekil: the village is near the camera"
+    }
+  ]
+}
