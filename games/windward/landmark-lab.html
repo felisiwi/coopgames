@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Windward Landmark Lab</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1a24; --panel: rgba(14, 26, 36, 0.93); --line: #2c4556; --text: #e6eef2; --dim: #9db3c0;
+    --accent: #6fd0d6; --on: #06222a; --dusk: #f0b25c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.35 system-ui, sans-serif; overflow: hidden; overscroll-behavior: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--dim); background: var(--bg); z-index: 9; }
+  #loading.err { color: #ffb4a8; white-space: pre-wrap; }
+
+  #labels { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+  .lab { position: absolute; left: 0; top: 0; transform: translate(-50%, 0); max-width: 104px; padding: 2px 6px; border-radius: 7px; background: rgba(14, 26, 36, 0.72); border: 1px solid var(--line); font-size: 10px; line-height: 1.2; text-align: center; color: var(--text); }
+  .lab small { display: block; color: var(--dim); font-size: 10px; }
+  .lab.gone { display: none; }
+  #labels.dense .lab small { display: none; }
+  #labels.dense .lab { font-size: 9px; padding: 1px 4px; max-width: 80px; }
+
+  #bar { position: fixed; z-index: 4; top: calc(8px + env(safe-area-inset-top, 0px)); left: calc(8px + env(safe-area-inset-left, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); display: flex; gap: 6px; align-items: center; pointer-events: none; }
+  #bar > * { pointer-events: auto; }
+  .nav { flex: none; width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: 600 18px system-ui, sans-serif; cursor: pointer; }
+  #title { flex: 1; min-width: 0; height: 44px; display: grid; align-content: center; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); text-align: center; }
+  #title b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #title small { display: block; color: var(--dim); font-size: 11px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dusk { flex: none; min-width: 64px; height: 44px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: 600 13px system-ui, sans-serif; cursor: pointer; }
+  #dusk.on { background: var(--dusk); border-color: var(--dusk); color: #2a1a06; }
+
+  #panel { position: fixed; z-index: 4; left: calc(8px + env(safe-area-inset-left, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); bottom: calc(8px + env(safe-area-inset-bottom, 0px)); max-width: 460px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+  #head { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; background: none; color: inherit; font: 600 14px system-ui, sans-serif; text-align: left; cursor: pointer; }
+  #head .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #head .chev { transition: transform .15s; } #panel.open #head .chev { transform: rotate(180deg); }
+  #body { display: none; padding: 0 12px 12px; max-height: min(62vh, 560px); overflow: auto; -webkit-overflow-scrolling: touch; }
+  #panel.open #body { display: block; }
+  h2 { margin: 12px 0 6px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  button.chip, #copy { font: inherit; color: var(--text); background: #1c3140; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; min-height: 44px; cursor: pointer; }
+  button.chip.on { background: var(--accent); border-color: var(--accent); color: var(--on); font-weight: 600; }
+  .tog { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+  .tog input { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+  .slider { display: grid; gap: 2px; padding: 4px 0; }
+  .slider .top { display: flex; justify-content: space-between; align-items: baseline; }
+  .slider output { color: var(--dim); font-variant-numeric: tabular-nums; }
+  .slider input { width: 100%; height: 36px; margin: 0; accent-color: var(--accent); }
+  .row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+  #stats { margin-top: 10px; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  #info { margin-top: 8px; font-size: 12px; color: var(--dim); }
+  #info b { color: var(--text); }
+  .note { margin: 8px 0 0; font-size: 12px; color: var(--dim); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="labels"></div>
+<div id="loading">loading the landmarks…</div>
+<div id="bar">
+  <button class="nav" id="prev" type="button" aria-label="Previous type">◀</button>
+  <div id="title"><b id="tname">Landmark Lab</b><small id="tsub"></small></div>
+  <button class="nav" id="next" type="button" aria-label="Next type">▶</button>
+  <button id="dusk" type="button" aria-pressed="false">Day</button>
+</div>
+<div id="panel">
+  <button id="head" type="button" aria-expanded="false" aria-controls="body"><span class="name" id="headname">Landmark Lab</span><span class="chev" aria-hidden="true">▲</span></button>
+  <div id="body">
+    <h2>Era</h2>
+    <div class="chips" id="eras"></div>
+    <h2>Type</h2>
+    <div class="chips" id="types"></div>
+    <div id="variantBox"><h2>One variant (turn it)</h2><div class="chips" id="variants"></div></div>
+    <h2>Show</h2>
+    <label class="tog"><input type="checkbox" id="fig"><span>A 1.5 m figure beside each, for scale</span></label>
+    <label class="tog"><input type="checkbox" id="rs"><span>The game's read scale (cairns x1.8, marks x2.0)</span></label>
+    <h2>Camera</h2>
+    <div class="chips" id="cams"></div>
+    <label class="slider"><span class="top"><span>Distance (1 = fitted to the shelf)</span><output id="zoomOut"></output></span><input id="zoom" type="range" min="0.05" max="3" step="0.01"></label>
+    <label class="slider" id="rotBox"><span class="top"><span>Turn the landmark</span><output id="rotOut"></output></span><input id="rot" type="range" min="0" max="360" step="1"></label>
+    <div id="info"></div>
+    <div class="row"><button id="copy" type="button">Copy link</button><span class="note" style="margin:0">The address always holds your settings: send it back.</span></div>
+    <div id="stats"></div>
+    <p class="note">Drag to orbit, pinch or scroll to zoom. “Game camera” is the in-game angle and height. Dusk lights the windows and lanterns only (no extra lights). Models are built at 1:1 real metres; the game enlarges landmarks when it places them.</p>
+  </div>
+</div>
+<script type="module" src="./src/landmark-lab.js"></script>
+</body>
+</html>
