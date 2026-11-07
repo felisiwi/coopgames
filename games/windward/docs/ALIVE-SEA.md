@@ -391,3 +391,20 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
 14. **A sighting entry** holds one handwritten line, the ink sketch, and the place and era in the margin.
 15. **Tapping an entry** opens the chart at that place.
 16. **Order:** newest first within each section.
+
+## Grill: anchoring close-ups (2026-11-07, settled; Felix chose)
+
+1. **Where:** sheltered, shallow spots near land: coves always, and an island's lee when today's wind
+   blows from the other side (ties to the weather's lee). Harbours by mooring as now.
+2. **How:** an "Anchor" button appears when you're slow near a good spot.
+3. **Camera:** eases in low and close; drag to look around; tap things (the tap system).
+4. **Up close:** wildlife comes closer, shore detail (rock pools, flowers, small fish in shallow water),
+   finds to pick up, and people ashore you can hail. All via the thing model's "anchored nearby" reaction.
+5. **Patience:** gradual: birds within seconds, seals after about a minute of stillness.
+6. **Ashore:** everything is reached from the boat for now; no walking.
+7. **Passing time:** a "Wait until evening / morning" button once day and night exist; in co-op both
+   players must be anchored.
+8. **Harbour close-ups** (steering narrow gaps at a big scale) share the close camera and detail tech but
+   stay a separate, later feature.
+9. **Co-op:** raft up side by side; both get the close view and the same wildlife.
+10. **Leaving:** a "Weigh anchor" button (or start steering and it asks once).
