@@ -428,3 +428,13 @@ when anchored, both players in co-op (anchoring grill); one shared clock in co-o
    a quieter sea (fewer boats, wildlife asleep).
 8. **The story can set the time, rarely** (key moments jump to dusk or night), like the wind override.
 9. **The first dusk after relighting:** your lights come on one by one along the coast.
+
+## Direction: generative choose-your-own-adventure quests (Felix and Pierre, 2026-11-07)
+
+The first 18 quest templates (data/quests-1950.json) read as repetitive fetch-and-carry. Felix and Pierre's
+direction: keep the 1950 data (things, regulars, places, items, wrecks, rumours, artifacts with true stories,
+island lore) as a solid dataset with parameters, and build a **generative, choose-your-own-adventure layer** on
+top: choices, branches, consequences, people who remember what you chose. The 18 templates are placeholders.
+To be grilled with Pierre after the split; a likely first lane for him.
+Small calls (Felix): Lysekil bath-house attendant moves to Fiskebäckskil; the 1950 radio forecast is heard from
+Måseskär's keeper and a radio in each harbour's shop or café; keep the Kornö south-point rumour (a wink to 1970).
