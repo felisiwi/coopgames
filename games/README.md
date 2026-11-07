@@ -120,6 +120,16 @@ with the other player's position unknown, renders nothing for them until
 their first `pos` message arrives, and has no other host-side state a late
 guest would need to be caught up on.
 
+**A guest can also leave and come back on the same link** (a closed tab, a
+phone that slept): the host's slot is freed when the guest's connection
+closes, and the hub sends the returning guest `launch` again. To your host
+`start()` that is the same event as a late first join, with a brand-new guest
+page that knows nothing yet, so whatever catches up a late guest (a state
+snapshot, a resent value) must also be safe to send a second time. Only one
+guest at a time is still allowed. A game that cannot resume mid-game (for
+example lockstep from frame 0) should decide what a returning guest means for
+it: restart the round, or ignore a second `hello`.
+
 ## Solo dev entry
 
 Because `game.js` never touches PeerJS, a game can be developed and tested

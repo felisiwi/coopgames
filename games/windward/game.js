@@ -1037,6 +1037,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       otherWake = null;
       other.x = null;
       partnerLeftAtS = nowS;
+      heardFromPeer = false; // a returning guest is a first contact again: the host re-sends the wind at once (see onMessage)
       showNotice('Your friend has left. Keep sailing, or close the tab.', CONFIG.PARTNER_LEFT_NOTICE_S, 'left');
     }
     if (partnerLeftAtS !== null && partnerState(otherLastPosAtS, nowS) === 'present') {

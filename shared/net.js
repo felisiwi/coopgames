@@ -40,13 +40,23 @@
 // numbers) — PeerJS's default serialization handles them as-is, no manual
 // stringify. Don't send functions, class instances, or binary data.
 //
-// Only one guest connection is supported (this hub is a 2-player affair
-// today); a host peer that receives a second incoming connection while one
-// is already open closes it immediately.
+// Only one guest connection is supported at a time (this hub is a 2-player
+// affair today); a host peer that receives a second incoming connection
+// while a guest is connected closes it immediately.
 //
-// Reconnect is explicitly out of scope: once the connection closes (or
-// errors), onClose fires and nothing more is sent or received. The hub is
-// responsible for telling the user to get a fresh link from the host.
+// A guest may come BACK. When the guest's connection closes or errors, the
+// host's slot is freed and onClose fires; the same link then works again for
+// a new guest connection (a closed tab reopened, a phone that slept). The new
+// connection is wired exactly like the first: onConnect fires again (so the
+// hub sends 'launch' again), messages reach the same onMessage listeners, and
+// anything send() queued while nobody was connected is flushed to it. Events
+// from the OLD connection are ignored once it has been replaced. Games treat
+// a returning guest like a late joiner: see games/README.md ("Drop-in play").
+//
+// What is still out of scope: the guest's own page does NOT reconnect by
+// itself. After its connection closes, onClose fires there and nothing more
+// is sent or received; getting back in means reopening the host's link,
+// which makes a new page and a new connection.
 
 // Google STUN plus the Open Relay Project's free public TURN service
 // (https://www.metered.ca/tools/openrelay/). This is a shared, rate-limited
@@ -133,9 +143,12 @@ function buildNet({ peer, isHost }) {
     for (const fn of closeListeners) fn();
   }
 
+  // Only the CURRENT connection may speak: once a returning guest has replaced a dropped one, a late 'close',
+  // 'error' or 'data' from the old connection must not fire onClose or reach the game (the `c !== conn` checks).
   function wireConnection(c) {
     conn = c;
     conn.on('data', (data) => {
+      if (c !== conn) return;
       if (messageListeners.length === 0) {
         inboundQueue.push(data);
         if (inboundQueue.length > INBOUND_QUEUE_MAX) inboundQueue.shift();
@@ -144,14 +157,17 @@ function buildNet({ peer, isHost }) {
       for (const fn of messageListeners) fn(data);
     });
     conn.on('open', () => {
+      if (c !== conn) return;
       while (sendQueue.length) conn.send(sendQueue.shift());
       for (const fn of connectListeners) fn();
     });
     conn.on('close', () => {
+      if (c !== conn) return;
       logIceDiagnostics(conn, 'closed');
       fireClose();
     });
     conn.on('error', (err) => {
+      if (c !== conn) return;
       console.warn('shared/net.js: connection error', err);
       logIceDiagnostics(conn, 'errored');
       fireClose();
@@ -210,6 +226,12 @@ export function host() {
           return;
         }
         guestConn = conn;
+        // Free the slot when THIS guest's connection closes or errors, so the same link works for a guest who
+        // comes back (closed tab, phone asleep). `guestConn === conn` keeps a late event from an old
+        // connection from freeing the slot of the guest who replaced it. Still one guest at a time.
+        const free = () => { if (guestConn === conn) guestConn = null; };
+        conn.on('close', free);
+        conn.on('error', free);
         wireConnection(conn);
       });
       resolve(net);
