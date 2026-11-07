@@ -74,8 +74,17 @@ export function fixedDirectionForYaw(yaw, out = _yawDirection) {
 
 // rate: how quickly the camera catches up (1/s). Faster while zooming, so the 3D view stays in step with the chart.
 // yaw: extra turn round the target in radians (0 = north-up), for the lighthouse relight's slow circle.
-export function updateFixedCamera(camera, boatPosition, dt, zoom = 1, rate = CONFIG.FIXED_CAMERA_DAMPING_RATE, yaw = 0) {
-  _fixedDesired.copy(boatPosition).addScaledVector(fixedDirectionForYaw(yaw), CONFIG.FIXED_CAMERA_DISTANCE * zoom);
+// The same, with the camera dropped `elevDropDeg` lower (the speed feel: sail-feel-model.js cameraFeel). 0 = exactly fixedDirectionForYaw.
+export function fixedDirectionFor(yaw, elevDropDeg = 0, out = _yawDirection) {
+  if (!elevDropDeg) return fixedDirectionForYaw(yaw, out);
+  const elevation = ((CONFIG.FIXED_CAMERA_ELEVATION_DEG - elevDropDeg) * Math.PI) / 180;
+  const azimuth = (CONFIG.FIXED_CAMERA_AZIMUTH_DEG * Math.PI) / 180 + yaw;
+  return out.set(Math.sin(azimuth) * Math.cos(elevation), Math.sin(elevation), Math.cos(azimuth) * Math.cos(elevation));
+}
+
+// feel (optional): { elevDropDeg, distMul } from sail-feel-model.js cameraFeel(): the camera dips and moves in with speed. Omitted = the game's fixed rig, unchanged.
+export function updateFixedCamera(camera, boatPosition, dt, zoom = 1, rate = CONFIG.FIXED_CAMERA_DAMPING_RATE, yaw = 0, feel = null) {
+  _fixedDesired.copy(boatPosition).addScaledVector(feel ? fixedDirectionFor(yaw, feel.elevDropDeg) : fixedDirectionForYaw(yaw), CONFIG.FIXED_CAMERA_DISTANCE * zoom * (feel ? feel.distMul : 1));
   const smoothing = 1 - Math.exp(-rate * dt);
   camera.position.lerp(_fixedDesired, smoothing);
   camera.lookAt(boatPosition);
