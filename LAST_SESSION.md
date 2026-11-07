@@ -22,7 +22,7 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 
 ## Next
 
-1. Merge `felix/windward-landmarks` (agent 4; re-sync its camera numbers to the merged weather camera first) and `felix/windward-thing-templates` (agent 3, gate 2 in progress). `felix/hub-guest-rejoin` waits for Felix's two-phone test.
+1. Landmarks merged (lab + data only, not in the game yet). Merge `felix/windward-thing-templates` (agent 3, gate 2 in progress). `felix/hub-guest-rejoin` waits for Felix's two-phone test.
 2. Then the split into `felisiwi/windward` (docs/WINDWARD-SPLIT-PLAN.md; phase 1 prompt in games/windward/docs/prompts/2026-11-07-split-phase1.md), then invite Pierre (pierre/* branches; main and felix/* protected, Felix is on GitHub Pro).
 3. After that: the thing-model slice and the quest slice (docs/ALIVE-SEA.md build order), co-op stage 2, sound, chapter 2, the 1703 jump.
 
