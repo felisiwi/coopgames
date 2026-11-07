@@ -357,7 +357,8 @@ export function createWindField(opts) {
     out.strength = strength;
     out.baseStrength = w.strength; // the day's wind alone
     out.baseDir = w.dir;
-    out.rel = strength / Math.max(0.05, w.strength); // vs the day's wind: > 1 gust, < 1 lull or lee (what the sea paints)
+    out.rel = strength / Math.max(0.05, w.strength); // vs the day's wind alone
+    out.local = strength / Math.max(0.05, w.strength * boost); // vs the calm-air wind of THIS water (open sea's steady boost removed): > 1 gust or squall, < 1 lull or lee. What the sea paints
     out.gust = gust;
     out.shadow = shadow;
     out.funnel = funnel;
