@@ -378,6 +378,16 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
 6. **One book across all eras,** entries marked with their era.
 7. **Co-op:** your book is yours; days sailed in a friend's world are recorded in it too.
 
-**Round 2 (in progress):**
-12. **Logbook drawings:** auto-made ink silhouettes rendered from the 3D models for every template;
-    hand-drawn only for unique artifacts (Felix agreed).
+**Round 2 and 3, settled (Felix chose):**
+8. **Open it** with a small book icon in a corner; a ribbon shows when something new was noted.
+9. **When something is noted:** a small "noted in the logbook" toast only; the book never opens itself.
+10. **Lettering:** legible handwriting for entries, serif headings; fall back to serif if it reads badly
+    on a phone.
+11. **Voice:** you, first person, short ("Three harbour seals off Gåsö. Fog lifting.").
+12. **Drawings:** auto-made ink silhouettes rendered from the 3D models for every template; hand-drawn
+    only for unique artifacts.
+13. **Grandpa's faded pages:** in today's opening some pages are already written but unreadable; as you
+    write in 1950 they turn out to be your own entries, one by one.
+14. **A sighting entry** holds one handwritten line, the ink sketch, and the place and era in the margin.
+15. **Tapping an entry** opens the chart at that place.
+16. **Order:** newest first within each section.
