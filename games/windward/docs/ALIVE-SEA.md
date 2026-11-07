@@ -204,3 +204,22 @@ in an era, with conditions (time of day, weather, season, story phase), what it 
    exists). No world seed is saved today: it will be a new key, with a test.
 6. **Cross-era traces are things** you create, with the year made and how they age; later eras
    read the same list.
+
+**Round 2, settled (Felix agreed):**
+7. **Template fields:** name, era range; where (anchor type + placement rules); when (time of
+   day, weather, season, story phase); routine; reactions (tap, approach, anchored nearby);
+   sighting entry; rarity; source (research ref or "invented", so Felix can rewrite by eye).
+8. **Anchors to start:** skerry, island, harbour, village, light, sea mark, berth, pass, plus
+   **open water** (sampled sea points). Bays later, when anchoring/close-ups need them.
+9. **Placement is a fixed function** of world seed + day seed + anchor + template (like life.js):
+   both phones agree with no messages; the guest uses the host's seeds, sent on join.
+10. **Density:** rarity per template plus a cap per area; tuned with the route log.
+11. **Change log:** stable key per thing (template + anchor); one save key per era with entries
+    `{key, what, when}`; existing keys untouched; test that old saves load without it.
+12. **Co-op ownership:** world changes are saved by the host (gone on both screens); personal
+    rewards (sighting, souvenir) go to whoever tapped.
+13. **Templates in one data file per era** (e.g. data/things-1950.json) wired through
+    world-years.json; a research agent drafts them from WORLD/PEOPLE docs, Felix reviews.
+14. **Traces age** by type (stands, weathers, grows, lost) with an optional "survives until" year
+    from research (e.g. a breakwater built over your cairn).
+15. **Sighting log per kind,** with the first place and era it was seen.
