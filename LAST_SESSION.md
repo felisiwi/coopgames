@@ -31,3 +31,4 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 - stage agent, Next run: batches 0-2 on `felix/windward-next-run` (1020d30); 69 test files pass; no save keys changed. Errand wind covers `errand`+`return`, hands back at `help` (not `free`: the doc was stale).
 - stage agent, Task card: in 1950 the Task button now shows what-and-why (`TASK_WHY`, `taskCardLines` in `story-1950.js`, draft copy) before the progress line; 70 test files pass.
 - mission control: merged next-run (pause, game clock, light names, errand wind, light air, task card) and island-lore (`data/island-lore.json`, 27 places; `docs/ISLAND-LORE.md`, `ISLAND-ASSETS-BRIEF.md`, `UNIQUE-ARTIFACT-CANDIDATES.md`). Design grills (thing model, weather, mini quests, logbook) in `docs/ALIVE-SEA.md`; agent prompts in `docs/prompts/`.
+- mission control: merged the co-op stage 2 plan (`games/windward/docs/COOP-STAGE2-PLAN.md`, decisions F1-F9) and `docs/notes/KENNY-HUB-LAUNCH.md`.
