@@ -325,3 +325,25 @@ bays/headlands; a weather system; anchoring close-ups; sound wiring.
    drafted from the research, marked INVENTED, rewritten by Felix by eye.
 8. **Co-op:** quests live in the host's world, both can help, rewards split like the thing model;
    a few two-boat quests (towing, holding a line) later, after co-op stage 2.
+
+**Round 2, settled (Felix agreed):**
+9. **Artifacts are templates:** name, era made, era found, rarity tier, true story with a research
+   reference, what it leads to (quest template or story hook), sellable later. Tiers: common,
+   uncommon, rare, unique. Uniques are only ever placed by Felix. **Felix:** later, a curated list
+   of unique candidates, inspired by history and fitting the story, for him to pick from.
+10. **Artifacts across time:** rare and unique ones can carry "lost in year X at place Y" and their
+    owners can be met in their own era; things you leave in 1703 can turn up in 1950 or today.
+11. **Sources and rarity:** quest rewards, drift finds, places' secrets, close looks when anchored,
+    gifts from warm regulars. Drift finds mostly common; secrets and warm regulars give rare ones.
+12. **The collection:** a logbook page with a small drawing per artifact; rare ones displayed in the
+    world (Svalan's chest or shelf now; Britta's house and your own later).
+13. **Lore is told by a regular who knows** (the keeper, an old fisherman, Britta's father); it stays
+    in the logbook marked "real history" with its source.
+14. **"Leads to":** rare artifacts unlock small templated quests (return it to a descendant, find its
+    pair, learn where it came from); uniques are wired into the main story by Felix.
+15. **Repetition:** per-template cooldowns; regulars remember what you've done for them.
+16. **Co-op:** commons to the finder; rare and unique finds go to both players as a shared memory.
+
+**New research thread (Felix, 2026-11-07):** lore of Bohuslän's islands (history, folklore,
+place-name meanings, landmarks) for the game, story and quests, and for recognisable per-island
+assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
