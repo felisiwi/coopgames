@@ -364,3 +364,16 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
 4. Weather and sail feel into the game, once Felix has felt the lab.
 5. Quest slice: the three templates, logbook pages.
 6. Co-op stage 2 build (Kenny gets a heads-up note on the hub launch change; Felix: no OK needed).
+
+## Grill: the logbook (2026-11-07, in progress)
+
+**Round 1, settled (Felix agreed):**
+1. **One paper book** with sections you leaf through (the cards' paper style).
+2. **It is Grandpa's logbook:** it lies aboard Svalan in today's opening; you carry it into 1950 and
+   write in it; the finale can reveal its old pages are in your hand (mirrors Svalan's loop).
+3. **Sections (Felix: lighter):** light log, sightings, collection, stories, people, places.
+   ("On your mind" and best runs are not sections for now; quests are remembered by people.)
+4. **Opening the book pauses** solo (game clock), not in co-op (same rule as the pause).
+5. **Automatic handwritten entries** with small drawings; your own short notes later.
+6. **One book across all eras,** entries marked with their era.
+7. **Co-op:** your book is yours; days sailed in a friend's world are recorded in it too.
