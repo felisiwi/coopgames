@@ -1,5 +1,5 @@
-// Landmark placement, the pure parts (no THREE, no DOM): which placements stand in an era, which way they face, where the boat and camera go for a "from the boat" view,
-// and the three camera rigs. Testable in node (src/landmark-place.test.js). The data is data/landmarks.json; docs/LANDMARKS.md explains the fields.
+// Landmark placement, the parts with no scene and no DOM: which placements stand in an era, which way they face, where the boat and camera go for a "from the boat" view,
+// and the three camera rigs (derived from the game's own camera code on main). Testable in node (src/landmark-place.test.js). The data is data/landmarks.json; docs/LANDMARKS.md explains the fields.
 //
 // Conventions (checked against the game, 2026-11-07):
 //  - Game axes: +x east, +z SOUTH (lat = north - z; seamark-place.js makeFromGame). The coast is 1:10 in plan: 1 game metre = 10 real metres.
@@ -8,6 +8,10 @@
 //  - The game's fixed camera sits SOUTH of the boat looking north (azimuth 0, elevation 52 deg, distance 125 x zoom), so a landmark you can see well lies north of the boat.
 //  - Landmarks are built at 1:1 real metres; the game enlarges them when it places them (cairns x1.8, marks x2.0, src/world-year-build.js): LANDMARK_TYPES[type].readScale.
 import { LANDMARK_TYPES } from './landmark-assets.js';
+import { FEEL, cameraFeel } from './sail-feel-model.js';
+import { lookAheadVector as gameLookAheadVector } from './sail-feel-fx.js';
+import { GAME_WEATHER } from './game-weather.js';
+import { CONFIG } from './config.js';
 
 export const ERA_YEAR = { 1703: 1703, 1950: 1950, today: 2026 };
 export const ERA_IDS = Object.keys(ERA_YEAR);
@@ -43,23 +47,20 @@ export function seawardBearing(heightAt, x, z, { r = 16, steps = 24 } = {}) {
 export const gameOf = (toGame, lon, lat) => toGame(lon, lat);
 
 // ---- the three cameras (the "from the boat" toggle) --------------------------------------------------------------------
-// game    the camera as it is on main: zoom 1, elevation 52 deg, nothing else.
-// weather the weather camera at rest: agent 2 (felix/windward-weather, src/game-weather.js HOME_ZOOM) rests it at zoom 1.4.
-// speed   the weather camera at full speed (src/sail-feel-model.js FEEL): 12 deg lower, 20% closer, looking 45 m ahead of the bow.
-// COPIED, not imported: those files are on agent 2's branch, not on main yet. TODO(agent 4): re-sync when the weather branch is merged.
+// game    the camera as it was before the weather work: zoom 1, elevation 52 deg, nothing else.
+// weather the game's camera at rest on main: it rests at zoom GAME_WEATHER.HOME_ZOOM (src/game-weather.js; game.js `zoom = weatherWanted ? HOME_ZOOM : 1`).
+// speed   the same at full speed: the camera feel at full speed (game.js: cameraFeel(camShare) with camShare 1), i.e. dipped, tighter and looking ahead of the bow.
+// SYNCED 2026-11-07 after felix/windward-weather merged to main: the numbers are IMPORTED from main's modules (sail-feel-model.js FEEL / cameraFeel, game-weather.js GAME_WEATHER,
+// sail-feel-fx.js lookAheadVector), no longer copied, so the lab follows the game when agent 2 tunes them. The test compares the rigs with those exports.
+const FULL = cameraFeel(1); // { elevDropDeg, distMul, lookAheadM } at full speed, as game.js computes it with the feel fade k = 1 (zoom well under 1.8, not near the chart)
 export const CAMERA_RIGS = {
-  game: { label: 'The game today', zoom: 1, dipDeg: 0, tight: 0, lookAheadM: 0, note: 'zoom 1, elevation 52 deg (config.js)' },
-  weather: { label: 'Weather camera (x1.4)', zoom: 1.4, dipDeg: 0, tight: 0, lookAheadM: 0, note: 'agent 2: resting zoom 1.4' },
-  speed: { label: 'Weather camera at speed', zoom: 1.4, dipDeg: 12, tight: 0.2, lookAheadM: 45, note: 'agent 2: dip 12 deg, 20% closer, 45 m look-ahead, at full speed' },
+  game: { label: 'Game camera (zoom 1)', zoom: 1, dipDeg: 0, tight: 0, lookAheadM: 0, note: `zoom 1, elevation ${CONFIG.FIXED_CAMERA_ELEVATION_DEG} deg, distance ${CONFIG.FIXED_CAMERA_DISTANCE} (config.js)` },
+  weather: { label: `Weather camera (x${GAME_WEATHER.HOME_ZOOM})`, zoom: GAME_WEATHER.HOME_ZOOM, dipDeg: 0, tight: 0, lookAheadM: 0, note: `main: resting zoom ${GAME_WEATHER.HOME_ZOOM} (GAME_WEATHER.HOME_ZOOM)` },
+  speed: { label: 'Weather camera at speed', zoom: GAME_WEATHER.HOME_ZOOM, dipDeg: FEEL.CAM_DIP_DEG, tight: FEEL.CAM_TIGHT, lookAheadM: FEEL.CAM_LOOK_AHEAD_M, note: `main: ${FEEL.CAM_DIP_DEG} deg lower, ${Math.round(FEEL.CAM_TIGHT * 100)}% closer, ${FEEL.CAM_LOOK_AHEAD_M} m look-ahead at full speed (cameraFeel(1))` },
 };
 export const CAMERA_IDS = Object.keys(CAMERA_RIGS);
-const AHEAD_SIDE_M = 6, AHEAD_DOWN_M = 7; // agent 2's clamps: sideways per unit of zoom, and toward the bottom of the screen
-// the look-ahead offset for a boat with this game heading (radians; 0 = +z = south; PI = north), as sail-feel-fx.js lookAheadVector
-export function lookAheadVector(heading, lookM, zoom) {
-  const lx = Math.max(-AHEAD_SIDE_M * zoom, Math.min(AHEAD_SIDE_M * zoom, Math.sin(heading) * lookM));
-  const lzRaw = Math.cos(heading) * lookM;
-  return { x: lx, z: lzRaw > AHEAD_DOWN_M * zoom ? AHEAD_DOWN_M * zoom : lzRaw };
-}
+// the look-ahead offset for a boat with this game heading (radians; 0 = +z = south; PI = north): the game's own function, sail-feel-fx.js lookAheadVector
+export const lookAheadVector = (heading, lookM, zoom) => gameLookAheadVector(heading, lookM, zoom, { x: 0, z: 0 });
 // Where the camera sits and what it looks at, for a rig, a boat position and the boat's game heading. cfg = { distance, elevationDeg, azimuthDeg } from config.js FIXED_CAMERA_*.
 export function rigPose(rig, boat, heading, cfg) {
   const r = typeof rig === 'string' ? CAMERA_RIGS[rig] : rig;

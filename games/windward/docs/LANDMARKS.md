@@ -79,12 +79,15 @@ kit's landmarks snapped to land, the boat parked on open water straight south of
 
 | `cam` | Camera | Numbers |
 |---|---|---|
-| `game` | the game today | zoom 1, elevation 52°, distance 125 (`config.js`) |
-| `weather` | agent 2's weather camera at rest | zoom ×1.4 |
-| `speed` | the weather camera at full speed | zoom ×1.4, 12° lower, 20% closer, a 45 m look-ahead (clamped 6 m a side and 7 m toward the bottom, per unit of zoom) |
+| `game` | Game camera (zoom 1): the camera as it was before the weather work, and what the game uses when the weather is off | zoom 1, elevation 52°, distance 125 (`config.js`) |
+| `weather` | Weather camera (×1.4): the game's camera at rest with the weather on | zoom `GAME_WEATHER.HOME_ZOOM` (1.4 on main) |
+| `speed` | Weather camera at speed: the same at full speed (`cameraFeel(1)` in `game.js`) | zoom 1.4, `FEEL.CAM_DIP_DEG` lower (12°), `FEEL.CAM_TIGHT` closer (20%), a `FEEL.CAM_LOOK_AHEAD_M` look-ahead (45 m), clamped by the game's `lookAheadVector` |
 
-**TODO(agent 4): re-sync the `weather` and `speed` numbers when `felix/windward-weather` merges.** They are copied, not imported, from that branch (`src/game-weather.js` `HOME_ZOOM`,
-`src/sail-feel-model.js` `FEEL`, `src/sail-feel-fx.js` `lookAheadVector`) because those files are not on `main`. They live in one place: `CAMERA_RIGS` in `src/landmark-place.js`.
+**Synced to main (2026-11-07, after `felix/windward-weather` merged).** The rigs are no longer copied: `CAMERA_RIGS` in `src/landmark-place.js` is *derived from main's own exports*
+(`GAME_WEATHER.HOME_ZOOM` from `src/game-weather.js`, `FEEL` and `cameraFeel` from `src/sail-feel-model.js`, `lookAheadVector` from `src/sail-feel-fx.js`), so the lab follows the game when
+those numbers are tuned. `landmark-place.test.js` compares the rigs with those exports and recomputes the camera the way `game.js` does (distance = `FIXED_CAMERA_DISTANCE` × zoom × `distMul`,
+elevation dropped by the feel, the view target slid by `lookAheadVector`); the full-speed case is `camShare = 1` with the feel fade `k = 1` (zoom well under 1.8, not near the chart). The numbers
+in the table are the values on main at this sync.
 
 **What the cameras show.** The game's camera is narrow: from its field of view (30°) and distance (125) the screen covers roughly 65 to 85 m of sea top to bottom and about 30 m across on a phone (aspect 0.46), always south of the boat looking north. A landmark is only seen when it
 is within roughly 25 to 45 m ahead and nearly centred, which is why every view puts it dead ahead. The weather camera shows more sea ahead: at Käringön the church and its tower appear
@@ -122,7 +125,7 @@ placer is one loop and a new landmark is a new row. Dusk is `setNight`. Each loo
 
 ## 8. Phone checklist (Felix)
 
-Open `landmark-lab.html` on the preview deployment, open the panel (tap the bar at the bottom), and for each place switch **From the boat** and flip the camera chips (The game today · Weather camera · Weather at speed).
+Open `landmark-lab.html` on the preview deployment, open the panel (tap the bar at the bottom), and for each place switch **From the boat** and flip the camera chips (Game camera (zoom 1) · Weather camera (×1.4) · Weather camera at speed).
 
 1. **Shelf, 1950, Stone cairn:** do the nine cairns look like *different marks* (square white, black cylinder, white cone with an arm, belted ones, the tall one with a pole)? Anything too small, too big, or the wrong colour?
 2. **Måseskär** (view 1): does Hinneskär's white cone read as *the cairn next to the lighthouse*? Is the light's beam in the way?

@@ -3,6 +3,10 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { LANDMARK_TYPES } from './landmark-assets.js';
+import { FEEL, cameraFeel } from './sail-feel-model.js';
+import { lookAheadVector as mainLookAhead } from './sail-feel-fx.js';
+import { GAME_WEATHER } from './game-weather.js';
+import { CONFIG } from './config.js';
 import {
   ERA_IDS, ERA_YEAR, standsIn, expectedEras, placementsFor, placementById, bearingToYaw, yawToBearing, bearingVector, bearingOf, seawardBearing, CAMERA_RIGS, CAMERA_IDS,
   lookAheadVector, rigPose, boatWanted, inRegion, readScaleOf,
@@ -85,27 +89,42 @@ check('seawardBearing finds the open water: lowest ground to the west gives 270,
   assert.equal(seawardBearing(ne, 0, 0), 45);
 });
 
-check('the three cameras are agent 2\'s numbers: game 1.0, weather 1.4, speed 1.4 with a 12 deg dip, 20% closer, 45 m look-ahead', () => {
+check('the cameras ARE main\'s: the rigs are derived from the game\'s own exports (HOME_ZOOM, FEEL, cameraFeel), so they cannot drift', () => {
   assert.deepEqual(CAMERA_IDS, ['game', 'weather', 'speed']);
-  assert.equal(CAMERA_RIGS.game.zoom, 1); assert.equal(CAMERA_RIGS.weather.zoom, 1.4);
-  assert.equal(CAMERA_RIGS.speed.dipDeg, 12); assert.equal(CAMERA_RIGS.speed.tight, 0.2); assert.equal(CAMERA_RIGS.speed.lookAheadM, 45);
-  const cfg = { distance: 125, elevationDeg: 52, azimuthDeg: 0 };
-  const boat = { x: 100, z: 200 }, north = Math.PI; // heading north
-  const g = rigPose('game', boat, north, cfg), w = rigPose('weather', boat, north, cfg), s = rigPose('speed', boat, north, cfg);
-  assert.deepEqual(g.target, boat); assert.deepEqual(w.target, boat);
-  assert.ok(Math.abs(g.distance - 125) < 1e-9 && Math.abs(w.distance - 175) < 1e-9 && Math.abs(s.distance - 140) < 1e-9, `distances ${g.distance} ${w.distance} ${s.distance}`);
-  assert.equal(s.elevationDeg, 40);
-  assert.ok(Math.abs(s.target.z - (200 - 45)) < 1e-9 && Math.abs(s.target.x - 100) < 1e-9, 'looks 45 m north of a boat heading north');
-  assert.ok(g.position.z > boat.z && g.position.y > 0, 'the camera is south of the boat, above it');
-  assert.ok(Math.abs(g.position.y - 125 * Math.sin(52 * Math.PI / 180)) < 1e-9);
+  const full = cameraFeel(1);
+  assert.equal(CAMERA_RIGS.game.zoom, 1);
+  assert.equal(CAMERA_RIGS.weather.zoom, GAME_WEATHER.HOME_ZOOM, 'the weather camera rests at HOME_ZOOM');
+  assert.equal(CAMERA_RIGS.speed.zoom, GAME_WEATHER.HOME_ZOOM);
+  assert.equal(CAMERA_RIGS.speed.dipDeg, FEEL.CAM_DIP_DEG); assert.equal(CAMERA_RIGS.speed.dipDeg, full.elevDropDeg);
+  assert.ok(Math.abs(1 - CAMERA_RIGS.speed.tight - full.distMul) < 1e-12, 'closer by the same share cameraFeel(1) gives');
+  assert.equal(CAMERA_RIGS.speed.lookAheadM, full.lookAheadM);
+  // the story, whatever the numbers: resting is further out than the old camera; at speed it dips, tightens and looks ahead
+  assert.ok(CAMERA_RIGS.weather.zoom > CAMERA_RIGS.game.zoom);
+  assert.ok(CAMERA_RIGS.speed.dipDeg > 0 && CAMERA_RIGS.speed.tight > 0 && CAMERA_RIGS.speed.lookAheadM > 0);
+  for (const id of ['game', 'weather']) assert.ok(CAMERA_RIGS[id].dipDeg === 0 && CAMERA_RIGS[id].tight === 0 && CAMERA_RIGS[id].lookAheadM === 0, `${id} rests`);
 });
 
-check('the look-ahead is clamped like the game\'s: 6 m a side per unit zoom, 7 m toward the bottom of the screen', () => {
-  const e = lookAheadVector(Math.PI / 2, 45, 1.4); // heading west... sideways
-  assert.ok(Math.abs(e.x) <= 6 * 1.4 + 1e-9, 'sideways clamp');
-  const south = lookAheadVector(0, 45, 1.4); // heading south: toward the bottom of the screen
-  assert.ok(Math.abs(south.z - 7 * 1.4) < 1e-9, 'downward clamp');
-  assert.ok(Math.abs(lookAheadVector(Math.PI, 45, 1.4).z + 45) < 1e-9, 'north is free');
+check('rigPose does what game.js does: distance = FIXED_CAMERA_DISTANCE x zoom x distMul, elevation dropped by the feel, the target slid by lookAheadVector', () => {
+  const cfg = { distance: CONFIG.FIXED_CAMERA_DISTANCE, elevationDeg: CONFIG.FIXED_CAMERA_ELEVATION_DEG, azimuthDeg: CONFIG.FIXED_CAMERA_AZIMUTH_DEG };
+  const boat = { x: 100, z: 200 };
+  for (const heading of [0, Math.PI / 2, Math.PI, 4.2]) {
+    const g = rigPose('game', boat, heading, cfg), w = rigPose('weather', boat, heading, cfg), s = rigPose('speed', boat, heading, cfg);
+    assert.deepEqual(g.target, boat); assert.deepEqual(w.target, boat);
+    assert.ok(Math.abs(g.distance - cfg.distance) < 1e-9 && Math.abs(w.distance - cfg.distance * GAME_WEATHER.HOME_ZOOM) < 1e-9);
+    const f = cameraFeel(1), ahead = mainLookAhead(heading, f.lookAheadM, GAME_WEATHER.HOME_ZOOM);
+    assert.ok(Math.abs(s.distance - cfg.distance * GAME_WEATHER.HOME_ZOOM * f.distMul) < 1e-9, `speed distance, heading ${heading}`);
+    assert.ok(Math.abs(s.elevationDeg - (cfg.elevationDeg - f.elevDropDeg)) < 1e-12);
+    assert.ok(Math.abs(s.target.x - (boat.x + ahead.x)) < 1e-9 && Math.abs(s.target.z - (boat.z + ahead.z)) < 1e-9, `speed target, heading ${heading}`);
+  }
+  const g = rigPose('game', boat, Math.PI, cfg);
+  assert.ok(g.position.z > boat.z && g.position.y > 0, 'the camera is south of the boat, above it');
+  assert.ok(Math.abs(g.position.y - cfg.distance * Math.sin(cfg.elevationDeg * Math.PI / 180)) < 1e-9);
+});
+
+check('the look-ahead IS the game\'s function (sail-feel-fx.js), and north is free', () => {
+  for (const zoom of [1, 1.4, 2]) for (const h of [0, 1, Math.PI / 2, 2.5, Math.PI, 5]) assert.deepEqual(lookAheadVector(h, 45, zoom), mainLookAhead(h, 45, zoom), `heading ${h}, zoom ${zoom}`);
+  assert.ok(Math.abs(lookAheadVector(Math.PI, 12, 1.4).z + 12) < 1e-9, 'a boat heading north looks the full distance up the screen');
+  assert.notEqual(lookAheadVector(Math.PI, 45, 1.4), lookAheadVector(Math.PI, 45, 1.4), 'a fresh object each call (no shared mutable state)');
 });
 
 check('every view is complete: a focus inside the region, landmarks that exist, one that stands in the view\'s era; the boat starts on the named side', () => {
