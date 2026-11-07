@@ -92,6 +92,16 @@ export function createFeelWake(pool = 48) {
 // speed up: the camera drops lower, moves closer, and looks ahead of the bow; slow: it pulls back and centres on the boat.
 const AHEAD_SIDE_M = 6; // metres of look-ahead allowed sideways per unit of zoom
 const AHEAD_DOWN_M = 7; // and toward the bottom of the screen
+// How far the view may slide ahead of the boat without losing it: lots up the screen (north: the screen is tall), a little sideways and down
+// (a portrait phone is narrow, and there is little sea below the boat). Measured at 500 x 757: half-width ~ 30 m, bottom ~ 28 m at zoom 1.
+// Returns { x, z } in game metres, to add to the boat's position. Shared by the lab's camera and the game's.
+export function lookAheadVector(heading, lookM, zoom, out = { x: 0, z: 0 }) {
+  const lx = Math.max(-AHEAD_SIDE_M * zoom, Math.min(AHEAD_SIDE_M * zoom, Math.sin(heading) * lookM));
+  const lzRaw = Math.cos(heading) * lookM; // negative = north = up the screen
+  out.x = lx;
+  out.z = lzRaw > AHEAD_DOWN_M * zoom ? AHEAD_DOWN_M * zoom : lzRaw;
+  return out;
+}
 export function createFeelCamera(camera) {
   const ahead = new THREE.Vector3(); // how far the view has slid ahead of the boat (smoothed)
   const aheadTarget = new THREE.Vector3();
@@ -99,12 +109,8 @@ export function createFeelCamera(camera) {
   const desired = new THREE.Vector3();
   let share = 0;
   function place(boat, heading, zoom, f, dt, snap) {
-    // How far the view may slide ahead of the boat without losing it: lots up the screen (north: the screen is tall), a little sideways and down
-    // (a portrait phone is narrow, and there is little sea below the boat). Measured at 500 x 757: half-width ~ 30 m, bottom ~ 28 m at zoom 1.
-    const lx = Math.max(-AHEAD_SIDE_M * zoom, Math.min(AHEAD_SIDE_M * zoom, Math.sin(heading) * f.lookAheadM));
-    const lzRaw = Math.cos(heading) * f.lookAheadM; // negative = north = up the screen
-    const lz = lzRaw > AHEAD_DOWN_M * zoom ? AHEAD_DOWN_M * zoom : lzRaw;
-    aheadTarget.set(lx, 0, lz);
+    const la = lookAheadVector(heading, f.lookAheadM, zoom);
+    aheadTarget.set(la.x, 0, la.z);
     if (snap) ahead.copy(aheadTarget); else ahead.lerp(aheadTarget, 1 - Math.exp(-2 * dt));
     focus.set(boat.x + ahead.x, boat.y, boat.z + ahead.z);
     const elev = (CONFIG.FIXED_CAMERA_ELEVATION_DEG - f.elevDropDeg) * DEG;

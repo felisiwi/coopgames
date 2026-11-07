@@ -66,6 +66,11 @@ import { createPause } from './src/pause.js';
 import { withBrittaNames } from './src/britta-names.js';
 import { createErrandWind } from './src/errand-wind.js';
 import { createGameWeather, windMessage, dayTypeFromParam, startHourFromParam, GAME_WEATHER } from './src/game-weather.js';
+import { createWindPaint } from './src/sail-feel-water.js';
+import { createSpray, createFeelWake, lookAheadVector } from './src/sail-feel-fx.js';
+import { heelTarget, stepHeel, createLuffState, stepLuff, luffFlutter, sprayRate, cameraFeel, smoothShare, speedShare } from './src/sail-feel-model.js';
+import { swellHeight, swellPhaseUniform, surfBoost } from './src/sail-feel-swell.js';
+import { smoothstep } from './src/weather-noise.js';
 import { createPauseCard } from './src/pause-ui.js';
 import { profileForYear } from './src/busy-era.js';
 
@@ -75,14 +80,14 @@ import { profileForYear } from './src/busy-era.js';
 // Pitch/roll come from a finite-difference gradient of that same function
 // sampled a short distance ahead/right of the boat, clamped so a steep local
 // slope can't flip it.
-function bobBoat(group, x, z, headingRad, waves, wind) {
+function bobBoat(group, x, z, headingRad, waves, wind, swellAt = null, heelRoll = 0) { // swellAt(x, z): the swell's height there (weather); heelRoll: extra roll to leeward
   const eps = CONFIG.BOAT_TILT_GRADIENT_EPS;
   const fwd = { x: Math.sin(headingRad), z: Math.cos(headingRad) };
   const right = { x: Math.cos(headingRad), z: -Math.sin(headingRad) };
 
-  const y = seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength);
-  const yFwd = seaHeightCPU(x + fwd.x * eps, z + fwd.z * eps, waves.phases, wind.dir, wind.strength);
-  const yRight = seaHeightCPU(x + right.x * eps, z + right.z * eps, waves.phases, wind.dir, wind.strength);
+  const y = seaHeightCPU(x, z, waves.phases, wind.dir, wind.strength) + (swellAt ? swellAt(x, z) : 0);
+  const yFwd = seaHeightCPU(x + fwd.x * eps, z + fwd.z * eps, waves.phases, wind.dir, wind.strength) + (swellAt ? swellAt(x + fwd.x * eps, z + fwd.z * eps) : 0);
+  const yRight = seaHeightCPU(x + right.x * eps, z + right.z * eps, waves.phases, wind.dir, wind.strength) + (swellAt ? swellAt(x + right.x * eps, z + right.z * eps) : 0);
 
   const slopeForward = (yFwd - y) / eps;
   const slopeRight = (yRight - y) / eps;
@@ -90,7 +95,7 @@ function bobBoat(group, x, z, headingRad, waves, wind) {
 
   group.position.y = y;
   group.rotation.x = Math.min(max, Math.max(-max, -slopeForward * CONFIG.BOAT_TILT_GAIN));
-  group.rotation.z = Math.min(max, Math.max(-max, slopeRight * CONFIG.BOAT_TILT_GAIN));
+  group.rotation.z = Math.min(max, Math.max(-max, slopeRight * CONFIG.BOAT_TILT_GAIN)) + heelRoll;
 }
 
 // Eases self.speed toward the sail model's instantaneous target
@@ -267,6 +272,12 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
 
   const water = createWater(depthMap);
   scene.add(water.mesh);
+  // WEATHER on the real coast (src/game-weather.js); ?weather=0 keeps the old wind and the old sea paint (for comparison). Decided here because the sea, the wake and the camera all depend on it.
+  const weatherWanted = !!coast && new URLSearchParams(window.location.search).get('weather') !== '0';
+  const windPaint = weatherWanted ? createWindPaint(water) : null;
+  // The swell's height anywhere (0 when weather is off or the boat is inside the skerries). Filled in every frame by the weather; declared here so the sea lambdas below can use it.
+  const swellState = { on: false, sw: null, t: 0, exposure: 0 };
+  const swellNow = (x, z) => (swellState.on ? swellHeight(swellState.sw, x, z, swellState.t, swellState.exposure) : 0); // the real wind field on the sea (gusts, lulls, lees, squall line) + the swell (src/sail-feel-water.js)
 
   // Golden distance haze: fog for the meshes (the sea mixes the same colour
   // in its own shader). near/far follow the camera-to-boat distance each
@@ -420,8 +431,16 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // The beach where you wake in 1950: Svalan thrown up wrecked, the boatbuilder's son and Britta (src/wake-scene.js). Already hauled onto her cradle if the intro has been seen.
   const wakeScene = coast && coast.wake ? createWakeScene({ plan: coast.wake, heightAt: coast.heightAt }) : null;
   if (wakeScene) { scene.add(wakeScene.group); { const q = new URLSearchParams(window.location.search); if (hasSeenIntro(store) && q.get('opening') !== '1' && q.get('lights') !== 'reset') wakeScene.settle(); } if (relaunched) { wakeScene.settle(); wakeScene.relaunch(); } }
-  const selfWake = createWake();
+  if (weatherWanted) selfBoat.group.rotation.order = 'YXZ'; // yaw first, then pitch and roll in the boat's own frame, so heel rolls along the keel
+  const selfWake = weatherWanted ? createFeelWake() : createWake(); // the weather's wake grows and lingers with speed
   scene.add(selfWake.group);
+  const spray = weatherWanted ? createSpray() : null; // bow spray
+  if (spray) scene.add(spray.points);
+  const luff = createLuffState(); // the sail's flutter when headed (the shift signal)
+  let heel = 0; // how far the boat leans to leeward now (radians)
+  let camShare = 0; // the camera's smoothed reading of your speed
+  const aheadV = { x: 0, z: 0 }; // how far the view has slid ahead of the bow (smoothed), and where it is heading
+  const aheadTarget = { x: 0, z: 0 };
   let otherBoat = null; // created lazily on the peer's first 'pos' (drop-in play)
   let otherWake = null; // created alongside otherBoat
 
@@ -460,13 +479,13 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const life = lureOn
     ? createLife({
       THREE, scene, heightAt: coast.heightAt, places: coast.names, lights: coast.lights,
-      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength), // (waves / seaWind are set up below)
+      seaY: (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength) + swellNow(x, z), // (waves / seaWind are set up below)
       inside: (x, z) => coast.world.inside(x, z, 100),
       onCry: () => audio.gull(0, 0.5),
       marks: seamarkLayer ? seamarkLayer.perchMarks() : null, // gulls perch on the REAL marks; no decorative buoys
     })
     : null;
-  const seaAtCPU = (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength); // the sea surface at a point (waves / seaWind are set up below)
+  const seaAtCPU = (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength) + swellNow(x, z); // the sea surface at a point (waves / seaWind are set up below)
   // THE game clock (src/game-clock.js): wall time minus time paused. The busy coast's traffic and ferry and the host's wind controller read it instead of the
   // wall clock, so a pause (src/pause.js) freezes them and a return does not make them jump. (Co-op: see the rule in src/pause.js.)
   const clock = createGameClock();
@@ -506,10 +525,11 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // WEATHER (src/game-weather.js, the sail-feel lab's weather): on the real coast the wind comes from the day's weather on the GAME clock, the same on both phones;
   // ?weather=0 keeps the old random wind controller below (for comparison), and so does the procedural-islands game. ?day=<type> ?t=HH:MM pick the day and the hour.
   const weatherQ = new URLSearchParams(window.location.search);
-  let weatherActive = !!coast && weatherQ.get('weather') !== '0'; // a guest that hears an old host (no `wx` in its wind message) drops back to the old way
+  let weatherActive = weatherWanted; // a guest that hears an old host (no `wx` in its wind message) drops back to the old way
   const weather = weatherActive ? createGameWeather({ seed, dayType: dayTypeFromParam(weatherQ.get('day')), startHour: startHourFromParam(weatherQ.get('t')), heightAt: coast.heightAt, bounds: coast.world.bounds, center: coast.spawn, clock }) : null;
   const windOut = {}; // windAt() fills this each frame: the wind at the boat
   if (weather && debugOverlay) window.__weather = weather; // headless checks (?debug=1)
+  if (weather && windPaint) windPaint.refreshNow(weather.field, weather.gt, self.x, self.z); // the sea's first picture of the wind, before the first frame
   let windController = !weatherActive && role === 'host' ? createWindController(seed, nowS0) : null;
   let wind = weatherActive ? weather.update().windAt(self.x, self.z, windOut) : (role === 'host' ? windController.current : initialWind(seed));
   // The SEA (waves, foam, the boat's bob) follows the day's wind and sea state, not the gusts, so it does not shimmer when a gust passes. Without weather: the wind itself.
@@ -630,7 +650,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   window.addEventListener('keydown', onKeyDown);
 
   // Zoom. The procedural islands keep the old wheel zoom; the real coast has the new zoom + chart (src/chart-controller.js).
-  let zoom = 1;
+  let zoom = weatherWanted ? GAME_WEATHER.HOME_ZOOM : 1;
   function onWheel(e) {
     e.preventDefault();
     zoom = Math.min(CONFIG.ZOOM_MAX, Math.max(CONFIG.ZOOM_MIN, zoom + e.deltaY * CONFIG.ZOOM_WHEEL_SENSITIVITY));
@@ -851,6 +871,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // Stage 1c: zoom out into the chart, the minimap, lighthouse visits. ?debug=1 adds a "jump here" button to a visit.
   const chartCtl = coast
     ? createChartController({
+      homeZoom: weatherWanted ? GAME_WEATHER.HOME_ZOOM : 1, // the camera rests further out with the weather: gusts show ~15 s early
       isDark: (id) => !!task && task.isDark(id),
       holdTarget: (entry) => !!task && (task.isDark(entry.id) || (task.phase === 'report' && entry.id === GRANDMA_ID) || (era1950 && beats && ((beats.phase === 'errand' && grundsundEntry && entry.id === grundsundEntry.id) || (beats.phase === 'return' && entry.id === YARD.id) || ((beats.phase === 'help' || task.phase === 'report') && entry.id === BRITTA_ENTRY.id))) || (era1950 && task.phase === 'keeper' && keeperEntry && entry.id === keeperEntry.id)), // a dark light's tag stays until it is lit; grandma's until you are IN the harbour
       onRelit,
@@ -972,6 +993,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       weather.setPhase(beats ? beats.phase : null); // the first errand's scripted wind, as a story override that hands back smoothly at 'help' (host only: the guest gets the events)
       wind = weather.windAt(self.x, self.z, windOut);
       seaWind = weather.sea;
+      swellState.sw = weather.swell; swellState.t = weather.gt; swellState.exposure = wind.exposure;
       if (role === 'host') {
         const windS = clock.now();
         if (windS >= windHeartbeatAt) { windHeartbeatAt = windS + GAME_WEATHER.HEARTBEAT_S; sendWind(); }
@@ -1003,6 +1025,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       seaWind = wind; // an old-style guest: the host's wind is the sea's wind too
     }
 
+    swellState.on = weatherActive;
     const frozen = !!(chartCtl && chartCtl.visiting) || !!(taskUi && taskUi.visible) || !!dawn || pauseCtl.paused; // a lighthouse visit (the camera goes) or the storm / end card is up: the boat stays put
     if (!frozen) phone?.apply(self, wind, dt);
     if (!frozen && (input.left || input.right)) hasSteered = true;
@@ -1012,7 +1035,9 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (!frozen && input.up) self.trim = Math.max(CONFIG.TRIM_MIN, self.trim - CONFIG.TRIM_RATE * dt);
     if (!frozen && input.down) self.trim = Math.min(CONFIG.TRIM_MAX, self.trim + CONFIG.TRIM_RATE * dt);
 
-    const targetSpeed = boatSpeed(self.heading, wind.dir, wind.strength, self.trim);
+    // surf: a burst down the front of a crest on a broad reach or run, outside the skerries only (src/sail-feel-swell.js)
+    const surf = weatherActive ? surfBoost(weather.swell, self.heading, self.x, self.z, weather.gt, wind.exposure, self.speed) : 0;
+    const targetSpeed = boatSpeed(self.heading, wind.dir, wind.strength, self.trim) + surf;
     self.speed = frozen ? 0 : approachSpeed(self.speed, targetSpeed, dt);
     if (coast) {
       // Real coast: very shallow water slows the boat a little; the shore is solid but gentle: the boat slides along
@@ -1084,9 +1109,19 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     selfBoat.group.position.set(self.x, 0, self.z);
     selfBoat.group.rotation.y = self.heading;
     stepWaves(waves, dt, seaWind, self.x, self.z); // before anything samples the sea this frame
-    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, seaWind);
-    selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim);
+    // heel (leans to leeward in gusts and strong wind) and luff flutter (the sail shivers when headed: the shift signal)
+    const offWind = angleOffWind(self.heading, wind.dir);
+    let heelRoll = 0;
+    if (weatherActive) {
+      heel = stepHeel(heel, heelTarget(wind.strength, offWind), dt);
+      stepLuff(luff, offWind, dt);
+      const leeSide = Math.sign(-Math.sin(wind.dir) * Math.cos(self.heading) + Math.cos(wind.dir) * Math.sin(self.heading)) || 1; // which side the wind pushes toward
+      heelRoll = -leeSide * heel;
+    }
+    bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, seaWind, weatherActive ? swellNow : null, heelRoll);
+    selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim + (weatherActive ? luffFlutter(luff.luff, nowS) : 0));
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
+    if (spray) spray.update(dt, selfBoat.group.position, self.heading, self.speed, weatherActive ? sprayRate(camShare, wind.strength, 1) : 0);
     updateSunPosition(viewTarget);
     if (lureOn) {
       moment.update(dt, nowS);
@@ -1159,12 +1194,30 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       ? chartCtl.update(dt, nowS, { x: self.x, z: self.z, heading: self.heading, speed: self.speed }, canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, Math.min(window.devicePixelRatio || 1, 2), partnerPos ? [{ x: partnerPos.x, z: partnerPos.z, heading: partnerPos.heading }] : [])
       : null;
     for (const [id, fx] of lanternFx) fx.update(nowS, ctlView && ctlView.relight && ctlView.relight.id === id ? ctlView.relight.lamp : 1); // lit lanterns flash their real pattern; the one being relit warms up
+    // The speed feel (sail-feel lab defaults): the camera dips, moves in and looks ahead of the bow with speed, pulls back when slow. It fades out toward the chart (its scale is
+    // matched to the zoom) and on a lighthouse visit (its own framing), so the chart, the minimap and the visits work exactly as before.
+    let feel = null;
+    if (weatherActive) {
+      camShare = smoothShare(camShare, self.speed, dt);
+      const viewZoom = ctlView ? ctlView.zoom : zoom;
+      const k = ctlView && (ctlView.visiting || ctlView.relight) ? 0 : 1 - smoothstep(1.8, 3.2, viewZoom);
+      const f = cameraFeel(camShare);
+      feel = { elevDropDeg: f.elevDropDeg * k, distMul: 1 - (1 - f.distMul) * k };
+      lookAheadVector(self.heading, f.lookAheadM * k, viewZoom, aheadTarget);
+    } else { aheadTarget.x = 0; aheadTarget.z = 0; }
+    const aheadK = 1 - Math.exp(-2 * dt);
+    aheadV.x += (aheadTarget.x - aheadV.x) * aheadK; aheadV.z += (aheadTarget.z - aheadV.z) * aheadK;
     const lookAt = ctlView ? ctlView.focus : self;
     const drift = strange && strangeEntry ? STRANGE_LOOK_BIAS * strange.look : 0; // the strange moment: the view drifts toward the old tower so the flash is on screen
     viewTarget.set(lookAt.x + (drift ? (strangeEntry.x - lookAt.x) * drift : 0), ctlView && ctlView.visiting ? 0 : selfBoat.group.position.y, lookAt.z + (drift ? (strangeEntry.z - lookAt.z) * drift : 0));
+    viewTarget.x += aheadV.x; viewTarget.z += aheadV.z; // look ahead of the bow (zero on a visit, near the chart, and without weather)
+    if (windPaint) { // the wind painted on the sea, a few rows a frame (src/sail-feel-water.js); off (and no swell) if an old host sent the old wind
+      windPaint.setOn(weatherActive);
+      if (weatherActive) { windPaint.step(weather.field, weather.gt, selfBoat.group.position.x, selfBoat.group.position.z, 6); windPaint.setSwell(weather.swell, swellPhaseUniform(weather.swell, weather.gt)); } else windPaint.setSwell(null, 0);
+    }
     water.update(waves, seaWind, viewTarget, dt, camera.position);
     shoalLayer?.update(nowS);
-    seamarkLayer?.update(nowS, viewTarget, (x, z) => seaHeightCPU(x, z, waves.phases, seaWind.dir, seaWind.strength)); // buoys ride the real waves
+    seamarkLayer?.update(nowS, viewTarget, seaAtCPU); // buoys ride the real waves (and the swell)
     windArrow.update(selfBoat.group.position, wind);
 
     if (wireGrid) {
@@ -1175,7 +1228,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     }
 
     if (isFixedCamera) {
-      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined, ctlView ? ctlView.yaw : 0);
+      updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined, ctlView ? ctlView.yaw : 0, feel);
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }

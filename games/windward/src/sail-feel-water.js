@@ -18,6 +18,7 @@ const V_DECL_AFTER = 'uniform vec2 uPlaneOffset;';
 const V_OLD_H = '  float h = seaHeight(wx, wz, uPhases, uWindDir, uWindStrength) * uWaveScale;';
 const V_OLD_G = '  vGrad = seaSlope(wx, wz, uPhases, uWindDir, uWindStrength);';
 const V_UNIFORMS = `
+varying vec2 vSwell;
 uniform sampler2D uWindTex;
 uniform vec4 uWindRect;
 uniform vec4 uSwell;     // x, y: the unit vector (x, z) the swell travels along; z: k (rad/m); w: phase
@@ -30,6 +31,7 @@ const V_NEW = `  // sail-feel lab: the swell (src/sail-feel-swell.js), full outs
   float swE = smoothstep(0.35, 0.9, texture2D(uWindTex, swuv).g) * swin;
   float swA = uSwellAmp * swE;
   float swTheta = uSwell.z * (wx * uSwell.x + wz * uSwell.y) + uSwell.w;
+  vSwell = vec2(sin(swTheta), swA);
   float h = (seaHeight(wx, wz, uPhases, uWindDir, uWindStrength) + swA * sin(swTheta)) * uWaveScale;
   vGrad = seaSlope(wx, wz, uPhases, uWindDir, uWindStrength) + swA * uSwell.z * cos(swTheta) * vec2(uSwell.x, uSwell.y);`;
 
@@ -42,14 +44,16 @@ export function patchWaterVertexSource(vertexShader) {
 }
 
 const UNIFORMS_GLSL = `
+varying vec2 vSwell;          // x = sin(swell phase) here (+1 crest, -1 trough), y = swell height in metres here (0 inside the skerries)
 uniform sampler2D uWindTex;   // r = wind relative to calm-air wind of this water, (local - 0.2) / 1.6
 uniform vec4 uWindRect;       // world x, z of the texture's corner, and its size in metres
 uniform vec2 uWindDrift;      // where the air has carried a patch from the origin: ripples ride with it
 uniform float uWindOn;        // 0 = layer off
+uniform vec4 uSwell;          // x, y: the unit vector (x, z) the swell travels along (the fragment shader needs it to stretch foam streaks along the crests)
 // (texture: r = wind vs calm-air wind, g = open-water exposure, b = squall water darkness)
 `;
 
-const BLOCK_GLSL = `  // sail-feel lab: the real wind field, from a texture around the boat (src/sail-feel-water.js)
+const BLOCK_GLSL = `  // sail-feel: the real wind field, from a texture around the boat (src/sail-feel-water.js)
   vec2 wuv = (vWorld.xz - uWindRect.xy) / uWindRect.zw;
   float inWin = step(0.0, wuv.x) * step(wuv.x, 1.0) * step(0.0, wuv.y) * step(wuv.y, 1.0);
   vec4 wf = texture2D(uWindTex, wuv);
@@ -57,11 +61,21 @@ const BLOCK_GLSL = `  // sail-feel lab: the real wind field, from a texture arou
   vec2 dp = vWorld.xz - uWindDrift;
   float rip = vn(dp * 0.55) * 0.6 + vn(dp * 1.3 + 7.0) * 0.4; // fine ripples, carried with the air
   float openSea = smoothstep(1.2, 3.0, depth);
-  float gustK = smoothstep(1.05, 1.35, rel) * inWin * openSea * uWindOn;
-  float lullK = smoothstep(0.95, 0.60, rel) * inWin * openSea * uWindOn;
-  col = mix(col, col * vec3(0.42, 0.58, 0.82), gustK * (0.6 + 0.4 * rip)); // a gust: darker ...
-  col += vec3(0.10, 0.14, 0.17) * smoothstep(0.62, 0.85, rip) * gustK; // ... and ruffled, with pale flecks (cat's-paws)
-  col = mix(col, mix(col, vec3(0.80, 0.88, 0.92), 0.35), lullK * 0.85); // a lull or a lee: a pale, glassy sheen
+  float gustK = smoothstep(1.04, 1.30, rel) * inWin * openSea * uWindOn;
+  float lullK = smoothstep(0.96, 0.62, rel) * inWin * openSea * uWindOn;
+  // swell: long crests of foam-bright water with darker, bluer troughs, in lines across the swell (flat inside the skerries: vSwell.y = 0). Lulls calm it.
+  float swV = smoothstep(0.08, 0.5, vSwell.y) * (1.0 - 0.8 * lullK) * openSea;
+  float crest = smoothstep(0.72, 0.98, vSwell.x); // a narrow crest line ...
+  float trough = smoothstep(-0.20, -0.95, vSwell.x);
+  vec2 trav = uSwell.xy; vec2 along = vec2(-trav.y, trav.x); // along the crest line
+  vec2 sc = vec2(dot(vWorld.xz, along) * 0.075, dot(vWorld.xz, trav) * 0.55);
+  float crestBreak = smoothstep(0.28, 0.72, vn(sc + vec2(3.0, 9.0)) * 0.7 + vn(sc * 2.3 + vec2(11.0, 4.0)) * 0.3); // ... that breaks into foam streaks 10 to 15 m long, along the crest (not a solid stripe, not blocks)
+  col = mix(col, col * vec3(0.72, 0.82, 0.92), trough * swV * 0.5);
+  col *= 1.0 + 0.10 * vSwell.x * swV; // a gentle roll between the crests
+  col = mix(col, vec3(0.95, 0.98, 1.0), crest * (0.22 + 0.78 * crestBreak) * swV * 0.7);
+  col = mix(col, col * vec3(0.34, 0.50, 0.76), gustK * (0.72 + 0.28 * rip)); // a gust: clearly darker and bluer ...
+  col += vec3(0.13, 0.18, 0.21) * smoothstep(0.58, 0.84, rip) * gustK; // ... and ruffled, with pale flecks (cat's-paws)
+  col = mix(col, vec3(0.72, 0.84, 0.90), lullK * 0.62); // a lull or a lee: a pale, smooth, glassy sheen (the sky in the water)
   float stormK = wf.b * inWin * uWindOn; // a squall: a dark line racing across the sea, then dark water with whitecaps
   col = mix(col, col * vec3(0.30, 0.38, 0.50), stormK * 0.85);
   col += vec3(0.55, 0.62, 0.68) * smoothstep(0.6, 0.82, rip) * stormK * stormK * 0.45;

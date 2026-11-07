@@ -13,6 +13,7 @@
 // STORY. The first errand's scripted wind (src/errand-wind.js) is a use of the field's override hook: setPhase(beats.phase) turns the phase into override events.
 import { CONFIG } from './config.js';
 import { createWindField } from './wind-field.js';
+import { swellFor } from './sail-feel-swell.js';
 import { timeOfHour, hourOf, DAY_TYPES, dayTypeFor, parseClock, formatClock } from './weather.js';
 import { errandWindFor } from './errand-wind.js';
 
@@ -21,6 +22,7 @@ export const GAME_WEATHER = {
   SYNC_TOL_S: 0.4, // a guest re-aligns its weather time when it is further than this from the host's (latency is ~0.1 s)
   HEARTBEAT_S: 2, // the host sends its 'wind' message at least this often (old guests get a fresh dir/strength; new guests re-check their time)
   EVENT_KEEP: 8, // override events carried in a message (the story has two or three)
+  HOME_ZOOM: 1.4, // the camera rests this far out (the game's was 1): the screen sees ~120 m ahead at speed, so a gust shows ~15 s early (measured in the lab)
   SEA_MIN: 0.12, // the sea's wind strength never drops below this (waves stay a little alive in a calm)
   PREWARM_EVERY_S: 2, // keep the coast grid warm for the next directions the wind may turn to ...
   PREWARM_SPREAD_DEG: 8, // ... this far either side
@@ -79,12 +81,14 @@ export function createGameWeather(opts) {
     else addEvent({ t0: gt, blend, target: null }); // 'help': hands back to the weather, smoothly
   }
 
+  let swell = swellFor(seed, dayType, gt); // today's swell (direction and length fixed for the day, height follows the sea state)
   let lastPrewarm = -Infinity;
   const api = {
     get field() { return field; },
     get dayType() { return dayType; },
     get seed() { return seed; },
     get gt() { return gt; },
+    get swell() { return swell; },
     get hour() { return hourOf(gt); },
     get clockText() { return formatClock(gt); },
     sea,
@@ -96,6 +100,7 @@ export function createGameWeather(opts) {
       const b = field.base(gt);
       sea.dir = b.dir;
       sea.strength = Math.max(GAME_WEATHER.SEA_MIN, b.seaState);
+      swell = swellFor(seed, dayType, gt);
       if (gt - lastPrewarm > GAME_WEATHER.PREWARM_EVERY_S || gt < lastPrewarm) {
         lastPrewarm = gt;
         const s = (GAME_WEATHER.PREWARM_SPREAD_DEG * Math.PI) / 180;
