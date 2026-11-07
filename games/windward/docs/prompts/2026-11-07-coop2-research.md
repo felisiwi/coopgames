@@ -35,15 +35,15 @@ DELIVERABLES (new files only)
    - Clock: how the guest adopts the host's game clock (offset) so traffic/ferry/wind agree,
      including after either player pauses.
    - Game options through the hub launch message (e.g. ?year, story flags lost by the ?host=
-     rewrite): the minimal change to the hub. This is SHARED (Kenny's surface): spell out exactly
-     which hub lines change and how other games stay unaffected.
+     rewrite): the minimal change to the hub. This is the shared hub: spell out exactly which hub lines
+     change and how other games (Kenny's) stay unaffected; Kenny gets a heads-up, no sign-off needed.
    - What happens when the guest lands mid-story (cards, the opening, the guest joining in 1950
      while the host is past chapter 1).
    - Gated build plan (batches with DONE WHEN, tests, and a two-phone/two-network check), and the
      risks you found. Options, not decisions, where the design is open; mark each for Felix.
-2. docs/notes/KENNY-HUB-LAUNCH.md: a short plain-English note to Kenny: what we want to change in
-   the hub launch message and why, the exact lines/files, how his games stay unaffected, and a
-   question asking for his OK or concerns. Nothing in the hub is built until he answers.
+2. docs/notes/KENNY-HUB-LAUNCH.md: a short plain-English heads-up for Kenny (FYI, not a sign-off:
+   Felix decided no OK is needed): what will change in the hub launch message and why, the exact
+   lines/files, and how his games stay unaffected.
 
 RULES
 - Commits: author `Claude <noreply@anthropic.com>`; messages end with the Co-Authored-By /

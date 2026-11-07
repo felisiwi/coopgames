@@ -363,4 +363,4 @@ assets. Prompt: docs/prompts/2026-11-07-island-lore-research.md.
 3. Thing-model slice: tap vs hold, fish box, seals ported, net-mender, one rumour, world seed.
 4. Weather and sail feel into the game, once Felix has felt the lab.
 5. Quest slice: the three templates, logbook pages.
-6. Co-op stage 2 build (after Kenny's OK on the hub launch message).
+6. Co-op stage 2 build (Kenny gets a heads-up note on the hub launch change; Felix: no OK needed).
