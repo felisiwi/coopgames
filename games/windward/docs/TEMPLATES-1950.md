@@ -2,8 +2,13 @@
 
 Drafted 2026-11-07 on branch `felix/windward-thing-templates`. **Data only: nothing in the game reads these files
 yet.** They are the content for the alive-sea systems settled in `docs/ALIVE-SEA.md` (the thing model, mini quests,
-artifacts, anchoring, day and night, the logbook), written for 1950 first. Felix reads and rewrites them by eye; the
-JSON is the source of truth (the files were generated from tables once, and are now meant to be edited by hand).
+artifacts, anchoring, day and night, the logbook), written for 1950 first. Felix reads and rewrites them by eye. The JSON is
+**generated** from the tables in `tools/templates/` (see its README): edit the tables and regenerate, do not hand-edit the
+JSON; a test fails if the two drift apart.
+
+**The 18 quests are placeholders.** They read as repetitive fetch-and-carry, and Felix and Pierre plan a generative
+choose-your-own-adventure layer on top of this data (`docs/ALIVE-SEA.md`, "Direction: generative choose-your-own-adventure
+quests"). The solid part is the dataset underneath: things, regulars, places, items, wrecks, rumours and artifacts with true stories.
 
 **The rule everywhere:** every record says where it comes from (`source.kind` + `refs`), and anything invented has
 `invented: true`. Spoken lines are INVENTED-DIALOGUE, kept short. No real private person is named. **No unique
@@ -17,7 +22,8 @@ artifacts**: those are only ever placed by Felix, from `docs/UNIQUE-ARTIFACT-CAN
 | `data/quests-1950.json` | **Quest templates**: a need + 1 to 3 steps + a resolution, slots the world fills, lines per personality | **18** (3 first-slice + 15) |
 | `data/artifacts-1950.json` | **Artifact templates**: an invented object carrying a true story, common to rare | **31** |
 | `data/rumours-1950.json` | **Rumour records**: target, teller or channel, text, days, true or twist | **53** |
-| `src/templates-1950.test.js` | The test: `node games/windward/src/templates-1950.test.js` | **34 checks** |
+| `src/templates-1950.test.js` | The test: `node games/windward/src/templates-1950.test.js` (its last check regenerates the data and compares) | **38 checks** |
+| `tools/templates/` | The generators and the tables the data comes from, with a README | 7 scripts |
 
 **Things (106):** 15 wildlife, 12 drift finds, 51 people, 21 secrets, 6 ambient (smoke, washing, nets, bells, a dog, the
 lights coming on at dusk), 1 gear (pot floats). 66 link back to an exact hook in `island-lore.json`; 7 are
@@ -122,9 +128,9 @@ Sources are Swedish Wikipedia articles read on 2026-11-07, plus one search summa
 - **No template for two lore secrets / ten lore quest seeds**, each with its reason in the files: the canon chapter-1 relights and errands belong to the story script; repainting a belt is not an existing verb (folded into the delivery template as "a tin of paint").
 - **Commons are sellable later; uncommon and rare are not** (ALIVE-SEA: "later sell the common ones; rare ones lead to lore"). A default, one flag per artifact.
 - **Knowledge rewards are invented** ("the ferry's turn-round time", "the Freya wreck ground is marked on your chart"). They are text for the quest to promise, nothing the game has yet.
-- **One rumour is a wink across time.** `rumour.korno-military-south-point` ("the military will want the south point") is true: a battery was built there in 1970. Keep it as a hunch that pays off later, or drop it.
-- **The radio is sourced at Måseskär only** (a battery radio reserved for the weather report, 1941). Radio in Skaftö homes in the 1940s was not found. Where the evening forecast is heard ashore (a shop, the harbour office) is open.
-- **The bath-house attendant has a `TODO(felix)`**: the lore documents bath resorts at Fiskebäckskil and Gåsö, not a cold-bath jetty at Lysekil itself. Confirm it, or move her to Fiskebäckskil.
+- **Decided by Felix, 2026-11-07: the Kornö rumour stays.** `rumour.korno-military-south-point` ("the military will want the south point") is true: a battery was built there in 1970. A hunch in 1950, a wink across time for the player.
+- **Decided by Felix, 2026-11-07: where the radio is heard.** The evening shipping forecast is heard from the Måseskär keeper's battery radio (sourced: a radio reserved for the weather report, 1941) **and** a radio in the shop or café of each harbour: Käringön, Gullholmen, Hälleviksstrand, Grundsund, Fiskebäckskil and Lysekil. The harbour radios are the decision, not a finding: radio in Skaftö homes in the 1940s was not found. Each of the three radio rumours lists these venues in its `tellers` (`venue: keeper | shop-or-cafe`).
+- **Decided by Felix, 2026-11-07: the bath-house attendant stands at Fiskebäckskil**, where the lore documents the bath resort (since 1867); id `place.fiskebackskil.bath-house-attendant`. Her lore link stays on the Lysekil hook she grew from. The quest `quest.bakery-parcel-korno` and the rumour `rumour.person.bath-jetty-mended` follow her, and the parcel is now simply "from the bakery" (the lore seed said the Lysekil bakery).
 - **Quest lines have no "remind" variant** (the settled rule asks for "a few short line variants per personality per template"; offer, done and fade are in, a reminder line is easy to add).
 - **All 18 quests have two or more steps**, so none is a plain one-step errand; the shape allows them.
 - **Changes to the approved gate-1 file** (the ids and the count, 106, are unchanged): `errand` or `rumour` was added to the `offers` of 7 regulars that quests or rumours needed (the Gullholmen long-liner, the Kornö teacher, the ferry deckhand, the bath-house attendant, the Bonden lad, the pup-counter, the Stångehuvud quarryman); the wildlife got `speciesCheck`; six source kinds changed from `invented` to `grounded`; the cormorant's `years` and the mackerel's season changed (above).

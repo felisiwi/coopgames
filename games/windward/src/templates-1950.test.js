@@ -9,6 +9,10 @@
 // secrets, quest seeds, rumours or artifacts is silently left out; the species check holds; no unique is created.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { LIGHTHOUSES } from './lighthouses.js';
 
 let passed = 0;
@@ -414,13 +418,51 @@ check('every rumour channel, teller and truth is valid; radio, notice-board and 
     if (r.dynamic !== undefined) assert.equal(r.dynamic, 'weather', `${r.id}: dynamic`);
     for (const t of r.tellers) {
       if (r.channel === 'person') { assert.ok(t.thing && isThing(t.thing), `${r.id}: teller ${JSON.stringify(t)}`); assert.ok((byId.get(t.thing).offers || []).includes('rumour'), `${r.id}: ${t.thing} does not offer rumours`); }
-      else { assert.equal(t.channel, r.channel, `${r.id}: teller channel`); if (r.channel !== 'radio') assert.ok(knownIds.has(t.at), `${r.id}: ${r.channel} at ${t.at}`); }
+      else {
+        assert.equal(t.channel, r.channel, `${r.id}: teller channel`);
+        assert.ok(knownIds.has(t.at), `${r.id}: ${r.channel} at ${t.at}`);
+        if (r.channel === 'radio') {
+          assert.ok(RV.radioVenues.includes(t.venue), `${r.id}: radio venue ${t.venue}`);
+          if (t.via) assert.ok(isThing(t.via), `${r.id}: radio via ${t.via}`);
+        }
+      }
     }
     for (const [k, list] of Object.entries(r.when || {})) { assert.ok(V[k], `${r.id}: when.${k}`); for (const x of list) assert.ok(V[k].includes(x), `${r.id}: when.${k} ${x}`); }
   }
   for (const ch of ['radio', 'notice-board', 'post']) assert.ok(rums.some((r) => r.channel === ch), `no ${ch} rumour`);
   assert.ok(rums.some((r) => r.truth === 'true') && rums.some((r) => r.truth === 'twist'), 'mostly true, sometimes a twist');
   assert.ok(rums.filter((r) => r.truth === 'true').length > rums.filter((r) => r.truth === 'twist').length, 'mostly true');
+});
+
+check('the evening forecast is heard from the Måseskär keeper\'s radio AND a shop or café radio in each harbour (Felix, 2026-11-07)', () => {
+  const HARBOURS = ['village:Käringön', 'village:Gullholmen', 'village:Hälleviksstrand', 'village:Grundsund', 'village:Fiskebäckskil', 'village:Lysekil'];
+  const radio = rums.filter((r) => r.channel === 'radio');
+  assert.equal(radio.length, 3);
+  for (const r of radio) {
+    const keeper = r.tellers.filter((t) => t.venue === 'keeper');
+    assert.equal(keeper.length, 1, `${r.id}: exactly one keeper radio`);
+    assert.equal(keeper[0].at, 'light:Måseskär'); assert.equal(keeper[0].via, 'place.maseskar.keeper');
+    const shops = r.tellers.filter((t) => t.venue === 'shop-or-cafe').map((t) => t.at).sort();
+    assert.deepEqual(shops, [...HARBOURS].sort(), `${r.id}: a shop or café radio in each harbour`);
+  }
+  assert.match(radio[0].source.note, /Felix/, 'the note records the decision');
+  assert.doesNotMatch(radio[0].source.note, /is open|Felix.s choice/, 'no longer an open question');
+});
+
+check('the bath-house attendant stands at Fiskebäckskil; her lore link stays on the Lysekil hook she grew from; the old id is gone', () => {
+  assert.equal(byId.has('place.lysekil.bath-house-attendant'), false);
+  const t = byId.get('place.fiskebackskil.bath-house-attendant');
+  assert.deepEqual(t.where.places, ['village:Fiskebäckskil']);
+  assert.deepEqual(t.lore, { place: 'village:Lysekil', hook: 'regulars', index: 2 });
+  assert.doesNotMatch(JSON.stringify(t), /TODO\(felix\)/);
+  assert.equal(qById.get('quest.bakery-parcel-korno').giver, 'place.fiskebackskil.bath-house-attendant');
+  assert.deepEqual(rById.get('rumour.person.bath-jetty-mended').tellers, [{ thing: 'place.fiskebackskil.bath-house-attendant' }]);
+  assert.equal(rById.get('rumour.person.bath-jetty-mended').target.place, 'village:Fiskebäckskil');
+});
+
+check('the Kornö south-point rumour is kept, with its wink to 1970', () => {
+  const r = rById.get('rumour.korno-military-south-point');
+  assert.ok(r && r.truth === 'true'); assert.match(r.source.note, /KEPT/); assert.match(r.source.note, /1970/);
 });
 
 check('every regular who offers a rumour has at least one to tell', () => {
@@ -449,6 +491,23 @@ check('the files link as a set: every thing a quest, artifact or rumour names ex
   // nothing in any file mentions a unique as something you can obtain
   const all = JSON.stringify([Q, arts, rums]);
   assert.doesNotMatch(all, /"tier":\s*"unique"/);
+});
+
+// =====================================================================================================================
+// The generators: tools/templates/ reproduces the data files exactly
+// =====================================================================================================================
+check('the generators in tools/templates reproduce the four data files byte for byte (edit the tables there, then regenerate)', () => {
+  const tools = fileURLToPath(new URL('../tools/templates/', import.meta.url));
+  const data = fileURLToPath(new URL('../data/', import.meta.url));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'templates-1950-'));
+  try {
+    execFileSync(process.execPath, [path.join(tools, 'build.mjs'), path.join(tmp, 'things-1950.json')], { stdio: 'pipe' });
+    execFileSync(process.execPath, [path.join(tools, 'build-content.mjs'), tmp], { stdio: 'pipe' });
+    for (const f of ['things', 'quests', 'artifacts', 'rumours']) {
+      assert.equal(fs.readFileSync(path.join(tmp, `${f}-1950.json`), 'utf8'), fs.readFileSync(path.join(data, `${f}-1950.json`), 'utf8'),
+        `${f}-1950.json differs from what tools/templates generates: edit the tables in tools/templates and run build.mjs and build-content.mjs (see its README), do not hand-edit the JSON`);
+    }
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 });
 
 console.log(`\n${passed} checks passed`);

@@ -4638,7 +4638,7 @@
       }
     },
     {
-      "id": "place.lysekil.bath-house-attendant",
+      "id": "place.fiskebackskil.bath-house-attendant",
       "name": "The bath-house attendant sweeping the cold-bath jetty",
       "category": "people",
       "years": [
@@ -4648,7 +4648,7 @@
       "where": {
         "anchor": "berth",
         "places": [
-          "village:Lysekil"
+          "village:Fiskebäckskil"
         ],
         "spot": "the cold-bath jetty"
       },
@@ -4698,9 +4698,10 @@
         "kind": "grounded",
         "refs": [
           "lore:village:Lysekil#regulars[2]",
-          "lore:village:Fiskebäckskil and lore:relation/10604591 (bath resorts nearby: Fiskebäckskil since 1867, a bath house on Gåsö around 1900)"
+          "lore:village:Fiskebäckskil (a bath resort since 1867)",
+          "people:Q10 (Fiskebäckskil a bath resort from the late 1800s, mainly a summer resort in the 1900s)"
         ],
-        "note": "INVENTED regular. island-lore.json does not document a cold-bath jetty at Lysekil itself: this borrows the sourced bath-resort setting of its neighbours, TODO(felix): confirm or move to Fiskebäckskil"
+        "note": "INVENTED regular. The lore lists her as a Lysekil regular (regulars[2]); on Felix's call (2026-11-07) she stands at Fiskebäckskil, where the lore documents the bath resort. The lore link stays on the Lysekil hook she grew from."
       },
       "invented": true,
       "lore": {

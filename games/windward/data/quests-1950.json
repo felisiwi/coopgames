@@ -717,12 +717,12 @@
       "name": "Buns for the schoolteacher",
       "kind": "chain",
       "firstSlice": false,
-      "giver": "place.lysekil.bath-house-attendant",
+      "giver": "place.fiskebackskil.bath-house-attendant",
       "slots": {
         "parcel": {
           "type": "object",
           "from": [
-            "a wrapped parcel from the Lysekil bakery"
+            "a wrapped parcel of buns from the bakery"
           ]
         }
       },
@@ -789,7 +789,7 @@
           "lore:relation/10094463#questSeeds[0]",
           "docs/ALIVE-SEA.md: mini quests grill"
         ],
-        "note": "the need, the steps and the lines are INVENTED; the lore quest seed is itself an invented hook"
+        "note": "the need, the steps and the lines are INVENTED; the lore seed (Stora Kornö, questSeeds[0]) says the Lysekil bakery, but the giver now stands at Fiskebäckskil, so the parcel is simply from \"the bakery\""
       },
       "invented": true
     },

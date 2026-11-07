@@ -6,7 +6,7 @@
     "id": "rumour.<slug>",
     "channel": "person | radio | notice-board | post",
     "target": "{ thing?: thing id, place?: name-list or island-lore id }: at least one",
-    "tellers": "[{ thing: id } | { channel: radio, program } | { channel: notice-board | post, at: place id, note? }]",
+    "tellers": "[{ thing: id } | { channel: radio, program, at: place id, venue: keeper | shop-or-cafe, via?: thing id, note? } | { channel: notice-board | post, at: place id, note? }]. A radio rumour lists every place it can be heard: the Måseskär keeper's battery radio (venue keeper, via the keeper) and a shop or café radio in each harbour",
     "text": "what is said (never empty)",
     "days": "how many game days it keeps going round",
     "truth": "true | twist",
@@ -27,6 +27,10 @@
     "truth": [
       "true",
       "twist"
+    ],
+    "radioVenues": [
+      "keeper",
+      "shop-or-cafe"
     ]
   },
   "_counts": {
@@ -218,7 +222,7 @@
         "refs": [
           "lore:relation/10094463#rumours[0]"
         ],
-        "note": "FORESIGHT: a coastal battery was built there in 1970. In 1950 it is a hunch; for the player it is a wink across time. Felix decides whether to keep it."
+        "note": "FORESIGHT: a coastal battery was built there in 1970. In 1950 it is a hunch; for the player it is a wink across time. KEPT (Felix, 2026-11-07)."
       },
       "invented": true,
       "lore": {
@@ -859,7 +863,53 @@
       "tellers": [
         {
           "channel": "radio",
-          "program": "the evening shipping forecast"
+          "program": "the evening shipping forecast",
+          "at": "light:Måseskär",
+          "venue": "keeper",
+          "via": "place.maseskar.keeper",
+          "note": "the keeper's battery radio"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Käringön",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Gullholmen",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Hälleviksstrand",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Grundsund",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Fiskebäckskil",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Lysekil",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
         }
       ],
       "text": "Skagerrak: south-westerly gale expected tomorrow, rain from the west. Small craft keep to harbour.",
@@ -875,7 +925,7 @@
           "people:Q11,Q14 (radio in Skaftö households in the 1940s: not found)",
           "docs/ALIVE-SEA.md: rumours without radio / the evening shipping forecast"
         ],
-        "note": "DYNAMIC: truth follows the next day's weather; the weather system picks the wording. A wrong forecast makes it a twist. WHERE it is heard is open: radio at Måseskär is sourced (a battery radio reserved for the weather report, 1941), radio in Skaftö homes in the 1940s was NOT found (people:Q11, Q14), so a harbour office, shop or keeper's cottage is Felix's choice."
+        "note": "DYNAMIC: truth follows the next day's weather; the weather system picks the wording. A wrong forecast makes it a twist. HEARD at the Måseskär keeper's battery radio (sourced: people:M03) and at a radio in the shop or café of each harbour (Felix's decision, 2026-11-07; INVENTED, because radio in Skaftö homes in the 1940s was not found: people:Q11, Q14)."
       },
       "invented": true
     },
@@ -887,7 +937,53 @@
       "tellers": [
         {
           "channel": "radio",
-          "program": "the evening shipping forecast"
+          "program": "the evening shipping forecast",
+          "at": "light:Måseskär",
+          "venue": "keeper",
+          "via": "place.maseskar.keeper",
+          "note": "the keeper's battery radio"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Käringön",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Gullholmen",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Hälleviksstrand",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Grundsund",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Fiskebäckskil",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Lysekil",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
         }
       ],
       "text": "Skagerrak: fine weather tomorrow, light westerly, a sea breeze by midday.",
@@ -901,7 +997,8 @@
         "refs": [
           "docs/ALIVE-SEA.md weather grill: fine sea-breeze day type",
           "people:M03 (the radio forecast at Måseskär)"
-        ]
+        ],
+        "note": "DYNAMIC, heard where the gale warning is heard (see rumour.radio.gale-warning)."
       },
       "invented": true
     },
@@ -913,7 +1010,53 @@
       "tellers": [
         {
           "channel": "radio",
-          "program": "the evening shipping forecast"
+          "program": "the evening shipping forecast",
+          "at": "light:Måseskär",
+          "venue": "keeper",
+          "via": "place.maseskar.keeper",
+          "note": "the keeper's battery radio"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Käringön",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Gullholmen",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Hälleviksstrand",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Grundsund",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Fiskebäckskil",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
+        },
+        {
+          "channel": "radio",
+          "program": "the evening shipping forecast",
+          "at": "village:Lysekil",
+          "venue": "shop-or-cafe",
+          "note": "the radio in the harbour shop or café"
         }
       ],
       "text": "Fog banks off the Skagerrak coast; poor visibility in the morning, clearing by midday.",
@@ -927,7 +1070,8 @@
         "refs": [
           "docs/ALIVE-SEA.md weather grill: calm misty morning that clears",
           "people:M03 (the radio forecast at Måseskär)"
-        ]
+        ],
+        "note": "DYNAMIC, heard where the gale warning is heard (see rumour.radio.gale-warning)."
       },
       "invented": true
     },
@@ -1438,11 +1582,11 @@
     {
       "id": "rumour.person.bath-jetty-mended",
       "target": {
-        "place": "village:Lysekil"
+        "place": "village:Fiskebäckskil"
       },
       "tellers": [
         {
-          "thing": "place.lysekil.bath-house-attendant"
+          "thing": "place.fiskebackskil.bath-house-attendant"
         }
       ],
       "text": "They say the cold-bath jetty is to be mended before next summer. New planks all along.",
