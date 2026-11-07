@@ -59,7 +59,10 @@ more terrain inside the skerries (+43k triangles). **Not measured:** a real phon
 - Luff flutter is covered by unit tests and the lab; not looked at in the game by eye. Lighthouse visits use the old camera path by construction (feel off) but were not driven.
 - Visual taste is Felix's: squall whitecap size, crest foam strength, gust contrast, the x1.4 camera, how long the 45% squall slowdown feels.
 
-## Update: the blocky sea on a phone (fixed) and `?squall=soon`
+## Update 1 (SUPERSEDED, see Update 2): the blocky sea on a phone and `?squall=soon`
+
+> **Correction (Felix's phone, same day): the precision theory below was WRONG.** His phone prints `fragment highp 23 bits` (WebGL2, dpr 3), so shaders run at full precision. The camera-local
+> coordinates fix below is harmless and stays, but it did not cure the blocks. The real cause is in Update 2. `?squall=soon` and the `gpu` debug line from this section are still good.
 
 **Blocky water.** Felix's Android phone showed the whole sea covered in hard-edged squares (~30 to 40 px) with the weather on, inside and outside the skerries; `?weather=0` looked normal. Desktop never did.
 - **Cause (mechanism proven, the phone's own precision not yet read):** my new water-shader code did high-frequency noise on large absolute world coordinates (x ~ 2500, z ~ 8100, less the air's drift of
@@ -88,3 +91,22 @@ start (`GAME_WEATHER.SQUALL_SOON_S`), on ANY day type, on top of the day's own. 
 - Counts from when the game starts, not from when you tap "Set sail" on the first-run card, so reading that card eats a few seconds of the 60.
 - **Warning readability at phone size (500x701 here; Chrome will not go narrower):** the first version was a faint darkening and a 13 px label, clipped at the left edge and over the zoom buttons. Now: a broad glow centred on the
   edge or corner the squall comes from (strong from the start, ~0.6 of full at 54 s), a 17 px high-contrast label with an arrow, kept fully on screen and inset clear of the corner buttons and the minimap. Checked at 54 s, 26 s and arrival.
+
+## Update 2: the camouflage sea (the real cause) and a squall you can't miss
+
+**What Felix saw (`felix-phone/` on main, screenshots 2 and 4):** small, hard-edged pale and dark blotches over the whole sea, like camouflage; in screenshot 3 (errand story wind, which has no gusts) the water was normal. Mission control's
+reading was right and I had it wrong: the blotches are the gust and lull painting itself.
+- **Evidence:** the same look reproduces on a desktop GPU, with the first-version shader, whenever a gust covers the screen (same seed 4242, same moment, same spot: `docs/weather-into-game/gust-camouflage-before-after.jpg`).
+  Measured on the field over 3 seeds x 3 day types, seen through a 70 x 100 m phone view: the gust paint started at a +4% wind change, so it covered **18% of the view on average** (more than half the view 8% of the time), mostly *weak* gusts drawn almost as
+  strongly as real ones; patches are already ~75 m wide (bigger than the screen), so the 2 to 4 m blotches were NOT the patches: they were the **fleck term** (a hard threshold on fine noise, added pale inside every gust), and the patch edges
+  were hard (up to **22% change per metre**). Under the errand's story wind there is no gust field, so no flecks, which is why screenshot 3 looked normal.
+- **Redesign (only how it is drawn; `wind-field.js` is untouched):** `src/sea-look.js` holds the numbers. The wind texture is blurred (gaussian, ~32 m) when it is built, so edges are soft; a gust shows only from +10% and grows smoothly to full at +34%;
+  at full it darkens the water by at most 18% and a little bluer, with a very slow smooth shimmer inside (no thresholded noise, no flecks); a lull or lee is barely paler (18% towards the sky, was 62%); squall foam is soft streaks along the crests, not blobs.
+  Result on the same measurement: **gust area 18% -> 8%**, more than half the view **8% -> 4%** of the time, steepest edge **22.5% -> 4.0% per metre**, patches ~75 m across (the whole phone screen or more). Test: `sea-look.test.js` (8 checks; it fails if a fleck or a thresholded noise comes back).
+- **A hazard found on the way:** `smoothstep(-0.20, -0.95, x)` (reversed edges) is undefined in GLSL; a desktop gives the sensible answer, a phone's compiler may not. The swell trough had it, and the first gust/lull code did. Every smoothstep in the weather block now has edge0 < edge1, and a test enforces it.
+- Felix's `gpu` line, for the record: `fragment highp 23 bits, mediump 10 bits`, WebGL2: a phone with full-precision shaders (so Three's highp applies).
+
+**Squalls, so you know what one is and feel it hit** (`src/squall-notes.js`, tested): the first time a warning appears, a toast explains it ("A squall is coming: a short, hard blow. When it hits, ease the sheet or head up into the wind", 9 s, once per page load; nothing is saved).
+The edge glow is stronger and the label reads "Squall coming - N s" and throbs for the last 15 s. When it hits: a toast "Squall! Ease the sheet, or head up into the wind.", a buzz on phones that can, a short small camera shake, more spray, and the wind jump, heel and slowdown that were already
+there. When it is over: "The squall has passed." Each squall gets its own "hit" and "passed". Checked live at 54 s, 44 s, 9 s and 4 s after the hit (500x757, the narrowest Chrome allows here).
+**Not verified:** the buzz and the shake on a real phone (they are code paths a desktop cannot show); how the new quiet gusts *feel* is for Felix's eye: they are deliberately subtle now. If they are too faint, the three numbers to raise are `GUST_FROM` (lower = more gusts show), `GUST_DARKEN` and `GUST_SHIMMER` in `src/sea-look.js`.

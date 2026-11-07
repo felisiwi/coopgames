@@ -35,13 +35,14 @@ check('every offset handed to the shader is small (< 128): a 16-bit float holds 
   assert.equal(wrapL(-1), LATTICE - 1); assert.equal(wrapL(LATTICE * 3 + 5), 5);
 });
 
-check('THE REGRESSION: with 16-bit coordinates the old absolute form is corrupted (the phone\'s mosaic), the local form is not', () => {
-  const err = (form) => { let sum = 0; let bad = 0; let n = 0; for (const [ox, oz] of SPOTS.slice(0, 2)) { const dx = 1800; const dz = 500; const r = rippleOffsets(ox, oz, dx, dz); view((lx, lz) => {
+check('THE REGRESSION: with 16-bit coordinates a HIGH-FREQUENCY lookup on absolute coordinates is corrupted (the first version used 0.55 per metre), the local form is not', () => {
+  const F = 0.55; // the frequency the first look used (the current shimmer is far lower, so it would not show the bug)
+  const err = (form) => { let sum = 0; let bad = 0; let n = 0; for (const [ox, oz] of SPOTS.slice(0, 2)) { const dx = 1800; const dz = 500; const r0 = wrapL((ox - dx) * F); const r1 = wrapL((oz - dz) * F); view((lx, lz) => {
     const wx = ox + lx; const wz = oz + lz;
-    const exact = vnp((wx - dx) * RIPPLE.F1, (wz - dz) * RIPPLE.F1);
+    const exact = vnp((wx - dx) * F, (wz - dz) * F);
     const got = form === 'absolute16'
-      ? vnp(q16(q16(wx) - q16(dx)) * RIPPLE.F1, q16(q16(wz) - q16(dz)) * RIPPLE.F1) // what the first version did on a 16-bit GPU
-      : vnp(q16(lx) * RIPPLE.F1 + q16(r[0]), q16(lz) * RIPPLE.F1 + q16(r[1])); // the fix on a 16-bit GPU (the local position is what the vertex shader passes down)
+      ? vnp(q16(q16(wx) - q16(dx)) * F, q16(q16(wz) - q16(dz)) * F) // what the first version did on a 16-bit GPU
+      : vnp(q16(lx) * F + q16(r0), q16(lz) * F + q16(r1)); // the fix on a 16-bit GPU (the local position is what the vertex shader passes down)
     const e = Math.abs(exact - got); sum += e; n++; if (e > 0.15) bad++; }); } return { mean: sum / n, bad: bad / n }; };
   const old = err('absolute16'); const fix = err('local16');
   assert.ok(old.mean > 0.08 && old.bad > 0.2, `the absolute form is wrong over ${(100 * old.bad).toFixed(0)}% of the sea (mean error ${old.mean.toFixed(3)})`);

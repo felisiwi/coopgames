@@ -71,6 +71,7 @@ import { createSpray, createFeelWake, lookAheadVector } from './src/sail-feel-fx
 import { FEEL, heelTarget, stepHeel, createLuffState, stepLuff, luffFlutter, sprayRate, cameraFeel, smoothShare, overpowerFactor, easeRelief, lookFor } from './src/sail-feel-model.js';
 import { createRain, createMist, createCloudBank } from './src/sail-feel-weather-fx.js';
 import { squallAt } from './src/squall.js';
+import { createSquallNotes } from './src/squall-notes.js';
 import { emulateMediumpFragment } from './src/shader-fp16.js';
 import { swellHeight, swellPhaseUniform, surfBoost } from './src/sail-feel-swell.js';
 import { smoothstep } from './src/weather-noise.js';
@@ -463,6 +464,17 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     stormEl.style.cssText = 'position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0';
     stormLabel.style.cssText = 'position:fixed;z-index:4;pointer-events:none;opacity:0;transform:translate(-50%,-50%);padding:6px 14px;border-radius:16px;background:rgba(20,26,38,.92);border:1px solid rgba(243,230,200,.6);color:#fff3d6;font:italic 700 17px/1.1 Georgia,serif;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.45)';
     document.body.append(stormEl, stormLabel);
+  }
+  // Telling the player what a squall IS and what to do (src/squall-notes.js): one explanation at the first warning, "Squall! Ease the sheet..." when it hits, "has passed" after. A toast,
+  // not a card: the game keeps running. At the hit it is also FELT: a buzz on a phone that can, and a short shake of the camera (the heel, spray and the wind jump come from the weather itself).
+  const squallNotes = weatherWanted ? createSquallNotes() : null;
+  const squallToast = weatherWanted ? document.createElement('div') : null;
+  let squallToastUntil = 0;
+  let squallShake = 0;
+  if (squallToast) {
+    squallToast.style.cssText = 'position:fixed;left:50%;top:15%;transform:translateX(-50%);max-width:min(88vw,420px);padding:12px 18px;border-radius:14px;background:rgba(20,26,38,.94);border:1px solid rgba(243,230,200,.6);color:#fff3d6;font:italic 600 19px/1.3 Georgia,serif;text-align:center;z-index:6;pointer-events:none;opacity:0;transition:opacity .35s;box-shadow:0 4px 18px rgba(0,0,0,.5)';
+    const kf = document.createElement('style'); kf.textContent = '@keyframes sqPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.1)}}'; document.head.appendChild(kf);
+    document.body.appendChild(squallToast);
   }
   let sqNow = squallAt([], 0, 0, 0); // this frame's squall at the boat
   let wxLook = null; // this frame's weather look { mist, fogNearMul, fogFarMul, gloom, lightScale } (null without weather)
@@ -1055,6 +1067,13 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
 
     swellState.on = weatherActive;
     sqNow = weatherActive ? squallAt(weather.field.squallPlan, self.x, self.z, weather.gt) : sqNow;
+    if (squallNotes) {
+      for (const ev of squallNotes.step(weatherActive ? sqNow : null)) {
+        squallToast.textContent = ev.text; squallToast.style.opacity = '1'; squallToastUntil = nowS + ev.seconds;
+        if (ev.kind === 'hit') { squallShake = 1; try { navigator.vibrate?.([70, 40, 160]); } catch { /* no buzz on this device */ } }
+      }
+      if (squallToastUntil && nowS > squallToastUntil) { squallToast.style.opacity = '0'; squallToastUntil = 0; }
+    }
     if (weatherActive) {
       const wb = weather.base();
       const rainNow = Math.max(wb.rain, sqNow.rain);
@@ -1159,7 +1178,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     bobBoat(selfBoat.group, self.x, self.z, self.heading, waves, seaWind, weatherActive ? swellNow : null, heelRoll);
     selfBoat.setSailAngle(leewardSign(self.heading, wind.dir) * self.trim + (weatherActive ? luffFlutter(luff.luff, nowS) : 0));
     selfWake.update(dt, selfBoat.group.position, self.heading, self.speed);
-    if (spray) spray.update(dt, selfBoat.group.position, self.heading, self.speed, weatherActive ? sprayRate(camShare, wind.strength, 1) : 0);
+    if (spray) spray.update(dt, selfBoat.group.position, self.heading, self.speed, weatherActive ? sprayRate(camShare, wind.strength, 1 + 1.5 * sqNow.intensity) : 0); // a squall throws more spray
     updateSunPosition(viewTarget);
     if (lureOn) {
       moment.update(dt, nowS);
@@ -1270,7 +1289,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       if (weatherActive && sqNow.event && sqNow.aheadM !== null && sqNow.cloud > 0.04) {
         const ux = -sqNow.event.tx; const uy = -sqNow.event.tz; const m = Math.max(Math.abs(ux), Math.abs(uy)) || 1;
         const ex = Math.round(50 + (ux / m) * 50); const ey = Math.round(50 + (uy / m) * 50); // ON the edge (or corner) it comes from, so the glow is at its strongest right at the screen's rim
-        const a = Math.round(Math.min(0.92, Math.pow(sqNow.cloud, 0.4) * 1.1) * 40) / 40; // strong from the first moment (a squall ~60 s away already reads clearly)
+        const a = Math.round(Math.min(0.95, Math.pow(sqNow.cloud, 0.35) * 1.2) * 40) / 40; // strong from the first moment (a squall ~60 s away already reads clearly)
         const arrow = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'][((Math.round(Math.atan2(uy, ux) / (Math.PI / 4)) % 8) + 8) % 8]; // where it is coming from, on the screen (north is up)
         key = `${ex},${ey},${a},${Math.round(sqNow.etaS)},${arrow}`;
       }
@@ -1280,7 +1299,8 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
           const parts = key.split(','); const [ex, ey, a, eta] = parts.slice(0, 4).map(Number); const arrow = parts[4];
           stormEl.style.background = `radial-gradient(ellipse 110% 80% at ${ex}% ${ey}%, rgba(22,29,42,${a}) 0%, rgba(22,29,42,${a * 0.75}) 35%, rgba(22,29,42,${a * 0.3}) 70%, rgba(22,29,42,0) 100%)`;
           stormEl.style.opacity = '1';
-          stormLabel.textContent = `${arrow} Squall · ${eta} s`;
+          stormLabel.textContent = `${arrow} Squall coming · ${eta} s`;
+          stormLabel.style.animation = eta <= 15 ? 'sqPulse .8s ease-in-out infinite' : 'none'; // the last 15 s: the label throbs
           stormLabel.style.left = `${Math.min(74, Math.max(26, ex))}%`; stormLabel.style.top = `${Math.min(84, Math.max(16, ey))}%`; // fully on screen, clear of the corner buttons and the minimap
           stormLabel.style.opacity = '1';
         }
@@ -1305,6 +1325,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
 
     if (isFixedCamera) {
       updateFixedCamera(camera, viewTarget, dt, ctlView ? ctlView.zoom : zoom, ctlView && ctlView.zooming ? 14 : undefined, ctlView ? ctlView.yaw : 0, feel);
+      if (squallShake > 0.01) { camera.position.x += (Math.random() - 0.5) * 0.9 * squallShake; camera.position.y += (Math.random() - 0.5) * 0.5 * squallShake; squallShake *= Math.exp(-dt * 2.2); } // the squall's first blow: a short, small shake
     } else {
       updateChaseCamera(camera, selfBoat.group.position, self.heading, dt, zoom);
     }

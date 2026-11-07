@@ -14,7 +14,7 @@ export const LATTICE = 128;
 export const wrapL = (v) => ((v % LATTICE) + LATTICE) % LATTICE;
 
 // The noise lookups of the water shader, as numbers (the GLSL in sail-feel-water.js uses the same ones).
-export const RIPPLE = { F1: 0.55, F2: 1.3, SHIFT2: 7 }; // gust ripples: vnp(p * F1) and vnp(p * F2 + SHIFT2), p = the position relative to the air's drift
+export const RIPPLE = { F1: 0.07, F2: 0.19, SHIFT2: 7 }; // the slow shimmer inside a gust: vnp(p * F1) and vnp(p * F2 + SHIFT2), p = the position relative to the air's drift (sea-look.js SHIMMER_FREQ; the first version used 0.55 and 1.3, and a threshold on them made the pale blobs)
 export const CREST = { ALONG: 0.075, ACROSS: 0.55, A: [3, 9], F2: 2.3, B: [11, 4] }; // crest foam streaks, long along the crest
 
 // origin: the camera target (world x, z); drift: where the air has carried a patch from the origin of time. Returns [x1, y1, x2, y2] lattice offsets, each in [0, LATTICE).

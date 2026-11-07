@@ -8,6 +8,7 @@
 import * as THREE from '../vendor/three/three.module.js';
 import { clamp } from './weather-noise.js';
 import { rippleOffsets, crestOffsets, LATTICE } from './shader-local.js';
+import { LOOK, blurGrid, vec3, glsl } from './sea-look.js';
 
 // What we replace: from this comment line up to (not including) the "wind lines" comment.
 const START = '  // gust patches: darker, finely ruffled areas sliding across the sea';
@@ -73,31 +74,33 @@ float vnp(vec2 p) {
 }
 `;
 
-const BLOCK_GLSL = `  // sail-feel: the real wind field, from a texture around the boat (src/sail-feel-water.js)
+const BLOCK_GLSL = `  // sail-feel: the real wind field, from a (blurred) texture around the boat (src/sail-feel-water.js; the look's numbers are src/sea-look.js)
   vec2 wuv = (vLocal - uWindRectL.xy) / uWindRectL.zw;
   float inWin = step(0.0, wuv.x) * step(wuv.x, 1.0) * step(0.0, wuv.y) * step(wuv.y, 1.0);
   vec4 wf = texture2D(uWindTex, wuv);
   float rel = wf.r * 1.6 + 0.2;
-  float rip = vnp(vLocal * 0.55 + uRip.xy) * 0.6 + vnp(vLocal * 1.3 + uRip.zw) * 0.4; // fine ripples, carried with the air (offsets fold in the target's position and the drift)
   float openSea = smoothstep(1.2, 3.0, depth);
-  float gustK = smoothstep(1.04, 1.30, rel) * inWin * openSea * uWindOn;
-  float lullK = smoothstep(0.96, 0.62, rel) * inWin * openSea * uWindOn;
+  // a gust: a large, soft-edged, slightly darker and bluer area (only gusts of +${Math.round((LOOK.GUST_FROM - 1) * 100)}% or more show); a very slow smooth shimmer inside it, no thresholded noise
+  float gustK = smoothstep(${glsl(LOOK.GUST_FROM)}, ${glsl(LOOK.GUST_FULL)}, rel) * inWin * openSea * uWindOn;
+  // a lull or a lee: barely paler and smoother. (smoothstep needs edge0 < edge1, so the falling ramp is written as 1 - smoothstep)
+  float lullK = (1.0 - smoothstep(${glsl(LOOK.LULL_FULL)}, ${glsl(LOOK.LULL_FROM)}, rel)) * inWin * openSea * uWindOn;
+  float shimmer = vnp(vLocal * ${glsl(LOOK.SHIMMER_FREQ[0])} + uRip.xy) * 0.6 + vnp(vLocal * ${glsl(LOOK.SHIMMER_FREQ[1])} + uRip.zw) * 0.4;
   // swell: long crests of foam-bright water with darker, bluer troughs, in lines across the swell (flat inside the skerries: vSwell.y = 0). Lulls calm it.
   float swV = smoothstep(0.08, 0.5, vSwell.y) * (1.0 - 0.8 * lullK) * openSea;
   float crest = smoothstep(0.72, 0.98, vSwell.x); // a narrow crest line ...
-  float trough = smoothstep(-0.20, -0.95, vSwell.x);
+  float trough = 1.0 - smoothstep(-0.95, -0.20, vSwell.x); // (smoothstep needs edge0 < edge1: a reversed pair is undefined in GLSL, and a phone's compiler may not do what a desktop's does)
   vec2 trav = uSwell.xy; vec2 along = vec2(-trav.y, trav.x); // along the crest line
   vec2 sc = vec2(dot(vLocal, along) * 0.075, dot(vLocal, trav) * 0.55);
   float crestBreak = smoothstep(0.28, 0.72, vnp(sc + uCrest.xy) * 0.7 + vnp(sc * 2.3 + uCrest.zw) * 0.3); // ... that breaks into foam streaks 10 to 15 m long, along the crest (not a solid stripe, not blocks)
   col = mix(col, col * vec3(0.72, 0.82, 0.92), trough * swV * 0.5);
   col *= 1.0 + 0.10 * vSwell.x * swV; // a gentle roll between the crests
   col = mix(col, vec3(0.95, 0.98, 1.0), crest * (0.22 + 0.78 * crestBreak) * swV * 0.7);
-  col = mix(col, col * vec3(0.34, 0.50, 0.76), gustK * (0.72 + 0.28 * rip)); // a gust: clearly darker and bluer ...
-  col += vec3(0.13, 0.18, 0.21) * smoothstep(0.58, 0.84, rip) * gustK; // ... and ruffled, with pale flecks (cat's-paws)
-  col = mix(col, vec3(0.72, 0.84, 0.90), lullK * 0.62); // a lull or a lee: a pale, smooth, glassy sheen (the sky in the water)
-  float stormK = wf.b * inWin * uWindOn; // a squall: a dark line racing across the sea, then dark water with whitecaps
-  col = mix(col, col * vec3(0.30, 0.38, 0.50), stormK * 0.85);
-  col += vec3(0.55, 0.62, 0.68) * smoothstep(0.6, 0.82, rip) * stormK * stormK * 0.45;
+  col *= mix(vec3(1.0), ${vec3(LOOK.GUST_DARKEN)}, gustK * (${glsl(1 - LOOK.GUST_SHIMMER)} + ${glsl(2 * LOOK.GUST_SHIMMER)} * shimmer));
+  col = mix(col, ${vec3(LOOK.LULL_COLOR)}, lullK * ${glsl(LOOK.LULL_MIX)});
+  // a squall: a dark line racing across the sea, then dark water with foam streaks along the crests (no blobs)
+  float stormK = wf.b * inWin * uWindOn;
+  col = mix(col, col * ${vec3(LOOK.STORM_DARKEN)}, stormK * ${glsl(LOOK.STORM_MIX)});
+  col += vec3(0.62, 0.70, 0.76) * crestBreak * smoothstep(0.35, 1.0, stormK) * ${glsl(LOOK.WHITECAP)};
 `;
 
 export function patchWaterSource(fragmentShader) {
@@ -146,6 +149,8 @@ export function createWindPaint(water, { size = 512, n = 48 } = {}) {
   const cell = size / n;
   const tmp = {};
   const next = new Uint8Array(n * n * 4); // the texture being built, a few rows per frame; swapped in when complete
+  const raw = new Float32Array(n * n); // the wind ratio per texel as sampled; blurred into the red channel at the end of a pass (soft edges, src/sea-look.js)
+  const blurred = new Float32Array(n * n);
   let pass = null;
   // The big numbers live here, in 64-bit JS: the texture's corner, the air's drift, the swell's direction and the camera target. setOrigin() folds them into the small
   // numbers the fragment shader gets (src/shader-local.js: why).
@@ -159,6 +164,8 @@ export function createWindPaint(water, { size = 512, n = 48 } = {}) {
     if (depthRect) u.uDepthL.value.set(depthRect.x - st.ox, depthRect.y - st.oz, depthRect.z, depthRect.w);
   }
   function finish() {
+    blurGrid(raw, n, LOOK.BLUR_SIGMA_TEXELS, blurred); // the gust/lull look is drawn from this soft version
+    for (let q = 0; q < n * n; q++) next[q * 4] = Math.round(clamp((blurred[q] - 0.2) / 1.6, 0, 1) * 255);
     data.set(next);
     tex.needsUpdate = true;
     u.uWindRect.value.set(pass.ox, pass.oz, size, size);
@@ -185,7 +192,7 @@ export function createWindPaint(water, { size = 512, n = 48 } = {}) {
         for (let i = 0; i < n; i++) {
           const w = field.windAt(pass.ox + (i + 0.5) * cell, pass.oz + (j + 0.5) * cell, pass.t, tmp);
           const k = (j * n + i) * 4;
-          next[k] = Math.round(clamp((w.local - 0.2) / 1.6, 0, 1) * 255);
+          raw[j * n + i] = w.local;
           next[k + 1] = Math.round(clamp(w.exposure, 0, 1) * 255);
           next[k + 2] = Math.round(clamp(w.stormBand, 0, 1) * 255);
           next[k + 3] = 255;
