@@ -71,6 +71,7 @@ import { createSpray, createFeelWake, lookAheadVector } from './src/sail-feel-fx
 import { FEEL, heelTarget, stepHeel, createLuffState, stepLuff, luffFlutter, sprayRate, cameraFeel, smoothShare, overpowerFactor, easeRelief, lookFor } from './src/sail-feel-model.js';
 import { createRain, createMist, createCloudBank } from './src/sail-feel-weather-fx.js';
 import { squallAt } from './src/squall.js';
+import { emulateMediumpFragment } from './src/shader-fp16.js';
 import { swellHeight, swellPhaseUniform, surfBoost } from './src/sail-feel-swell.js';
 import { smoothstep } from './src/weather-noise.js';
 import { createPauseCard } from './src/pause-ui.js';
@@ -192,6 +193,10 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   // ?debug=1: performance overlay (src/debug-overlay.js). Not created otherwise.
   const debugOverlay = new URLSearchParams(window.location.search).get('debug') === '1' ? createDebugOverlay(renderer) : null;
+  if (debugOverlay) { // what this GPU really runs the shaders at (a phone that reports "mediump" or few bits here explains water that is fine on a desktop)
+    const gl = renderer.getContext(); const hf = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT); const mf = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT);
+    debugOverlay.set('gpu', `gpu         shaders ${renderer.capabilities.precision} | fragment highp ${hf ? hf.precision : 0} bits, mediump ${mf ? mf.precision : 0} bits | WebGL${renderer.capabilities.isWebGL2 ? 2 : 1}`);
+  }
   // Phones: cap render resolution (a 3x screen is 9x the pixels for little
   // visible gain on flat shapes).
   const isPhone = wantsPhoneControls();
@@ -277,6 +282,8 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // WEATHER on the real coast (src/game-weather.js); ?weather=0 keeps the old wind and the old sea paint (for comparison). Decided here because the sea, the wake and the camera all depend on it.
   const weatherWanted = !!coast && new URLSearchParams(window.location.search).get('weather') !== '0';
   const windPaint = weatherWanted ? createWindPaint(water) : null;
+  // ?fp16=1 (debug): run the water's fragment shader as a phone's mediump would (16-bit coordinates), with or without weather (src/shader-fp16.js)
+  if (new URLSearchParams(window.location.search).get('fp16') === '1') for (const m of [water.mesh.material, ...water.mesh.children.map((c) => c.material).filter(Boolean)]) { m.fragmentShader = emulateMediumpFragment(m.fragmentShader); m.needsUpdate = true; }
   // The swell's height anywhere (0 when weather is off or the boat is inside the skerries). Filled in every frame by the weather; declared here so the sea lambdas below can use it.
   const swellState = { on: false, sw: null, t: 0, exposure: 0 };
   const swellNow = (x, z) => (swellState.on ? swellHeight(swellState.sw, x, z, swellState.t, swellState.exposure) : 0); // the real wind field on the sea (gusts, lulls, lees, squall line) + the swell (src/sail-feel-water.js)
@@ -454,7 +461,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   const stormLabel = weatherWanted ? document.createElement('div') : null;
   if (stormEl) {
     stormEl.style.cssText = 'position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0';
-    stormLabel.style.cssText = 'position:fixed;z-index:4;pointer-events:none;opacity:0;transform:translate(-50%,-50%);padding:3px 10px;border-radius:12px;background:rgba(24,30,42,.82);color:#f3e6c8;font:italic 600 13px Georgia,serif;white-space:nowrap';
+    stormLabel.style.cssText = 'position:fixed;z-index:4;pointer-events:none;opacity:0;transform:translate(-50%,-50%);padding:6px 14px;border-radius:16px;background:rgba(20,26,38,.92);border:1px solid rgba(243,230,200,.6);color:#fff3d6;font:italic 700 17px/1.1 Georgia,serif;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.45)';
     document.body.append(stormEl, stormLabel);
   }
   let sqNow = squallAt([], 0, 0, 0); // this frame's squall at the boat
@@ -545,7 +552,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
   // ?weather=0 keeps the old random wind controller below (for comparison), and so does the procedural-islands game. ?day=<type> ?t=HH:MM pick the day and the hour.
   const weatherQ = new URLSearchParams(window.location.search);
   let weatherActive = weatherWanted; // a guest that hears an old host (no `wx` in its wind message) drops back to the old way
-  const weather = weatherActive ? createGameWeather({ seed, dayType: dayTypeFromParam(weatherQ.get('day')), startHour: startHourFromParam(weatherQ.get('t')), heightAt: coast.heightAt, bounds: coast.world.bounds, center: coast.spawn, clock }) : null;
+  const weather = weatherActive ? createGameWeather({ seed, dayType: dayTypeFromParam(weatherQ.get('day')), startHour: startHourFromParam(weatherQ.get('t')), squallSoon: weatherQ.get('squall') === 'soon', heightAt: coast.heightAt, bounds: coast.world.bounds, center: coast.spawn, clock }) : null;
   const windOut = {}; // windAt() fills this each frame: the wind at the boat
   if (weather && debugOverlay) window.__weather = weather; // headless checks (?debug=1)
   if (weather && windPaint) windPaint.refreshNow(weather.field, weather.gt, self.x, self.z); // the sea's first picture of the wind, before the first frame
@@ -1262,18 +1269,19 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
       let key = 'off';
       if (weatherActive && sqNow.event && sqNow.aheadM !== null && sqNow.cloud > 0.04) {
         const ux = -sqNow.event.tx; const uy = -sqNow.event.tz; const m = Math.max(Math.abs(ux), Math.abs(uy)) || 1;
-        const ex = Math.round(50 + (ux / m) * 58); const ey = Math.round(50 + (uy / m) * 58);
-        const a = Math.round(Math.min(0.92, Math.pow(sqNow.cloud, 0.6) * 1.1) * 40) / 40;
-        key = `${ex},${ey},${a},${Math.round(sqNow.etaS)}`;
+        const ex = Math.round(50 + (ux / m) * 50); const ey = Math.round(50 + (uy / m) * 50); // ON the edge (or corner) it comes from, so the glow is at its strongest right at the screen's rim
+        const a = Math.round(Math.min(0.92, Math.pow(sqNow.cloud, 0.4) * 1.1) * 40) / 40; // strong from the first moment (a squall ~60 s away already reads clearly)
+        const arrow = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'][((Math.round(Math.atan2(uy, ux) / (Math.PI / 4)) % 8) + 8) % 8]; // where it is coming from, on the screen (north is up)
+        key = `${ex},${ey},${a},${Math.round(sqNow.etaS)},${arrow}`;
       }
       if (key !== stormKey) {
         stormKey = key;
         if (key === 'off') { stormEl.style.opacity = '0'; stormLabel.style.opacity = '0'; } else {
-          const [ex, ey, a, eta] = key.split(',').map(Number);
-          stormEl.style.background = `radial-gradient(ellipse 75% 55% at ${ex}% ${ey}%, rgba(26,34,48,${a}) 0%, rgba(26,34,48,${a * 0.55}) 38%, rgba(26,34,48,0) 78%)`;
+          const parts = key.split(','); const [ex, ey, a, eta] = parts.slice(0, 4).map(Number); const arrow = parts[4];
+          stormEl.style.background = `radial-gradient(ellipse 110% 80% at ${ex}% ${ey}%, rgba(22,29,42,${a}) 0%, rgba(22,29,42,${a * 0.75}) 35%, rgba(22,29,42,${a * 0.3}) 70%, rgba(22,29,42,0) 100%)`;
           stormEl.style.opacity = '1';
-          stormLabel.textContent = `Squall · ${eta} s`;
-          stormLabel.style.left = `${Math.min(86, Math.max(14, ex))}%`; stormLabel.style.top = `${Math.min(88, Math.max(14, ey))}%`;
+          stormLabel.textContent = `${arrow} Squall · ${eta} s`;
+          stormLabel.style.left = `${Math.min(74, Math.max(26, ex))}%`; stormLabel.style.top = `${Math.min(84, Math.max(16, ey))}%`; // fully on screen, clear of the corner buttons and the minimap
           stormLabel.style.opacity = '1';
         }
       }
@@ -1281,6 +1289,7 @@ function startGame({ canvas, net, seed, role }, coast, opts = {}) {
     if (windPaint) { // the wind painted on the sea, a few rows a frame (src/sail-feel-water.js); off (and no swell) if an old host sent the old wind
       windPaint.setOn(weatherActive);
       if (weatherActive) { windPaint.step(weather.field, weather.gt, selfBoat.group.position.x, selfBoat.group.position.z, 6); windPaint.setSwell(weather.swell, swellPhaseUniform(weather.swell, weather.gt)); } else windPaint.setSwell(null, 0);
+      windPaint.setOrigin(viewTarget.x, viewTarget.z); // the fragment shader only ever sees positions relative to this (src/shader-local.js: a phone's 16-bit shader turned big world coordinates into blocks)
     }
     water.update(waves, seaWind, viewTarget, dt, camera.position);
     shoalLayer?.update(nowS);

@@ -23,6 +23,7 @@ export const GAME_WEATHER = {
   HEARTBEAT_S: 2, // the host sends its 'wind' message at least this often (old guests get a fresh dir/strength; new guests re-check their time)
   EVENT_KEEP: 8, // override events carried in a message (the story has two or three)
   HOME_ZOOM: 1.4, // the camera rests this far out (the game's was 1): the screen sees ~120 m ahead at speed, so a gust shows ~15 s early (measured in the lab)
+  SQUALL_SOON_S: 60, // ?squall=soon: a squall line reaches the start of the session this many seconds after the weather's start (the warning shows at once)
   SEA_MIN: 0.12, // the sea's wind strength never drops below this (waves stay a little alive in a calm)
   PREWARM_EVERY_S: 2, // keep the coast grid warm for the next directions the wind may turn to ...
   PREWARM_SPREAD_DEG: 8, // ... this far either side
@@ -41,7 +42,10 @@ export function startHourFromParam(text) {
   return h === null ? GAME_WEATHER.START_HOUR : h;
 }
 
-// opts: { seed, dayType (null = the seed's own), startHour, heightAt, bounds, center, clock { now() }, errand { yard, grundsund } | null }
+// ?squall=soon (a test link): a squall that reaches the session's start ~60 s after the weather starts, on ANY day type. Its time is the weather's own start + SQUALL_SOON_S, so two phones
+// that start the weather at the same hour derive the same squall from the seed and the clock with nothing sent; a guest that did not have the same ?t= adopts the host's time from the `ss`
+// number in the `wx` it already hears (no new message). The squall's direction, length and offset come from the seed (src/squall.js makeSquall), like every other squall.
+// opts: { seed, dayType (null = the seed's own), startHour, heightAt, bounds, center, clock { now() }, errand { yard, grundsund } | null, squallSoon }
 export function createGameWeather(opts) {
   const { clock } = opts;
   let errand = opts.errand ?? null; // { yard, grundsund }: the host's first-errand story; set later by setErrand() (the positions are known after the world is built)
@@ -53,6 +57,7 @@ export function createGameWeather(opts) {
   const gtNow = () => startS + (clock.now() - anchor) + offset;
   let gt = gtNow(); // the weather time of this frame (update() refreshes it)
 
+  let soonAt = opts.squallSoon ? startS + GAME_WEATHER.SQUALL_SOON_S : null; // weather time the test squall crosses the centre (null: none)
   const events = []; // the story override, replayed into whichever field is current: { t0, blend, target | null }
   let eventsTotal = 0; // how many the story has made (a guest counts how many it has applied)
   let applied = 0; // events already given to the field
@@ -61,6 +66,7 @@ export function createGameWeather(opts) {
     field = createWindField({ daySeed: seed, dayType, heightAt: opts.heightAt, bounds: opts.bounds, center: opts.center });
     applied = 0;
     for (const e of events) { if (e.target) field.setOverride(e.target, e.blend, e.t0); else field.clearOverride(e.blend, e.t0); applied++; }
+    if (soonAt !== null) field.addSquall(soonAt, opts.center);
   }
   build();
 
@@ -89,6 +95,7 @@ export function createGameWeather(opts) {
     get seed() { return seed; },
     get gt() { return gt; },
     get swell() { return swell; },
+    get squallSoonAt() { return soonAt; },
     get hour() { return hourOf(gt); },
     get clockText() { return formatClock(gt); },
     sea,
@@ -116,7 +123,7 @@ export function createGameWeather(opts) {
     packet() {
       const keep = events.slice(-GAME_WEATHER.EVENT_KEEP);
       return {
-        v: 1, gt: Math.round(gt * 1000) / 1000, seed, day: dayType, n: eventsTotal,
+        v: 1, gt: Math.round(gt * 1000) / 1000, seed, day: dayType, n: eventsTotal, ...(soonAt !== null ? { ss: Math.round(soonAt * 1000) / 1000 } : {}),
         ov: keep.map((e) => [Math.round(e.t0 * 1000) / 1000, e.blend, e.target ? Math.round(e.target.dir * 1e6) / 1e6 : null, e.target ? Math.round(e.target.strength * 1e6) / 1e6 : null]),
       };
     },
@@ -125,6 +132,7 @@ export function createGameWeather(opts) {
       if (!wx || wx.v !== 1 || !Number.isFinite(wx.gt)) return false;
       const sameDay = wx.day === dayType && wx.seed === seed;
       if (!sameDay && DAY_TYPES.includes(wx.day)) { dayType = wx.day; seed = wx.seed; build(); } // follow the host's day (a ?day= on the host's URL)
+      if (Number.isFinite(wx.ss) && Math.abs(wx.ss - (soonAt ?? -1e9)) > 0.01) { soonAt = wx.ss; build(); } // the host's test squall (its start hour may differ from ours)
       if (Math.abs(wx.gt - gtNow()) > GAME_WEATHER.SYNC_TOL_S) offset += wx.gt - gtNow();
       if (Array.isArray(wx.ov)) { // the host's story-override events: apply the ones we have not applied
         const keep = wx.ov; const firstIndex = wx.n - keep.length; // event number of keep[0]

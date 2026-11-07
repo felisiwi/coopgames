@@ -406,6 +406,7 @@ async function main() {
 
     const viewTarget = new THREE.Vector3(self.x, bp.y, self.z);
     sun.position.copy(viewTarget).add(sunOffset); sun.target.position.copy(viewTarget);
+    paint.setOrigin(viewTarget.x, viewTarget.z); // the fragment shader only ever sees positions relative to this (src/shader-local.js)
     era.water.update(waves, seaWind, viewTarget, dt, camera.position);
     feelCam.update(dt, bp, self.heading, self.speed, { zoom: S.zoom, dip: layerOn('dip'), look: layerOn('look') });
     const cam = camera.position.distanceTo(viewTarget);

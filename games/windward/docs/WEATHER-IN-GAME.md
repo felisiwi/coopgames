@@ -17,7 +17,8 @@ game does, the decisions taken with evidence, and what is NOT verified.
   line and whitecaps on the water, rain, dimming light. Soft: an overpowered boat loses up to 45% speed unless you ease the sheet or round up. No damage.
 - **Weather mist** (misty mornings): cool grey-white fog pulled in close and drifting wisps; not the exploration fog.
 - URL: `?weather=0` the old behaviour (random wind, old sea paint, old camera), `?day=sea|grey|misty|unsettled` (or the full names), `?t=HH:MM`, `?debug=1`
-  adds a `weather` line (day type, game time, wind at the boat, "+x% vs the day", open/shadow, visibility, rain, next squall).
+  adds a `weather` line (day type, game time, wind at the boat, "+x% vs the day", open/shadow, visibility, rain, next squall) and a `gpu` line (what precision this device runs shaders at),
+  **`?squall=soon`** a test squall that reaches the start ~60 s after the weather starts, on any day type (see below), `?fp16=1` (debug) runs the water shader the way a 16-bit phone GPU would.
 
 ## Decisions, with evidence (`src/game-weather.test.js`, 18 checks, plus live runs)
 
@@ -54,5 +55,36 @@ more terrain inside the skerries (+43k triangles). **Not measured:** a real phon
 
 - **Co-op was not run live** (two real peers over PeerJS): the protocol is proven by tests only (host, new guest, old guest, old host, skew, day follow, story events).
 - The first-run 1950 story was not played end to end; the errand, the opening, `?jump=britta`, `?year=2015`, the chart round trip and the pause were each checked.
+- **The phone's shader precision is unread** (see the update above): ask for the `gpu` line from `?debug=1`.
 - Luff flutter is covered by unit tests and the lab; not looked at in the game by eye. Lighthouse visits use the old camera path by construction (feel off) but were not driven.
 - Visual taste is Felix's: squall whitecap size, crest foam strength, gust contrast, the x1.4 camera, how long the 45% squall slowdown feels.
+
+## Update: the blocky sea on a phone (fixed) and `?squall=soon`
+
+**Blocky water.** Felix's Android phone showed the whole sea covered in hard-edged squares (~30 to 40 px) with the weather on, inside and outside the skerries; `?weather=0` looked normal. Desktop never did.
+- **Cause (mechanism proven, the phone's own precision not yet read):** my new water-shader code did high-frequency noise on large absolute world coordinates (x ~ 2500, z ~ 8100, less the air's drift of
+  thousands of metres). A fragment shader at 16-bit precision (mediump) can only represent a number near 4000 in steps of 2 (near 8000 in steps of 4), so `fract()`/`floor()` noise collapses into flat
+  squares. A desktop GPU runs the same code at 32 bits, so it was invisible there.
+- **Evidence:** `?fp16=1` (new, `src/shader-fp16.js`) rounds the shader's coordinates to 16 bits. At the same spot: weather on, 32-bit = smooth (`docs/weather-into-game/blocky-water-before-after.jpg`, bottom row);
+  weather on, 16-bit = a mosaic of hard rectangles (top left), which is Felix's description. Measured on the noise itself (CPU port of the shader's noise): under 16-bit coordinates the old low-frequency lookups were
+  barely harmed (mean error 0.006 to 0.014), the three new ones badly (0.13 to 0.22; 0.25 = uncorrelated), wrong by >0.15 over 31 to 58% of the visible sea. That also explains why `?weather=0` looked normal: its few
+  high-frequency terms are faint (it shows faint tiles under the emulation too).
+- **Not proven:** that Felix's phone runs mediump. A desktop reports `mediump 23 bits` (full precision), so it cannot show it. `?debug=1` now prints a `gpu` line (`fragment highp N bits, mediump N bits`): a phone
+  that prints `mediump 10 bits` confirms it. WebGL2 requires highp in fragment shaders, so a modern phone *should* have it; if the line says 23 bits and the mosaic still shows, the cause is something else and this
+  fix will not have cured it.
+- **Fix (`src/shader-local.js`, `src/sail-feel-water.js`):** the fragment shader only ever sees small numbers. The vertex shader (always full precision) passes `vLocal`, the position relative to the camera target; the target's absolute
+  position and the air's drift are folded into small offsets in JS (64-bit) and wrapped into a 128-cell *periodic* noise lattice (`vnp`), which gives exactly the value the absolute coordinate would (tested to 1e-6).
+  The wind-texture lookup and the baked shore/depth lookup are local too. Under the 16-bit emulation the mosaic is gone (top right of the image). Tests: `shader-local.test.js` (seamless wrapping; 16-bit regression: old form wrong over >20% of the sea,
+  new form under 0.01 mean error), `sail-feel-water.test.js` (the weather block never reads `vWorld`).
+- **What remains:** under the emulation two or three small faint pale rectangles are still visible. They come from the game's ORIGINAL wind-line code (it feeds large coordinates into `sin()`), which the weather does not touch; they
+  are also there with `?weather=0` under the emulation. Not changed (Felix called `?weather=0` normal). If the phone does turn out to be mediump and they bother, they are a small follow-up.
+
+**`?squall=soon`.** A test squall for people who do not want to wait for an unsettled day's first squall (often many real minutes away). It adds one squall that crosses the session's start 60 s after the weather's
+start (`GAME_WEATHER.SQUALL_SOON_S`), on ANY day type, on top of the day's own. The warning (glow on the screen edge it comes from, an arrow and a "Squall - N s" countdown) is up from the first frame (a squall 60 s away is
+~540 m off: cloud 0.23) and gets stronger as it nears; then wind +60%, a ~30 degree swing, dark water, rain.
+- **Same on both phones, no messages:** the arrival time is the weather's start hour (11:00, or `?t=`) + 60 s, so two phones that start the weather the same way derive the same squall from the seed and the clock; the
+  squall's direction, length and offset come from the seed (`makeSquall`). The one case that differs: a guest whose link does not carry the host's `?t=`. It adopts the host's arrival time from one number (`ss`) in the `wx`
+  the host already sends in its `wind` message (no new message type; an old guest ignores it). Tests: `game-weather.test.js` (5 new checks).
+- Counts from when the game starts, not from when you tap "Set sail" on the first-run card, so reading that card eats a few seconds of the 60.
+- **Warning readability at phone size (500x701 here; Chrome will not go narrower):** the first version was a faint darkening and a 13 px label, clipped at the left edge and over the zoom buttons. Now: a broad glow centred on the
+  edge or corner the squall comes from (strong from the start, ~0.6 of full at 54 s), a 17 px high-contrast label with an arrow, kept fully on screen and inset clear of the corner buttons and the minimap. Checked at 54 s, 26 s and arrival.

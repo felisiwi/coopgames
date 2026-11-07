@@ -7,6 +7,7 @@ import { createErrandWind, errandWindFor } from './errand-wind.js';
 import { createPause } from './pause.js';
 import { CONFIG } from './config.js';
 import { timeOfHour, hourOf, formatClock, weatherAt } from './weather.js';
+import { squallAt } from './squall.js';
 
 let passed = 0;
 function check(name, fn) { fn(); passed += 1; console.log(`ok - ${name}`); }
@@ -211,6 +212,66 @@ check('the message is the same shape every time, small, and JSON-safe (the wire 
   assert.deepEqual(JSON.parse(JSON.stringify(msg)), msg);
   assert.ok(Object.keys(msg).join() === 'type,dir,strength,seq,wx');
   void DEG;
+});
+
+
+// ---- ?squall=soon ----
+const CENTER = { x: 0, z: 0 };
+check('?squall=soon: a squall line crosses the start ~60 s after the weather starts, on any day type; the warning shows at once and counts down', () => {
+  for (const day of ['sea-breeze', 'grey-westerly', 'misty-morning', 'unsettled']) {
+    const c = wallClock(); const w = make(c, { dayType: day, squallSoon: true }); w.update();
+    assert.equal(w.squallSoonAt, timeOfHour(11) + GAME_WEATHER.SQUALL_SOON_S, 'the arrival is the weather start + 60 s');
+    const now = squallAt(w.field.squallPlan, CENTER.x, CENTER.z, w.gt);
+    assert.ok(now.aheadM !== null && now.cloud > 0.1 && now.etaS > 55 && now.etaS < 65, `${day}: at load the warning is up (cloud ${now.cloud.toFixed(2)}, ${now.etaS?.toFixed(0)} s away)`);
+    assert.equal(now.intensity, 0, 'no wind change yet');
+    c.advance(30); w.update();
+    const mid = squallAt(w.field.squallPlan, CENTER.x, CENTER.z, w.gt);
+    assert.ok(mid.cloud > now.cloud && mid.etaS < now.etaS && Math.abs(mid.etaS - 30) < 3, `${day}: closer after 30 s (${mid.etaS?.toFixed(0)} s)`);
+    c.advance(42); // 12 s behind the front
+    const w2 = w.update().windAt(CENTER.x, CENTER.z);
+    assert.ok(w2.squall > 0.6, `${day}: it has arrived (${w2.squall.toFixed(2)}) and the wind is up: ${w2.strength.toFixed(2)} vs the day's ${w2.baseStrength.toFixed(2)}`);
+  }
+});
+
+check('?squall=soon: off unless asked for (no extra squall on a quiet day, the plan is untouched on an unsettled one)', () => {
+  const c = wallClock();
+  assert.equal(make(c, { dayType: 'sea-breeze' }).update().field.squallPlan.length, 0);
+  assert.equal(make(c, { dayType: 'sea-breeze' }).squallSoonAt, null);
+  const plain = make(c, { dayType: 'unsettled' }); const soon = make(c, { dayType: 'unsettled', squallSoon: true });
+  assert.equal(soon.field.squallPlan.length, plain.field.squallPlan.length + 1, 'one extra squall, the day\'s own are still there');
+});
+
+check('?squall=soon: two phones derive the SAME squall from the seed and the weather start, with nothing sent (same wind, same warning, any moment)', () => {
+  const ca = wallClock(); const cb = wallClock();
+  const a = make(ca, { squallSoon: true }); const b = make(cb, { squallSoon: true });
+  for (const dt of [0, 10, 25, 25, 20, 15]) {
+    ca.advance(dt); cb.advance(dt);
+    assert.deepEqual(wind(a, 40, -30), wind(b, 40, -30));
+    assert.deepEqual(squallAt(a.field.squallPlan, 40, -30, a.gt), squallAt(b.field.squallPlan, 40, -30, b.gt));
+  }
+});
+
+check('?squall=soon: a guest whose start hour differs (the ?t= was only on the host\'s link) adopts the host\'s squall time from the existing wx, then matches it exactly', () => {
+  const host = wallClock(); const guest = wallClock();
+  const h = make(host, { squallSoon: true, startHour: 7 }); const g = make(guest, { squallSoon: false, startHour: 11 });
+  assert.equal(g.squallSoonAt, null);
+  host.advance(5); guest.advance(5); h.update();
+  const msg = windMessage(h, wind(h), 1);
+  assert.equal(msg.wx.ss, h.squallSoonAt, 'the host\'s time rides in the wx it already sends');
+  assert.ok(JSON.stringify(msg).length < 400, `still small (${JSON.stringify(msg).length} bytes)`);
+  assert.ok(g.receive(JSON.parse(JSON.stringify(msg)).wx));
+  assert.equal(g.squallSoonAt, h.squallSoonAt, 'adopted');
+  for (const dt of [10, 20, 28, 10]) { host.advance(dt); guest.advance(dt); assert.deepEqual(wind(g, 15, 15), wind(h, 15, 15)); }
+  assert.ok(wind(g, 15, 15).squall > 0.5, 'the guest is in the squall too');
+  const before = g.field;
+  g.receive(h.packet()); assert.equal(g.field, before, 'the same ss again does not rebuild the field');
+});
+
+check('?squall=soon: an old host (no ss) leaves a guest\'s own squall alone; the packet has no ss when there is no test squall', () => {
+  const c = wallClock(); const plain = make(c); const soon = make(c, { squallSoon: true });
+  assert.equal('ss' in plain.packet(), false);
+  const at = soon.squallSoonAt; soon.receive({ v: 1, gt: soon.gt, seed: soon.seed, day: soon.dayType });
+  assert.equal(soon.squallSoonAt, at);
 });
 
 console.log(`${passed} game-weather checks passed`);
