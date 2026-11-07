@@ -29,7 +29,7 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
   + 16 harbour approaches carved, busy era-driven traffic + ferry, the **world-years system**
   (`worldAtYear(year)`, rows in `data/world-years.json` for 1700 / 1950 / today; `?year=2015` gives
   the old Today game), research data for 1700 and 1950, a synthesised 1950 sound lab (not yet wired).
-- **Tests:** ~66 node test files, all passing. Run: `cd games/windward && for t in src/*.test.js test/*.test.js; do node $t >/dev/null || echo FAIL $t; done`.
+- **Tests:** 65 node test files in `games/windward/src/` (recounted 2026-11-07; there is no `test/` folder), all passing. Run: `cd games/windward && for t in src/*.test.js; do node $t >/dev/null || echo FAIL $t; done`.
 
 ## 2. Where the truth lives (read in this order)
 
@@ -43,6 +43,7 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
    `world-years.json`.
 5. `games/windward/docs/`: per-stage reports and research (CHART, LURE, LIGHTHOUSE-TASK, WORLD-1700/1950,
    PEOPLE-1700/1950, SOUND-1950, COOP-CHECK, BOAT-BRIEF, passes/, seamarks/, harbours/, era-assets/…).
+   `games/windward/docs/ALIVE-SEA.md`: the alive-sea ideas plus the settled thing-model and weather grills.
 6. `AGENTS.md`, `docs/COLLABORATION.md`, `games/README.md`: hub contract and rules (Kenny shares the repo).
 
 ## 3. The story canon (short)
@@ -142,9 +143,11 @@ fallible: verify on disk (`git log`, tests, the live URL) before trusting any li
 
 ## 8. Branches and worktrees (cleanup pending)
 
-Merged into `main` but still on GitHub: `felix/windward-1700-people`, `-1950-people`, `-busy-today`,
-`-chapter1-1950`, `-coop-check`, `-sound-lab`. Keep `felix/windward-chapter1-1950` only while
-anyone still uses its preview link; otherwise delete all merged ones. Unmerged and old:
-`felix/art-facet-rule` (September, unrelated history), `felix/windward-touch` (superseded touch
-controls). Deleting remote branches is Felix's command to run (mission control is blocked from it).
+From `git ls-remote --heads origin` on 2026-11-07 (merged = ancestor of `main`).
+Merged into `main`, still on GitHub, safe to delete: `felix/windward-1700-people`,
+`felix/windward-busy-today`, `felix/windward-chapter1-1950` (keep only while anyone still uses its
+preview link), `felix/windward-coop-check`, `felix/windward-sound-lab`, `felix/art-facet-rule`.
+(`felix/windward-1950-people` is already gone.) Unmerged: `felix/windward-touch` (superseded touch
+controls; ours). **Kenny's, not ours to delete:** `kenny/hub-mobile`, `kenny/last-session-append-only`.
+Deleting remote branches is Felix's command to run (mission control is blocked from it).
 Laptop worktrees under `~/GitHub/coopgames-*` can be removed once their branches are merged.
