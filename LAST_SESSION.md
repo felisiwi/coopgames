@@ -1,6 +1,6 @@
 # Last session
 
-**2026-11-07 (agent 2, weather): `felix/windward-weather` @ ae9ebea (pushed, NOT merged): the lab's weather in the game, plus the phone blocky-sea fix and `?squall=soon`; main is `e1863a1`; 80 test files pass.** Read `docs/MISSION-CONTROL.md` first.
+**2026-11-07 (agent 2, weather): `felix/windward-weather` @ b52d038 (pushed, NOT merged): the lab's weather in the game; phone fixes round 2 (gusts redrawn soft and rare, a squall you can feel); main is `e1863a1`+; 82 test files pass.** Read `docs/MISSION-CONTROL.md` first.
 
 **State:** chapter 1 in 1950 is MERGED and LIVE (https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html).
 Order of play: the opening in the engine (`src/opening-stage.js`: dusk over today's Fiskebäckskil, storm, lighthouse rewind
@@ -22,7 +22,7 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 
 ## Next
 
-1. Felix sails `felix/windward-weather` on his phone (see `games/windward/docs/WEATHER-IN-GAME.md` for the checklist and what is NOT verified: co-op live, real-phone GPU), then merge or adjust. `?weather=0` = the old game for comparison; `?squall=soon` = a test squall in ~60 s; `?debug=1` prints the phone's shader precision (`gpu` line): read it to confirm the blocky-sea cause was 16-bit shaders. Agent 1: research corrections (docs/CORRECTIONS-TODO.md). Agent 3: guest rejoin fix (`felix/hub-guest-rejoin`); co-op stage 2 plan on `felix/windward-coop2-plan`.
+1. Felix sails `felix/windward-weather` on his phone (see `games/windward/docs/WEATHER-IN-GAME.md` for the checklist and what is NOT verified: co-op live, real-phone GPU), then merge or adjust. `?weather=0` = the old game for comparison; `?squall=soon` = a test squall in ~60 s; `?debug=1` prints the shader precision (`gpu` line) and the weather line. Agent 1: research corrections (docs/CORRECTIONS-TODO.md). Agent 3: guest rejoin fix (`felix/hub-guest-rejoin`); co-op stage 2 plan on `felix/windward-coop2-plan`.
 2. Then: the thing-model slice and the quest slice (docs/ALIVE-SEA.md build order), co-op stage 2 ("visit the host's world", docs/COOP-CHECK.md), then day and night, sound wiring, chapter 2, the 1703 jump.
 
 ## Today's sessions
@@ -32,4 +32,4 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 - stage agent, Task card: in 1950 the Task button now shows what-and-why (`TASK_WHY`, `taskCardLines` in `story-1950.js`, draft copy) before the progress line; 70 test files pass.
 - mission control: merged next-run (pause, game clock, light names, errand wind, light air, task card) and island-lore (`data/island-lore.json`, 27 places; `docs/ISLAND-LORE.md`, `ISLAND-ASSETS-BRIEF.md`, `UNIQUE-ARTIFACT-CANDIDATES.md`). Design grills (thing model, weather, mini quests, logbook) in `docs/ALIVE-SEA.md`; agent prompts in `docs/prompts/`.
 - agent 2, weather into the game: `felix/windward-weather` (3 gates): weather on the game clock drives the wind (co-op needs no wind messages; `wx` rides the host's `wind` message; old guest/host tested); errand wind = story override; readable swell + gusts, surf, heel, luff, spray, wake, x1.4 look-ahead camera; squalls + mist; no new save keys; weather costs ~0 ms (1.63 vs 1.55 ms JS/frame).
-- agent 2, phone fixes: blocky sea on Android = water-shader noise on big world coordinates at 16-bit (proved with `?fp16=1`; fix = camera-local coordinates + periodic noise, `src/shader-local.js`); `?squall=soon` + a clearer storm warning. Phone's real precision still unread.
+- agent 2, phone fixes: the "blocky sea" was NOT 16-bit precision (Felix's phone: highp 23 bits; that fix is harmless, stays). It was the gust paint itself: a +4% threshold (18% of the view painted) + a hard-thresholded fleck term (the pale blobs) + hard edges. Redrawn soft and rare (`src/sea-look.js`, blur ~32 m, gusts from +10%, no flecks; gust area 18%->8%); wind maths untouched. Squalls: `src/squall-notes.js` toasts (explain once, "Squall! Ease the sheet...", "passed"), buzz, shake, stronger glow. `?squall=soon` for testing.
