@@ -18,7 +18,8 @@ render its picker:
   "name": "Archipelago",
   "description": "One sentence, shown on the hub picker card.",
   "players": { "min": 2, "max": 2 },
-  "owner": "felix"
+  "owner": "felix",
+  "rejoin": true
 }
 ```
 
@@ -27,6 +28,12 @@ render its picker:
 manifest passes it through as-is so the hub can show who made each game. A
 folder with no `game.json` isn't discoverable. `_template/` is skipped
 outright, by name, regardless of what its own `game.json` says.
+
+`rejoin` is **optional and off unless it is exactly `true`**: it says your game
+can cope with a guest who leaves and comes back on the same link (see "Drop-in
+play" below). Leave it out and a guest who has left cannot come back; the host
+sees "Connection lost", exactly as before this field existed. The manifest
+passes it through, and the hub reads it when the host picks your game.
 
 **`game.js`** — default-exports the game's entry point:
 
@@ -121,14 +128,17 @@ their first `pos` message arrives, and has no other host-side state a late
 guest would need to be caught up on.
 
 **A guest can also leave and come back on the same link** (a closed tab, a
-phone that slept): the host's slot is freed when the guest's connection
-closes, and the hub sends the returning guest `launch` again. To your host
+phone that slept), **if your game opts in with `"rejoin": true` in its
+`game.json`**. Then the host's slot is freed once the guest's connection has
+closed, and the hub sends the returning guest `launch` again. To your host
 `start()` that is the same event as a late first join, with a brand-new guest
 page that knows nothing yet, so whatever catches up a late guest (a state
 snapshot, a resent value) must also be safe to send a second time. Only one
-guest at a time is still allowed. A game that cannot resume mid-game (for
-example lockstep from frame 0) should decide what a returning guest means for
-it: restart the round, or ignore a second `hello`.
+guest at a time is still allowed. Without the opt-in nothing changes: a guest
+who left holds the slot and a returning guest is refused. Do not opt in if
+your game cannot resume mid-game (for example lockstep from frame 0), unless
+it decides what a returning guest means: restart the round, or ignore a
+second `hello`.
 
 ## Solo dev entry
 

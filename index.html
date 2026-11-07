@@ -191,10 +191,14 @@
         els.hostLinkText.textContent = link;
         els.copyButton.disabled = false;
         showOnly(els.hostLink);
-        // A guest leaving no longer ends the session: shared/net.js frees the slot, so the same link works for
-        // a returning guest and onConnect (below) sends 'launch' to them again. The "Connection lost" panel is
-        // for guests, whose link really is dead; it must not replace the host's screen when a guest drops.
-        net.onClose(() => console.info('[hub] guest left; the same link still works'));
+        // For a game that opted in ("rejoin": true in its game.json, set at pick time below) a guest leaving does
+        // not end the session: shared/net.js lets a returning guest take the slot and onConnect (below) sends
+        // 'launch' to them again, so the host must not be shown "Connection lost". For any other game nothing
+        // changes: the slot is not freed and the host sees the panel, exactly as before.
+        net.onClose(() => {
+          if (net.rejoinAllowed()) console.info('[hub] guest left; the same link still works');
+          else showLost();
+        });
 
         // Drop-in play (Stage D): the picker no longer waits for a guest.
         // currentLaunch is the single piece of state that lets a guest
@@ -222,6 +226,7 @@
         for (const game of games) {
           els.gameList.appendChild(renderCard(game, {
             onPick: (picked) => {
+              net.setRejoin(picked.rejoin === true); // opt-in per game (games/README.md, game.json "rejoin")
               currentLaunch = { gameId: picked.id, seed: Math.floor(Math.random() * 1_000_000) };
               if (net.hasConnection()) net.send({ type: 'launch', ...currentLaunch });
               else els.waitingOverlay.hidden = false;

@@ -16,7 +16,7 @@
 // host() and joinFromUrl() both resolve with the same shape:
 //
 //   { send(msg), onMessage(fn), onClose(fn), onConnect(fn), hasConnection(),
-//     peerId, isHost }
+//     setRejoin(on), rejoinAllowed(), peerId, isHost }
 //
 // send/onMessage/onClose are the documented contract (games/README.md) —
 // games only ever see those four (plus peerId/isHost), never onConnect or
@@ -44,14 +44,18 @@
 // affair today); a host peer that receives a second incoming connection
 // while a guest is connected closes it immediately.
 //
-// A guest may come BACK. When the guest's connection closes or errors, the
-// host's slot is freed and onClose fires; the same link then works again for
-// a new guest connection (a closed tab reopened, a phone that slept). The new
-// connection is wired exactly like the first: onConnect fires again (so the
-// hub sends 'launch' again), messages reach the same onMessage listeners, and
-// anything send() queued while nobody was connected is flushed to it. Events
-// from the OLD connection are ignored once it has been replaced. Games treat
-// a returning guest like a late joiner: see games/README.md ("Drop-in play").
+// A guest may come BACK, but only for a game that opts in ("rejoin": true in
+// its game.json; the hub calls net.setRejoin(...) when the host picks a game,
+// default off). When such a guest's connection has closed or errored, the
+// same link works again for a new guest connection (a closed tab reopened, a
+// phone that slept). The new connection is wired exactly like the first:
+// onConnect fires again (so the hub sends 'launch' again), messages reach the
+// same onMessage listeners, and anything send() queued while nobody was
+// connected is flushed to it. Events from the OLD connection are ignored once
+// it has been replaced. Games treat a returning guest like a late joiner: see
+// games/README.md ("Drop-in play"). For a game that has NOT opted in, a guest
+// who left holds the slot for good and a returning guest is refused, as before.
+// setRejoin/rejoinAllowed are hub-only, like onConnect and hasConnection.
 //
 // What is still out of scope: the guest's own page does NOT reconnect by
 // itself. After its connection closes, onClose fires there and nothing more
@@ -138,6 +142,9 @@ function buildNet({ peer, isHost }) {
   const connectListeners = [];
   const sendQueue = [];
   const inboundQueue = [];
+  // Hub-only switch: may a guest who has left be replaced by a returning one? The hub sets it when the host
+  // picks a game, from that game's game.json ("rejoin": true). Off by default, which is the old behaviour.
+  let rejoin = false;
 
   function fireClose() {
     for (const fn of closeListeners) fn();
@@ -180,6 +187,12 @@ function buildNet({ peer, isHost }) {
     hasConnection() {
       return !!(conn && conn.open);
     },
+    setRejoin(on) {
+      rejoin = on === true;
+    },
+    rejoinAllowed() {
+      return rejoin;
+    },
     send(msg) {
       if (conn && conn.open) {
         conn.send(msg);
@@ -220,18 +233,21 @@ export function host() {
     peer.on('open', () => {
       const { net, wireConnection } = buildNet({ peer, isHost: true });
       let guestConn = null;
+      let guestGone = false; // the guest in guestConn has closed or errored
       peer.on('connection', (conn) => {
-        if (guestConn) {
+        // One guest at a time. A guest who has LEFT may be replaced by a returning one only when the hosted game
+        // opted in (net.setRejoin, from game.json "rejoin": true); otherwise the slot stays taken for good, as it
+        // always was. Checked when the new guest arrives, so a game picked after the guest left still counts.
+        if (guestConn && !(guestGone && net.rejoinAllowed())) {
           conn.close();
           return;
         }
         guestConn = conn;
-        // Free the slot when THIS guest's connection closes or errors, so the same link works for a guest who
-        // comes back (closed tab, phone asleep). `guestConn === conn` keeps a late event from an old
-        // connection from freeing the slot of the guest who replaced it. Still one guest at a time.
-        const free = () => { if (guestConn === conn) guestConn = null; };
-        conn.on('close', free);
-        conn.on('error', free);
+        guestGone = false;
+        // `guestConn === conn` keeps a late event from an old connection from marking the NEW guest as gone.
+        const gone = () => { if (guestConn === conn) guestGone = true; };
+        conn.on('close', gone);
+        conn.on('error', gone);
         wireConnection(conn);
       });
       resolve(net);
