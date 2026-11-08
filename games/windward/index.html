@@ -13,6 +13,20 @@
 <body>
   <div id="hud"><a href="../../" style="color:#eaf6ff">&larr; hub</a> — solo dev entry, no hub, no PeerJS</div>
   <canvas id="game"></canvas>
+  <!-- Save bridge (split plan phase 4), OFF by default. Module scripts run in order, so this runs before the game script below.
+       REDIRECT_TO = '' (empty): nothing happens and the game loads exactly as before. Set it to the new address and this page packs every
+       windward.* save into #import=... and moves the player there (see BRIDGE.md; the frozen old copy is frozen.html, which never redirects). -->
+  <script type="module">
+    import { buildRedirectUrl } from './src/save-bridge.js';
+    const REDIRECT_TO = ''; // <- the one switch. e.g. 'https://windward.example/'. Empty = off.
+    if (REDIRECT_TO) {
+      try {
+        const { url } = buildRedirectUrl(REDIRECT_TO, window.localStorage);
+        window.__windwardRedirecting = true; // tells the game script below not to boot
+        window.location.replace(url);
+      } catch (e) { console.warn('[save-bridge] not redirecting:', e); } // blocked storage etc.: stay and play here
+    }
+  </script>
   <script type="module">
     import start from './game.js';
     import { CONFIG } from './src/config.js';
@@ -62,7 +76,7 @@
     // The hub keeps the real rule.
     CONFIG.DISCOVER_REQUIRE_BOTH = false;
 
-    start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } });
+    if (!window.__windwardRedirecting) start({ canvas, net: fakeNet, seed, role: 'host', players: { min: 1, max: 1 } }); // bridge off: always true
   </script>
 </body>
 </html>

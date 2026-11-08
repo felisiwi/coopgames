@@ -1,6 +1,6 @@
 # Last session
 
-**2026-11-07 (agent 2, Islandsberg beam): `felix/windward-islandsberg-beam` @ 2f02bd5 (pushed, NOT merged) on main cb9bc0c; 85 test files pass. Main otherwise as mission control left it (weather + sail feel, boat variety, corrections, Islandsberg, island lore, Next run). Open: landmarks (agent 4), templates (agent 3), hub rejoin (needs a two-phone test).** Read `docs/MISSION-CONTROL.md` first.
+**2026-11-07 (agent 2, split phase 4 gate 2, branch `felix/windward-bridge` on main f989ca8; pushed, NOT merged): Windward save bridge built and OFF (`REDIRECT_TO` empty, no game has `hidden`), frozen copy `games/windward/frozen.html`; the old Windward behaves as before.** Read `docs/MISSION-CONTROL.md` first; switches in `games/windward/BRIDGE.md`.
 
 **State:** chapter 1 in 1950 is MERGED and LIVE (https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html).
 Order of play: the opening in the engine (`src/opening-stage.js`: dusk over today's Fiskebäckskil, storm, lighthouse rewind
@@ -30,3 +30,4 @@ light readings, Stångholmen position, undrawn fyrkurar, 1950 buoy colour, ferry
 
 - Merged to main: Next run (pause + game clock, Britta's light names, downwind errand, light air, Task card); island lore (27 places); co-op stage 2 plan (F1-F9); research corrections; Islandsberg's gable-window light and no beam (`lanternOptions`); weather + sail feel in the game (`docs/WEATHER-IN-GAME.md`; the "blocky sea" was the gust paint, not shader precision); boat variety (`docs/BOATS-BY-ERA.md`, `boats-lab.html`).
 - Design grills settled in `docs/ALIVE-SEA.md` (thing model, weather, mini quests + artifacts, logbook, anchoring, day and night); agent prompts in `docs/prompts/`; Windward split plan + kickoff in `docs/WINDWARD-SPLIT-PLAN.md`, `docs/WINDWARD-KICKOFF.md`.
+- agent 2, split phase 4 gate 2: `frozen.html`, `src/save-bridge.js` (+ test), switched-off bridge in `index.html`, optional `hidden` flag in `scripts/manifest.js` (+ test), `BRIDGE.md`, `docs/notes/KENNY-WINDWARD-MOVED.md`. Receiving side: windward `felix/save-import`.

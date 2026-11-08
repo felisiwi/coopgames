@@ -23,6 +23,7 @@ for (const name of gameDirs) {
   const gameJsonPath = path.join(gamesDir, name, 'game.json');
   if (!fs.existsSync(gameJsonPath)) continue; // no game.json -> not discoverable yet
   const game = JSON.parse(fs.readFileSync(gameJsonPath, 'utf8'));
+  if (game.hidden === true) continue; // optional flag (default false): the game stays deployed at its URL but leaves the hub picker
   manifest.push({ ...game, path: `games/${name}/` });
 }
 

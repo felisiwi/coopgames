@@ -28,6 +28,10 @@ manifest passes it through as-is so the hub can show who made each game. A
 folder with no `game.json` isn't discoverable. `_template/` is skipped
 outright, by name, regardless of what its own `game.json` says.
 
+Optional: `"hidden": true` in `game.json` keeps the game deployed at `/games/<name>/` but leaves it out of the manifest, so the hub picker does not list
+it (added 2026-11-07 for Windward's move to its own repo; see `games/windward/BRIDGE.md`). Missing or `false` means listed, which is every game today;
+only a real boolean `true` hides. Run `node scripts/manifest.js` and commit `games/manifest.json` after changing it.
+
 **`game.js`** — default-exports the game's entry point:
 
 ```js
