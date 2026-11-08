@@ -18,7 +18,7 @@
        windward.* save into #import=... and moves the player there (see BRIDGE.md; the frozen old copy is frozen.html, which never redirects). -->
   <script type="module">
     import { buildRedirectUrl } from './src/save-bridge.js';
-    const REDIRECT_TO = ''; // <- the one switch. e.g. 'https://windward.example/'. Empty = off.
+    const REDIRECT_TO = 'https://windward-pi.vercel.app/index.html'; // <- the one switch. e.g. 'https://windward.example/'. Empty = off.
     if (REDIRECT_TO) {
       try {
         const { url } = buildRedirectUrl(REDIRECT_TO, window.localStorage);
