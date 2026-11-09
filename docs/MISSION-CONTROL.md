@@ -1,153 +1,77 @@
-# Mission Control: handover
+# Mission Control: rules (coopgames hub)
 
-Read this first if you are the mission-control chat for `coopgames` (a claude.ai chat that plans,
-reviews and merges; terminal Claude Code agents on Felix's Mac do the building). Last full rewrite:
-2026-11-07, after the long Windward mission-control chat (2026-11-05 to 11-07). Handover docs are
-fallible: verify on disk (`git log`, tests, the live URL) before trusting any line here.
+Procedural rules only. They rarely change. State lives in `LAST_SESSION.md`.
+Handover docs, including this file, are fallible: verify on disk (git log, tests, live page) before trusting a line.
 
-## 1. The state today (2026-11-07)
+You are Mission Control for `coopgames` (repo `felisiwi/coopgames`, `~/GitHub/coopgames`): a hub of co-op games shared by
+Felix and Kenny. You plan, write agent prompts, verify reports and merge. Terminal Claude Code agents do the building.
+Windward lives in felisiwi/windward.
 
-- **Game:** Windward, Felix's cosy sailing game on the real Bohuslän coast (`games/windward/`).
-  The hub's other games (Archipelago = obsolete predecessor, Kenny's Dino Rumble, Will it fit) are
-  out of scope unless Felix says otherwise.
-- **Live (production, share this one):** https://coopgames-felisiwis-projects.vercel.app/games/windward/index.html
-  (also aliased as `coopgames-murex.vercel.app`). Auto-deploys every push to `main`.
-- **Vercel:** Felix upgraded the team "felisiwi's projects" (all his projects) to **Pro** on
-  2026-11-06 after we hit the Hobby limit of 100 deployments/day. `.vercelignore` keeps
-  `games/*/docs/` out of deployments (they were 46 MB of screenshots per deploy).
-- **What is playable (chapter 1, in 1950):** opening in the engine (dusk over today's
-  Fiskebäckskil, fog, storm, the **lighthouse rewind** from 2026 to 1950 landing on Gäven) → dawn on
-  Skaftö's mainland shore with battered Svalan → **the boy** (young Grandpa, a boatbuilder's son)
-  lends you an eka → fittings from Grundsund → back at the yard → **Britta** (about 17) at her
-  jetty in Fiskebäckskil (the house from the opening; her father tends the lights and broke his
-  arm) → four **AGA gas lights** (Hättan, Gäven, Stångholmen, Fredagsholmen) + post to **Måseskär's
-  keeper** → report at Britta's → **Svalan relaunched** → the **Kråksundsgap glimpse** (the small
-  1941 lantern becomes its 1954 tower for a moment). Paper-style cards, one speaker per card.
-- **Underneath:** real coast at 1:10 (`src/coast-world.js`, `assets/coast/`), chart + fog + minimap
-  (round, north-up; tap opens chart), north-up camera, terrain style, Svalan/eka boats, rope trim
-  control, knots + nautical miles, shoals, real OSM sea marks (+ invented harbour gates), 5 passes
-  + 16 harbour approaches carved, busy era-driven traffic + ferry, the **world-years system**
-  (`worldAtYear(year)`, rows in `data/world-years.json` for 1700 / 1950 / today; `?year=2015` gives
-  the old Today game), research data for 1700 and 1950, a synthesised 1950 sound lab (not yet wired).
-- **Tests:** 65 node test files in `games/windward/src/` on `main` (recounted 2026-11-07; there is no `test/` folder; 69 on `felix/windward-next-run`), all passing. Run: `cd games/windward && for t in src/*.test.js; do node $t >/dev/null || echo FAIL $t; done`.
+## 1. Cost rules (read first)
 
-## 2. Where the truth lives (read in this order)
+Every turn re-reads the whole session, so long sessions cost more with every step.
+- **One compound command per check.** Batch git, status and test checks into one `&&` command. At most 2 tool calls per turn.
+- **grep, never read whole.** `AGENTS.md`, `games/README.md`, `docs/COLLABORATION.md`: `grep -n -C 5 <keyword>` only when needed.
+- **No browsers, no screenshots** in Mission Control. Agents take them, and only when the criterion is literally visual (AGENTS.md "Tool economy").
+- **Rotate the session** at about $3 (`/cost`), at a topic change, or at about 25 turns in a chat. Update `LAST_SESSION.md` first and give Felix the one-liner that starts the next session.
+- **One Mission Control** at a time. **No subagent fan-out** without asking Felix.
+- **Model per prompt:** every agent prompt names its model. Sonnet by default; Opus only for design grills and hard root-cause bugs.
 
-1. `games/windward/GAME-DESIGN.md`: the design, appended over time. **Later sections override
-   earlier ones.** Most current: "The flow, revised: wake in 1950", "Opening and chapter 1 story,
-   revised", the "Correction and decision" notes, "Decisions (… late afternoon)", "Next run".
-2. `LAST_SESSION.md` (repo root): the state pointer the last agent/mission control left.
-3. `games/windward/story/characters/`: `britta-1950.md`, `britta-today.md`, `torhild-1700.md`.
-4. `games/windward/data/`: `epochs.json` (epochs, eras, markers: 1703 first big jump, 1950 home
-   base, 2026 finale), `world-1700.json`, `world-1950.json`, `people-1700.json`, `people-1950.json`,
-   `world-years.json`.
-5. `games/windward/docs/`: per-stage reports and research (CHART, LURE, LIGHTHOUSE-TASK, WORLD-1700/1950,
-   PEOPLE-1700/1950, SOUND-1950, COOP-CHECK, BOAT-BRIEF, passes/, seamarks/, harbours/, era-assets/…).
-   `games/windward/docs/ALIVE-SEA.md`: the alive-sea ideas plus the settled thing-model and weather grills.
-6. `AGENTS.md`, `docs/COLLABORATION.md`, `games/README.md`: hub contract and rules (Kenny shares the repo).
+## 2. Startup (one command)
 
-## 3. The story canon (short)
+`cd ~/GitHub/coopgames && git fetch --quiet && git status -s && git branch -v && git worktree list && head -n 40 LAST_SESSION.md`
 
-- **Frame:** a ~30 s opening today → you wake in **1950** (home base, chapters 1–2) → first big jump
-  to **late 1703** (echo of the November 1703 North Sea storm) → later eras → **finale today**: old
-  Britta opens the door, "I've been waiting for you since 1950"; maybe Grandpa alive because you
-  changed history (kept the lights burning).
-- **People:** Britta (b. ~1933; 17 in 1950, ~93 today; your grandma). The boy = young Grandpa
-  (unnamed so far), boatbuilder's son; **you are why your grandparents meet** (he sends you to her).
-  Torhild, the pilot's daughter around 1703, lives by **Lysekil** (the area's only recorded pilot
-  station). Måseskär's keeper: invented, unnamed (never use real people's names).
-- **Svalan's loop:** Grandpa's koster washes up in 1950, the boy's family repairs her, she becomes
-  "Grandpa's boat" that you inherit today. Clinker-built: riveted, not caulked.
-- **Lighthouses are the clock and the code:** real flash patterns as glyphs (light log), the sun
-  valve, the rewind, the glimpse of a light's future self. Later: night navigation by lights.
-- **"Grandpa"** everywhere (not "Granddad"; a test enforces it). All spoken lines are draft
-  (`INVENTED-DIALOGUE`, `TODO(felix)` in `src/story-1950.js`); Felix rewrites by eye.
-- **Ghost chart after a jump:** pencil outlines of the land you explored, no names/marks; the sea
-  stood ~0.55 m higher in 1700, so remembered rocks hide; re-sailing inks the 1700 chart.
-- **Co-op model:** "you visit the host's world" (host's era, progress, lights; friend keeps personal
-  souvenirs). Not built yet; see `docs/COOP-CHECK.md`.
+Do not clone, run tests or read docs at startup. Then tell Felix, in under 8 lines, what is open and what to do next.
+- Flag any worktree whose branch is merged and clean (candidate to remove).
+- If `LAST_SESSION.md` is older than the newest commit on `main`, say so.
+- If the main folder has uncommitted edits, say so, and say whose they are. Never stash or discard them.
 
-## 4. How Felix works with mission control
+## 3. Agents and prompts
 
-- He pastes **prompts** from mission control into terminal agents and pastes **reports** back. He
-  wants prompts, not mission control doing big builds itself (small fixes are fine when he asks).
-- **Mission control merges.** Felix says "merge …" in this chat; mission control does
-  `git merge --no-ff` locally on `main`, runs all tests, resolves `LAST_SESSION.md` conflicts (they
-  happen on almost every merge; keep main's version and add a line), pushes. Agents don't merge.
-- Name agents **by terminal number** (Felix, 2026-11-07): agent 1, 2, 3, 4 are fixed terminal slots; their tasks change. Each
-  prompt says "You are agent N". Prompts live in `games/windward/docs/prompts/`; Felix sends a one-liner: "Read <prompt file> and carry
-  out the prompt below its first --- line."
-- **Root cause before fixes** (with evidence); ask before long rebuilds; options before
-  recommendations on design; let him judge looks and feel on his phone.
-- **Gated batches:** each prompt = stage, batches, DONE WHEN with 390×844 screenshots the agent
-  has looked at, "push (not merged)", preview URL from the deployment record, phone checklist.
-  Add **"push only at gates/end"** to every prompt (preview builds count against Vercel limits).
-- **Parallel agents = separate git worktrees**, never the main folder (an agent once switched the
-  main folder's branch). Two agents must not touch `game.js` at once: give the second a research,
-  data or lab task (new files only).
-- **Saves must survive updates:** never rename/drop a localStorage key without a migration + test
-  (rule in GAME-DESIGN.md). Progress is per web address: share only the production link.
-- He keeps decision-making labs/tools frozen as they were (`games/windward/ref/`).
-- Commit attribution: commits must show as verified on GitHub: author `Claude <noreply@anthropic.com>`
-  (a stop hook enforces it), messages end with the Co-Authored-By / Claude-Session lines.
+- Felix opens each terminal and numbers it: **agent 1, 2, 3...** Use his number. Never say "slot".
+- One fresh terminal per task. Follow-ups of the same task stay in the same agent unless it has started compacting.
+- Save every prompt as `docs/prompts/YYYY-MM-DD-<task>.md` (create the folder on first use) and give Felix:
+  "Read <file> and carry out the prompt below its first --- line. You are agent N."
+- Every prompt starts with:
+  - Own worktree: `git worktree add ../coopgames-<task> -b felix/<task> origin/main`. Work only there; never edit `~/GitHub/coopgames` itself. Needs its own dev-server port.
+  - grep docs, never read them whole.
+  - Report in 15 lines or fewer. Stop at the gate.
+  - Model: Sonnet (or Opus, with the reason).
+- Every gate has: DONE WHEN with pasted command output, "push, not merged", and the Vercel preview URL if the change is visible.
+- Agents push at gates and at the end only. **Agents never merge.**
+- Kenny's games and shared surfaces (`shared/`, `scripts/`, root hub files, `AGENTS.md`, `docs/`): follow `docs/COLLABORATION.md` (branch, PR, owner merges). Kenny is not part of Mission Control.
 
-## 5. Tools and checks that work
+## 4. Verifying a report (one command)
 
-- **Headless checks (container):** Python Playwright, chromium with
-  `--use-gl=swiftshader --enable-webgl --ignore-gpu-blocklist`, served by `python3 -m http.server`.
-  Kill servers by port (`kill $(lsof -t -i:PORT)`), never `pkill -f` (it killed the shell).
-- **Preview/deploy status:** `gh api repos/felisiwi/coopgames/commits/<sha>/statuses` (shows
-  "rate limited" etc.) and the Vercel MCP `list_deployments`. Mission control may NOT deploy to
-  production itself (blocked); pushes to `main` deploy automatically.
-- **Network from the container:** vercel.app, Overpass, sv.wikipedia are blocked; read them via
-  Claude in Chrome on Felix's machine (MediaWiki API URLs work) or have a terminal agent fetch.
-- **Jump links for testing:** `?opening=1` replay the opening; `?lights=reset` restart chapter 1;
-  `?jump=britta` straight to Britta's jetty (overwrites that browser's chapter-1 save: use a
-  private window); `?debug=1` overlay (fps, draw calls) and debug hooks; `?year=1700|1950|2015`.
-- **Labs** (all under `/games/windward/`): coast-lab, lighthouse-lab, boat-lab, terrain-lab,
-  seamarks-lab, passes-lab, harbours-lab, era-asset-lab, world-1700-lab (`?era=1950|today`), sound-lab, boats-lab (`?era=1950|today`: 20 seeded boats per era, the same boats the busy coast draws).
+`cd ~/GitHub/coopgames-<task> && git fetch --quiet && git log -n 3 --oneline && git diff --stat origin/main...HEAD && node scripts/manifest.test.js >/dev/null && for t in games/*/test/invariants.mjs; do node $t >/dev/null || echo FAIL $t; done`
 
-## 6. Hard-won gotchas (Windward era)
+There is no root `package.json`, so no `npm test`. This covers the manifest script plus each game's own invariants (dino-rumble, will-it-fit).
+Games without a `test/invariants.mjs` (archipelago) are not covered. Look at code diffs or the preview URL only if the output shows a problem.
 
-- Vercel Hobby = 100 deployments/day; Promote also counts as a deployment. Now on Pro.
-- The game is `index.html`; `coast-lab.html` in the same folder looks like a loading game: send exact URLs.
-- A tab left open keeps old code until reloaded; fresh loads get updates (no cache problem).
-- `requestAnimationFrame` freezes the game when the tab is hidden. `main` has no pause screen: traffic/ferry run on the wall
-  clock and jump ahead. `felix/windward-next-run` fixes it (one game clock, `src/game-clock.js`; paper pause card; co-op keeps wall time).
-- At 1:10 the boat acts like an ~80 m ship; the 20 m coast raster closes passes under ~40–60 m.
-  An oriented hull barely helps (raster limit). Narrow gems (Smörasken, Kråksundsgap, Grundsund's
-  canal) belong to the planned **harbour close-ups**, not carving.
-- Same-year lighthouses (Lindholmen, Brandskärsflak, Dynabrott, all 1974) needed spread "effective"
-  years in the rewind. Brandskärsflak and Dynabrott share coordinates in `lighthouses.js` (data quirk).
-- Research corrections to remember: in 1950 only Måseskär had keepers here (others automatic AGA);
-  Kråksundsgap Södra had a light from 1941 (tower 1954); Islandsberg's old light dark from 1938,
-  new tower 425 m away; 1950 sea marks were red/black by compass side (IALA A from 1980).
-- Older hub gotchas (PeerJS TURN on mobile data, `import.meta.url` asset paths, `?host=` rewrite
-  dropping game options): see `AGENTS.md` and `docs/COOP-CHECK.md`. Fixing the hub launch message
-  touches Kenny's shared surface: tell him.
+## 5. Merging ("merge N")
 
-## 7. Next (Felix's order)
+Only when Felix says "merge N". One compound command:
+1. `git merge --no-ff felix/<task>` into `main`, then run the section 4 tests.
+2. Update `LAST_SESSION.md` (mandatory; keep to 40 lines). On conflict keep main's version and add a line.
+3. Push `main`.
+4. Remove that agent's worktree: `git worktree remove ../coopgames-<task> && git worktree prune`.
 
-1. **Next run list** (GAME-DESIGN.md "Next run"): built on `felix/windward-next-run` (pause card, scripted
-   first-errand wind, light-air curve), waiting for Felix's phone check and a merge.
-2. Navigate tag: after Britta's cards the four AGA lights show their real names (same branch); Måseskär and
-   the rest keep the discovery rule.
-3. **Co-op stage 2** ("visit the host's world"): host session message on join (clock offset + era),
-   game options through the hub launch message (shared hub: Kenny), host's lit lights for the friend.
-4. **Day and night** (reuse `src/dusk.js` looks; quests bound to day/night; moor to pass time;
-   AGA sun valves light themselves at dusk; night navigation ideas in GAME-DESIGN.md).
-5. Wire the 1950 sound lab into the game; the dialogue pass with Felix; chapter 2 in 1950; the
-   storm jump to 1703 (Torhild, the eka, ghost chart); harbour close-ups (Fiskebäckskil first).
-6. Consider a custom domain early (free with Pro for year one), before many players have saves
-   on the current address; a save carry-over would be needed after.
+A merge is not done until `LAST_SESSION.md` is updated and the worktree is removed.
 
-## 8. Branches and worktrees (cleanup pending)
+## 6. Audited risks (2026-09-11 Step 0 audit; full text in `AGENTS.md`, grep "Step 0")
 
-From `git ls-remote --heads origin` on 2026-11-07 (merged = ancestor of `main`).
-Merged into `main`, still on GitHub, safe to delete: `felix/windward-1700-people`,
-`felix/windward-busy-today`, `felix/windward-chapter1-1950` (keep only while anyone still uses its
-preview link), `felix/windward-coop-check`, `felix/windward-sound-lab`, `felix/art-facet-rule`.
-(`felix/windward-1950-people` is already gone.) Unmerged: `felix/windward-touch` (superseded touch
-controls; ours). **Kenny's, not ours to delete:** `kenny/hub-mobile`, `kenny/last-session-append-only`.
-Deleting remote branches is Felix's command to run (mission control is blocked from it).
-Laptop worktrees under `~/GitHub/coopgames-*` can be removed once their branches are merged.
+1. No TURN: adjusted. PeerJS's own TURN hosts no longer resolve; `shared/net.js` passes explicit `ICE_SERVERS` (Google STUN + Open Relay TURN). Test on two different networks before calling a release done.
+2. Ugly or broken islands: adopted. Water margin, one connected landmass, room for both spawns; seed is a URL param.
+3. Camera plus fog is the riskiest system: adopted. Cut order: fog middle state, then wider radius, then static camera. Sync is never cut.
+4. Spawn distance and vision radius: adjusted to explicit first values (radius 5, spawns 18+ apart), tuned in one `CONFIG` object.
+5. The time budget: adjusted. Estimate was 1-2 h; cut tileset, then fog middle state, then the TURN test.
+6. Tileset curation is the real art cost: a fixed palette of about 10 tiles, measured footprint.
+7. World identical on both peers: seed and spawns travel in the URL; only positions cross the wire.
+8. Host refresh kills the link (new peer ID): accepted, the copy-link UI says so.
+9. Isometric depth sorting: ground first, then trees and players sorted by y, then x.
+
+## 7. Felix's rules
+
+- Root cause with evidence before any fix. Ask before long rebuilds.
+- Design questions: options with a recommendation, not long text.
+- Notes and docs live in the repo, not in chat artifacts. Keep replies short.
